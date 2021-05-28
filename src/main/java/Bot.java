@@ -120,8 +120,6 @@ public class Bot {
 
             jda.addEventListener(waiter, client.build());
 
-
-
             //EVENTS
             jda.addEventListener(new GuildJoin());
             jda.addEventListener(new UserJoin());
@@ -135,7 +133,6 @@ public class Bot {
             jda.addEventListener(new SubmissionListener());
             jda.addEventListener(new SlashCommands());
             //jda.addEventListener(new StarboardListener());
-
     }
 }
 

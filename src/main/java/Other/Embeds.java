@@ -27,7 +27,7 @@ public class Embeds {
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
-            event.getMessage().addReaction("❌").complete();
+            event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 
@@ -55,7 +55,7 @@ public class Embeds {
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
-            event.getMessage().addReaction("❌").complete();
+            event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 
@@ -83,7 +83,7 @@ public class Embeds {
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
-            event.getMessage().addReaction("❌").complete();
+            event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 
@@ -111,7 +111,7 @@ public class Embeds {
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
-            event.getMessage().addReaction("❌").complete();
+            event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 
@@ -139,7 +139,7 @@ public class Embeds {
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
-            event.getMessage().addReaction("❌").complete();
+            event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 
@@ -167,7 +167,7 @@ public class Embeds {
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
-            event.getMessage().addReaction("❌").complete();
+            event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 

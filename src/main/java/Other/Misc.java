@@ -147,7 +147,7 @@ public class Misc {
         return sb.substring(2);
     }
 
-    public static MessageEmbed HelpEmbed (CommandEvent event) {
+    /*public static MessageEmbed HelpEmbed (CommandEvent event) {
 
         Command.Category category = null;
         EmbedBuilder eb = new EmbedBuilder()
@@ -186,5 +186,5 @@ public class Misc {
         if(first == null) return second == null;
         if(second == null) return false;
         return first.getName().equals(second.getName());
-    }
+    }*/
 }
