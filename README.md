@@ -1,0 +1,2 @@
+# JavaBot
+scuffed lmao
