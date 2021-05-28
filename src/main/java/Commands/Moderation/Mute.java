@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Database;
 import Other.Embeds;
 import Other.Misc;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 import java.awt.*;
+import java.lang.invoke.ConstantBootstraps;
 import java.util.Date;
 
 
@@ -51,7 +53,7 @@ public class Mute extends Command {
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
-                        .setColor(Color.RED)
+                        .setColor(Constants.RED)
                         .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                         .addField("Moderator", "```" + moderatorTag + "```", true)
                         .addField("ID", "```" + member.getId() + "```", false)

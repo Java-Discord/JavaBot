@@ -24,21 +24,14 @@ public class Help extends Command {
 
     public static void exCommand (SlashCommandEvent event) {
 
-        String id = event.getUser().getId();
-
         EmbedBuilder eb = new EmbedBuilder()
-                .setTitle("Command List")
-                .setDescription("**" + event.getJDA().getSelfUser().getName() + Constants.HELP_MAIN)
-                .setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl())
+                .setAuthor("Command List", null)
+                .setDescription("Full Image: [Link](" + Constants.HELP_IMAGE + ")")
+                .setImage(Constants.HELP_IMAGE)
                 .setColor(Constants.GRAY);
 
-        event.replyEmbeds(eb.build()).addActionRow(
-                Button.secondary(id + ":help-home", "\uD83C\uDFE0"),
-                Button.secondary(id + ":help-user", "User Commands"),
-                Button.secondary(id + ":help-mod", "Moderation"),
-                Button.secondary(id + ":help-other", "Other")
-        ).queue();
-
+        event.getUser().openPrivateChannel().complete().sendMessage(eb.build()).queue();
+        event.reply("I've sent you a DM!").queue();
     }
 
     public Help () {

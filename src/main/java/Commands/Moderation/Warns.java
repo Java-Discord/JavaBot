@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Database;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
@@ -43,7 +44,7 @@ public class Warns extends Command {
             EmbedBuilder eb = new EmbedBuilder()
                     .setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
                     .setDescription(member.getAsMention() + " has been warned **" + warnCount + " times** so far.")
-                    .setColor(Color.YELLOW)
+                    .setColor(Constants.YELLOW)
                     .setFooter("ID: " + member.getId())
                     .setTimestamp(new Date().toInstant());
             event.reply(eb.build());

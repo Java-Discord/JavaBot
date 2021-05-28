@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Embeds;
 import Other.Misc;
 import com.jagrosh.jdautilities.command.Command;
@@ -30,7 +31,7 @@ public class Unban extends Command {
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setAuthor(member.getUser().getAsTag() + " | Unban", null, member.getUser().getEffectiveAvatarUrl())
-                        .setColor(Color.RED)
+                        .setColor(Constants.RED)
                         .addField("ID", "```" + member.getId() + "```", true)
                         .addField("Moderator", "```" + event.getAuthor().getAsTag() + "```", true)
                         .setFooter("ID: " + member.getId())

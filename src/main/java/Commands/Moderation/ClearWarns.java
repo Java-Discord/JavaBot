@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Database;
 import Other.Embeds;
 import com.jagrosh.jdautilities.command.Command;
@@ -39,7 +40,7 @@ public class ClearWarns extends Command {
 
                     EmbedBuilder eb = new EmbedBuilder()
                             .setAuthor(member.getUser().getAsTag() + " | Warns cleared", null, member.getUser().getEffectiveAvatarUrl())
-                            .setColor(Color.YELLOW)
+                            .setColor(Constants.YELLOW)
                             .setDescription("Succesfully cleared all warns from " + member.getUser().getAsMention() + ".")
                             .setFooter("ID: " + member.getId())
                             .setTimestamp(new Date().toInstant());

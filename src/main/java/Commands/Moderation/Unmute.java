@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Database;
 import Other.Embeds;
 import Other.Misc;
@@ -47,7 +48,7 @@ public class Unmute extends Command {
 
                         EmbedBuilder eb = new EmbedBuilder()
                                 .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
-                                .setColor(Color.RED)
+                                .setColor(Constants.RED)
                                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                                 .addField("Moderator", "```" + event.getMessage().getAuthor().getAsTag() + "```", true)
                                 .addField("ID", "```" + member.getId() + "```", false)

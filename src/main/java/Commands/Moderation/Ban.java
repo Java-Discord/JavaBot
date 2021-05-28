@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Embeds;
 import Other.Misc;
 import com.jagrosh.jdautilities.command.Command;
@@ -42,7 +43,7 @@ public class Ban extends Command {
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setAuthor(member.getUser().getAsTag() + " | Ban", null, member.getUser().getEffectiveAvatarUrl())
-                    .setColor(Color.RED)
+                    .setColor(Constants.RED)
                     .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                     .addField("Moderator", "```" + moderatorTag + "```", true)
                     .addField("ID", "```" + member.getId() + "```", false)

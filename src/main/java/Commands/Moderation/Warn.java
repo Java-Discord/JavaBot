@@ -1,5 +1,6 @@
 package Commands.Moderation;
 
+import Other.Constants;
 import Other.Database;
 import Other.Embeds;
 import Other.Misc;
@@ -57,7 +58,7 @@ public class Warn extends Command {
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setAuthor(member.getUser().getAsTag() + " | Warn (" + totalWarnPoints + "/3)", null, member.getUser().getEffectiveAvatarUrl())
-                    .setColor(Color.YELLOW)
+                    .setColor(Constants.YELLOW)
                     .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                     .addField("Moderator", "```" + moderatorTag + "```", true)
                     .addField("ID", "```" + member.getId() + "```", false)

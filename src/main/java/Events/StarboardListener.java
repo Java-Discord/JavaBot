@@ -106,9 +106,6 @@ public class StarboardListener extends ListenerAdapter {
 
                 Guild guild = event.getJDA().getGuildById(gID);
 
-                /*System.out.println(Arrays.toString(guild.getTextChannelById(cID).retrieveMessageById(mID).complete()
-                        .getReactions().stream().toArray()));*/
-
                 guild.getTextChannelById(cID).retrieveMessageById(mID).queue(msg -> {
                             msg.getReactions().stream()
                                     .filter(msge -> msge.getReactionEmote().getName().equals("⭐")).iterator();
