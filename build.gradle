@@ -1,0 +1,55 @@
+plugins { id 'java' }
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+group 'com.dynxsty.bot'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'https://m2.dv8tion.net/releases' }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    //compile 'net.dv8tion:JDA:4.2.0_247'
+    compile 'com.jagrosh:jda-utilities:3.0.5'
+    compile 'org.mongodb:mongodb-driver:3.6.0'
+    compile 'com.google.code.gson:gson:2.8.6'
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.9.0'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.3.1'
+
+    compile 'com.github.dv8fromtheworld:jda:f957801'
+    //compile group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
+    //compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    //compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
+    //compile group: 'com.jcabi', name: 'jcabi-aspects', version: '0.22.6'
+    //compile 'com.jagrosh:jda-utilities-doc:3.0.5'
+    }
+
+jar {
+    archiveName="javabot.zip"
+    from {
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+
+        configurations.compile.findAll{ !it.name.endsWith('pom') } .collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "Bot") }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' }
+
+tasks.withType(JavaCompile){ options.encoding = 'UTF-8'}
+test { useJUnitPlatform() }
