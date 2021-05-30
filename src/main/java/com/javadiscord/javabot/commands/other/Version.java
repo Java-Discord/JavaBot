@@ -39,12 +39,7 @@ public class Version extends Command {
     }
 
     protected void execute(CommandEvent event) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
         String[] args = event.getArgs().split("\\s+");
-
         String input;
         if (args.length > 0 && args[0].equalsIgnoreCase("now")) {
             input = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY-MM.dd"));
@@ -66,6 +61,8 @@ public class Version extends Command {
         Document update = new Document();
         update.append("$set", SetData);
 
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
         collection.updateOne(Query, update);
     }
 }
