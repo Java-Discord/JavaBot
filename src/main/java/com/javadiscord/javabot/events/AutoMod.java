@@ -50,7 +50,7 @@ public class AutoMod extends ListenerAdapter {
                 }
             }
 
-        } catch (NullPointerException e) { System.out.println("NullPointerException in AutoMod: GitHub Webhook?");}
+        } catch (NullPointerException ignored) {}
     }
 }
 
