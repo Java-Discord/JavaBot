@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.other.Misc;
-import com.javadiscord.javabot.properties.ConfigString;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import net.dv8tion.jda.api.entities.SelfUser;
@@ -28,9 +28,7 @@ public class Startup extends ListenerAdapter {
         bot = event.getJDA().getSelfUser();
 
         try {
-
-            ConfigString login = new ConfigString("mongologin", "default");
-            MongoClientURI uri = new MongoClientURI(login.getValue());
+            MongoClientURI uri = new MongoClientURI(Bot.getProperty("mongologin", "default"));
             mongoClient = new MongoClient(uri);
 
             LoggerFactory.getLogger(Startup.class).info("* Successfully connected to Database!");
