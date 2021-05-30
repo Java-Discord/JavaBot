@@ -11,27 +11,21 @@ public class Help extends Command {
 
     public static void exCommand (CommandEvent event) {
 
-        event.getMessage().addReaction(Constants.CHECK).complete();
-
         EmbedBuilder eb = new EmbedBuilder()
-                .setAuthor("Command List", null)
-                .setDescription("Full Image: [Link](" + Constants.HELP_IMAGE + ")")
-                .setImage(Constants.HELP_IMAGE)
+                .setDescription("Visit **[this page](" + Constants.HELP_LINK + ")** for a full list of Commands")
                 .setColor(Constants.GRAY);
-        event.replyInDm(eb.build());
+
+        event.reply(eb.build());
 
     }
 
     public static void exCommand (SlashCommandEvent event) {
 
         EmbedBuilder eb = new EmbedBuilder()
-                .setAuthor("Command List", null)
-                .setDescription("Full Image: [Link](" + Constants.HELP_IMAGE + ")")
-                .setImage(Constants.HELP_IMAGE)
+                .setDescription("Visit **[this page](" + Constants.HELP_LINK + ")** for a full list of Commands")
                 .setColor(Constants.GRAY);
 
-        event.getUser().openPrivateChannel().complete().sendMessage(eb.build()).queue();
-        event.reply("I've sent you a DM!").queue();
+        event.replyEmbeds(eb.build()).queue();
     }
 
     public Help () {

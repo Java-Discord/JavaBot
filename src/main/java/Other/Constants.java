@@ -17,5 +17,6 @@ public class Constants {
         public static final Color RED  = Color.decode("#FF212D");
         public static final Color YELLOW = Color.decode("#FFFF00");
         public static final String WEBSITE  = "https://javadiscord.net";
-        public static final String HELP_IMAGE  = "https://cdn.discordapp.com/attachments/744899463591624815/826106107553906738/21-03.29.png";
+        public static final String HELP_LINK  = "https://pages.javadiscord.net/commands/";
+        public static final String QOTW_LINK  = "https://pages.javadiscord.net/qotw/";
 }
