@@ -4,28 +4,6 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.javadiscord.javabot.events.*;
-import com.javadiscord.javabot.properties.ConfigString;
-import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.javadiscord.javabot.commands.configuation.Config;
-import com.javadiscord.javabot.commands.configuation.WelcomeImage;
-import com.javadiscord.javabot.commands.custom_commands.CustomCommands;
-import com.javadiscord.javabot.commands.moderation.*;
-import com.javadiscord.javabot.commands.other.GuildConfig;
-import com.javadiscord.javabot.commands.other.Question;
-import com.javadiscord.javabot.commands.other.Shutdown;
-import com.javadiscord.javabot.commands.other.Version;
-import com.javadiscord.javabot.commands.other.qotw.ClearQOTW;
-import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
-import com.javadiscord.javabot.commands.other.suggestions.Accept;
-import com.javadiscord.javabot.commands.other.suggestions.Clear;
-import com.javadiscord.javabot.commands.other.suggestions.Decline;
-import com.javadiscord.javabot.commands.other.suggestions.Response;
-import com.javadiscord.javabot.commands.other.testing.*;
-import com.javadiscord.javabot.commands.reaction_roles.ReactionRoles;
-import com.javadiscord.javabot.commands.user_commands.*;
-import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -35,12 +13,8 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.reflections.Reflections;
 
-import java.util.Objects;
-import org.reflections.Reflections;
-
-import java.util.Objects;
-
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Properties;
 
 
@@ -108,28 +82,28 @@ public class Bot {
         return properties.getProperty(key, defaultValue);
     }
 
-        /**
-         * Discovers and instantiates all commands found in the bot's "commands"
-         * package. This uses the reflections API to find all classes in that
-         * package which extend from the base {@link Command} class.
-         * <p>
-         *     <strong>All command classes MUST have a no-args constructor.</strong>
-         * </p>
-         * @return The array of commands.
-         */
-        private static Command[] discoverCommands() {
-                Reflections reflections = new Reflections("com.javadiscord.javabot.commands");
-                return reflections.getSubTypesOf(Command.class).stream()
-                    .map(type -> {
-                            try {
-                                    return (Command) type.getDeclaredConstructor().newInstance();
-                            } catch (Exception e) {
-                                    e.printStackTrace();
-                                    return null;
-                            }
-                    })
-                    .filter(Objects::nonNull)
-                    .toArray(Command[]::new);
-        }
+    /**
+     * Discovers and instantiates all commands found in the bot's "commands"
+     * package. This uses the reflections API to find all classes in that
+     * package which extend from the base {@link Command} class.
+     * <p>
+     *     <strong>All command classes MUST have a no-args constructor.</strong>
+     * </p>
+     * @return The array of commands.
+     */
+    private static Command[] discoverCommands() {
+        Reflections reflections = new Reflections("com.javadiscord.javabot.commands");
+        return reflections.getSubTypesOf(Command.class).stream()
+            .map(type -> {
+                try {
+                    return (Command) type.getDeclaredConstructor().newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .toArray(Command[]::new);
+    }
 }
 
