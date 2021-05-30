@@ -1,6 +1,6 @@
 # JavaBot
 
-some sort of description
+general utility bot for the [JavaDiscord Community](https://join.javadiscord.net)
 
 # Usage 
 
