@@ -1,25 +1,8 @@
 package com.javadiscord.javabot;
 
+import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.javadiscord.javabot.commands.configuation.Config;
-import com.javadiscord.javabot.commands.configuation.WelcomeImage;
-import com.javadiscord.javabot.commands.custom_commands.CustomCommands;
-import com.javadiscord.javabot.commands.moderation.*;
-import com.javadiscord.javabot.commands.other.GuildConfig;
-import com.javadiscord.javabot.commands.other.Question;
-import com.javadiscord.javabot.commands.other.Shutdown;
-import com.javadiscord.javabot.commands.other.Version;
-import com.javadiscord.javabot.commands.other.qotw.ClearQOTW;
-import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
-import com.javadiscord.javabot.commands.other.suggestions.Accept;
-import com.javadiscord.javabot.commands.other.suggestions.Clear;
-import com.javadiscord.javabot.commands.other.suggestions.Decline;
-import com.javadiscord.javabot.commands.other.suggestions.Response;
-import com.javadiscord.javabot.commands.other.testing.*;
-import com.javadiscord.javabot.commands.reaction_roles.ReactionRoles;
-import com.javadiscord.javabot.commands.user_commands.*;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
 import net.dv8tion.jda.api.JDA;
@@ -28,8 +11,10 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.reflections.Reflections;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Properties;
 
 
@@ -49,70 +34,7 @@ public class Bot {
                     .setPrefix("!")
                     .setEmojis("✅", "⚠️", "❌")
                     .useHelpBuilder(false)
-                    .addCommands(
-
-                            //UserCommands
-                            new Avatar(),
-                            new BotInfo(),
-                            new ChangeMyMind(),
-                            new Help(),
-                            new IDCalc(),
-                            new Lmgtfy(),
-                            new Ping(),
-                            new Profile(),
-                            new ServerInfo(),
-                            new Uptime(),
-
-                            //ReactionRoles
-                            new ReactionRoles(),
-
-                            //CustomCommands
-                            new CustomCommands(),
-
-                            //Other
-                            new Question(),
-                            new Shutdown(),
-                            new Version(),
-                            new GuildConfig(),
-
-                            //Other.Testing
-                            new SampleSuggestion(),
-                            new RefreshCategory(),
-                            new MongoDBAddUser(),
-                            new Image(),
-                            new AddConfigFile(),
-                            new UpdateUserFiles(),
-
-                            //Other.Suggestions
-                            new Accept(),
-                            new Clear(),
-                            new Decline(),
-                            new Response(),
-
-                            //Other.QOTW
-                            new ClearQOTW(),
-                            new Correct(),
-                            new Leaderboard(),
-
-                            //Commands.Moderation
-                            new Ban(),
-                            new ClearWarns(),
-                            new EditEmbed(),
-                            new Embed(),
-                            new Kick(),
-                            new Mute(),
-                            new Mutelist(),
-                            new Purge(),
-                            new Report(),
-                            new Unban(),
-                            new Unmute(),
-                            new Warn(),
-                            new Warns(),
-
-                            //Commands.Configuration
-                            new Config(),
-                            new WelcomeImage()
-                    );
+                    .addCommands(discoverCommands());
 
 
             jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
@@ -158,6 +80,30 @@ public class Bot {
      */
     public static String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
+    }
+
+    /**
+     * Discovers and instantiates all commands found in the bot's "commands"
+     * package. This uses the reflections API to find all classes in that
+     * package which extend from the base {@link Command} class.
+     * <p>
+     *     <strong>All command classes MUST have a no-args constructor.</strong>
+     * </p>
+     * @return The array of commands.
+     */
+    private static Command[] discoverCommands() {
+        Reflections reflections = new Reflections("com.javadiscord.javabot.commands");
+        return reflections.getSubTypesOf(Command.class).stream()
+            .map(type -> {
+                try {
+                    return (Command) type.getDeclaredConstructor().newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .toArray(Command[]::new);
     }
 }
 
