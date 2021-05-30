@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.commands.other;
 
-import com.javadiscord.javabot.other.Embeds;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.Embeds;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -45,38 +45,24 @@ public class Version extends Command {
 
         String[] args = event.getArgs().split("\\s+");
 
-        try {
-
-            String input;
-
-            if (args[0].equalsIgnoreCase("now")) {
-
-                LocalDate currentdate = LocalDate.now();
-                String currentDay = currentdate.format(DateTimeFormatter.ofPattern("dd"));
-                String currentMonth = currentdate.format(DateTimeFormatter.ofPattern("MM"));
-                String currentYear = currentdate.format(DateTimeFormatter.ofPattern("YYYY")).substring(2);
-
-                input = currentYear + "-" + currentMonth + "." + currentDay;
-
-            } else {
-                input = args[0];
-            }
-
-            event.reply(Embeds.configEmbed(event, "Version", "Version succesfully changed to", null, input, true));
-
-            Document Query = new Document();
-            Query.append("name", "Java#9523");
-
-            Document SetData = new Document();
-            SetData.append("version", input);
-
-            Document update = new Document();
-            update.append("$set", SetData);
-
-            collection.updateOne(Query, update);
-
-        } catch (ArrayIndexOutOfBoundsException e) {
-            event.reply(Embeds.syntaxError("version now|Text", event));
+        String input;
+        if (args.length > 0 && args[0].equalsIgnoreCase("now")) {
+            input = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY-MM.dd"));
+        } else {
+            input = args[0];
         }
+
+        event.reply(Embeds.configEmbed(event, "Version", "Version succesfully changed to", null, input, true));
+
+        Document Query = new Document();
+        Query.append("name", "Java#9523");
+
+        Document SetData = new Document();
+        SetData.append("version", input);
+
+        Document update = new Document();
+        update.append("$set", SetData);
+
+        collection.updateOne(Query, update);
     }
 }

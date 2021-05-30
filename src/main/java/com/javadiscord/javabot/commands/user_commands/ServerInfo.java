@@ -1,9 +1,9 @@
 package com.javadiscord.javabot.commands.user_commands;
 
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Misc;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -11,9 +11,7 @@ import net.dv8tion.jda.api.interactions.ActionRow;
 import net.dv8tion.jda.api.interactions.button.Button;
 
 import java.awt.*;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 
 public class ServerInfo extends Command {
 
@@ -25,8 +23,8 @@ public class ServerInfo extends Command {
         long voiceChannelCount = event.getGuild().getVoiceChannels().stream().count();
         long channelCount = event.getGuild().getChannels().stream().count() - catCount;
 
-        String guildDate = event.getGuild().getTimeCreated().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
-        String createdDiff = " (" + Misc.getDateDiff(Date.from(event.getGuild().getTimeCreated().toInstant()), Date.from(new Date().toInstant())) + " ago)";
+        String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
+        String createdDiff = TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated());
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(new Color(0x2F3136))
@@ -60,8 +58,8 @@ public class ServerInfo extends Command {
         long voiceChannelCount = event.getGuild().getVoiceChannels().stream().count();
         long channelCount = event.getGuild().getChannels().stream().count() - catCount;
 
-        String guildDate = event.getGuild().getTimeCreated().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
-        String createdDiff = " (" + Misc.getDateDiff(Date.from(event.getGuild().getTimeCreated().toInstant()), Date.from(new Date().toInstant())) + " ago)";
+        String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
+        String createdDiff = TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated());
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(new Color(0x2F3136))

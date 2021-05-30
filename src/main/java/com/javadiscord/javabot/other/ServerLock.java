@@ -13,9 +13,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.bson.Document;
 
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -52,8 +50,8 @@ public class ServerLock {
         lockCount = lockCount + 1;
         Database.queryConfigInt(event.getGuild().getId(), "lockcount", lockCount);
 
-        String timeCreated = user.getTimeCreated().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
-        String createDiff = " (" + Misc.getDateDiff(Date.from(user.getTimeCreated().toInstant()), Date.from(new Date().toInstant())) + " ago)";
+        String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
+        String createDiff = " (" + TimeUtils.formatDurationToNow(user.getTimeCreated()) + " ago)";
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(Constants.GRAY)

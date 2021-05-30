@@ -1,9 +1,6 @@
 package com.javadiscord.javabot.events;
 
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Misc;
-import com.javadiscord.javabot.other.ServerLock;
-import com.javadiscord.javabot.other.StatsCategory;
+import com.javadiscord.javabot.other.*;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -201,7 +198,7 @@ public class UserJoin extends ListenerAdapter {
             user.openPrivateChannel().complete().sendMessage(ServerLock.lockEmbed(event.getGuild())).queue();
             event.getMember().kick().complete();
 
-            String diff = Misc.getDateDiff(Date.from(user.getTimeCreated().toInstant()), Date.from(new Date().toInstant()));
+            String diff = TimeUtils.formatDurationToNow(event.getMember().getTimeCreated());
             welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
 
         }
