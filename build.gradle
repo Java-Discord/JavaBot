@@ -37,6 +37,9 @@ dependencies {
     //compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
     //compile group: 'com.jcabi', name: 'jcabi-aspects', version: '0.22.6'
     //compile 'com.jagrosh:jda-utilities-doc:3.0.5'
+
+    // Reflections API
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.12'
     }
 
 jar {
