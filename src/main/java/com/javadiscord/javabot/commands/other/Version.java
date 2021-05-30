@@ -48,8 +48,11 @@ public class Version extends Command {
         String input;
         if (args.length > 0 && args[0].equalsIgnoreCase("now")) {
             input = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY-MM.dd"));
-        } else {
+        } else if (args.length > 0) {
             input = args[0];
+        } else {
+            event.reply(Embeds.syntaxError("version now|Text", event));
+            return;
         }
 
         event.reply(Embeds.configEmbed(event, "Version", "Version succesfully changed to", null, input, true));
