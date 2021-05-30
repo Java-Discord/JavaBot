@@ -16,6 +16,7 @@ public class Response extends Command {
 
     public Response () {
         this.name = "response";
+        this.aliases = new String[]{ "respond" };
         this.category = new Category("OTHER");
         this.arguments = "<ID> <Text>";
         this.help = "adds a response to the given submission";
