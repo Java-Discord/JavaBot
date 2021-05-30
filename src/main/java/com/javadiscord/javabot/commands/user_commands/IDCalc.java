@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.user_commands;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
@@ -32,8 +33,7 @@ public class IDCalc extends Command {
         long unixTimeStampMilliseconds = Input / 4194304 + 1420070400000L;
         long unixTimeStamp = unixTimeStampMilliseconds / 1000;
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en"));
-        String Date = Instant.ofEpochMilli(unixTimeStampMilliseconds).atZone(ZoneId.of("GMT")).format(dtf);
+        String Date = Instant.ofEpochMilli(unixTimeStampMilliseconds).atZone(ZoneId.of("GMT")).format(TimeUtils.STANDARD_FORMATTER);
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("ID-Calculator")
@@ -51,8 +51,7 @@ public class IDCalc extends Command {
         long unixTimeStampMilliseconds = id / 4194304 + 1420070400000L;
         long unixTimeStamp = unixTimeStampMilliseconds / 1000;
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en"));
-        String Date = Instant.ofEpochMilli(unixTimeStampMilliseconds).atZone(ZoneId.of("GMT")).format(dtf);
+        String Date = Instant.ofEpochMilli(unixTimeStampMilliseconds).atZone(ZoneId.of("GMT")).format(TimeUtils.STANDARD_FORMATTER);
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("ID-Calculator")

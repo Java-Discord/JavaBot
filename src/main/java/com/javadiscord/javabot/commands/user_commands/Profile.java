@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.commands.user_commands;
 
-import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Misc;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
+import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.other.TimeUtils;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -15,10 +15,9 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.bson.Document;
 
 import java.awt.*;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Locale;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 
@@ -48,8 +47,8 @@ public class Profile extends Command {
             highestRole = "everyone";
         }
 
-        String timeJoined = member.getTimeJoined().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
-        String timeCreated = member.getTimeCreated().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
+        String timeJoined = member.getTimeJoined().format(TimeUtils.STANDARD_FORMATTER);
+        String timeCreated = member.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
 
         Color color = null;
         String colorText;
@@ -149,9 +148,11 @@ public class Profile extends Command {
             int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
             int warnCount = Database.getMemberInt(collection, member, "warns");
 
-            String joinDiff = " (" + Misc.getDateDiff(Date.from(member.getTimeJoined().toInstant()), Date.from(new Date().toInstant())) + " ago)";
-            String createDiff = " (" + Misc.getDateDiff(Date.from(member.getUser().getTimeCreated().toInstant()), Date.from(new Date().toInstant())) + " ago)";
+            Duration memberDuration = Duration.between(OffsetDateTime.now(member.getTimeJoined().getOffset()), member.getTimeJoined());
+            Duration createDuration = Duration.between(OffsetDateTime.now(member.getTimeCreated().getOffset()), member.getTimeCreated());
 
+            String joinDiff = TimeUtils.formatDuration(memberDuration);
+            String createDiff = TimeUtils.formatDuration(createDuration);
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)
@@ -184,8 +185,8 @@ public class Profile extends Command {
             highestRole = "everyone";
         }
 
-        String timeJoined = member.getTimeJoined().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
-        String timeCreated = member.getTimeCreated().format(DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en")));
+        String timeJoined = member.getTimeJoined().format(TimeUtils.STANDARD_FORMATTER);
+        String timeCreated = member.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
 
         Color color = null;
         String colorText;
@@ -285,9 +286,8 @@ public class Profile extends Command {
             int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
             int warnCount = Database.getMemberInt(collection, member, "warns");
 
-            String joinDiff = " (" + Misc.getDateDiff(Date.from(member.getTimeJoined().toInstant()), Date.from(new Date().toInstant())) + " ago)";
-            String createDiff = " (" + Misc.getDateDiff(Date.from(member.getUser().getTimeCreated().toInstant()), Date.from(new Date().toInstant())) + " ago)";
-
+            String joinDiff = TimeUtils.formatDurationToNow(member.getTimeJoined());
+            String createDiff = TimeUtils.formatDurationToNow(member.getTimeCreated());
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)

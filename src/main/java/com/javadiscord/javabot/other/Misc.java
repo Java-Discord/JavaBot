@@ -11,9 +11,7 @@ import javax.imageio.ImageIO;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.javadiscord.javabot.events.Startup.iae;
 
@@ -25,45 +23,6 @@ public class Misc {
         BigDecimal i = BigDecimal.valueOf(value);
         i = i.setScale(places, RoundingMode.HALF_UP);
         return i.doubleValue();
-    }
-
-    public static String getDateDiff(Date date1, Date date2) {
-        TimeUnit timeUnit = null;
-        String ex = " ";
-        long diffInMillies = date2.getTime() - date1.getTime();
-
-        if (TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS) > 365) {
-            double i = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS) / 365.0;
-            double yrs = round(i, 1);
-            ex += "years";
-            return yrs + ex;
-        }
-
-        if (TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS) > 48) {
-            timeUnit = TimeUnit.DAYS;
-            ex += "days";
-            return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS) + ex;
-        }
-
-        if (TimeUnit.MINUTES.convert(diffInMillies, TimeUnit.MILLISECONDS) > 120) {
-            timeUnit = TimeUnit.HOURS;
-            ex += "hours";
-            return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS) + ex;
-        }
-
-        if (TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS) > 120) {
-            timeUnit = TimeUnit.MINUTES;
-            ex += "minutes";
-            return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS) + ex;
-        }
-
-        if (TimeUnit.MILLISECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS) > 2000) {
-            timeUnit = TimeUnit.SECONDS;
-            ex += "seconds";
-            return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS) + ex;
-        }
-
-        return null;
     }
 
     public static int parseInt (String input) {

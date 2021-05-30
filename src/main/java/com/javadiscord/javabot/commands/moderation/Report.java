@@ -1,19 +1,18 @@
 package com.javadiscord.javabot.commands.moderation;
 
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.other.Embeds;
+import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Locale;
 
 public class Report extends Command {
 
@@ -24,10 +23,6 @@ public class Report extends Command {
         String[] args = event.getArgs().split("\\s+");
         Member member = null;
         String reason = null;
-
-
-
-            
 
                 if (event.getMessage().getReferencedMessage() == null) {
 
@@ -70,8 +65,6 @@ public class Report extends Command {
 
                     }
 
-                    DateTimeFormatter dtw = DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", new Locale("en"));
-                    LocalDateTime now = LocalDateTime.now();
                     MessageChannel reportChannel = Database.configChannel(event, "report_cid");
 
                     EmbedBuilder eb = new EmbedBuilder()
@@ -81,7 +74,7 @@ public class Report extends Command {
                             .addField("ID", "```" + member.getId() + "```", true)
                             .addField("Reported by", "```" + event.getMessage().getAuthor().getAsTag() + "```", true)
                             .addField("Channel", "```#" + event.getMessage().getChannel().getName() + "```", true)
-                            .addField("Reported on", "```" + dtw.format(now) + "```", true)
+                            .addField("Reported on", "```" + LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER) + "```", true)
                             .addField("Reason", "```" + reason + "```", false)
                             .setFooter(event.getAuthor().getAsTag(), event.getAuthor().getEffectiveAvatarUrl())
                             .setTimestamp(new Date().toInstant());
