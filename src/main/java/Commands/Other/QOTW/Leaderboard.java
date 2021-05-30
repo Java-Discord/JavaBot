@@ -97,14 +97,14 @@ public class Leaderboard extends Command {
 
         BufferedImage backgroundImage = null;
         try {
-            backgroundImage = ImageIO.read(new File("./images/LeaderboardBackground.png"));
+            backgroundImage = ImageIO.read(Leaderboard.class.getClassLoader().getResourceAsStream("images/LeaderboardBackground.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         BufferedImage overlayImage = null;
         try {
-            overlayImage = ImageIO.read(new File("./images/LeaderboardOverlay.png"));
+            overlayImage = ImageIO.read(Leaderboard.class.getClassLoader().getResourceAsStream("images/LeaderboardOverlay.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,7 +136,7 @@ public class Leaderboard extends Command {
 
         Font listNameFont = null;
         try {
-            listNameFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/Uni-Sans-Heavy.ttf")).deriveFont(listNameSize);
+            listNameFont = Font.createFont(Font.TRUETYPE_FONT, Leaderboard.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(listNameSize);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
             ge.registerFont(listNameFont);
@@ -146,7 +146,7 @@ public class Leaderboard extends Command {
 
         Font listPointsFont = null;
         try {
-            listPointsFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/Uni-Sans-Heavy.ttf")).deriveFont(listPointsSize);
+            listPointsFont = Font.createFont(Font.TRUETYPE_FONT, Leaderboard.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(listPointsSize);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
             ge.registerFont(listPointsFont);

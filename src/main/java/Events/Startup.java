@@ -43,16 +43,15 @@ public class Startup extends ListenerAdapter {
         }
 
         try {
-            File f = new File("textfiles/startup.txt");
             StringBuilder sb = new StringBuilder();
-            Scanner fReader = new Scanner(f);
+            Scanner fReader = new Scanner(getClass().getClassLoader().getResourceAsStream("textfiles/startup.txt"));
 
             while (fReader.hasNextLine()) {
                 sb.append(fReader.nextLine() + "\n");
             }
             System.out.println("\n" + sb.toString().replace("{!version}", new Version().getVersion()));
 
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             LoggerFactory.getLogger(Startup.class).error("* textfiles/startup.txt not found");
         }
 

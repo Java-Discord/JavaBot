@@ -1,5 +1,6 @@
 package Events;
 
+import Commands.Other.QOTW.Leaderboard;
 import Other.Database;
 import Other.Misc;
 import Other.ServerLock;
@@ -104,13 +105,13 @@ public class UserJoin extends ListenerAdapter {
 
                 avatarURL = new URL(member.getUser().getEffectiveAvatarUrl() + "?size=4096");
                 avatarImage = ImageIO.read(avatarURL);
-                botImage = ImageIO.read(new File("./images/BotIcon.png"));
-                flagImage = ImageIO.read(new File("./images/FlagIcon.png"));
+                botImage = ImageIO.read(UserJoin.class.getClassLoader().getResourceAsStream("images/BotIcon.png"));
+                flagImage = ImageIO.read(UserJoin.class.getClassLoader().getResourceAsStream("images/FlagIcon.png"));
 
             } catch (IOException e) { e.printStackTrace(); }
 
             try {
-                MemberFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/Uni-Sans-Heavy.ttf")).deriveFont(memberSize);
+                MemberFont = Font.createFont(Font.TRUETYPE_FONT, UserJoin.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(memberSize);
                 GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
                 ge.registerFont(MemberFont);
@@ -119,7 +120,7 @@ public class UserJoin extends ListenerAdapter {
             }
 
             try {
-                CountFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/Uni-Sans-Heavy.ttf")).deriveFont(countSize);
+                CountFont = Font.createFont(Font.TRUETYPE_FONT, UserJoin.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(countSize);
                 GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
                 ge.registerFont(CountFont);
