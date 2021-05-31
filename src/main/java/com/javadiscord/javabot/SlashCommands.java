@@ -32,19 +32,7 @@ public class SlashCommands extends ListenerAdapter {
     public void onSlashCommand(SlashCommandEvent event) {
         if (event.getGuild() == null) return;
 
-        String id = event.getUser().getId();
-
             switch (event.getName()) {
-
-                case "button-test":
-
-                event.reply("Button Test").addActionRow(
-                        Button.primary(id + ":do-nothing", "Primary"),
-                        Button.secondary(id + ":do-nothing", "Secondary"),
-                        Button.success(id + ":do-nothing", "Success"),
-                        Button.danger(id + ":do-nothing", "Danger"),
-                        Button.link(Constants.WEBSITE, "Link")).queue();
-                break;
 
                 case "avatar":
 
@@ -122,7 +110,6 @@ public class SlashCommands extends ListenerAdapter {
 
         // Simple reply Commands
         commands.addCommands(
-                //new CommandData("button-test", "button test"),
                 new CommandData("botinfo", "Shows some information about Java"),
                 new CommandData("help", "Sends you a DM with all Commands"),
                 new CommandData("ping", "Checks Java's Gateway Ping"),
@@ -161,10 +148,7 @@ public class SlashCommands extends ListenerAdapter {
 
         event.deferEdit().queue();
         switch (type) {
-
-            case "do-nothing":
-                break;
-
+                
             case "submission":
 
                 try {
