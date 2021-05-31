@@ -53,7 +53,7 @@ jar {
             it.isDirectory() ? it : zipTree(it)
         }
     }
-    manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "Bot") }
+    manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "com.javadiscord.javabot.Bot") }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' }
 
 tasks.withType(JavaCompile){ options.encoding = 'UTF-8'}
