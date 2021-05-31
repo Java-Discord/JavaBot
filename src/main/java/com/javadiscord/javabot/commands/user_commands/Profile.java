@@ -148,11 +148,8 @@ public class Profile extends Command {
             int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
             int warnCount = Database.getMemberInt(collection, member, "warns");
 
-            Duration memberDuration = Duration.between(OffsetDateTime.now(member.getTimeJoined().getOffset()), member.getTimeJoined());
-            Duration createDuration = Duration.between(OffsetDateTime.now(member.getTimeCreated().getOffset()), member.getTimeCreated());
-
-            String joinDiff = TimeUtils.formatDuration(memberDuration);
-            String createDiff = TimeUtils.formatDuration(createDuration);
+            String joinDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeJoined()) + ")";
+            String createDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeCreated()) + ")";
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)
@@ -286,8 +283,8 @@ public class Profile extends Command {
             int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
             int warnCount = Database.getMemberInt(collection, member, "warns");
 
-            String joinDiff = TimeUtils.formatDurationToNow(member.getTimeJoined());
-            String createDiff = TimeUtils.formatDurationToNow(member.getTimeCreated());
+            String joinDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeJoined()) + ")";
+            String createDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeCreated()) + ")";
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)
