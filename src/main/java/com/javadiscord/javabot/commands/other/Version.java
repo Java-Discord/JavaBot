@@ -42,7 +42,7 @@ public class Version extends Command {
         String[] args = event.getArgs().split("\\s+");
         String input;
         if (args.length > 0 && args[0].equalsIgnoreCase("now")) {
-            input = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY-MM.dd"));
+            input = LocalDate.now().format(DateTimeFormatter.ofPattern("yy-MM.dd"));
         } else if (args.length > 0) {
             input = args[0];
         } else {
