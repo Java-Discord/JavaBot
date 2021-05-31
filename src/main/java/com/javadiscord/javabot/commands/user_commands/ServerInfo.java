@@ -24,7 +24,7 @@ public class ServerInfo extends Command {
         long channelCount = event.getGuild().getChannels().stream().count() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-        String createdDiff = TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated());
+        String createdDiff = " (" + TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(new Color(0x2F3136))
@@ -44,7 +44,7 @@ public class ServerInfo extends Command {
                 .setTimestamp(new Date().toInstant());
 
         if (event.getGuild().getId().equals("648956210850299986")) {
-            event.reply(new MessageBuilder().setEmbed(eb.build()).setActionRows(ActionRow.of(Button.link("Website", Constants.WEBSITE))).build());
+            event.reply(new MessageBuilder().setEmbed(eb.build()).setActionRows(ActionRow.of(Button.link(Constants.WEBSITE, "Website"))).build());
         } else { event.reply(eb.build()); }
 
 
@@ -59,7 +59,7 @@ public class ServerInfo extends Command {
         long channelCount = event.getGuild().getChannels().stream().count() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-        String createdDiff = TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated());
+        String createdDiff = " (" + TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(new Color(0x2F3136))
