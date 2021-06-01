@@ -24,7 +24,7 @@ public class ServerInfo extends Command {
         long channelCount = event.getGuild().getChannels().stream().count() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-        String createdDiff = " (" + TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
+        String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(new Color(0x2F3136))
@@ -59,7 +59,7 @@ public class ServerInfo extends Command {
         long channelCount = event.getGuild().getChannels().stream().count() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-        String createdDiff = " (" + TimeUtils.formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
+        String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(new Color(0x2F3136))

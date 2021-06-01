@@ -198,7 +198,7 @@ public class UserJoin extends ListenerAdapter {
             user.openPrivateChannel().complete().sendMessage(ServerLock.lockEmbed(event.getGuild())).queue();
             event.getMember().kick().complete();
 
-            String diff = TimeUtils.formatDurationToNow(event.getMember().getTimeCreated());
+            String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
             welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
 
         }
