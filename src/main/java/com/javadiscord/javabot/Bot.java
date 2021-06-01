@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.reflections.Reflections;
 
+import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Properties;
@@ -36,7 +37,7 @@ public class Bot {
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .enableCache(CacheFlag.ACTIVITY)
                     .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                    .addEventListeners(client)
+                    .addEventListeners(client, new SlashCommands(client))
                     .build();
 
             //EVENTS
@@ -50,7 +51,6 @@ public class Bot {
             jda.addEventListener(new CstmCmdListener());
             jda.addEventListener(new AutoMod());
             jda.addEventListener(new SubmissionListener());
-            jda.addEventListener(new SlashCommands());
             //jda.addEventListener(new StarboardListener());
     }
 
@@ -89,6 +89,7 @@ public class Bot {
         return reflections.getSubTypesOf(Command.class).stream()
             .map(type -> {
                 try {
+                    if (Modifier.isAbstract(type.getModifiers())) return null;
                     return (Command) type.getDeclaredConstructor().newInstance();
                 } catch (Exception e) {
                     e.printStackTrace();
