@@ -51,7 +51,7 @@ public class ServerLock {
         Database.queryConfigInt(event.getGuild().getId(), "lockcount", lockCount);
 
         String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-        String createDiff = " (" + TimeUtils.formatDurationToNow(user.getTimeCreated()) + " ago)";
+        String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(Constants.GRAY)

@@ -15,8 +15,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.bson.Document;
 
 import java.awt.*;
-import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -148,8 +146,9 @@ public class Profile extends Command {
             int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
             int warnCount = Database.getMemberInt(collection, member, "warns");
 
-            String joinDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeJoined()) + ")";
-            String createDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeCreated()) + ")";
+            TimeUtils tu = new TimeUtils();
+            String joinDiff = " (" + tu.formatDurationToNow(member.getTimeJoined()) + ")";
+            String createDiff = " (" + tu.formatDurationToNow(member.getTimeCreated()) + ")";
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)
@@ -283,8 +282,9 @@ public class Profile extends Command {
             int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
             int warnCount = Database.getMemberInt(collection, member, "warns");
 
-            String joinDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeJoined()) + ")";
-            String createDiff = " (" + TimeUtils.formatDurationToNow(member.getTimeCreated()) + ")";
+            TimeUtils tu = new TimeUtils();
+            String joinDiff = " (" + tu.formatDurationToNow(member.getTimeJoined()) + ")";
+            String createDiff = " (" + tu.formatDurationToNow(member.getTimeCreated()) + ")";
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)
