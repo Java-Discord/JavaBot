@@ -1,10 +1,9 @@
 package com.javadiscord.javabot;
 
-import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.commands.user_commands.*;
-import com.javadiscord.javabot.other.Constants;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.commands.other.qotw.Correct;
+import com.javadiscord.javabot.commands.user_commands.*;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -105,8 +104,7 @@ public class SlashCommands extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event){
-
-        CommandUpdateAction commands = Bot.jda.getGuilds().get(0).updateCommands();
+        CommandUpdateAction commands = event.getJDA().getGuilds().get(0).updateCommands();
 
         // Simple reply Commands
         commands.addCommands(

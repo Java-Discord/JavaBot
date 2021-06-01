@@ -1,8 +1,8 @@
 package com.javadiscord.javabot;
 
 import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
 import net.dv8tion.jda.api.JDA;
@@ -19,32 +19,25 @@ import java.util.Properties;
 
 
 public class Bot {
-
-    public static JDA jda;
-    public static EventWaiter waiter;
-
     private static final Properties properties = new MultiProperties(Path.of("bot.props"));
 
     public static void main(String[] args) throws Exception {
-            waiter = new EventWaiter();
-
-            CommandClientBuilder client = new CommandClientBuilder()
+            CommandClient client = new CommandClientBuilder()
                     .setOwnerId("374328434677121036")
                     .setCoOwnerIds("299555811804315648", "620615131256061972")
                     .setPrefix("!")
                     .setEmojis("✅", "⚠️", "❌")
                     .useHelpBuilder(false)
-                    .addCommands(discoverCommands());
+                    .addCommands(discoverCommands())
+                    .build();
 
-
-            jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
+            JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .enableCache(CacheFlag.ACTIVITY)
                     .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
+                    .addEventListeners(client)
                     .build();
-
-            jda.addEventListener(waiter, client.build());
 
             //EVENTS
             jda.addEventListener(new GuildJoin());

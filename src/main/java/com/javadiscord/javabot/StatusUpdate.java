@@ -24,8 +24,8 @@ public class StatusUpdate extends ListenerAdapter{
                     Activity.listening(event.getJDA().getGuilds().get(0).getMemberCount() + " members" + " | " + new Version().getVersion()),
                     Activity.watching("!help" + " | " + new Version().getVersion())};
 
-            Bot.jda.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
-            Bot.jda.getPresence().setActivity(activities[currentIndex]);
+            event.getJDA().getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
+            event.getJDA().getPresence().setActivity(activities[currentIndex]);
             currentIndex = (currentIndex + 1) % activities.length;
         }, 0, 35, TimeUnit.SECONDS);
     }
