@@ -31,6 +31,10 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.USER;
 
 public class SlashCommands extends ListenerAdapter {
+    /**
+     * Maps every command name and alias to an instance of the command, for
+     * constant-time lookup.
+     */
     private final Map<String, SlashEnabledCommand> commandsIndex;
 
     public SlashCommands(CommandClient commandClient) {
@@ -89,10 +93,6 @@ public class SlashCommands extends ListenerAdapter {
                     Lmgtfy.exCommand(event, event.getOption("text").getAsString());
                     break;
 
-                case "ping":
-                    new Ping().execute(event);
-                    break;
-
                 case "profile":
 
                     OptionMapping profileOption = event.getOption("user");
@@ -117,6 +117,10 @@ public class SlashCommands extends ListenerAdapter {
             }
         }
 
+    /**
+     * Registers all slash commands in the command index.
+     * @param commandClient The command client to register commands from.
+     */
     private void registerSlashCommands(CommandClient commandClient) {
         for (var cmd : commandClient.getCommands()) {
             if (cmd instanceof SlashEnabledCommand) {
