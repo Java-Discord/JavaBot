@@ -1,10 +1,11 @@
 package com.javadiscord.javabot;
 
-import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.commands.user_commands.*;
-import com.javadiscord.javabot.other.Constants;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jagrosh.jdautilities.command.CommandClient;
+import com.javadiscord.javabot.commands.other.qotw.Correct;
+import com.javadiscord.javabot.commands.user_commands.*;
+import com.javadiscord.javabot.other.SlashEnabledCommand;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -22,15 +23,34 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.restaction.CommandUpdateAction;
 import org.bson.Document;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.USER;
 
 public class SlashCommands extends ListenerAdapter {
+    /**
+     * Maps every command name and alias to an instance of the command, for
+     * constant-time lookup.
+     */
+    private final Map<String, SlashEnabledCommand> commandsIndex;
+
+    public SlashCommands(CommandClient commandClient) {
+        this.commandsIndex = new HashMap<>();
+        this.registerSlashCommands(commandClient);
+    }
 
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
         if (event.getGuild() == null) return;
+
+        var command = this.commandsIndex.get(event.getName());
+        if (command != null) {
+            command.execute(event);
+            return;
+        }
 
             switch (event.getName()) {
 
@@ -73,10 +93,6 @@ public class SlashCommands extends ListenerAdapter {
                     Lmgtfy.exCommand(event, event.getOption("text").getAsString());
                     break;
 
-                case "ping":
-                    Ping.exCommand(event);
-                    break;
-
                 case "profile":
 
                     OptionMapping profileOption = event.getOption("user");
@@ -101,12 +117,25 @@ public class SlashCommands extends ListenerAdapter {
             }
         }
 
-
+    /**
+     * Registers all slash commands in the command index.
+     * @param commandClient The command client to register commands from.
+     */
+    private void registerSlashCommands(CommandClient commandClient) {
+        for (var cmd : commandClient.getCommands()) {
+            if (cmd instanceof SlashEnabledCommand) {
+                var slashCommand = (SlashEnabledCommand) cmd;
+                this.commandsIndex.put(slashCommand.getName(), slashCommand);
+                for (var alias : slashCommand.getAliases()) {
+                    this.commandsIndex.put(alias, slashCommand);
+                }
+            }
+        }
+    }
 
     @Override
     public void onReady(ReadyEvent event){
-
-        CommandUpdateAction commands = Bot.jda.getGuilds().get(0).updateCommands();
+        CommandUpdateAction commands = event.getJDA().getGuilds().get(0).updateCommands();
 
         // Simple reply Commands
         commands.addCommands(
