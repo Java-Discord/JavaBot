@@ -31,7 +31,7 @@ dependencies {
 
 
     // SlashCommands (+ Buttons) feature branch
-    compile 'com.github.dv8fromtheworld:jda:f957801'
+    compile 'com.github.dv8fromtheworld:jda:bf71f22'
     //compile group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
     //compile 'com.googlecode.json-simple:json-simple:1.1.1'
     //compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'

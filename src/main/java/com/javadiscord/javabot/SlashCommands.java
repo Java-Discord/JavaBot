@@ -15,12 +15,13 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.requests.restaction.CommandUpdateAction;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
 
 import java.util.HashMap;
@@ -135,7 +136,7 @@ public class SlashCommands extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event){
-        CommandUpdateAction commands = event.getJDA().getGuilds().get(0).updateCommands();
+        CommandListUpdateAction commands = event.getJDA().getGuilds().get(0).updateCommands();
 
         // Simple reply Commands
         commands.addCommands(
@@ -149,19 +150,20 @@ public class SlashCommands extends ListenerAdapter {
         // Commands with required options
         commands.addCommands(
                 new CommandData("avatar", "Shows your profile picture")
-                        .addOption(new OptionData(USER, "user", "If given, shows the profile picture of the given user")),
+                        .addOption(USER, "user", "If given, shows the profile picture of the given user", false),
 
                 new CommandData("changemymind", "Generates the \"change my mind\" meme out of your given input")
-                        .addOption(new OptionData(STRING, "text", "your text-input").setRequired(true)),
+                        .addOption(STRING, "text", "your text-input", true),
 
                 new CommandData("idcalc", "Generates a human-readable timestamp out of a given id")
-                        .addOption(new OptionData(STRING, "id", "The id, that the bot will convert into a human-readable timestamp").setRequired(true)),
+                        .addOption(STRING, "id", "The id, that the bot will convert into a human-readable timestamp", true),
 
                 new CommandData("lmgtfy", "Turns your text-input into a lmgtfy-link")
-                        .addOption(new OptionData(STRING, "text", "The text, that will be converted into a lmgtfy-link").setRequired(true)),
+                        .addOption(STRING, "text", "The text, that will be converted into a lmgtfy-link", true),
 
                 new CommandData("profile", "Shows your profile")
-                        .addOption(new OptionData(USER, "user", "If given, shows the profile of the given user")));
+                        .addOption(USER, "user", "If given, shows the profile of the given user", false)
+        );
 
         commands.queue();
     }
