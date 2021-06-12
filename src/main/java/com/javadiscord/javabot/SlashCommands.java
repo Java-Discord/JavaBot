@@ -15,12 +15,11 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
 
@@ -162,8 +161,7 @@ public class SlashCommands extends ListenerAdapter {
                         .addOption(STRING, "text", "The text, that will be converted into a lmgtfy-link", true),
 
                 new CommandData("profile", "Shows your profile")
-                        .addOption(USER, "user", "If given, shows the profile of the given user", false)
-        );
+                        .addOption(USER, "user", "If given, shows the profile of the given user", false));
 
         commands.queue();
     }

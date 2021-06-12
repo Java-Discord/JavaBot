@@ -17,7 +17,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-    //compile 'net.dv8tion:JDA:4.2.0_247'
+    compile 'net.dv8tion:JDA:4.3.0_277'
     compile 'com.jagrosh:jda-utilities:3.0.5'
     compile 'org.mongodb:mongodb-driver:3.6.0'
     compile 'com.google.code.gson:gson:2.8.6'
@@ -31,7 +31,7 @@ dependencies {
 
 
     // SlashCommands (+ Buttons) feature branch
-    compile 'com.github.dv8fromtheworld:jda:bf71f22'
+    //compile 'com.github.dv8fromtheworld:jda:f957801'
     //compile group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
     //compile 'com.googlecode.json-simple:json-simple:1.1.1'
     //compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
