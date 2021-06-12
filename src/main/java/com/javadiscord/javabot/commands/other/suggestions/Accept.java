@@ -30,24 +30,30 @@ public class Accept extends Command {
 
                 Emote check = event.getGuild().getEmotesByName("check", false).get(0);
 
-                Message SuggestionMessage = event.getChannel().retrieveMessageById(args[0]).complete();
-                MessageEmbed SuggestionMessageEmbed = event.getChannel().retrieveMessageById(args[0]).complete().getEmbeds().get(0);
-                SuggestionMessage.clearReactions().queue();
+                Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
+                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
+                msg.clearReactions().queue();
 
-                String authorName = SuggestionMessage.getEmbeds().get(0).getAuthor().getName();
-                String authorIcon = SuggestionMessage.getEmbeds().get(0).getAuthor().getIconUrl();
-                String description = SuggestionMessage.getEmbeds().get(0).getDescription();
-                OffsetDateTime timestamp = SuggestionMessage.getEmbeds().get(0).getTimestamp();
+                String name = msg.getEmbeds().get(0).getAuthor().getName();
+                String iconUrl = msg.getEmbeds().get(0).getAuthor().getIconUrl();
+                String description = msg.getEmbeds().get(0).getDescription();
+                OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setColor(Constants.GREEN)
-                        .setAuthor(authorName, null, authorIcon);
+                        .setAuthor(name, null, iconUrl);
 
                 try {
-                    String responseFieldName = SuggestionMessageEmbed.getFields().get(0).getName();
-                    String responseFieldValue = SuggestionMessageEmbed.getFields().get(0).getValue();
+                    String responseFieldName = msgEmbed.getFields().get(0).getName();
+                    String responseFieldValue = msgEmbed.getFields().get(0).getValue();
 
                     eb.addField(responseFieldName, responseFieldValue, false);
+
+                } catch (IndexOutOfBoundsException e) {}
+
+                try {
+
+                    eb.setImage(msgEmbed.getImage().getUrl());
 
                 } catch (IndexOutOfBoundsException e) {}
 
@@ -55,7 +61,7 @@ public class Accept extends Command {
                         .setTimestamp(timestamp)
                         .setFooter("Accepted by " + event.getAuthor().getAsTag());
 
-                SuggestionMessage.editMessage(eb.build()).queue(message1 -> message1.addReaction(check).queue());
+                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(check).queue());
 
                 event.getMessage().delete().queue();
 

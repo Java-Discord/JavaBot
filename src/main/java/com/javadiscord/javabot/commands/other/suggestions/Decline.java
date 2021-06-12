@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
@@ -28,34 +29,38 @@ public class Decline extends Command {
 
             try {
 
-                Emote Abort = event.getGuild().getEmotesByName("abort", false).get(0);
+                Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
+                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
+                msg.clearReactions().queue();
 
-                Message SuggestionMessage = event.getChannel().retrieveMessageById(args[0]).complete();
-                MessageEmbed SuggestionMessageEmbed = event.getChannel().retrieveMessageById(args[0]).complete().getEmbeds().get(0);
-                SuggestionMessage.clearReactions().queue();
-
-                String AuthorName = SuggestionMessage.getEmbeds().get(0).getAuthor().getName();
-                String AuthorIcon = SuggestionMessage.getEmbeds().get(0).getAuthor().getIconUrl();
-                String Description = SuggestionMessage.getEmbeds().get(0).getDescription();
-                OffsetDateTime Timestamp = SuggestionMessage.getEmbeds().get(0).getTimestamp();
+                String name = msgEmbed.getAuthor().getName();
+                String iconUrl = msgEmbed.getAuthor().getIconUrl();
+                String description = msgEmbed.getDescription();
+                OffsetDateTime timestamp = msgEmbed.getTimestamp();
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setColor(new Color(0xe74c3c))
-                        .setAuthor(AuthorName, null, AuthorIcon);
+                        .setAuthor(name, null, iconUrl);
 
                 try {
-                    String ResponseFieldName = SuggestionMessageEmbed.getFields().get(0).getName();
-                    String ResponseFieldValue = SuggestionMessageEmbed.getFields().get(0).getValue();
+                    String ResponseFieldName = msgEmbed.getFields().get(0).getName();
+                    String ResponseFieldValue = msgEmbed.getFields().get(0).getValue();
 
                     eb.addField(ResponseFieldName, ResponseFieldValue, false);
 
                 } catch (IndexOutOfBoundsException e) {}
 
-                eb.setDescription(Description)
-                        .setTimestamp(Timestamp)
+                try {
+
+                    eb.setImage(msgEmbed.getImage().getUrl());
+
+                } catch (IndexOutOfBoundsException e) {}
+
+                eb.setDescription(description)
+                        .setTimestamp(timestamp)
                         .setFooter("Declined by " + event.getAuthor().getAsTag());
 
-                SuggestionMessage.editMessage(eb.build()).queue(message1 -> message1.addReaction(Abort).queue());
+                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_FAILURE).queue());
 
                 event.getMessage().delete().queue();
 

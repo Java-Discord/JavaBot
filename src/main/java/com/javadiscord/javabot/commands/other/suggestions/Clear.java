@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
@@ -27,26 +29,30 @@ public class Clear extends Command {
 
             try {
 
-                Emote Upvote = event.getGuild().getEmotesByName("up_vote", false).get(0);
-                Emote Downvote = event.getGuild().getEmotesByName("down_vote", false).get(0);
+                Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
+                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
+                msg.clearReactions().queue();
 
-                Message SuggestionMessage = event.getChannel().retrieveMessageById(args[0]).complete();
-                SuggestionMessage.clearReactions().queue();
-
-                String AuthorName = SuggestionMessage.getEmbeds().get(0).getAuthor().getName();
-                String AuthorIcon = SuggestionMessage.getEmbeds().get(0).getAuthor().getIconUrl();
-                String Description = SuggestionMessage.getEmbeds().get(0).getDescription();
-                OffsetDateTime Timestamp = SuggestionMessage.getEmbeds().get(0).getTimestamp();
+                String name = msg.getEmbeds().get(0).getAuthor().getName();
+                String iconUrl = msg.getEmbeds().get(0).getAuthor().getIconUrl();
+                String description = msg.getEmbeds().get(0).getDescription();
+                OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setColor(new Color(0x2F3136))
-                        .setAuthor(AuthorName, null, AuthorIcon)
-                        .setDescription(Description)
-                        .setTimestamp(Timestamp);
+                        .setAuthor(name, null, iconUrl)
+                        .setDescription(description)
+                        .setTimestamp(timestamp);
 
-                SuggestionMessage.editMessage(eb.build()).queue(message1 -> {
-                    message1.addReaction(Upvote).queue();
-                    message1.addReaction(Downvote).queue();
+                try {
+
+                    eb.setImage(msgEmbed.getImage().getUrl());
+
+                } catch (IndexOutOfBoundsException e) {}
+
+                msg.editMessage(eb.build()).queue(message1 -> {
+                    message1.addReaction(Constants.REACTION_UPVOTE).queue();
+                    message1.addReaction(Constants.REACTION_DOWNVOTE).queue();
                 });
 
                 event.getMessage().delete().queue();

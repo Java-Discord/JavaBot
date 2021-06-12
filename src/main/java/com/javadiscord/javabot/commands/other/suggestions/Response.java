@@ -36,23 +36,29 @@ public class Response extends Command {
                 }
                 String Text = builder.substring(0, builder.toString().length() - 1);
 
-                Message SuggestionMessage = event.getChannel().retrieveMessageById(args[0]).complete();
-                MessageEmbed SuggestionMessageEmbed = event.getChannel().retrieveMessageById(args[0]).complete().getEmbeds().get(0);
+                Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
+                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
 
-                String AuthorName = SuggestionMessageEmbed.getAuthor().getName();
-                String AuthorIcon = SuggestionMessageEmbed.getAuthor().getIconUrl();
-                String Description = SuggestionMessageEmbed.getDescription();
-                Color Color = SuggestionMessageEmbed.getColor();
-                OffsetDateTime Timestamp = SuggestionMessageEmbed.getTimestamp();
+                String name = msgEmbed.getAuthor().getName();
+                String iconUrl = msgEmbed.getAuthor().getIconUrl();
+                String description = msgEmbed.getDescription();
+                Color color = msgEmbed.getColor();
+                OffsetDateTime timestamp = msgEmbed.getTimestamp();
 
                 EmbedBuilder eb = new EmbedBuilder()
-                        .setColor(Color)
-                        .setAuthor(AuthorName, null, AuthorIcon)
-                        .setDescription(Description)
+                        .setColor(color)
+                        .setAuthor(name, null, iconUrl)
+                        .setDescription(description)
                         .addField("→ Response from " + event.getAuthor().getAsTag(), Text, false)
-                        .setTimestamp(Timestamp);
+                        .setTimestamp(timestamp);
 
-                SuggestionMessage.editMessage(eb.build()).queue();
+                try {
+
+                    eb.setImage(msgEmbed.getImage().getUrl());
+
+                } catch (IndexOutOfBoundsException e) {}
+
+                msg.editMessage(eb.build()).queue();
                 event.getMessage().delete().queue();
 
             } catch (Exception e) {
