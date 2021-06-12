@@ -25,7 +25,7 @@ public class Bot {
     public static void main(String[] args) throws Exception {
             CommandClient client = new CommandClientBuilder()
                     .setOwnerId("374328434677121036")
-                    .setCoOwnerIds("299555811804315648", "620615131256061972")
+                    .setCoOwnerIds("299555811804315648", "620615131256061972", "810481402390118400")
                     .setPrefix("!")
                     .setEmojis("✅", "⚠️", "❌")
                     .useHelpBuilder(false)
