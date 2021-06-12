@@ -28,8 +28,6 @@ public class Accept extends Command {
 
             try {
 
-                Emote check = event.getGuild().getEmotesByName("check", false).get(0);
-
                 Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
                 MessageEmbed msgEmbed = msg.getEmbeds().get(0);
                 msg.clearReactions().queue();
@@ -61,7 +59,7 @@ public class Accept extends Command {
                         .setTimestamp(timestamp)
                         .setFooter("Accepted by " + event.getAuthor().getAsTag());
 
-                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(check).queue());
+                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_UPVOTE).queue());
 
                 event.getMessage().delete().queue();
 

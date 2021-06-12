@@ -34,7 +34,8 @@ public class Response extends Command {
                 for (String value : MessageArg) {
                     builder.append(value + " ");
                 }
-                String Text = builder.substring(0, builder.toString().length() - 1);
+                
+                String text = builder.substring(0, builder.toString().length() - 1);
 
                 Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
                 MessageEmbed msgEmbed = msg.getEmbeds().get(0);
@@ -49,7 +50,7 @@ public class Response extends Command {
                         .setColor(color)
                         .setAuthor(name, null, iconUrl)
                         .setDescription(description)
-                        .addField("→ Response from " + event.getAuthor().getAsTag(), Text, false)
+                        .addField("→ Response from " + event.getAuthor().getAsTag(), text, false)
                         .setTimestamp(timestamp);
 
                 try {

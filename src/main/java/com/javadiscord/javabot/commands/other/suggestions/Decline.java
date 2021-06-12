@@ -43,10 +43,10 @@ public class Decline extends Command {
                         .setAuthor(name, null, iconUrl);
 
                 try {
-                    String ResponseFieldName = msgEmbed.getFields().get(0).getName();
-                    String ResponseFieldValue = msgEmbed.getFields().get(0).getValue();
+                    String responseFieldName = msgEmbed.getFields().get(0).getName();
+                    String responseFieldValue = msgEmbed.getFields().get(0).getValue();
 
-                    eb.addField(ResponseFieldName, ResponseFieldValue, false);
+                    eb.addField(responseFieldName, responseFieldValue, false);
 
                 } catch (IndexOutOfBoundsException e) {}
 
