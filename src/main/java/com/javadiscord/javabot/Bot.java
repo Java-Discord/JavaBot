@@ -20,38 +20,41 @@ import java.util.Properties;
 
 
 public class Bot {
-    private static final Properties properties = new MultiProperties(Path.of("bot.props"));
+    private static final Properties properties = new MultiProperties(
+            MultiProperties.getClasspathResource("bot.properties").orElseThrow(),
+            Path.of("bot.props")
+    );
 
     public static void main(String[] args) throws Exception {
-            CommandClient client = new CommandClientBuilder()
-                    .setOwnerId("374328434677121036")
-                    .setCoOwnerIds("299555811804315648", "620615131256061972", "810481402390118400")
-                    .setPrefix("!")
-                    .setEmojis("✅", "⚠️", "❌")
-                    .useHelpBuilder(false)
-                    .addCommands(discoverCommands())
-                    .build();
+        CommandClient client = new CommandClientBuilder()
+                .setOwnerId(getProperty("ownerId"))
+                .setCoOwnerIds(getProperty("coOwnerIds").split("\\s*,\\s*"))
+                .setPrefix(getProperty("prefix"))
+                .setEmojis(getProperty("emojis.success"), getProperty("emojis.warning"), getProperty("emojis.error"))
+                .useHelpBuilder(false)
+                .addCommands(discoverCommands())
+                .build();
 
-            JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
-                    .setStatus(OnlineStatus.DO_NOT_DISTURB)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL)
-                    .enableCache(CacheFlag.ACTIVITY)
-                    .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                    .addEventListeners(client, new SlashCommands(client))
-                    .build();
+        JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
+                .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                .enableCache(CacheFlag.ACTIVITY)
+                .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
+                .addEventListeners(client, new SlashCommands(client))
+                .build();
 
-            //EVENTS
-            jda.addEventListener(new GuildJoin());
-            jda.addEventListener(new UserJoin());
-            jda.addEventListener(new UserLeave());
-            jda.addEventListener(new Startup());
-            jda.addEventListener(new StatusUpdate());
-            jda.addEventListener(new ReactionListener());
-            jda.addEventListener(new SuggestionListener());
-            jda.addEventListener(new CstmCmdListener());
-            jda.addEventListener(new AutoMod());
-            jda.addEventListener(new SubmissionListener());
-            //jda.addEventListener(new StarboardListener());
+        //EVENTS
+        jda.addEventListener(new GuildJoin());
+        jda.addEventListener(new UserJoin());
+        jda.addEventListener(new UserLeave());
+        jda.addEventListener(new Startup());
+        jda.addEventListener(new StatusUpdate());
+        jda.addEventListener(new ReactionListener());
+        jda.addEventListener(new SuggestionListener());
+        jda.addEventListener(new CstmCmdListener());
+        jda.addEventListener(new AutoMod());
+        jda.addEventListener(new SubmissionListener());
+        //jda.addEventListener(new StarboardListener());
     }
 
     /**
@@ -85,7 +88,7 @@ public class Bot {
      * @return The array of commands.
      */
     private static Command[] discoverCommands() {
-        Reflections reflections = new Reflections("com.javadiscord.javabot.commands");
+        Reflections reflections = new Reflections(getProperty("commandsPackage"));
         return reflections.getSubTypesOf(Command.class).stream()
             .map(type -> {
                 try {

@@ -112,6 +112,11 @@ public class SlashCommands extends ListenerAdapter {
                     Lmgtfy.execute(event, event.getOption("text").getAsString());
                     break;
 
+                case "ping":
+
+                    Ping.execute(event);
+                    break;
+
                 case "profile":
 
                     OptionMapping profileOption = event.getOption("user");
