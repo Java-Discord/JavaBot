@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import org.bson.Document;
@@ -191,6 +192,13 @@ public class Database {
             guildName = e.getGuild().getName();
         }
 
+        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
+
+            guildID = e.getGuild().getId();
+            guildName = e.getGuild().getName();
+        }
+
         if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
 
@@ -255,14 +263,19 @@ public class Database {
         }
     }
 
-
-
     public static int getConfigInt(Object event, String varName) {
 
         String guildName = null, guildID = null;
 
         if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
             com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
+
+            guildID = e.getGuild().getId();
+            guildName = e.getGuild().getName();
+        }
+
+        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
             guildID = e.getGuild().getId();
             guildName = e.getGuild().getName();
@@ -311,6 +324,13 @@ public class Database {
             tc = e.getGuild().getTextChannelById(id);
         }
 
+        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
+
+            String id = getConfigString(event, varName);
+            tc = e.getGuild().getTextChannelById(id);
+        }
+
         if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
 
@@ -334,6 +354,13 @@ public class Database {
 
         if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
             com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
+
+            String id = getConfigString(event, varName);
+            role = e.getGuild().getRoleById(id);
+        }
+
+        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
             String id = getConfigString(event, varName);
             role = e.getGuild().getRoleById(id);
@@ -406,5 +433,4 @@ public class Database {
 
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject("welcome_img." + varName, newValue)));
     }
-
-    }
+}

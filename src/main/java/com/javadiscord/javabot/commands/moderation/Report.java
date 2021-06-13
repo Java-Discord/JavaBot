@@ -1,91 +1,39 @@
 package com.javadiscord.javabot.commands.moderation;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Date;
 
-public class Report extends Command {
+public class Report {
 
-    public Report () { this.name = "report"; }
+    public static void execute(SlashCommandEvent event, Member member, User author, String reason) {
 
-    protected void execute(CommandEvent event) {
+        MessageChannel reportChannel = Database.configChannel(event, "report_cid");
 
-        String[] args = event.getArgs().split("\\s+");
-        Member member = null;
-        String reason = null;
+        var e = new EmbedBuilder()
+                .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
+                .setColor(Constants.GRAY)
+                .addField("Name", "```" + member.getUser().getAsTag() + "```", false)
+                .addField("ID", "```" + member.getId() + "```", true)
+                .addField("Reported by", "```" + author.getAsTag() + "```", true)
+                .addField("Channel", "```#" + event.getTextChannel().getName() + "```", true)
+                .addField("Reported on", "```" + LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER) + "```", true)
+                .addField("Reason", "```" + reason + "```", false)
+                .setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
+                .setTimestamp(new Date().toInstant());
 
-                if (event.getMessage().getReferencedMessage() == null) {
+        reportChannel.sendMessage("@here").embed(e.build()).queue();
 
-                    try {
-
-                    if (args.length >= 1) {
-                        if (!event.getMessage().getMentionedMembers().isEmpty()) {
-                            member = event.getMessage().getMentionedMembers().get(0);
-
-                        } else {
-                            member = event.getGuild().getMemberById(args[0]);
-                        }
-
-                        if (event.getMessage().getMember().equals(member)) {
-                            event.reply(Embeds.selfPunishError("report", event));
-                            return;
-                        }
-                    }
-
-                    if (args.length >= 2) {
-                        String[] reasonArray = Arrays.copyOfRange(args, 1, args.length);
-
-                        StringBuilder builder = new StringBuilder();
-                        for (String value : reasonArray) {
-                            builder.append(value + " ");
-                        }
-                        reason = builder.substring(0, builder.toString().length() - 1);
-                    } else {
-                        reason = "None";
-                    }
-
-                    } catch (NullPointerException | IllegalArgumentException e) {
-                        event.reply(Embeds.syntaxError("report @User/ID (Reason)", event));
-                    }
-                    
-                    } else {
-
-                        member = event.getMessage().getReferencedMessage().getMember();
-                        reason = "None";
-
-                    }
-
-                    MessageChannel reportChannel = Database.configChannel(event, "report_cid");
-
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
-                            .setColor(new Color(0x2F3136))
-                            .addField("Name", "```" + member.getUser().getAsTag() + "```", false)
-                            .addField("ID", "```" + member.getId() + "```", true)
-                            .addField("Reported by", "```" + event.getMessage().getAuthor().getAsTag() + "```", true)
-                            .addField("Channel", "```#" + event.getMessage().getChannel().getName() + "```", true)
-                            .addField("Reported on", "```" + LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER) + "```", true)
-                            .addField("Reason", "```" + reason + "```", false)
-                            .setFooter(event.getAuthor().getAsTag(), event.getAuthor().getEffectiveAvatarUrl())
-                            .setTimestamp(new Date().toInstant());
-
-                    reportChannel.sendMessage("@here").embed(eb.build()).queue();
-
-                    eb.setDescription("Succesfully reported " + "``" + member.getUser().getAsTag() + "``!\nYour report has been send to our Moderators");
-                    event.getAuthor().openPrivateChannel().complete().sendMessage(eb.build()).queue();
-
-                    event.getMessage().delete().queue();
-                    
+        e.setDescription("Succesfully reported " + "``" + member.getUser().getAsTag() + "``!\nYour report has been send to our Moderators");
+        event.replyEmbeds(e.build()).setEphemeral(true).queue();
         }
     }
 

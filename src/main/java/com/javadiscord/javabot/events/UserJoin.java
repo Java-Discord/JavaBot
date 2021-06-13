@@ -1,7 +1,10 @@
 package com.javadiscord.javabot.events;
 
-import com.javadiscord.javabot.other.*;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.other.ServerLock;
+import com.javadiscord.javabot.other.StatsCategory;
+import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -19,7 +22,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
 import static com.javadiscord.javabot.events.Startup.iae;

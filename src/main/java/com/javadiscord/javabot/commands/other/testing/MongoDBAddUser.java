@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.commands.other.testing;
 
-import com.javadiscord.javabot.other.Database;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.entities.Member;
