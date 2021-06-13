@@ -2,7 +2,10 @@ package com.javadiscord.javabot.properties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -31,12 +34,29 @@ public class MultiProperties extends Properties {
 	public MultiProperties(Path... paths) {
 		for (Path path : paths) {
 			Properties props = new Properties();
-			try {
-				props.load(new FileInputStream(path.toFile()));
+			try (FileInputStream fis = new FileInputStream(path.toFile())) {
+				props.load(fis);
 			} catch (IOException e) {
 				System.err.println("Could not load properties from path: " + path + ", Exception: " + e.getMessage());
 			}
 			this.putAll(props);
+		}
+	}
+
+	/**
+	 * Gets a path that leads to a classpath resource.
+	 * @param name The name of the resource.
+	 * @return An optional that will contain a path to the resource, if it was
+	 * found.
+	 */
+	public static Optional<Path> getClasspathResource(String name) {
+		URL url = Thread.currentThread().getContextClassLoader().getResource(name);
+		if (url == null) return Optional.empty();
+		try {
+			return Optional.of(Path.of(url.toURI()));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return Optional.empty();
 		}
 	}
 }
