@@ -1,13 +1,22 @@
 package com.javadiscord.javabot.events;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.SlashCommands;
 import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
@@ -58,11 +67,12 @@ public class Startup extends ListenerAdapter {
             e.printStackTrace();
         }
 
-        LoggerFactory.getLogger(Startup.class).info("* Bot is ready!");
-        LoggerFactory.getLogger(Startup.class).info("* Logged in as " + event.getJDA().getSelfUser().getAsTag() + "!");
+        LoggerFactory.getLogger(this.getClass()).info("* Bot is ready!");
+        LoggerFactory.getLogger(this.getClass()).info("* Logged in as " + event.getJDA().getSelfUser().getAsTag() + "!");
 
-        LoggerFactory.getLogger(Startup.class).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
+        LoggerFactory.getLogger(this.getClass()).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         //StarboardListener.updateAllSBM(event);
+        SlashCommands.registerSlashCommands(event.getJDA().getGuilds().get(0));
     }
 }

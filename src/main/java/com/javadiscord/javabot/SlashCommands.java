@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.javadiscord.javabot.commands.configuation.Config;
 import com.javadiscord.javabot.commands.configuation.WelcomeImage;
+import com.javadiscord.javabot.commands.custom_commands.CustomCommands;
 import com.javadiscord.javabot.commands.moderation.*;
 import com.javadiscord.javabot.commands.other.Question;
 import com.javadiscord.javabot.commands.other.qotw.ClearQOTW;
@@ -20,8 +21,11 @@ import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.SlashEnabledCommand;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -42,6 +46,8 @@ import java.util.Map;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
+
+import static com.mongodb.client.model.Filters.eq;
 
 public class SlashCommands extends ListenerAdapter {
     /**
@@ -401,6 +407,38 @@ public class SlashCommands extends ListenerAdapter {
 
                     break;
 
+                case "customcommand":
+
+                        switch (event.getSubcommandName()) {
+
+                            case "list":
+                                CustomCommands.list(event);
+                                break;
+
+                            case "create":
+
+                                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                                CustomCommands.createCustomCommand(event, event.getOption("name").getAsString(), event.getOption("text").getAsString());
+                                } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+                                break;
+
+                            case "edit":
+
+                                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                                    CustomCommands.editCustomComand(event, event.getOption("name").getAsString(), event.getOption("text").getAsString());
+                                } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+                                break;
+
+                            case "delete":
+
+                                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                                    CustomCommands.deleteCustomComand(event, event.getOption("name").getAsString());
+                                } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+                                break;
+                        }
+
+                    break;
+
                 case "leaderboard":
 
                     try {
@@ -438,10 +476,18 @@ public class SlashCommands extends ListenerAdapter {
                     break;
 
                 default:
-                    event.reply("Oops, " + event.getName() + " isnt a registered Command, yet.").setEphemeral(true).queue();
-                    System.out.println(event.getName());
-                    System.out.println(event.getSubcommandGroup());
-                    System.out.println(event.getSubcommandName());
+
+                    try {
+                        MongoDatabase database = mongoClient.getDatabase("other");
+                        MongoCollection<Document> collection = database.getCollection("customcommands");
+                        Document it = collection.find(eq("commandname", event.getName())).first();
+
+                        JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
+                        String value = Root.get("value").getAsString();
+
+                        event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
+
+                    } catch (Exception e) { event.reply("Oops, this command isnt registered, yet" ).queue(); }
             }
         }
 
@@ -461,10 +507,9 @@ public class SlashCommands extends ListenerAdapter {
         }
     }
 
-    @Override
-    public void onReady(ReadyEvent event) {
+    public static void registerSlashCommands(Guild guild) {
 
-        CommandListUpdateAction commands = event.getJDA().getGuilds().get(0).updateCommands();
+        CommandListUpdateAction commands = guild.updateCommands();
 
         commands.addCommands(
 
@@ -584,6 +629,19 @@ public class SlashCommands extends ListenerAdapter {
                         new SubcommandData("avatar-width", "changes the width of the avatar image").addOption(INTEGER, "width", "the new width of the avatar image", true),
                         new SubcommandData("avatar-height", "changes the height of the avatar image").addOption(INTEGER, "height", "the new height of the avatar image", true)),
 
+                new CommandData("customcommand", "lists, creats or deletes custom slash commands")
+                        .addSubcommands(
+                                new SubcommandData("list", "lists all custom slash commands"),
+                                new SubcommandData("create", "creates a custom slash command")
+                                        .addOption(STRING, "name", "the name of the custom slash command", true)
+                                        .addOption(STRING, "text", "the text of the custom slash command", true),
+                                new SubcommandData("edit", "edits a custom slash command")
+                                        .addOption(STRING, "name", "the name of the custom slash command", true)
+                                        .addOption(STRING, "text", "the text of the custom slash command", true),
+                                new SubcommandData("delete", "deletes a custom slash command")
+                                        .addOption(STRING, "name", "the name of the custom slash command", true)),
+
+
                 new CommandData("leaderboard", "generates the question of the week leaderboard")
                         .addOption(BOOLEAN, "old", "if true, sends the old leaderboard", false),
 
@@ -602,6 +660,20 @@ public class SlashCommands extends ListenerAdapter {
                 new CommandData("respond", "adds a response to the given submissions")
                         .addOption(STRING, "message-id", "the id of the submission", true)
                         .addOption(STRING, "text", "the text of the response", true));
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("customcommands");
+        MongoCursor<Document> it = collection.find().iterator();
+
+        while (it.hasNext()) {
+
+            JsonObject Root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
+            String commandName = Root.get("commandname").getAsString();
+            String value = Root.get("value").getAsString();
+
+            if (value.length() > 100) value = value.substring(0, 97) + "...";
+            commands.addCommands(new CommandData(commandName, value));
+        }
 
         commands.queue();
     }
