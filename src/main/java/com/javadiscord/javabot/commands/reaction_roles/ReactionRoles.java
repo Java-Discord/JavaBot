@@ -2,8 +2,6 @@ package com.javadiscord.javabot.commands.reaction_roles;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
@@ -19,10 +17,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.bson.Document;
 
 import java.awt.*;
-import java.io.Console;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
