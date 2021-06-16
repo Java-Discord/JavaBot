@@ -15,6 +15,7 @@ import com.javadiscord.javabot.commands.other.suggestions.Accept;
 import com.javadiscord.javabot.commands.other.suggestions.Clear;
 import com.javadiscord.javabot.commands.other.suggestions.Decline;
 import com.javadiscord.javabot.commands.other.suggestions.Respond;
+import com.javadiscord.javabot.commands.reaction_roles.ReactionRoles;
 import com.javadiscord.javabot.commands.user_commands.*;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
@@ -28,7 +29,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -416,26 +416,51 @@ public class SlashCommands extends ListenerAdapter {
                                 break;
 
                             case "create":
+                                CustomCommands.create(event,
+                                        event.getOption("name").getAsString(),
+                                        event.getOption("text").getAsString());
 
-                                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                                CustomCommands.createCustomCommand(event, event.getOption("name").getAsString(), event.getOption("text").getAsString());
-                                } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
                                 break;
 
                             case "edit":
+                                CustomCommands.edit(event,
+                                        event.getOption("name").getAsString(),
+                                        event.getOption("text").getAsString());
 
-                                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                                    CustomCommands.editCustomComand(event, event.getOption("name").getAsString(), event.getOption("text").getAsString());
-                                } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
                                 break;
 
                             case "delete":
+                                CustomCommands.delete(event,
+                                        event.getOption("name").getAsString());
 
-                                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                                    CustomCommands.deleteCustomComand(event, event.getOption("name").getAsString());
-                                } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
                                 break;
                         }
+
+                    break;
+
+                case "reactionrole":
+
+                    switch (event.getSubcommandName()) {
+
+                        case "list":
+                            ReactionRoles.list(event);
+                            break;
+
+                        case "create":
+                            ReactionRoles.create(event,
+                                    event.getOption("channel").getAsMessageChannel(),
+                                    event.getOption("messageid").getAsString(),
+                                    event.getOption("emote").getAsString(),
+                                    event.getOption("role").getAsRole());
+
+                            break;
+
+                        case "delete":
+                            ReactionRoles.delete(event,
+                                    event.getOption("messageid").getAsString(),
+                                    event.getOption("emote").getAsString());
+                            break;
+                    }
 
                     break;
 
@@ -629,7 +654,7 @@ public class SlashCommands extends ListenerAdapter {
                         new SubcommandData("avatar-width", "changes the width of the avatar image").addOption(INTEGER, "width", "the new width of the avatar image", true),
                         new SubcommandData("avatar-height", "changes the height of the avatar image").addOption(INTEGER, "height", "the new height of the avatar image", true)),
 
-                new CommandData("customcommand", "lists, creats or deletes custom slash commands")
+                new CommandData("customcommand", "lists, creates, edits or deletes custom slash commands")
                         .addSubcommands(
                                 new SubcommandData("list", "lists all custom slash commands"),
                                 new SubcommandData("create", "creates a custom slash command")
@@ -640,6 +665,19 @@ public class SlashCommands extends ListenerAdapter {
                                         .addOption(STRING, "text", "the text of the custom slash command", true),
                                 new SubcommandData("delete", "deletes a custom slash command")
                                         .addOption(STRING, "name", "the name of the custom slash command", true)),
+
+
+                new CommandData("reactionrole", "lists, creates or deletes reaction roles")
+                        .addSubcommands(
+                                new SubcommandData("list", "lists all reaction roles"),
+                                new SubcommandData("create", "creates a reaction role")
+                                        .addOption(CHANNEL, "channel", "the channel, the reaction role should be created in", true)
+                                        .addOption(STRING, "messageid", "the message, the reaction role should be created on", true)
+                                        .addOption(STRING, "emote", "the emote, the reaction role should use", true)
+                                        .addOption(ROLE, "role", "the role, the reaction role should add", true),
+                                new SubcommandData("delete", "deletes a reaction role")
+                                        .addOption(STRING, "messageid", "the message, the reaction role is on", true)
+                                        .addOption(STRING, "emote", "the emote, the reaction role is using", true)),
 
 
                 new CommandData("leaderboard", "generates the question of the week leaderboard")

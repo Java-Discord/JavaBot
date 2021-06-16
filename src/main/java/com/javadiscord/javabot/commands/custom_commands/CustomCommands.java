@@ -74,7 +74,8 @@ public class CustomCommands {
                     event.replyEmbeds(e).queue();
             }
 
-    public static void createCustomCommand(SlashCommandEvent event, String commandName, String value) {
+    public static void create(SlashCommandEvent event, String commandName, String value) {
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
@@ -101,46 +102,50 @@ public class CustomCommands {
                 SlashCommands.registerSlashCommands(event.getGuild());
 
             } else { event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called " + "``" + "/" + commandName + "`` already exists.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 
-    public static void editCustomComand(SlashCommandEvent event, String commandName, String value) {
+    public static void edit(SlashCommandEvent event, String commandName, String value) {
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("customcommands");
+            MongoDatabase database = mongoClient.getDatabase("other");
+            MongoCollection<Document> collection = database.getCollection("customcommands");
 
-        if (docExists(event.getGuild().getId(), commandName)) {
-            event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-        } else {
+            if (docExists(event.getGuild().getId(), commandName)) {
+                event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            } else {
 
-            BasicDBObject criteria = new BasicDBObject()
-                    .append("guild_id", event.getGuild().getId())
-                    .append("commandname", commandName);
+                BasicDBObject criteria = new BasicDBObject()
+                        .append("guild_id", event.getGuild().getId())
+                        .append("commandname", commandName);
 
-            Document doc = collection.find(criteria).first();
+                Document doc = collection.find(criteria).first();
 
-            Document setData = new Document();
-            setData.append("value", value);
+                Document setData = new Document();
+                setData.append("value", value);
 
-            Document update = new Document();
-            update.append("$set", setData);
+                Document update = new Document();
+                update.append("$set", setData);
 
-            collection.updateOne(doc, update);
+                collection.updateOne(doc, update);
 
-            var e = new EmbedBuilder()
-                    .setTitle("Custom Slash Command edited")
-                    .addField("Name", "```" + "/" + commandName + "```", false)
-                    .addField("Value", "```" + value + "```", false)
-                    .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(new Color(0x2F3136))
-                    .setTimestamp(new Date().toInstant())
-                    .build();
+                var e = new EmbedBuilder()
+                        .setTitle("Custom Slash Command edited")
+                        .addField("Name", "```" + "/" + commandName + "```", false)
+                        .addField("Value", "```" + value + "```", false)
+                        .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+                        .setColor(new Color(0x2F3136))
+                        .setTimestamp(new Date().toInstant())
+                        .build();
 
-            event.replyEmbeds(e).queue();
-            SlashCommands.registerSlashCommands(event.getGuild());
-        }
+                event.replyEmbeds(e).queue();
+                SlashCommands.registerSlashCommands(event.getGuild());
+            }
+        } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 
-    public static void deleteCustomComand(SlashCommandEvent event, String commandName) {
+    public static void delete(SlashCommandEvent event, String commandName) {
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
@@ -168,5 +173,6 @@ public class CustomCommands {
                 event.replyEmbeds(e).queue();
                 SlashCommands.registerSlashCommands(event.getGuild());
             }
-}
+        } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+    }
 }
