@@ -51,7 +51,6 @@ public class Bot {
         jda.addEventListener(new StatusUpdate());
         jda.addEventListener(new ReactionListener());
         jda.addEventListener(new SuggestionListener());
-        jda.addEventListener(new CstmCmdListener());
         jda.addEventListener(new AutoMod());
         jda.addEventListener(new SubmissionListener());
         //jda.addEventListener(new StarboardListener());
