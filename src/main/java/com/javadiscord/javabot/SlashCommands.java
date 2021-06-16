@@ -45,9 +45,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
-
 import static com.mongodb.client.model.Filters.eq;
+import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 public class SlashCommands extends ListenerAdapter {
     /**
@@ -507,9 +506,15 @@ public class SlashCommands extends ListenerAdapter {
             default:
 
                 try {
+
+                    BasicDBObject criteria = new BasicDBObject()
+                            .append("guild_id", event.getGuild().getId())
+                            .append("commandname", event.getName());
+
                     MongoDatabase database = mongoClient.getDatabase("other");
                     MongoCollection<Document> collection = database.getCollection("customcommands");
-                    Document it = collection.find(eq("commandname", event.getName())).first();
+                    
+                    Document it = collection.find(criteria).first();
 
                     JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
                     String value = Root.get("value").getAsString();
