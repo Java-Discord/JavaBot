@@ -21,8 +21,9 @@ import java.util.Properties;
 
 public class Bot {
     private static final Properties properties = new MultiProperties(
-            MultiProperties.getClasspathResource("bot.properties").orElseThrow(),
-            Path.of("bot.props")
+        MultiProperties.getClasspathResource("bot.properties").orElseThrow(),
+        Path.of("bot.props")
+
     );
 
     public static void main(String[] args) throws Exception {
