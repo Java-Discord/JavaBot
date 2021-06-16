@@ -16,6 +16,8 @@ import org.bson.Document;
 import java.awt.*;
 import java.util.List;
 
+import static com.mongodb.client.model.Filters.eq;
+
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 
 public class Profile {
@@ -125,10 +127,11 @@ public class Profile {
             }
 
             MongoDatabase database = mongoClient.getDatabase("userdata");
-            MongoCollection<Document> collection = database.getCollection("users");
+            MongoCollection<Document> users = database.getCollection("users");
+            MongoCollection<Document> warns = database.getCollection("warns");
 
-            int qotwCount = Database.getMemberInt(collection, member, "qotwpoints");
-            int warnCount = Database.getMemberInt(collection, member, "warns");
+            int qotwCount = Database.getMemberInt(users, member, "qotwpoints");
+            int warnCount = (int) warns.count(eq("user_id", member.getId()));
 
             TimeUtils tu = new TimeUtils();
             String joinDiff = " (" + tu.formatDurationToNow(member.getTimeJoined()) + ")";

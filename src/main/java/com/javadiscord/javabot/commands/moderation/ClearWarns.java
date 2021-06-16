@@ -16,6 +16,7 @@ public class ClearWarns {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
                     Database.queryMemberInt(member.getId(), "warns", 0);
+                    Warn.deleteAllDocs(member.getId());
 
                     var e = new EmbedBuilder()
                             .setAuthor(member.getUser().getAsTag() + " | Warns cleared", null, member.getUser().getEffectiveAvatarUrl())

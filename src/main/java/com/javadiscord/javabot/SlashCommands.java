@@ -547,7 +547,7 @@ public class SlashCommands extends ListenerAdapter {
 
                 new CommandData("warn", "Warns a member")
                         .addOption(USER, "user", "The user you want to warn", true)
-                        .addOption(USER, "reason", "The reason", false),
+                        .addOption(STRING, "reason", "The reason", false),
 
                 new CommandData("warns", "Shows your warn count")
                         .addOption(USER, "user", "If given, shows the warn count of the given user", false),
@@ -577,8 +577,8 @@ public class SlashCommands extends ListenerAdapter {
                         new SubcommandData("image-height", "changes the welcome image height").addOption(INTEGER, "height", "the new welcome image height", true),
                         new SubcommandData("overlay-url", "changes the welcome image overlay url").addOption(STRING, "url", "the new welcome image url", true),
                         new SubcommandData("background-url", "changes the welcome image background url").addOption(STRING, "url", "the new welcome image background url", true),
-                        new SubcommandData("primary-color", "changes the primary color (tag)").addOption(STRING, "color", "the new primary color (e.g. #ff0000)", true),
-                        new SubcommandData("secondary-color", "changes the secondary color (member count)").addOption(STRING, "color", "the new secondary color (e.g. #ff0000)", true),
+                        new SubcommandData("primary-color", "changes the primary color (tag)").addOption(STRING, "color", "the new primary color (e.g. ff0000)", true),
+                        new SubcommandData("secondary-color", "changes the secondary color (member count)").addOption(STRING, "color", "the new secondary color (e.g. ff0000)", true),
                         new SubcommandData("avatar-x", "changes the x-position of the avatar image").addOption(INTEGER, "x", "the new x-position of the avatar image", true),
                         new SubcommandData("avatar-y", "changes the y-position of the avatar image").addOption(INTEGER, "y", "the new y-position of the avatar image", true),
                         new SubcommandData("avatar-width", "changes the width of the avatar image").addOption(INTEGER, "width", "the new width of the avatar image", true),

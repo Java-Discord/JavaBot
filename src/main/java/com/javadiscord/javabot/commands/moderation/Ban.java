@@ -1,8 +1,12 @@
 package com.javadiscord.javabot.commands.moderation;
 
 import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -11,9 +15,13 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import org.bson.Document;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.mongodb.client.model.Filters.eq;
 
 public class Ban {
 
@@ -36,6 +44,8 @@ public class Ban {
 
             member.ban(6, reason).queueAfter(3, TimeUnit.SECONDS);
 
+            Warn.deleteAllDocs(member.getId());
+
             if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
                 net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
@@ -47,8 +57,9 @@ public class Ban {
                 net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
 
                 tc = event.getTextChannel();
-                event.replyEmbeds(eb).queue();
-            }
+                if (reason.equalsIgnoreCase("3/3 warns")) tc.sendMessage(eb).queue();
+                else event.replyEmbeds(eb).queue();
+                }
 
             Misc.sendToLog(ev, eb);
             member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();

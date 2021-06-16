@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
@@ -63,8 +64,5 @@ public class Startup extends ListenerAdapter {
         LoggerFactory.getLogger(Startup.class).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         //StarboardListener.updateAllSBM(event);
-
-
-
     }
 }

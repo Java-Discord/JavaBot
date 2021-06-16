@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.commands.moderation;
 
 import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,6 +32,9 @@ public class Kick {
         try {
 
             member.kick(reason).queueAfter(3, TimeUnit.SECONDS);
+            Database.queryMemberInt(member.getId(), "warns", 0);
+
+            Warn.deleteAllDocs(member.getId());
 
             Misc.sendToLog(event, eb);
             member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
