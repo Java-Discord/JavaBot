@@ -30,13 +30,11 @@ public class Warns {
             while (it.hasNext()) {
 
             JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
-            String uuID = root.get("uuid").getAsString();
             String reason = root.get("reason").getAsString();
             String date = root.get("date").getAsString();
 
             sb.append("[Date] " + date +
-                    "\n[Reason] " + reason +
-                    "\n[UUID] " + uuID + "\n\n");
+                    "\n[Reason] " + reason + "\n\n");
             }
 
             var e = new EmbedBuilder()

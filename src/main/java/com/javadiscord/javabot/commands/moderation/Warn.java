@@ -24,14 +24,13 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class Warn {
 
-    public static void addToDatabase(String memID, String guildID, String uuID, String reason) {
+    public static void addToDatabase(String memID, String guildID, String reason) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
         Document doc = new Document("guild_id", guildID)
                 .append("user_id", memID)
-                .append("uuid", uuID)
                 .append("date", LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER))
                 .append("reason", reason);
 
@@ -56,7 +55,6 @@ public class Warn {
         MongoCollection<Document> warns = database.getCollection("warns");
 
         int warnPoints = (int) warns.count(eq("user_id", member.getId()));
-        String uuID = UUID.randomUUID().toString();
 
         var eb = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
@@ -65,7 +63,7 @@ public class Warn {
                 .addField("Moderator", "```" + modTag + "```", true)
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
-                .setFooter("UUID: " +  uuID)
+                .setFooter("ID: " +  member.getId())
                 .setTimestamp(new Date().toInstant())
                 .build();
 
@@ -97,8 +95,7 @@ public class Warn {
             Misc.sendToLog(ev, eb);
 
             if ((warnPoints + 1) >= 3) Ban.ban(member, "3/3 warns", selfUser.getAsTag(), ev);
-            else addToDatabase(member.getId(), guildID, uuID, reason);
-
+            else addToDatabase(member.getId(), guildID, reason);
 
         } catch (HierarchyException e) {
 
