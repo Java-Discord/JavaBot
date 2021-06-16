@@ -75,449 +75,456 @@ public class SlashCommands extends ListenerAdapter {
         boolean bool;
         Member member;
 
-            switch (event.getName()) {
+        switch (event.getName()) {
 
-                // USER COMMANDS
+            // USER COMMANDS
 
-                case "avatar":
+            case "avatar":
 
-                    OptionMapping option = event.getOption("user");
-                    User user = option == null ? event.getUser() : option.getAsUser();
+                OptionMapping option = event.getOption("user");
+                User user = option == null ? event.getUser() : option.getAsUser();
 
-                    Avatar.execute(event, user);
-                    break;
+                Avatar.execute(event, user);
+                break;
 
-                case "botinfo":
+            case "botinfo":
 
-                    BotInfo.execute(event);
-                    break;
+                BotInfo.execute(event);
+                break;
 
-                case "changemymind":
+            case "changemymind":
 
-                    ChangeMyMind.execute(event, event.getOption("text").getAsString());
-                    break;
+                ChangeMyMind.execute(event, event.getOption("text").getAsString());
+                break;
 
-                case "help":
-                    Help.execute(event);
-                    break;
+            case "help":
+                Help.execute(event);
+                break;
 
-                case "idcalc":
+            case "idcalc":
 
-                    long idInput = 0;
-                    try {
-                        idInput = event.getOption("id").getAsLong();
-                    } catch (Exception e) {
-                        idInput = event.getUser().getIdLong();
-                    }
+                long idInput = 0;
+                try {
+                    idInput = event.getOption("id").getAsLong();
+                } catch (Exception e) {
+                    idInput = event.getUser().getIdLong();
+                }
 
-                    IDCalc.execute(event, idInput);
-                    break;
+                IDCalc.execute(event, idInput);
+                break;
 
-                case "lmgtfy":
+            case "lmgtfy":
 
-                    Lmgtfy.execute(event, event.getOption("text").getAsString());
-                    break;
+                Lmgtfy.execute(event, event.getOption("text").getAsString());
+                break;
 
-                case "ping":
+            case "ping":
 
-                    Ping.execute(event);
-                    break;
+                Ping.execute(event);
+                break;
 
-                case "profile":
+            case "profile":
 
-                    OptionMapping profileOption = event.getOption("user");
-                    member = profileOption == null ? event.getMember() : profileOption.getAsMember();
+                OptionMapping profileOption = event.getOption("user");
+                member = profileOption == null ? event.getMember() : profileOption.getAsMember();
 
-                    Profile.execute(event, member);
-                    break;
+                Profile.execute(event, member);
+                break;
 
-                case "serverinfo":
+            case "serverinfo":
 
-                    ServerInfo.execute(event);
-                    break;
+                ServerInfo.execute(event);
+                break;
 
-                case "uptime":
+            case "uptime":
 
-                    Uptime.execute(event);
-                    break;
+                Uptime.execute(event);
+                break;
 
-                    // MODERATION
+            // MODERATION
 
-                case "ban":
+            case "ban":
 
-                    try {
-                        reason = event.getOption("reason").getAsString();
-                    } catch (NullPointerException e) {
-                        reason = "None";
-                    }
+                try {
+                    reason = event.getOption("reason").getAsString();
+                } catch (NullPointerException e) {
+                    reason = "None";
+                }
 
-                    Ban.execute(event,
-                            event.getOption("user").getAsMember(),
-                            event.getUser(), reason);
-                    break;
+                Ban.execute(event,
+                        event.getOption("user").getAsMember(),
+                        event.getUser(), reason);
+                break;
 
-                case "clearwarns":
+            case "clearwarns":
 
-                    ClearWarns.execute(event,
-                            event.getOption("user").getAsMember());
-                    break;
+                ClearWarns.execute(event,
+                        event.getOption("user").getAsMember());
+                break;
 
-                case "clearqotw":
+            case "clearqotw":
 
-                    ClearQOTW.execute(event,
-                            event.getOption("user").getAsMember());
-                    break;
+                ClearQOTW.execute(event,
+                        event.getOption("user").getAsMember());
+                break;
 
-                case "editembed":
+            case "editembed":
 
-                    EditEmbed.execute(event,
-                            event.getOption("messageid").getAsString(),
-                            event.getOption("title").getAsString(),
-                            event.getOption("description").getAsString());
-                    break;
+                EditEmbed.execute(event,
+                        event.getOption("messageid").getAsString(),
+                        event.getOption("title").getAsString(),
+                        event.getOption("description").getAsString());
+                break;
 
-                case "embed":
+            case "embed":
 
-                    OptionMapping embedOption;
-                    embedOption = event.getOption("title");
-                    String title = embedOption == null ? null : embedOption.getAsString();
+                OptionMapping embedOption;
+                embedOption = event.getOption("title");
+                String title = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("description");
-                    String description = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("description");
+                String description = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("author-name");
-                    String authorname = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("author-name");
+                String authorname = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("author-url");
-                    String url = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("author-url");
+                String url = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("author-iconurl");
-                    String iconurl = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("author-iconurl");
+                String iconurl = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("thumbnail-url");
-                    String thumb = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("thumbnail-url");
+                String thumb = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("image-url");
-                    String img = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("image-url");
+                String img = embedOption == null ? null : embedOption.getAsString();
 
-                    embedOption = event.getOption("color");
-                    String color = embedOption == null ? null : embedOption.getAsString();
+                embedOption = event.getOption("color");
+                String color = embedOption == null ? null : embedOption.getAsString();
 
-                    Embed.execute(event, title, description, authorname, url, iconurl, thumb, img, color);
-                    break;
+                Embed.execute(event, title, description, authorname, url, iconurl, thumb, img, color);
+                break;
 
-                case "kick":
+            case "kick":
 
-                    try {
-                        reason = event.getOption("reason").getAsString();
-                    } catch (NullPointerException e) {
-                        reason = "None";
-                    }
+                try {
+                    reason = event.getOption("reason").getAsString();
+                } catch (NullPointerException e) {
+                    reason = "None";
+                }
 
-                    Kick.execute(event,
-                            event.getOption("user").getAsMember(),
-                            event.getUser(), reason);
-                    break;
+                Kick.execute(event,
+                        event.getOption("user").getAsMember(),
+                        event.getUser(), reason);
+                break;
 
-                case "mute":
+            case "mute":
 
-                    Mute.execute(event,
-                            event.getOption("user").getAsMember(),
-                            event.getUser());
-                    break;
+                Mute.execute(event,
+                        event.getOption("user").getAsMember(),
+                        event.getUser());
+                break;
 
-                case "mutelist":
+            case "mutelist":
 
-                    Mutelist.execute(event);
-                    break;
+                Mutelist.execute(event);
+                break;
 
-                case "purge":
+            case "purge":
 
-                    try {
-                        bool = event.getOption("nuke-channel").getAsBoolean();
-                    } catch (NullPointerException e) {
-                        bool = false;
-                    }
+                try {
+                    bool = event.getOption("nuke-channel").getAsBoolean();
+                } catch (NullPointerException e) {
+                    bool = false;
+                }
 
-                    Purge.execute(event,
-                            (int) event.getOption("amount").getAsLong(),
-                            bool);
-                    break;
+                Purge.execute(event,
+                        (int) event.getOption("amount").getAsLong(),
+                        bool);
+                break;
 
-                case "report":
+            case "report":
 
-                    try {
-                        reason = event.getOption("reason").getAsString();
-                    } catch (NullPointerException e) {
-                        reason = "None";
-                    }
+                try {
+                    reason = event.getOption("reason").getAsString();
+                } catch (NullPointerException e) {
+                    reason = "None";
+                }
 
-                    Report.execute(event,
-                            event.getOption("user").getAsMember(),
-                            event.getUser(), reason);
-                    break;
+                Report.execute(event,
+                        event.getOption("user").getAsMember(),
+                        event.getUser(), reason);
+                break;
 
-                case "unban":
+            case "unban":
 
-                    Unban.execute(event,
-                            event.getOption("id").getAsString(),
-                            event.getUser());
-                    break;
+                Unban.execute(event,
+                        event.getOption("id").getAsString(),
+                        event.getUser());
+                break;
 
-                case "unmute":
+            case "unmute":
 
-                    Unmute.execute(event,
-                            event.getOption("user").getAsMember(),
-                            event.getUser());
-                    break;
+                Unmute.execute(event,
+                        event.getOption("user").getAsMember(),
+                        event.getUser());
+                break;
 
-                case "warn":
+            case "warn":
 
-                    try {
+                try {
                     reason = event.getOption("reason").getAsString();
 
-                    } catch (NullPointerException e) {
+                } catch (NullPointerException e) {
                     reason = "None";
-                    }
+                }
 
-                    Warn.execute(event,
-                            event.getOption("user").getAsMember(),
-                            event.getUser(), reason);
-                    break;
+                Warn.execute(event,
+                        event.getOption("user").getAsMember(),
+                        event.getUser(), reason);
+                break;
 
-                case "warns":
+            case "warns":
 
-                    OptionMapping warnsOption = event.getOption("user");
-                    member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
+                OptionMapping warnsOption = event.getOption("user");
+                member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
 
-                    Warns.execute(event, member);
-                    break;
+                Warns.execute(event, member);
+                break;
 
-                case "config":
+            case "config":
 
-                    if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                        switch (event.getSubcommandName()) {
-
-                            case "list":
-                                Config.getList(event);
-                                break;
-
-                            case "leave-message":
-                                Config.setLeaveMessage(event, event.getOption("message").getAsString());
-                                break;
-
-                            case "welcome-message":
-                                Config.setWelcomeMessage(event, event.getOption("message").getAsString());
-                                break;
-
-                            case "welcome-channel":
-                                Config.setWelcomeChannel(event, event.getOption("channel").getAsMessageChannel());
-                                break;
-
-                            case "stats-category":
-                                Config.setStatsCategory(event, event.getOption("id").getAsString());
-                                break;
-
-                            case "stats-message":
-                                Config.setStatsMessage(event, event.getOption("message").getAsString());
-                                break;
-
-                            case "report-channel":
-                                Config.setReportChannel(event, event.getOption("channel").getAsMessageChannel());
-                                break;
-
-                            case "log-channel":
-                                Config.setLogChannel(event, event.getOption("channel").getAsMessageChannel());
-                                break;
-
-                            case "suggestion-channel":
-                                Config.setSuggestionChannel(event, event.getOption("channel").getAsMessageChannel());
-                                break;
-
-                            case "submission-channel":
-                                Config.setSubmissionChannel(event, event.getOption("channel").getAsMessageChannel());
-                                break;
-
-                            case "mute-role":
-                                Config.setMuteRole(event, event.getOption("role").getAsRole());
-                                break;
-
-                            case "dm-qotw":
-                                Config.setDMQOTWStatus(event, event.getOption("enabled").getAsBoolean());
-                                break;
-
-                            case "lock":
-                                Config.setLockStatus(event, event.getOption("locked").getAsBoolean());
-                                break;
-                        }
-                    } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
-
-                    break;
-
-                case "welcome-image":
-
-                    if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                        switch (event.getSubcommandName()) {
-
-                            case "list":
-                                WelcomeImage.getList(event);
-                                break;
-
-                            case "image-width":
-                                WelcomeImage.setImageWidth(event, (int) event.getOption("width").getAsLong());
-                                break;
-
-                            case "image-height":
-                                WelcomeImage.setImageHeight(event, (int) event.getOption("height").getAsLong());
-                                break;
-
-                            case "overlay-url":
-                                WelcomeImage.setOverlayURL(event, event.getOption("url").getAsString());
-                                break;
-
-                            case "background-url":
-                                WelcomeImage.setBackgroundURL(event, event.getOption("url").getAsString());
-                                break;
-
-                            case "primary-color":
-                                WelcomeImage.setPrimaryColor(event, event.getOption("color").getAsString());
-                                break;
-
-                            case "secondary-color":
-                                WelcomeImage.setSecondaryColor(event, event.getOption("color").getAsString());
-                                break;
-
-                            case "avatar-x":
-                                WelcomeImage.setAvatarX(event, (int) event.getOption("x").getAsLong());
-                                break;
-
-                            case "avatar-y":
-                                WelcomeImage.setAvatarY(event, (int) event.getOption("y").getAsLong());
-                                break;
-
-                            case "avatar-width":
-                                WelcomeImage.setAvatarWidth(event, (int) event.getOption("width").getAsLong());
-                                break;
-
-                            case "avatar-height":
-                                WelcomeImage.setAvatarHeight(event, (int) event.getOption("height").getAsLong());
-                                break;
-                        }
-                    } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
-
-                    break;
-
-                case "customcommand":
-
-                        switch (event.getSubcommandName()) {
-
-                            case "list":
-                                CustomCommands.list(event);
-                                break;
-
-                            case "create":
-                                CustomCommands.create(event,
-                                        event.getOption("name").getAsString(),
-                                        event.getOption("text").getAsString());
-
-                                break;
-
-                            case "edit":
-                                CustomCommands.edit(event,
-                                        event.getOption("name").getAsString(),
-                                        event.getOption("text").getAsString());
-
-                                break;
-
-                            case "delete":
-                                CustomCommands.delete(event,
-                                        event.getOption("name").getAsString());
-
-                                break;
-                        }
-
-                    break;
-
-                case "reactionrole":
-
+                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                     switch (event.getSubcommandName()) {
 
                         case "list":
-                            ReactionRoles.list(event);
+                            Config.getList(event);
                             break;
 
-                        case "create":
-                            ReactionRoles.create(event,
-                                    event.getOption("channel").getAsMessageChannel(),
-                                    event.getOption("messageid").getAsString(),
-                                    event.getOption("emote").getAsString(),
-                                    event.getOption("role").getAsRole());
-
+                        case "leave-message":
+                            Config.setLeaveMessage(event, event.getOption("message").getAsString());
                             break;
 
-                        case "delete":
-                            ReactionRoles.delete(event,
-                                    event.getOption("messageid").getAsString(),
-                                    event.getOption("emote").getAsString());
+                        case "welcome-message":
+                            Config.setWelcomeMessage(event, event.getOption("message").getAsString());
+                            break;
+
+                        case "welcome-channel":
+                            Config.setWelcomeChannel(event, event.getOption("channel").getAsMessageChannel());
+                            break;
+
+                        case "stats-category":
+                            Config.setStatsCategory(event, event.getOption("id").getAsString());
+                            break;
+
+                        case "stats-message":
+                            Config.setStatsMessage(event, event.getOption("message").getAsString());
+                            break;
+
+                        case "report-channel":
+                            Config.setReportChannel(event, event.getOption("channel").getAsMessageChannel());
+                            break;
+
+                        case "log-channel":
+                            Config.setLogChannel(event, event.getOption("channel").getAsMessageChannel());
+                            break;
+
+                        case "suggestion-channel":
+                            Config.setSuggestionChannel(event, event.getOption("channel").getAsMessageChannel());
+                            break;
+
+                        case "submission-channel":
+                            Config.setSubmissionChannel(event, event.getOption("channel").getAsMessageChannel());
+                            break;
+
+                        case "mute-role":
+                            Config.setMuteRole(event, event.getOption("role").getAsRole());
+                            break;
+
+                        case "dm-qotw":
+                            Config.setDMQOTWStatus(event, event.getOption("enabled").getAsBoolean());
+                            break;
+
+                        case "lock":
+                            Config.setLockStatus(event, event.getOption("locked").getAsBoolean());
                             break;
                     }
+                } else {
+                    event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                }
 
-                    break;
+                break;
 
-                case "leaderboard":
+            case "welcome-image":
 
-                    try {
-                        bool = event.getOption("old").getAsBoolean();
-                    } catch (NullPointerException e) {
-                        bool = false;
+                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    switch (event.getSubcommandName()) {
+
+                        case "list":
+                            WelcomeImage.getList(event);
+                            break;
+
+                        case "image-width":
+                            WelcomeImage.setImageWidth(event, (int) event.getOption("width").getAsLong());
+                            break;
+
+                        case "image-height":
+                            WelcomeImage.setImageHeight(event, (int) event.getOption("height").getAsLong());
+                            break;
+
+                        case "overlay-url":
+                            WelcomeImage.setOverlayURL(event, event.getOption("url").getAsString());
+                            break;
+
+                        case "background-url":
+                            WelcomeImage.setBackgroundURL(event, event.getOption("url").getAsString());
+                            break;
+
+                        case "primary-color":
+                            WelcomeImage.setPrimaryColor(event, event.getOption("color").getAsString());
+                            break;
+
+                        case "secondary-color":
+                            WelcomeImage.setSecondaryColor(event, event.getOption("color").getAsString());
+                            break;
+
+                        case "avatar-x":
+                            WelcomeImage.setAvatarX(event, (int) event.getOption("x").getAsLong());
+                            break;
+
+                        case "avatar-y":
+                            WelcomeImage.setAvatarY(event, (int) event.getOption("y").getAsLong());
+                            break;
+
+                        case "avatar-width":
+                            WelcomeImage.setAvatarWidth(event, (int) event.getOption("width").getAsLong());
+                            break;
+
+                        case "avatar-height":
+                            WelcomeImage.setAvatarHeight(event, (int) event.getOption("height").getAsLong());
+                            break;
                     }
+                } else {
+                    event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                }
 
-                    Leaderboard.execute(event, bool);
-                    break;
+                break;
 
-                case "question":
+            case "customcommand":
 
-                    Question.execute(event, (int) event.getOption("amount").getAsLong());
-                    break;
+                switch (event.getSubcommandName()) {
 
-                case "accept":
+                    case "list":
+                        CustomCommands.list(event);
+                        break;
 
-                    Accept.execute(event, event.getOption("message-id").getAsString());
-                    break;
+                    case "create":
+                        CustomCommands.create(event,
+                                event.getOption("name").getAsString(),
+                                event.getOption("text").getAsString());
 
-                case "clear":
+                        break;
 
-                    Clear.execute(event, event.getOption("message-id").getAsString());
-                    break;
+                    case "edit":
+                        CustomCommands.edit(event,
+                                event.getOption("name").getAsString(),
+                                event.getOption("text").getAsString());
 
-                case "decline":
+                        break;
 
-                    Decline.execute(event, event.getOption("message-id").getAsString());
-                    break;
+                    case "delete":
+                        CustomCommands.delete(event,
+                                event.getOption("name").getAsString());
 
-                case "respond":
+                        break;
+                }
 
-                    Respond.execute(event, event.getOption("message-id").getAsString(), event.getOption("text").getAsString());
-                    break;
+                break;
 
-                default:
+            case "reactionrole":
 
-                    try {
-                        MongoDatabase database = mongoClient.getDatabase("other");
-                        MongoCollection<Document> collection = database.getCollection("customcommands");
-                        Document it = collection.find(eq("commandname", event.getName())).first();
+                switch (event.getSubcommandName()) {
 
-                        JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
-                        String value = Root.get("value").getAsString();
+                    case "list":
+                        ReactionRoles.list(event);
+                        break;
 
-                        event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
+                    case "create":
+                        ReactionRoles.create(event,
+                                event.getOption("channel").getAsMessageChannel(),
+                                event.getOption("messageid").getAsString(),
+                                event.getOption("emote").getAsString(),
+                                event.getOption("role").getAsRole());
 
-                    } catch (Exception e) { event.reply("Oops, this command isnt registered, yet" ).queue(); }
-            }
+                        break;
+
+                    case "delete":
+                        ReactionRoles.delete(event,
+                                event.getOption("messageid").getAsString(),
+                                event.getOption("emote").getAsString());
+                        break;
+                }
+
+                break;
+
+            case "leaderboard":
+
+                try {
+                    bool = event.getOption("old").getAsBoolean();
+                } catch (NullPointerException e) {
+                    bool = false;
+                }
+
+                Leaderboard.execute(event, bool);
+                break;
+
+            case "question":
+
+                Question.execute(event, (int) event.getOption("amount").getAsLong());
+                break;
+
+            case "accept":
+
+                Accept.execute(event, event.getOption("message-id").getAsString());
+                break;
+
+            case "clear":
+
+                Clear.execute(event, event.getOption("message-id").getAsString());
+                break;
+
+            case "decline":
+
+                Decline.execute(event, event.getOption("message-id").getAsString());
+                break;
+
+            case "respond":
+
+                Respond.execute(event, event.getOption("message-id").getAsString(), event.getOption("text").getAsString());
+                break;
+
+            default:
+
+                try {
+                    MongoDatabase database = mongoClient.getDatabase("other");
+                    MongoCollection<Document> collection = database.getCollection("customcommands");
+                    Document it = collection.find(eq("commandname", event.getName())).first();
+
+                    JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
+                    String value = Root.get("value").getAsString();
+
+                    event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
+
+                } catch (Exception e) {
+                    event.reply("Oops, this command isnt registered, yet").queue();
+                }
         }
+    }
 
     /**
      * Registers all slash commands in the command index.
+     *
      * @param commandClient The command client to register commands from.
      */
     private void registerSlashCommands(CommandClient commandClient) {
@@ -626,33 +633,33 @@ public class SlashCommands extends ListenerAdapter {
 
                 new CommandData("config", "Shows the config for the current guild")
                         .addSubcommands(
-                        new SubcommandData("list", "sends the current config"),
-                        new SubcommandData("leave-message", "changes the leave message").addOption(STRING, "message", "the new leave message", true),
-                        new SubcommandData("welcome-message", "changes the welcome message").addOption(STRING, "message", "the new welcome message", true),
-                        new SubcommandData("welcome-channel", "changes the welcome channel").addOption(CHANNEL, "channel", "the new welcome channel", true),
-                        new SubcommandData("stats-category", "changes the id of the stats category").addOption(STRING, "id", "the id of the new stats category", true),
-                        new SubcommandData("stats-message", "changes the message of the stats category").addOption(STRING, "message", "the new text of the stats category", true),
-                        new SubcommandData("report-channel", "changes the report channel").addOption(CHANNEL, "channel", "the new report channel", true),
-                        new SubcommandData("log-channel", "changes the log channel").addOption(CHANNEL, "channel", "the new log channel", true),
-                        new SubcommandData("suggestion-channel", "changes the suggestion channel").addOption(CHANNEL, "channel", "the new suggestion channel", true),
-                        new SubcommandData("submission-channel", "changes the submission channel").addOption(CHANNEL, "channel", "the new submission channel", true),
-                        new SubcommandData("mute-role", "changes the mute role").addOption(ROLE, "role", "the new mute role", true),
-                        new SubcommandData("dm-qotw", "changes the state of dm-qotw").addOption(BOOLEAN, "enabled", "state of dm-qotw", true),
-                        new SubcommandData("lock", "changes the state of the server lock").addOption(BOOLEAN, "locked", "state of the server lock", true)),
+                                new SubcommandData("list", "sends the current config"),
+                                new SubcommandData("leave-message", "changes the leave message").addOption(STRING, "message", "the new leave message", true),
+                                new SubcommandData("welcome-message", "changes the welcome message").addOption(STRING, "message", "the new welcome message", true),
+                                new SubcommandData("welcome-channel", "changes the welcome channel").addOption(CHANNEL, "channel", "the new welcome channel", true),
+                                new SubcommandData("stats-category", "changes the id of the stats category").addOption(STRING, "id", "the id of the new stats category", true),
+                                new SubcommandData("stats-message", "changes the message of the stats category").addOption(STRING, "message", "the new text of the stats category", true),
+                                new SubcommandData("report-channel", "changes the report channel").addOption(CHANNEL, "channel", "the new report channel", true),
+                                new SubcommandData("log-channel", "changes the log channel").addOption(CHANNEL, "channel", "the new log channel", true),
+                                new SubcommandData("suggestion-channel", "changes the suggestion channel").addOption(CHANNEL, "channel", "the new suggestion channel", true),
+                                new SubcommandData("submission-channel", "changes the submission channel").addOption(CHANNEL, "channel", "the new submission channel", true),
+                                new SubcommandData("mute-role", "changes the mute role").addOption(ROLE, "role", "the new mute role", true),
+                                new SubcommandData("dm-qotw", "changes the state of dm-qotw").addOption(BOOLEAN, "enabled", "state of dm-qotw", true),
+                                new SubcommandData("lock", "changes the state of the server lock").addOption(BOOLEAN, "locked", "state of the server lock", true)),
 
                 new CommandData("welcome-image", "edits the welcome image config")
                         .addSubcommands(
-                        new SubcommandData("list", "sends the current welcome image config"),
-                        new SubcommandData("image-width", "changes the welcome image width").addOption(INTEGER, "width", "the new welcome image width", true),
-                        new SubcommandData("image-height", "changes the welcome image height").addOption(INTEGER, "height", "the new welcome image height", true),
-                        new SubcommandData("overlay-url", "changes the welcome image overlay url").addOption(STRING, "url", "the new welcome image url", true),
-                        new SubcommandData("background-url", "changes the welcome image background url").addOption(STRING, "url", "the new welcome image background url", true),
-                        new SubcommandData("primary-color", "changes the primary color (tag)").addOption(STRING, "color", "the new primary color (e.g. ff0000)", true),
-                        new SubcommandData("secondary-color", "changes the secondary color (member count)").addOption(STRING, "color", "the new secondary color (e.g. ff0000)", true),
-                        new SubcommandData("avatar-x", "changes the x-position of the avatar image").addOption(INTEGER, "x", "the new x-position of the avatar image", true),
-                        new SubcommandData("avatar-y", "changes the y-position of the avatar image").addOption(INTEGER, "y", "the new y-position of the avatar image", true),
-                        new SubcommandData("avatar-width", "changes the width of the avatar image").addOption(INTEGER, "width", "the new width of the avatar image", true),
-                        new SubcommandData("avatar-height", "changes the height of the avatar image").addOption(INTEGER, "height", "the new height of the avatar image", true)),
+                                new SubcommandData("list", "sends the current welcome image config"),
+                                new SubcommandData("image-width", "changes the welcome image width").addOption(INTEGER, "width", "the new welcome image width", true),
+                                new SubcommandData("image-height", "changes the welcome image height").addOption(INTEGER, "height", "the new welcome image height", true),
+                                new SubcommandData("overlay-url", "changes the welcome image overlay url").addOption(STRING, "url", "the new welcome image url", true),
+                                new SubcommandData("background-url", "changes the welcome image background url").addOption(STRING, "url", "the new welcome image background url", true),
+                                new SubcommandData("primary-color", "changes the primary color (tag)").addOption(STRING, "color", "the new primary color (e.g. ff0000)", true),
+                                new SubcommandData("secondary-color", "changes the secondary color (member count)").addOption(STRING, "color", "the new secondary color (e.g. ff0000)", true),
+                                new SubcommandData("avatar-x", "changes the x-position of the avatar image").addOption(INTEGER, "x", "the new x-position of the avatar image", true),
+                                new SubcommandData("avatar-y", "changes the y-position of the avatar image").addOption(INTEGER, "y", "the new y-position of the avatar image", true),
+                                new SubcommandData("avatar-width", "changes the width of the avatar image").addOption(INTEGER, "width", "the new width of the avatar image", true),
+                                new SubcommandData("avatar-height", "changes the height of the avatar image").addOption(INTEGER, "height", "the new height of the avatar image", true)),
 
                 new CommandData("customcommand", "lists, creates, edits or deletes custom slash commands")
                         .addSubcommands(
@@ -701,7 +708,7 @@ public class SlashCommands extends ListenerAdapter {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
-        MongoCursor<Document> it = collection.find().iterator();
+        MongoCursor<Document> it = collection.find(eq("guild_id", guild.getId())).iterator();
 
         while (it.hasNext()) {
 

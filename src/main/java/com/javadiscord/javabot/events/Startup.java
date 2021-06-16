@@ -73,6 +73,9 @@ public class Startup extends ListenerAdapter {
         LoggerFactory.getLogger(this.getClass()).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         //StarboardListener.updateAllSBM(event);
-        SlashCommands.registerSlashCommands(event.getJDA().getGuilds().get(0));
+
+        for (var guild : event.getJDA().getGuilds()) {
+            SlashCommands.registerSlashCommands(guild);
+        }
     }
 }
