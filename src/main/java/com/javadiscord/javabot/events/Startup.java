@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.SlashCommands;
 import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
@@ -66,7 +65,7 @@ public class Startup extends ListenerAdapter {
         //StarboardListener.updateAllSBM(event);
 
         for (var guild : event.getJDA().getGuilds()) {
-            SlashCommands.registerSlashCommands(guild);
+            Bot.slashCommands.registerSlashCommands(guild);
         }
     }
 }

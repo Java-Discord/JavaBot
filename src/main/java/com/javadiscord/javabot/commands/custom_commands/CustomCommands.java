@@ -2,7 +2,7 @@ package com.javadiscord.javabot.commands.custom_commands;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.javadiscord.javabot.SlashCommands;
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.mongodb.BasicDBObject;
@@ -92,7 +92,7 @@ public class CustomCommands {
                         .build();
 
                 event.replyEmbeds(e).queue();
-                SlashCommands.registerSlashCommands(event.getGuild());
+                Bot.slashCommands.registerSlashCommands(event.getGuild());
 
             } else { event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called " + "``" + "/" + commandName + "`` already exists.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
         } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
@@ -132,7 +132,7 @@ public class CustomCommands {
                         .build();
 
                 event.replyEmbeds(e).queue();
-                SlashCommands.registerSlashCommands(event.getGuild());
+                Bot.slashCommands.registerSlashCommands(event.getGuild());
             }
         } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
@@ -164,7 +164,7 @@ public class CustomCommands {
                         .build();
 
                 event.replyEmbeds(e).queue();
-                SlashCommands.registerSlashCommands(event.getGuild());
+                Bot.slashCommands.registerSlashCommands(event.getGuild());
             }
         } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }

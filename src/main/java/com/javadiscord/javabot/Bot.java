@@ -3,13 +3,11 @@ package com.javadiscord.javabot;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -17,10 +15,8 @@ import org.reflections.Reflections;
 
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 
 public class Bot {
@@ -29,6 +25,8 @@ public class Bot {
         Path.of("bot.props")
 
     );
+
+    public static SlashCommands slashCommands;
 
     public static void main(String[] args) throws Exception {
         CommandClient client = new CommandClientBuilder()
@@ -40,12 +38,14 @@ public class Bot {
                 .addCommands(discoverCommands())
                 .build();
 
+        slashCommands = new SlashCommands();
+
         JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ACTIVITY)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                .addEventListeners(client, new SlashCommands(client))
+                .addEventListeners(client, slashCommands)
                 .build();
 
         //EVENTS

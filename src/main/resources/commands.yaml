@@ -1,0 +1,376 @@
+- description: Shows your or someone else's profile picture
+  name: avatar
+  options:
+    - {description: 'If given, shows the profile picture of the given user', name: user,
+       required: false, type: USER}
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.Avatar
+- description: Shows some information about the Bot
+  name: botinfo
+  options: []
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.BotInfo
+- description: Generates the "change my mind" meme from your given input
+  name: changemymind
+  options:
+    - {description: your text-input, name: text, required: true, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.ChangeMyMind
+- description: Sends you a DM with all Commands
+  name: help
+  options: []
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.Help
+- description: Generates a human-readable timestamp out of a Discord-ID
+  name: idcalc
+  options:
+    - {description: The id the bot will convert into a human-readable timestamp, name: id,
+       required: true, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.IDCalc
+- description: Turns your text-input into a lmgtfy-link
+  name: lmgtfy
+  options:
+    - {description: Text that will be converted into a lmgtfy-link, name: text, required: true,
+       type: STRING}
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.Lmgtfy
+- description: Checks the Bot's Gateway Ping
+  name: ping
+  options: []
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.Ping
+- description: Shows your or someon else's profile
+  name: profile
+  options:
+    - {description: 'If given, shows the profile of the user', name: user, required: false,
+       type: USER}
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.Profile
+- description: Shows some information about the current guild
+  name: serverinfo
+  options: []
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.ServerInfo
+- description: Checks the Bot's uptime
+  name: uptime
+  options: []
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.user_commands.Uptime
+- description: Bans a member.
+  name: ban
+  options:
+    - {description: The user you want to ban, name: user, required: true, type: USER}
+    - {description: The reason, name: reason, required: false, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Clears all warns from the given user.
+  name: clearwarns
+  options:
+    - {description: The user you want to clear all warns from, name: user, required: true,
+       type: USER}
+  subCommandGroups: []
+  subCommands: []
+- description: Clears all QOTW-points from the given user.
+  name: clearqotw
+  options:
+    - {description: The user you want to clear all QOTW-points from, name: user, required: true,
+       type: USER}
+  subCommandGroups: []
+  subCommands: []
+- description: Edits an embed
+  name: editembed
+  options:
+    - {description: The message ID of the embed you want to edit, name: messageid, required: true,
+       type: STRING}
+    - {description: New title of the embed, name: title, required: true, type: STRING}
+    - {description: New description of the embed, name: description, required: true,
+       type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Sends an embed
+  name: embed
+  options:
+    - {description: Title of the embed, name: title, required: false, type: STRING}
+    - {description: Description of the embed, name: description, required: false, type: STRING}
+    - {description: Author name of the embed, name: author-name, required: false, type: STRING}
+    - {description: Author url of the embed, name: author-url, required: false, type: STRING}
+    - {description: Author iconurl of the embed, name: author-iconurl, required: false,
+       type: STRING}
+    - {description: Thumbnail url of the embed, name: thumbnail-url, required: false,
+       type: STRING}
+    - {description: Image url of the embed, name: image-url, required: false, type: STRING}
+    - {description: 'Color of the embed (e.g. #ff0000)', name: color, required: false,
+       type: STRING}
+  subCommandGroups: []
+  subCommands: []
+  handler: com.javadiscord.javabot.commands.moderation.Embed
+- description: Kicks a member
+  name: kick
+  options:
+    - {description: The user you want to kick, name: user, required: true, type: USER}
+    - {description: The reason, name: reason, required: false, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Mutes a member
+  name: mute
+  options:
+    - {description: The user you want to mute, name: user, required: true, type: USER}
+  subCommandGroups: []
+  subCommands: []
+- description: Lists all muted members
+  name: mutelist
+  options: []
+  subCommandGroups: []
+  subCommands: []
+- description: Deletes the given amount of messages in a channel
+  name: purge
+  options:
+    - {description: the amount of messages you want to delete (2-100), name: amount,
+       required: true, type: INTEGER}
+    - {description: 'If true, creates a copy- and deletes the current channel', name: nuke-channel,
+       required: false, type: BOOLEAN}
+  subCommandGroups: []
+  subCommands: []
+- description: Reports a member
+  name: report
+  options:
+    - {description: The user you want to report, name: user, required: true, type: USER}
+    - {description: The reason, name: reason, required: false, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Unbans a member
+  name: unban
+  options:
+    - {description: The ID of the user you want to unban, name: id, required: true,
+       type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Unmutes a member
+  name: unmute
+  options:
+    - {description: The user you want to unmute, name: user, required: true, type: USER}
+  subCommandGroups: []
+  subCommands: []
+- description: Warns a member
+  name: warn
+  options:
+    - {description: The user you want to warn, name: user, required: true, type: USER}
+    - {description: The reason, name: reason, required: false, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Shows your warn count
+  name: warns
+  options:
+    - {description: 'If given, shows the warn count of the given user', name: user,
+       required: false, type: USER}
+  subCommandGroups: []
+  subCommands: []
+- description: Shows the config for the current guild
+  name: config
+  options: []
+  subCommandGroups: []
+  subCommands:
+    - description: Shows the current config
+      name: list
+      options: []
+    - description: Changes the leave message
+      name: leave-message
+      options:
+        - {description: New leave message, name: message, required: true, type: STRING}
+    - description: Changes the welcome message
+      name: welcome-message
+      options:
+        - {description: New welcome message, name: message, required: true, type: STRING}
+    - description: Changes the welcome channel
+      name: welcome-channel
+      options:
+        - {description: New welcome channel, name: channel, required: true, type: CHANNEL}
+    - description: Changes the id of the stats category
+      name: stats-category
+      options:
+        - {description: ID of the new stats category, name: id, required: true, type: STRING}
+    - description: Changes the message of the stats category
+      name: stats-message
+      options:
+        - {description: New text of the stats category, name: message, required: true,
+           type: STRING}
+    - description: Changes the report channel
+      name: report-channel
+      options:
+        - {description: New report channel, name: channel, required: true, type: CHANNEL}
+    - description: Changes the log channel
+      name: log-channel
+      options:
+        - {description: the new log channel, name: channel, required: true, type: CHANNEL}
+    - description: Changes the suggestion channel
+      name: suggestion-channel
+      options:
+        - {description: New suggestion channel, name: channel, required: true, type: CHANNEL}
+    - description: Changes the submission channel
+      name: submission-channel
+      options:
+        - {description: New submission channel, name: channel, required: true, type: CHANNEL}
+    - description: Changes the mute role
+      name: mute-role
+      options:
+        - {description: New mute role, name: role, required: true, type: ROLE}
+    - description: Changes the state of dm-qotw
+      name: dm-qotw
+      options:
+        - {description: State of dm-qotw, name: enabled, required: true, type: BOOLEAN}
+    - description: Changes the state of the server lock
+      name: lock
+      options:
+        - {description: State of the server lock, name: locked, required: true, type: BOOLEAN}
+- description: edits the welcome image config
+  name: welcome-image
+  options: []
+  subCommandGroups: []
+  subCommands:
+    - description: Sends the current welcome image config
+      name: list
+      options: []
+    - description: Changes the welcome image width
+      name: image-width
+      options:
+        - {description: New welcome image width, name: width, required: true, type: INTEGER}
+    - description: Changes the welcome image height
+      name: image-height
+      options:
+        - {description: New welcome image height, name: height, required: true, type: INTEGER}
+    - description: Changes the welcome image overlay url
+      name: overlay-url
+      options:
+        - {description: New welcome image url, name: url, required: true, type: STRING}
+    - description: Changes the welcome image background url
+      name: background-url
+      options:
+        - {description: New welcome image background url, name: url, required: true, type: STRING}
+    - description: Changes the primary color (tag)
+      name: primary-color
+      options:
+        - {description: New primary color (e.g. ff0000), name: color, required: true,
+           type: STRING}
+    - description: Changes the secondary color (member count)
+      name: secondary-color
+      options:
+        - {description: New secondary color (e.g. ff0000), name: color, required: true,
+           type: STRING}
+    - description: Changes the x-position of the avatar image
+      name: avatar-x
+      options:
+        - {description: New x-position of the avatar image, name: x, required: true, type: INTEGER}
+    - description: Changes the y-position of the avatar image
+      name: avatar-y
+      options:
+        - {description: New y-position of the avatar image, name: y, required: true, type: INTEGER}
+    - description: Changes the width of the avatar image
+      name: avatar-width
+      options:
+        - {description: New width of the avatar image, name: width, required: true, type: INTEGER}
+    - description: Changes the height of the avatar image
+      name: avatar-height
+      options:
+        - {description: New height of the avatar image, name: height, required: true,
+           type: INTEGER}
+- description: lists, creates, edits or deletes custom slash commands
+  name: customcommand
+  options: []
+  subCommandGroups: []
+  subCommands:
+    - description: Lists all custom slash commands
+      name: list
+      options: []
+    - description: Creates a custom slash command
+      name: create
+      options:
+        - {description: Name of the custom slash command, name: name, required: true,
+           type: STRING}
+        - {description: Content of the custom slash command, name: text, required: true,
+           type: STRING}
+    - description: Edits a custom slash command
+      name: edit
+      options:
+        - {description: Name of the custom slash command, name: name, required: true,
+           type: STRING}
+        - {description: Content of the custom slash command, name: text, required: true,
+           type: STRING}
+    - description: Deletes a custom slash command
+      name: delete
+      options:
+        - {description: Name of the custom slash command, name: name, required: true,
+           type: STRING}
+- description: lists, creates or deletes reaction roles
+  name: reactionrole
+  options: []
+  subCommandGroups: []
+  subCommands:
+    - description: Lists all reaction roles
+      name: list
+      options: []
+    - description: Creates a reaction role
+      name: create
+      options:
+        - {description: 'Channel, the reaction role should be created in', name: channel,
+           required: true, type: CHANNEL}
+        - {description: 'Message, the reaction role should be created on', name: messageid,
+           required: true, type: STRING}
+        - {description: 'Emote, the reaction role should use', name: emote, required: true,
+           type: STRING}
+        - {description: 'Role, the reaction role should add', name: role, required: true,
+           type: ROLE}
+    - description: Deletes a reaction role
+      name: delete
+      options:
+        - {description: 'Message, the reaction role is on', name: messageid, required: true,
+           type: STRING}
+        - {description: 'Emote, the reaction role is using', name: emote, required: true,
+           type: STRING}
+- description: Generates the question of the week leaderboard
+  name: leaderboard
+  options:
+    - {description: 'If true, uses the old design', name: old, required: false, type: BOOLEAN}
+  subCommandGroups: []
+  subCommands: []
+- description: Displays the given amount of questions in a random order
+  name: question
+  options:
+    - {description: Aamount of questions, name: amount, required: true, type: INTEGER}
+  subCommandGroups: []
+  subCommands: []
+- description: Accepts the given submissions
+  name: accept
+  options:
+    - {description: ID of the submission, name: message-id, required: true, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: clears the given submissions
+  name: clear
+  options:
+    - {description: ID of the submission, name: message-id, required: true, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: declines the given submissions
+  name: decline
+  options:
+    - {description: ID of the submission, name: message-id, required: true, type: STRING}
+  subCommandGroups: []
+  subCommands: []
+- description: Adds a response to the given submissions
+  name: respond
+  options:
+    - {description: ID of the submission, name: message-id, required: true, type: STRING}
+    - {description: Text of the response, name: text, required: true, type: STRING}
+  subCommandGroups: []
+  subCommands: []
