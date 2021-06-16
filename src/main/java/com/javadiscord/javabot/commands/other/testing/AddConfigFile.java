@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.other.testing;
 
+import com.javadiscord.javabot.events.GuildJoin;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.javadiscord.javabot.events.GuildJoin;
 
 public class AddConfigFile extends Command {
 

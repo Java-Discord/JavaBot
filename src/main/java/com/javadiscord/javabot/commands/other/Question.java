@@ -1,67 +1,92 @@
 package com.javadiscord.javabot.commands.other;
 
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
-import org.bson.Document;
 
-import java.util.Random;
+import java.awt.*;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
+public class Question extends Command {
 
-public class Question {
 
-    public static void execute(SlashCommandEvent event, int num) {
+    public Question () {
+        this.name = "question";
+        this.category = new Category("OTHER");
+        this.arguments = "1-15";
+        this.help = "displays the given amount of questions in a random order";
+    }
 
-        event.deferReply(false).queue();
-        InteractionHook hook = event.getHook();
-
+    protected void execute(CommandEvent event) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
-            MongoDatabase database = mongoClient.getDatabase("other");
-            MongoCollection<Document> collection = database.getCollection("expert_questions");
+        int num = 0;
+        String[] args = event.getArgs().split("\\s+");
 
-            long l = collection.count();
+        try {
+            if (!(Integer.parseInt(args[0]) >= 16)) {
 
-            if (!(num > l) && num > 0) {
-                Random rand = new Random();
-                int i = num;
+                String[] questionArray = {
+                        "Question 0-",
+                        "Question 1-",
+                        "Question 2-",
+                        "Question 3-",
+                        "Question 4-",
+                        "Question 5-",
+                        "Question 6-",
+                        "Question 7-",
+                        "Question 8-",
+                        "Question 9-",
+                        "Question 10-",
+                        "Question 11-",
+                        "Question 12-",
+                        "Question 13-",
+                        "Question 14-",
+                        "Question 15-",
+                        "Question 16-"
+                };
 
                 StringBuilder sb = new StringBuilder();
-                while (i > 0) {
 
-                    int number = rand.nextInt(((int) l - 1) + 1) + 1;
-                    String JSON = collection.find(eq("number", number)).first().toJson();
-                    JsonObject root = JsonParser.parseString(JSON).getAsJsonObject();
+                for (int i = Integer.parseInt(args[0]); i > 0; i--) {
+                    num = (int) ((Math.random() * (questionArray.length - 1) + 1));
+                    String text = sb.toString();
 
-                    String text = root.get("text").getAsString();
-                    if (!(sb.toString().contains(text))) {
-
-                        sb.append("• " + text + "\n");
-                        i--;
-                    } else {
-                        continue;
+                    while (text.contains("Question " + num + "-")) {
+                        num = (int) ((Math.random() * (16) + 1));
                     }
+                    sb.append("• " + questionArray[num] + "\n");
                 }
 
-                var e = new EmbedBuilder()
-                        .setColor(Constants.GRAY)
-                        .setAuthor("Questions (" + num + ")")
-                        .setDescription(sb.toString())
-                        .build();
+                String text = sb.toString()
+                        .replace("Question 0-", "Explain the keyword ``synchronized``")
+                        .replace("Question 1-", "Explain the keyword ``finally``")
+                        .replace("Question 2-", "Explain the keyword ``transient``")
+                        .replace("Question 3-", "Explain the keyword ``volatile``")
+                        .replace("Question 4-", "How do you manage ``dependencies?``")
+                        .replace("Question 5-", "How does Java interact with the OS?")
+                        .replace("Question 6-", "What differentiates java from native lags like C++ ?")
+                        .replace("Question 7-", "What is ``(@)FunctionalInterface?``")
+                        .replace("Question 8-", "What is type erasure?")
+                        .replace("Question 9-", "What is ``maven``/``gradle``(/``ant``)?")
+                        .replace("Question 10-", "What file format is ``.jar``, actually?")
+                        .replace("Question 11-", "What is ``serialization`` and ``deserialization``?")
+                        .replace("Question 12-", "Can main method be declared final?")
+                        .replace("Question 13-", "How can you achieve multiple Inheritance in Java?")
+                        .replace("Question 14-", "What is the problem with ``string1==string2 / System.out.println(array);``")
+                        .replace("Question 15-", "What is the difference between ``Integer.valueOf`` and ``Integer.parseInt``?")
+                        .replace("Question 16-", "Where do I find documentation for the java language?");
 
-                hook.sendMessageEmbeds(e).queue();
+                EmbedBuilder eb = new EmbedBuilder()
+                        .setTitle("Questions (" + args[0] + ")")
+                        .setDescription(text)
+                        .setColor(new Color(0x2F3136));
+                event.reply(eb.build());
 
-            } else { hook.sendMessageEmbeds(Embeds.emptyError("```Please choose a Number between 1 and " + l + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();}
-            } else { hook.sendMessageEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            } else { event.reply(Embeds.syntaxError("question 1-15", event)); }
+            } catch (Exception e) { event.reply(Embeds.syntaxError("question 1-15", event)); }
+            } else { event.reply(Embeds.permissionError("MESSAGE_MANAGE", event)); }
     }
 }

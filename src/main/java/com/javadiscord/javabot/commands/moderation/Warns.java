@@ -1,51 +1,51 @@
 package com.javadiscord.javabot.commands.moderation;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.bson.Document;
 
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
 
-public class Warns {
+public class Warns extends Command {
 
-    public static void execute(SlashCommandEvent event, Member member) {
+    public Warns () { this.name = "warns"; }
+
+    protected void execute(CommandEvent event) {
+
+            String[] args = event.getArgs().split("\\s+");
+            Member member = event.getMember();
 
             MongoDatabase database = mongoClient.getDatabase("userdata");
-            MongoCollection<Document> warns = database.getCollection("warns");
+            MongoCollection<Document> collection = database.getCollection("users");
 
-            StringBuilder sb = new StringBuilder();
-            MongoCursor<Document> it = warns.find(eq("user_id", member.getId())).iterator();
-
-            while (it.hasNext()) {
-
-            JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
-            String reason = root.get("reason").getAsString();
-            String date = root.get("date").getAsString();
-
-            sb.append("[Date] " + date +
-                    "\n[Reason] " + reason + "\n\n");
+            if (args.length == 1) {
+                if (!event.getMessage().getMentionedMembers().isEmpty()) {
+                    member = event.getGuild().getMember(event.getMessage().getMentionedUsers().get(0));
+                } else {
+                    try {
+                        member = event.getGuild().getMember(event.getJDA().getUserById(args[0]));
+                    } catch (IllegalArgumentException e) {
+                        member = event.getGuild().getMember(event.getMessage().getAuthor());
+                    }
+                }
             }
 
-            var e = new EmbedBuilder()
+            int warnCount = Database.getMemberInt(collection, member, "warns");
+
+            EmbedBuilder eb = new EmbedBuilder()
                     .setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
-                    .setDescription("```" + member.getUser().getAsTag() + " has been warned " + warns.count(eq("user_id", member.getId())) + " times so far."
-                    + "\n\n" + sb + "```")
+                    .setDescription(member.getAsMention() + " has been warned **" + warnCount + " times** so far.")
                     .setColor(Constants.YELLOW)
                     .setFooter("ID: " + member.getId())
-                    .setTimestamp(new Date().toInstant())
-                    .build();
-
-            event.replyEmbeds(e).queue();
+                    .setTimestamp(new Date().toInstant());
+            event.reply(eb.build());
         }
     }

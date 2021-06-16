@@ -1,14 +1,16 @@
 package com.javadiscord.javabot.commands.other.qotw;
 
+import com.javadiscord.javabot.other.Database;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.javadiscord.javabot.other.Database;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.Message;
 import org.bson.Document;
 
 import javax.imageio.ImageIO;
@@ -19,17 +21,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Indexes.descending;
 import static com.mongodb.client.model.Projections.excludeId;
 
-public class Leaderboard {
+public class Leaderboard extends Command {
 
-    static void generateLB(SlashCommandEvent event) {
+    static void generateLeaderboard(CommandEvent event, Message message, boolean time) {
+        double startTime = System.currentTimeMillis();
 
-        event.deferReply(false).queue();
-        InteractionHook hook = event.getHook();
+        List<Emote> Emote = event.getGuild().getEmotesByName("loading", false);
+        message.addReaction(Emote.get(0)).complete();
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -73,7 +77,7 @@ public class Leaderboard {
         }
 
         boolean topTen = false;
-        if(topTenID.contains(event.getUser().getId())) {
+        if(topTenID.contains(event.getAuthor().getId())) {
            topTen = true;
         }
 
@@ -189,7 +193,7 @@ public class Leaderboard {
         if (!topTen) {
 
 
-            String text = event.getUser().getAsTag() + " - " + QOTWPoints + " points (#" + rank(event.getUser().getId()) + ")";
+            String text = event.getAuthor().getAsTag() + " - " + QOTWPoints + " points (#" + rank(event.getAuthor().getId()) + ")";
             int stringLength = (int) g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();
             int start = width / 2 - stringLength / 2;
             g2d.drawString(text, start, 3095);
@@ -210,10 +214,17 @@ public class Leaderboard {
             e.printStackTrace();
         }
 
-        hook.sendFile(new ByteArrayInputStream(outputStream.toByteArray()), "leaderboard" + ".png").queue();
+        message.reply(new ByteArrayInputStream(outputStream.toByteArray()), "leaderboard" + ".png").queue();
+        message.clearReactions().complete();
+
+        double endTime = System.currentTimeMillis();
+
+        if (time) {
+            event.getChannel().sendMessage("That took " + ((endTime - startTime) / 1000) + " seconds").queue();
+        }
     }
 
-    static void generateOldLB(SlashCommandEvent event) {
+    static void oldLeaderboard (CommandEvent event) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -231,16 +242,16 @@ public class Leaderboard {
             sb.append(i + ". " + Name + " - " + Points + " points\n");
         }
 
-        String topTen = sb.toString().replace(event.getUser().getAsTag(), "** ➔ " + event.getUser().getAsTag() + "**");
-        String authorPlacement = rank(event.getUser().getId()) + ". " + event.getUser().getAsTag() + " - " + qotwPoints + " points";
+        String topTen = sb.toString().replace(event.getAuthor().getAsTag(), "** ➔ " + event.getAuthor().getAsTag() + "**");
+        String authorPlacement = rank(event.getAuthor().getId()) + ". " + event.getAuthor().getAsTag() + " - " + qotwPoints + " points";
 
         EmbedBuilder eb = new EmbedBuilder()
-                .setAuthor("QOTW-Leaderboard", null, event.getUser().getEffectiveAvatarUrl())
+                .setAuthor("QOTW-Leaderboard", null, event.getAuthor().getEffectiveAvatarUrl())
                 .setColor(new Color(0x2F3136))
                 .setDescription(topTen.replace("- 1 points", "- 1 point"))
                 .addField("Your placement", authorPlacement.replace("- 1 points", "- 1 point"), false);
 
-        event.replyEmbeds(eb.build()).queue();
+        event.reply(eb.build());
     }
 
     public static int rank(String userid) {
@@ -262,10 +273,26 @@ public class Leaderboard {
 
     }
 
-    public static void execute (SlashCommandEvent event, boolean old) {
+    public static void exCommand (CommandEvent event) {
 
-        if (old) generateOldLB(event);
-        else generateLB(event);
+        String[] args = event.getArgs().split("\\s+");
+
+        if (args[0].equalsIgnoreCase("old")) oldLeaderboard(event);
+        else if (args[0].equalsIgnoreCase("showTime")) generateLeaderboard(event, event.getMessage(), true);
+        else generateLeaderboard(event, event.getMessage(), false);
 
     }
-}
+
+    public Leaderboard () {
+        this.name = "leaderboard";
+        this.aliases = new String[]{"l", "lb"};
+        this.category = new Category("USER COMMANDS");
+        this.arguments = "(old|showTime)";
+        this.help = "displays the question of the week leaderboard";
+    }
+
+    protected void execute(CommandEvent event) {
+
+        exCommand(event);
+        }
+    }

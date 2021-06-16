@@ -1,119 +1,122 @@
 package com.javadiscord.javabot.commands.moderation;
 
-import com.javadiscord.javabot.other.*;
+import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.other.Embeds;
+import com.javadiscord.javabot.other.Misc;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import org.bson.Document;
 
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.UUID;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
 
-public class Warn {
+public class Warn extends Command {
 
-    public static void addToDatabase(String memID, String guildID, String reason) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> warns = database.getCollection("warns");
-
-        Document doc = new Document("guild_id", guildID)
-                .append("user_id", memID)
-                .append("date", LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER))
-                .append("reason", reason);
-
-        warns.insertOne(doc);
-    }
-
-    public static void deleteAllDocs(String memID) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> warns = database.getCollection("warns");
-        MongoCursor<Document> it = warns.find(eq("user_id", memID)).iterator();
-
-        while (it.hasNext()) {
-
-            warns.deleteOne(it.next());
-        }
-    }
-
-    public static void warn(Member member, String reason, String modTag, Object ev) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> warns = database.getCollection("warns");
-
-        int warnPoints = (int) warns.count(eq("user_id", member.getId()));
-
-        var eb = new EmbedBuilder()
-                .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Constants.YELLOW)
-                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                .addField("Moderator", "```" + modTag + "```", true)
-                .addField("ID", "```" + member.getId() + "```", false)
-                .addField("Reason", "```" + reason + "```", false)
-                .setFooter("ID: " +  member.getId())
-                .setTimestamp(new Date().toInstant())
-                .build();
+    public static void warn(Member member, String reason, String moderatorTag, Object ev) {
 
         TextChannel tc = null;
         SelfUser selfUser = null;
-        String guildID = null;
+
+        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
+            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
+
+            tc = event.getTextChannel();
+            selfUser = event.getSelfUser();
+
+        }
 
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
             tc = event.getChannel();
-            guildID = event.getGuild().getId();
             selfUser = event.getJDA().getSelfUser();
-            tc.sendMessage(eb).queue();
         }
 
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-
-            tc = event.getTextChannel();
-            guildID = event.getGuild().getId();
-            selfUser = event.getJDA().getSelfUser();
-            event.replyEmbeds(eb).queue();
-        }
+        Object event = ev;
 
         try {
 
-            member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
-            Misc.sendToLog(ev, eb);
+            MongoDatabase database = mongoClient.getDatabase("userdata");
+            MongoCollection<Document> collection = database.getCollection("users");
 
-            if ((warnPoints + 1) >= 3) Ban.ban(member, "3/3 warns", selfUser.getAsTag(), ev);
-            else addToDatabase(member.getId(), guildID, reason);
+            int warnPoints = Database.getMemberInt(collection, member, "warns");
+            int totalWarnPoints = warnPoints + 1;
+            Database.queryMemberInt(member.getId(), "warns", totalWarnPoints);
 
-        } catch (HierarchyException e) {
+            EmbedBuilder eb = new EmbedBuilder()
+                    .setAuthor(member.getUser().getAsTag() + " | Warn (" + totalWarnPoints + "/3)", null, member.getUser().getEffectiveAvatarUrl())
+                    .setColor(Constants.YELLOW)
+                    .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+                    .addField("Moderator", "```" + moderatorTag + "```", true)
+                    .addField("ID", "```" + member.getId() + "```", false)
+                    .addField("Reason", "```" + reason + "```", false)
+                    .setFooter("ID: " +  member.getId())
+                    .setTimestamp(new Date().toInstant());
 
-            if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-                net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-                event.replyEmbeds(Embeds.hierarchyError(ev)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            member.getUser().openPrivateChannel().complete().sendMessage(eb.build()).queue();
+            Misc.sendToLog(event, eb.build());
+            tc.sendMessage(eb.build()).queue();
 
-            } else { tc.sendMessage(Embeds.hierarchyError(ev)).queue(); }
-        }
+            if (totalWarnPoints >= 3) {
+                Database.queryMemberInt(member.getId(), "warns", 0);
+                new Ban().ban(member, "3/3 warns", selfUser.getAsTag(), event);
+            }
 
+        } catch (HierarchyException e) { tc.sendMessage(Embeds.hierarchyError(event)).queue();
+        } catch (NullPointerException | NumberFormatException e) { tc.sendMessage(Embeds.syntaxError("warn @User/ID (Reason)", event)); }
     }
 
-    public static void execute(SlashCommandEvent event, Member member, User author, String reason) {
+    public Warn () { this.name = "warn"; }
+
+    protected void execute(CommandEvent event) {
         if (event.getMember().hasPermission(Permission.KICK_MEMBERS)) {
 
-            warn(member, reason, author.getAsTag(), event);
+            String[] args = event.getArgs().split("\\s+");
 
-        } else { event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
-    }
-}
+                try {
+                    Member member = null;
+                    String reason;
+
+                    if (args.length >= 1) {
+                        if (!event.getMessage().getMentionedMembers().isEmpty()) {
+                            member = event.getMessage().getMentionedMembers().get(0);
+
+                        } else { member = event.getGuild().getMemberById(args[0]); }
+
+                        if (event.getMessage().getMember().equals(member)) {
+                            event.reply(Embeds.selfPunishError("warn", event));
+                            return;
+                        }
+                    }
+
+                    if (args.length >= 2) {
+                        String[] Arg = Arrays.copyOfRange(args, 1, args.length);
+                     StringBuilder builder = new StringBuilder();
+
+                        for (String value : Arg) {
+                         builder.append(value + " ");
+                        }
+
+                        reason = builder.substring(0, builder.toString().length() - 1);
+
+                } else { reason = "None"; }
+
+                warn(member, reason, event.getAuthor().getAsTag(), event);
+
+                } catch (NullPointerException | IllegalArgumentException e) { event.reply(Embeds.syntaxError("warn @User/ID (Reason)", event)); }
+                } else { event.reply(Embeds.permissionError("KICK_MEMBERS", event)); }
+        }
+        }
 

@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.imageio.ImageIO;
@@ -81,12 +80,6 @@ public class Misc {
 
         if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
             net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            tc = Database.configChannel(event, "log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
             tc = Database.configChannel(event, "log_cid");
         }

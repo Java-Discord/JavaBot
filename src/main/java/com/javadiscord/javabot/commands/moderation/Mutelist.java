@@ -1,22 +1,24 @@
 package com.javadiscord.javabot.commands.moderation;
 
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
 
 
-public class Mutelist {
+public class Mutelist extends Command {
 
-    public static void execute(SlashCommandEvent event) {
+    public Mutelist () { this.name = "mutelist"; }
+
+    protected void execute(CommandEvent event) {
         if (event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
 
             String res = "";
@@ -40,15 +42,15 @@ public class Mutelist {
                 memberSize = 0;
             }
 
-            var e = new EmbedBuilder()
+            EmbedBuilder eb = new EmbedBuilder()
                     .setAuthor("Mutelist (" + memberSize + ")")
                     .setColor(new Color(0x2F3136))
                     .setDescription(res)
-                    .setTimestamp(new Date().toInstant())
-                    .build();
+                    .setTimestamp(new Date().toInstant());
+            event.reply(eb.build());
 
-            event.replyEmbeds(e).queue();
-
-        } else { event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        } else {
+            event.reply(Embeds.permissionError("MANAGE_ROLES", event));
+        }
     }
 }

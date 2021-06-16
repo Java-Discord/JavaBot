@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.other;
 
+import com.javadiscord.javabot.other.Embeds;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.javadiscord.javabot.other.Embeds;
 import org.slf4j.LoggerFactory;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;

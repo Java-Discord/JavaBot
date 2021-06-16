@@ -2,26 +2,34 @@ package com.javadiscord.javabot.commands.other.suggestions;
 
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
 
-public class Decline {
+public class Decline extends Command {
 
-    public static void execute(SlashCommandEvent event, String messageID) {
+    public Decline () {
+        this.name = "decline";
+        this.category = new Category("OTHER");
+        this.arguments = "<ID>";
+        this.help = "declines the given submission";
+    }
+
+    protected void execute(CommandEvent event) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
-                Message msg = null;
+            String[] args = event.getArgs().split("\\s+");
 
-                try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
-                catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            try {
 
+                Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
                 MessageEmbed msgEmbed = msg.getEmbeds().get(0);
                 msg.clearReactions().queue();
 
@@ -42,13 +50,26 @@ public class Decline {
 
                 } catch (IndexOutOfBoundsException e) {}
 
+                try {
+
+                    eb.setImage(msgEmbed.getImage().getUrl());
+
+                } catch (IndexOutOfBoundsException e) {}
+
                 eb.setDescription(description)
                         .setTimestamp(timestamp)
-                        .setFooter("Declined by " + event.getUser().getAsTag());
+                        .setFooter("Declined by " + event.getAuthor().getAsTag());
 
                 msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_FAILURE).queue());
-                event.reply("Done!").setEphemeral(true).queue();
 
-            } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+                event.getMessage().delete().queue();
+
+            } catch (Exception e) {
+                event.reply(Embeds.syntaxError("decline MessageID", event));
+            }
+
+            } else {
+                event.reply(Embeds.permissionError("MESSAGE_MANAGE", event));
+            }
     }
 }

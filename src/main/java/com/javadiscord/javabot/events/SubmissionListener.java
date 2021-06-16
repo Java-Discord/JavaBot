@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;

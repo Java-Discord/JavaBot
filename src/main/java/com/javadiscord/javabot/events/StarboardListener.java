@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.other.Database;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.javadiscord.javabot.other.Database;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
