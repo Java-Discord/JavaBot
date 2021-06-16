@@ -85,7 +85,9 @@ public class PresenceUpdater extends ListenerAdapter {
                 this.jda.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
             }
             if (currentActivityIndex >= this.activities.size()) currentActivityIndex = 0;
-            this.jda.getPresence().setActivity(this.activities.get(currentActivityIndex++).apply(this.jda));
+            if (this.activities.size() > 0) {
+                this.jda.getPresence().setActivity(this.activities.get(currentActivityIndex++).apply(this.jda));
+            }
         }, 0, this.delay, this.delayUnit);
     }
 
