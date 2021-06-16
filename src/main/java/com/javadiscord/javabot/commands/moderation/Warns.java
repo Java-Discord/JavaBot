@@ -3,6 +3,7 @@ package com.javadiscord.javabot.commands.moderation;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;

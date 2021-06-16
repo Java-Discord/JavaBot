@@ -16,8 +16,9 @@ import org.bson.Document;
 import java.awt.*;
 import java.util.List;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
+
+import static com.javadiscord.javabot.events.Startup.mongoClient;
 
 public class Profile {
 

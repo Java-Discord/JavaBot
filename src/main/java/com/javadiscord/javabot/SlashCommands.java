@@ -39,15 +39,15 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
-import org.bson.BsonDocument;
 import org.bson.Document;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
+
+import static com.mongodb.client.model.Filters.eq;
 
 public class SlashCommands extends ListenerAdapter {
     /**
@@ -507,14 +507,9 @@ public class SlashCommands extends ListenerAdapter {
             default:
 
                 try {
-
-                    BasicDBObject criteria = new BasicDBObject()
-                            .append("guild_id", event.getGuild().getId())
-                            .append("commandname", event.getName());
-
                     MongoDatabase database = mongoClient.getDatabase("other");
                     MongoCollection<Document> collection = database.getCollection("customcommands");
-                    Document it = collection.find(criteria).first();
+                    Document it = collection.find(eq("commandname", event.getName())).first();
 
                     JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
                     String value = Root.get("value").getAsString();
@@ -552,36 +547,36 @@ public class SlashCommands extends ListenerAdapter {
 
                 // USER COMMANDS
 
-                new CommandData("avatar", "Shows your profile picture")
+                new CommandData("avatar", "Shows your or someone else's profile picture")
                         .addOption(USER, "user", "If given, shows the profile picture of the given user", false),
 
-                new CommandData("botinfo", "Shows some information about Java"),
+                new CommandData("botinfo", "Shows some information about the Bot"),
 
-                new CommandData("changemymind", "Generates the \"change my mind\" meme out of your given input")
+                new CommandData("changemymind", "Generates the \"change my mind\" meme from your given input")
                         .addOption(STRING, "text", "your text-input", true),
 
                 new CommandData("help", "Sends you a DM with all Commands"),
 
-                new CommandData("idcalc", "Generates a human-readable timestamp out of a given id")
-                        .addOption(STRING, "id", "The id, that the bot will convert into a human-readable timestamp", true),
+                new CommandData("idcalc", "Generates a human-readable timestamp out of a Discord-ID")
+                        .addOption(STRING, "id", "The id the bot will convert into a human-readable timestamp", true),
 
                 new CommandData("lmgtfy", "Turns your text-input into a lmgtfy-link")
-                        .addOption(STRING, "text", "The text, that will be converted into a lmgtfy-link", true),
+                        .addOption(STRING, "text", "Text that will be converted into a lmgtfy-link", true),
 
-                new CommandData("ping", "Checks Java's Gateway Ping"),
+                new CommandData("ping", "Checks the Bot's Gateway Ping"),
 
-                new CommandData("profile", "Shows your profile")
-                        .addOption(USER, "user", "If given, shows the profile of the given user", false),
+                new CommandData("profile", "Shows your or someon else's profile")
+                        .addOption(USER, "user", "If given, shows the profile of the user", false),
 
                 new CommandData("serverinfo", "Shows some information about the current guild"),
 
-                new CommandData("uptime", "Checks Java's uptime"),
+                new CommandData("uptime", "Checks the Bot's uptime"),
 
                 // MODERATION
 
-                new CommandData("ban", "Bans a member")
+                new CommandData("ban", "Bans a member.")
                         .addOption(USER, "user", "The user you want to ban", true)
-                        .addOption(STRING, "reason", "the reason", false),
+                        .addOption(STRING, "reason", "The reason", false),
 
                 new CommandData("clearwarns", "Clears all warns from the given user.")
                         .addOption(USER, "user", "The user you want to clear all warns from", true),
@@ -590,23 +585,23 @@ public class SlashCommands extends ListenerAdapter {
                         .addOption(USER, "user", "The user you want to clear all QOTW-points from", true),
 
                 new CommandData("editembed", "Edits an embed")
-                        .addOption(STRING, "messageid", "The message ID of the embed, that you want to edit", true)
-                        .addOption(STRING, "title", "The new title of the embed", true)
-                        .addOption(STRING, "description", "The new description of the embed", true),
+                        .addOption(STRING, "messageid", "The message ID of the embed you want to edit", true)
+                        .addOption(STRING, "title", "New title of the embed", true)
+                        .addOption(STRING, "description", "New description of the embed", true),
 
                 new CommandData("embed", "Sends an embed")
-                        .addOption(STRING, "title", "The title of the embed", false)
-                        .addOption(STRING, "description", "The description of the embed", false)
-                        .addOption(STRING, "author-name", "The author name of the embed", false)
-                        .addOption(STRING, "author-url", "The author url of the embed", false)
-                        .addOption(STRING, "author-iconurl", "The author iconurl of the embed", false)
-                        .addOption(STRING, "thumbnail-url", "The thumbnail url of the embed", false)
-                        .addOption(STRING, "image-url", "The image url of the embed", false)
-                        .addOption(STRING, "color", "The color of the embed (e.g. #ff0000)", false),
+                        .addOption(STRING, "title", "Title of the embed", false)
+                        .addOption(STRING, "description", "Description of the embed", false)
+                        .addOption(STRING, "author-name", "Author name of the embed", false)
+                        .addOption(STRING, "author-url", "Author url of the embed", false)
+                        .addOption(STRING, "author-iconurl", "Author iconurl of the embed", false)
+                        .addOption(STRING, "thumbnail-url", "Thumbnail url of the embed", false)
+                        .addOption(STRING, "image-url", "Image url of the embed", false)
+                        .addOption(STRING, "color", "Color of the embed (e.g. #ff0000)", false),
 
                 new CommandData("kick", "Kicks a member")
                         .addOption(USER, "user", "The user you want to kick", true)
-                        .addOption(STRING, "reason", "the reason", false),
+                        .addOption(STRING, "reason", "The reason", false),
 
                 new CommandData("mute", "Mutes a member")
                         .addOption(USER, "user", "The user you want to mute", true),
@@ -614,15 +609,15 @@ public class SlashCommands extends ListenerAdapter {
                 new CommandData("mutelist", "Lists all muted members"),
 
                 new CommandData("purge", "Deletes the given amount of messages in a channel")
-                        .addOption(OptionType.INTEGER, "amount", "the amount of messages you want to delete (between 2-100)", true)
-                        .addOption(OptionType.BOOLEAN, "nuke-channel", "if true, creates a copy- and deletes the current channel", false),
+                        .addOption(OptionType.INTEGER, "amount", "the amount of messages you want to delete (2-100)", true)
+                        .addOption(OptionType.BOOLEAN, "nuke-channel", "If true, creates a copy- and deletes the current channel", false),
 
                 new CommandData("report", "Reports a member")
                         .addOption(USER, "user", "The user you want to report", true)
-                        .addOption(STRING, "reason", "the reason", false),
+                        .addOption(STRING, "reason", "The reason", false),
 
                 new CommandData("unban", "Unbans a member")
-                        .addOption(STRING, "id", "The id of the user you want to unban", true),
+                        .addOption(STRING, "id", "The ID of the user you want to unban", true),
 
                 new CommandData("unmute", "Unmutes a member")
                         .addOption(USER, "user", "The user you want to unmute", true),
@@ -638,78 +633,78 @@ public class SlashCommands extends ListenerAdapter {
 
                 new CommandData("config", "Shows the config for the current guild")
                         .addSubcommands(
-                                new SubcommandData("list", "sends the current config"),
-                                new SubcommandData("leave-message", "changes the leave message").addOption(STRING, "message", "the new leave message", true),
-                                new SubcommandData("welcome-message", "changes the welcome message").addOption(STRING, "message", "the new welcome message", true),
-                                new SubcommandData("welcome-channel", "changes the welcome channel").addOption(CHANNEL, "channel", "the new welcome channel", true),
-                                new SubcommandData("stats-category", "changes the id of the stats category").addOption(STRING, "id", "the id of the new stats category", true),
-                                new SubcommandData("stats-message", "changes the message of the stats category").addOption(STRING, "message", "the new text of the stats category", true),
-                                new SubcommandData("report-channel", "changes the report channel").addOption(CHANNEL, "channel", "the new report channel", true),
-                                new SubcommandData("log-channel", "changes the log channel").addOption(CHANNEL, "channel", "the new log channel", true),
-                                new SubcommandData("suggestion-channel", "changes the suggestion channel").addOption(CHANNEL, "channel", "the new suggestion channel", true),
-                                new SubcommandData("submission-channel", "changes the submission channel").addOption(CHANNEL, "channel", "the new submission channel", true),
-                                new SubcommandData("mute-role", "changes the mute role").addOption(ROLE, "role", "the new mute role", true),
-                                new SubcommandData("dm-qotw", "changes the state of dm-qotw").addOption(BOOLEAN, "enabled", "state of dm-qotw", true),
-                                new SubcommandData("lock", "changes the state of the server lock").addOption(BOOLEAN, "locked", "state of the server lock", true)),
+                                new SubcommandData("list", "Shows the current config"),
+                                new SubcommandData("leave-message", "Changes the leave message").addOption(STRING, "message", "New leave message", true),
+                                new SubcommandData("welcome-message", "Changes the welcome message").addOption(STRING, "message", "New welcome message", true),
+                                new SubcommandData("welcome-channel", "Changes the welcome channel").addOption(CHANNEL, "channel", "New welcome channel", true),
+                                new SubcommandData("stats-category", "Changes the id of the stats category").addOption(STRING, "id", "ID of the new stats category", true),
+                                new SubcommandData("stats-message", "Changes the message of the stats category").addOption(STRING, "message", "New text of the stats category", true),
+                                new SubcommandData("report-channel", "Changes the report channel").addOption(CHANNEL, "channel", "New report channel", true),
+                                new SubcommandData("log-channel", "Changes the log channel").addOption(CHANNEL, "channel", "the new log channel", true),
+                                new SubcommandData("suggestion-channel", "Changes the suggestion channel").addOption(CHANNEL, "channel", "New suggestion channel", true),
+                                new SubcommandData("submission-channel", "Changes the submission channel").addOption(CHANNEL, "channel", "New submission channel", true),
+                                new SubcommandData("mute-role", "Changes the mute role").addOption(ROLE, "role", "New mute role", true),
+                                new SubcommandData("dm-qotw", "Changes the state of dm-qotw").addOption(BOOLEAN, "enabled", "State of dm-qotw", true),
+                                new SubcommandData("lock", "Changes the state of the server lock").addOption(BOOLEAN, "locked", "State of the server lock", true)),
 
                 new CommandData("welcome-image", "edits the welcome image config")
                         .addSubcommands(
-                                new SubcommandData("list", "sends the current welcome image config"),
-                                new SubcommandData("image-width", "changes the welcome image width").addOption(INTEGER, "width", "the new welcome image width", true),
-                                new SubcommandData("image-height", "changes the welcome image height").addOption(INTEGER, "height", "the new welcome image height", true),
-                                new SubcommandData("overlay-url", "changes the welcome image overlay url").addOption(STRING, "url", "the new welcome image url", true),
-                                new SubcommandData("background-url", "changes the welcome image background url").addOption(STRING, "url", "the new welcome image background url", true),
-                                new SubcommandData("primary-color", "changes the primary color (tag)").addOption(STRING, "color", "the new primary color (e.g. ff0000)", true),
-                                new SubcommandData("secondary-color", "changes the secondary color (member count)").addOption(STRING, "color", "the new secondary color (e.g. ff0000)", true),
-                                new SubcommandData("avatar-x", "changes the x-position of the avatar image").addOption(INTEGER, "x", "the new x-position of the avatar image", true),
-                                new SubcommandData("avatar-y", "changes the y-position of the avatar image").addOption(INTEGER, "y", "the new y-position of the avatar image", true),
-                                new SubcommandData("avatar-width", "changes the width of the avatar image").addOption(INTEGER, "width", "the new width of the avatar image", true),
-                                new SubcommandData("avatar-height", "changes the height of the avatar image").addOption(INTEGER, "height", "the new height of the avatar image", true)),
+                                new SubcommandData("list", "Sends the current welcome image config"),
+                                new SubcommandData("image-width", "Changes the welcome image width").addOption(INTEGER, "width", "New welcome image width", true),
+                                new SubcommandData("image-height", "Changes the welcome image height").addOption(INTEGER, "height", "New welcome image height", true),
+                                new SubcommandData("overlay-url", "Changes the welcome image overlay url").addOption(STRING, "url", "New welcome image url", true),
+                                new SubcommandData("background-url", "Changes the welcome image background url").addOption(STRING, "url", "New welcome image background url", true),
+                                new SubcommandData("primary-color", "Changes the primary color (tag)").addOption(STRING, "color", "New primary color (e.g. ff0000)", true),
+                                new SubcommandData("secondary-color", "Changes the secondary color (member count)").addOption(STRING, "color", "New secondary color (e.g. ff0000)", true),
+                                new SubcommandData("avatar-x", "Changes the x-position of the avatar image").addOption(INTEGER, "x", "New x-position of the avatar image", true),
+                                new SubcommandData("avatar-y", "Changes the y-position of the avatar image").addOption(INTEGER, "y", "New y-position of the avatar image", true),
+                                new SubcommandData("avatar-width", "Changes the width of the avatar image").addOption(INTEGER, "width", "New width of the avatar image", true),
+                                new SubcommandData("avatar-height", "Changes the height of the avatar image").addOption(INTEGER, "height", "New height of the avatar image", true)),
 
                 new CommandData("customcommand", "lists, creates, edits or deletes custom slash commands")
                         .addSubcommands(
-                                new SubcommandData("list", "lists all custom slash commands"),
-                                new SubcommandData("create", "creates a custom slash command")
-                                        .addOption(STRING, "name", "the name of the custom slash command", true)
-                                        .addOption(STRING, "text", "the text of the custom slash command", true),
-                                new SubcommandData("edit", "edits a custom slash command")
-                                        .addOption(STRING, "name", "the name of the custom slash command", true)
-                                        .addOption(STRING, "text", "the text of the custom slash command", true),
-                                new SubcommandData("delete", "deletes a custom slash command")
-                                        .addOption(STRING, "name", "the name of the custom slash command", true)),
+                                new SubcommandData("list", "Lists all custom slash commands"),
+                                new SubcommandData("create", "Creates a custom slash command")
+                                        .addOption(STRING, "name", "Name of the custom slash command", true)
+                                        .addOption(STRING, "text", "Content of the custom slash command", true),
+                                new SubcommandData("edit", "Edits a custom slash command")
+                                        .addOption(STRING, "name", "Name of the custom slash command", true)
+                                        .addOption(STRING, "text", "Content of the custom slash command", true),
+                                new SubcommandData("delete", "Deletes a custom slash command")
+                                        .addOption(STRING, "name", "Name of the custom slash command", true)),
 
 
                 new CommandData("reactionrole", "lists, creates or deletes reaction roles")
                         .addSubcommands(
-                                new SubcommandData("list", "lists all reaction roles"),
-                                new SubcommandData("create", "creates a reaction role")
-                                        .addOption(CHANNEL, "channel", "the channel, the reaction role should be created in", true)
-                                        .addOption(STRING, "messageid", "the message, the reaction role should be created on", true)
-                                        .addOption(STRING, "emote", "the emote, the reaction role should use", true)
-                                        .addOption(ROLE, "role", "the role, the reaction role should add", true),
-                                new SubcommandData("delete", "deletes a reaction role")
-                                        .addOption(STRING, "messageid", "the message, the reaction role is on", true)
-                                        .addOption(STRING, "emote", "the emote, the reaction role is using", true)),
+                                new SubcommandData("list", "Lists all reaction roles"),
+                                new SubcommandData("create", "Creates a reaction role")
+                                        .addOption(CHANNEL, "channel", "Channel, the reaction role should be created in", true)
+                                        .addOption(STRING, "messageid", "Message, the reaction role should be created on", true)
+                                        .addOption(STRING, "emote", "Emote, the reaction role should use", true)
+                                        .addOption(ROLE, "role", "Role, the reaction role should add", true),
+                                new SubcommandData("delete", "Deletes a reaction role")
+                                        .addOption(STRING, "messageid", "Message, the reaction role is on", true)
+                                        .addOption(STRING, "emote", "Emote, the reaction role is using", true)),
 
 
-                new CommandData("leaderboard", "generates the question of the week leaderboard")
-                        .addOption(BOOLEAN, "old", "if true, sends the old leaderboard", false),
+                new CommandData("leaderboard", "Generates the question of the week leaderboard")
+                        .addOption(BOOLEAN, "old", "If true, uses the old design", false),
 
-                new CommandData("question", "displays the given amount of questions in a random order")
-                        .addOption(INTEGER, "amount", "the amount of questions", true),
+                new CommandData("question", "Displays the given amount of questions in a random order")
+                        .addOption(INTEGER, "amount", "Aamount of questions", true),
 
-                new CommandData("accept", "accepts the given submissions")
-                        .addOption(STRING, "message-id", "the id of the submission", true),
+                new CommandData("accept", "Accepts the given submissions")
+                        .addOption(STRING, "message-id", "ID of the submission", true),
 
                 new CommandData("clear", "clears the given submissions")
-                        .addOption(STRING, "message-id", "the id of the submission", true),
+                        .addOption(STRING, "message-id", "ID of the submission", true),
 
                 new CommandData("decline", "declines the given submissions")
-                        .addOption(STRING, "message-id", "the id of the submission", true),
+                        .addOption(STRING, "message-id", "ID of the submission", true),
 
-                new CommandData("respond", "adds a response to the given submissions")
-                        .addOption(STRING, "message-id", "the id of the submission", true)
-                        .addOption(STRING, "text", "the text of the response", true));
+                new CommandData("respond", "Adds a response to the given submissions")
+                        .addOption(STRING, "message-id", "ID of the submission", true)
+                        .addOption(STRING, "text", "Text of the response", true));
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
