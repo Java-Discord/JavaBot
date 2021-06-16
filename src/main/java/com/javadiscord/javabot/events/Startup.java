@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.SlashCommands;
 import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
@@ -57,14 +58,15 @@ public class Startup extends ListenerAdapter {
             e.printStackTrace();
         }
 
-        LoggerFactory.getLogger(Startup.class).info("* Bot is ready!");
-        LoggerFactory.getLogger(Startup.class).info("* Logged in as " + event.getJDA().getSelfUser().getAsTag() + "!");
+        LoggerFactory.getLogger(this.getClass()).info("* Bot is ready!");
+        LoggerFactory.getLogger(this.getClass()).info("* Logged in as " + event.getJDA().getSelfUser().getAsTag() + "!");
 
-        LoggerFactory.getLogger(Startup.class).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
+        LoggerFactory.getLogger(this.getClass()).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         //StarboardListener.updateAllSBM(event);
 
-
-
+        for (var guild : event.getJDA().getGuilds()) {
+            SlashCommands.registerSlashCommands(guild);
+        }
     }
 }

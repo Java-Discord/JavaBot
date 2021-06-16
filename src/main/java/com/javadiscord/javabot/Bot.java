@@ -23,6 +23,7 @@ public class Bot {
     private static final Properties properties = new MultiProperties(
         MultiProperties.getClasspathResource("bot.properties").orElseThrow(),
         Path.of("bot.props")
+
     );
 
     public static void main(String[] args) throws Exception {
@@ -51,7 +52,6 @@ public class Bot {
         jda.addEventListener(new StatusUpdate());
         jda.addEventListener(new ReactionListener());
         jda.addEventListener(new SuggestionListener());
-        jda.addEventListener(new CstmCmdListener());
         jda.addEventListener(new AutoMod());
         jda.addEventListener(new SubmissionListener());
         //jda.addEventListener(new StarboardListener());

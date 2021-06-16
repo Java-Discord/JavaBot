@@ -1,42 +1,40 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 import java.awt.*;
 
-public class Embed extends Command {
+public class Embed {
 
-    public Embed () {
-        this.name = "embed";
-    }
-
-    protected void execute(CommandEvent event) {
+    public static void execute(SlashCommandEvent event, String title, String description, String autorname, String authorurl, String authoriconurl, String thumb, String img, String color) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
-                try {
-                    String[] embedargs = event.getMessage().getContentRaw().split("~;");
+            try {
 
-                    String Title = embedargs[0].substring(7);
-                    String Description = embedargs[1];
+                var eb = new EmbedBuilder();
 
-                    event.getMessage().delete().queue();
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setColor(new Color(0x2F3136))
-                            .setTitle(Title)
-                            .setDescription(Description);
+                eb.setTitle(title);
+                eb.setDescription(description);
+                eb.setAuthor(autorname, authorurl, authoriconurl);
+                eb.setImage(img);
+                eb.setThumbnail(thumb);
 
-                    event.reply(eb.build());
-
-                } catch (IndexOutOfBoundsException e) {
-                    event.reply(Embeds.syntaxError("embed Title~;Description", event));
+                if (!(color == null)) {
+                    try {
+                        eb.setColor(Color.decode(color));
+                    } catch (Exception e) {
+                        eb.setColor(Constants.GRAY);
+                    }
                 }
 
-                } else {
-                    event.reply(Embeds.permissionError("MESSAGE_MANAGE", event));
-                }
+                event.replyEmbeds(eb.build()).queue();
+
+            } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+
             }
         }

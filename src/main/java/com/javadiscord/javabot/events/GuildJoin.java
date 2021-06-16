@@ -1,8 +1,9 @@
 package com.javadiscord.javabot.events;
 
-import com.javadiscord.javabot.other.Database;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.SlashCommands;
+import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -34,6 +35,10 @@ public class GuildJoin extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
+
+        for (var guild : event.getJDA().getGuilds()) {
+            SlashCommands.registerSlashCommands(guild);
+        }
 
         addGuildToDB(event.getGuild().getId(), event.getGuild().getName());
     }

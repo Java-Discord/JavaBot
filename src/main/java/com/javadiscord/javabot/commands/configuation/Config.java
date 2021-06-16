@@ -4,207 +4,92 @@ import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import java.awt.*;
-import java.util.Arrays;
+public class Config {
 
-public class Config extends Command {
+    public static void setLeaveMessage(SlashCommandEvent event, String message) {
 
-    public Config () { this.name = "config"; }
+        Database.queryConfigString(event.getGuild().getId(), "leave_msg", message);
+        event.replyEmbeds(Embeds.configEmbed(event, "Leave Message", "Leave Message succesfully changed to", null, message, true)).queue();
+    }
 
-    protected void execute(CommandEvent event) {
-        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+    public static void setWelcomeMessage(SlashCommandEvent event, String message) {
 
-            String[] args = event.getArgs().split("\\s+");
+        Database.queryConfigString(event.getGuild().getId(), "welcome_msg", message);
+        event.replyEmbeds(Embeds.configEmbed(event, "Welcome Message", "Welcome Message succesfully changed to", null, message, true)).queue();
+    }
 
-            if (args[0].length() > 0) {
+    public static void setWelcomeChannel(SlashCommandEvent event, MessageChannel channel) {
 
-                Message message = event.getMessage();
-                String param;
-                String[] configArg;
-                StringBuilder builder;
-                String text;
+        Database.queryConfigString(event.getGuild().getId(), "welcome_cid", channel.getId());
+        event.replyEmbeds(Embeds.configEmbed(event, "Welcome Channel", "Welcome Channel succesfully changed to", null, channel.getId(), true, true)).queue();
+    }
 
+    public static void setStatsCategory(SlashCommandEvent event, String id) {
 
-                switch (args[0]) {
-                    case "list":
-                        EmbedBuilder eb = new EmbedBuilder()
-                                .setColor(new Color(0x2F3136))
-                                .setTitle("Bot Configuration List")
-                                .addField("Available Options", "``list, leavemsg, welcomemsg, welcomechannel, statscategory, statsmsg, reportchannel, logchannel, muterole, suggestchannel, submissionchannel, dm-qotw, lock``", false)
-                                .addField("Extra Arguments", "```{!member}, {!membertag}, {!server}```", false);
+        Database.queryConfigString(event.getGuild().getId(), "stats_cid", id);
+        event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category ID", "Stats-Category ID succesfully changed to", null, id, true)).queue();
+    }
 
-                        MessageChannel channel = event.getChannel();
-                        channel.sendMessage(eb.build())
-                                .queue();
-                        break;
+    public static void setStatsMessage(SlashCommandEvent event, String message) {
 
-                    case "leavemsg":
+        Database.queryConfigString(event.getGuild().getId(), "stats_msg", message);
+        event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category Message", "Stats-Category Message succesfully changed to", null, message, true)).queue();
+    }
 
-                        configArg = Arrays.copyOfRange(args, 1, args.length);
-                        builder = new StringBuilder();
-                        for (String value : configArg) {
-                            builder.append(value + " ");
-                        }
-                        text = builder.substring(0, builder.toString().length() - 1);
+    public static void setReportChannel(SlashCommandEvent event, MessageChannel channel) {
 
-                        Database.queryConfigString(event.getGuild().getId(), "leave_msg", text);
-                        event.reply(Embeds.configEmbed(event, "Leave Message", "Leave Message succesfully changed to", null, text, true));
-                        break;
+        Database.queryConfigString(event.getGuild().getId(), "report_cid", channel.getId());
+        event.replyEmbeds(Embeds.configEmbed(event, "Report Channel", "Report Channel succesfully changed to", null, channel.getId(), true, true)).queue();
+    }
 
-                    case "welcomemsg":
+    public static void setLogChannel(SlashCommandEvent event, MessageChannel channel) {
 
-                        configArg = Arrays.copyOfRange(args, 1, args.length);
-                        builder = new StringBuilder();
-                        for (String value : configArg) {
-                            builder.append(value + " ");
-                        }
-                        text = builder.substring(0, builder.toString().length() - 1);
+        Database.queryConfigString(event.getGuild().getId(), "log_cid", channel.getId());
+        event.replyEmbeds(Embeds.configEmbed(event, "Log Channel", "Log Channel succesfully changed to", null, channel.getId(), true, true)).queue();
+    }
 
-                        Database.queryConfigString(event.getGuild().getId(), "welcome_msg", text);
-                        event.reply(Embeds.configEmbed(event, "Welcome Message", "Welcome Message succesfully changed to", null, text, true));
-                        break;
+    public static void setSuggestionChannel(SlashCommandEvent event, MessageChannel channel) {
 
-                    case "welcomechannel":
+        Database.queryConfigString(event.getGuild().getId(), "suggestion_cid", channel.getId());
+        event.replyEmbeds(Embeds.configEmbed(event, "Suggest Channel", "Suggest Channel succesfully changed to", null, channel.getId(), true, true)).queue();
+    }
 
-                        if(!message.getMentionedChannels().isEmpty()) {
-                            param = message.getMentionedChannels().get(0).getId();
-                        } else {
-                            param = args[1];
-                        }
+    public static void setSubmissionChannel(SlashCommandEvent event, MessageChannel channel) {
 
-                        Database.queryConfigString(event.getGuild().getId(), "welcome_cid", param);
-                        event.reply(Embeds.configEmbed(event, "Welcome Channel", "Welcome Channel succesfully changed to", null, param, true, true));
-                        break;
+        Database.queryConfigString(event.getGuild().getId(), "submission_cid", channel.getId());
+        event.replyEmbeds(Embeds.configEmbed(event, "QOTW-Submission Channel", "QOTW-Submission Channel succesfully changed to", null, channel.getId(), true, true)).queue();
+    }
 
-                    case "statscategory":
-                        Database.queryConfigString(event.getGuild().getId(), "stats_cid", args[1]);
-                        event.reply(Embeds.configEmbed(event, "Stats-Category ID", "Stats-Category ID succesfully changed to", null, args[1], true));
-                        break;
+    public static void setMuteRole(SlashCommandEvent event, Role role) {
 
-                    case "statsmsg":
+        Database.queryConfigString(event.getGuild().getId(), "mute_rid", role.getId());
+        event.replyEmbeds(Embeds.configEmbed(event, "Mute Role", "Mute Role succesfully changed to", null, role.getId(), true, false, true)).queue();
+    }
 
-                        configArg = Arrays.copyOfRange(args, 1, args.length);
-                        builder = new StringBuilder();
-                        for (String value : configArg) {
-                            builder.append(value + " ");
-                        }
-                        text = builder.substring(0, builder.toString().length() - 1);
+    public static void setDMQOTWStatus(SlashCommandEvent event, boolean status) {
 
-                        Database.queryConfigString(event.getGuild().getId(), "stats_msg", text);
-                        event.reply(Embeds.configEmbed(event, "Stats-Category Message", "Stats-Category Message succesfully changed to", null, text, true));
-                        break;
+        Database.queryConfigString(event.getGuild().getId(), "dm-qotw", String.valueOf(status));
+        event.replyEmbeds(Embeds.configEmbed(event, "QOTW-DM Status", "QOTW-DM Status succesfully changed to", null, String.valueOf(status), true)).queue();
+    }
 
-                    case "reportchannel":
+    public static void setLockStatus(SlashCommandEvent event, boolean status) {
 
-                        if(!message.getMentionedChannels().isEmpty()) {
-                            param = message.getMentionedChannels().get(0).getId();
-                        } else {
-                            param = args[1];
-                        }
+        Database.queryConfigString(event.getGuild().getId(), "lock", String.valueOf(status));
+        event.replyEmbeds(Embeds.configEmbed(event, "Lock Status changed", "Lock Status succesfully changed to", null, String.valueOf(status))).queue();
+    }
 
-                        Database.queryConfigString(event.getGuild().getId(), "report_cid", param);
-                        event.reply(Embeds.configEmbed(event, "Report Channel", "Report Channel succesfully changed to", null, param, true, true));
-                        break;
+    public static void getList(SlashCommandEvent event) {
 
-                    case "logchannel":
-
-                        if(!message.getMentionedChannels().isEmpty()) {
-                            param = message.getMentionedChannels().get(0).getId();
-                        } else {
-                            param = args[1];
-                        }
-
-                        Database.queryConfigString(event.getGuild().getId(), "log_cid", param);
-                        event.reply(Embeds.configEmbed(event, "Log Channel", "Log Channel succesfully changed to", null, param, true, true));
-                        break;
-
-                    case "muterole":
-
-                        if(!message.getMentionedRoles().isEmpty()) {
-                            param = message.getMentionedRoles().get(0).getId();
-                        } else {
-                            param = args[1];
-                        }
-
-                        Database.queryConfigString(event.getGuild().getId(), "mute_rid", param);
-                        event.reply(Embeds.configEmbed(event, "Mute Role", "Mute Role succesfully changed to", null, param, true, false, true));
-                        break;
-
-                    case "suggestchannel":
-
-                        if(!message.getMentionedChannels().isEmpty()) {
-                            param = message.getMentionedChannels().get(0).getId();
-                        } else {
-                            param = args[1];
-                        }
-
-                        Database.queryConfigString(event.getGuild().getId(), "suggestion_cid", param);
-                        event.reply(Embeds.configEmbed(event, "Suggest Channel", "Suggest Channel succesfully changed to", null, param, true, true));
-                        break;
-
-                    case "submissionchannel":
-
-                        if(!message.getMentionedChannels().isEmpty()) {
-                            param = message.getMentionedChannels().get(0).getId();
-                        } else {
-                            param = args[1];
-                        }
-
-                        Database.queryConfigString(event.getGuild().getId(), "submission_cid", param);
-                        event.reply(Embeds.configEmbed(event, "QOTW-Submission Channel", "QOTW-Submission Channel succesfully changed to", null, param, true, true));
-                        break;
-
-                    case "dm-qotw":
-                        String qotwstatus = Database.getConfigString(event, "dm-qotw");
-
-                        if(qotwstatus.equalsIgnoreCase("true")) {
-                            qotwstatus = "false";
-                        } else {
-                            qotwstatus = "true";
-                        }
-
-                        Database.queryConfigString(event.getGuild().getId(), "dm-qotw", qotwstatus);
-                        event.reply(Embeds.configEmbed(event, "QOTW-DM Status", "QOTW-DM Status succesfully changed to", null, qotwstatus, true));
-                        break;
-
-                    case "lock":
-                        String lockstatus = Database.getConfigString(event, "lock");
-                        Database.queryConfigInt(event.getGuild().getId(), "lockcount", 0);
-                        String title, desc;
-
-                        if(lockstatus.equalsIgnoreCase("true")) {
-                            lockstatus = "false";
-                            title = "Server unlocked";
-                            desc = "Server succesfully unlocked! \uD83D\uDD13";
-                        } else {
-                            lockstatus = "true";
-                            title = "Server locked";
-                            desc = "Server succesfully locked! \uD83D\uDD12";
-                        }
-
-                        Database.queryConfigString(event.getGuild().getId(), "lock", lockstatus);
-                        event.reply(Embeds.configEmbed(event, title, desc, null, lockstatus));
-                        break;
-
-                    default:
-                        event.reply(Embeds.emptyError("```Option not available.```", event));
-                }
-
-            } else {
-
-                EmbedBuilder eb = new EmbedBuilder()
+                var eb = new EmbedBuilder()
                         .setColor(Constants.GRAY)
                         .setTitle("Bot Configuration");
 
                 String overlayURL = Database.welcomeImage(event.getGuild().getId()).get("overlayURL").getAsString();
-
                 eb.setImage(Misc.checkImage(overlayURL));
 
                         eb.addField("Server locked?", "``" + Database.getConfigString(event, "lock") + ", " + Database.getConfigString(event, "lockcount") + "``", false)
@@ -214,15 +99,12 @@ public class Config extends Command {
                         .addField("Log", "<#" + Database.getConfigString(event, "log_cid") + ">", true)
                         .addField("Mute", "<@&" + Database.getConfigString(event, "mute_rid") + ">", true)
                         .addField("Suggestions", "<#" + Database.getConfigString(event, "suggestion_cid") + ">", true)
-                        .addField("Welcome-System", "<#" + Database.getConfigString(event, "welcome_cid") +
+                        .addField("Welcome-System",
+                                "<#" + Database.getConfigString(event, "welcome_cid") +
                                 ">\nWelcome Message: ``" + Database.getConfigString(event, "welcome_msg") +
                                 "``\nLeave Message: ``" + Database.getConfigString(event, "leave_msg") +
                                 "``\n[Image Link](" + overlayURL + ")", false);
 
-                event.reply(eb.build());
-            }
-
-        } else { event.reply(Embeds.permissionError("ADMINISTRATOR", event)); }
-
+                event.replyEmbeds(eb.build()).queue();
     }
 }
