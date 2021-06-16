@@ -12,9 +12,9 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import java.awt.*;
 import java.time.OffsetDateTime;
 
-public class Decline {
+public class Respond {
 
-    public static void execute(SlashCommandEvent event, String messageID) {
+    public static void execute(SlashCommandEvent event, String messageID, String text) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
                 Message msg = null;
@@ -23,32 +23,24 @@ public class Decline {
                 catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
 
                 MessageEmbed msgEmbed = msg.getEmbeds().get(0);
-                msg.clearReactions().queue();
 
                 String name = msgEmbed.getAuthor().getName();
                 String iconUrl = msgEmbed.getAuthor().getIconUrl();
                 String description = msgEmbed.getDescription();
+                Color color = msgEmbed.getColor();
                 OffsetDateTime timestamp = msgEmbed.getTimestamp();
 
-                EmbedBuilder eb = new EmbedBuilder()
-                        .setColor(new Color(0xe74c3c))
-                        .setAuthor(name, null, iconUrl);
-
-                try {
-                    String responseFieldName = msgEmbed.getFields().get(0).getName();
-                    String responseFieldValue = msgEmbed.getFields().get(0).getValue();
-
-                    eb.addField(responseFieldName, responseFieldValue, false);
-
-                } catch (IndexOutOfBoundsException e) {}
-
-                eb.setDescription(description)
+                var e = new EmbedBuilder()
+                        .setColor(color)
+                        .setAuthor(name, null, iconUrl)
+                        .setDescription(description)
+                        .addField("→ Response from " + event.getUser().getAsTag(), text, false)
                         .setTimestamp(timestamp)
-                        .setFooter("Declined by " + event.getUser().getAsTag());
+                        .build();
 
-                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_FAILURE).queue());
+                msg.editMessage(e).queue();
                 event.reply("Done!").setEphemeral(true).queue();
 
             } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        }
     }
-}

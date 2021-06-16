@@ -4,6 +4,7 @@ import java.awt.*;
 
 public class Constants {
 
+        public static final boolean ERR_EPHEMERAL = false;
         public static final String CHECK = "✅";
         public static final String CROSS = "❌";
         public static final String FAILURE = "<abort:759740784882089995>";

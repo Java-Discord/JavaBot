@@ -2,35 +2,25 @@ package com.javadiscord.javabot.commands.other.suggestions;
 
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
 
-public class Clear extends Command {
+public class Clear {
 
-    public Clear () {
-        this.name = "clear";
-        this.category = new Category("OTHER");
-        this.arguments = "<ID>";
-        this.help = "clears the given submission";
-    }
-
-    protected void execute(CommandEvent event) {
+    public static void execute(SlashCommandEvent event, String messageID) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
-            String[] args = event.getArgs().split("\\s+");
+            Message msg = null;
 
-            try {
+            try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
+            catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
 
-                Message msg = event.getChannel().retrieveMessageById(args[0]).complete();
-                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
                 msg.clearReactions().queue();
 
                 String name = msg.getEmbeds().get(0).getAuthor().getName();
@@ -44,25 +34,12 @@ public class Clear extends Command {
                         .setDescription(description)
                         .setTimestamp(timestamp);
 
-                try {
-
-                    eb.setImage(msgEmbed.getImage().getUrl());
-
-                } catch (IndexOutOfBoundsException e) {}
-
                 msg.editMessage(eb.build()).queue(message1 -> {
                     message1.addReaction(Constants.REACTION_UPVOTE).queue();
                     message1.addReaction(Constants.REACTION_DOWNVOTE).queue();
                 });
+                event.reply("Done!").setEphemeral(true).queue();
 
-                event.getMessage().delete().queue();
-
-            } catch (Exception e){
-                event.reply(Embeds.syntaxError("clear MessageID", event));
-            }
-
-            } else {
-                event.reply(Embeds.permissionError("MESSAGE_MANAGE", event));
-            }
+            } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 }

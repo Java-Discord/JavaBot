@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Date;
@@ -31,10 +32,16 @@ public class Embeds {
             user = event.getAuthor();
         }
 
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
+        }
+
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("An Error occurred")
                 .setColor(Constants.RED)
-                .setDescription("Sorry, " + user.getAsMention() + "\nTo execute this command you need following permissions: ** " + perm + "**")
+                .setDescription("Sorry, " + user.getAsMention() + "\nTo execute this command you need following permissions: **``" + perm + "``**")
                 .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant());
 
@@ -57,6 +64,12 @@ public class Embeds {
 
             event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
+        }
+
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
         }
 
         EmbedBuilder eb = new EmbedBuilder()
@@ -87,6 +100,12 @@ public class Embeds {
             user = event.getAuthor();
         }
 
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
+        }
+
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("An Error occurred")
                 .setColor(Constants.RED)
@@ -115,6 +134,13 @@ public class Embeds {
             user = event.getAuthor();
         }
 
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
+        }
+
+
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("An Error occurred")
                 .setColor(Constants.RED)
@@ -141,6 +167,12 @@ public class Embeds {
 
             event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
+        }
+
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
         }
 
         EmbedBuilder eb = new EmbedBuilder()
@@ -171,6 +203,12 @@ public class Embeds {
             user = event.getAuthor();
         }
 
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
+        }
+
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("An Error occurred")
                 .setColor(Constants.RED)
@@ -197,6 +235,12 @@ public class Embeds {
             user = event.getAuthor();
         }
 
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
+        }
+
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle(title)
                 .setImage(image)
@@ -213,6 +257,13 @@ public class Embeds {
         EmbedBuilder eb = new EmbedBuilder();
         User user = null;
         Guild guild = null;
+
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+
+            user = event.getUser();
+            guild = event.getGuild();
+        }
 
         if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
             com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;

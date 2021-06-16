@@ -3,51 +3,40 @@ package com.javadiscord.javabot.commands.moderation;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.util.Date;
 
-public class Unban extends Command {
+public class Unban {
 
-    public Unban () {
-        this.name = "unban";
-    }
-
-    protected void execute(CommandEvent event) {
+    public static void execute(SlashCommandEvent event, String id, User author) {
         if (event.getMember().hasPermission(Permission.BAN_MEMBERS)) {
-
-            Member member = event.getMember();
-            String[] args = event.getArgs().split("\\s+");
 
             try {
 
-                event.getGuild().unban(args[0]).complete();
+                event.getGuild().unban(id).complete();
 
-                EmbedBuilder eb = new EmbedBuilder()
-                        .setAuthor(member.getUser().getAsTag() + " | Unban", null, member.getUser().getEffectiveAvatarUrl())
+                var e = new EmbedBuilder()
+                        .setAuthor("Unban")
                         .setColor(Constants.RED)
-                        .addField("ID", "```" + member.getId() + "```", true)
-                        .addField("Moderator", "```" + event.getAuthor().getAsTag() + "```", true)
-                        .setFooter("ID: " + member.getId())
-                        .setTimestamp(new Date().toInstant());
-                event.reply(eb.build());
-                Misc.sendToLog(event, eb.build());
+                        .addField("ID", "```" +id + "```", true)
+                        .addField("Moderator", "```" + author.getAsTag() + "```", true)
+                        .setFooter("ID: " + id)
+                        .setTimestamp(new Date().toInstant())
+                        .build();
 
-            } catch (IllegalArgumentException e) {
-                event.reply(Embeds.syntaxError("unban @User/ID", event));
+                event.replyEmbeds(e).queue();
+                Misc.sendToLog(event, e);
 
             } catch (ErrorResponseException e) {
-                event.reply(Embeds.emptyError("```User (" + args[0] + ") not found.```", event));
+                event.replyEmbeds(Embeds.emptyError("```User (" + id + ") not found.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
 
-            } else {
-            event.reply(Embeds.permissionError("BAN_MEMBERS", event));
-        }
+        } else { event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 }
 
