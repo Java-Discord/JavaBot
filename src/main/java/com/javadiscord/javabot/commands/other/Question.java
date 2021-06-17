@@ -3,6 +3,7 @@ package com.javadiscord.javabot.commands.other;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.mongodb.client.MongoCollection;
@@ -18,15 +19,14 @@ import java.util.Random;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
-public class Question {
-
-    public static void execute(SlashCommandEvent event, int num) {
-
+public class Question implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
         event.deferReply(false).queue();
         InteractionHook hook = event.getHook();
 
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-
+            int num = (int) event.getOption("amount").getAsLong();
             MongoDatabase database = mongoClient.getDatabase("other");
             MongoCollection<Document> collection = database.getCollection("expert_questions");
 
@@ -54,14 +54,18 @@ public class Question {
                 }
 
                 var e = new EmbedBuilder()
-                        .setColor(Constants.GRAY)
-                        .setAuthor("Questions (" + num + ")")
-                        .setDescription(sb.toString())
-                        .build();
+                    .setColor(Constants.GRAY)
+                    .setAuthor("Questions (" + num + ")")
+                    .setDescription(sb.toString())
+                    .build();
 
                 hook.sendMessageEmbeds(e).queue();
 
-            } else { hook.sendMessageEmbeds(Embeds.emptyError("```Please choose a Number between 1 and " + l + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();}
-            } else { hook.sendMessageEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            } else {
+                hook.sendMessageEmbeds(Embeds.emptyError("```Please choose a Number between 1 and " + l + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            }
+        } else {
+            hook.sendMessageEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        }
     }
 }

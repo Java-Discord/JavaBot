@@ -2,7 +2,6 @@ package com.javadiscord.javabot.other;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -184,13 +183,6 @@ public class Database {
 
         String guildName = null, guildID = null;
 
-        if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
         if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
             net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
@@ -266,13 +258,6 @@ public class Database {
 
         String guildName = null, guildID = null;
 
-        if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
         if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
             net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
@@ -316,13 +301,6 @@ public class Database {
 
         TextChannel tc = null;
 
-        if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
-
-            String id = getConfigString(event, varName);
-            tc = e.getGuild().getTextChannelById(id);
-        }
-
         if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
             net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
@@ -350,13 +328,6 @@ public class Database {
     public static Role configRole(Object event, String varName) {
 
         Role role = null;
-
-        if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
-
-            String id = getConfigString(event, varName);
-            role = e.getGuild().getRoleById(id);
-        }
 
         if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
             net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;

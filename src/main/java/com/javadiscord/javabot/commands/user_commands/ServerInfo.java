@@ -30,7 +30,6 @@ public class ServerInfo implements SlashCommandHandler {
             .addField("Name", "```" + event.getGuild().getName() + "```", true)
             .addField("Owner", "```" + event.getGuild().getOwner().getUser().getAsTag() + "```", true)
             .addField("ID", "```" + event.getGuild().getId() + "```", false)
-            .addField("Region", "```" + event.getGuild().getRegion() + "```", true)
             .addField("Roles", "```" + roleCount + " Roles```", true)
             .addField("Channel Count", "```" + channelCount + " Channel, " + catCount + " Categories" +
                 "\n → Text: " + textChannelCount +

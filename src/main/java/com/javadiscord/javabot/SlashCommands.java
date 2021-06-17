@@ -3,19 +3,12 @@ package com.javadiscord.javabot;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.commands.custom_commands.CustomCommands;
-import com.javadiscord.javabot.commands.moderation.Unban;
-import com.javadiscord.javabot.commands.moderation.Unmute;
-import com.javadiscord.javabot.commands.moderation.Warn;
-import com.javadiscord.javabot.commands.moderation.Warns;
 import com.javadiscord.javabot.commands.other.Question;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
 import com.javadiscord.javabot.commands.other.suggestions.Accept;
 import com.javadiscord.javabot.commands.other.suggestions.Clear;
 import com.javadiscord.javabot.commands.other.suggestions.Decline;
 import com.javadiscord.javabot.commands.other.suggestions.Respond;
-import com.javadiscord.javabot.commands.reaction_roles.ReactionRoles;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
@@ -25,11 +18,9 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
@@ -62,135 +53,23 @@ public class SlashCommands extends ListenerAdapter {
             command.handle(event);
             return;
         }
+        try {
+            BasicDBObject criteria = new BasicDBObject()
+                    .append("guild_id", event.getGuild().getId())
+                    .append("commandname", event.getName());
 
-        String reason;
-        boolean bool;
-        Member member;
+            MongoDatabase database = mongoClient.getDatabase("other");
+            MongoCollection<Document> collection = database.getCollection("customcommands");
 
-        switch (event.getName()) {
-            // MODERATION
-            case "warns":
+            Document it = collection.find(criteria).first();
 
-                OptionMapping warnsOption = event.getOption("user");
-                member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
+            JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
+            String value = Root.get("value").getAsString();
 
-                Warns.execute(event, member);
-                break;
+            event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
 
-            case "customcommand":
-
-                switch (event.getSubcommandName()) {
-
-                    case "list":
-                        CustomCommands.list(event);
-                        break;
-
-                    case "create":
-                        CustomCommands.create(event,
-                                event.getOption("name").getAsString(),
-                                event.getOption("text").getAsString());
-
-                        break;
-
-                    case "edit":
-                        CustomCommands.edit(event,
-                                event.getOption("name").getAsString(),
-                                event.getOption("text").getAsString());
-
-                        break;
-
-                    case "delete":
-                        CustomCommands.delete(event,
-                                event.getOption("name").getAsString());
-
-                        break;
-                }
-
-                break;
-
-            case "reactionrole":
-
-                switch (event.getSubcommandName()) {
-
-                    case "list":
-                        ReactionRoles.list(event);
-                        break;
-
-                    case "create":
-                        ReactionRoles.create(event,
-                                event.getOption("channel").getAsMessageChannel(),
-                                event.getOption("messageid").getAsString(),
-                                event.getOption("emote").getAsString(),
-                                event.getOption("role").getAsRole());
-
-                        break;
-
-                    case "delete":
-                        ReactionRoles.delete(event,
-                                event.getOption("messageid").getAsString(),
-                                event.getOption("emote").getAsString());
-                        break;
-                }
-
-                break;
-
-            case "leaderboard":
-
-                try {
-                    bool = event.getOption("old").getAsBoolean();
-                } catch (NullPointerException e) {
-                    bool = false;
-                }
-
-                Leaderboard.execute(event, bool);
-                break;
-
-            case "question":
-
-                Question.execute(event, (int) event.getOption("amount").getAsLong());
-                break;
-
-            case "accept":
-
-                Accept.execute(event, event.getOption("message-id").getAsString());
-                break;
-
-            case "clear":
-
-                Clear.execute(event, event.getOption("message-id").getAsString());
-                break;
-
-            case "decline":
-
-                Decline.execute(event, event.getOption("message-id").getAsString());
-                break;
-
-            case "respond":
-
-                Respond.execute(event, event.getOption("message-id").getAsString(), event.getOption("text").getAsString());
-                break;
-
-            default:
-
-                try {
-
-                    BasicDBObject criteria = new BasicDBObject()
-                            .append("guild_id", event.getGuild().getId())
-                            .append("commandname", event.getName());
-
-                    MongoDatabase database = mongoClient.getDatabase("other");
-                    MongoCollection<Document> collection = database.getCollection("customcommands");
-                    
-                    Document it = collection.find(criteria).first();
-
-                    JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
-                    String value = Root.get("value").getAsString();
-
-                    event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
-
-                } catch (Exception e) {
-                    event.reply("Oops, this command isnt registered, yet").queue();
-                }
+        } catch (Exception e) {
+            event.reply("Oops, this command isnt registered, yet").queue();
         }
     }
 

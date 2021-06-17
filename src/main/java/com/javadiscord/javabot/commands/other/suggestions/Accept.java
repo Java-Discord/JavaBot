@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -11,43 +12,45 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.time.OffsetDateTime;
 
-public class Accept {
-
-    public static void execute(SlashCommandEvent event, String messageID) {
+public class Accept implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
-                Message msg = null;
+            Message msg = null;
+            String messageID = event.getOption("message-id").getAsString();
+            try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
+            catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
 
-                try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
-                catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            MessageEmbed msgEmbed = msg.getEmbeds().get(0);
+            msg.clearReactions().queue();
 
-                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
-                msg.clearReactions().queue();
+            String name = msg.getEmbeds().get(0).getAuthor().getName();
+            String iconUrl = msg.getEmbeds().get(0).getAuthor().getIconUrl();
+            String description = msg.getEmbeds().get(0).getDescription();
+            OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
-                String name = msg.getEmbeds().get(0).getAuthor().getName();
-                String iconUrl = msg.getEmbeds().get(0).getAuthor().getIconUrl();
-                String description = msg.getEmbeds().get(0).getDescription();
-                OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
+            EmbedBuilder eb = new EmbedBuilder()
+                .setColor(Constants.GREEN)
+                .setAuthor(name, null, iconUrl);
 
-                EmbedBuilder eb = new EmbedBuilder()
-                        .setColor(Constants.GREEN)
-                        .setAuthor(name, null, iconUrl);
+            try {
+                String responseFieldName = msgEmbed.getFields().get(0).getName();
+                String responseFieldValue = msgEmbed.getFields().get(0).getValue();
 
-                try {
-                    String responseFieldName = msgEmbed.getFields().get(0).getName();
-                    String responseFieldValue = msgEmbed.getFields().get(0).getValue();
+                eb.addField(responseFieldName, responseFieldValue, false);
 
-                    eb.addField(responseFieldName, responseFieldValue, false);
+            } catch (IndexOutOfBoundsException e) {}
 
-                } catch (IndexOutOfBoundsException e) {}
+            eb.setDescription(description)
+                .setTimestamp(timestamp)
+                .setFooter("Accepted by " + event.getUser().getAsTag());
 
-                eb.setDescription(description)
-                        .setTimestamp(timestamp)
-                        .setFooter("Accepted by " + event.getUser().getAsTag());
+            msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_UPVOTE).queue());
+            event.reply("Done!").setEphemeral(true).queue();
 
-                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_UPVOTE).queue());
-                event.reply("Done!").setEphemeral(true).queue();
-
-            } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        } else {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
         }
     }
+}

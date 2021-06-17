@@ -8,8 +8,10 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.async.Callback;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -35,12 +37,17 @@ public class ChangeMyMind implements SlashCommandHandler {
             @Override
             public void completed(HttpResponse<JsonNode> hr) {
 
-                var e = new EmbedBuilder()
-                    .setColor(Constants.GRAY)
-                    .setImage(hr.getBody().getObject().getString("message"))
-                    .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setTimestamp(new Date().toInstant())
-                    .build();
+                MessageEmbed e = null;
+                try {
+                    e = new EmbedBuilder()
+                        .setColor(Constants.GRAY)
+                        .setImage(hr.getBody().getObject().getString("message"))
+                        .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+                        .setTimestamp(new Date().toInstant())
+                        .build();
+                } catch (JSONException jsonException) {
+                    jsonException.printStackTrace();
+                }
 
                 hook.sendMessageEmbeds(e).queue();
             }

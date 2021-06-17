@@ -1,8 +1,5 @@
 package com.javadiscord.javabot;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandClient;
-import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
 import net.dv8tion.jda.api.JDA;
@@ -11,13 +8,9 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.reflections.Reflections;
 
-import java.lang.reflect.Modifier;
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Properties;
-
 
 public class Bot {
     private static final Properties properties = new MultiProperties(
@@ -29,15 +22,6 @@ public class Bot {
     public static SlashCommands slashCommands;
 
     public static void main(String[] args) throws Exception {
-        CommandClient client = new CommandClientBuilder()
-                .setOwnerId(getProperty("ownerId"))
-                .setCoOwnerIds(getProperty("coOwnerIds").split("\\s*,\\s*"))
-                .setPrefix(getProperty("prefix"))
-                .setEmojis(getProperty("emojis.success"), getProperty("emojis.warning"), getProperty("emojis.error"))
-                .useHelpBuilder(false)
-                .addCommands(discoverCommands())
-                .build();
-
         slashCommands = new SlashCommands();
 
         JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
@@ -45,7 +29,7 @@ public class Bot {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ACTIVITY)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                .addEventListeners(client, slashCommands)
+                .addEventListeners(slashCommands)
                 .build();
 
         //EVENTS
@@ -80,31 +64,6 @@ public class Bot {
      */
     public static String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
-    }
-
-    /**
-     * Discovers and instantiates all commands found in the bot's "commands"
-     * package. This uses the reflections API to find all classes in that
-     * package which extend from the base {@link Command} class.
-     * <p>
-     *     <strong>All command classes MUST have a no-args constructor.</strong>
-     * </p>
-     * @return The array of commands.
-     */
-    private static Command[] discoverCommands() {
-        Reflections reflections = new Reflections(getProperty("commandsPackage"));
-        return reflections.getSubTypesOf(Command.class).stream()
-            .map(type -> {
-                try {
-                    if (Modifier.isAbstract(type.getModifiers())) return null;
-                    return (Command) type.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            })
-            .filter(Objects::nonNull)
-            .toArray(Command[]::new);
     }
 }
 
