@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.events;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.ServerLock;
 import com.javadiscord.javabot.other.StatsCategory;
@@ -32,13 +31,6 @@ public class UserJoin extends ListenerAdapter {
 
         Guild guild = null;
         Member member = null;
-
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            guild = event.getGuild();
-            member = event.getMember();
-        }
 
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;

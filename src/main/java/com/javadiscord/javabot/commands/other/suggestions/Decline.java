@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,43 +13,43 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import java.awt.*;
 import java.time.OffsetDateTime;
 
-public class Decline {
-
-    public static void execute(SlashCommandEvent event, String messageID) {
+public class Decline implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            Message msg = null;
+            String messageID = event.getOption("message-id").getAsString();
+            try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
+            catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
 
-                Message msg = null;
+            MessageEmbed msgEmbed = msg.getEmbeds().get(0);
+            msg.clearReactions().queue();
 
-                try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
-                catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            String name = msgEmbed.getAuthor().getName();
+            String iconUrl = msgEmbed.getAuthor().getIconUrl();
+            String description = msgEmbed.getDescription();
+            OffsetDateTime timestamp = msgEmbed.getTimestamp();
 
-                MessageEmbed msgEmbed = msg.getEmbeds().get(0);
-                msg.clearReactions().queue();
+            EmbedBuilder eb = new EmbedBuilder()
+                .setColor(new Color(0xe74c3c))
+                .setAuthor(name, null, iconUrl);
 
-                String name = msgEmbed.getAuthor().getName();
-                String iconUrl = msgEmbed.getAuthor().getIconUrl();
-                String description = msgEmbed.getDescription();
-                OffsetDateTime timestamp = msgEmbed.getTimestamp();
+            try {
+                String responseFieldName = msgEmbed.getFields().get(0).getName();
+                String responseFieldValue = msgEmbed.getFields().get(0).getValue();
 
-                EmbedBuilder eb = new EmbedBuilder()
-                        .setColor(new Color(0xe74c3c))
-                        .setAuthor(name, null, iconUrl);
+                eb.addField(responseFieldName, responseFieldValue, false);
 
-                try {
-                    String responseFieldName = msgEmbed.getFields().get(0).getName();
-                    String responseFieldValue = msgEmbed.getFields().get(0).getValue();
+            } catch (IndexOutOfBoundsException e) {}
 
-                    eb.addField(responseFieldName, responseFieldValue, false);
+            eb.setDescription(description)
+                .setTimestamp(timestamp)
+                .setFooter("Declined by " + event.getUser().getAsTag());
 
-                } catch (IndexOutOfBoundsException e) {}
-
-                eb.setDescription(description)
-                        .setTimestamp(timestamp)
-                        .setFooter("Declined by " + event.getUser().getAsTag());
-
-                msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_FAILURE).queue());
-                event.reply("Done!").setEphemeral(true).queue();
-
-            } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_FAILURE).queue());
+            event.reply("Done!").setEphemeral(true).queue();
+        } else {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        }
     }
 }

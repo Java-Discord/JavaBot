@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.other;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -66,12 +65,6 @@ public class Misc {
     public static void sendToLog(Object event, MessageEmbed embed) {
 
         TextChannel tc = null;
-
-        if (event instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent e = (CommandEvent) event;
-
-            tc = Database.configChannel(event, "log_cid");
-        }
 
         if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;

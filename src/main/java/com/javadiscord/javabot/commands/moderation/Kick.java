@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
@@ -14,20 +15,31 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class Kick {
-
-    public static void kick(Member member, String reason, String moderatorTag, SlashCommandEvent event){
-
+public class Kick implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
+        Member member = event.getOption("user").getAsMember();
+        if (!event.getMember().hasPermission(Permission.KICK_MEMBERS)) {
+            event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+        String reason;
+        try {
+            reason = event.getOption("reason").getAsString();
+        } catch (NullPointerException e) {
+            reason = "None";
+        }
+        String moderatorTag = event.getUser().getAsTag();
         var eb = new EmbedBuilder()
-                .setAuthor(member.getUser().getAsTag() + " | Kick", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Constants.RED)
-                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                .addField("Moderator", "```" + moderatorTag + "```", true)
-                .addField("ID", "```" + member.getId() + "```", false)
-                .addField("Reason", "```" + reason + "```", false)
-                .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
-                .build();
+            .setAuthor(member.getUser().getAsTag() + " | Kick", null, member.getUser().getEffectiveAvatarUrl())
+            .setColor(Constants.RED)
+            .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+            .addField("Moderator", "```" + moderatorTag + "```", true)
+            .addField("ID", "```" + member.getId() + "```", false)
+            .addField("Reason", "```" + reason + "```", false)
+            .setFooter("ID: " + member.getId())
+            .setTimestamp(new Date().toInstant())
+            .build();
 
         try {
 
@@ -43,13 +55,5 @@ public class Kick {
         } catch (HierarchyException e) {
             event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
         }
-    }
-
-    public static void execute(SlashCommandEvent event, Member member, User author, String reason) {
-        if (event.getMember().hasPermission(Permission.KICK_MEMBERS)) {
-
-                kick(member, reason, author.getAsTag(), event);
-
-            } else { event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 }

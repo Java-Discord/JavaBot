@@ -2,7 +2,7 @@ package com.javadiscord.javabot.events;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.javadiscord.javabot.SlashCommands;
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -37,7 +37,7 @@ public class GuildJoin extends ListenerAdapter {
     public void onGuildJoin(GuildJoinEvent event) {
 
         for (var guild : event.getJDA().getGuilds()) {
-            SlashCommands.registerSlashCommands(guild);
+            Bot.slashCommands.registerSlashCommands(guild);
         }
 
         addGuildToDB(event.getGuild().getId(), event.getGuild().getName());

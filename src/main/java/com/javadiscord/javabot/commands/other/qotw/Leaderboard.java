@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.other.qotw;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -24,7 +25,18 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Indexes.descending;
 import static com.mongodb.client.model.Projections.excludeId;
 
-public class Leaderboard {
+public class Leaderboard implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
+        boolean old;
+        try {
+            old = event.getOption("old").getAsBoolean();
+        } catch (NullPointerException e) {
+            old = false;
+        }
+        if (old) generateOldLB(event);
+        else generateLB(event);
+    }
 
     static void generateLB(SlashCommandEvent event) {
 
@@ -259,13 +271,6 @@ public class Leaderboard {
         }
 
         return (users.indexOf(userid)) + 1;
-
-    }
-
-    public static void execute (SlashCommandEvent event, boolean old) {
-
-        if (old) generateOldLB(event);
-        else generateLB(event);
 
     }
 }

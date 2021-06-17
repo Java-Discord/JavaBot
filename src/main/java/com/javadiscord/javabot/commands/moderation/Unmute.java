@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
@@ -14,31 +15,32 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 import java.util.Date;
 
-public class Unmute {
-
-    public static void execute(SlashCommandEvent event, Member member, User author) {
-            if (event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-
-                    Role muteRole = Database.configRole(event, "mute_rid");
-
-                    try {
-                        event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
-
-                        var e = new EmbedBuilder()
-                                .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
-                                .setColor(Constants.RED)
-                                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                                .addField("Moderator", "```" + author.getAsTag() + "```", true)
-                                .addField("ID", "```" + member.getId() + "```", false)
-                                .setFooter("ID: " + member.getId())
-                                .setTimestamp(new Date().toInstant())
-                                .build();
-
-                        member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
-                        Misc.sendToLog(event, e);
-                        event.replyEmbeds(e).queue();
-
-                    } catch (HierarchyException e) { event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
-                    } else { event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+public class Unmute implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
+        if (event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
+            Role muteRole = Database.configRole(event, "mute_rid");
+            Member member = event.getOption("user").getAsMember();
+            User author = event.getUser();
+            try {
+                event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
+                var e = new EmbedBuilder()
+                    .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
+                    .setColor(Constants.RED)
+                    .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+                    .addField("Moderator", "```" + author.getAsTag() + "```", true)
+                    .addField("ID", "```" + member.getId() + "```", false)
+                    .setFooter("ID: " + member.getId())
+                    .setTimestamp(new Date().toInstant())
+                    .build();
+                member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
+                Misc.sendToLog(event, e);
+                event.replyEmbeds(e).queue();
+            } catch (HierarchyException e) {
+                event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            }
+        } else {
+            event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
         }
     }
+}

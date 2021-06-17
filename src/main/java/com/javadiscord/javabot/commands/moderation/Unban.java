@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
@@ -11,32 +12,32 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.util.Date;
 
-public class Unban {
-
-    public static void execute(SlashCommandEvent event, String id, User author) {
+public class Unban implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
         if (event.getMember().hasPermission(Permission.BAN_MEMBERS)) {
-
+            String id = event.getOption("id").getAsString();
+            User author = event.getUser();
             try {
-
                 event.getGuild().unban(id).complete();
-
                 var e = new EmbedBuilder()
-                        .setAuthor("Unban")
-                        .setColor(Constants.RED)
-                        .addField("ID", "```" +id + "```", true)
-                        .addField("Moderator", "```" + author.getAsTag() + "```", true)
-                        .setFooter("ID: " + id)
-                        .setTimestamp(new Date().toInstant())
-                        .build();
+                    .setAuthor("Unban")
+                    .setColor(Constants.RED)
+                    .addField("ID", "```" +id + "```", true)
+                    .addField("Moderator", "```" + author.getAsTag() + "```", true)
+                    .setFooter("ID: " + id)
+                    .setTimestamp(new Date().toInstant())
+                    .build();
 
                 event.replyEmbeds(e).queue();
                 Misc.sendToLog(event, e);
-
             } catch (ErrorResponseException e) {
                 event.replyEmbeds(Embeds.emptyError("```User (" + id + ") not found.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
 
-        } else { event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        } else {
+            event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        }
     }
 }
 

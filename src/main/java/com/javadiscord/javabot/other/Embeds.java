@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.other;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -17,13 +16,6 @@ public class Embeds {
     public static MessageEmbed permissionError(String perm, Object ev) {
 
         User user = null;
-
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            event.reactError();
-            user = event.getAuthor();
-        }
 
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
@@ -52,13 +44,6 @@ public class Embeds {
 
         User user = null;
 
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            event.reactError();
-            user = event.getAuthor();
-        }
-
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
@@ -86,13 +71,6 @@ public class Embeds {
 
         User user = null;
 
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            event.reactError();
-            user = event.getAuthor();
-        }
-
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
@@ -119,13 +97,6 @@ public class Embeds {
     public static MessageEmbed purgeError(Object ev) {
 
         User user = null;
-
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            event.reactError();
-            user = event.getAuthor();
-        }
 
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
@@ -155,13 +126,6 @@ public class Embeds {
 
         User user = null;
 
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            event.reactError();
-            user = event.getAuthor();
-        }
-
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
@@ -189,13 +153,6 @@ public class Embeds {
 
         User user = null;
 
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            event.reactError();
-            user = event.getAuthor();
-        }
-
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
 
@@ -222,12 +179,6 @@ public class Embeds {
     public static MessageEmbed emptyEmbed(String title, String desc, String image, Object ev) {
 
         User user = null;
-
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            user = event.getAuthor();
-        }
 
         if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
@@ -262,13 +213,6 @@ public class Embeds {
             net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
 
             user = event.getUser();
-            guild = event.getGuild();
-        }
-
-        if (ev instanceof com.jagrosh.jdautilities.command.CommandEvent) {
-            com.jagrosh.jdautilities.command.CommandEvent event = (CommandEvent) ev;
-
-            user = event.getAuthor();
             guild = event.getGuild();
         }
 

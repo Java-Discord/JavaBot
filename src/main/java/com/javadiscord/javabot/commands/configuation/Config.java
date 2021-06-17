@@ -1,15 +1,17 @@
 package com.javadiscord.javabot.commands.configuation;
 
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-public class Config {
+public class Config implements SlashCommandHandler {
 
     public static void setLeaveMessage(SlashCommandEvent event, String message) {
 
@@ -106,5 +108,67 @@ public class Config {
                                 "``\n[Image Link](" + overlayURL + ")", false);
 
                 event.replyEmbeds(eb.build()).queue();
+    }
+
+    @Override
+    public void handle(SlashCommandEvent event) {
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            switch (event.getSubcommandName()) {
+
+                case "list":
+                    Config.getList(event);
+                    break;
+
+                case "leave-message":
+                    Config.setLeaveMessage(event, event.getOption("message").getAsString());
+                    break;
+
+                case "welcome-message":
+                    Config.setWelcomeMessage(event, event.getOption("message").getAsString());
+                    break;
+
+                case "welcome-channel":
+                    Config.setWelcomeChannel(event, event.getOption("channel").getAsMessageChannel());
+                    break;
+
+                case "stats-category":
+                    Config.setStatsCategory(event, event.getOption("id").getAsString());
+                    break;
+
+                case "stats-message":
+                    Config.setStatsMessage(event, event.getOption("message").getAsString());
+                    break;
+
+                case "report-channel":
+                    Config.setReportChannel(event, event.getOption("channel").getAsMessageChannel());
+                    break;
+
+                case "log-channel":
+                    Config.setLogChannel(event, event.getOption("channel").getAsMessageChannel());
+                    break;
+
+                case "suggestion-channel":
+                    Config.setSuggestionChannel(event, event.getOption("channel").getAsMessageChannel());
+                    break;
+
+                case "submission-channel":
+                    Config.setSubmissionChannel(event, event.getOption("channel").getAsMessageChannel());
+                    break;
+
+                case "mute-role":
+                    Config.setMuteRole(event, event.getOption("role").getAsRole());
+                    break;
+
+                case "dm-qotw":
+                    Config.setDMQOTWStatus(event, event.getOption("enabled").getAsBoolean());
+                    break;
+
+                case "lock":
+                    Config.setLockStatus(event, event.getOption("locked").getAsBoolean());
+                    break;
+            }
+        } else {
+            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        }
     }
 }

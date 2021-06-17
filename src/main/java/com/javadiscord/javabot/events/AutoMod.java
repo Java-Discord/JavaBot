@@ -1,7 +1,5 @@
 package com.javadiscord.javabot.events;
 
-import com.javadiscord.javabot.commands.moderation.Mute;
-import com.javadiscord.javabot.commands.moderation.Warn;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -31,22 +29,27 @@ public class AutoMod extends ListenerAdapter {
             if (!(event.getMember().hasPermission(Permission.MESSAGE_MANAGE))) {
 
                 if (event.getMessage().getMentionedMembers().size() >= 5) {
-                    Warn.warn(event.getMember(), "Automod: Mention Spam", event.getJDA().getSelfUser().getAsTag(), event);
+//                    Warn.warn(event.getMember(), "Automod: Mention Spam", event.getJDA().getSelfUser().getAsTag(), event);
+                    // TODO: Extract warn logic.
                 }
 
                 Matcher matcher = inviteURL.matcher(cleanString(event.getMessage().getContentRaw()));
 
                 if (matcher.find()) {
-
-                    Warn.warn(event.getMember(), "Automod: Advertising", event.getJDA().getSelfUser().getAsTag(), event);
+//                    Warn.warn(event.getMember(), "Automod: Advertising", event.getJDA().getSelfUser().getAsTag(), event);
+                    // TODO: Extract warn logic.
                     event.getMessage().delete().complete();
                 }
 
                 List<Message> history = event.getChannel().getIterableHistory().complete().stream().limit(10).filter(msg -> !msg.equals(event.getMessage())).collect(Collectors.toList());
-                int spamCount = history.stream().filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot()).filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).collect(Collectors.toList()).size();
+                int spamCount = history.stream()
+                    .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
+                    .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6)
+                    .collect(Collectors.toList()).size();
 
                 if (spamCount > 5) {
-                    Mute.mute(event.getMember(), event.getJDA().getSelfUser().getAsTag(), event);
+//                    Mute.mute(event.getMember(), event.getJDA().getSelfUser().getAsTag(), event);
+                    // TODO: Extract mute logic to service.
                 }
             }
 

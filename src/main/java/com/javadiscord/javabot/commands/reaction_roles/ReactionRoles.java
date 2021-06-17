@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.reaction_roles;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
@@ -22,9 +23,32 @@ import java.util.Date;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
-public class ReactionRoles {
+public class ReactionRoles implements SlashCommandHandler {
+    @Override
+    public void handle(SlashCommandEvent event) {
+        switch (event.getSubcommandName()) {
+            case "list":
+                list(event);
+                break;
 
-    public static void list(SlashCommandEvent event) {
+            case "create":
+                create(event,
+                    event.getOption("channel").getAsMessageChannel(),
+                    event.getOption("messageid").getAsString(),
+                    event.getOption("emote").getAsString(),
+                    event.getOption("role").getAsRole());
+
+                break;
+
+            case "delete":
+                delete(event,
+                    event.getOption("messageid").getAsString(),
+                    event.getOption("emote").getAsString());
+                break;
+        }
+    }
+
+    private void list(SlashCommandEvent event) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("reactionroles");
@@ -66,7 +90,7 @@ public class ReactionRoles {
             event.replyEmbeds(e).queue();
         }
 
-    public static void create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, Role role) {
+    private void create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, Role role) {
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
             boolean validEmote = false, integratedEmote = false;
@@ -148,7 +172,7 @@ public class ReactionRoles {
         } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 
-    public static void delete(SlashCommandEvent event, String mID, String emote) {
+    private void delete(SlashCommandEvent event, String mID, String emote) {
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
         boolean validEmote = false, integratedEmote = false;
