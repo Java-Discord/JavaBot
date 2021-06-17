@@ -74,6 +74,7 @@
     - {description: The reason, name: reason, required: false, type: STRING}
   subCommandGroups: []
   subCommands: []
+  handler: com.javadiscord.javabot.commands.moderation.Ban
 - description: Clears all warns from the given user.
   name: clearwarns
   options:
@@ -81,6 +82,7 @@
        type: USER}
   subCommandGroups: []
   subCommands: []
+  handler: com.javadiscord.javabot.commands.moderation.ClearWarns
 - description: Clears all QOTW-points from the given user.
   name: clearqotw
   options:
@@ -88,6 +90,7 @@
        type: USER}
   subCommandGroups: []
   subCommands: []
+  handler: com.javadiscord.javabot.commands.other.qotw.ClearQOTW
 - description: Edits an embed
   name: editembed
   options:
@@ -98,6 +101,7 @@
        type: STRING}
   subCommandGroups: []
   subCommands: []
+  handler: com.javadiscord.javabot.commands.moderation.EditEmbed
 - description: Sends an embed
   name: embed
   options:
@@ -178,6 +182,7 @@
   subCommands: []
 - description: Shows the config for the current guild
   name: config
+  handler: com.javadiscord.javabot.commands.configuation.Config
   options: []
   subCommandGroups: []
   subCommands:
@@ -235,6 +240,7 @@
         - {description: State of the server lock, name: locked, required: true, type: BOOLEAN}
 - description: edits the welcome image config
   name: welcome-image
+  handler: com.javadiscord.javabot.commands.configuation.WelcomeImage
   options: []
   subCommandGroups: []
   subCommands:

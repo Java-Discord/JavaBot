@@ -96,8 +96,12 @@ public class Warn {
             member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
             Misc.sendToLog(ev, eb);
 
-            if ((warnPoints + 1) >= 3) Ban.ban(member, "3/3 warns", selfUser.getAsTag(), ev);
-            else addToDatabase(member.getId(), guildID, reason);
+            if ((warnPoints + 1) >= 3) {
+//                Ban.ban(member, "3/3 warns", selfUser.getAsTag(), ev);
+                // TODO: New method for 3/3 warns ban, or extract ban logic out of handler.
+            } else {
+                addToDatabase(member.getId(), guildID, reason);
+            }
 
         } catch (HierarchyException e) {
 

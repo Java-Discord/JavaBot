@@ -1,14 +1,16 @@
 package com.javadiscord.javabot.commands.configuation;
 
 import com.google.gson.JsonObject;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-public class WelcomeImage {
+public class WelcomeImage implements SlashCommandHandler {
 
     public static void setImageWidth(SlashCommandEvent event, int width) {
 
@@ -113,6 +115,59 @@ public class WelcomeImage {
 
         event.replyEmbeds(eb).queue();
 
+    }
+
+    @Override
+    public void handle(SlashCommandEvent event) {
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            switch (event.getSubcommandName()) {
+                case "list":
+                    WelcomeImage.getList(event);
+                    break;
+
+                case "image-width":
+                    WelcomeImage.setImageWidth(event, (int) event.getOption("width").getAsLong());
+                    break;
+
+                case "image-height":
+                    WelcomeImage.setImageHeight(event, (int) event.getOption("height").getAsLong());
+                    break;
+
+                case "overlay-url":
+                    WelcomeImage.setOverlayURL(event, event.getOption("url").getAsString());
+                    break;
+
+                case "background-url":
+                    WelcomeImage.setBackgroundURL(event, event.getOption("url").getAsString());
+                    break;
+
+                case "primary-color":
+                    WelcomeImage.setPrimaryColor(event, event.getOption("color").getAsString());
+                    break;
+
+                case "secondary-color":
+                    WelcomeImage.setSecondaryColor(event, event.getOption("color").getAsString());
+                    break;
+
+                case "avatar-x":
+                    WelcomeImage.setAvatarX(event, (int) event.getOption("x").getAsLong());
+                    break;
+
+                case "avatar-y":
+                    WelcomeImage.setAvatarY(event, (int) event.getOption("y").getAsLong());
+                    break;
+
+                case "avatar-width":
+                    WelcomeImage.setAvatarWidth(event, (int) event.getOption("width").getAsLong());
+                    break;
+
+                case "avatar-height":
+                    WelcomeImage.setAvatarHeight(event, (int) event.getOption("height").getAsLong());
+                    break;
+            }
+        } else {
+            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        }
     }
 }
 
