@@ -4,6 +4,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 import java.util.Arrays;
 
+/**
+ * Simple DTO representing a top-level Discord slash command.
+ */
 public class CommandConfig {
 	private String name;
 	private String description;

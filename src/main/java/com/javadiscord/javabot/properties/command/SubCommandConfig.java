@@ -4,6 +4,9 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 import java.util.Arrays;
 
+/**
+ * Simple DTO for a Discord subcommand.
+ */
 public class SubCommandConfig {
 	private String name;
 	private String description;

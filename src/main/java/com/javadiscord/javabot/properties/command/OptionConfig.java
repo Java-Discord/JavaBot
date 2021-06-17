@@ -3,6 +3,10 @@ package com.javadiscord.javabot.properties.command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
+/**
+ * Simple DTO representing an option that can be given to a Discord slash
+ * command or subcommand.
+ */
 public class OptionConfig {
 	private String name;
 	private String description;
