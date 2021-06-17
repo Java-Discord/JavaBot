@@ -71,31 +71,6 @@ public class SlashCommands extends ListenerAdapter {
 
         switch (event.getName()) {
             // MODERATION
-            case "kick":
-
-                try {
-                    reason = event.getOption("reason").getAsString();
-                } catch (NullPointerException e) {
-                    reason = "None";
-                }
-
-                Kick.execute(event,
-                        event.getOption("user").getAsMember(),
-                        event.getUser(), reason);
-                break;
-
-            case "mute":
-
-                Mute.execute(event,
-                        event.getOption("user").getAsMember(),
-                        event.getUser());
-                break;
-
-            case "mutelist":
-
-                Mutelist.execute(event);
-                break;
-
             case "purge":
 
                 try {

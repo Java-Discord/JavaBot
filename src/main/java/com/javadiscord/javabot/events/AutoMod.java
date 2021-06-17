@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.events;
 
-import com.javadiscord.javabot.commands.moderation.Mute;
 import com.javadiscord.javabot.commands.moderation.Warn;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
@@ -46,7 +45,8 @@ public class AutoMod extends ListenerAdapter {
                 int spamCount = history.stream().filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot()).filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).collect(Collectors.toList()).size();
 
                 if (spamCount > 5) {
-                    Mute.mute(event.getMember(), event.getJDA().getSelfUser().getAsTag(), event);
+//                    Mute.mute(event.getMember(), event.getJDA().getSelfUser().getAsTag(), event);
+                    // TODO: Extract mute logic to service.
                 }
             }
 
