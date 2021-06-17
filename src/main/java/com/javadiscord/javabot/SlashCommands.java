@@ -3,12 +3,12 @@ package com.javadiscord.javabot;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.commands.configuation.Config;
-import com.javadiscord.javabot.commands.configuation.WelcomeImage;
 import com.javadiscord.javabot.commands.custom_commands.CustomCommands;
-import com.javadiscord.javabot.commands.moderation.*;
+import com.javadiscord.javabot.commands.moderation.Unban;
+import com.javadiscord.javabot.commands.moderation.Unmute;
+import com.javadiscord.javabot.commands.moderation.Warn;
+import com.javadiscord.javabot.commands.moderation.Warns;
 import com.javadiscord.javabot.commands.other.Question;
-import com.javadiscord.javabot.commands.other.qotw.ClearQOTW;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
 import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
 import com.javadiscord.javabot.commands.other.suggestions.Accept;
@@ -17,7 +17,6 @@ import com.javadiscord.javabot.commands.other.suggestions.Decline;
 import com.javadiscord.javabot.commands.other.suggestions.Respond;
 import com.javadiscord.javabot.commands.reaction_roles.ReactionRoles;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
 import com.mongodb.BasicDBObject;
@@ -25,7 +24,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -71,60 +69,6 @@ public class SlashCommands extends ListenerAdapter {
 
         switch (event.getName()) {
             // MODERATION
-            case "purge":
-
-                try {
-                    bool = event.getOption("nuke-channel").getAsBoolean();
-                } catch (NullPointerException e) {
-                    bool = false;
-                }
-
-                Purge.execute(event,
-                        (int) event.getOption("amount").getAsLong(),
-                        bool);
-                break;
-
-            case "report":
-
-                try {
-                    reason = event.getOption("reason").getAsString();
-                } catch (NullPointerException e) {
-                    reason = "None";
-                }
-
-                Report.execute(event,
-                        event.getOption("user").getAsMember(),
-                        event.getUser(), reason);
-                break;
-
-            case "unban":
-
-                Unban.execute(event,
-                        event.getOption("id").getAsString(),
-                        event.getUser());
-                break;
-
-            case "unmute":
-
-                Unmute.execute(event,
-                        event.getOption("user").getAsMember(),
-                        event.getUser());
-                break;
-
-            case "warn":
-
-                try {
-                    reason = event.getOption("reason").getAsString();
-
-                } catch (NullPointerException e) {
-                    reason = "None";
-                }
-
-                Warn.execute(event,
-                        event.getOption("user").getAsMember(),
-                        event.getUser(), reason);
-                break;
-
             case "warns":
 
                 OptionMapping warnsOption = event.getOption("user");

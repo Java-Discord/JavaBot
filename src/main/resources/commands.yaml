@@ -142,6 +142,7 @@
   subCommands: []
 - description: Deletes the given amount of messages in a channel
   name: purge
+  handler: com.javadiscord.javabot.commands.moderation.Purge
   options:
     - {description: the amount of messages you want to delete (2-100), name: amount,
        required: true, type: INTEGER}
@@ -151,6 +152,7 @@
   subCommands: []
 - description: Reports a member
   name: report
+  handler: com.javadiscord.javabot.commands.moderation.Report
   options:
     - {description: The user you want to report, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -158,6 +160,7 @@
   subCommands: []
 - description: Unbans a member
   name: unban
+  handler: com.javadiscord.javabot.commands.moderation.Unban
   options:
     - {description: The ID of the user you want to unban, name: id, required: true,
        type: STRING}
@@ -165,12 +168,14 @@
   subCommands: []
 - description: Unmutes a member
   name: unmute
+  handler: com.javadiscord.javabot.commands.moderation.Unmute
   options:
     - {description: The user you want to unmute, name: user, required: true, type: USER}
   subCommandGroups: []
   subCommands: []
 - description: Warns a member
   name: warn
+  handler: com.javadiscord.javabot.commands.moderation.Warn
   options:
     - {description: The user you want to warn, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
