@@ -8,18 +8,19 @@ import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.bson.Document;
 
-import java.util.Random;
+import java.util.Arrays;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
 
 public class Question implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
         event.deferReply(false).queue();
@@ -33,14 +34,12 @@ public class Question implements SlashCommandHandler {
             long l = collection.count();
 
             if (!(num > l) && num > 0) {
-                Random rand = new Random();
                 int i = num;
 
                 StringBuilder sb = new StringBuilder();
                 while (i > 0) {
 
-                    int number = rand.nextInt(((int) l - 1) + 1) + 1;
-                    String JSON = collection.find(eq("number", number)).first().toJson();
+                    String JSON = collection.aggregate(Arrays.asList(Aggregates.sample(1))).first().toJson();
                     JsonObject root = JsonParser.parseString(JSON).getAsJsonObject();
 
                     String text = root.get("text").getAsString();
