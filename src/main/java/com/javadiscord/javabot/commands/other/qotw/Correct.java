@@ -20,7 +20,7 @@ public class Correct {
 
         String check;
         TextChannel tc;
-        tc = event.getGuild().getTextChannelById(Database.getConfigString(event.getGuild().getName(), event.getGuild().getId(), "log_cid"));
+        tc = event.getGuild().getTextChannelById(Database.getConfigString(event.getGuild().getName(), event.getGuild().getId(), "channels.log_cid"));
         check = event.getGuild().getEmotesByName("check", false).get(0).getAsMention();
 
         MongoDatabase database = mongoClient.getDatabase("userdata");

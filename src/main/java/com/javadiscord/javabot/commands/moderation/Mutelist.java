@@ -20,7 +20,7 @@ public class Mutelist implements SlashCommandHandler {
         if (event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
             String res = "";
             int memberSize;
-            Role muteRole = Database.configRole(event, "mute_rid");
+            Role muteRole = Database.getConfigRole(event, "roles.mute_rid");
 
             try {
                 List<Member> members = event.getGuild().getMembersWithRoles(muteRole);

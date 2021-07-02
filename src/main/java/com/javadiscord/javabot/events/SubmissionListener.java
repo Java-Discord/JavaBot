@@ -68,7 +68,7 @@ public class SubmissionListener extends ListenerAdapter {
 
                 try {
 
-                    String sCID = Database.getConfigString(guild.getName(), guild.getId(), "submission_cid");
+                    String sCID = Database.getConfigString(guild.getName(), guild.getId(), "channels.submission_cid");
                     TextChannel submissionChannel = guild.getTextChannelById(sCID);
 
                     EmbedBuilder submissionEb = new EmbedBuilder()

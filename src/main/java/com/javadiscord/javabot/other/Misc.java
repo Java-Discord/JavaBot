@@ -69,22 +69,48 @@ public class Misc {
         if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
             net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
 
-            tc = Database.configChannel(event, "log_cid");
+            tc = Database.getConfigChannel(event, "channels.log_cid");
         }
 
         if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
             net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
 
-            tc = Database.configChannel(event, "log_cid");
+            tc = Database.getConfigChannel(event, "channels.log_cid");
         }
 
         if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
             net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
 
-            tc = Database.configChannel(event, "log_cid");
+            tc = Database.getConfigChannel(event, "channels.log_cid");
         }
 
         tc.sendMessage(embed).queue();
+
+    }
+
+    public static void sendToLog(Object event, String text) {
+
+        TextChannel tc = null;
+
+        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
+            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
+
+            tc = Database.getConfigChannel(event, "channels.log_cid");
+        }
+
+        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
+            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
+
+            tc = Database.getConfigChannel(event, "channels.log_cid");
+        }
+
+        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
+
+            tc = Database.getConfigChannel(event, "channels.log_cid");
+        }
+
+        tc.sendMessage(text).queue();
 
     }
 

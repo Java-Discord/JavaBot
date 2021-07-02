@@ -2,6 +2,8 @@ package com.javadiscord.javabot.other;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.events.Startup;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -15,6 +17,8 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import org.bson.Document;
+
+import java.util.Arrays;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -51,23 +55,41 @@ public class Database {
                 .append("primCol", "16777215")
                 .append("secCol", "16720173");
 
-        Document doc = new Document("name", guildName)
-                .append("guild_id", guildID)
-                .append("welcome_status", false)
-                .append("welcome_msg", "None")
+        Document ws = new Document("image", wi)
+                .append("join_msg", "None")
                 .append("leave_msg", "None")
-                .append("welcome_img", wi)
                 .append("welcome_cid", "None")
-                .append("stats_cid", "None")
-                .append("stats_msg", "None")
-                .append("report_cid", "None")
+                .append("welcome_status", false);
+
+        Document channels = new Document("report_cid", "None")
                 .append("log_cid", "None")
                 .append("suggestion_cid", "None")
-                .append("submission_cid", "None")
-                .append("mute_rid", "None")
-                .append("dm-qotw", false)
-                .append("lock", false)
-                .append("lockcount", 0);
+                .append("submission_cid", "None");
+
+        Document roles = new Document("mute_rid", "None");
+
+        Document stats = new Document("stats_cid", "None")
+                .append("stats_text", "None");
+
+        Document qotw = new Document("dm-qotw", false);
+
+        Document lock = new Document("lock_status", false)
+                .append("lock_count", 0);
+
+        Document sb = new Document("starboard_cid", "None")
+                .append("starboard_emote", "⭐");
+
+        Document other = new Document("stats_category", stats)
+                .append("qotw", qotw)
+                .append("server_lock", lock)
+                .append("starboard", sb);
+
+        Document doc = new Document("name", guildName)
+                .append("guild_id", guildID)
+                .append("welcome_system", ws)
+                .append("channels", channels)
+                .append("roles", roles)
+                .append("other", other);
 
         return doc;
     }
@@ -146,58 +168,40 @@ public class Database {
         }
     }
 
-    public static void queryConfigString(String guildID, String varName, String newValue) {
+    public static void queryConfig(String guildID, String path, String newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        Document Query = new Document();
-        Query.append("guild_id", guildID);
+        Document query = new Document();
+        query.append("guild_id", guildID);
 
-        Document SetData = new Document();
-        SetData.append(varName, newValue);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(Query, update);
+        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public static void queryConfigInt(String guildID, String varName, int newValue) {
+    public static void queryConfig(String guildID, String path, int newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        Document Query = new Document();
-        Query.append("guild_id", guildID);
+        Document query = new Document();
+        query.append("guild_id", guildID);
 
-        Document SetData = new Document();
-        SetData.append(varName, newValue);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(Query, update);
+        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public static void queryConfigBoolean(String guildID, String varName, boolean newValue) {
+    public static void queryConfig(String guildID, String path, boolean newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        Document Query = new Document();
-        Query.append("guild_id", guildID);
+        Document query = new Document();
+        query.append("guild_id", guildID);
 
-        Document SetData = new Document();
-        SetData.append(varName, newValue);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(Query, update);
+        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public static String getConfigString(Object event, String varName) {
+    public static String getConfigString(Object event, String path) {
 
         String guildName = null, guildID = null;
 
@@ -241,38 +245,46 @@ public class Database {
 
         try {
             String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String[] splittedPath = path.split("\\.");
 
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            String var = Root.get(varName).getAsString();
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
+            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+            String var = root.get(splittedPath[splittedPath.length - 1]).getAsString();
+
             return var;
 
         } catch (NullPointerException e) {
 
+            e.printStackTrace();
             collection.insertOne(guildDoc(guildName, guildID));
             return "None";
         }
     }
 
-    public static String getConfigString(String guildName, String guildID, String varName) {
+    public static String getConfigString(String guildName, String guildID, String path) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
         try {
             String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String[] splittedPath = path.split("\\.");
 
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            String var = Root.get(varName).getAsString();
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
+            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+            String var = root.get(splittedPath[splittedPath.length - 1]).getAsString();
+
             return var;
 
         } catch (NullPointerException e) {
 
+            e.printStackTrace();
             collection.insertOne(guildDoc(guildName, guildID));
             return "None";
         }
     }
 
-    public static int getConfigInt(Object event, String varName) {
+    public static int getConfigInt(Object event, String path) {
 
         String guildName = null, guildID = null;
 
@@ -301,21 +313,47 @@ public class Database {
         MongoCollection<Document> collection = database.getCollection("config");
 
         try {
-
             String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String[] splittedPath = path.split("\\.");
 
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            int var = Root.get(varName).getAsInt();
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
+            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+            int var = root.get(splittedPath[splittedPath.length - 1]).getAsInt();
+
             return var;
 
         } catch (NullPointerException e) {
 
+            e.printStackTrace();
             collection.insertOne(guildDoc(guildName, guildID));
             return 0;
         }
     }
 
-    public static boolean getConfigBoolean(Object event, String varName) {
+    public static int getConfigInt(String guildName, String guildID, String path) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+
+        try {
+            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String[] splittedPath = path.split("\\.");
+
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
+            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+            int var = root.get(splittedPath[splittedPath.length - 1]).getAsInt();
+
+            return var;
+
+        } catch (NullPointerException e) {
+
+            e.printStackTrace();
+            collection.insertOne(guildDoc(guildName, guildID));
+            return 0;
+        }
+    }
+
+    public static boolean getConfigBoolean(Object event, String path) {
 
         String guildName = null, guildID = null;
 
@@ -344,21 +382,24 @@ public class Database {
         MongoCollection<Document> collection = database.getCollection("config");
 
         try {
-
             String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String[] splittedPath = path.split("\\.");
 
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            boolean var = Root.get(varName).getAsBoolean();
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
+            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+            boolean var = root.get(splittedPath[splittedPath.length - 1]).getAsBoolean();
+
             return var;
 
         } catch (NullPointerException e) {
 
+            e.printStackTrace();
             collection.insertOne(guildDoc(guildName, guildID));
             return false;
         }
     }
 
-    public static TextChannel configChannel(Object event, String varName) {
+    public static TextChannel getConfigChannel(Object event, String varName) {
 
         TextChannel tc = null;
 
@@ -386,7 +427,7 @@ public class Database {
         return tc;
     }
 
-    public static Role configRole(Object event, String varName) {
+    public static Role getConfigRole(Object event, String varName) {
 
         Role role = null;
 
@@ -414,54 +455,4 @@ public class Database {
         return role;
     }
 
-    public static JsonObject welcomeImage(String guildID) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        String doc = collection.find(eq("guild_id", guildID)).first().toJson();
-        JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-        JsonObject welcomeimg = root.get("welcome_img").getAsJsonObject();
-
-        return welcomeimg;
-    }
-
-    public static JsonObject avatarImage(String guildID) {
-
-        JsonObject avatar = welcomeImage(guildID).get("avatar").getAsJsonObject();
-        return avatar;
-        }
-
-    public static void queryAvatarImageInt(String guildID, String varName, int newValue) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        Document query = new Document();
-        query.append("guild_id", guildID);
-
-        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject("welcome_img.avatar." + varName, newValue)));
-    }
-
-    public static void queryWelcomeImageInt(String guildID, String varName, int newValue) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        Document query = new Document();
-        query.append("guild_id", guildID);
-
-        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject("welcome_img." + varName, newValue)));
-    }
-
-    public static void queryWelcomeImageString(String guildID, String varName, String newValue) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        Document query = new Document();
-        query.append("guild_id", guildID);
-
-        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject("welcome_img." + varName, newValue)));
-    }
 }

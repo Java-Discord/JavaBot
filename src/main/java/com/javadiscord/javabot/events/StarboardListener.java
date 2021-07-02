@@ -33,7 +33,7 @@ public class StarboardListener extends ListenerAdapter {
         changeSBCBool(event.getGuild().getId(), event.getChannel().getId(), mID, true);
 
         Message msg = event.getChannel().retrieveMessageById(mID).complete();
-        TextChannel sc = event.getGuild().getTextChannelById(Database.getConfigString(event, "starboard_cid"));
+        TextChannel sc = event.getGuild().getTextChannelById(Database.getConfigString(event, "other.starboard.starboard_cid"));
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor(msg.getAuthor().getAsTag(), msg.getJumpUrl(), msg.getAuthor().getEffectiveAvatarUrl())
@@ -55,7 +55,7 @@ public class StarboardListener extends ListenerAdapter {
                 else eb.setDescription(attachment.getUrl() + "\n\n" + eb.build().getDescription());
             }
 
-            sc.sendMessage(Database.getConfigString(event, "starboard_emote")
+            sc.sendMessage(Database.getConfigString(event, "other.starboard.starboard_emote")
                     + " " + getStarCount(gID, cID, mID) + " | " + msg.getTextChannel().getAsMention()).embed(eb.build())
                     .queue((message) -> {
                         String eMID = message.getId();
@@ -66,7 +66,7 @@ public class StarboardListener extends ListenerAdapter {
 
             eb.setImage(null);
 
-            sc.sendMessage(Database.getConfigString(event, "starboard_emote")
+            sc.sendMessage(Database.getConfigString(event, "other.starboard.starboard_emote")
                     + " " + getStarCount(gID, cID, mID) + " | " + msg.getTextChannel().getAsMention()).embed(eb.build())
                     .queue((message) -> {
                         String eMID = message.getId();
@@ -79,11 +79,11 @@ public class StarboardListener extends ListenerAdapter {
 
         TextChannel tc = event.getGuild().getTextChannelById(cID);
 
-        Message msg = event.getGuild().getTextChannelById(Database.getConfigString(event, "starboard_cid"))
+        Message msg = event.getGuild().getTextChannelById(Database.getConfigString(event, "other.starboard.starboard_cid"))
                 .retrieveMessageById(getSBCString(event.getGuild().getId(), cID, mID, "starboard_embed")).complete();
 
 
-        msg.editMessage(Database.getConfigString(event, "starboard_emote")
+        msg.editMessage(Database.getConfigString(event, "other.starboard.starboard_emote")
                 + " " + getStarCount(event.getGuild().getId(), cID, mID) + " | " +
                 tc.getAsMention()).queue();
     }
@@ -296,7 +296,7 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
         if (event.getMember().getUser().isBot()) return;
 
-        if (event.getReactionEmote().getName().equals(Database.getConfigString(event, "starboard_emote"))) {
+        if (event.getReactionEmote().getName().equals(Database.getConfigString(event, "other.starboard.starboard_emote"))) {
 
             String gID = event.getGuild().getId();
             String cID = event.getChannel().getId();

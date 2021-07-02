@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.other.StatsCategory;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
@@ -13,31 +14,30 @@ public class UserLeave extends ListenerAdapter {
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
 
+        if (event.getMember().getUser().isBot()) return;
 
-        if ((Database.getConfigString(event, "lock")).equalsIgnoreCase("false")) {
-            String leaveMessage = Database.getConfigString(event, "leave_msg");
-            String replacedText;
-            Guild guild = event.getGuild();
+        if (!Database.getConfigBoolean(event, "other.server_lock.lock_status")) {
+            if (Database.getConfigBoolean(event, "welcome_system.welcome_status")) {
 
-            if (event.getUser().isBot()) {
-                List<Emote> Emote = event.getGuild().getEmotesByName("badgeBot", false);
-                replacedText = leaveMessage.replace("{!boticon}", " " + Emote.get(0).getAsMention());
-            } else {
-                replacedText = leaveMessage.replace("{!boticon}", "");
+                String leaveMessage = Database.getConfigString(event, "welcome_system.leave_msg");
+                String replacedText;
+
+                if (event.getUser().isBot()) {
+                    List<Emote> Emote = event.getGuild().getEmotesByName("badgeBot", false);
+                    replacedText = leaveMessage.replace("{!boticon}", " " + Emote.get(0).getAsMention());
+                } else {
+                    replacedText = leaveMessage.replace("{!boticon}", "");
+                }
+
+                String replacedText2 = replacedText
+                        .replace("{!member}", event.getUser().getAsMention())
+                        .replace("{!membertag}", event.getUser().getAsTag())
+                        .replace("{!server}", event.getGuild().getName());
+
+                event.getGuild().getTextChannelById(String.valueOf(Database.getConfigString(event, "welcome_system.welcome_cid"))).sendMessage(replacedText2).queue();
             }
 
-            String replacedText2 = replacedText
-                    .replace("{!member}", event.getUser().getAsMention())
-                    .replace("{!membertag}", event.getUser().getAsTag())
-                    .replace("{!server}", event.getGuild().getName());
-
-            event.getGuild().getTextChannelById(String.valueOf(Database.getConfigString(event, "welcome_cid"))).sendMessage(replacedText2).queue();
-
-            String text = Database.getConfigString(event, "stats_msg")
-                    .replace("{!membercount}", String.valueOf(guild.getMemberCount()))
-                    .replace("{!server}", guild.getName());
-
-            guild.getCategoryById(Database.getConfigString(event, "stats_cid")).getManager().setName(text).queue();
+            StatsCategory.update(event);
         }
     }
 }

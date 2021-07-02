@@ -15,55 +15,55 @@ public class Config implements SlashCommandHandler {
 
     public static void setStatsCategory(SlashCommandEvent event, String id) {
 
-        Database.queryConfigString(event.getGuild().getId(), "stats_cid", id);
+        Database.queryConfig(event.getGuild().getId(), "other.stats_category.stats_cid", id);
         event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category ID", "Stats-Category ID succesfully changed to", null, id, true)).queue();
     }
 
     public static void setStatsMessage(SlashCommandEvent event, String message) {
 
-        Database.queryConfigString(event.getGuild().getId(), "stats_msg", message);
+        Database.queryConfig(event.getGuild().getId(), "other.stats_category.stats_text", message);
         event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category Message", "Stats-Category Message succesfully changed to", null, message, true)).queue();
     }
 
     public static void setReportChannel(SlashCommandEvent event, MessageChannel channel) {
 
-        Database.queryConfigString(event.getGuild().getId(), "report_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "channels.report_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Report Channel", "Report Channel succesfully changed to", null, channel.getId(), true, true)).queue();
     }
 
     public static void setLogChannel(SlashCommandEvent event, MessageChannel channel) {
 
-        Database.queryConfigString(event.getGuild().getId(), "log_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "channels.log_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Log Channel", "Log Channel succesfully changed to", null, channel.getId(), true, true)).queue();
     }
 
     public static void setSuggestionChannel(SlashCommandEvent event, MessageChannel channel) {
 
-        Database.queryConfigString(event.getGuild().getId(), "suggestion_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "channels.suggestion_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Suggest Channel", "Suggest Channel succesfully changed to", null, channel.getId(), true, true)).queue();
     }
 
     public static void setSubmissionChannel(SlashCommandEvent event, MessageChannel channel) {
 
-        Database.queryConfigString(event.getGuild().getId(), "submission_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "channels.submission_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "QOTW-Submission Channel", "QOTW-Submission Channel succesfully changed to", null, channel.getId(), true, true)).queue();
     }
 
     public static void setMuteRole(SlashCommandEvent event, Role role) {
 
-        Database.queryConfigString(event.getGuild().getId(), "mute_rid", role.getId());
+        Database.queryConfig(event.getGuild().getId(), "roles.mute_rid", role.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Mute Role", "Mute Role succesfully changed to", null, role.getId(), true, false, true)).queue();
     }
 
     public static void setDMQOTWStatus(SlashCommandEvent event, boolean status) {
 
-        Database.queryConfigString(event.getGuild().getId(), "dm-qotw", String.valueOf(status));
+        Database.queryConfig(event.getGuild().getId(), "other.qotw.dm-qotw", status);
         event.replyEmbeds(Embeds.configEmbed(event, "QOTW-DM Status", "QOTW-DM Status succesfully changed to", null, String.valueOf(status), true)).queue();
     }
 
     public static void setLockStatus(SlashCommandEvent event, boolean status) {
 
-        Database.queryConfigString(event.getGuild().getId(), "lock", String.valueOf(status));
+        Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", status);
         event.replyEmbeds(Embeds.configEmbed(event, "Lock Status changed", "Lock Status succesfully changed to", null, String.valueOf(status))).queue();
     }
 
@@ -73,22 +73,22 @@ public class Config implements SlashCommandHandler {
                         .setColor(Constants.GRAY)
                         .setTitle("Bot Configuration");
 
-                String overlayURL = Database.welcomeImage(event.getGuild().getId()).get("overlayURL").getAsString();
+                String overlayURL = Database.getConfigString(event, "welcome_system.image.overlayURL");
                 eb.setImage(Misc.checkImage(overlayURL));
 
-                        eb.addField("Lock Status", "Lock: ``" + Database.getConfigBoolean(event, "lock") + "``" +
-                                "\nCount: ``" + Database.getConfigInt(event, "lockcount") + "/5``", true)
+                        eb.addField("Lock Status", "Lock: ``" + Database.getConfigBoolean(event, "other.server_lock.lock_status") + "``" +
+                                "\nCount: ``" + Database.getConfigInt(event, "other.server_lock.lock_count") + "/5``", true)
 
-                        .addField("Question of the Week", "Submission Channel: " + Database.configChannel(event, "submission_cid").getAsMention()
-                                + "\nSubmission-Status: ``" + Database.getConfigBoolean(event, "dm-qotw") + "``", true)
+                        .addField("Question of the Week", "Submission Channel: " + Database.getConfigChannel(event, "channels.submission_cid").getAsMention()
+                                + "\nSubmission-Status: ``" + Database.getConfigBoolean(event, "other.qotw.dm-qotw") + "``", true)
 
-                        .addField("Stats-Category", "Category-ID: ``" + Database.getConfigString(event, "stats_cid") + "``" +
-                                "\nText: ``" + Database.getConfigString(event, "stats_msg") + "``", false)
+                        .addField("Stats-Category", "Category-ID: ``" + Database.getConfigString(event, "other.stats_category.stats_cid") + "``" +
+                                "\nText: ``" + Database.getConfigString(event, "other.stats_category.stats_text") + "``", false)
 
-                        .addField("Other", "Report Channel: " + Database.configChannel(event, "report_cid").getAsMention() +
-                                ", Log Channel: " + Database.configChannel(event, "log_cid").getAsMention() +
-                                "\nSuggestion Channel: " + Database.configChannel(event, "suggestion_cid").getAsMention() +
-                                ", Mute Role: " + Database.configRole(event, "mute_rid").getAsMention(), false);
+                        .addField("Other", "Report Channel: " + Database.getConfigChannel(event, "channels.report_cid").getAsMention() +
+                                ", Log Channel: " + Database.getConfigChannel(event, "channels.log_cid").getAsMention() +
+                                "\nSuggestion Channel: " + Database.getConfigChannel(event, "channels.suggestion_cid").getAsMention() +
+                                ", Mute Role: " + Database.getConfigRole(event, "roles.mute_rid").getAsMention(), false);
 
                 event.replyEmbeds(eb.build()).queue();
     }

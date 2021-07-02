@@ -7,7 +7,6 @@ import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -42,7 +41,7 @@ public class Mute implements SlashCommandHandler {
             .build();
 
         try {
-            Role muteRole = Database.configRole(event, "mute_rid");
+            Role muteRole = Database.getConfigRole(event, "roles.mute_rid");
             if (!(member.getRoles().toString().contains(muteRole.getId()))) {
                 event.getGuild().addRoleToMember(member.getId(), muteRole).complete();
 

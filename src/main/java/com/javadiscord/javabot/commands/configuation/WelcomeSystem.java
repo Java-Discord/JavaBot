@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.commands.configuation;
 
-import com.google.gson.JsonObject;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
@@ -11,44 +10,42 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import javax.xml.crypto.Data;
-
 public class WelcomeSystem implements SlashCommandHandler {
 
     public static void setLeaveMessage(SlashCommandEvent event, String message) {
 
-        Database.queryConfigString(event.getGuild().getId(), "leave_msg", message);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.leave_msg", message);
         event.replyEmbeds(Embeds.configEmbed(event, "Leave Message", "Leave Message successfully changed to", null, message, true)).queue();
     }
 
     public static void setWelcomeMessage(SlashCommandEvent event, String message) {
 
-        Database.queryConfigString(event.getGuild().getId(), "welcome_msg", message);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.join_msg", message);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Message", "Welcome Message successfully changed to", null, message, true)).queue();
     }
 
     public static void setWelcomeChannel(SlashCommandEvent event, MessageChannel channel) {
 
-        Database.queryConfigString(event.getGuild().getId(), "welcome_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.welcome_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Channel", "Welcome Channel successfully changed to", null, channel.getId(), true, true)).queue();
     }
 
     public static void setImageWidth(SlashCommandEvent event, int width) {
 
-        Database.queryWelcomeImageInt(event.getGuild().getId(), "imgW", width);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.imgW", width);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Width", "Welcome Image Width successfully changed to ", null, String.valueOf(width), true)).queue();
     }
 
     public static void setImageHeight(SlashCommandEvent event, int height) {
 
-        Database.queryWelcomeImageInt(event.getGuild().getId(), "imgH", height);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.imgH", height);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Height", "Welcome Image Height successfully changed to ", null, String.valueOf(height), true)).queue();
     }
 
     public static void setOverlayURL(SlashCommandEvent event, String url) {
 
         if (Misc.isImage(url)) {
-            Database.queryWelcomeImageString(event.getGuild().getId(), "overlayURL", url);
+            Database.queryConfig(event.getGuild().getId(), "welcome_system.image.overlayURL", url);
             event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Overlay", "Welcome Image Overlay successfully changed to ", Misc.checkImage(url), url, true)).queue();
         } else {
             event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event)).queue();
@@ -58,7 +55,7 @@ public class WelcomeSystem implements SlashCommandHandler {
     public static void setBackgroundURL(SlashCommandEvent event, String url) {
 
         if (Misc.isImage(url)) {
-            Database.queryWelcomeImageString(event.getGuild().getId(), "bgURL", url);
+            Database.queryConfig(event.getGuild().getId(), "welcome_system.image.bgURL", url);
             event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Background", "Welcome Image Background successfully changed to ", Misc.checkImage(url), url, true)).queue();
         } else {
             event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event)).queue();
@@ -70,7 +67,7 @@ public class WelcomeSystem implements SlashCommandHandler {
         long l = Long.parseLong(color, 16);
         int i = (int) l;
 
-        Database.queryWelcomeImageInt(event.getGuild().getId(), "primCol", i);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.primCol", i);
         event.replyEmbeds(Embeds.configEmbed(event, "Primary Welcome Image Color", "Primary Welcome Image Color successfully changed to ", null, i + " (#" + Integer.toHexString(i) + ")", true)).queue();
     }
 
@@ -79,74 +76,72 @@ public class WelcomeSystem implements SlashCommandHandler {
         long l = Long.parseLong(color, 16);
         int i = (int) l;
 
-        Database.queryWelcomeImageInt(event.getGuild().getId(), "secCol", i);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.secCol", i);
         event.replyEmbeds(Embeds.configEmbed(event, "Secondary Welcome Image Color", "Secondary Welcome Image Color successfully changed to ", null, i + " (#" + Integer.toHexString(i) + ")", true)).queue();
     }
 
     public static void setAvatarHeight(SlashCommandEvent event, int height) {
 
-        Database.queryAvatarImageInt(event.getGuild().getId(), "avH", height);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avH", height);
         event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image Height", "Avatar Image Height successfully changed to ", null, String.valueOf(height), true)).queue();
     }
 
     public static void setAvatarWidth(SlashCommandEvent event, int width) {
 
-        Database.queryAvatarImageInt(event.getGuild().getId(), "avW", width);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avW", width);
         event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image Width", "Avatar Image Width successfully changed to ", null, String.valueOf(width), true)).queue();
     }
 
     public static void setAvatarX(SlashCommandEvent event, int x) {
 
-        Database.queryAvatarImageInt(event.getGuild().getId(), "avX", x);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avX", x);
         event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image (X-Pos)", "Avatar Image ``(X-Position)`` successfully changed to ", null, String.valueOf(x), true)).queue();
     }
 
     public static void setAvatarY(SlashCommandEvent event, int y) {
 
-        Database.queryAvatarImageInt(event.getGuild().getId(), "avY", y);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avY", y);
         event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image (Y-Pos)", "Avatar Image ``(Y-Position)`` successfully changed to ", null, String.valueOf(y), true)).queue();
     }
 
     public static void setStatus(SlashCommandEvent event, boolean status) {
 
-        Database.queryConfigBoolean(event.getGuild().getId(), "welcome_status", status);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.welcome_status", status);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome System Status changed", "Status successfully changed to ", null, String.valueOf(status), true)).queue();
     }
 
     public static void getList(SlashCommandEvent event) {
 
         String guildID = event.getGuild().getId();
-        JsonObject welcomeImage = Database.welcomeImage(guildID);
-        JsonObject avatarImage = Database.avatarImage(guildID);
-        String overlayURL = Database.welcomeImage(event.getGuild().getId()).get("overlayURL").getAsString();
+
 
         String status;
-        if (Database.getConfigBoolean(event, "welcome_status")) status = "enabled";
+        if (Database.getConfigBoolean(event, "welcome_system.welcome_status")) status = "enabled";
         else status = "disabled";
 
         var eb = new EmbedBuilder()
                 .setTitle("Welcome System Configuration")
                 .setColor(Constants.GRAY)
 
-                .setImage(Misc.checkImage(overlayURL))
+                .setImage(Misc.checkImage(Database.getConfigString(event, "welcome_system.image.overlayURL")))
 
-                .addField("Image", "Width, Height: ``" + welcomeImage.get("imgW").getAsString() +
-                        "``, ``" + welcomeImage.get("imgH").getAsString() +
-                        "``\n[Overlay](" + overlayURL +
-                        "), [Background](" + welcomeImage.get("bgURL").getAsString() + ")", false)
+                .addField("Image", "Width, Height: ``" + Database.getConfigString(event, "welcome_system.image.imgW") +
+                        "``, ``" + Database.getConfigString(event, "welcome_system.image.imgH") +
+                        "``\n[Overlay](" + Database.getConfigString(event, "welcome_system.image.overlayURL") +
+                        "), [Background](" + Database.getConfigString(event, "welcome_system.image.bgURL") + ")", false)
 
-                .addField("Color", "Primary Color: ``#" + Integer.toHexString(welcomeImage.get("primCol").getAsInt()) +
-                        "``\nSecondary Color: ``#" + Integer.toHexString(welcomeImage.get("secCol").getAsInt()) + "``", true)
+                .addField("Color", "Primary Color: ``#" + Integer.toHexString(Database.getConfigInt(event, "welcome_system.image.primCol")) +
+                        "``\nSecondary Color: ``#" + Integer.toHexString(Database.getConfigInt(event, "welcome_system.image.secCol")) + "``", true)
 
-                .addField("Avatar Image", "Width, Height: ``" + avatarImage.get("avW").getAsString() +
-                        "``,``" + avatarImage.get("avH").getAsString() +
-                        "``\nX, Y: ``" + avatarImage.get("avX").getAsString() +
-                        "``, ``" + avatarImage.get("avY").getAsString() + "``", true)
+                .addField("Avatar Image", "Width, Height: ``" + Database.getConfigInt(event, "welcome_system.image.avatar.avW") +
+                        "``,``" + Database.getConfigInt(event, "welcome_system.image.avatar.avH") +
+                        "``\nX, Y: ``" + Database.getConfigInt(event, "welcome_system.image.avatar.avX") +
+                        "``, ``" + Database.getConfigInt(event, "welcome_system.image.avatar.avY") + "``", true)
 
-                .addField("Messages", "Welcome: ``" + Database.getConfigString(event, "welcome_msg") +
-                        "``\nLeave: ``" + Database.getConfigString(event, "leave_msg") + "``", false)
+                .addField("Messages", "Welcome: ``" + Database.getConfigString(event, "welcome_system.join_msg") +
+                        "``\nLeave: ``" + Database.getConfigString(event, "welcome_system.leave_msg") + "``", false)
 
-                .addField("Channel", Database.configChannel(event, "welcome_cid").getAsMention(), true)
+                .addField("Channel", Database.getConfigChannel(event, "welcome_system.welcome_cid").getAsMention(), true)
                 .addField("Status", "``" + status + "``", true)
                 .build();
 
