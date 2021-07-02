@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -17,10 +16,12 @@ import java.util.Date;
 public class Report implements SlashCommandHandler {
     @Override
     public void handle(SlashCommandEvent event) {
-
-        OptionMapping option = event.getOption("reason");
-        String reason = option == null ? "None" : option.getAsString();
-
+        String reason;
+        try {
+            reason = event.getOption("reason").getAsString();
+        } catch (NullPointerException e) {
+            reason = "None";
+        }
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
         MessageChannel reportChannel = Database.configChannel(event, "report_cid");

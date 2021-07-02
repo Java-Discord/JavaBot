@@ -16,16 +16,14 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 import java.util.Date;
 
 public class Unmute implements SlashCommandHandler {
-
     @Override
     public void handle(SlashCommandEvent event) {
         if (event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-
             Role muteRole = Database.configRole(event, "mute_rid");
             Member member = event.getOption("user").getAsMember();
             User author = event.getUser();
             try {
-
+                event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
                 var e = new EmbedBuilder()
                     .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
                     .setColor(Constants.RED)
@@ -35,18 +33,9 @@ public class Unmute implements SlashCommandHandler {
                     .setFooter("ID: " + member.getId())
                     .setTimestamp(new Date().toInstant())
                     .build();
-
-                if (member.getRoles().toString().contains(muteRole.getId())) {
-                    event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
-
-                    member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
-                    event.replyEmbeds(e).queue();
-                    Misc.sendToLog(event, e);
-
-                } else {
-                    event.replyEmbeds(Embeds.emptyError("```I can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-                }
-
+                member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
+                Misc.sendToLog(event, e);
+                event.replyEmbeds(e).queue();
             } catch (HierarchyException e) {
                 event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }

@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -25,10 +24,12 @@ public class Ban implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
         String modTag = event.getUser().getAsTag();
-
-        OptionMapping option = event.getOption("reason");
-        String reason = option == null ? "None" : option.getAsString();
-
+        String reason;
+        try {
+            reason = event.getOption("reason").getAsString();
+        } catch (NullPointerException e) {
+            reason = "None";
+        }
         var eb = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Ban", null, member.getUser().getEffectiveAvatarUrl())
             .setColor(Constants.RED)
@@ -50,6 +51,7 @@ public class Ban implements SlashCommandHandler {
             else event.replyEmbeds(eb).queue();
             Misc.sendToLog(event, eb);
             member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
+
 
         } catch (HierarchyException e) {
             event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();

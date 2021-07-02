@@ -13,9 +13,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.bson.Document;
 
 import java.time.LocalDateTime;
@@ -58,10 +59,13 @@ public class Warn implements SlashCommandHandler {
             return;
         }
         Member member = event.getOption("user").getAsMember();
+        String reason;
+        try {
+            reason = event.getOption("reason").getAsString();
+        } catch (NullPointerException e) {
+            reason = "None";
+        }
         String modTag = event.getUser().getAsTag();
-
-        OptionMapping option = event.getOption("reason");
-        String reason = option == null ? "None" : option.getAsString();
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
