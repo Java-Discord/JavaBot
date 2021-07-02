@@ -100,6 +100,7 @@
   handler: com.javadiscord.javabot.commands.moderation.Mute
   options:
     - {description: The user you want to mute, name: user, required: true, type: USER}
+    - {description: The reason, name: reason, required: false, type: STRING}
 - description: Lists all muted members
   name: mutelist
   handler: com.javadiscord.javabot.commands.moderation.Mutelist

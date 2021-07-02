@@ -8,9 +8,9 @@ import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -23,12 +23,10 @@ public class Kick implements SlashCommandHandler {
             event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
-        String reason;
-        try {
-            reason = event.getOption("reason").getAsString();
-        } catch (NullPointerException e) {
-            reason = "None";
-        }
+
+        OptionMapping option = event.getOption("reason");
+        String reason = option == null ? "None" : option.getAsString();
+
         String moderatorTag = event.getUser().getAsTag();
         var eb = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Kick", null, member.getUser().getEffectiveAvatarUrl())
