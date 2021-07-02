@@ -16,7 +16,7 @@ public class SuggestionListener extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
             if (event.getMember().getUser().isBot()) return;
 
-            if (event.getChannel().getId().equals(Database.getConfigString(event, "suggestion_cid"))) {
+            if (event.getChannel().getId().equals(Database.getConfigString(event.getGuild().getName(), event.getGuild().getId(), "channels.suggestion_cid"))) {
 
                 String[] args = event.getMessage().getContentDisplay().split(" ");
                 if (!args[0].startsWith("!")) {

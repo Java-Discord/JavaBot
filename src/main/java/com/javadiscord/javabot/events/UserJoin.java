@@ -47,15 +47,15 @@ public class UserJoin extends ListenerAdapter {
         }
 
         int stringWidth;
-        int imgW = Database.welcomeImage(guild.getId()).get("imgW").getAsInt();
-        int imgH = Database.welcomeImage(guild.getId()).get("imgH").getAsInt();
-        int avX = Database.avatarImage(guild.getId()).get("avX").getAsInt();
-        int avY = Database.avatarImage(guild.getId()).get("avY").getAsInt();
-        int avW = Database.avatarImage(guild.getId()).get("avW").getAsInt();
-        int avH = Database.avatarImage(guild.getId()).get("avH").getAsInt();
+        int imgW = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.imgW");
+        int imgH = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.imgH");
+        int avX = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avX");
+        int avY = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avY");
+        int avW = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avW");
+        int avH = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avH");
 
-        int primCol = Database.welcomeImage(guild.getId()).get("primCol").getAsInt();
-        int secCol = Database.welcomeImage(guild.getId()).get("secCol").getAsInt();
+        int primCol = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.primCol");
+        int secCol = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.secCol");
 
         float memberSize = 120;
         float countSize = 72;
@@ -65,13 +65,13 @@ public class UserJoin extends ListenerAdapter {
         BufferedImage flagImage = null, botImage = null, avatarImage = null, bgImage = null, overlayImage = null;
 
         try {
-            overlayURL = new URL(Database.welcomeImage(guild.getId()).get("overlayURL").getAsString());
+            overlayURL = new URL(Database.getConfigString(guild.getName(), guild.getId(), "welcome_system.image.overlayURL"));
         } catch (MalformedURLException e) {
             overlayURL = new URL(iae);
         }
 
         try {
-            bgURL = new URL(Database.welcomeImage(guild.getId()).get("bgURL").getAsString());
+            bgURL = new URL(Database.getConfigString(guild.getName(), guild.getId(), "welcome_system.image.bgURL"));
         } catch (MalformedURLException e) {
             bgURL = new URL(iae);
         }
@@ -159,12 +159,13 @@ public class UserJoin extends ListenerAdapter {
             return outputStream.toByteArray();
         }
 
-        @Override
+    @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+
         if (event.getMember().getUser().isBot()) return;
 
         User user = event.getMember().getUser();
-        TextChannel welcomeChannel = Database.configChannel(event, "welcome_cid");
+        TextChannel welcomeChannel = Database.getConfigChannel(event, "channels.welcome_cid");
 
         if (!ServerLock.lockStatus(event)) {
 
@@ -173,13 +174,17 @@ public class UserJoin extends ListenerAdapter {
             CompletableFuture.runAsync(() -> {
 
                 try {
-                    String welcomeMessage = Database.getConfigString(event, "welcome_msg")
-                            .replace("{!member}", event.getMember().getAsMention())
-                            .replace("{!membertag}", event.getMember().getUser().getAsTag())
-                            .replace("{!server}", event.getGuild().getName());
 
-                    event.getGuild().getTextChannelById(Database.getConfigString(event, "welcome_cid")).sendMessage(welcomeMessage)
-                            .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
+                    if (Database.getConfigBoolean(event, "welcome_system.welcome_status")) {
+
+                        String welcomeMessage = Database.getConfigString(event, "welcome_system.join_msg")
+                                .replace("{!member}", event.getMember().getAsMention())
+                                .replace("{!membertag}", event.getMember().getUser().getAsTag())
+                                .replace("{!server}", event.getGuild().getName());
+
+                        event.getGuild().getTextChannelById(Database.getConfigString(event, "welcome_system.welcome_cid")).sendMessage(welcomeMessage)
+                                .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
+                    }
 
                     StatsCategory.update(event);
 
@@ -202,7 +207,7 @@ public class UserJoin extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         String[] args = event.getMessage().getContentDisplay().split(" ");
 
-        if (args[0].equalsIgnoreCase("!generateImage") && event.getMember().getId().equals("374328434677121036")) {
+        if (args[0].equalsIgnoreCase("!generateImage") && event.getMember().getId().equals("810481402390118400")) {
 
             boolean imgFlag = false;
             boolean imgBot = false;
