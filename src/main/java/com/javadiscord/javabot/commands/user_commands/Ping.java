@@ -23,10 +23,5 @@ public class Ping implements SlashCommandHandler {
             .build();
 
         event.replyEmbeds(e).queue();
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        collection.insertOne(Database.guildDoc(event.getGuild().getName(), event.getGuild().getId()));
     }
 }

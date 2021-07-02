@@ -207,7 +207,7 @@ public class UserJoin extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         String[] args = event.getMessage().getContentDisplay().split(" ");
 
-        if (args[0].equalsIgnoreCase("!generateImage") && event.getMember().getId().equals("374328434677121036")) {
+        if (args[0].equalsIgnoreCase("!generateImage") && event.getMember().getId().equals("810481402390118400")) {
 
             boolean imgFlag = false;
             boolean imgBot = false;
