@@ -51,7 +51,6 @@ public class Ban implements SlashCommandHandler {
             Misc.sendToLog(event, eb);
             member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
 
-
         } catch (HierarchyException e) {
             event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
         } catch (NullPointerException | NumberFormatException e) {

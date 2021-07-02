@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import java.util.Date;
 
 public class Mute implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
@@ -40,14 +41,17 @@ public class Mute implements SlashCommandHandler {
             .setTimestamp(new Date().toInstant())
             .build();
 
-        Guild guild = event.getGuild();
         try {
             Role muteRole = Database.configRole(event, "mute_rid");
             if (!(member.getRoles().toString().contains(muteRole.getId()))) {
-                guild.addRoleToMember(member.getId(), muteRole).complete();
-                Misc.sendToLog(event, eb);
+                event.getGuild().addRoleToMember(member.getId(), muteRole).complete();
+
                 member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
                 event.replyEmbeds(eb).queue();
+                Misc.sendToLog(event, eb);
+
+            } else {
+                event.replyEmbeds(Embeds.emptyError("```" + member.getUser().getAsTag() + " is already muted```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
 
         } catch (HierarchyException e) {
