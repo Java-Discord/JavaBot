@@ -150,18 +150,6 @@
     - description: Shows the current config
       name: list
       options: []
-    - description: Changes the leave message
-      name: leave-message
-      options:
-        - {description: New leave message, name: message, required: true, type: STRING}
-    - description: Changes the welcome message
-      name: welcome-message
-      options:
-        - {description: New welcome message, name: message, required: true, type: STRING}
-    - description: Changes the welcome channel
-      name: welcome-channel
-      options:
-        - {description: New welcome channel, name: channel, required: true, type: CHANNEL}
     - description: Changes the id of the stats category
       name: stats-category
       options:
@@ -200,13 +188,29 @@
       options:
         - {description: State of the server lock, name: locked, required: true, type: BOOLEAN}
 - description: edits the welcome image config
-  name: welcome-image
-  handler: com.javadiscord.javabot.commands.configuation.WelcomeImage
+  name: welcome
+  handler: com.javadiscord.javabot.commands.configuation.WelcomeSystem
   options: []
   subCommands:
-    - description: Sends the current welcome image config
+    - description: Sends the current welcome system config
       name: list
       options: []
+    - description: Changes the leave message
+      name: leave-msg
+      options:
+        - {description: New leave message, name: message, required: true, type: STRING}
+    - description: Changes the welcome message
+      name: join-msg
+      options:
+        - {description: New welcome message, name: message, required: true, type: STRING}
+    - description: Changes the Welcome-System status
+      name: status
+      options:
+        - {description: Status of the Welcome-System, name: status, required: true, type: BOOLEAN}
+    - description: Changes the welcome channel
+      name: channel
+      options:
+        - {description: New welcome channel, name: channel, required: true, type: CHANNEL}
     - description: Changes the welcome image width
       name: image-width
       options:

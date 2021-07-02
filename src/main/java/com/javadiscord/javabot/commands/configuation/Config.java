@@ -13,24 +13,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class Config implements SlashCommandHandler {
 
-    public static void setLeaveMessage(SlashCommandEvent event, String message) {
-
-        Database.queryConfigString(event.getGuild().getId(), "leave_msg", message);
-        event.replyEmbeds(Embeds.configEmbed(event, "Leave Message", "Leave Message succesfully changed to", null, message, true)).queue();
-    }
-
-    public static void setWelcomeMessage(SlashCommandEvent event, String message) {
-
-        Database.queryConfigString(event.getGuild().getId(), "welcome_msg", message);
-        event.replyEmbeds(Embeds.configEmbed(event, "Welcome Message", "Welcome Message succesfully changed to", null, message, true)).queue();
-    }
-
-    public static void setWelcomeChannel(SlashCommandEvent event, MessageChannel channel) {
-
-        Database.queryConfigString(event.getGuild().getId(), "welcome_cid", channel.getId());
-        event.replyEmbeds(Embeds.configEmbed(event, "Welcome Channel", "Welcome Channel succesfully changed to", null, channel.getId(), true, true)).queue();
-    }
-
     public static void setStatsCategory(SlashCommandEvent event, String id) {
 
         Database.queryConfigString(event.getGuild().getId(), "stats_cid", id);
@@ -94,18 +76,19 @@ public class Config implements SlashCommandHandler {
                 String overlayURL = Database.welcomeImage(event.getGuild().getId()).get("overlayURL").getAsString();
                 eb.setImage(Misc.checkImage(overlayURL));
 
-                        eb.addField("Server locked?", "``" + Database.getConfigString(event, "lock") + ", " + Database.getConfigString(event, "lockcount") + "``", false)
-                        .addField("QOTW", "<#" + Database.getConfigString(event, "submission_cid") + ">\n" + "DM-Submissions: ``" + Database.getConfigString(event, "dm-qotw") + "``", false)
-                        .addField("Stats-Category", Database.getConfigString(event, "stats_cid") + "\n``" + Database.getConfigString(event, "stats_msg") + "``", true)
-                        .addField("Report", "<#" + Database.getConfigString(event, "report_cid") + ">", true)
-                        .addField("Log", "<#" + Database.getConfigString(event, "log_cid") + ">", true)
-                        .addField("Mute", "<@&" + Database.getConfigString(event, "mute_rid") + ">", true)
-                        .addField("Suggestions", "<#" + Database.getConfigString(event, "suggestion_cid") + ">", true)
-                        .addField("Welcome-System",
-                                "<#" + Database.getConfigString(event, "welcome_cid") +
-                                ">\nWelcome Message: ``" + Database.getConfigString(event, "welcome_msg") +
-                                "``\nLeave Message: ``" + Database.getConfigString(event, "leave_msg") +
-                                "``\n[Image Link](" + overlayURL + ")", false);
+                        eb.addField("Lock Status", "Lock: ``" + Database.getConfigBoolean(event, "lock") + "``" +
+                                "\nCount: ``" + Database.getConfigInt(event, "lockcount") + "/5``", true)
+
+                        .addField("Question of the Week", "Submission Channel: " + Database.configChannel(event, "submission_cid").getAsMention()
+                                + "\nSubmission-Status: ``" + Database.getConfigBoolean(event, "dm-qotw") + "``", true)
+
+                        .addField("Stats-Category", "Category-ID: ``" + Database.getConfigString(event, "stats_cid") + "``" +
+                                "\nText: ``" + Database.getConfigString(event, "stats_msg") + "``", false)
+
+                        .addField("Other", "Report Channel: " + Database.configChannel(event, "report_cid").getAsMention() +
+                                ", Log Channel: " + Database.configChannel(event, "log_cid").getAsMention() +
+                                "\nSuggestion Channel: " + Database.configChannel(event, "suggestion_cid").getAsMention() +
+                                ", Mute Role: " + Database.configRole(event, "mute_rid").getAsMention(), false);
 
                 event.replyEmbeds(eb.build()).queue();
     }
@@ -117,18 +100,6 @@ public class Config implements SlashCommandHandler {
 
                 case "list":
                     Config.getList(event);
-                    break;
-
-                case "leave-message":
-                    Config.setLeaveMessage(event, event.getOption("message").getAsString());
-                    break;
-
-                case "welcome-message":
-                    Config.setWelcomeMessage(event, event.getOption("message").getAsString());
-                    break;
-
-                case "welcome-channel":
-                    Config.setWelcomeChannel(event, event.getOption("channel").getAsMessageChannel());
                     break;
 
                 case "stats-category":

@@ -53,6 +53,7 @@ public class Database {
 
         Document doc = new Document("name", guildName)
                 .append("guild_id", guildID)
+                .append("welcome_status", false)
                 .append("welcome_msg", "None")
                 .append("leave_msg", "None")
                 .append("welcome_img", wi)
@@ -64,8 +65,8 @@ public class Database {
                 .append("suggestion_cid", "None")
                 .append("submission_cid", "None")
                 .append("mute_rid", "None")
-                .append("dm-qotw", "false")
-                .append("lock", "false")
+                .append("dm-qotw", false)
+                .append("lock", false)
                 .append("lockcount", 0);
 
         return doc;
@@ -163,6 +164,23 @@ public class Database {
     }
 
     public static void queryConfigInt(String guildID, String varName, int newValue) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+
+        Document Query = new Document();
+        Query.append("guild_id", guildID);
+
+        Document SetData = new Document();
+        SetData.append(varName, newValue);
+
+        Document update = new Document();
+        update.append("$set", SetData);
+
+        collection.updateOne(Query, update);
+    }
+
+    public static void queryConfigBoolean(String guildID, String varName, boolean newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -294,6 +312,49 @@ public class Database {
 
             collection.insertOne(guildDoc(guildName, guildID));
             return 0;
+        }
+    }
+
+    public static boolean getConfigBoolean(Object event, String varName) {
+
+        String guildName = null, guildID = null;
+
+        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
+
+            guildID = e.getGuild().getId();
+            guildName = e.getGuild().getName();
+        }
+
+        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
+            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
+
+            guildID = e.getGuild().getId();
+            guildName = e.getGuild().getName();
+        }
+
+        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
+            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
+
+            guildID = e.getGuild().getId();
+            guildName = e.getGuild().getName();
+        }
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+
+        try {
+
+            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+
+            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
+            boolean var = Root.get(varName).getAsBoolean();
+            return var;
+
+        } catch (NullPointerException e) {
+
+            collection.insertOne(guildDoc(guildName, guildID));
+            return false;
         }
     }
 
