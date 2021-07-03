@@ -79,16 +79,16 @@ public class Config implements SlashCommandHandler {
                         eb.addField("Lock Status", "Lock: ``" + Database.getConfigBoolean(event, "other.server_lock.lock_status") + "``" +
                                 "\nCount: ``" + Database.getConfigInt(event, "other.server_lock.lock_count") + "/5``", true)
 
-                        .addField("Question of the Week", "Submission Channel: " + Database.getConfigChannel(event, "channels.submission_cid").getAsMention()
+                        .addField("Question of the Week", "Submission Channel: " + Database.getConfigChannelAsMention(event, "channels.submission_cid")
                                 + "\nSubmission-Status: ``" + Database.getConfigBoolean(event, "other.qotw.dm-qotw") + "``", true)
 
                         .addField("Stats-Category", "Category-ID: ``" + Database.getConfigString(event, "other.stats_category.stats_cid") + "``" +
                                 "\nText: ``" + Database.getConfigString(event, "other.stats_category.stats_text") + "``", false)
 
-                        .addField("Other", "Report Channel: " + Database.getConfigChannel(event, "channels.report_cid").getAsMention() +
-                                ", Log Channel: " + Database.getConfigChannel(event, "channels.log_cid").getAsMention() +
-                                "\nSuggestion Channel: " + Database.getConfigChannel(event, "channels.suggestion_cid").getAsMention() +
-                                ", Mute Role: " + Database.getConfigRole(event, "roles.mute_rid").getAsMention(), false);
+                        .addField("Other", "Report Channel: " + Database.getConfigChannelAsMention(event, "channels.report_cid") +
+                                ", Log Channel: " + Database.getConfigChannelAsMention(event, "channels.log_cid") +
+                                "\nSuggestion Channel: " + Database.getConfigChannelAsMention(event, "channels.suggestion_cid") +
+                                ", Mute Role: " + Database.getConfigRoleAsMention(event, "roles.mute_rid"), false);
 
                 event.replyEmbeds(eb.build()).queue();
     }

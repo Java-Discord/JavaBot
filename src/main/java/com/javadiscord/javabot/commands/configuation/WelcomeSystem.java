@@ -141,7 +141,7 @@ public class WelcomeSystem implements SlashCommandHandler {
                 .addField("Messages", "Welcome: ``" + Database.getConfigString(event, "welcome_system.join_msg") +
                         "``\nLeave: ``" + Database.getConfigString(event, "welcome_system.leave_msg") + "``", false)
 
-                .addField("Channel", Database.getConfigChannel(event, "welcome_system.welcome_cid").getAsMention(), true)
+                .addField("Channel", Database.getConfigChannelAsMention(event, "welcome_system.welcome_cid"), true)
                 .addField("Status", "``" + status + "``", true)
                 .build();
 

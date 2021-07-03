@@ -455,4 +455,26 @@ public class Database {
         return role;
     }
 
+    public static String getConfigChannelAsMention(SlashCommandEvent event, String varName) {
+
+            String mention;
+            String id = getConfigString(event, varName);
+
+            try { mention = event.getGuild().getTextChannelById(id).getAsMention(); }
+            catch (NumberFormatException e) { mention = "None"; }
+
+        return mention;
+    }
+
+    public static String getConfigRoleAsMention(SlashCommandEvent event, String varName) {
+
+        String mention;
+        String id = getConfigString(event, varName);
+
+        try { mention = event.getGuild().getRoleById(id).getAsMention(); }
+        catch (NumberFormatException e) { mention = "None"; }
+
+        return mention;
+    }
+
 }
