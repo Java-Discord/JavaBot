@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.commands.configuation;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.events.UserJoin;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
@@ -8,7 +9,11 @@ import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
 
 public class WelcomeSystem implements SlashCommandHandler {
 
@@ -64,6 +69,7 @@ public class WelcomeSystem implements SlashCommandHandler {
 
     public static void setPrimaryColor(SlashCommandEvent event, String color) {
 
+        color = color.replace("#", "");
         long l = Long.parseLong(color, 16);
         int i = (int) l;
 
@@ -73,6 +79,7 @@ public class WelcomeSystem implements SlashCommandHandler {
 
     public static void setSecondaryColor(SlashCommandEvent event, String color) {
 
+        color = color.replace("#", "");
         long l = Long.parseLong(color, 16);
         int i = (int) l;
 
@@ -112,8 +119,7 @@ public class WelcomeSystem implements SlashCommandHandler {
 
     public static void getList(SlashCommandEvent event) {
 
-        String guildID = event.getGuild().getId();
-
+        event.deferReply().queue();
 
         String status;
         if (Database.getConfigBoolean(event, "welcome_system.welcome_status")) status = "enabled";
@@ -122,8 +128,6 @@ public class WelcomeSystem implements SlashCommandHandler {
         var eb = new EmbedBuilder()
                 .setTitle("Welcome System Configuration")
                 .setColor(Constants.GRAY)
-
-                .setImage(Misc.checkImage(Database.getConfigString(event, "welcome_system.image.overlayURL")))
 
                 .addField("Image", "Width, Height: ``" + Database.getConfigString(event, "welcome_system.image.imgW") +
                         "``, ``" + Database.getConfigString(event, "welcome_system.image.imgH") +
@@ -138,15 +142,15 @@ public class WelcomeSystem implements SlashCommandHandler {
                         "``\nX, Y: ``" + Database.getConfigInt(event, "welcome_system.image.avatar.avX") +
                         "``, ``" + Database.getConfigInt(event, "welcome_system.image.avatar.avY") + "``", true)
 
-                .addField("Messages", "Welcome: ``" + Database.getConfigString(event, "welcome_system.join_msg") +
+                .addField("Messages", "Join: ``" + Database.getConfigString(event, "welcome_system.join_msg") +
                         "``\nLeave: ``" + Database.getConfigString(event, "welcome_system.leave_msg") + "``", false)
 
                 .addField("Channel", Database.getConfigChannelAsMention(event, "welcome_system.welcome_cid"), true)
-                .addField("Status", "``" + status + "``", true)
-                .build();
+                .addField("Status", "``" + status + "``", true);
 
-        event.replyEmbeds(eb).queue();
-
+        try {
+            event.getHook().editOriginalEmbeds(eb.build()).addFile(new ByteArrayInputStream(new UserJoin().generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @Override

@@ -71,12 +71,9 @@ public class Config implements SlashCommandHandler {
 
                 var eb = new EmbedBuilder()
                         .setColor(Constants.GRAY)
-                        .setTitle("Bot Configuration");
+                        .setTitle("Bot Configuration")
 
-                String overlayURL = Database.getConfigString(event, "welcome_system.image.overlayURL");
-                eb.setImage(Misc.checkImage(overlayURL));
-
-                        eb.addField("Lock Status", "Lock: ``" + Database.getConfigBoolean(event, "other.server_lock.lock_status") + "``" +
+                        .addField("Lock Status", "Lock: ``" + Database.getConfigBoolean(event, "other.server_lock.lock_status") + "``" +
                                 "\nCount: ``" + Database.getConfigInt(event, "other.server_lock.lock_count") + "/5``", true)
 
                         .addField("Question of the Week", "Submission Channel: " + Database.getConfigChannelAsMention(event, "channels.submission_cid")
@@ -88,9 +85,10 @@ public class Config implements SlashCommandHandler {
                         .addField("Other", "Report Channel: " + Database.getConfigChannelAsMention(event, "channels.report_cid") +
                                 ", Log Channel: " + Database.getConfigChannelAsMention(event, "channels.log_cid") +
                                 "\nSuggestion Channel: " + Database.getConfigChannelAsMention(event, "channels.suggestion_cid") +
-                                ", Mute Role: " + Database.getConfigRoleAsMention(event, "roles.mute_rid"), false);
+                                ", Mute Role: " + Database.getConfigRoleAsMention(event, "roles.mute_rid"), false)
+                        .build();
 
-                event.replyEmbeds(eb.build()).queue();
+                event.replyEmbeds(eb).queue();
     }
 
     @Override

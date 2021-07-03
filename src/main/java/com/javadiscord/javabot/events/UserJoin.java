@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -41,6 +42,13 @@ public class UserJoin extends ListenerAdapter {
 
         if (ev instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
             net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent event = (GuildMemberJoinEvent) ev;
+
+            guild = event.getGuild();
+            member = event.getMember();
+        }
+
+        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
+            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
 
             guild = event.getGuild();
             member = event.getMember();
