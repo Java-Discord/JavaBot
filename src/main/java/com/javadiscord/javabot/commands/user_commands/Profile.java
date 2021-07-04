@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.TimeUtils;
@@ -75,46 +76,30 @@ public class Profile implements SlashCommandHandler {
 
         try {
 
-            List<Emote> emoteOnline = event.getGuild().getEmotesByName("sOnline", false);
-            List<Emote> emoteIdle = event.getGuild().getEmotesByName("sIdle", false);
-            List<Emote> emoteDND = event.getGuild().getEmotesByName("sDND", false);
-            List<Emote> emoteOffline = event.getGuild().getEmotesByName("sOffline", false);
-            List<Emote> emoteBrilliance = event.getGuild().getEmotesByName("badgeBrilliance", false);
-            List<Emote> emoteBalance = event.getGuild().getEmotesByName("badgeBalance", false);
-            List<Emote> emoteBravery = event.getGuild().getEmotesByName("badgeBravery", false);
-            List<Emote> emoteNitro = event.getGuild().getEmotesByName("badgeNitro", false);
-            List<Emote> emoteESupporter = event.getGuild().getEmotesByName("badgeESupporter", false);
-            List<Emote> emotePartner = event.getGuild().getEmotesByName("badgePartner", false);
-            List<Emote> emoteDev = event.getGuild().getEmotesByName("badgeDev", false);
-            List<Emote> emoteStaff = event.getGuild().getEmotesByName("badgeStaff", false);
-            List<Emote> emoteServerBoost = event.getGuild().getEmotesByName("badgeServerBoost", false);
-            List<Emote> emoteBugHunter = event.getGuild().getEmotesByName("badgeBugHunter", false);
-            List<Emote> emoteBot = event.getGuild().getEmotesByName("badgeBot", false);
-
             String statusEmote = status
-                .replace("Online", emoteOnline.get(0).getAsMention())
-                .replace("Idle", emoteIdle.get(0).getAsMention())
-                .replace("Do not disturb", emoteDND.get(0).getAsMention())
-                .replace("Offline", emoteOffline.get(0).getAsMention());
+                .replace("Online", Constants.ONLINE)
+                .replace("Idle", Constants.IDLE)
+                .replace("Do not disturb", Constants.DND)
+                .replace("Offline", Constants.OFFLINE);
 
             String badges = member.getUser().getFlags().toString()
                 .substring(1, member.getUser().getFlags().toString().length() - 1)
                 .replace(",", "")
-                .replace("PARTNER", emotePartner.get(0).getAsMention())
-                .replace("HYPESQUAD_BRAVERY", emoteBravery.get(0).getAsMention())
-                .replace("HYPESQUAD_BRILLIANCE", emoteBrilliance.get(0).getAsMention())
-                .replace("HYPESQUAD_BALANCE", emoteBalance.get(0).getAsMention())
-                .replace("VERIFIED_DEVELOPER", emoteDev.get(0).getAsMention())
-                .replace("EARLY_SUPPORTER", emoteESupporter.get(0).getAsMention())
-                .replace("SYSTEM", emoteStaff.get(0).getAsMention())
-                .replace("BUG_HUNTER_LEVEL_1", emoteBugHunter.get(0).getAsMention())
-                .replace("BUG_HUNTER_LEVEL_2", emoteBugHunter.get(0).getAsMention())
+                .replace("PARTNER", Constants.PARTNER)
+                .replace("HYPESQUAD_BRAVERY", Constants.BRAVERY)
+                .replace("HYPESQUAD_BRILLIANCE", Constants.BRILLIANCE)
+                .replace("HYPESQUAD_BALANCE", Constants.BALANCE)
+                .replace("VERIFIED_DEVELOPER", Constants.DEV)
+                .replace("EARLY_SUPPORTER", Constants.EARLY_SUPPORTER)
+                .replace("SYSTEM", Constants.STAFF)
+                .replace("BUG_HUNTER_LEVEL_1", Constants.BUG_HUNTER)
+                .replace("BUG_HUNTER_LEVEL_2", Constants.BUG_HUNTER)
                 .replace("VERIFIED_BOT", "");
 
             String boostBadge, botBadge;
 
             if (!(member.getTimeBoosted() == null)) {
-                boostBadge = emoteServerBoost.get(0).getAsMention();
+                boostBadge = Constants.SERVER_BOOST;
             } else {
                 boostBadge = "";
             }
@@ -123,7 +108,7 @@ public class Profile implements SlashCommandHandler {
                 .replace("```", "");
 
             if (member.getUser().isBot()) {
-                botBadge = emoteBot.get(0).getAsMention();
+                botBadge = Constants.BOT;
             } else {
                 botBadge = "";
             }
