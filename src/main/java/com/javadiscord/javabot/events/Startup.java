@@ -5,6 +5,7 @@ import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -21,6 +22,7 @@ public class Startup extends ListenerAdapter {
 
     public static MongoClient mongoClient;
     public static SelfUser bot;
+    public static Guild preferredGuild;
 
     @Override
     public void onReady(ReadyEvent event){
@@ -57,9 +59,21 @@ public class Startup extends ListenerAdapter {
             e.printStackTrace();
         }
 
+        String[] guildOrder = new String[]{"648956210850299986", "675136900478140422", "861254598046777344"};
+        //                                        Java              Mount Everest™    JavaDiscord Emoji Server
+
+        for (int i = 0; i < event.getJDA().getGuilds().size(); i++) {
+
+            try { preferredGuild = event.getJDA().getGuildById(guildOrder[i]); }
+            catch (Exception ignored) {}
+        }
+
+        if (preferredGuild == null) preferredGuild = event.getJDA().getGuilds().get(0);
+
         LoggerFactory.getLogger(this.getClass()).info("* Bot is ready!");
         LoggerFactory.getLogger(this.getClass()).info("* Logged in as " + event.getJDA().getSelfUser().getAsTag() + "!");
 
+        LoggerFactory.getLogger(this.getClass()).info("    * Preferred Guild: " + preferredGuild.getName());
         LoggerFactory.getLogger(this.getClass()).info("    * Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         //StarboardListener.updateAllSBM(event);
