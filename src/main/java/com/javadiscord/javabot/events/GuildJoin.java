@@ -9,11 +9,14 @@ import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bson.Document;
+import org.slf4j.LoggerFactory;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class GuildJoin extends ListenerAdapter {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(GuildJoin.class);
 
     public static void addGuildToDB (String guildID, String guildName) {
 
@@ -28,7 +31,7 @@ public class GuildJoin extends ListenerAdapter {
         } catch (NullPointerException e) {
 
             collection.insertOne(Database.guildDoc(guildName, guildID));
-            System.out.println("* Added Database entry for Guild \"" + guildName + "\" (" + guildID + ")");
+            logger.warn("Added Database entry for Guild \"" + guildName + "\" (" + guildID + ")");
         }
     }
 
