@@ -39,7 +39,7 @@ public class BotInfo implements SlashCommandHandler {
 
         EmbedBuilder eb = new EmbedBuilder()
             .setColor(new Color(0x2F3136))
-            .setDescription("**" + botName + "** - currently running version ``" + new Version().getVersion() + "``")
+            .setDescription("**" + botName + "** - currently running version `" + new Version().getVersion() + "`")
             .setThumbnail(botImage)
             .setAuthor(botName + " | Info", null, botImage)
             .addField("Name", "```" + botTag + "```", true)
