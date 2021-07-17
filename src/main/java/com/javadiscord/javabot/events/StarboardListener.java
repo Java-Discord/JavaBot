@@ -61,9 +61,12 @@ public class StarboardListener extends ListenerAdapter {
     void updateSB(Guild guild, String cID, String mID) {
 
         TextChannel tc = guild.getTextChannelById(cID);
+        Message msg = null;
 
-        Message msg = guild.getTextChannelById(Database.getConfigString(guild.getName(), guild.getId(), "other.starboard.starboard_cid"))
-                .retrieveMessageById(getSBCString(guild.getId(), cID, mID, "starboard_embed")).complete();
+        if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) {
+            msg = guild.getTextChannelById(Database.getConfigString(guild.getName(), guild.getId(), "other.starboard.starboard_cid"))
+                    .retrieveMessageById(getSBCString(guild.getId(), cID, mID, "starboard_embed")).complete();
+        }
 
         if (getStarCount(guild.getId(), cID, mID) > 0) {
 
@@ -71,7 +74,7 @@ public class StarboardListener extends ListenerAdapter {
                     + " " + getStarCount(guild.getId(), cID, mID) + " | " +
                     tc.getAsMention()).queue();
         } else {
-            msg.delete().queue();
+            if (!(msg == null)) msg.delete().queue();
 
             MongoDatabase database = mongoClient.getDatabase("other");
             MongoCollection<Document> collection = database.getCollection("starboard_messages");
