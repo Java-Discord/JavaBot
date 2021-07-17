@@ -16,6 +16,11 @@ public class Embed implements SlashCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
+        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
         switch (event.getSubcommandName()) {
             case "create": createEmbed(event); break;
             case "from-message": createEmbedFromLink(event); break;
@@ -41,10 +46,6 @@ public class Embed implements SlashCommandHandler {
     }
 
     void createEmbed(SlashCommandEvent event) {
-        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
-        }
 
             OptionMapping embedOption;
             embedOption = event.getOption("title");
