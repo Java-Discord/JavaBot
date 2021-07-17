@@ -2,6 +2,7 @@ package com.javadiscord.javabot.events;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.other.Constants;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -23,7 +24,7 @@ public class CstmCmdListener extends ListenerAdapter {
         } catch (NullPointerException e) { }
 
         String[] args = event.getMessage().getContentDisplay().split(" ");
-            if (args[0].startsWith("!")) {
+            if (!args[0].startsWith("!")) return;
 
                 MongoDatabase database = mongoClient.getDatabase("other");
                 MongoCollection<Document> collection = database.getCollection("customcommands");
@@ -35,26 +36,28 @@ public class CstmCmdListener extends ListenerAdapter {
                         .append("commandname", commandName);
 
                 try {
-                    String JSON = collection.find(criteria).first().toJson();
+                    String json = collection.find(criteria).first().toJson();
 
-                    JsonObject Root = JsonParser.parseString(JSON).getAsJsonObject();
-                    String Value = Root.get("value").getAsString();
-                    boolean deleteMessage = Root.get("delete_message").getAsBoolean();
+                    JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+                    String value = root.get("value").getAsString();
+                    boolean deleteMessage = root.get("delete_message").getAsBoolean();
 
                     if (deleteMessage) event.getMessage().delete().complete();
 
-                    String text = Value
+                    String text = value
                             .replace("{!membercount}", String.valueOf(event.getGuild().getMemberCount()))
                             .replace("{!servername}", event.getGuild().getName())
                             .replace("{!serverid}", event.getGuild().getId());
 
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setColor(new Color(0x2F3136))
-                            .setDescription(text);
-                    event.getChannel().sendMessage(eb.build()).queue();
+                    var e = new EmbedBuilder()
+                            .setColor(Constants.GRAY)
+                            .setDescription(text)
+                            .build();
+
+                    event.getChannel().sendMessageEmbeds(e).queue();
 
                 } catch (NullPointerException ignored) { }
-            }
+
         }
     }
 
