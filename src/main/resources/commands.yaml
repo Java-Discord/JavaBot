@@ -197,7 +197,7 @@
         - {description: State of the server lock, name: locked, required: true, type: BOOLEAN}
 - description: edits the welcome image config
   name: welcome
-  handler: com.javadiscord.javabot.commands.configuation.WelcomeSystem
+  handler: com.javadiscord.javabot.commands.configuation.welcome_system.WelcomeSystem
   options: []
   subCommands:
     - description: Sends the current welcome system config
