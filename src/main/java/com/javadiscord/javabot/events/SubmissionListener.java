@@ -84,6 +84,7 @@ public class SubmissionListener extends ListenerAdapter {
                             Button.danger(event.getAuthor().getId() + ":dm-submission:cancel", "Cancel"))).build()).queue();
 
                     // TODO: Re-implement this without EventWaiter.
+                    // TODO: Swap Button Author ID with Button Type (see SlashCommands.java:108)
                     event.getMessage().reply("Submission is unsupported at this time.").queue();
 //                    EventWaiter waiter = new EventWaiter();
 //                    event.getJDA().addEventListener(waiter);

@@ -38,7 +38,6 @@ public class Bot {
         jda.addEventListener(new UserLeave());
         jda.addEventListener(new Startup());
         jda.addEventListener(PresenceUpdater.standardActivities());
-        jda.addEventListener(new ReactionListener());
         jda.addEventListener(new SuggestionListener());
         jda.addEventListener(new AutoMod());
         jda.addEventListener(new SubmissionListener());

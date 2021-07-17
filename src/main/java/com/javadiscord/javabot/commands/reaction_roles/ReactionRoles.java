@@ -94,7 +94,7 @@ public class ReactionRoles implements SlashCommandHandler {
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role List")
                 .setDescription(description)
-                .setColor(new Color(0x2F3136))
+                .setColor(Constants.GRAY)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();
@@ -180,9 +180,10 @@ public class ReactionRoles implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role removed")
+                .addField("MessageID", "```" + mID + "```", false)
                 .addField("Emote", "```" + emote + "```", true)
-                .addField("MessageID", "```" + mID + "```", true)
-                .setColor(new Color(0x2F3136))
+                .addField("Button Label", "```" + buttonLabel + "```", true)
+                .setColor(Constants.GRAY)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();
@@ -206,8 +207,9 @@ public class ReactionRoles implements SlashCommandHandler {
             JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
             String label = root.get("button_label").getAsString();
             String emote = root.get("emote").getAsString();
+            Emoji emoji = Emoji.fromMarkdown(emote);
 
-            buttons.add(Button.of(ButtonStyle.SECONDARY, "reactionroles:" + message.getId() + ":" + label, label, Emoji.fromMarkdown(emote)));
+            buttons.add(Button.of(ButtonStyle.SECONDARY, "reactionroles:" + message.getId() + ":" + label + ":" + emoji.getId(), label, emoji));
         }
 
         message.editMessageEmbeds(message.getEmbeds().get(0)).setActionRow(buttons.toArray(new Button[0])).queue();
