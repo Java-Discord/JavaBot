@@ -116,7 +116,7 @@ public class StarboardListener extends ListenerAdapter {
                 if (!msg.getReactions().get(i - 1).getReactionEmote().getName().equals(emote)) return;
 
                 setEmoteCount(msg.getReactions().get(i - 1).getCount(), gID, cID, mID);
-                if (msg.getReactions().get(i - 1).getCount() >= 3) addToSB(guild, guild.getTextChannelById(cID), msg);
+                if (msg.getReactions().get(i - 1).getCount() >= 3 && !getSBCBool(gID, cID, mID)) addToSB(guild, guild.getTextChannelById(cID), msg);
                 if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) updateSB(event.getJDA().getGuildById(gID), cID, mID);
             }
         }
