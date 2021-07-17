@@ -85,7 +85,7 @@ public class Startup extends ListenerAdapter {
         logger.info("Preferred Guild: " + preferredGuild.getName());
         logger.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
-        //StarboardListener.updateAllSBM(event);
+        new StarboardListener().updateAllSBM(event);
 
         for (var guild : event.getJDA().getGuilds()) {
             Bot.slashCommands.registerSlashCommands(guild);
