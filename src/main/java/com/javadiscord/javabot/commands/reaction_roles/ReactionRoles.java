@@ -12,13 +12,21 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.Component;
 import org.bson.Document;
+import org.yaml.snakeyaml.util.ArrayUtils;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -33,17 +41,19 @@ public class ReactionRoles implements SlashCommandHandler {
 
             case "create":
                 create(event,
-                    event.getOption("channel").getAsMessageChannel(),
-                    event.getOption("messageid").getAsString(),
-                    event.getOption("emote").getAsString(),
-                    event.getOption("role").getAsRole());
+                        event.getOption("channel").getAsMessageChannel(),
+                        event.getOption("messageid").getAsString(),
+                        event.getOption("emote").getAsString(),
+                        event.getOption("button-label").getAsString(),
+                        event.getOption("role").getAsRole());
 
                 break;
 
             case "delete":
                 delete(event,
-                    event.getOption("messageid").getAsString(),
-                    event.getOption("emote").getAsString());
+                        event.getOption("messageid").getAsString(),
+                        event.getOption("button-label").getAsString(),
+                        event.getOption("emote").getAsString());
                 break;
         }
     }
@@ -63,12 +73,14 @@ public class ReactionRoles implements SlashCommandHandler {
             String messageID = root.get("message_id").getAsString();
             String roleID = root.get("role_id").getAsString();
             String emoteName = root.get("emote").getAsString();
+            String label = root.get("button_label").getAsString();
 
             sb.append("#ReactionRole" + i +
                     "\n[CID] " + channelID +
                     "\n[MID] " + messageID +
                     "\n[RID] " + roleID +
-                    "\n[EmoteName] " + emoteName + "\n\n");
+                    "\n[Label] " + label +
+                    "\n[Emote] " + emoteName + "\n\n");
         }
 
         String description;
@@ -79,154 +91,125 @@ public class ReactionRoles implements SlashCommandHandler {
             description = "```No Reaction Roles created yet```";
         }
 
-            var e = new EmbedBuilder()
-                    .setTitle("Reaction Role List")
-                    .setDescription(description)
-                    .setColor(new Color(0x2F3136))
-                    .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setTimestamp(new Date().toInstant())
-                    .build();
-
-            event.replyEmbeds(e).queue();
-        }
-
-    private void create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, Role role) {
-        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-
-            boolean validEmote = false, integratedEmote = false;
-            String emoteName = null;
-
-            MongoDatabase database = mongoClient.getDatabase("other");
-            MongoCollection<Document> collection = database.getCollection("reactionroles");
-
-                if (emote.length() < 24) {
-                    emoteName = emote;
-                    integratedEmote = true;
-                    validEmote = true;
-                }
-
-                if (!integratedEmote) {
-                    emoteName = emote.substring(2, emote.length() - 20);
-
-                    if (emoteName.startsWith(":")) emoteName = emoteName.substring(1);
-
-                    try {
-
-                        if (event.getGuild().getEmotes().contains(event.getGuild().getEmotesByName(emoteName, false).get(0))) {
-                            validEmote = true;
-
-                        } else {
-
-                            event.replyEmbeds(Embeds.emptyError("```Please provide a valid Emote.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-                            return;
-                        }
-
-                    } catch (IndexOutOfBoundsException e) {
-
-                        event.replyEmbeds(Embeds.emptyError("```Please provide a valid Emote.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-                        return;
-                    }
-                }
-
-                BasicDBObject criteria = new BasicDBObject()
-                        .append("guild_id", event.getGuild().getId())
-                        .append("channel_id", channel.getId())
-                        .append("message_id", mID)
-                        .append("emote", emoteName);
-
-                if (collection.find(criteria).first() == null) {
-
-                    if (validEmote) {
-                        if (integratedEmote) channel.addReactionById(mID, emoteName).complete();
-                        else channel.addReactionById(mID, event.getGuild().getEmotesByName(emoteName, false).get(0)).complete();
-                    }
-
-                    Document doc = new Document()
-                            .append("guild_id", event.getGuild().getId())
-                            .append("channel_id", channel.getId())
-                            .append("message_id", mID)
-                            .append("role_id", role.getId())
-                            .append("emote", emoteName);
-
-                    collection.insertOne(doc);
-
-                    var e = new EmbedBuilder()
-                            .setTitle("Reaction Role created")
-                            .addField("Channel", "<#" + channel.getId() + ">", true)
-                            .addField("Role", role.getAsMention(), true)
-                            .addField("Emote", "``" + emoteName + "``", true)
-                            .addField("MessageID", "```" + mID + "```", false)
-                            .setColor(Constants.GRAY)
-                            .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                            .setTimestamp(new Date().toInstant())
-                            .build();
-
-                    event.replyEmbeds(e).setEphemeral(true).queue();
-                    Misc.sendToLog(event, e);
-
-                } else {
-                    event.replyEmbeds(Embeds.emptyError("A Reaction Role on message ``" + mID + "`` with emote ``" + emoteName + "`` already exists.", event))
-                            .setEphemeral(Constants.ERR_EPHEMERAL).queue();
-                }
-
-        } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
-    }
-
-    private void delete(SlashCommandEvent event, String mID, String emote) {
-        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-
-        boolean validEmote = false, integratedEmote = false;
-        String emoteName = null;
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("reactionroles");
-
-        if (emote.length() < 24) {
-            emoteName = emote;
-            integratedEmote = true;
-            validEmote = true;
-        }
-
-        if (!integratedEmote) {
-            emoteName = emote.substring(2, emote.length() - 20);
-
-            if (emoteName.startsWith(":")) emoteName = emoteName.substring(1);
-
-            try {
-                if (event.getGuild().getEmotes().contains(event.getGuild().getEmotesByName(emoteName, false).get(0))) { validEmote = true; }
-
-                else { event.replyEmbeds(Embeds.emptyError("```Please provide a valid Emote.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); return; }
-            } catch (IndexOutOfBoundsException e) { event.replyEmbeds(Embeds.emptyError("```Please provide a valid Emote.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); return; }
-        }
-
-
-        BasicDBObject criteria = new BasicDBObject()
-                .append("guild_id", event.getGuild().getId())
-                .append("message_id", mID)
-                .append("emote", emoteName);
-
-        String doc = collection.find(criteria).first().toJson();
-        JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-        mID = Root.get("channel_id").getAsString();
-
-        if (validEmote) {
-            if (integratedEmote) { event.getGuild().getTextChannelById(mID).removeReactionById(mID, emoteName).complete(); }
-            else { event.getGuild().getTextChannelById(mID).removeReactionById(mID, event.getGuild().getEmotesByName(emoteName, false).get(0)).complete(); }
-        }
-
-        collection.deleteOne(criteria);
-
         var e = new EmbedBuilder()
-                .setTitle("Reaction Role removed")
-                .addField("Emote", "```" + emoteName + "```", true)
-                .addField("MessageID", "```" + mID + "```", true)
+                .setTitle("Reaction Role List")
+                .setDescription(description)
                 .setColor(new Color(0x2F3136))
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();
 
         event.replyEmbeds(e).queue();
+    }
 
-        } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+    private void create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, String buttonLabel, Role role) {
+
+        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("reactionroles");
+
+        BasicDBObject criteria = new BasicDBObject()
+                .append("guild_id", event.getGuild().getId())
+                .append("channel_id", channel.getId())
+                .append("message_id", mID)
+                .append("button_label", buttonLabel)
+                .append("emote", emote);
+
+        if (collection.find(criteria).first() == null) {
+
+            Document doc = new Document()
+                    .append("guild_id", event.getGuild().getId())
+                    .append("channel_id", channel.getId())
+                    .append("message_id", mID)
+                    .append("role_id", role.getId())
+                    .append("button_label", buttonLabel)
+                    .append("emote", emote);
+
+            collection.insertOne(doc);
+            var e = new EmbedBuilder()
+                    .setTitle("Reaction Role created")
+                    .addField("Channel", "<#" + channel.getId() + ">", true)
+                    .addField("Role", role.getAsMention(), true)
+                    .addField("MessageID", "```" + mID + "```", false)
+                    .addField("Emote", "```" + emote + "```", true)
+                    .addField("Button Label", "```" + buttonLabel + "```", true)
+                    .setColor(Constants.GRAY)
+                    .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+                    .setTimestamp(new Date().toInstant())
+                    .build();
+
+            event.replyEmbeds(e).setEphemeral(true).queue();
+            Misc.sendToLog(event, e);
+
+            updateMessageComponents(channel.retrieveMessageById(mID).complete());
+
+        } else {
+            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.", event))
+                    .setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        }
+    }
+
+    private void delete(SlashCommandEvent event, String mID, String buttonLabel, String emote) {
+        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("reactionroles");
+
+        BasicDBObject criteria = new BasicDBObject()
+                .append("guild_id", event.getGuild().getId())
+                .append("message_id", mID)
+                .append("emote", emote)
+                .append("button_label", buttonLabel);
+
+        try {
+            collection.find(criteria).first().toJson();
+        } catch (NullPointerException e) {
+            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.", event))
+                    .setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
+        collection.deleteOne(criteria);
+
+        var e = new EmbedBuilder()
+                .setTitle("Reaction Role removed")
+                .addField("Emote", "```" + emote + "```", true)
+                .addField("MessageID", "```" + mID + "```", true)
+                .setColor(new Color(0x2F3136))
+                .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+                .setTimestamp(new Date().toInstant())
+                .build();
+
+        event.replyEmbeds(e).setEphemeral(true).queue();
+        Misc.sendToLog(event, e);
+
+        updateMessageComponents(event.getChannel().retrieveMessageById(mID).complete());
+    }
+
+    void updateMessageComponents (Message message) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("reactionroles");
+
+        List<Button> buttons = new ArrayList<>();
+        MongoCursor<Document> it = collection.find(eq("message_id", message.getId())).iterator();
+
+        while (it.hasNext()) {
+
+            JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
+            String label = root.get("button_label").getAsString();
+            String emote = root.get("emote").getAsString();
+
+            buttons.add(Button.of(ButtonStyle.SECONDARY, "reactionroles:" + message.getId() + ":" + label, label, Emoji.fromMarkdown(emote)));
+        }
+
+        message.editMessageEmbeds(message.getEmbeds().get(0)).setActionRow(buttons.toArray(new Button[0])).queue();
     }
 }

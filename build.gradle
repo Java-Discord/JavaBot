@@ -17,7 +17,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-    compile 'net.dv8tion:JDA:4.3.0_293'
+    compile 'net.dv8tion:JDA:4.3.0_297'
     compile 'org.mongodb:mongodb-driver:3.6.0'
     compile 'com.google.code.gson:gson:2.8.6'
     compile 'org.yaml:snakeyaml:1.29'
