@@ -152,7 +152,7 @@
        required: false, type: USER}
 - description: Shows the config for the current guild
   name: config
-  handler: com.javadiscord.javabot.commands.configuation.Config
+  handler: com.javadiscord.javabot.commands.configuation.config.Config
   options: []
   subCommands:
     - description: Shows the current config
