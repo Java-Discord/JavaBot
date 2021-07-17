@@ -47,7 +47,9 @@ public class AutoMod extends ListenerAdapter {
                     .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6)
                     .collect(Collectors.toList()).size();
 
+
                 if (spamCount > 5) {
+                    if (!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).getFileExtension().equals("java")) return;
 //                    Mute.mute(event.getMember(), event.getJDA().getSelfUser().getAsTag(), event);
                     // TODO: Extract mute logic to service.
                 }
