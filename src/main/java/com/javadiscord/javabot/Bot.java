@@ -41,7 +41,7 @@ public class Bot {
         jda.addEventListener(new SuggestionListener());
         jda.addEventListener(new AutoMod());
         jda.addEventListener(new SubmissionListener());
-        //jda.addEventListener(new StarboardListener());
+        jda.addEventListener(new StarboardListener());
     }
 
     /**
