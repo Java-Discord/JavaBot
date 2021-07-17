@@ -185,8 +185,13 @@ public class SlashCommands extends ListenerAdapter {
 
                 Role role = event.getGuild().getRoleById(roleID);
 
-                if (member.getRoles().contains(role)) event.getGuild().removeRoleFromMember(member, role).queue();
-                else event.getGuild().addRoleToMember(member, role).queue();
+                if (member.getRoles().contains(role)) {
+                    event.getGuild().removeRoleFromMember(member, role).queue();
+                    event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
+                } else {
+                    event.getGuild().addRoleToMember(member, role).queue();
+                    event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
+                }
                 break;
         }
     }
