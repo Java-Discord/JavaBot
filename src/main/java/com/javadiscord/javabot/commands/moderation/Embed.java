@@ -5,6 +5,8 @@ import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -14,7 +16,36 @@ public class Embed implements SlashCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+        switch (event.getSubcommandName()) {
+            case "create": createEmbed(event); break;
+            case "from-message": createEmbedFromLink(event); break;
+        }
+    }
+
+    void createEmbedFromLink(SlashCommandEvent event) {
+        MessageChannel channel = event.getOption("channel").getAsMessageChannel();
+        String messageID = event.getOption("message-id").getAsString();
+
+        try {
+        Message message = channel.retrieveMessageById(messageID).complete();
+
+        var e = new EmbedBuilder()
+                .setColor(Constants.GRAY)
+                .setDescription(message.getContentRaw())
+                .build();
+
+        event.getChannel().sendMessageEmbeds(e).queue();
+        event.reply("Done!").setEphemeral(true).queue();
+
+        } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+    }
+
+    void createEmbed(SlashCommandEvent event) {
+        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
             OptionMapping embedOption;
             embedOption = event.getOption("title");
             String title = embedOption == null ? null : embedOption.getAsString();
@@ -59,6 +90,5 @@ public class Embed implements SlashCommandHandler {
                 event.replyEmbeds(eb.build()).queue();
 
             } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
-        } else { event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 }

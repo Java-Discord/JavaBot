@@ -76,19 +76,27 @@
   handler: com.javadiscord.javabot.commands.moderation.EditEmbed
 - description: Sends an embed
   name: embed
-  options:
-    - {description: Title of the embed, name: title, required: false, type: STRING}
-    - {description: Description of the embed, name: description, required: false, type: STRING}
-    - {description: Author name of the embed, name: author-name, required: false, type: STRING}
-    - {description: Author url of the embed, name: author-url, required: false, type: STRING}
-    - {description: Author iconurl of the embed, name: author-iconurl, required: false,
-       type: STRING}
-    - {description: Thumbnail url of the embed, name: thumbnail-url, required: false,
-       type: STRING}
-    - {description: Image url of the embed, name: image-url, required: false, type: STRING}
-    - {description: 'Color of the embed (e.g. #ff0000)', name: color, required: false,
-       type: STRING}
   handler: com.javadiscord.javabot.commands.moderation.Embed
+  options: []
+  subCommands:
+    - description: Creates a new Embed
+      name: create
+      options:
+        - { description: Title of the embed, name: title, required: false, type: STRING }
+        - { description: Description of the embed, name: description, required: false, type: STRING }
+        - { description: Author name of the embed, name: author-name, required: false, type: STRING }
+        - { description: Author url of the embed, name: author-url, required: false, type: STRING }
+        - { description: Author iconurl of the embed, name: author-iconurl, required: false,
+            type: STRING }
+        - { description: Thumbnail url of the embed, name: thumbnail-url, required: false,
+            type: STRING }
+        - { description: Image url of the embed, name: image-url, required: false, type: STRING }
+        - { description: 'Color of the embed (e.g. #ff0000)', name: color, required: false, type: STRING }
+    - description: Created a new Embed from a Message
+      name: from-message
+      options:
+        - { description: Channel of the original Message, name: channel, required: true, type: CHANNEL }
+        - { description: ID of the original Message, name: message-id, required: true, type: STRING }
 - description: Kicks a member
   name: kick
   handler: com.javadiscord.javabot.commands.moderation.Kick
@@ -310,7 +318,7 @@
         - {description: 'Emote, the reaction role is using', name: emote, required: true,
            type: STRING}
         - {description: 'Label, the button should use', name: button-label, required: true,
-            type: STRING}
+           type: STRING}
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
