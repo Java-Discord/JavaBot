@@ -2,17 +2,9 @@ package com.javadiscord.javabot.commands.configuation.config;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.configuation.config.subcommands.*;
-import com.javadiscord.javabot.commands.configuation.config.subcommands.GetList;
-import com.javadiscord.javabot.commands.configuation.welcome_system.WelcomeCommandHandler;
-import com.javadiscord.javabot.commands.configuation.welcome_system.subcommands.*;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
-import com.javadiscord.javabot.other.StatsCategory;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 import java.util.HashMap;

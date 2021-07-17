@@ -11,8 +11,6 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bson.Document;
 
-import java.awt.*;
-
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 
 public class CstmCmdListener extends ListenerAdapter {

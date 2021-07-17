@@ -3,7 +3,6 @@ package com.javadiscord.javabot.events;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.StatsCategory;
 import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 

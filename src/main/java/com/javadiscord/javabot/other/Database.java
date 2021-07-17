@@ -2,8 +2,6 @@ package com.javadiscord.javabot.other;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.events.Startup;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -17,8 +15,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import org.bson.Document;
-
-import java.util.Arrays;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
