@@ -12,7 +12,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -22,11 +22,13 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.size;
 
 public class SlashCommands extends ListenerAdapter {
     /**
@@ -105,17 +107,19 @@ public class SlashCommands extends ListenerAdapter {
 
     @Override
     public void onButtonClick(ButtonClickEvent event) {
+        if (event.getUser().isBot()) return;
 
         String[] id = event.getComponentId().split(":");
-        String authorId = id[0];
-        String type = id[1];
-
-        if (!authorId.equals(event.getUser().getId()) && !(type.startsWith("submission"))) return;
+        String type = id[0];
 
         event.deferEdit().queue();
+
         switch (type) {
                 
             case "submission":
+
+                String authorId = id[1];
+                if (!authorId.equals(event.getUser().getId())) return;
 
                 try {
 
@@ -154,6 +158,35 @@ public class SlashCommands extends ListenerAdapter {
                     submission_messages.deleteOne(submission_criteria);
 
                 } catch (Exception e) { e.printStackTrace(); }
+                break;
+
+            case "reactionroles":
+
+                String messageID = id[1];
+                String buttonLabel = id[2];
+                String emoteID = id[3];
+
+                MongoDatabase database = mongoClient.getDatabase("other");
+                MongoCollection<Document> collection = database.getCollection("reactionroles");
+
+                Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
+                Emote emote = event.getGuild().getEmoteById(emoteID);
+
+                BasicDBObject criteria = new BasicDBObject()
+                        .append("guild_id", event.getGuild().getId())
+                        .append("message_id", messageID)
+                        .append("emote", emote.getAsMention())
+                        .append("button_label", buttonLabel);
+
+                String JSON = collection.find(criteria).first().toJson();
+
+                JsonObject Root = JsonParser.parseString(JSON).getAsJsonObject();
+                String roleID = Root.get("role_id").getAsString();
+
+                Role role = event.getGuild().getRoleById(roleID);
+
+                if (member.getRoles().contains(role)) event.getGuild().removeRoleFromMember(member, role).queue();
+                else event.getGuild().addRoleToMember(member, role).queue();
                 break;
         }
     }
