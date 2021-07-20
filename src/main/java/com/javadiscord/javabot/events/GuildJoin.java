@@ -24,7 +24,6 @@ public class GuildJoin extends ListenerAdapter {
         MongoCollection<Document> collection = database.getCollection("config");
 
         try {
-
             String doc = collection.find(eq("guild_id", guildID)).first().toJson();
             JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
 

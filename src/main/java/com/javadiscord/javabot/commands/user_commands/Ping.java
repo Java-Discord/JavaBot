@@ -9,6 +9,7 @@ public class Ping implements SlashCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
+
         long gatewayPing = event.getJDA().getGatewayPing();
         String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 

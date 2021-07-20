@@ -23,10 +23,15 @@ public class Question implements SlashCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
+
         event.deferReply(false).queue();
         InteractionHook hook = event.getHook();
 
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            hook.sendMessageEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
             int num = (int) event.getOption("amount").getAsLong();
             MongoDatabase database = mongoClient.getDatabase("other");
             MongoCollection<Document> collection = database.getCollection("expert_questions");
@@ -63,8 +68,5 @@ public class Question implements SlashCommandHandler {
             } else {
                 hook.sendMessageEmbeds(Embeds.emptyError("```Please choose a Number between 1 and " + l + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
-        } else {
-            hook.sendMessageEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-        }
     }
 }

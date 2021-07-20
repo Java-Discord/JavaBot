@@ -5,10 +5,7 @@ import com.google.gson.JsonParser;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -90,7 +87,7 @@ public class Database {
         return doc;
     }
 
-    public static void queryMemberString(String memberID, String varName, String newValue) {
+    public static void queryMember(String memberID, String varName, String newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -107,7 +104,7 @@ public class Database {
         collection.updateOne(Query, update);
     }
 
-    public static void queryMemberInt(String memberID, String varName, int newValue) {
+    public static void queryMember(String memberID, String varName, int newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -122,11 +119,6 @@ public class Database {
         update.append("$set", SetData);
 
         collection.updateOne(Query, update);
-    }
-
-    public static String getMemberString(Member member, String varName) {
-
-        return getMemberString(member.getUser(), varName);
     }
 
     public static String getMemberString(User user, String varName) {
@@ -148,7 +140,10 @@ public class Database {
         }
     }
 
-    public static int getMemberInt(MongoCollection<Document> collection, Member member, String varName) {
+    public static int getMemberInt(Member member, String varName) {
+
+        MongoDatabase database = mongoClient.getDatabase("userdata");
+        MongoCollection<Document> collection = database.getCollection("users");
 
         try {
             String doc = collection.find(eq("discord_id", member.getUser().getId())).first().toJson();
@@ -257,13 +252,13 @@ public class Database {
         }
     }
 
-    public static String getConfigString(String guildName, String guildID, String path) {
+    public static String getConfigString(Guild guild, String path) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
         try {
-            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String doc = collection.find(eq("guild_id", guild.getId())).first().toJson();
             String[] splittedPath = path.split("\\.");
 
             JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
@@ -275,7 +270,7 @@ public class Database {
         } catch (NullPointerException e) {
 
             e.printStackTrace();
-            collection.insertOne(guildDoc(guildName, guildID));
+            collection.insertOne(guildDoc(guild.getName(), guild.getId()));
             return "None";
         }
     }
@@ -326,13 +321,13 @@ public class Database {
         }
     }
 
-    public static int getConfigInt(String guildName, String guildID, String path) {
+    public static int getConfigInt(Guild guild, String path) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
         try {
-            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
+            String doc = collection.find(eq("guild_id", guild.getId())).first().toJson();
             String[] splittedPath = path.split("\\.");
 
             JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
@@ -344,7 +339,7 @@ public class Database {
         } catch (NullPointerException e) {
 
             e.printStackTrace();
-            collection.insertOne(guildDoc(guildName, guildID));
+            collection.insertOne(guildDoc(guild.getName(), guild.getId()));
             return 0;
         }
     }

@@ -22,10 +22,13 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Profile implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         OptionMapping profileOption = event.getOption("user");
         Member member = profileOption == null ? event.getMember() : profileOption.getAsMember();
+
         String highestRole;
         try {
             highestRole = member.getRoles().get(0).getName();
@@ -113,10 +116,9 @@ public class Profile implements SlashCommandHandler {
             }
 
             MongoDatabase database = mongoClient.getDatabase("userdata");
-            MongoCollection<Document> users = database.getCollection("users");
             MongoCollection<Document> warns = database.getCollection("warns");
 
-            int qotwCount = Database.getMemberInt(users, member, "qotwpoints");
+            int qotwCount = Database.getMemberInt(member, "qotwpoints");
             int warnCount = (int) warns.count(eq("user_id", member.getId()));
 
             TimeUtils tu = new TimeUtils();

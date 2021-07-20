@@ -9,8 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class Lmgtfy implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         String encodedSearchTerm = null;
 
         try {

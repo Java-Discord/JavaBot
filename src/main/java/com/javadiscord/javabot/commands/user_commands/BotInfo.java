@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.other.Version;
+import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
@@ -38,7 +39,7 @@ public class BotInfo implements SlashCommandHandler {
         long botMemUsed = botMemTotal - botMemFree;
 
         EmbedBuilder eb = new EmbedBuilder()
-            .setColor(new Color(0x2F3136))
+            .setColor(Constants.GRAY)
             .setDescription("**" + botName + "** - currently running version `" + new Version().getVersion() + "`")
             .setThumbnail(botImage)
             .setAuthor(botName + " | Info", null, botImage)

@@ -151,6 +151,7 @@ public class ReactionRoles implements SlashCommandHandler {
     }
 
     private void delete(SlashCommandEvent event, String mID, String buttonLabel, String emote) {
+
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;

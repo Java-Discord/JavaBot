@@ -20,8 +20,10 @@ import java.util.Date;
 import java.util.Objects;
 
 public class ChangeMyMind implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         event.deferReply(false).queue();
         InteractionHook hook = event.getHook();
 
@@ -30,7 +32,6 @@ public class ChangeMyMind implements SlashCommandHandler {
         try {
             encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) { e.printStackTrace(); }
-
 
         Unirest.get("https://nekobot.xyz/api/imagegen?type=changemymind&text=" + encodedSearchTerm).asJsonAsync(new Callback<JsonNode>(){
 

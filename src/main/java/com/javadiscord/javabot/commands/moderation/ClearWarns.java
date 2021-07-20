@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.commands.moderation.actions.WarnAction;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
@@ -24,8 +23,8 @@ public class ClearWarns implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
 
-        Database.queryMemberInt(member.getId(), "warns", 0);
-        WarnAction.deleteAllDocs(member.getId());
+        Database.queryMember(member.getId(), "warns", 0);
+        new Warn().deleteAllDocs(member.getId());
 
         var e = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | Warns cleared", null, member.getUser().getEffectiveAvatarUrl())

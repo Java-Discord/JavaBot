@@ -26,8 +26,10 @@ import static com.mongodb.client.model.Indexes.descending;
 import static com.mongodb.client.model.Projections.excludeId;
 
 public class Leaderboard implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         boolean old;
         try {
             old = event.getOption("old").getAsBoolean();
@@ -46,7 +48,7 @@ public class Leaderboard implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
-        int QOTWPoints = Database.getMemberInt(collection, event.getMember(), "qotwpoints");
+        int QOTWPoints = Database.getMemberInt(event.getMember(), "qotwpoints");
 
         ArrayList<String> topTenID = new ArrayList<String>();
         ArrayList<String> topTenAvatarURL = new ArrayList<String>();
@@ -230,7 +232,7 @@ public class Leaderboard implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
-        int qotwPoints = Database.getMemberInt(collection, event.getMember(), "qotwpoints");
+        int qotwPoints = Database.getMemberInt(event.getMember(), "qotwpoints");
 
         StringBuilder sb = new StringBuilder();
         MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();

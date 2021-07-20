@@ -12,7 +12,6 @@ public class UserLeave extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-
         if (event.getMember().getUser().isBot()) return;
 
         if (!Database.getConfigBoolean(event, "other.server_lock.lock_status")) {
@@ -36,7 +35,7 @@ public class UserLeave extends ListenerAdapter {
                 event.getGuild().getTextChannelById(String.valueOf(Database.getConfigString(event, "welcome_system.welcome_cid"))).sendMessage(replacedText2).queue();
             }
 
-            StatsCategory.update(event);
+            StatsCategory.update(event.getGuild());
         }
     }
 }

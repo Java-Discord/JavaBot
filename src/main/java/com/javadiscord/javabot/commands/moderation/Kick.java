@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.commands.moderation.actions.WarnAction;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
@@ -10,13 +9,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class Kick implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
 
@@ -46,16 +45,16 @@ public class Kick implements SlashCommandHandler {
         try {
 
             member.kick(reason).queueAfter(3, TimeUnit.SECONDS);
-            Database.queryMemberInt(member.getId(), "warns", 0);
+            Database.queryMember(member.getId(), "warns", 0);
 
-            WarnAction.deleteAllDocs(member.getId());
+            new Warn().deleteAllDocs(member.getId());
 
             Misc.sendToLog(event.getGuild(), eb);
-            member.getUser().openPrivateChannel().complete().sendMessage(eb).queue();
+            member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
             event.replyEmbeds(eb).queue();
 
-        } catch (HierarchyException e) {
-            event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+        } catch (Exception e) {
+            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
         }
     }
 }

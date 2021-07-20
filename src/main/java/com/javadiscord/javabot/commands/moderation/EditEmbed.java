@@ -34,7 +34,7 @@ public class EditEmbed implements SlashCommandHandler {
                 .setTitle(title)
                 .setDescription(description);
 
-            message.editMessage(eb.build()).queue();
+            message.editMessageEmbeds(eb.build()).queue();
             event.reply("Done!").setEphemeral(true).queue();
     }
 }

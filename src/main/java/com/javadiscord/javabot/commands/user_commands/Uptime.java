@@ -11,8 +11,10 @@ import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.TimeUnit;
 
 public class Uptime implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
         long uptimeMS = rb.getUptime();
 
@@ -25,9 +27,10 @@ public class Uptime implements SlashCommandHandler {
         long uptimeSEC = TimeUnit.MILLISECONDS.toSeconds(uptimeMS);
 
         String botImage = Startup.bot.getAvatarUrl();
+
         EmbedBuilder eb = new EmbedBuilder()
-            .setAuthor(uptimeDAYS + "d " + uptimeHRS + "h " + uptimeMIN + "min " + uptimeSEC + "s", null, botImage)
-            .setColor(new Color(0x2F3136));
+            .setColor(Color.GRAY)
+            .setAuthor(uptimeDAYS + "d " + uptimeHRS + "h " + uptimeMIN + "min " + uptimeSEC + "s", null, botImage);
 
         event.replyEmbeds(eb.build()).queue();
     }

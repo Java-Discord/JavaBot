@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -11,8 +12,10 @@ import java.time.ZoneId;
 import java.util.Objects;
 
 public class IDCalc implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         long id;
         try {
             id = Objects.requireNonNull(event.getOption("id")).getAsLong();
@@ -26,7 +29,7 @@ public class IDCalc implements SlashCommandHandler {
 
         EmbedBuilder eb = new EmbedBuilder()
             .setAuthor("ID-Calculator")
-            .setColor(new Color(0x2F3136))
+            .setColor(Constants.GRAY)
             .addField("ID", "```" + id + "```", false)
             .addField("Unix-Timestamp (+ milliseconds)", "```" + unixTimeStampMilliseconds + "```", false)
             .addField("Unix-Timestamp", "```" + unixTimeStamp + "```", false)

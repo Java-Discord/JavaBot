@@ -18,10 +18,13 @@ public class Version implements SlashCommandHandler {
     }
 
     public String getVersion () {
+
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
+
         String doc = collection.find(eq("name", "Java#9523")).first().toJson();
         JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
+
         return Root.get("version").getAsString();
     }
 }

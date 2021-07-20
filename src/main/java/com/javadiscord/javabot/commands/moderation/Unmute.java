@@ -52,7 +52,7 @@ public class Unmute implements SlashCommandHandler {
                 }
 
             } catch (HierarchyException e) {
-                event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", author)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
     }
 }

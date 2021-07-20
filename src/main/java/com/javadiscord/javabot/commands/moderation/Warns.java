@@ -25,6 +25,7 @@ public class Warns implements SlashCommandHandler {
 
         OptionMapping warnsOption = event.getOption("user");
         Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
+
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 

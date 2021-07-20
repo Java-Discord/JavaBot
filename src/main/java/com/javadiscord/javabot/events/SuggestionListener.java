@@ -16,41 +16,37 @@ public class SuggestionListener extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
             if (event.getMember().getUser().isBot()) return;
 
-            if (event.getChannel().getId().equals(Database.getConfigString(event.getGuild().getName(), event.getGuild().getId(), "channels.suggestion_cid"))) {
-
+            if (event.getChannel().getId().equals(Database.getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
                 String[] args = event.getMessage().getContentDisplay().split(" ");
-                if (!args[0].startsWith("!")) {
+                if (args[0].startsWith("!")) return;
 
                     EmbedBuilder eb = new EmbedBuilder()
                             .setColor(Constants.GRAY)
+                            .setImage(null)
                             .setAuthor(event.getAuthor().getAsTag() + " · Suggestion", null, event.getAuthor().getEffectiveAvatarUrl())
                             .setTimestamp(new Date().toInstant())
                             .setDescription(event.getMessage().getContentRaw());
 
-                    try {
+                        if (!event.getMessage().getAttachments().isEmpty()) {
+                            Message.Attachment attachment = event.getMessage().getAttachments().get(0);
 
-                        Message.Attachment attachment = event.getMessage().getAttachments().get(0);
+                            try {
+                                event.getChannel().sendFile(attachment.retrieveInputStream().get(), "attachment." + attachment.getFileExtension()).setEmbeds(eb.build()).queue(message -> {
+                                    message.addReaction(Constants.REACTION_UPVOTE).queue();
+                                    message.addReaction(Constants.REACTION_DOWNVOTE).queue();
+                                });
 
-                        try {
-                            event.getChannel().sendFile(attachment.retrieveInputStream().get(), "image." + attachment.getFileExtension()).setEmbeds(eb.build()).queue(message -> {
+                            } catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError(event.getAuthor().getAsMention() + ": ```" + e.getMessage() + "```", event.getAuthor())).queue(); }
+
+                        } else {
+
+                            event.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
                                 message.addReaction(Constants.REACTION_UPVOTE).queue();
                                 message.addReaction(Constants.REACTION_DOWNVOTE).queue();
                             });
-
-                        } catch (Exception e) {
-                            event.getChannel().sendMessageEmbeds(Embeds.emptyError(event.getAuthor().getAsMention() + ": ```" + e.getMessage() + "```", event.getAuthor())).queue();
                         }
 
-                    } catch (Exception e) {
-
-                        event.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
-                            message.addReaction(Constants.REACTION_UPVOTE).queue();
-                            message.addReaction(Constants.REACTION_DOWNVOTE).queue();
-                        });
-                    }
-
                     event.getMessage().delete().queue();
-                }
             }
         }
     }

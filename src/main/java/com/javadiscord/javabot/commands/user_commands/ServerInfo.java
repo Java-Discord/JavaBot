@@ -11,8 +11,10 @@ import java.awt.*;
 import java.util.Date;
 
 public class ServerInfo implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         if (event.getGuild() == null) return;
         long roleCount = event.getGuild().getRoles().stream().count() - 1;
         long catCount = event.getGuild().getCategories().stream().count();
@@ -24,7 +26,7 @@ public class ServerInfo implements SlashCommandHandler {
         String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
-            .setColor(new Color(0x2F3136))
+            .setColor(Color.GRAY)
             .setThumbnail(event.getGuild().getIconUrl())
             .setAuthor(event.getGuild().getName(), null, event.getGuild().getIconUrl())
             .addField("Name", "```" + event.getGuild().getName() + "```", true)

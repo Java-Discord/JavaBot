@@ -32,10 +32,12 @@ public class Config implements SlashCommandHandler, ConfigCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
+
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
+
         var command = configIndex.get(event.getSubcommandName());
         if (command != null) {
             command.handle(event);
