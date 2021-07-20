@@ -50,6 +50,6 @@ public class Ban implements SlashCommandHandler {
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
         try { ban(member, reason); }
-        catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
+        catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
     }
 }

@@ -15,10 +15,7 @@ public class SuggestionListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
             if (event.getMember().getUser().isBot()) return;
-
             if (event.getChannel().getId().equals(Database.getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
-                String[] args = event.getMessage().getContentDisplay().split(" ");
-                if (args[0].startsWith("!")) return;
 
                     EmbedBuilder eb = new EmbedBuilder()
                             .setColor(Constants.GRAY)

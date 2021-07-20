@@ -2,15 +2,19 @@ package com.javadiscord.javabot.events;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.commands.other.qotw.Correct;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -21,71 +25,131 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
 public class SubmissionListener extends ListenerAdapter {
+
+    public void dmSubmissionSend (ButtonClickEvent event, String text) {
+
+        Guild guild = preferredGuild;
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+
+        var eb = new EmbedBuilder()
+                .setColor(Constants.GRAY)
+                .setAuthor("Submission by " + event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
+                .setDescription(text)
+                .setFooter("ID: " + event.getUser().getId())
+                .setTimestamp(new Date().toInstant())
+                .build();
+
+        TextChannel subChannel = guild.getTextChannelById(Database.getConfigString(guild, "channels.submission_cid"));
+
+        subChannel.sendMessageEmbeds(eb).setActionRows(ActionRow.of(
+                Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
+                Button.danger("submission:decline:" + event.getUser().getId(), "Decline")))
+                .queue(m -> {
+
+                    MongoCollection<Document> submission_messages = database.getCollection("submission_messages");
+
+                    Document doc = new Document()
+                            .append("guild_id", m.getGuild().getId())
+                            .append("channel_id", m.getChannel().getId())
+                            .append("message_id", m.getId())
+                            .append("user_id", event.getUser().getId());
+
+                    submission_messages.insertOne(doc);
+                });
+
+        event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
+                .setActionRows(ActionRow.of(
+                        Button.success("dm-submission:send:" + event.getUser().getId(), "Submission sent").asDisabled()))
+                .queue();
+    }
+
+    public void dmSubmissionCancel (ButtonClickEvent event) {
+
+        event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
+                .setActionRows(ActionRow.of(
+                        Button.danger("dm-submission:cancel:" + event.getUser().getId(), "Process canceled").asDisabled())
+                ).queue();
+    }
+
+    public void submissionApprove (ButtonClickEvent event, String userID) {
+
+        Correct.correct(event, event.getGuild().getMemberById(userID));
+
+        event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
+                .setActionRows(ActionRow.of(
+                        Button.success("submission:approve:" + event.getUser().getId(), "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())
+                ).queue();
+    }
+
+    public void submissionDecline (ButtonClickEvent event) {
+
+        event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
+                .setActionRows(ActionRow.of(
+                        Button.danger("submission:decline:" + event.getUser().getId(), "Declined by " + event.getMember().getUser().getAsTag()).asDisabled())
+                )
+                .queue();
+    }
 
     @Override
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> config = database.getCollection("config");
-
         String message = event.getMessage().getContentDisplay();
         String[] args = message.split("\\s+");
 
-        if (!args[0].startsWith("!")) {
+        if (args[0].startsWith("!")) return;
 
-            MongoCursor<Document> it = config.find(eq("dm-qotw", "true")).iterator();
-            ArrayList<String> isAvailable = new ArrayList<String>();
+        Guild guild = Startup.preferredGuild;
 
-            int i = 0;
-            Guild guild;
-
-            while (it.hasNext()) {
-
-                JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
-                String guildID = root.get("guild_id").getAsString();
-
-                if (event.getJDA().getGuilds().contains(event.getJDA().getGuildById(guildID))) {
-
-                    isAvailable.add(guildID);
-                    i++;
-                }
-
-            }
-
-            if (i > 0) {
-
-                String guildID = Database.getMemberString(event.getAuthor(), "qotw-guild");
-
-                if (isAvailable.contains(guildID)) {
-                    guild = event.getJDA().getGuildById(guildID);
-                } else {
-                    guild = event.getJDA().getGuildById(isAvailable.get(0));
-                }
+            if (!Database.getConfigBoolean(guild, "other.qotw.dm-qotw")) return;
 
                 try {
-
-                    String sCID = Database.getConfigString(guild, "channels.submission_cid");
-                    TextChannel submissionChannel = guild.getTextChannelById(sCID);
 
                     EmbedBuilder submissionEb = new EmbedBuilder()
                             .setColor(Constants.GRAY)
                             .setAuthor("Question of the Week | Submission", null, event.getAuthor().getEffectiveAvatarUrl())
                             .setDescription(message)
-                            .addField("Current Guild", guild.getName() + " ``(" + guild.getId() + ")``", false)
+                            .addField("Current Guild", guild.getName() + " `(" + guild.getId() + ")`", false)
                             .setFooter("NOTE: spamming submissions may result in a warn")
                             .setTimestamp(new Date().toInstant());
 
-                    event.getChannel().sendMessage(new MessageBuilder().setEmbed(submissionEb.build()).setActionRows(ActionRow.of(
-                            Button.success(event.getAuthor().getId() + ":dm-submission:send", "Send Submission"),
-                            Button.danger(event.getAuthor().getId() + ":dm-submission:cancel", "Cancel"))).build()).queue();
+                    MongoDatabase database = mongoClient.getDatabase("other");
+                    MongoCollection<Document> collection = database.getCollection("open_submissions");
 
-                    // TODO: Re-implement this without EventWaiter.
-                    // TODO: Swap Button Author ID with Button Type (see SlashCommands.java:108)
-                    event.getMessage().reply("Submission is unsupported at this time.").queue();
+                    Document document = collection.find(eq("guild_id", guild.getId())).first();
+
+                    if (!(document == null)) {
+
+                        JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+                        String messageId = root.get("message_id").getAsString();
+                        Message msg = event.getAuthor().openPrivateChannel().complete().retrieveMessageById(messageId).complete();
+
+                        msg.editMessageEmbeds(msg.getEmbeds().get(0))
+                                .setActionRows(ActionRow.of(
+                                        Button.danger("dm-submission:canceled:" + event.getAuthor().getId(), "Process canceled").asDisabled()))
+                                .queue();
+
+                        collection.deleteOne(document);
+                    }
+
+                    event.getChannel().sendMessageEmbeds(submissionEb.build()).setActionRows(ActionRow.of(
+                            Button.success("dm-submission:send:" + event.getAuthor().getId(), "Send Submission"),
+                            Button.danger("dm-submission:cancel:" + event.getAuthor().getId(), "Cancel"))).queue(
+                                m -> {
+                                    Document doc = new Document()
+                                            .append("guild_id", guild.getId())
+                                            .append("message_id", m.getId())
+                                            .append("user_id", event.getAuthor().getId())
+                                            .append("text", message);
+
+                                    collection.insertOne(doc);
+                                });
+
 //                    EventWaiter waiter = new EventWaiter();
 //                    event.getJDA().addEventListener(waiter);
 //
@@ -147,7 +211,5 @@ public class SubmissionListener extends ListenerAdapter {
 
                 } catch (NullPointerException ignored) { }
             }
-        }
     }
-}
 

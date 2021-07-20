@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.Version;
+import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -86,6 +87,7 @@ public class Startup extends ListenerAdapter {
         logger.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         new StarboardListener().updateAllSBM(event);
+        new Database().deleteOpenSubmissions();
 
         for (var guild : event.getJDA().getGuilds()) {
             Bot.slashCommands.registerSlashCommands(guild);

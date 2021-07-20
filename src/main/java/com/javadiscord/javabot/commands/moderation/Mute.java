@@ -59,6 +59,6 @@ public class Mute implements SlashCommandHandler {
         }
 
         try { mute(member, event.getGuild(), reason); }
-        catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
+        catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
     }
 }

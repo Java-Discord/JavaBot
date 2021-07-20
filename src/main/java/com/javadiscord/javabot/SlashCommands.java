@@ -4,7 +4,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
+import com.javadiscord.javabot.events.SubmissionListener;
 import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
 import com.mongodb.BasicDBObject;
@@ -12,10 +14,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -24,11 +23,13 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
+import org.w3c.dom.Text;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.events.Startup.*;
 import static com.mongodb.client.model.Filters.eq;
 
 public class SlashCommands extends ListenerAdapter {
@@ -111,54 +112,45 @@ public class SlashCommands extends ListenerAdapter {
         if (event.getUser().isBot()) return;
 
         String[] id = event.getComponentId().split(":");
-        String type = id[0];
-
         event.deferEdit().queue();
 
-        switch (type) {
-                
+        JsonObject root;
+        Document document;
+
+        Guild guild = preferredGuild;
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> reactionroles = database.getCollection("reactionroles");
+        MongoCollection<Document> openSubmissions = database.getCollection("open_submissions");
+        MongoCollection<Document> submissionMessages = database.getCollection("submission_messages");
+
+        switch (id[0]) {
+            case "dm-submission":
+
+                document = openSubmissions.find(eq("guild_id", guild.getId())).first();
+
+                root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+                String text = root.get("text").getAsString();
+
+                switch (id[1]) {
+                    case "send": new SubmissionListener().dmSubmissionSend(event, text); break;
+                    case "cancel": new SubmissionListener().dmSubmissionCancel(event); break;
+                }
+                openSubmissions.deleteOne(document);
+                break;
+
             case "submission":
 
-                String authorId = id[1];
-                if (!authorId.equals(event.getUser().getId())) return;
+                document = submissionMessages.find(eq("guild_id", guild.getId())).first();
 
-                try {
+                root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+                String userID = root.get("user_id").getAsString();
 
-                    MongoDatabase database = mongoClient.getDatabase("other");
-                    MongoCollection<Document> submission_messages = database.getCollection("submission_messages");
-
-                    BasicDBObject submission_criteria = new BasicDBObject()
-                            .append("guild_id", event.getGuild().getId())
-                            .append("channel_id", event.getChannel().getId())
-                            .append("message_id", event.getMessageId());
-
-                    String JSON = submission_messages.find(submission_criteria).first().toJson();
-
-                    JsonObject root = JsonParser.parseString(JSON).getAsJsonObject();
-                    String userID = root.get("user_id").getAsString();
-
-                    if (id[2].equals("approve")) {
-
-                        Correct.correct(event, event.getGuild().getMemberById(userID));
-
-                        event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
-                                .setActionRows(ActionRow.of(
-                                        Button.success(authorId + ":submission:approve", "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())
-                                )
-                                .queue();
-
-                    } else if (id[2].equals("decline")) {
-
-                        event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
-                                .setActionRows(ActionRow.of(
-                                        Button.danger(authorId + ":submission:decline", "Declined by " + event.getMember().getUser().getAsTag()).asDisabled())
-                                )
-                                .queue();
-                    }
-
-                    submission_messages.deleteOne(submission_criteria);
-
-                } catch (Exception e) { e.printStackTrace(); }
+                switch (id[1]) {
+                    case "approve": new SubmissionListener().submissionApprove(event, userID); break;
+                    case "decline": new SubmissionListener().submissionDecline(event); break;
+                }
+                submissionMessages.deleteOne(document);
                 break;
 
             case "reactionroles":
@@ -166,9 +158,6 @@ public class SlashCommands extends ListenerAdapter {
                 String messageID = id[1];
                 String buttonLabel = id[2];
                 String emoteID = id[3];
-
-                MongoDatabase database = mongoClient.getDatabase("other");
-                MongoCollection<Document> collection = database.getCollection("reactionroles");
 
                 Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
                 Emote emote = event.getGuild().getEmoteById(emoteID);
@@ -179,7 +168,7 @@ public class SlashCommands extends ListenerAdapter {
                         .append("emote", emote.getAsMention())
                         .append("button_label", buttonLabel);
 
-                String JSON = collection.find(criteria).first().toJson();
+                String JSON = reactionroles.find(criteria).first().toJson();
 
                 JsonObject Root = JsonParser.parseString(JSON).getAsJsonObject();
                 String roleID = Root.get("role_id").getAsString();

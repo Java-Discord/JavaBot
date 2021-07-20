@@ -11,12 +11,38 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Database {
+
+    public void deleteOpenSubmissions () {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("open_submissions");
+
+        for (var document : collection.find()) {
+
+            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+            String messageId = root.get("message_id").getAsString();
+            String userId = root.get("user_id").getAsString();
+
+            User user = preferredGuild.retrieveMemberById(userId).complete().getUser();
+            Message msg = user.openPrivateChannel().complete().retrieveMessageById(messageId).complete();
+
+            msg.editMessageEmbeds(msg.getEmbeds().get(0))
+                    .setActionRows(ActionRow.of(
+                            Button.danger("dm-submission:canceled:" + user.getId(), "Process canceled").asDisabled()))
+                    .queue();
+
+            collection.deleteOne(document);
+        }
+    }
 
     public static Document userDoc (Member member) {
 
@@ -386,6 +412,29 @@ public class Database {
 
             e.printStackTrace();
             collection.insertOne(guildDoc(guildName, guildID));
+            return false;
+        }
+    }
+
+    public static boolean getConfigBoolean(Guild guild, String path) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+
+        try {
+            String doc = collection.find(eq("guild_id", guild.getId())).first().toJson();
+            String[] splittedPath = path.split("\\.");
+
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
+            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+            boolean var = root.get(splittedPath[splittedPath.length - 1]).getAsBoolean();
+
+            return var;
+
+        } catch (NullPointerException e) {
+
+            e.printStackTrace();
+            collection.insertOne(guildDoc(guild.getName(), guild.getId()));
             return false;
         }
     }
