@@ -140,12 +140,12 @@ public class ReactionRoles implements SlashCommandHandler {
                     .build();
 
             event.replyEmbeds(e).setEphemeral(true).queue();
-            Misc.sendToLog(event, e);
+            Misc.sendToLog(event.getGuild(), e);
 
             updateMessageComponents(channel.retrieveMessageById(mID).complete());
 
         } else {
-            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.", event))
+            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.", event.getUser()))
                     .setEphemeral(Constants.ERR_EPHEMERAL).queue();
         }
     }
@@ -168,7 +168,7 @@ public class ReactionRoles implements SlashCommandHandler {
         try {
             collection.find(criteria).first().toJson();
         } catch (NullPointerException e) {
-            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.", event))
+            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.", event.getUser()))
                     .setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
@@ -186,7 +186,7 @@ public class ReactionRoles implements SlashCommandHandler {
                 .build();
 
         event.replyEmbeds(e).setEphemeral(true).queue();
-        Misc.sendToLog(event, e);
+        Misc.sendToLog(event.getGuild(), e);
 
         updateMessageComponents(event.getChannel().retrieveMessageById(mID).complete());
     }

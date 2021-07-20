@@ -117,7 +117,7 @@ public class CustomCommands implements SlashCommandHandler {
                 event.replyEmbeds(e).queue();
                 Bot.slashCommands.registerSlashCommands(event.getGuild());
 
-            } else { event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called " + "``" + "/" + commandName + "`` already exists.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            } else { event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called " + "``" + "/" + commandName + "`` already exists.", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
         } else { event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 
@@ -128,7 +128,7 @@ public class CustomCommands implements SlashCommandHandler {
             MongoCollection<Document> collection = database.getCollection("customcommands");
 
             if (docExists(event.getGuild().getId(), commandName)) {
-                event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             } else {
 
                 BasicDBObject criteria = new BasicDBObject()
@@ -167,7 +167,7 @@ public class CustomCommands implements SlashCommandHandler {
             MongoCollection<Document> collection = database.getCollection("customcommands");
 
             if (docExists(event.getGuild().getId(), commandName)) {
-                event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             } else {
 
                 BasicDBObject criteria = new BasicDBObject()

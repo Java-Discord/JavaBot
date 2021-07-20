@@ -21,7 +21,7 @@ public class Respond implements SlashCommandHandler {
             String messageID = event.getOption("message-id").getAsString();
             String text = event.getOption("text").getAsString();
             try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
-            catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
 
             MessageEmbed msgEmbed = msg.getEmbeds().get(0);
 

@@ -48,7 +48,7 @@ public class Correct {
             tc.sendMessage(emb.build()).queue();
 
         } catch (Exception e) {
-            tc.sendMessage(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event)).queue();
+            tc.sendMessage(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event.getUser())).queue();
         }
     }
 }

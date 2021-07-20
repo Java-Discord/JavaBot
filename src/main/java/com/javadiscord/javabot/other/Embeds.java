@@ -149,22 +149,8 @@ public class Embeds {
         return eb.build();
     }
 
-    public static MessageEmbed emptyError(String text, Object ev) {
+    public static MessageEmbed emptyError(String text, User user) {
 
-        User user = null;
-
-        if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
-
-            event.getMessage().addReaction(Constants.CROSS).complete();
-            user = event.getAuthor();
-        }
-
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-
-            user = event.getUser();
-        }
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("An Error occurred")

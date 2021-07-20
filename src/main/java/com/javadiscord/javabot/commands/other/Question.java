@@ -61,7 +61,7 @@ public class Question implements SlashCommandHandler {
                 hook.sendMessageEmbeds(e).queue();
 
             } else {
-                hook.sendMessageEmbeds(Embeds.emptyError("```Please choose a Number between 1 and " + l + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                hook.sendMessageEmbeds(Embeds.emptyError("```Please choose a Number between 1 and " + l + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
         } else {
             hook.sendMessageEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();

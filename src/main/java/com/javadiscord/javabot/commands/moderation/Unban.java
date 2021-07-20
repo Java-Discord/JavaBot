@@ -13,11 +13,18 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import java.util.Date;
 
 public class Unban implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
-        if (event.getMember().hasPermission(Permission.BAN_MEMBERS)) {
+
+        if (!event.getMember().hasPermission(Permission.BAN_MEMBERS)) {
+            event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
             String id = event.getOption("id").getAsString();
             User author = event.getUser();
+
             try {
                 event.getGuild().unban(id).complete();
                 var e = new EmbedBuilder()
@@ -30,14 +37,11 @@ public class Unban implements SlashCommandHandler {
                     .build();
 
                 event.replyEmbeds(e).queue();
-                Misc.sendToLog(event, e);
-            } catch (ErrorResponseException e) {
-                event.replyEmbeds(Embeds.emptyError("```User (" + id + ") not found.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            }
+                Misc.sendToLog(event.getGuild(), e);
 
-        } else {
-            event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            } catch (ErrorResponseException e) {
+                event.replyEmbeds(Embeds.emptyError("```User (" + id + ") not found.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            }
         }
     }
-}
 

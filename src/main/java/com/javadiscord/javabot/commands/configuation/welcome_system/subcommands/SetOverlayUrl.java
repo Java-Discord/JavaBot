@@ -16,7 +16,7 @@ public class SetOverlayUrl implements WelcomeCommandHandler {
             Database.queryConfig(event.getGuild().getId(), "welcome_system.image.overlayURL", url);
             event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Overlay", "Welcome Image Overlay successfully changed to ", Misc.checkImage(url), url, true)).queue();
         } else {
-            event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event)).queue();
+            event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event.getUser())).queue();
         }
     }
 }

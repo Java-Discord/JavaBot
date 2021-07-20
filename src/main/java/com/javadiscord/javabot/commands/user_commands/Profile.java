@@ -141,7 +141,7 @@ public class Profile implements SlashCommandHandler {
             event.replyEmbeds(eb.build()).queue();
 
         } catch (IndexOutOfBoundsException e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(true).queue();
+            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(true).queue();
         }
     }
 }

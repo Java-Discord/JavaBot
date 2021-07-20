@@ -24,6 +24,7 @@ public class Report implements SlashCommandHandler {
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
         MessageChannel reportChannel = Database.getConfigChannel(event, "channels.report_cid");
+
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
             .setColor(Constants.GRAY)
@@ -36,7 +37,7 @@ public class Report implements SlashCommandHandler {
             .setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
             .setTimestamp(new Date().toInstant());
 
-        reportChannel.sendMessage("@here").embed(e.build()).queue();
+        reportChannel.sendMessage("@here").setEmbeds(e.build()).queue();
 
         e.setDescription("Successfully reported " + "``" + member.getUser().getAsTag() + "``!\nYour report has been send to our Moderators");
         event.replyEmbeds(e.build()).setEphemeral(true).queue();

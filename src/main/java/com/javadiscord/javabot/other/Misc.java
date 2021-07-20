@@ -62,56 +62,14 @@ public class Misc {
         return b;
     }
 
-    public static void sendToLog(Object event, MessageEmbed embed) {
+    public static void sendToLog(Guild guild, MessageEmbed embed) {
 
-        TextChannel tc = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        tc.sendMessage(embed).queue();
-
+        guild.getTextChannelById(Database.getConfigString(guild.getName(), guild.getId(), "channels.log_cid")).sendMessageEmbeds(embed).queue();
     }
 
-    public static void sendToLog(Object event, String text) {
+    public static void sendToLog(Guild guild, String text) {
 
-        TextChannel tc = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        tc.sendMessage(text).queue();
-
+        guild.getTextChannelById(Database.getConfigString(guild.getName(), guild.getId(), "channels.log_cid")).sendMessage(text).queue();
     }
 
     public static String getGuildList (List<Guild> guildList, boolean showID, boolean showMemCount) {

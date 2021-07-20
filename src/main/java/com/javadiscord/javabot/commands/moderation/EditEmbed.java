@@ -9,17 +9,23 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class EditEmbed implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
+        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
         String mID = event.getOption("messageid").getAsString();
         String title = event.getOption("title").getAsString();
         String description = event.getOption("description").getAsString();
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
             Message message;
             try {
                 message = event.getChannel().retrieveMessageById(mID).complete();
             } catch (Exception e) {
-                event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
                 return;
             }
 
@@ -30,9 +36,5 @@ public class EditEmbed implements SlashCommandHandler {
 
             message.editMessage(eb.build()).queue();
             event.reply("Done!").setEphemeral(true).queue();
-
-        } else {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-        }
     }
 }

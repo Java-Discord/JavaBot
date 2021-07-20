@@ -32,18 +32,18 @@ public class SuggestionListener extends ListenerAdapter {
                         Message.Attachment attachment = event.getMessage().getAttachments().get(0);
 
                         try {
-                            event.getChannel().sendFile(attachment.retrieveInputStream().get(), "image." + attachment.getFileExtension()).embed(eb.build()).queue(message -> {
+                            event.getChannel().sendFile(attachment.retrieveInputStream().get(), "image." + attachment.getFileExtension()).setEmbeds(eb.build()).queue(message -> {
                                 message.addReaction(Constants.REACTION_UPVOTE).queue();
                                 message.addReaction(Constants.REACTION_DOWNVOTE).queue();
                             });
 
                         } catch (Exception e) {
-                            event.getChannel().sendMessage(Embeds.emptyError(event.getAuthor().getAsMention() + ": ```" + e.getMessage() + "```", event)).queue();
+                            event.getChannel().sendMessageEmbeds(Embeds.emptyError(event.getAuthor().getAsMention() + ": ```" + e.getMessage() + "```", event.getAuthor())).queue();
                         }
 
                     } catch (Exception e) {
 
-                        event.getChannel().sendMessage(eb.build()).queue(message -> {
+                        event.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
                             message.addReaction(Constants.REACTION_UPVOTE).queue();
                             message.addReaction(Constants.REACTION_DOWNVOTE).queue();
                         });

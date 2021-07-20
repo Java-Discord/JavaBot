@@ -61,7 +61,7 @@ public class ServerLock {
                 .setFooter("ID: " + user.getId())
                 .setTimestamp(new Date().toInstant());
 
-        Misc.sendToLog(event, eb.build());
+        Misc.sendToLog(event.getGuild(), eb.build());
     }
 
     public static void lockServer(GuildMemberJoinEvent event) {
@@ -85,7 +85,7 @@ public class ServerLock {
         Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
         deletePBL();
 
-        Misc.sendToLog(event, "**SERVER LOCKED!** @here");
+        Misc.sendToLog(event.getGuild(), "**SERVER LOCKED!** @here");
     }
 
     public static boolean lockStatus (GuildMemberJoinEvent event) {

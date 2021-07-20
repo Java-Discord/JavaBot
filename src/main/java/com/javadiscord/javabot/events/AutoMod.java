@@ -1,5 +1,9 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.commands.moderation.Mute;
+import com.javadiscord.javabot.commands.moderation.Warn;
+import com.javadiscord.javabot.commands.moderation.actions.MuteAction;
+import com.javadiscord.javabot.commands.moderation.actions.WarnAction;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -29,15 +33,15 @@ public class AutoMod extends ListenerAdapter {
             if (!(event.getMember().hasPermission(Permission.MESSAGE_MANAGE))) {
 
                 if (event.getMessage().getMentionedMembers().size() >= 5) {
-//                    Warn.warn(event.getMember(), "Automod: Mention Spam", event.getJDA().getSelfUser().getAsTag(), event);
-                    // TODO: Extract warn logic.
+//
+                    new WarnAction().handle(event, event.getMember(), event.getJDA().getSelfUser(), "Automod: Mention Spam");
                 }
 
                 Matcher matcher = inviteURL.matcher(cleanString(event.getMessage().getContentRaw()));
 
                 if (matcher.find()) {
-//                    Warn.warn(event.getMember(), "Automod: Advertising", event.getJDA().getSelfUser().getAsTag(), event);
-                    // TODO: Extract warn logic.
+//
+                    new WarnAction().handle(event, event.getMember(), event.getJDA().getSelfUser(), "Automod: Advertising");
                     event.getMessage().delete().complete();
                 }
 
@@ -50,8 +54,8 @@ public class AutoMod extends ListenerAdapter {
 
                 if (spamCount > 5) {
                     if (!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).getFileExtension().equals("java")) return;
-//                    Mute.mute(event.getMember(), event.getJDA().getSelfUser().getAsTag(), event);
-                    // TODO: Extract mute logic to service.
+//                  
+                    new MuteAction().handle(event, event.getMember(), event.getJDA().getSelfUser(), "Automod: Spam");
                 }
             }
 

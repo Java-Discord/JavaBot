@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class Ping implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
         long gatewayPing = event.getJDA().getGatewayPing();
