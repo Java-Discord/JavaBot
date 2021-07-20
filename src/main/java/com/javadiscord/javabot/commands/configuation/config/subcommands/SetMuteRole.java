@@ -12,7 +12,7 @@ public class SetMuteRole implements ConfigCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         Role role = event.getOption("role").getAsRole();
-        Database.queryConfig(event.getGuild().getId(), "roles.mute_rid", role.getId());
+        new Database().queryConfig(event.getGuild().getId(), "roles.mute_rid", role.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Mute Role", "Mute Role succesfully changed to", null, role.getId(), true, false, true)).queue();
 
     }

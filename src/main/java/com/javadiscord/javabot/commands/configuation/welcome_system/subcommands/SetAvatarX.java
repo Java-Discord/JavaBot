@@ -11,7 +11,7 @@ public class SetAvatarX implements WelcomeCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         int x = (int) event.getOption("x").getAsLong();
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avX", x);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avX", x);
         event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image (X-Pos)", "Avatar Image ``(X-Position)`` successfully changed to ", null, String.valueOf(x), true)).queue();
     }
 }

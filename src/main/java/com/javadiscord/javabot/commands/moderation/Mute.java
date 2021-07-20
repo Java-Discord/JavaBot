@@ -17,9 +17,9 @@ import java.util.Date;
 
 public class Mute implements SlashCommandHandler {
 
-    public void mute (Member member, Guild guild, String reason) throws Exception {
+    public void mute (Member member, Guild guild) throws Exception {
 
-        Role muteRole = guild.getRoleById(Database.getConfigString(guild, "roles.mute_rid"));
+        Role muteRole = guild.getRoleById(new Database().getConfigString(guild, "roles.mute_rid"));
         guild.addRoleToMember(member.getId(), muteRole).complete();
     }
 
@@ -51,14 +51,14 @@ public class Mute implements SlashCommandHandler {
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-        Role muteRole = event.getGuild().getRoleById(Database.getConfigString(event.getGuild(), "roles.mute_rid"));
+        Role muteRole = event.getGuild().getRoleById(new Database().getConfigString(event.getGuild(), "roles.mute_rid"));
 
         if (member.getRoles().contains(muteRole)) {
             event.replyEmbeds(Embeds.emptyError("```" + member.getUser().getAsTag() + " is already muted```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
 
-        try { mute(member, event.getGuild(), reason); }
+        try { mute(member, event.getGuild()); }
         catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
     }
 }

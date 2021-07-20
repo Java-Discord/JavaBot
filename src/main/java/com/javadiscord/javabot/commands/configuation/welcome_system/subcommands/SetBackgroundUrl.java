@@ -13,10 +13,9 @@ public class SetBackgroundUrl implements WelcomeCommandHandler {
 
         String url = event.getOption("url").getAsString();
         if (Misc.isImage(url)) {
-            Database.queryConfig(event.getGuild().getId(), "welcome_system.image.bgURL", url);
+            new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.bgURL", url);
             event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Background", "Welcome Image Background successfully changed to ", Misc.checkImage(url), url, true)).queue();
-        } else {
-            event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event.getUser())).queue();
         }
+        else event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event.getUser())).queue();
     }
 }

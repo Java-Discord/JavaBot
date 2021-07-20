@@ -44,7 +44,7 @@ public class SubmissionListener extends ListenerAdapter {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        TextChannel subChannel = guild.getTextChannelById(Database.getConfigString(guild, "channels.submission_cid"));
+        TextChannel subChannel = guild.getTextChannelById(new Database().getConfigString(guild, "channels.submission_cid"));
 
         subChannel.sendMessageEmbeds(eb).setActionRows(ActionRow.of(
                 Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
@@ -106,7 +106,7 @@ public class SubmissionListener extends ListenerAdapter {
 
         Guild guild = Startup.preferredGuild;
 
-            if (!Database.getConfigBoolean(guild, "other.qotw.dm-qotw")) return;
+            if (!new Database().getConfigBoolean(guild, "other.qotw.dm-qotw")) return;
 
                 try {
 

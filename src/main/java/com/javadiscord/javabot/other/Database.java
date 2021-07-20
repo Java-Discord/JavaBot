@@ -44,12 +44,12 @@ public class Database {
         }
     }
 
-    public static Document userDoc (Member member) {
+    public Document userDoc (Member member) {
 
         return userDoc(member.getUser());
     }
 
-    public static Document userDoc (User user) {
+    public Document userDoc(User user) {
 
         Document doc = new Document("tag", user.getAsTag())
                 .append("discord_id", user.getId())
@@ -59,7 +59,7 @@ public class Database {
         return doc;
     }
 
-    public static Document guildDoc (String guildName, String guildID) {
+    public Document guildDoc (String guildName, String guildID) {
 
         Document av = new Document("avX", 75)
                 .append("avY", 100)
@@ -113,7 +113,7 @@ public class Database {
         return doc;
     }
 
-    public static void queryMember(String memberID, String varName, String newValue) {
+    public void queryMember(String memberID, String varName, String newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -130,7 +130,7 @@ public class Database {
         collection.updateOne(Query, update);
     }
 
-    public static void queryMember(String memberID, String varName, int newValue) {
+    public void queryMember(String memberID, String varName, int newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -147,7 +147,7 @@ public class Database {
         collection.updateOne(Query, update);
     }
 
-    public static String getMemberString(User user, String varName) {
+    public String getMemberString(User user, String varName) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -166,7 +166,7 @@ public class Database {
         }
     }
 
-    public static int getMemberInt(Member member, String varName) {
+    public int getMemberInt(Member member, String varName) {
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -185,7 +185,7 @@ public class Database {
         }
     }
 
-    public static void queryConfig(String guildID, String path, String newValue) {
+    public void queryConfig(String guildID, String path, String newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -196,7 +196,7 @@ public class Database {
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public static void queryConfig(String guildID, String path, int newValue) {
+    public void queryConfig(String guildID, String path, int newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -207,7 +207,7 @@ public class Database {
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public static void queryConfig(String guildID, String path, boolean newValue) {
+    public void queryConfig(String guildID, String path, boolean newValue) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -218,67 +218,7 @@ public class Database {
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public static String getConfigString(Object event, String path) {
-
-        String guildName = null, guildID = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent e = (GuildMemberRemoveEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent) {
-            net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent e = (GuildMessageReactionAddEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        try {
-            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
-            String[] splittedPath = path.split("\\.");
-
-            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
-            String var = root.get(splittedPath[splittedPath.length - 1]).getAsString();
-
-            return var;
-
-        } catch (NullPointerException e) {
-
-            e.printStackTrace();
-            collection.insertOne(guildDoc(guildName, guildID));
-            return "None";
-        }
-    }
-
-    public static String getConfigString(Guild guild, String path) {
+    public String getConfigString(Guild guild, String path) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -301,53 +241,7 @@ public class Database {
         }
     }
 
-    public static int getConfigInt(Object event, String path) {
-
-        String guildName = null, guildID = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        try {
-            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
-            String[] splittedPath = path.split("\\.");
-
-            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
-            int var = root.get(splittedPath[splittedPath.length - 1]).getAsInt();
-
-            return var;
-
-        } catch (NullPointerException e) {
-
-            e.printStackTrace();
-            collection.insertOne(guildDoc(guildName, guildID));
-            return 0;
-        }
-    }
-
-    public static int getConfigInt(Guild guild, String path) {
+    public int getConfigInt(Guild guild, String path) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -370,53 +264,7 @@ public class Database {
         }
     }
 
-    public static boolean getConfigBoolean(Object event, String path) {
-
-        String guildName = null, guildID = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            guildID = e.getGuild().getId();
-            guildName = e.getGuild().getName();
-        }
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        try {
-            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
-            String[] splittedPath = path.split("\\.");
-
-            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
-            boolean var = root.get(splittedPath[splittedPath.length - 1]).getAsBoolean();
-
-            return var;
-
-        } catch (NullPointerException e) {
-
-            e.printStackTrace();
-            collection.insertOne(guildDoc(guildName, guildID));
-            return false;
-        }
-    }
-
-    public static boolean getConfigBoolean(Guild guild, String path) {
+    public boolean getConfigBoolean (Guild guild, String path) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -439,79 +287,35 @@ public class Database {
         }
     }
 
-    public static TextChannel getConfigChannel(Object event, String varName) {
+    public TextChannel getConfigChannel (Guild guild, String path) {
 
-        TextChannel tc = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            String id = getConfigString(event, varName);
-            tc = e.getGuild().getTextChannelById(id);
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            String id = getConfigString(event, varName);
-            tc = e.getGuild().getTextChannelById(id);
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            String id = getConfigString(event, varName);
-            tc = e.getGuild().getTextChannelById(id);
-        }
-
-        return tc;
+        String id = getConfigString(guild, path);
+        return guild.getTextChannelById(id);
     }
 
-    public static Role getConfigRole(Object event, String varName) {
+    public Role getConfigRole (Guild guild, String path) {
 
-        Role role = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            String id = getConfigString(event, varName);
-            role = e.getGuild().getRoleById(id);
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            String id = getConfigString(event, varName);
-            role = e.getGuild().getRoleById(id);
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            String id = getConfigString(event, varName);
-            role = e.getGuild().getRoleById(id);
-        }
-
-        return role;
+        String id = getConfigString(guild, path);
+        return guild.getRoleById(id);
     }
 
-    public static String getConfigChannelAsMention(SlashCommandEvent event, String varName) {
+    public String getConfigChannelAsMention (Guild guild, String path) {
 
             String mention;
-            String id = getConfigString(event, varName);
+            String id = getConfigString(guild, path);
 
-            try { mention = event.getGuild().getTextChannelById(id).getAsMention(); }
+            try { mention = guild.getTextChannelById(id).getAsMention(); }
             catch (NumberFormatException e) { mention = "None"; }
 
         return mention;
     }
 
-    public static String getConfigRoleAsMention(SlashCommandEvent event, String varName) {
+    public String getConfigRoleAsMention (Guild guild, String path) {
 
         String mention;
-        String id = getConfigString(event, varName);
+        String id = getConfigString(guild, path);
 
-        try { mention = event.getGuild().getRoleById(id).getAsMention(); }
+        try { mention = guild.getRoleById(id).getAsMention(); }
         catch (NumberFormatException e) { mention = "None"; }
 
         return mention;

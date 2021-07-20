@@ -12,7 +12,7 @@ public class SetSubmissionChannel implements ConfigCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        Database.queryConfig(event.getGuild().getId(), "channels.submission_cid", channel.getId());
+        new Database().queryConfig(event.getGuild().getId(), "channels.submission_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "QOTW-Submission Channel", "QOTW-Submission Channel succesfully changed to", null, channel.getId(), true, true)).queue();
 
     }

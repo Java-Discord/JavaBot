@@ -22,7 +22,7 @@ public class ClearQOTW implements SlashCommandHandler {
         }
 
             Member member = event.getOption("user").getAsMember();
-            Database.queryMember(member.getId(), "qotwpoints", 0);
+        new Database().queryMember(member.getId(), "qotwpoints", 0);
 
             var e = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | QOTW-Points cleared", null, member.getUser().getEffectiveAvatarUrl())

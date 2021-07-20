@@ -11,7 +11,7 @@ public class SetJoinMessage implements WelcomeCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         String message = event.getOption("message").getAsString();
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.join_msg", message);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.join_msg", message);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Message", "Welcome Message successfully changed to", null, message, true)).queue();
     }
 }

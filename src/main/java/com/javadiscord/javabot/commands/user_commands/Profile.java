@@ -118,7 +118,7 @@ public class Profile implements SlashCommandHandler {
             MongoDatabase database = mongoClient.getDatabase("userdata");
             MongoCollection<Document> warns = database.getCollection("warns");
 
-            int qotwCount = Database.getMemberInt(member, "qotwpoints");
+            int qotwCount = new Database().getMemberInt(member, "qotwpoints");
             int warnCount = (int) warns.count(eq("user_id", member.getId()));
 
             TimeUtils tu = new TimeUtils();

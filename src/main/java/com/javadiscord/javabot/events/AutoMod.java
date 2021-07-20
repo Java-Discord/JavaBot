@@ -101,7 +101,7 @@ public class AutoMod extends ListenerAdapter {
                 if (spamCount > 5) {
                     if (!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).getFileExtension().equals("java")) return;
 
-                    Role muteRole = event.getGuild().getRoleById(Database.getConfigString(event.getGuild(), "roles.mute_rid"));
+                    Role muteRole = event.getGuild().getRoleById(new Database().getConfigString(event.getGuild(), "roles.mute_rid"));
                     if (member.getRoles().contains(muteRole)) return;
 
                     var eb = new EmbedBuilder()
@@ -119,7 +119,7 @@ public class AutoMod extends ListenerAdapter {
                     Misc.sendToLog(event.getGuild(), eb);
                     member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-                    try { new Mute().mute(event.getMember(), event.getGuild(), "Automod: Spam"); }
+                    try { new Mute().mute(event.getMember(), event.getGuild()); }
                     catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getAuthor())).queue(); }
                 }
             }

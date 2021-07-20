@@ -29,7 +29,7 @@ public class GuildJoin extends ListenerAdapter {
 
         } catch (NullPointerException e) {
 
-            collection.insertOne(Database.guildDoc(guildName, guildID));
+            collection.insertOne(new Database().guildDoc(guildName, guildID));
             logger.warn("Added Database entry for Guild \"" + guildName + "\" (" + guildID + ")");
         }
     }

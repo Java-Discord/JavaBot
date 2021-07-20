@@ -11,7 +11,7 @@ public class SetLeaveMessage implements WelcomeCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         String message = event.getOption("message").getAsString();
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.leave_msg", message);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.leave_msg", message);
         event.replyEmbeds(Embeds.configEmbed(event, "Leave Message", "Leave Message successfully changed to", null, event.getOption("message").getAsString(), true)).queue();
     }
 }

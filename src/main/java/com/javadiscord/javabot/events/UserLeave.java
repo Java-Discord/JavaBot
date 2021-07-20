@@ -14,10 +14,10 @@ public class UserLeave extends ListenerAdapter {
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
         if (event.getMember().getUser().isBot()) return;
 
-        if (!Database.getConfigBoolean(event, "other.server_lock.lock_status")) {
-            if (Database.getConfigBoolean(event, "welcome_system.welcome_status")) {
+        if (!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
+            if (new Database().getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {
 
-                String leaveMessage = Database.getConfigString(event, "welcome_system.leave_msg");
+                String leaveMessage = new Database().getConfigString(event.getGuild(), "welcome_system.leave_msg");
                 String replacedText;
 
                 if (event.getUser().isBot()) {
@@ -32,7 +32,7 @@ public class UserLeave extends ListenerAdapter {
                         .replace("{!membertag}", event.getUser().getAsTag())
                         .replace("{!server}", event.getGuild().getName());
 
-                event.getGuild().getTextChannelById(String.valueOf(Database.getConfigString(event, "welcome_system.welcome_cid"))).sendMessage(replacedText2).queue();
+                event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "welcome_system.welcome_cid")).sendMessage(replacedText2).queue();
             }
 
             StatsCategory.update(event.getGuild());

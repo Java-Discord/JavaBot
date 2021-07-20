@@ -12,7 +12,7 @@ public class SetSuggestionChannel implements ConfigCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        Database.queryConfig(event.getGuild().getId(), "channels.suggestion_cid", channel.getId());
+        new Database().queryConfig(event.getGuild().getId(), "channels.suggestion_cid", channel.getId());
         event.replyEmbeds(Embeds.configEmbed(event, "Suggest Channel", "Suggest Channel succesfully changed to", null, channel.getId(), true, true)).queue();
 
     }

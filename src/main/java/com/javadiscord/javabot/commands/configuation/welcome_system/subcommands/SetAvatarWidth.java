@@ -11,7 +11,7 @@ public class SetAvatarWidth implements WelcomeCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         int width = (int) event.getOption("width").getAsLong();
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avW", width);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avW", width);
         event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image Width", "Avatar Image Width successfully changed to ", null, String.valueOf(width), true)).queue();
     }
 }

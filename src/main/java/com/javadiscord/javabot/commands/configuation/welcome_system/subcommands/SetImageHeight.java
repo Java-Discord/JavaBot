@@ -11,7 +11,7 @@ public class SetImageHeight implements WelcomeCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         int height = (int) event.getOption("height").getAsLong();
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.imgH", height);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.imgH", height);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Height", "Welcome Image Height successfully changed to ", null, String.valueOf(height), true)).queue();
     }
 }

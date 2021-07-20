@@ -48,7 +48,7 @@ public class Leaderboard implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
-        int QOTWPoints = Database.getMemberInt(event.getMember(), "qotwpoints");
+        int QOTWPoints = new Database().getMemberInt(event.getMember(), "qotwpoints");
 
         ArrayList<String> topTenID = new ArrayList<String>();
         ArrayList<String> topTenAvatarURL = new ArrayList<String>();
@@ -232,7 +232,7 @@ public class Leaderboard implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
-        int qotwPoints = Database.getMemberInt(event.getMember(), "qotwpoints");
+        int qotwPoints = new Database().getMemberInt(event.getMember(), "qotwpoints");
 
         StringBuilder sb = new StringBuilder();
         MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();

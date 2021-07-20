@@ -15,7 +15,7 @@ public class SuggestionListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
             if (event.getMember().getUser().isBot()) return;
-            if (event.getChannel().getId().equals(Database.getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
+            if (event.getChannel().getId().equals(new Database().getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
 
                     EmbedBuilder eb = new EmbedBuilder()
                             .setColor(Constants.GRAY)

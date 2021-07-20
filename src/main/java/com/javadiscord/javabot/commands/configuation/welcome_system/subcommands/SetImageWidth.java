@@ -11,7 +11,7 @@ public class SetImageWidth implements WelcomeCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         int width = (int) event.getOption("width").getAsLong();
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.imgW", width);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.imgW", width);
         event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Width", "Welcome Image Width successfully changed to ", null, String.valueOf(width), true)).queue();
     }
 }

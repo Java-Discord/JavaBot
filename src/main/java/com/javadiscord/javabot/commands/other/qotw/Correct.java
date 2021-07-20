@@ -21,11 +21,11 @@ public class Correct {
 
         String check;
         TextChannel tc;
-        tc = event.getGuild().getTextChannelById(Database.getConfigString(event.getGuild(), "channels.log_cid"));
+        tc = event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "channels.log_cid"));
         check = event.getGuild().getEmotesByName("check", false).get(0).getAsMention();
 
-        int qotwPoints = Database.getMemberInt(member, "qotwpoints");
-        Database.queryMember(member.getId(), "qotwpoints", qotwPoints + 1);
+        int qotwPoints = new Database().getMemberInt(member, "qotwpoints");
+        new Database().queryMember(member.getId(), "qotwpoints", qotwPoints + 1);
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())

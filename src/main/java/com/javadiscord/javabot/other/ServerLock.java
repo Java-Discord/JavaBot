@@ -32,12 +32,12 @@ public class ServerLock {
 
             if (!isInPBL(user)) {
 
-                Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
+                new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
                 deletePBL();
             }
         }
 
-        if (Database.getConfigInt(event, "other.server_lock.lock_count") >= 5) {
+        if (new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count") >= 5) {
 
             lockServer(event);
         }
@@ -46,9 +46,9 @@ public class ServerLock {
 
     public static void incrementLock(GuildMemberJoinEvent event, User user) {
 
-        int lockCount = Database.getConfigInt(event, "other.server_lock.lock_count");
+        int lockCount = new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count");
         lockCount = lockCount + 1;
-        Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
+        new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
 
         String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
         String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
@@ -80,9 +80,9 @@ public class ServerLock {
             event.getGuild().getMemberById(discordID).kick().complete();
         }
 
-
-        Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", true);
-        Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
+        Database db = new Database();
+        db.queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", true);
+        db.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
         deletePBL();
 
         Misc.sendToLog(event.getGuild(), "**SERVER LOCKED!** @here");
@@ -90,12 +90,12 @@ public class ServerLock {
 
     public static boolean lockStatus (GuildMemberJoinEvent event) {
 
-        return Database.getConfigBoolean(event, "other.server_lock.lock_status");
+        return new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status");
     }
 
     public static boolean isNewAccount (GuildMemberJoinEvent event, User user) {
 
-        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) && !(Database.getConfigBoolean(event, "other.server_lock.lock_status"));
+        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) && !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
     }
 
     public static boolean isInPBL (User user) {

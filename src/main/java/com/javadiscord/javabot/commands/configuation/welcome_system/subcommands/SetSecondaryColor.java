@@ -15,7 +15,7 @@ public class SetSecondaryColor implements WelcomeCommandHandler {
         long l = Long.parseLong(color, 16);
         int i = (int) l;
 
-        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.secCol", i);
+        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.secCol", i);
         event.replyEmbeds(Embeds.configEmbed(event, "Secondary Welcome Image Color", "Secondary Welcome Image Color successfully changed to ", null, i + " (#" + Integer.toHexString(i) + ")", true)).queue();
     }
 }

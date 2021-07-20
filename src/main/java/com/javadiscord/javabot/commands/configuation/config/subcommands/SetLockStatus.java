@@ -11,7 +11,7 @@ public class SetLockStatus implements ConfigCommandHandler {
     public void handle(SlashCommandEvent event) {
 
         boolean status = event.getOption("locked").getAsBoolean();
-        Database.queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", status);
+        new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", status);
         event.replyEmbeds(Embeds.configEmbed(event, "Lock Status changed", "Lock Status succesfully changed to ", null, Boolean.toString(status), true)).queue();
 
     }

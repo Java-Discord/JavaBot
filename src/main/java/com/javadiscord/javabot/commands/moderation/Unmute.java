@@ -25,7 +25,7 @@ public class Unmute implements SlashCommandHandler {
             return;
         }
 
-            Role muteRole = Database.getConfigRole(event, "roles.mute_rid");
+            Role muteRole = new Database().getConfigRole(event.getGuild(), "roles.mute_rid");
             Member member = event.getOption("user").getAsMember();
             User author = event.getUser();
             try {

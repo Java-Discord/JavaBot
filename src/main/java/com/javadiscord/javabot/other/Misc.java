@@ -43,12 +43,12 @@ public class Misc {
 
     public static void sendToLog(Guild guild, MessageEmbed embed) {
 
-        guild.getTextChannelById(Database.getConfigString(guild, "channels.log_cid")).sendMessageEmbeds(embed).queue();
+        guild.getTextChannelById(new Database().getConfigString(guild, "channels.log_cid")).sendMessageEmbeds(embed).queue();
     }
 
     public static void sendToLog(Guild guild, String text) {
 
-        guild.getTextChannelById(Database.getConfigString(guild, "channels.log_cid")).sendMessage(text).queue();
+        guild.getTextChannelById(new Database().getConfigString(guild, "channels.log_cid")).sendMessage(text).queue();
     }
 
     public static String getGuildList (List<Guild> guildList, boolean showID, boolean showMemCount) {
