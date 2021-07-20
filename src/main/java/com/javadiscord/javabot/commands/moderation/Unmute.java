@@ -19,7 +19,11 @@ public class Unmute implements SlashCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
-        if (event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
+
+        if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
+            event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
 
             Role muteRole = Database.getConfigRole(event, "roles.mute_rid");
             Member member = event.getOption("user").getAsMember();
@@ -41,17 +45,14 @@ public class Unmute implements SlashCommandHandler {
 
                     member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
                     event.replyEmbeds(e).queue();
-                    Misc.sendToLog(event, e);
+                    Misc.sendToLog(event.getGuild(), e);
 
                 } else {
-                    event.replyEmbeds(Embeds.emptyError("```I can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                    event.replyEmbeds(Embeds.emptyError("```I can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
                 }
 
             } catch (HierarchyException e) {
-                event.replyEmbeds(Embeds.hierarchyError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", author)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
-        } else {
-            event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-        }
     }
 }

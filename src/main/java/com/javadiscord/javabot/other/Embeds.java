@@ -40,60 +40,6 @@ public class Embeds {
         return eb.build();
     }
 
-    public static MessageEmbed syntaxError(String syntax, Object ev) {
-
-        User user = null;
-
-        if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
-
-            event.getMessage().addReaction(Constants.CROSS).complete();
-            user = event.getAuthor();
-        }
-
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-
-            user = event.getUser();
-        }
-
-        EmbedBuilder eb = new EmbedBuilder()
-                .setTitle("An Error occurred")
-                .setColor(Constants.RED)
-                .setDescription("```" + "!" + syntax + "```")
-                .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant());
-
-        return eb.build();
-    }
-
-    public static MessageEmbed hierarchyError(Object ev) {
-
-        User user = null;
-
-        if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
-
-            event.getMessage().addReaction(Constants.CROSS).complete();
-            user = event.getAuthor();
-        }
-
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-
-            user = event.getUser();
-        }
-
-        EmbedBuilder eb = new EmbedBuilder()
-                .setTitle("An Error occurred")
-                .setColor(Constants.RED)
-                .setDescription("```Can't modify a member with higher or equal highest role than yourself!```")
-                .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant());
-
-        return eb.build();
-    }
-
     public static MessageEmbed purgeError(Object ev) {
 
         User user = null;
@@ -149,54 +95,13 @@ public class Embeds {
         return eb.build();
     }
 
-    public static MessageEmbed emptyError(String text, Object ev) {
+    public static MessageEmbed emptyError(String text, User user) {
 
-        User user = null;
-
-        if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
-
-            event.getMessage().addReaction(Constants.CROSS).complete();
-            user = event.getAuthor();
-        }
-
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-
-            user = event.getUser();
-        }
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("An Error occurred")
                 .setColor(Constants.RED)
                 .setDescription(text)
-                .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant());
-
-        return eb.build();
-    }
-
-    public static MessageEmbed emptyEmbed(String title, String desc, String image, Object ev) {
-
-        User user = null;
-
-        if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
-
-            user = event.getAuthor();
-        }
-
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
-
-            user = event.getUser();
-        }
-
-        EmbedBuilder eb = new EmbedBuilder()
-                .setTitle(title)
-                .setImage(image)
-                .setColor(Constants.RED)
-                .setDescription(desc)
                 .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant());
 

@@ -19,10 +19,13 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Warns implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
         OptionMapping warnsOption = event.getOption("user");
         Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
+
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
@@ -45,6 +48,7 @@ public class Warns implements SlashCommandHandler {
             .setFooter("ID: " + member.getId())
             .setTimestamp(new Date().toInstant())
             .build();
+
         event.replyEmbeds(e).queue();
     }
 }

@@ -12,11 +12,17 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import java.util.Date;
 
 public class ClearQOTW implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
-        Member member = event.getOption("user").getAsMember();
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            Database.queryMemberInt(member.getId(), "qotwpoints", 0);
+
+        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
+            Member member = event.getOption("user").getAsMember();
+            Database.queryMember(member.getId(), "qotwpoints", 0);
 
             var e = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | QOTW-Points cleared", null, member.getUser().getEffectiveAvatarUrl())
@@ -27,10 +33,6 @@ public class ClearQOTW implements SlashCommandHandler {
                 .build();
 
             event.replyEmbeds(e).queue();
-
-        } else {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-        }
     }
 }
 

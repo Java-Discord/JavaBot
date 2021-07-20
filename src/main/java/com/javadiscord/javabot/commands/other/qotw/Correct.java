@@ -16,18 +16,16 @@ import java.util.Date;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 
 public class Correct {
+
     public static void correct(ButtonClickEvent event, Member member) {
 
         String check;
         TextChannel tc;
-        tc = event.getGuild().getTextChannelById(Database.getConfigString(event.getGuild().getName(), event.getGuild().getId(), "channels.log_cid"));
+        tc = event.getGuild().getTextChannelById(Database.getConfigString(event.getGuild(), "channels.log_cid"));
         check = event.getGuild().getEmotesByName("check", false).get(0).getAsMention();
 
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-
-        int qotwPoints = Database.getMemberInt(collection, member, "qotwpoints");
-        Database.queryMemberInt(member.getId(), "qotwpoints", qotwPoints + 1);
+        int qotwPoints = Database.getMemberInt(member, "qotwpoints");
+        Database.queryMember(member.getId(), "qotwpoints", qotwPoints + 1);
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
@@ -48,7 +46,7 @@ public class Correct {
             tc.sendMessage(emb.build()).queue();
 
         } catch (Exception e) {
-            tc.sendMessage(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event)).queue();
+            tc.sendMessage(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event.getUser())).queue();
         }
     }
 }

@@ -13,8 +13,15 @@ import java.awt.*;
 import java.util.List;
 
 public class Purge implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
+
+        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
+
         int amount = (int) event.getOption("amount").getAsLong();
         boolean nuke;
         try {
@@ -22,7 +29,7 @@ public class Purge implements SlashCommandHandler {
         } catch (NullPointerException e) {
             nuke = false;
         }
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+
             try {
                 if (nuke) {
                     event.getTextChannel().createCopy().queue();
@@ -46,9 +53,5 @@ public class Purge implements SlashCommandHandler {
             } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
                 event.replyEmbeds(Embeds.purgeError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             }
-
-        } else {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
         }
     }
-}

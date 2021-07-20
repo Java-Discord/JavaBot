@@ -17,27 +17,6 @@ import static com.javadiscord.javabot.events.Startup.iae;
 
 public class Misc {
 
-    public static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal i = BigDecimal.valueOf(value);
-        i = i.setScale(places, RoundingMode.HALF_UP);
-        return i.doubleValue();
-    }
-
-    public static int parseInt (String input) {
-
-        int i;
-
-        try {
-            i = Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            i = 0;
-        }
-
-        return i;
-    }
-
     public static String checkImage (String input) {
 
         try {
@@ -62,56 +41,14 @@ public class Misc {
         return b;
     }
 
-    public static void sendToLog(Object event, MessageEmbed embed) {
+    public static void sendToLog(Guild guild, MessageEmbed embed) {
 
-        TextChannel tc = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        tc.sendMessage(embed).queue();
-
+        guild.getTextChannelById(Database.getConfigString(guild, "channels.log_cid")).sendMessageEmbeds(embed).queue();
     }
 
-    public static void sendToLog(Object event, String text) {
+    public static void sendToLog(Guild guild, String text) {
 
-        TextChannel tc = null;
-
-        if (event instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent e = (GuildMessageReceivedEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        if (event instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent e = (SlashCommandEvent) event;
-
-            tc = Database.getConfigChannel(event, "channels.log_cid");
-        }
-
-        tc.sendMessage(text).queue();
-
+        guild.getTextChannelById(Database.getConfigString(guild, "channels.log_cid")).sendMessage(text).queue();
     }
 
     public static String getGuildList (List<Guild> guildList, boolean showID, boolean showMemCount) {
@@ -128,45 +65,4 @@ public class Misc {
 
         return sb.substring(2);
     }
-
-    /*public static MessageEmbed HelpEmbed (CommandEvent event) {
-
-        Command.Category category = null;
-        EmbedBuilder eb = new EmbedBuilder()
-                .setTitle("Command List")
-                .setColor(Constants.GRAY)
-                .setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl());
-
-        StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** - currently running version ``" + new Version().getVersion() + "``\n\n" +
-                "``<>`` - required\n``()`` - optional");
-
-        for(Command command : event.getClient().getCommands()) {
-
-            if(command.isHidden()) continue;
-            if(command.isOwnerCommand() && !event.getAuthor().getId().equals(event.getClient().getOwnerId())) continue;
-
-            if(!isCategoryEqual(category, command.getCategory())) {
-
-                category = command.getCategory();
-                builder.append("\n\n**").append(category == null ? "No Category" : category.getName()).append("**\n");
-            }
-
-            builder.append("\n``• ").append(event.getClient().getPrefix()).append(command.getName())
-                    .append(command.getArguments() == null ? "``" : " " + command.getArguments()+"``")
-                    //.append(" - ").append(command.getHelp())
-                    ;
-        }
-
-        String desc = builder.toString();
-        eb.setDescription(desc);
-
-        return eb.build();
-    }
-
-    public static boolean isCategoryEqual(Command.Category first, Command.Category second) {
-
-        if(first == null) return second == null;
-        if(second == null) return false;
-        return first.getName().equals(second.getName());
-    }*/
 }

@@ -43,6 +43,7 @@ public class WelcomeSystem implements SlashCommandHandler, WelcomeCommandHandler
             event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
+
             var command = welcomeIndex.get(event.getSubcommandName());
             if (command != null) {
                 command.handle(event);

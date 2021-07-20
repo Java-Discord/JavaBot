@@ -55,15 +55,15 @@ public class UserJoin extends ListenerAdapter {
         }
 
         int stringWidth;
-        int imgW = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.imgW");
-        int imgH = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.imgH");
-        int avX = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avX");
-        int avY = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avY");
-        int avW = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avW");
-        int avH = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.avatar.avH");
+        int imgW = Database.getConfigInt(guild, "welcome_system.image.imgW");
+        int imgH = Database.getConfigInt(guild, "welcome_system.image.imgH");
+        int avX = Database.getConfigInt(guild, "welcome_system.image.avatar.avX");
+        int avY = Database.getConfigInt(guild, "welcome_system.image.avatar.avY");
+        int avW = Database.getConfigInt(guild, "welcome_system.image.avatar.avW");
+        int avH = Database.getConfigInt(guild, "welcome_system.image.avatar.avH");
 
-        int primCol = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.primCol");
-        int secCol = Database.getConfigInt(guild.getName(), guild.getId(), "welcome_system.image.secCol");
+        int primCol = Database.getConfigInt(guild, "welcome_system.image.primCol");
+        int secCol = Database.getConfigInt(guild, "welcome_system.image.secCol");
 
         float memberSize = 120;
         float countSize = 72;
@@ -73,13 +73,13 @@ public class UserJoin extends ListenerAdapter {
         BufferedImage flagImage = null, botImage = null, avatarImage = null, bgImage = null, overlayImage = null;
 
         try {
-            overlayURL = new URL(Database.getConfigString(guild.getName(), guild.getId(), "welcome_system.image.overlayURL"));
+            overlayURL = new URL(Database.getConfigString(guild, "welcome_system.image.overlayURL"));
         } catch (MalformedURLException e) {
             overlayURL = new URL(iae);
         }
 
         try {
-            bgURL = new URL(Database.getConfigString(guild.getName(), guild.getId(), "welcome_system.image.bgURL"));
+            bgURL = new URL(Database.getConfigString(guild, "welcome_system.image.bgURL"));
         } catch (MalformedURLException e) {
             bgURL = new URL(iae);
         }
@@ -169,7 +169,6 @@ public class UserJoin extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-
         if (event.getMember().getUser().isBot()) return;
 
         User user = event.getMember().getUser();
@@ -194,7 +193,7 @@ public class UserJoin extends ListenerAdapter {
                                 .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
                     }
 
-                    StatsCategory.update(event);
+                    StatsCategory.update(event.getGuild());
 
                 } catch (Exception e) { e.printStackTrace(); }
             });

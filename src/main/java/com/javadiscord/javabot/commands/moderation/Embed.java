@@ -16,6 +16,7 @@ public class Embed implements SlashCommandHandler {
 
     @Override
     public void handle(SlashCommandEvent event) {
+
         if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
             event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
@@ -42,7 +43,7 @@ public class Embed implements SlashCommandHandler {
         event.getChannel().sendMessageEmbeds(e).queue();
         event.reply("Done!").setEphemeral(true).queue();
 
-        } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 
     void createEmbed(SlashCommandEvent event) {
@@ -90,6 +91,6 @@ public class Embed implements SlashCommandHandler {
 
                 event.replyEmbeds(eb.build()).queue();
 
-            } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 }
