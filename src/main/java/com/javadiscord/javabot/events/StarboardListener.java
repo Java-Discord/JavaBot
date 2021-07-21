@@ -14,10 +14,15 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bson.Document;
+
+import javax.print.Doc;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -97,14 +102,27 @@ public class StarboardListener extends ListenerAdapter {
 
         while (it.hasNext()) {
 
-            JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
+            Document doc = it.next();
+            JsonObject root = JsonParser.parseString(doc.toJson()).getAsJsonObject();
 
             String gID = root.get("guild_id").getAsString();
             String cID = root.get("channel_id").getAsString();
             String mID = root.get("message_id").getAsString();
 
+            Message msg = null;
             Guild guild = event.getJDA().getGuildById(gID);
-            Message msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
+
+            try {
+                msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
+            } catch (ErrorResponseException e) {
+
+                if (root.get("isInSBC").getAsBoolean()) {
+                    new Database().getConfigChannel(guild, "other.starboard.starboard_cid")
+                            .retrieveMessageById(root.get("starboard_embed").getAsString()).complete().delete().queue();
+                }
+                collection.deleteOne(doc);
+                continue;
+            }
 
             String emote = new Database().getConfigString(guild, "other.starboard.starboard_emote");
 
@@ -140,7 +158,6 @@ public class StarboardListener extends ListenerAdapter {
         update.append("$set", SetData);
 
         collection.updateOne(query, update);
-
     }
 
     void changeSBCBool(String gID, String cID, String mID, boolean sbc) {
@@ -314,5 +331,21 @@ public class StarboardListener extends ListenerAdapter {
                 addToSB(event.getGuild(), event.getChannel(), event.getChannel().retrieveMessageById(event.getMessageId()).complete());
 
         } else { createSBDoc(gID, cID, mID); }
+    }
+
+    @Override
+    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("starboard_messages");
+
+        Document doc = collection.find(eq("message_id", event.getMessageId())).first();
+        if (doc == null) return;
+
+        JsonObject Root = JsonParser.parseString(doc.toJson()).getAsJsonObject();
+        String var = Root.get("starboard_embed").getAsString();
+
+        new Database().getConfigChannel(event.getGuild(), "other.starboard.starboard_cid").retrieveMessageById(var).complete().delete().queue();
+        collection.deleteOne(doc);
     }
 }
