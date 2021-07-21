@@ -1,12 +1,13 @@
 package com.javadiscord.javabot.properties;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +39,8 @@ public class MultiProperties extends Properties {
 	public MultiProperties(Path... paths) {
 		for (Path path : paths) {
 			Properties props = new Properties();
-			try (FileInputStream fis = new FileInputStream(path.toFile())) {
-				props.load(fis);
+			try (InputStream is = Files.newInputStream(path)) {
+				props.load(is);
 			} catch (IOException e) {
 				System.err.println("Could not load properties from path: " + path + ", Exception: " + e.getMessage());
 			}
