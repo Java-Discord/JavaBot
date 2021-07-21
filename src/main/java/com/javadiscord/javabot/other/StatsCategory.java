@@ -1,9 +1,6 @@
 package com.javadiscord.javabot.other;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class StatsCategory {
 

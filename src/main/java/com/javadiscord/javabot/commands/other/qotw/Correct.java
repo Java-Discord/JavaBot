@@ -3,17 +3,12 @@ package com.javadiscord.javabot.commands.other.qotw;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import org.bson.Document;
 
 import java.util.Date;
-
-import static com.javadiscord.javabot.events.Startup.mongoClient;
 
 public class Correct {
 

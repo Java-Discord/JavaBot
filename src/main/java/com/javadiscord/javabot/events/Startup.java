@@ -9,13 +9,10 @@ import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;

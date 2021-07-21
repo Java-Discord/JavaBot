@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class Ban implements SlashCommandHandler {
 

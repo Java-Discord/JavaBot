@@ -6,9 +6,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import org.yaml.snakeyaml.scanner.Constant;
-
-import java.awt.*;
 
 public class Avatar implements SlashCommandHandler {
 

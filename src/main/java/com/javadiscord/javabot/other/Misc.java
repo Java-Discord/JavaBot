@@ -2,14 +2,8 @@ package com.javadiscord.javabot.other;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.imageio.ImageIO;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.util.List;
 

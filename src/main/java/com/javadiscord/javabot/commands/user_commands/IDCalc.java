@@ -6,7 +6,6 @@ import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;

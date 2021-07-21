@@ -5,12 +5,9 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -21,7 +18,6 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
