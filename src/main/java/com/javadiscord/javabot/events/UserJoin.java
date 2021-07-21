@@ -214,6 +214,8 @@ public class UserJoin extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+        if (event.getMember().getUser().isBot() || event.getMember() == null) return;
+
         String[] args = event.getMessage().getContentDisplay().split(" ");
 
         if (args[0].equalsIgnoreCase("!generateImage") && event.getMember().getId().equals("810481402390118400")) {

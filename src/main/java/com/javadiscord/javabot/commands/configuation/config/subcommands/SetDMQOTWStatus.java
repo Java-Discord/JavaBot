@@ -12,7 +12,7 @@ public class SetDMQOTWStatus implements ConfigCommandHandler {
 
         boolean status = event.getOption("enabled").getAsBoolean();
         new Database().queryConfig(event.getGuild().getId(), "other.qotw.dm-qotw", status);
-        event.replyEmbeds(Embeds.configEmbed(event, "QOTW-DM Status", "QOTW-DM Status succesfully changed to", null, String.valueOf(status), true)).queue();
+        event.replyEmbeds(Embeds.configEmbed(event, "QOTW-DM Status", "QOTW-DM Status successfully changed to", null, String.valueOf(status), true)).queue();
 
     }
 }

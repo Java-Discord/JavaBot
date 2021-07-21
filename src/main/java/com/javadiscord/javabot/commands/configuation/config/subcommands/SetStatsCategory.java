@@ -12,7 +12,7 @@ public class SetStatsCategory implements ConfigCommandHandler {
 
         String id = event.getOption("id").getAsString();
         new Database().queryConfig(event.getGuild().getId(), "other.stats_category.stats_cid", id);
-        event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category ID", "Stats-Category ID succesfully changed to", null, id, true)).queue();
+        event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category ID", "Stats-Category ID successfully changed to", null, id, true)).queue();
 
     }
 }

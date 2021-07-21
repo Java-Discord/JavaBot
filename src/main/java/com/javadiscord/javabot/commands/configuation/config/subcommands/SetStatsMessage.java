@@ -12,7 +12,7 @@ public class SetStatsMessage implements ConfigCommandHandler {
 
         String message = event.getOption("message").getAsString();
         new Database().queryConfig(event.getGuild().getId(), "other.stats_category.stats_text", message);
-        event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category Message", "Stats-Category Message succesfully changed to", null, message, true)).queue();
+        event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category Message", "Stats-Category Message successfully changed to", null, message, true)).queue();
 
     }
 }

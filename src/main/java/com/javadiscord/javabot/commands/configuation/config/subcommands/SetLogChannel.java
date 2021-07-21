@@ -13,7 +13,7 @@ public class SetLogChannel implements ConfigCommandHandler {
 
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
         new Database().queryConfig(event.getGuild().getId(), "channels.log_cid", channel.getId());
-        event.replyEmbeds(Embeds.configEmbed(event, "Log Channel", "Log Channel succesfully changed to", null, channel.getId(), true, true)).queue();
+        event.replyEmbeds(Embeds.configEmbed(event, "Log Channel", "Log Channel successfully changed to", null, channel.getId(), true, true)).queue();
 
     }
 }
