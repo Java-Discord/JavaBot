@@ -214,7 +214,8 @@ public class UserJoin extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-        if (event.getMember().getUser().isBot() || event.getMember() == null) return;
+        try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
+        catch (NullPointerException ignored) {}
 
         String[] args = event.getMessage().getContentDisplay().split(" ");
 

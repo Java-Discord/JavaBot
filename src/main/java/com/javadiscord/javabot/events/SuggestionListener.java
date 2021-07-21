@@ -14,7 +14,9 @@ public class SuggestionListener extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-            if (event.getMember().getUser().isBot() || event.getMember() == null) return;
+        try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
+        catch (NullPointerException ignored) {}
+
             if (event.getChannel().getId().equals(new Database().getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
 
                     EmbedBuilder eb = new EmbedBuilder()
