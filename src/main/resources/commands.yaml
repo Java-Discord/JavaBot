@@ -74,13 +74,14 @@
       name: edit
       options:
         - { description: Link of the original Message, name: link, required: true, type: STRING }
-        - { description: Title of the embed, name: title, required: true, type: STRING }
         - { description: Description of the embed, name: description, required: true, type: STRING }
+        - { description: Title of the embed, name: title, required: false, type: STRING }
     - description: Edits an Embed from a Message
       name: from-message
       options:
-        - { description: Link of the original Message, name: original-link, required: true, type: STRING }
-        - { description: Link of the new Message, name: new-link, required: true, type: STRING }
+        - { description: Link of the original Message, name: embed-link, required: true, type: STRING }
+        - { description: Link of the new Message, name: message-link, required: true, type: STRING }
+        - { description: Title of the embed, name: title, required: false, type: STRING }
 - description: Sends an embed
   name: embed
   handler: com.javadiscord.javabot.commands.moderation.Embed
@@ -102,8 +103,8 @@
     - description: Created a new Embed from a Message
       name: from-message
       options:
-        - { description: Channel of the original Message, name: channel, required: true, type: CHANNEL }
-        - { description: ID of the original Message, name: message-id, required: true, type: STRING }
+        - { description: Link of the original Message, name: link, required: true, type: STRING }
+        - { description: Title of the embed, name: title, required: false, type: STRING }
 - description: Kicks a member
   name: kick
   handler: com.javadiscord.javabot.commands.moderation.Kick

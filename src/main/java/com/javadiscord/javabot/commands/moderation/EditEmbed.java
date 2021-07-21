@@ -31,34 +31,38 @@ public class EditEmbed implements SlashCommandHandler {
     }
 
     void editEmbedFromLink(SlashCommandEvent event) {
-        String oriLink = event.getOption("original-link").getAsString();
-        String newLink = event.getOption("new-link").getAsString();
+        String emLink = event.getOption("embed-link").getAsString();
+        String msgLink = event.getOption("message-link").getAsString();
 
-        String[] oriValue = oriLink.split("/");
-        String[] newValue = newLink.split("/");
+        String[] emValue = emLink.split("/");
+        String[] msgValue = msgLink.split("/");
 
-        Message oriMessage, newMessage;
+        Message emMessage, msgMessage;
         try {
-            TextChannel oriChannel = event.getGuild().getTextChannelById(oriValue[5]);
-            oriMessage = oriChannel.retrieveMessageById(oriValue[6]).complete();
+            TextChannel emChannel = event.getGuild().getTextChannelById(emValue[5]);
+            emMessage = emChannel.retrieveMessageById(emValue[6]).complete();
         } catch (Exception e) {
             event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
 
         try {
-            TextChannel newChannel = event.getGuild().getTextChannelById(newValue[5]);
-            newMessage = newChannel.retrieveMessageById(newValue[6]).complete();
+            TextChannel msgChannel = event.getGuild().getTextChannelById(msgValue[5]);
+            msgMessage = msgChannel.retrieveMessageById(msgValue[6]).complete();
         } catch (Exception e) {
             event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
             return;
         }
+
+        OptionMapping embedOption = event.getOption("title");
+        String title = embedOption == null ? emMessage.getEmbeds().get(0).getTitle() : embedOption.getAsString();
 
             EmbedBuilder eb = new EmbedBuilder()
-                    .setColor(oriMessage.getEmbeds().get(0).getColor())
-                    .setDescription(newMessage.getContentRaw());
+                    .setColor(emMessage.getEmbeds().get(0).getColor())
+                    .setTitle(title)
+                    .setDescription(msgMessage.getContentRaw());
 
-            oriMessage.editMessageEmbeds(eb.build()).queue();
+            emMessage.editMessageEmbeds(eb.build()).queue();
             event.reply("Done!").setEphemeral(true).queue();
     }
 
@@ -76,7 +80,9 @@ public class EditEmbed implements SlashCommandHandler {
             return;
         }
 
-        String title = event.getOption("title").getAsString();
+        OptionMapping embedOption = event.getOption("title");
+        String title = embedOption == null ? message.getEmbeds().get(0).getTitle() : embedOption.getAsString();
+
         String description = event.getOption("description").getAsString();
 
         EmbedBuilder eb = new EmbedBuilder()

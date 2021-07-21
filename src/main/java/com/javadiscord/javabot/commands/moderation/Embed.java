@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -29,21 +30,31 @@ public class Embed implements SlashCommandHandler {
     }
 
     void createEmbedFromLink(SlashCommandEvent event) {
-        MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        String messageID = event.getOption("message-id").getAsString();
+
+        String link = event.getOption("link").getAsString();
+        String[] value = link.split("/");
+
+        Message message;
 
         try {
-        Message message = channel.retrieveMessageById(messageID).complete();
+            TextChannel channel = event.getGuild().getTextChannelById(value[5]);
+            message = channel.retrieveMessageById(value[6]).complete();
+        } catch (Exception e) {
+            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return;
+        }
 
-        var e = new EmbedBuilder()
+        OptionMapping embedOption = event.getOption("title");
+        String title = embedOption == null ? null : embedOption.getAsString();
+
+        var eb = new EmbedBuilder()
                 .setColor(Constants.GRAY)
+                .setTitle(title)
                 .setDescription(message.getContentRaw())
                 .build();
 
-        event.getChannel().sendMessageEmbeds(e).queue();
+        event.getChannel().sendMessageEmbeds(eb).queue();
         event.reply("Done!").setEphemeral(true).queue();
-
-        } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
     }
 
     void createEmbed(SlashCommandEvent event) {
@@ -80,14 +91,8 @@ public class Embed implements SlashCommandHandler {
                 eb.setAuthor(authorname, url, iconurl);
                 eb.setImage(img);
                 eb.setThumbnail(thumb);
+                eb.setColor(Color.decode(color));
 
-                if (!(color == null)) {
-                    try {
-                        eb.setColor(Color.decode(color));
-                    } catch (Exception e) {
-                        eb.setColor(Constants.GRAY);
-                    }
-                }
 
                 event.replyEmbeds(eb.build()).queue();
 
