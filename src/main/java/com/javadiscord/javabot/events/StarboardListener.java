@@ -74,7 +74,13 @@ public class StarboardListener extends ListenerAdapter {
 
         if (getStarCount(guild.getId(), cID, mID) > 0) {
 
-            msg.editMessage(new Database().getConfigString(guild, "other.starboard.starboard_emote")
+            String starLevel = "starboard_emote";
+            int i = getStarCount(guild.getId(), cID, mID);
+
+            if (i > 5) starLevel = "starboard_emote2";
+            if (i > 10) starLevel = "starboard_emote3";
+
+            msg.editMessage(new Database().getConfigString(guild, "other.starboard." + starLevel)
                     + " " + getStarCount(guild.getId(), cID, mID) + " | " +
                     tc.getAsMention()).queue();
         } else {

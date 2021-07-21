@@ -12,6 +12,7 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Version implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
         event.reply(getVersion()).queue();

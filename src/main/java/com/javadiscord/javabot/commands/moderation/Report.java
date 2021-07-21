@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 public class Report implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
 

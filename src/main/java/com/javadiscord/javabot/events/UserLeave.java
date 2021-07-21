@@ -12,7 +12,6 @@ public class UserLeave extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-        if (event.getMember().getUser().isBot()) return;
 
         if (!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
             if (new Database().getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {

@@ -91,7 +91,9 @@ public class Database {
                 .append("lock_count", 0);
 
         Document sb = new Document("starboard_cid", "None")
-                .append("starboard_emote", "⭐");
+                .append("starboard_emote", "⭐")
+                .append("starboard_emote2", "\uD83C\uDF1F")
+                .append("starboard_emote3", "\uD83C\uDF20");
 
         Document other = new Document("stats_category", stats)
                 .append("qotw", qotw)
