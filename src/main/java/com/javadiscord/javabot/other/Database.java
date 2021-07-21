@@ -48,8 +48,7 @@ public class Database {
 
         Document doc = new Document("tag", user.getAsTag())
                 .append("discord_id", user.getId())
-                .append("qotwpoints", 0)
-                .append("qotw-guild", "");
+                .append("qotwpoints", 0);
 
         return doc;
     }
