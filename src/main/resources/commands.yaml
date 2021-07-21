@@ -67,13 +67,20 @@
   handler: com.javadiscord.javabot.commands.other.qotw.ClearQOTW
 - description: Edits an embed
   name: editembed
-  options:
-    - {description: The message ID of the embed you want to edit, name: messageid, required: true,
-       type: STRING}
-    - {description: New title of the embed, name: title, required: true, type: STRING}
-    - {description: New description of the embed, name: description, required: true,
-       type: STRING}
   handler: com.javadiscord.javabot.commands.moderation.EditEmbed
+  options: []
+  subCommands:
+    - description: Edits an embed
+      name: edit
+      options:
+        - { description: Link of the original Message, name: link, required: true, type: STRING }
+        - { description: Title of the embed, name: title, required: true, type: STRING }
+        - { description: Description of the embed, name: description, required: true, type: STRING }
+    - description: Edits an Embed from a Message
+      name: from-message
+      options:
+        - { description: Link of the original Message, name: original-link, required: true, type: STRING }
+        - { description: Link of the new Message, name: new-link, required: true, type: STRING }
 - description: Sends an embed
   name: embed
   handler: com.javadiscord.javabot.commands.moderation.Embed

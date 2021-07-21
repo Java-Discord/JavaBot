@@ -97,23 +97,21 @@ public class StarboardListener extends ListenerAdapter {
         }
     }
 
-    public void updateAllSBM(ReadyEvent event) {
+    public void updateAllSBM(ReadyEvent event, Guild guild) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("starboard_messages");
-        MongoCursor<Document> it = collection.find().iterator();
+        MongoCursor<Document> it = collection.find(eq("guild_id", guild.getId())).iterator();
 
         while (it.hasNext()) {
 
             Document doc = it.next();
             JsonObject root = JsonParser.parseString(doc.toJson()).getAsJsonObject();
 
-            String gID = root.get("guild_id").getAsString();
             String cID = root.get("channel_id").getAsString();
             String mID = root.get("message_id").getAsString();
 
             Message msg = null;
-            Guild guild = event.getJDA().getGuildById(gID);
 
             try {
                 msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
@@ -130,17 +128,17 @@ public class StarboardListener extends ListenerAdapter {
             String emote = new Database().getConfigString(guild, "other.starboard.starboard_emote");
 
             if (msg.getReactions().isEmpty()) {
-                setEmoteCount(0, gID, cID, mID);
-                updateSB(event.getJDA().getGuildById(gID), cID, mID);
+                setEmoteCount(0, guild.getId(), cID, mID);
+                updateSB(event.getJDA().getGuildById(guild.getId()), cID, mID);
             }
 
             for (int i = msg.getReactions().size(); i > 0; i--) {
 
                 if (!msg.getReactions().get(i - 1).getReactionEmote().getName().equals(emote)) return;
 
-                setEmoteCount(msg.getReactions().get(i - 1).getCount(), gID, cID, mID);
-                if (msg.getReactions().get(i - 1).getCount() >= 3 && !getSBCBool(gID, cID, mID)) addToSB(guild, guild.getTextChannelById(cID), msg);
-                if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) updateSB(event.getJDA().getGuildById(gID), cID, mID);
+                setEmoteCount(msg.getReactions().get(i - 1).getCount(), guild.getId(), cID, mID);
+                if (msg.getReactions().get(i - 1).getCount() >= 3 && !getSBCBool(guild.getId(), cID, mID)) addToSB(guild, guild.getTextChannelById(cID), msg);
+                if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) updateSB(event.getJDA().getGuildById(guild.getId()), cID, mID);
             }
         }
     }
