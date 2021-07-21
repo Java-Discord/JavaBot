@@ -15,7 +15,7 @@ public class SuggestionListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
-        catch (NullPointerException ignored) {}
+        catch (NullPointerException ignored) { return; }
 
             if (event.getChannel().getId().equals(new Database().getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
 

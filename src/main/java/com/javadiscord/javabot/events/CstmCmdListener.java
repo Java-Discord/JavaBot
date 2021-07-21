@@ -18,7 +18,7 @@ public class CstmCmdListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
-        catch (NullPointerException ignored) {}
+        catch (NullPointerException ignored) { return; }
 
         String[] args = event.getMessage().getContentDisplay().split(" ");
             if (!args[0].startsWith("!")) return;

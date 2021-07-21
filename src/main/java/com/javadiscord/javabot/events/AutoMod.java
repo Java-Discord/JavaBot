@@ -33,7 +33,7 @@ public class AutoMod extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
             try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
-            catch (NullPointerException ignored) {}
+            catch (NullPointerException ignored) { return; }
 
             if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) return;
 
