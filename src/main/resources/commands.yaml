@@ -171,6 +171,10 @@
       name: report-channel
       options:
         - {description: New report channel, name: channel, required: true, type: CHANNEL}
+    - description: Changes the report channel
+      name: starboard-channel
+      options:
+        - { description: New report channel, name: channel, required: true, type: CHANNEL }
     - description: Changes the log channel
       name: log-channel
       options:

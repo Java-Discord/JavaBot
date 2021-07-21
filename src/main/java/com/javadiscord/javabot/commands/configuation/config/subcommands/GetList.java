@@ -17,7 +17,7 @@ public class GetList implements ConfigCommandHandler {
                 .setColor(Constants.GRAY)
                 .setTitle("Bot Configuration")
 
-                .addField("Lock Status", "Lock: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
+                .addField("Lock Status", "Locked: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
                         "\nCount: `" + db.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
 
                 .addField("Question of the Week", "Submission Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.submission_cid")
@@ -29,7 +29,8 @@ public class GetList implements ConfigCommandHandler {
                 .addField("Other", "Report Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.report_cid") +
                         ", Log Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.log_cid") +
                         "\nSuggestion Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.suggestion_cid") +
-                        ", Mute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid"), false)
+                        ", Starboard Channel: " + db.getConfigChannelAsMention(event.getGuild(), "other.starboard.starboard_cid") +
+                        "\nMute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid"), false)
                 .build();
 
         event.replyEmbeds(eb).queue();

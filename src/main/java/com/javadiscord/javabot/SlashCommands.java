@@ -157,15 +157,12 @@ public class SlashCommands extends ListenerAdapter {
 
                 String messageID = id[1];
                 String buttonLabel = id[2];
-                String emoteID = id[3];
 
                 Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
-                Emote emote = event.getGuild().getEmoteById(emoteID);
 
                 BasicDBObject criteria = new BasicDBObject()
                         .append("guild_id", event.getGuild().getId())
                         .append("message_id", messageID)
-                        .append("emote", emote.getAsMention())
                         .append("button_label", buttonLabel);
 
                 String JSON = reactionroles.find(criteria).first().toJson();

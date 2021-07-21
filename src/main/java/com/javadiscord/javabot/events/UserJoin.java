@@ -174,7 +174,7 @@ public class UserJoin extends ListenerAdapter {
         if (event.getMember().getUser().isBot()) return;
 
         User user = event.getMember().getUser();
-        TextChannel welcomeChannel = new Database().getConfigChannel(event.getGuild(), "channels.welcome_cid");
+        TextChannel welcomeChannel = new Database().getConfigChannel(event.getGuild(), "welcome_system.welcome_cid");
 
         if (!ServerLock.lockStatus(event)) {
 

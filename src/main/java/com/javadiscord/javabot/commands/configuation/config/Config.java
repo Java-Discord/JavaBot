@@ -22,6 +22,7 @@ public class Config implements SlashCommandHandler, ConfigCommandHandler {
         configIndex.put("stats-category", new SetStatsCategory());
         configIndex.put("stats-message", new SetStatsMessage());
         configIndex.put("report-channel",new SetReportChannel());
+        configIndex.put("starboard-channel",new SetStarboardChannel());
         configIndex.put("log-channel", new SetLogChannel());
         configIndex.put("suggestion-channel", new SetSuggestionChannel());
         configIndex.put("submission-channel", new SetSubmissionChannel());
