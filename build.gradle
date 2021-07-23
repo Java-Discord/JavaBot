@@ -1,4 +1,5 @@
 plugins { id 'java' }
+apply plugin:'java'
 
 sourceCompatibility = 11
 targetCompatibility = 11
