@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
-import java.util.Date;
+import java.time.Instant;
 
 public class Ban implements SlashCommandHandler {
 
@@ -41,7 +41,7 @@ public class Ban implements SlashCommandHandler {
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
         event.replyEmbeds(eb).queue();
