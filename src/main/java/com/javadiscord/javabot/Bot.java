@@ -64,15 +64,18 @@ public class Bot {
      * @param jda The JDA bot instance to add listeners to.
      */
     private static void addEventListeners(JDA jda) {
-        jda.addEventListener(new GuildJoin());
-        jda.addEventListener(new UserJoin());
-        jda.addEventListener(new UserLeave());
-        jda.addEventListener(new Startup());
-        jda.addEventListener(PresenceUpdater.standardActivities());
-        jda.addEventListener(new SuggestionListener());
-        jda.addEventListener(new AutoMod());
-        jda.addEventListener(new SubmissionListener());
-        jda.addEventListener(new StarboardListener());
+        jda.addEventListener(
+                new GuildJoin(),
+                new UserJoin(),
+                new UserLeave(),
+                new Startup(),
+                PresenceUpdater.standardActivities(),
+                new SuggestionListener(),
+                new AutoMod(),
+                new SubmissionListener(),
+                new StarboardListener(),
+                new ButtonClickListener()
+        );
     }
 
     /**

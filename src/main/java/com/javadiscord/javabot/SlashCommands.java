@@ -3,7 +3,6 @@ package com.javadiscord.javabot;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.events.SubmissionListener;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
@@ -13,9 +12,6 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -26,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
 /**
@@ -121,81 +116,5 @@ public class SlashCommands extends ListenerAdapter {
         }
 
         commands.queue();
-    }
-
-    @Override
-    public void onButtonClick(ButtonClickEvent event) {
-        if (event.getUser().isBot()) return;
-
-        String[] id = event.getComponentId().split(":");
-        event.deferEdit().queue();
-
-        JsonObject root;
-        Document document;
-
-        Guild guild = preferredGuild;
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> reactionroles = database.getCollection("reactionroles");
-        MongoCollection<Document> openSubmissions = database.getCollection("open_submissions");
-        MongoCollection<Document> submissionMessages = database.getCollection("submission_messages");
-
-        switch (id[0]) {
-            case "dm-submission":
-
-                document = openSubmissions.find(eq("guild_id", guild.getId())).first();
-
-                root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-                String text = root.get("text").getAsString();
-
-                switch (id[1]) {
-                    case "send": new SubmissionListener().dmSubmissionSend(event, text); break;
-                    case "cancel": new SubmissionListener().dmSubmissionCancel(event); break;
-                }
-                openSubmissions.deleteOne(document);
-                break;
-
-            case "submission":
-
-                document = submissionMessages.find(eq("guild_id", guild.getId())).first();
-
-                root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-                String userID = root.get("user_id").getAsString();
-
-                switch (id[1]) {
-                    case "approve": new SubmissionListener().submissionApprove(event, userID); break;
-                    case "decline": new SubmissionListener().submissionDecline(event); break;
-                }
-                submissionMessages.deleteOne(document);
-                break;
-
-            case "reactionroles":
-
-                String messageID = id[1];
-                String buttonLabel = id[2];
-
-                Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
-
-                BasicDBObject criteria = new BasicDBObject()
-                        .append("guild_id", event.getGuild().getId())
-                        .append("message_id", messageID)
-                        .append("button_label", buttonLabel);
-
-                String JSON = reactionroles.find(criteria).first().toJson();
-
-                JsonObject Root = JsonParser.parseString(JSON).getAsJsonObject();
-                String roleID = Root.get("role_id").getAsString();
-
-                Role role = event.getGuild().getRoleById(roleID);
-
-                if (member.getRoles().contains(role)) {
-                    event.getGuild().removeRoleFromMember(member, role).queue();
-                    event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
-                } else {
-                    event.getGuild().addRoleToMember(member, role).queue();
-                    event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
-                }
-                break;
-        }
     }
 }
