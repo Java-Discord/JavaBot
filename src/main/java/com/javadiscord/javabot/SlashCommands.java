@@ -29,6 +29,15 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
+/**
+ * This listener is responsible for handling slash commands sent by users in
+ * guilds where the bot is active, and responding to them by calling the
+ * appropriate {@link SlashCommandHandler}.
+ * <p>
+ *     The list of valid commands, and their associated handlers, are defined in
+ *     the commands.yaml file under the resources directory.
+ * </p>
+ */
 public class SlashCommands extends ListenerAdapter {
     /**
      * Maps every command name and alias to an instance of the command, for
@@ -69,6 +78,16 @@ public class SlashCommands extends ListenerAdapter {
         }
     }
 
+    /**
+     * Registers all slash commands defined in commands.yaml for the given guild
+     * so that users can see the commands when they type a "/".
+     * <p>
+     *     It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
+     *     whose key is the command name, and whose value is a new instance of
+     *     the handler class which the command has specified.
+     * </p>
+     * @param guild The guild to update commands for.
+     */
     public void registerSlashCommands(Guild guild) {
         CommandListUpdateAction commands = guild.updateCommands();
 
