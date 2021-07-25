@@ -24,7 +24,7 @@ public class Embed implements SlashCommandHandler {
         }
 
         switch (event.getSubcommandName()) {
-            case "edit": createEmbed(event); break;
+            case "create": createEmbed(event); break;
             case "from-message": createEmbedFromLink(event); break;
         }
     }
