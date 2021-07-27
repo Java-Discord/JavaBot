@@ -362,3 +362,34 @@
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
     - {description: Text of the response, name: text, required: true, type: STRING}
+
+# Java Jam Specific Commands
+- name: jam
+  description: Interact with Java Jam functionality.
+  handler: com.javadiscord.javabot.commands.jam.JamCommandHandler
+  subCommands:
+    - name: info
+      description: Shows information about the current state of the Java Jam.
+      options: []
+  subCommandGroups:
+    - name: admin
+      description: Administrator actions for configuring the Java Jam.
+      subCommands:
+        - name: plan-new-jam
+          description: Creates a new Java Jam for the future.
+          options:
+            - name: start-date
+              description: The date at which the Jam should start. Format as DD-MM-YYYY.
+              required: true
+              type: STRING
+        - name: add-theme
+          description: Adds a new theme to the next upcoming Jam.
+          options:
+            - name: name
+              description: The name of this theme. Should be short (< 64 characters), and unique for the Jam.
+              required: true
+              type: STRING
+            - name: description
+              description: A longer description of the theme, that will help users to understand the theme.
+              required: true
+              type: STRING

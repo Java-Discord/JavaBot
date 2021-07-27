@@ -1,5 +1,6 @@
 package com.javadiscord.javabot;
 
+import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
 import net.dv8tion.jda.api.JDA;
@@ -11,7 +12,9 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import java.nio.file.Path;
+import java.time.ZoneOffset;
 import java.util.Properties;
+import java.util.TimeZone;
 
 /**
  * The main class where the bot is initialized.
@@ -36,8 +39,16 @@ public class Bot {
     public static SlashCommands slashCommands;
 
     /**
+     * A reference to the data source that provides access to the relational
+     * database that this bot users for certain parts of the application. Use
+     * this to obtain a connection and perform transactions.
+     */
+    public static H2DataSource dataSource;
+
+    /**
      * The main method that starts the bot. This involves a few steps:
      * <ol>
+     *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
      *     <li>Initializing the {@link SlashCommands} listener (which reads command data from a YAML file).</li>
      *     <li>Creating and configuring the {@link JDA} instance that enables the bot's Discord connectivity.</li>
      *     <li>Adding event listeners to the bot.</li>
@@ -46,8 +57,11 @@ public class Bot {
      * @throws Exception If any exception occurs during bot creation.
      */
     public static void main(String[] args) throws Exception {
-        slashCommands = new SlashCommands();
+        TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 
+        slashCommands = new SlashCommands();
+        dataSource = new H2DataSource();
+        dataSource.initDatabase();
         JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -59,7 +73,7 @@ public class Bot {
     }
 
     /**
-     * Adds all of the bot's event listeners to the JDA instance, except for the
+     * Adds all the bot's event listeners to the JDA instance, except for the
      * main {@link SlashCommands} listener.
      * @param jda The JDA bot instance to add listeners to.
      */
