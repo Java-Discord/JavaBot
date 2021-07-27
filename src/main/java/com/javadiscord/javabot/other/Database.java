@@ -16,12 +16,12 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class Database {
 
-    public void deleteOpenSubmissions () {
+    public void deleteOpenSubmissions (Guild guild) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("open_submissions");
 
-        for (var document : collection.find()) {
+        for (var document : collection.find(eq("guild_id", guild.getId()))) {
 
             JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
             String messageId = root.get("message_id").getAsString();
