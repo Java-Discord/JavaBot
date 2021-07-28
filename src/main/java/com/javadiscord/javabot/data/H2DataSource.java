@@ -28,8 +28,12 @@ public class H2DataSource {
 			InputStream is = getClass().getResourceAsStream("/schema.sql");
 			if (is == null) throw new IOException("Could not load schema.sql.");
 			Connection con = this.getConnection();
-			Statement statement = con.createStatement();
-			statement.executeUpdate(new String(is.readAllBytes()));
+			String sql = new String(is.readAllBytes());
+			for (String query : sql.split(";")) {
+				Statement statement = con.createStatement();
+				statement.executeUpdate(query);
+				statement.close();
+			}
 			log.info("Successfully initialized H2 database.");
 		} else {
 			log.info("H2 database exists, ready to create connections.");
