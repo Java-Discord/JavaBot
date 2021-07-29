@@ -12,9 +12,7 @@ import com.javadiscord.javabot.commands.jam.model.JamTheme;
 import com.javadiscord.javabot.other.Colors;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +83,9 @@ public class JamPhaseManager {
 		this.removeAllMessages(votingChannel);
 		log.info("Creating theme voting embed.");
 		EmbedBuilder voteEmbedBuilder = new EmbedBuilder()
-				.setTitle("Jam Theme Voting")
-				.setDescription("Vote for your preferred themes for the upcoming Java Jam.");
+				.setTitle(String.format("%s Theme Voting", jam.getFullName()))
+				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setDescription("Vote for your preferred themes for the upcoming Jam.");
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(jam);
 		if (themes.isEmpty()) throw new IllegalStateException("Cannot start theme voting until at least one theme is available.");
 		for (int i = 0; i < themes.size(); i++) {
@@ -100,7 +99,12 @@ public class JamPhaseManager {
 		}
 		new JamMessageRepository(con).saveMessageId(jam, themeVoteMessage.getIdLong(), "theme_voting");
 		log.info("Creating announcement.");
-		announcementChannel.sendMessage("The Jam has entered theme voting! Vote for your theme now!!!").complete();
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+				.setTitle(String.format("%s Theme Voting Has Started!", jam.getFullName()))
+				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setDescription("Go to " + votingChannel.getAsMention() + " to cast your votes, and decide what theme will be chosen for the Jam!");
+		announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+		this.pingRole(announcementChannel, event);
 		log.info("Updating Jam status.");
 		new JamRepository(con).updateJamPhase(jam, JamPhase.THEME_VOTING);
 	}
@@ -147,6 +151,7 @@ public class JamPhaseManager {
 
 		this.updateThemeAccepted(themes, winningTheme);
 		this.sendChosenThemeMessage(announcementChannel, votes, winningTheme);
+		this.pingRole(announcementChannel, event);
 
 		log.info("Moving jam to submission phase.");
 		new JamRepository(con).updateJamPhase(jam, JamPhase.SUBMISSION);
@@ -175,6 +180,9 @@ public class JamPhaseManager {
 		log.info("Clearing voting channel.");
 		this.removeAllMessages(votingChannel);
 		List<JamSubmission> submissions = new JamSubmissionRepository(con).getSubmissions(jam);
+		if (submissions.isEmpty()) {
+			throw new IllegalStateException("Cannot start submission voting because there aren't any submissions.");
+		}
 		JamMessageRepository messageRepository = new JamMessageRepository(con);
 		for (JamSubmission submission : submissions) {
 			User user = event.getJDA().getUserById(submission.getUserId());
@@ -189,7 +197,13 @@ public class JamPhaseManager {
 			message.addReaction(SUBMISSION_VOTE_UNICODE).complete();
 			messageRepository.saveMessageId(jam, message.getIdLong(), "submission-" + submission.getId());
 		}
-		announcementChannel.sendMessage("You can now vote on your favorite submission!").complete();
+
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+				.setTitle("Voting Has Begun!")
+				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setDescription(String.format("Go to %s to vote for who you think should win the %s.", votingChannel.getAsMention(), jam.getFullName()));
+		announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+		this.pingRole(announcementChannel, event);
 		log.info("Setting Jam to Submission Voting phase.");
 		new JamRepository(con).updateJamPhase(jam, JamPhase.SUBMISSION_VOTING);
 	}
@@ -219,6 +233,7 @@ public class JamPhaseManager {
 
 		PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)");
 
+		Map<JamSubmission, Integer> votesMap = new HashMap<>();
 		for (JamSubmission submission : submissions) {
 			submissionVoteStmt.setLong(1, submission.getId());
 			Long messageId = messageRepository.getMessageId(jam, "submission-" + submission.getId());
@@ -235,6 +250,7 @@ public class JamPhaseManager {
 				}
 				votes++;
 			}
+			votesMap.put(submission, votes);
 			if (votes > winningSubmissionVotes) {
 				winningSubmission = submission;
 				winningSubmissionVotes = votes;
@@ -246,7 +262,31 @@ public class JamPhaseManager {
 			announcementChannel.sendMessage("No winning submission could be determined.").complete();
 		} else {
 			User winner = event.getJDA().getUserById(winningSubmission.getUserId());
-			announcementChannel.sendMessage("The winner of the Java Jam is: " + winner.getAsTag()).complete();
+			Guild guild = event.getGuild();
+			Member member = guild == null || winner == null ? null : guild.getMember(winner);
+			String username = member == null ? "Unknown User" : member.getEffectiveName();
+
+			EmbedBuilder embedBuilder = new EmbedBuilder()
+					.setTitle(String.format("%s has won the %s!", username, jam.getFullName()), winningSubmission.getSourceLink())
+					.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+					.setDescription(String.format("> %s\nCheck out their project here:\n%s\nThey earned **%d** votes.", winningSubmission.getDescription(), winningSubmission.getSourceLink(), winningSubmissionVotes));
+			votesMap.remove(winningSubmission);
+			if (!votesMap.isEmpty()) {
+				embedBuilder.addField("Also check out the other submissions:", null, false);
+				for (Map.Entry<JamSubmission, Integer> entry : votesMap.entrySet()) {
+					User user = event.getJDA().getUserById(entry.getKey().getUserId());
+					Member runnerUpMember = guild == null || user == null ? null : guild.getMember(user);
+					String runnerUpUsername = runnerUpMember == null ? "Unknown User" : runnerUpMember.getEffectiveName();
+					embedBuilder.addField(
+							runnerUpUsername + " with " + entry.getValue() + " votes",
+							String.format("%s\n> %s", entry.getKey().getSourceLink(), entry.getKey().getDescription()),
+							false
+					);
+				}
+			}
+
+			announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+			this.pingRole(announcementChannel, event);
 		}
 		this.removeAllMessages(votingChannel);
 		new JamRepository(con).completeJam(jam);
@@ -290,11 +330,23 @@ public class JamPhaseManager {
 
 	private void sendChosenThemeMessage(TextChannel channel, Map<JamTheme, Integer> votes, JamTheme winner) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
-				.setTitle("The Jam's Theme Has Been Chosen!")
+				.setTitle(String.format("The %s's Theme Has Been Chosen!", winner.getJam().getFullName()))
 				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
-				.setDescription("This Jam's theme will be **" + winner.getName() + "**\n\n" + winner.getDescription());
+				.setDescription("The theme will be **" + winner.getName() + "**\n> " + winner.getDescription())
+				.addField(
+						"Submitting",
+						"To submit your project for the Jam, simply use the `/jam submit` command." +
+								" You'll need to provide a link to your project's source code, and a " +
+								"short description. If you submit more than once, only your latest " +
+								"submission is considered."
+						,
+						false
+				)
+				.addField("On behalf of Java-Discord's staff and helpers, we wish you the best of luck with your projects!", "*Also don't wait until the last minute to get started!*", false)
+				.addBlankField(false)
+				.addField("Here's how the votes played out:", "", false);
 		for (Map.Entry<JamTheme, Integer> entry : votes.entrySet()) {
-			embedBuilder.addField(entry.getKey().getName(), entry.getValue() + " votes", false);
+			embedBuilder.addField(entry.getKey().getName(), entry.getValue() + " votes", true);
 		}
 		channel.sendMessageEmbeds(embedBuilder.build()).complete();
 	}
@@ -310,5 +362,14 @@ public class JamPhaseManager {
 				channel.deleteMessages(messages).complete();
 			}
 		} while (!messages.isEmpty());
+	}
+
+	private void pingRole(TextChannel channel, SlashCommandEvent event) {
+		Role jamPingRole = event.getJDA().getRoleById(Bot.getProperty("jamPingRoleId"));
+		if (jamPingRole == null) {
+			log.error("Could not find Jam ping role.");
+			return;
+		}
+		channel.sendMessage(jamPingRole.getAsMention()).complete();
 	}
 }

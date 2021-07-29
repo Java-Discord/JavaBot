@@ -32,6 +32,7 @@ public class JamCommandHandler implements SlashCommandHandler {
 		this.subcommandHandlers.put("next-phase", new NextPhaseSubcommand());
 		this.subcommandHandlers.put("list-submissions", new ListSubmissionsSubcommand());
 		this.subcommandHandlers.put("remove-submissions", new RemoveSubmissionsSubcommand());
+		this.subcommandHandlers.put("cancel", new CancelSubcommand());
 	}
 
 	@Override

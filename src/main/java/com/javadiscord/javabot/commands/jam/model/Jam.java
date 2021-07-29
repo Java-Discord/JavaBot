@@ -11,6 +11,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Jam {
 	private long id;
+	private String name;
 	private long guildId;
 	private LocalDateTime createdAt;
 	private long startedBy;
@@ -20,6 +21,21 @@ public class Jam {
 
 	public boolean submissionsAllowed() {
 		return this.currentPhase.equals(JamPhase.SUBMISSION);
+	}
+
+	public String getNameOrEmpty() {
+		if (this.name == null) {
+			return "";
+		}
+		return this.name;
+	}
+
+	public String getFullName() {
+		if (this.name == null) {
+			return "Jam";
+		} else {
+			return this.name + " Jam";
+		}
 	}
 
 	@Override

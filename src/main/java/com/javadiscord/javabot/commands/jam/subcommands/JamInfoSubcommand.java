@@ -15,6 +15,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Shows some basic information about the current Java Jam.
+ */
 @RequiredArgsConstructor
 public class JamInfoSubcommand implements SlashCommandHandler {
 	@Override
@@ -39,6 +42,7 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 				.setTitle("Jam Information")
 				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
 				.addField("Id", Long.toString(jam.getId()), false)
+				.addField("Name", jam.getName(), false)
 				.addField("Created at", jam.getCreatedAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' kk:mm:ss 'UTC'")), false)
 				.addField("Started by", startedByUser.getAsTag(), false)
 				.addField("Starts at", jam.getStartsAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy")), false)
@@ -61,6 +65,7 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 			} else {
 				jam = jamRepository.getJam(idOption.getAsLong());
 			}
+			con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error occurred while fetching the Jam info.", e);

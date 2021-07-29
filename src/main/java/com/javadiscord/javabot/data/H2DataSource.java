@@ -34,6 +34,7 @@ public class H2DataSource {
 				statement.executeUpdate(query);
 				statement.close();
 			}
+			con.close();
 			log.info("Successfully initialized H2 database.");
 		} else {
 			log.info("H2 database exists, ready to create connections.");
@@ -43,20 +44,6 @@ public class H2DataSource {
 	public Connection getConnection() throws SQLException {
 		String fileName = Bot.getProperty("databaseFileName");
 		return DriverManager.getConnection("jdbc:h2:file:./" + fileName);
-	}
-
-	public void transaction(TransactionFunction function) throws SQLException {
-		Connection con = this.getConnection();
-		con.setAutoCommit(false);
-		try {
-			function.execute(con);
-			con.commit();
-		} catch (Throwable t) {
-			log.error("Error occurred while executing transaction.", t);
-			con.rollback();
-		} finally {
-			con.close();
-		}
 	}
 
 	/**

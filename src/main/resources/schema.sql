@@ -15,6 +15,7 @@ UPDATE jam_phase SET next_phase = 'Submission Voting' WHERE name = 'Submission';
 
 CREATE TABLE jam (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(64) NULL DEFAULT NULL,
     guild_id BIGINT NOT NULL,
     started_by BIGINT NOT NULL,
     created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),

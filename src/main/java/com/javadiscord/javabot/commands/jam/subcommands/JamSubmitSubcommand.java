@@ -15,6 +15,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * This command is used to submit a submission for a Java Jam.
+ */
 public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 

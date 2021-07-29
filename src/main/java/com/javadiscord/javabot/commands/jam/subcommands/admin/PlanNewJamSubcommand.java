@@ -38,6 +38,11 @@ public class PlanNewJamSubcommand implements SlashCommandHandler {
 			return;
 		}
 		long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+		String name = null;
+		OptionMapping nameOption = event.getOption("name");
+		if (nameOption != null) {
+			name = nameOption.getAsString();
+		}
 
 		try {
 			Connection con = Bot.dataSource.getConnection();
@@ -51,6 +56,7 @@ public class PlanNewJamSubcommand implements SlashCommandHandler {
 
 			Jam jam = new Jam();
 			jam.setGuildId(guildId);
+			jam.setName(name);
 			jam.setStartedBy(event.getUser().getIdLong());
 			jam.setStartsAt(startsAt);
 			jam.setCompleted(false);

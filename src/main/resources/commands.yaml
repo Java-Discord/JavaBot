@@ -401,6 +401,10 @@
               description: The date at which the Jam should start. Format as DD-MM-YYYY.
               required: true
               type: STRING
+            - name: name
+              description: A name for this Jam. Typical usage is `'{name} Jam'`.
+              required: false
+              type: STRING
 
         # Theme Commands
         - name: add-theme
@@ -451,3 +455,10 @@
         # Jam Interaction Commands
         - name: next-phase
           description: Manually moves the currently active Jam to the next phase.
+        - name: cancel
+          description: Cancels the current Jam. Use with caution!
+          options:
+            - name: confirm
+              description: Type 'yes' to confirm that you want to cancel the Jam.
+              required: true
+              type: STRING

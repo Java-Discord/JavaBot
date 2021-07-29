@@ -14,8 +14,13 @@ public class JamRepository {
 	public void saveJam(Jam jam) throws SQLException, IOException {
 		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/insert_jam.sql"), Statement.RETURN_GENERATED_KEYS);
 		stmt.setLong(1, jam.getGuildId());
-		stmt.setLong(2, jam.getStartedBy());
-		stmt.setDate(3, Date.valueOf(jam.getStartsAt()));
+		if (jam.getName() != null) {
+			stmt.setString(2, jam.getName());
+		} else {
+			stmt.setNull(2, Types.VARCHAR);
+		}
+		stmt.setLong(3, jam.getStartedBy());
+		stmt.setDate(4, Date.valueOf(jam.getStartsAt()));
 		int rows = stmt.executeUpdate();
 		if (rows == 0) throw new SQLException("New Jam was not inserted.");
 		ResultSet rs = stmt.getGeneratedKeys();
@@ -62,6 +67,7 @@ public class JamRepository {
 	private Jam readJam(ResultSet rs) throws SQLException {
 		Jam jam = new Jam();
 		jam.setId(rs.getLong("id"));
+		jam.setName(rs.getString("name"));
 		jam.setGuildId(rs.getLong("guild_id"));
 		jam.setStartedBy(rs.getLong("started_by"));
 		jam.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
@@ -85,6 +91,18 @@ public class JamRepository {
 		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/update_jam_phase.sql"));
 		stmt.setString(1, nextPhaseName);
 		stmt.setLong(2, jam.getId());
+		stmt.executeUpdate();
+		stmt.close();
+	}
+
+	public void cancelJam(Jam jam) throws SQLException, IOException {
+		this.completeJam(jam);
+		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?");
+		stmt.setLong(1, jam.getId());
+		stmt.executeUpdate();
+		stmt.close();
+		stmt = con.prepareStatement("UPDATE jam_theme SET accepted = FALSE WHERE jam_id = ? AND accepted IS NULL;");
+		stmt.setLong(1, jam.getId());
 		stmt.executeUpdate();
 		stmt.close();
 	}
