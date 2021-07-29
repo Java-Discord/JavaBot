@@ -236,7 +236,8 @@ public class Database {
         } catch (NullPointerException e) {
 
             e.printStackTrace();
-            collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+
+            if (!(guild == null)) collection.insertOne(guildDoc(guild.getName(), guild.getId()));
             return "None";
         }
     }
@@ -259,7 +260,8 @@ public class Database {
         } catch (NullPointerException e) {
 
             e.printStackTrace();
-            collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+
+            if (!(guild == null)) collection.insertOne(guildDoc(guild.getName(), guild.getId()));
             return 0;
         }
     }
@@ -282,7 +284,8 @@ public class Database {
         } catch (NullPointerException e) {
 
             e.printStackTrace();
-            collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+
+            if (!(guild == null)) collection.insertOne(guildDoc(guild.getName(), guild.getId()));
             return false;
         }
     }

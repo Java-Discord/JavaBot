@@ -23,11 +23,7 @@ public class GuildJoin extends ListenerAdapter {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        try {
-            String doc = collection.find(eq("guild_id", guildID)).first().toJson();
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-
-        } catch (NullPointerException e) {
+        if (collection.find(eq("guild_id", guildID)).first() == null) {
 
             collection.insertOne(new Database().guildDoc(guildName, guildID));
             logger.warn("Added Database entry for Guild \"" + guildName + "\" (" + guildID + ")");
