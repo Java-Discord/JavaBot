@@ -1,32 +1,27 @@
 package com.javadiscord.javabot.events;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bson.Document;
-import org.slf4j.LoggerFactory;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class GuildJoin extends ListenerAdapter {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(GuildJoin.class);
-
-    public static void addGuildToDB (String guildID, String guildName) {
+    public static void addGuildToDB (Guild guild) {
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        if (collection.find(eq("guild_id", guildID)).first() == null) {
+        if (collection.find(eq("guild_id", guild.getId())).first() == null) {
 
-            collection.insertOne(new Database().guildDoc(guildName, guildID));
-            logger.warn("Added Database entry for Guild \"" + guildName + "\" (" + guildID + ")");
+            new Database().insertGuildDoc(guild);
         }
     }
 
@@ -38,6 +33,6 @@ public class GuildJoin extends ListenerAdapter {
             Bot.slashCommands.registerSlashCommands(guild);
         }
 
-        addGuildToDB(event.getGuild().getId(), event.getGuild().getName());
+        addGuildToDB(event.getGuild());
     }
 }

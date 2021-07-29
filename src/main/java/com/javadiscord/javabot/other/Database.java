@@ -9,12 +9,15 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
+import org.slf4j.LoggerFactory;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Database {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Database.class);
 
     public void deleteOpenSubmissions (Guild guild) {
 
@@ -111,6 +114,27 @@ public class Database {
                 .append("other", other);
 
         return doc;
+    }
+
+    public boolean guildDocExists(Guild guild) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+
+        if (guild == null) return false;
+        if (collection.find(eq("guild_id", guild.getId())).first() == null) return false;
+
+        return true;
+    }
+
+    public void insertGuildDoc (Guild guild) {
+
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+
+        collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+
+        logger.warn("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
     }
 
     public void queryMember(String memberID, String varName, String newValue) {
@@ -220,6 +244,8 @@ public class Database {
 
     public String getConfigString(Guild guild, String path) {
 
+        String var = null;
+
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -229,20 +255,21 @@ public class Database {
 
             JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
             for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
-            String var = root.get(splittedPath[splittedPath.length - 1]).getAsString();
 
+            var = root.get(splittedPath[splittedPath.length - 1]).getAsString();
+            
             return var;
 
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
 
-            e.printStackTrace();
-
-            if (!(guild == null)) collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+            if (var == null) return "None";
+            if (guildDocExists(guild)) insertGuildDoc(guild);
             return "None";
         }
     }
 
     public int getConfigInt(Guild guild, String path) {
+
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
@@ -257,11 +284,9 @@ public class Database {
 
             return var;
 
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
 
-            e.printStackTrace();
-
-            if (!(guild == null)) collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+            if (guildDocExists(guild)) insertGuildDoc(guild);
             return 0;
         }
     }
@@ -281,11 +306,9 @@ public class Database {
 
             return var;
 
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
 
-            e.printStackTrace();
-
-            if (!(guild == null)) collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+            if (guildDocExists(guild)) insertGuildDoc(guild);
             return false;
         }
     }
