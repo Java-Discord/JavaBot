@@ -2,7 +2,7 @@ package com.javadiscord.javabot.commands.jam.subcommands;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.commands.jam.JamDataManager;
+import com.javadiscord.javabot.commands.jam.dao.JamRepository;
 import com.javadiscord.javabot.commands.jam.model.Jam;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -11,31 +11,24 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
 public class JamInfoSubcommand implements SlashCommandHandler {
-	private final JamDataManager dataManager;
-
 	@Override
 	public void handle(SlashCommandEvent event) {
 		event.deferReply().queue();
 
 		Jam jam;
-		OptionMapping idOption = event.getOption("id");
-		if (idOption == null) {
-			if (event.getGuild() == null) {
-				event.getHook().setEphemeral(true);
-				event.getHook().sendMessage("Cannot find active Jam without Guild context.").queue();
-				return;
-			}
-			jam = this.dataManager.getActiveJam(event.getGuild().getIdLong());
-		} else {
-			jam = this.dataManager.getJam(idOption.getAsLong());
+		try {
+			jam = this.fetchJam(event);
+		} catch (Throwable t) {
+			event.getHook().sendMessage(t.getMessage()).queue();
+			return;
 		}
-
 		if (jam == null) {
-			event.getHook().setEphemeral(true);
 			event.getHook().sendMessage("No Jam was found.").queue();
 			return;
 		}
@@ -52,5 +45,26 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 				.addField("Current phase", jam.getCurrentPhase(), false);
 
 		event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
+	}
+
+	private Jam fetchJam(SlashCommandEvent event) {
+		Jam jam;
+		try {
+			Connection con = Bot.dataSource.getConnection();
+			JamRepository jamRepository = new JamRepository(con);
+			OptionMapping idOption = event.getOption("id");
+			if (idOption == null) {
+				if (event.getGuild() == null) {
+					throw new RuntimeException("Cannot find active Jam without Guild context.");
+				}
+				jam = jamRepository.getActiveJam(event.getGuild().getIdLong());
+			} else {
+				jam = jamRepository.getJam(idOption.getAsLong());
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error occurred while fetching the Jam info.", e);
+		}
+		return jam;
 	}
 }

@@ -20,17 +20,18 @@ public class JamCommandHandler implements SlashCommandHandler {
 
 	public JamCommandHandler() {
 		this.subcommandHandlers = new HashMap<>();
-		JamDataManager dataManager = new JamDataManager();
 		// General purpose subcommands.
-		this.subcommandHandlers.put("info", new JamInfoSubcommand(dataManager));
+		this.subcommandHandlers.put("info", new JamInfoSubcommand());
 		this.subcommandHandlers.put("submit", new JamSubmitSubcommand());
 
 		// Admin subcommands.
-		this.subcommandHandlers.put("plan-new-jam", new PlanNewJamSubcommand(dataManager));
-		this.subcommandHandlers.put("add-theme", new AddThemeSubcommand(dataManager));
-		this.subcommandHandlers.put("list-themes", new ListThemesSubcommand(dataManager));
-		this.subcommandHandlers.put("remove-theme", new RemoveThemeSubcommand(dataManager));
-		this.subcommandHandlers.put("next-phase", new NextPhaseSubcommand(dataManager));
+		this.subcommandHandlers.put("plan-new-jam", new PlanNewJamSubcommand());
+		this.subcommandHandlers.put("add-theme", new AddThemeSubcommand());
+		this.subcommandHandlers.put("list-themes", new ListThemesSubcommand());
+		this.subcommandHandlers.put("remove-theme", new RemoveThemeSubcommand());
+		this.subcommandHandlers.put("next-phase", new NextPhaseSubcommand());
+		this.subcommandHandlers.put("list-submissions", new ListSubmissionsSubcommand());
+		this.subcommandHandlers.put("remove-submissions", new RemoveSubmissionsSubcommand());
 	}
 
 	@Override

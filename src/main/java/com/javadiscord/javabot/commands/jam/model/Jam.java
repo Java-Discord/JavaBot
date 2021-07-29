@@ -18,6 +18,10 @@ public class Jam {
 	private boolean completed;
 	private String currentPhase;
 
+	public boolean submissionsAllowed() {
+		return this.currentPhase.equals(JamPhase.SUBMISSION);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

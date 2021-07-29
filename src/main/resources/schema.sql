@@ -52,7 +52,8 @@ CREATE TABLE jam_submission (
         ON UPDATE CASCADE ON DELETE CASCADE,
     theme_name VARCHAR(64) NOT NULL,
     user_id BIGINT NOT NULL,
-    submission_content VARCHAR(2048) NOT NULL COMMENT 'The contents of the user submission message.',
+    source_link VARCHAR(2048) NOT NULL COMMENT 'A link to the submission source.',
+    description VARCHAR(2048) NOT NULL COMMENT 'The contents of the user submission message.',
     FOREIGN KEY (jam_id, theme_name) REFERENCES jam_theme(jam_id, name)
         ON UPDATE CASCADE ON DELETE CASCADE
 );

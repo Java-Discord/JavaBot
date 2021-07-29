@@ -378,10 +378,6 @@
     - name: submit
       description: Submit your project for the current Java Jam.
       options:
-        - name: theme
-          description: The name of the theme that you're submitting the project for.
-          required: true
-          type: STRING
         - name: link
           description: A link to your project's source (i.e. a GitHub repository)
           required: true
@@ -389,6 +385,10 @@
         - name: description
           description: A brief description of your project.
           required: true
+          type: STRING
+        - name: theme
+          description: The name of the theme that you're submitting for. Required when the Jam has multiple themes.
+          required: false
           type: STRING
   subCommandGroups:
     - name: admin
@@ -423,6 +423,30 @@
               description: The name of the theme to remove.
               required: true
               type: STRING
+
+        # Submission Management Commands
+        - name: list-submissions
+          description: Shows a list of all submissions that have been made so far.
+          options:
+            - name: page
+              description: The page of results to show. By default it starts at 1.
+              required: false
+              type: INTEGER
+            - name: user
+              description: The user to get submissions for.
+              required: false
+              type: USER
+        - name: remove-submissions
+          description: Removes one or more submissions from the Jam.
+          options:
+            - name: id
+              description: The id of the submission to remove.
+              required: false
+              type: INTEGER
+            - name: user
+              description: The user whose submissions to remove.
+              required: false
+              type: USER
 
         # Jam Interaction Commands
         - name: next-phase
