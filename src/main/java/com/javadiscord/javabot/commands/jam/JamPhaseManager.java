@@ -281,7 +281,7 @@ public class JamPhaseManager {
 					.setDescription(String.format("> %s\nCheck out their project here:\n%s\nThey earned **%d** votes.", winningSubmission.getDescription(), winningSubmission.getSourceLink(), winningSubmissionVotes));
 			votesMap.remove(winningSubmission);
 			if (!votesMap.isEmpty()) {
-				embedBuilder.addField("Also check out the other submissions:", null, false);
+				embedBuilder.addField("Also check out the other submissions:", "", false);
 				for (Map.Entry<JamSubmission, Integer> entry : votesMap.entrySet()) {
 					User user = event.getJDA().getUserById(entry.getKey().getUserId());
 					Member runnerUpMember = guild == null || user == null ? null : guild.getMember(user);
