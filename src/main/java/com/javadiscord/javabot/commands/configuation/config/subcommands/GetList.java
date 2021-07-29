@@ -26,11 +26,15 @@ public class GetList implements ConfigCommandHandler {
                 .addField("Stats-Category", "Category-ID: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_cid") + "`" +
                         "\nText: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_text") + "`", false)
 
-                .addField("Other", "Report Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.report_cid") +
+                .addField("Channel & Roles", "Report Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.report_cid") +
                         ", Log Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.log_cid") +
                         "\nSuggestion Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.suggestion_cid") +
                         ", Starboard Channel: " + db.getConfigChannelAsMention(event.getGuild(), "other.starboard.starboard_cid") +
-                        "\nMute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid"), false)
+                        "\nJam Announcement Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_announcement_cid") +
+                        ", Jam Vote Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_vote_cid") +
+                        "\n\nMute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid") +
+                        ", Jam-Admin Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_admin_rid") +
+                        ", Jam-Ping Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_ping_rid"), false)
                 .build();
 
         event.replyEmbeds(eb).queue();

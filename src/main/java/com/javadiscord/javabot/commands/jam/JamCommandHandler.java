@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.commands.jam;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.jam.subcommands.JamInfoSubcommand;
 import com.javadiscord.javabot.commands.jam.subcommands.JamSubmitSubcommand;
 import com.javadiscord.javabot.commands.jam.subcommands.admin.*;
+import com.javadiscord.javabot.other.Database;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
@@ -60,7 +60,9 @@ public class JamCommandHandler implements SlashCommandHandler {
 	 * @return True if the user is a Jam admin, or false otherwise.
 	 */
 	public static boolean ensureAdmin(SlashCommandEvent event) {
-		Role adminRole = event.getJDA().getRoleById(Bot.getProperty("jamAdminRoleId"));
+
+		Role adminRole = new Database().getConfigRole(event.getGuild(), "roles.jam_admin_rid");
+
 		if (event.getMember() == null || !event.getMember().getRoles().contains(adminRole)) {
 			event.getHook().setEphemeral(true);
 			event.getHook().sendMessage("You don't have permission to use this command.").queue();

@@ -207,6 +207,22 @@
       name: lock
       options:
         - {description: State of the server lock, name: locked, required: true, type: BOOLEAN}
+    - description: Changes the Jam Admin Role
+      name: jam-admin-role
+      options:
+        - {description: New Jam Admin role, name: role, required: true, type: ROLE}
+    - description: Changes the Jam Ping Role
+      name: jam-ping-role
+      options:
+        - { description: New Jam Ping role, name: role, required: true, type: ROLE }
+    - description: Changes the Jam Announcement Channel
+      name: jam-announcement-channel
+      options:
+        - { description: New Jam Announcement Channel, name: channel, required: true, type: CHANNEL }
+    - description: Changes the Jam Vote Channel
+      name: jam-vote-channel
+      options:
+        - { description: New Jam Vote Channel, name: channel, required: true, type: CHANNEL }
 - description: edits the welcome image config
   name: welcome
   handler: com.javadiscord.javabot.commands.configuation.welcome_system.WelcomeSystem

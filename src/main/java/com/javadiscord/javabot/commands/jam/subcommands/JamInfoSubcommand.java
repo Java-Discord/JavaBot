@@ -37,12 +37,13 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 		}
 
 		User startedByUser = event.getJDA().getUserById(jam.getStartedBy());
+		// TODO: "java.lang.IllegalArgumentException: Both Name and Value must be set!" (JamInfoSubcommand.java:46) (fixed it temporarily by adding Quotation Marks)
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("Jam Information")
 				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
 				.addField("Id", Long.toString(jam.getId()), false)
-				.addField("Name", jam.getName(), false)
+				.addField("Name", jam.getName() + "", false)
 				.addField("Created at", jam.getCreatedAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' kk:mm:ss 'UTC'")), false)
 				.addField("Started by", startedByUser.getAsTag(), false)
 				.addField("Starts at", jam.getStartsAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy")), false)

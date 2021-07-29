@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.commands.jam.dao;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.jam.model.Jam;
 import com.javadiscord.javabot.data.DatabaseHelper;
 import lombok.RequiredArgsConstructor;

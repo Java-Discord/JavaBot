@@ -29,6 +29,11 @@ public class Config implements SlashCommandHandler, ConfigCommandHandler {
         configIndex.put("mute-role", new SetMuteRole());
         configIndex.put("dm-qotw", new SetDMQOTWStatus());
         configIndex.put("lock", new SetLockStatus());
+
+        configIndex.put("jam-admin-role", new SetJamAdminRole());
+        configIndex.put("jam-ping-role", new SetJamPingRole());
+        configIndex.put("jam-vote-channel", new SetJamVoteChannel());
+        configIndex.put("jam-announcement-channel", new SetJamAnnouncementChannel());
     }
 
     @Override
