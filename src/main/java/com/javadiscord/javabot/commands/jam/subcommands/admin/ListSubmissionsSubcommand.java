@@ -47,7 +47,7 @@ public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
 					false
 			);
 		}
-		embedBuilder.setFooter("Page " + page);
+		embedBuilder.setFooter("Page " + page + ", up to 10 items per page");
 		event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
 	}
 }
