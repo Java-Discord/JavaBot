@@ -10,6 +10,7 @@ import com.javadiscord.javabot.commands.jam.model.JamPhase;
 import com.javadiscord.javabot.commands.jam.model.JamSubmission;
 import com.javadiscord.javabot.commands.jam.model.JamTheme;
 import com.javadiscord.javabot.other.Colors;
+import com.javadiscord.javabot.other.Database;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -74,8 +75,10 @@ public class JamPhaseManager {
 	 * @param event The event that triggered this action.
 	 */
 	public void moveToThemeVoting(Jam jam, SlashCommandEvent event) throws SQLException, IOException {
-		TextChannel votingChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamVotingChannelId"));
-		TextChannel announcementChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamAnnouncementChannelId"));
+
+		TextChannel votingChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_vote_cid");
+		TextChannel announcementChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_announcement_cid");
+
 		if (votingChannel == null) throw new IllegalArgumentException("Invalid jam voting channel id.");
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
@@ -122,8 +125,10 @@ public class JamPhaseManager {
 	 * @param event The event that triggered this action.
 	 */
 	public void moveToSubmission(Jam jam, SlashCommandEvent event) throws SQLException, IOException {
-		TextChannel votingChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamVotingChannelId"));
-		TextChannel announcementChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamAnnouncementChannelId"));
+
+		TextChannel votingChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_vote_cid");
+		TextChannel announcementChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_announcement_cid");
+
 		if (votingChannel == null) throw new IllegalArgumentException("Invalid jam voting channel id.");
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
@@ -172,8 +177,10 @@ public class JamPhaseManager {
 	 * @param event The event that triggered this action.
 	 */
 	public void moveToSubmissionVoting(Jam jam, SlashCommandEvent event) throws SQLException, IOException {
-		TextChannel votingChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamVotingChannelId"));
-		TextChannel announcementChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamAnnouncementChannelId"));
+
+		TextChannel votingChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_vote_cid");
+		TextChannel announcementChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_announcement_cid");
+
 		if (votingChannel == null) throw new IllegalArgumentException("Invalid jam voting channel id.");
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
@@ -220,8 +227,10 @@ public class JamPhaseManager {
 	 * @param event The event that triggered this action.
 	 */
 	public void completeJam(Jam jam, SlashCommandEvent event) throws SQLException, IOException {
-		TextChannel votingChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamVotingChannelId"));
-		TextChannel announcementChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamAnnouncementChannelId"));
+
+		TextChannel votingChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_vote_cid");
+		TextChannel announcementChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_announcement_cid");
+
 		if (votingChannel == null) throw new IllegalArgumentException("Invalid jam voting channel id.");
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
@@ -365,7 +374,7 @@ public class JamPhaseManager {
 	}
 
 	private void pingRole(TextChannel channel, SlashCommandEvent event) {
-		Role jamPingRole = event.getJDA().getRoleById(Bot.getProperty("jamPingRoleId"));
+		Role jamPingRole = new Database().getConfigRole(event.getGuild(), "roles.jam_ping_rid");
 		if (jamPingRole == null) {
 			log.error("Could not find Jam ping role.");
 			return;

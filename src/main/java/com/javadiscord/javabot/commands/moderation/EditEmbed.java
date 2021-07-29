@@ -6,13 +6,9 @@ import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-
-import java.awt.*;
-import java.util.Arrays;
 
 public class EditEmbed implements SlashCommandHandler {
 

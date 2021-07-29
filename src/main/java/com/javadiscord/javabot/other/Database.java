@@ -77,9 +77,13 @@ public class Database {
         Document channels = new Document("report_cid", "None")
                 .append("log_cid", "None")
                 .append("suggestion_cid", "None")
-                .append("submission_cid", "None");
+                .append("submission_cid", "None")
+                .append("jam_announcement_cid", "None")
+                .append("jam_vote_cid", "None");
 
-        Document roles = new Document("mute_rid", "None");
+        Document roles = new Document("mute_rid", "None")
+                .append("jam_admin_rid", "None")
+                .append("jam_ping_rid", "None");
 
         Document stats = new Document("stats_cid", "None")
                 .append("stats_text", "None");

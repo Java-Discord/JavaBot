@@ -1,9 +1,9 @@
 package com.javadiscord.javabot.commands.jam.subcommands.admin;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.jam.dao.JamRepository;
 import com.javadiscord.javabot.commands.jam.model.Jam;
 import com.javadiscord.javabot.commands.jam.subcommands.ActiveJamSubcommand;
+import com.javadiscord.javabot.other.Database;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -28,7 +28,7 @@ public class CancelSubcommand extends ActiveJamSubcommand {
 
 		new JamRepository(con).cancelJam(activeJam);
 
-		TextChannel announcementChannel = event.getJDA().getTextChannelById(Bot.getProperty("jamAnnouncementChannelId"));
+		TextChannel announcementChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_announcement_cid");
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 		announcementChannel.sendMessage("The current Java Jam has been cancelled.").queue();
 	}

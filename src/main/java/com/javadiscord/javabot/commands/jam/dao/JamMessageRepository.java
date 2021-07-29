@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.commands.jam.dao;
 
 import com.javadiscord.javabot.commands.jam.model.Jam;
-import com.javadiscord.javabot.other.QueryBuilder;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
