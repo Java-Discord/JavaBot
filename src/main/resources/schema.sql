@@ -81,5 +81,14 @@ CREATE TABLE jam_message_id (
 // Economy relations
 CREATE TABLE economy_account (
     user_id BIGINT PRIMARY KEY,
+    created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     balance BIGINT NOT NULL DEFAULT 0
-)
+);
+
+CREATE TABLE economy_transaction (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    from_user_id BIGINT NULL,
+    to_user_id BIGINT NULL,
+    value BIGINT NOT NULL
+);
