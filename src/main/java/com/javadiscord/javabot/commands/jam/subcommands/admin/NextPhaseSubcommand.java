@@ -13,13 +13,13 @@ public class NextPhaseSubcommand extends ActiveJamSubcommand {
 	}
 
 	@Override
-	protected void handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected void handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) {
 		String previousPhase = activeJam.getCurrentPhase();
 		if (previousPhase == null) {
 			event.getHook().sendMessage("Jam is not in any phase.").queue();
 			return;
 		}
-		JamPhaseManager phaseManager = new JamPhaseManager(con);
+		JamPhaseManager phaseManager = new JamPhaseManager();
 		phaseManager.nextPhase(activeJam, event);
 		event.getHook().sendMessage("Moved jam to next phase.").queue();
 	}
