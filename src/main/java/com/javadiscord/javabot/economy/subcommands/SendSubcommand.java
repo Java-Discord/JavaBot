@@ -21,17 +21,17 @@ public class SendSubcommand implements SlashCommandHandler {
 			return;
 		}
 
-		if (amountOption.getAsLong() == 0) {
-			event.getHook().sendMessage("Cannot send a value of zero.").queue();
-			return;
-		}
-
 		long amount = amountOption.getAsLong();
 		User fromUser = event.getUser();
 		User toUser = userOption.getAsUser();
 
 		if (toUser.isBot() || toUser.isSystem() || toUser.equals(fromUser)) {
 			event.getHook().sendMessage("Cannot send funds to this user.").queue();
+			return;
+		}
+
+		if (amountOption.getAsLong() <= 0) {
+			event.getHook().sendMessage("Cannot send a non-positive amount.").queue();
 			return;
 		}
 
