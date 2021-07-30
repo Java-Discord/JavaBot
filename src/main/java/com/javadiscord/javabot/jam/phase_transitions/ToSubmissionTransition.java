@@ -16,6 +16,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Moves the jam from the theme voting phase to the submission phase, by doing
+ * the following:
+ * <ol>
+ *     <li>Counts the number of votes for each theme.</li>
+ *     <li>Determine the winning theme(s).</li>
+ *     <li>Mark all themes as either accepted or not accepted.</li>
+ *     <li>Send an announcement about the winning theme(s).</li>
+ *     <li>Mark the jam as in the submission phase.</li>
+ *     <li>Remove the "theme_voting" message id from the database.</li>
+ * </ol>
+ */
 public class ToSubmissionTransition implements JamPhaseTransition {
 	@Override
 	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {

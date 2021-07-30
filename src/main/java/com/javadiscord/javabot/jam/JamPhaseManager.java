@@ -5,6 +5,7 @@ import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamPhase;
 import com.javadiscord.javabot.jam.phase_transitions.*;
 import com.javadiscord.javabot.other.Database;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +17,21 @@ import java.sql.SQLException;
  * The phase manager is responsible for the logic that is required to transition
  * to each phase of the Jam.
  */
+@RequiredArgsConstructor
 public class JamPhaseManager {
 	private static final Logger log = LoggerFactory.getLogger(JamPhaseManager.class);
 	public static final String[] REACTION_NUMBERS = {"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"};
 	public static final String SUBMISSION_VOTE_UNICODE = "⬆";
 
+	private final Jam jam;
+	private final SlashCommandEvent event;
+	private final JamChannelManager channelManager;
+
 	/**
 	 * Moves the jam to the next phase, or completes the jam if it's at the end
 	 * of its life cycle.
-	 * @param jam The jam to update.
-	 * @param event The event which triggered this action.
 	 */
-	public void nextPhase(Jam jam, SlashCommandEvent event) {
+	public void nextPhase() {
 		JamPhaseTransition transition = null;
 		switch (jam.getCurrentPhase()) {
 			case JamPhase.THEME_PLANNING:
@@ -44,13 +48,12 @@ public class JamPhaseManager {
 				break;
 		}
 		if (transition != null) {
-			this.doTransition(transition, jam, event);
+			this.doTransition(transition);
 		}
 	}
 
-	private void doTransition(JamPhaseTransition transition, Jam jam, SlashCommandEvent event) {
+	private void doTransition(JamPhaseTransition transition) {
 		new Thread(() -> {
-			var channelManager = new JamChannelManager(event.getGuild(), new Database());
 			Connection c;
 			try {
 				c = Bot.dataSource.getConnection();
@@ -64,20 +67,20 @@ public class JamPhaseManager {
 				transition.transition(jam, event, channelManager, c);
 				c.commit();
 			} catch (Exception e) {
+				log.error("An error occurred while transitioning the Jam phase.", e);
+				channelManager.sendErrorMessageAsync(event, "An error occurred: " + e.getMessage());
 				try {
 					c.rollback();
 				} catch (SQLException ex) {
-					log.error("SEVERE ERROR: Could not rollback changes made during a failed transition to new Jam state.");
-					ex.printStackTrace();
+					log.error("SEVERE ERROR: Could not rollback changes made during a failed transition to new Jam state.", ex);
+					channelManager.sendErrorMessageAsync(event, "Could not rollback phase change transaction. Please check database for errors: " + ex.getMessage());
 				}
-				log.error("An error occurred while transitioning the Jam phase: ", e);
-				channelManager.sendErrorMessageAsync(event, "An error occurred: " + e.getMessage());
 			}
 
 			try {
 				c.close();
 			} catch (SQLException e) {
-				log.error("Could not close connecting while transitioning the Jam phase: ", e);
+				log.error("Could not close connection while transitioning the Jam phase.", e);
 			}
 		}).start();
 	}

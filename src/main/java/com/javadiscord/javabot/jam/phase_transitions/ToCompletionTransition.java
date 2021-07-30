@@ -17,6 +17,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Transitions the jam to completion, that is, it does the following things:
+ * <ol>
+ *     <li>Counts the number of votes each submission received.</li>
+ *     <li>Determine the winner(s) of the jam.</li>
+ *     <li>Send an announcement about the winner(s).</li>
+ *     <li>Remove all stored "submission-[id]" message ids from the database.</li>
+ *     <li>Mark the jam as completed.</li>
+ * </ol>
+ */
 public class ToCompletionTransition implements JamPhaseTransition {
 	@Override
 	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {

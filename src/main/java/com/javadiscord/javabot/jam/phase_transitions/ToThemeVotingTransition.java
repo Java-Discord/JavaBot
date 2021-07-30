@@ -12,6 +12,15 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import java.sql.Connection;
 import java.util.List;
 
+/**
+ * Moves the jam from theme planning to theme voting.
+ * <ol>
+ *     <li>Get the list of themes.</li>
+ *     <li>Send a message in the voting channel so that users can vote on the themes.</li>
+ *     <li>Save the message's id to the database under the "theme_voting" name.</li>
+ *     <li>Mark the jam as in the voting phase.</li>
+ * </ol>
+ */
 public class ToThemeVotingTransition implements JamPhaseTransition {
 	@Override
 	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {

@@ -12,6 +12,15 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import java.sql.Connection;
 import java.util.List;
 
+/**
+ * Moves the jam from submission to submission voting. This involves:
+ * <ol>
+ *     <li>Get a list of all of the most recent submissions from each user.</li>
+ *     <li>Create a message for each submission so that users can vote on it.</li>
+ *     <li>Save a "submission-[id]" message to the database for each submission's voting message.</li>
+ *     <li>Mark the jam as in the submission voting phase.</li>
+ * </ol>
+ */
 public class ToSubmissionVotingTransition implements JamPhaseTransition {
 	@Override
 	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
