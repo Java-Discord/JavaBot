@@ -27,6 +27,7 @@ public class Config implements SlashCommandHandler, ConfigCommandHandler {
         configIndex.put("suggestion-channel", new SetSuggestionChannel());
         configIndex.put("submission-channel", new SetSubmissionChannel());
         configIndex.put("mute-role", new SetMuteRole());
+        configIndex.put("staff-role", new SetStaffRole());
         configIndex.put("dm-qotw", new SetDMQOTWStatus());
         configIndex.put("lock", new SetLockStatus());
 

@@ -33,6 +33,7 @@ public class GetList implements ConfigCommandHandler {
                         "\nJam Announcement Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_announcement_cid") +
                         ", Jam Vote Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_vote_cid") +
                         "\n\nMute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid") +
+                        ", Staff Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.staff_rid") +
                         ", Jam-Admin Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_admin_rid") +
                         ", Jam-Ping Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_ping_rid"), false)
                 .build();

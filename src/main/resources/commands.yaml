@@ -203,10 +203,6 @@
 - description: Shows your warn count
   name: warns
   handler: com.javadiscord.javabot.commands.moderation.Warns
-  enabledByDefault: false
-  privileges:
-      - type: ROLE
-        id: staff_rid
   options:
     - {description: 'If given, shows the warn count of the given user', name: user,
        required: false, type: USER}
@@ -255,6 +251,10 @@
       name: mute-role
       options:
         - {description: New mute role, name: role, required: true, type: ROLE}
+    - description: Changes the Staff role
+      name: staff-role
+      options:
+        - { description: New Staff role, name: role, required: true, type: ROLE }
     - description: Changes the state of dm-qotw
       name: dm-qotw
       options:
