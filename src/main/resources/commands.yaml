@@ -593,3 +593,24 @@
           description: The amount of funds to send.
           required: true
           type: INTEGER
+
+# Admin Economy Commands
+- name: economy-admin
+  description: Administrative tools to handle the server's economy.
+  handler: com.javadiscord.javabot.economy.EconomyAdminCommandHandler
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: staff_rid
+  subCommands:
+    - name: give
+      description: Give a user's account some funds (or subtract funds with a negative value).
+      options:
+        - name: recipient
+          description: The user that you want to add money to.
+          required: true
+          type: USER
+        - name: amount
+          description: The amount of funds to add. Make this negative to subtract.
+          required: true
+          type: INTEGER
