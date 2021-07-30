@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.geoIntersects;
 
 /**
  * This listener is responsible for handling slash commands sent by users in
@@ -107,7 +108,7 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private CommandListUpdateAction updateCommands(CommandConfig[] commandConfigs, Guild guild) {
-        log.info("Registering slash commands.");
+        log.info("Registering slash commands for Guild " + guild.getName());
         if (commandConfigs.length > 100) throw new IllegalArgumentException("Cannot add more than 100 commands.");
         CommandListUpdateAction commandUpdateAction = guild.updateCommands();
         for (CommandConfig config : commandConfigs) {
@@ -127,7 +128,7 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private void updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
-        log.info("Registering custom commands.");
+        log.info("Registering custom commands for Guild " + guild.getName());
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
         MongoCursor<Document> it = collection.find(eq("guild_id", guild.getId())).iterator();
@@ -142,7 +143,7 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) throws ExecutionException, InterruptedException {
-        log.info("Adding command privileges.");
+        log.info("Adding command privileges for Guild " + guild.getName());
         var db = new Database();
         for (var config : commandConfigs) {
             Long commandId = null;

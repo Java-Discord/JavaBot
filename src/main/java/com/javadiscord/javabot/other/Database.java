@@ -85,6 +85,7 @@ public class Database {
                 .append("jam_vote_cid", "None");
 
         Document roles = new Document("mute_rid", "None")
+                .append("staff_rid", "None")
                 .append("jam_admin_rid", "None")
                 .append("jam_ping_rid", "None");
 
@@ -322,7 +323,15 @@ public class Database {
     public Role getConfigRole (Guild guild, String path) {
 
         String id = getConfigString(guild, path);
-        return guild.getRoleById(id);
+        Role role;
+
+        try {
+            role = guild.getRoleById(id);
+        } catch (Exception e) {
+            role = null;
+        }
+
+        return role;
     }
 
     public String getConfigChannelAsMention (Guild guild, String path) {

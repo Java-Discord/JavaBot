@@ -53,21 +53,37 @@
     - {description: The user you want to ban, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
   handler: com.javadiscord.javabot.commands.moderation.Ban
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
 - description: Clears all warns from the given user.
   name: clearwarns
   options:
     - {description: The user you want to clear all warns from, name: user, required: true,
        type: USER}
   handler: com.javadiscord.javabot.commands.moderation.ClearWarns
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
 - description: Clears all QOTW-points from the given user.
   name: clearqotw
   options:
     - {description: The user you want to clear all QOTW-points from, name: user, required: true,
        type: USER}
   handler: com.javadiscord.javabot.commands.other.qotw.ClearQOTW
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
 - description: Edits an embed
   name: editembed
   handler: com.javadiscord.javabot.commands.moderation.EditEmbed
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options: []
   subCommands:
     - description: Edits an embed
@@ -85,6 +101,10 @@
 - description: Sends an embed
   name: embed
   handler: com.javadiscord.javabot.commands.moderation.Embed
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options: []
   subCommands:
     - description: Creates a new Embed
@@ -108,22 +128,38 @@
 - description: Kicks a member
   name: kick
   handler: com.javadiscord.javabot.commands.moderation.Kick
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: The user you want to kick, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Mutes a member
   name: mute
   handler: com.javadiscord.javabot.commands.moderation.Mute
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: The user you want to mute, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Lists all muted members
   name: mutelist
   handler: com.javadiscord.javabot.commands.moderation.Mutelist
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options: []
 - description: Deletes the given amount of messages in a channel
   name: purge
   handler: com.javadiscord.javabot.commands.moderation.Purge
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: the amount of messages you want to delete (2-100), name: amount,
        required: true, type: INTEGER}
@@ -132,35 +168,59 @@
 - description: Reports a member
   name: report
   handler: com.javadiscord.javabot.commands.moderation.Report
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: The user you want to report, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Unbans a member
   name: unban
   handler: com.javadiscord.javabot.commands.moderation.Unban
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: The ID of the user you want to unban, name: id, required: true,
        type: STRING}
 - description: Unmutes a member
   name: unmute
   handler: com.javadiscord.javabot.commands.moderation.Unmute
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: The user you want to unmute, name: user, required: true, type: USER}
 - description: Warns a member
   name: warn
   handler: com.javadiscord.javabot.commands.moderation.Warn
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: The user you want to warn, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Shows your warn count
   name: warns
   handler: com.javadiscord.javabot.commands.moderation.Warns
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: 'If given, shows the warn count of the given user', name: user,
        required: false, type: USER}
 - description: Shows the config for the current guild
   name: config
   handler: com.javadiscord.javabot.commands.configuation.config.Config
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options: []
   subCommands:
     - description: Shows the current config
@@ -226,6 +286,10 @@
 - description: edits the welcome image config
   name: welcome
   handler: com.javadiscord.javabot.commands.configuation.welcome_system.WelcomeSystem
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: staff_rid
   options: []
   subCommands:
     - description: Sends the current welcome system config
@@ -355,26 +419,46 @@
 - description: Displays the given amount of questions in a random order
   name: question
   handler: com.javadiscord.javabot.commands.other.Question
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: Amount of questions, name: amount, required: true, type: INTEGER}
 - description: Accepts the given submissions
   name: accept
   handler: com.javadiscord.javabot.commands.other.suggestions.Accept
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: clears the given submissions
   name: clear
   handler: com.javadiscord.javabot.commands.other.suggestions.Clear
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: declines the given submissions
   name: decline
   handler: com.javadiscord.javabot.commands.other.suggestions.Decline
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: Adds a response to the given submissions
   name: respond
   handler: com.javadiscord.javabot.commands.other.suggestions.Respond
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
     - {description: Text of the response, name: text, required: true, type: STRING}
