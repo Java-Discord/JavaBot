@@ -168,10 +168,6 @@
 - description: Reports a member
   name: report
   handler: com.javadiscord.javabot.commands.moderation.Report
-  enabledByDefault: false
-  privileges:
-      - type: ROLE
-        id: staff_rid
   options:
     - {description: The user you want to report, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
