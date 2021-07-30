@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class EconomyService {
@@ -43,11 +44,14 @@ public class EconomyService {
 	}
 
 	public Transaction performTransaction(Long fromUserId, Long toUserId, long value) throws SQLException {
+		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
+		if (Objects.equals(fromUserId, toUserId)) throw new IllegalArgumentException("Sender and recipient cannot be the same.");
+
 		Transaction t = new Transaction();
 		t.setFromUserId(fromUserId);
 		t.setToUserId(toUserId);
 		t.setValue(value);
-		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
+
 		Connection con = this.dataSource.getConnection();
 		con.setAutoCommit(false);
 		TransactionRepository transactionRepository = new TransactionRepository(con);
