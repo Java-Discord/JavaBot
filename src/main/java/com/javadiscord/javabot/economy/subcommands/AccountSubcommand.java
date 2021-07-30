@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AccountSubcommand implements SlashCommandHandler {
-	private static final int VALUE_BUFFER_SPACE = 23;
+	private static final int VALUE_BUFFER_SPACE = 40;
 
 	@Override
 	public void handle(SlashCommandEvent event) {
@@ -52,7 +52,7 @@ public class AccountSubcommand implements SlashCommandHandler {
 							}
 							value = " ".repeat(VALUE_BUFFER_SPACE - value.length()) + value;
 							otherUserString = " ".repeat(VALUE_BUFFER_SPACE - otherUserString.length()) + otherUserString;
-							return String.format("%s |\n%s |\n%s |", t.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss 'UTC'")), value, otherUserString);
+							return String.format("%s\n%s\n%s", t.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss 'UTC'")), value, otherUserString);
 						})
 						.collect(Collectors.joining("\n"));
 				EmbedBuilder embedBuilder = new EmbedBuilder()
