@@ -382,7 +382,7 @@
 # Java Jam Specific Commands
 - name: jam
   description: Interact with Java Jam functionality.
-  handler: com.javadiscord.javabot.commands.jam.JamCommandHandler
+  handler: com.javadiscord.javabot.jam.JamCommandHandler
   subCommands:
     - name: info
       description: Shows information about the current state of the Java Jam.
@@ -406,78 +406,84 @@
           description: The name of the theme that you're submitting for. Required when the Jam has multiple themes.
           required: false
           type: STRING
-  subCommandGroups:
-    - name: admin
-      description: Administrator actions for configuring the Java Jam.
-      subCommands:
-        - name: plan-new-jam
-          description: Creates a new Java Jam for the future.
-          options:
-            - name: start-date
-              description: The date at which the Jam should start. Format as DD-MM-YYYY.
-              required: true
-              type: STRING
-            - name: name
-              description: A name for this Jam. Typical usage is `'{name} Jam'`.
-              required: false
-              type: STRING
 
-        # Theme Commands
-        - name: add-theme
-          description: Adds a new theme to the next upcoming Jam.
-          options:
-            - name: name
-              description: The name of this theme. Should be short (< 64 characters), and unique for the Jam.
-              required: true
-              type: STRING
-            - name: description
-              description: A longer description of the theme, that will help users to understand the theme.
-              required: true
-              type: STRING
-        - name: list-themes
-          description: Show a list of all themes for the current Jam.
-        - name: remove-theme
-          description: Removes a theme from the current Jam. Only allowed prior to theme voting.
-          options:
-            - name: name
-              description: The name of the theme to remove.
-              required: true
-              type: STRING
+# Admin Commands for Java Jam
+- name: jam-admin
+  description: Administrator actions for configuring the Java Jam.
+  handler: com.javadiscord.javabot.jam.JamAdminCommandHandler
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: jam_admin_rid
+  subCommands:
+    - name: plan-new-jam
+      description: Creates a new Java Jam for the future.
+      options:
+        - name: start-date
+          description: The date at which the Jam should start. Format as DD-MM-YYYY.
+          required: true
+          type: STRING
+        - name: name
+          description: A name for this Jam. Typical usage is `'{name} Jam'`.
+          required: false
+          type: STRING
 
-        # Submission Management Commands
-        - name: list-submissions
-          description: Shows a list of all submissions that have been made so far.
-          options:
-            - name: page
-              description: The page of results to show. By default it starts at 1.
-              required: false
-              type: INTEGER
-            - name: user
-              description: The user to get submissions for.
-              required: false
-              type: USER
-        - name: remove-submissions
-          description: Removes one or more submissions from the Jam.
-          options:
-            - name: id
-              description: The id of the submission to remove.
-              required: false
-              type: INTEGER
-            - name: user
-              description: The user whose submissions to remove.
-              required: false
-              type: USER
+    # Theme Commands
+    - name: add-theme
+      description: Adds a new theme to the next upcoming Jam.
+      options:
+        - name: name
+          description: The name of this theme. Should be short (< 64 characters), and unique for the Jam.
+          required: true
+          type: STRING
+        - name: description
+          description: A longer description of the theme, that will help users to understand the theme.
+          required: true
+          type: STRING
+    - name: list-themes
+      description: Show a list of all themes for the current Jam.
+    - name: remove-theme
+      description: Removes a theme from the current Jam. Only allowed prior to theme voting.
+      options:
+        - name: name
+          description: The name of the theme to remove.
+          required: true
+          type: STRING
 
-        # Jam Interaction Commands
-        - name: next-phase
-          description: Manually moves the currently active Jam to the next phase.
-        - name: cancel
-          description: Cancels the current Jam. Use with caution!
-          options:
-            - name: confirm
-              description: Type 'yes' to confirm that you want to cancel the Jam.
-              required: true
-              type: STRING
+    # Submission Management Commands
+    - name: list-submissions
+      description: Shows a list of all submissions that have been made so far.
+      options:
+        - name: page
+          description: The page of results to show. By default it starts at 1.
+          required: false
+          type: INTEGER
+        - name: user
+          description: The user to get submissions for.
+          required: false
+          type: USER
+    - name: remove-submissions
+      description: Removes one or more submissions from the Jam.
+      options:
+        - name: id
+          description: The id of the submission to remove.
+          required: false
+          type: INTEGER
+        - name: user
+          description: The user whose submissions to remove.
+          required: false
+          type: USER
+
+    # Jam Interaction Commands
+    - name: next-phase
+      description: Manually moves the currently active Jam to the next phase.
+    - name: cancel
+      description: Cancels the current Jam. Use with caution!
+      options:
+        - name: confirm
+          description: Type 'yes' to confirm that you want to cancel the Jam.
+          required: true
+          type: STRING
 
 # Economy Commands
 - name: economy
