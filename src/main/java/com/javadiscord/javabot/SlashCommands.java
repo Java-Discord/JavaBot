@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
 import com.mongodb.BasicDBObject;
@@ -14,12 +15,17 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -34,6 +40,8 @@ import static com.mongodb.client.model.Filters.eq;
  * </p>
  */
 public class SlashCommands extends ListenerAdapter {
+    private static final Logger log = LoggerFactory.getLogger(SlashCommands.class);
+
     /**
      * Maps every command name and alias to an instance of the command, for
      * constant-time lookup.
@@ -84,9 +92,24 @@ public class SlashCommands extends ListenerAdapter {
      * @param guild The guild to update commands for.
      */
     public void registerSlashCommands(Guild guild) {
-        CommandListUpdateAction commands = guild.updateCommands();
-
         CommandConfig[] commandConfigs = CommandDataConfig.load();
+        var commandUpdateAction = this.updateCommands(commandConfigs, guild);
+        this.updateCustomCommands(commandUpdateAction, guild);
+
+        // Add privileges to the commands, after the commands have been registered.
+        commandUpdateAction.queue(commands -> Executors.newSingleThreadExecutor().submit(() ->{
+            try {
+                this.addCommandPrivileges(commands, commandConfigs, guild);
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Could not add command privileges.", e);
+            }
+        }));
+    }
+
+    private CommandListUpdateAction updateCommands(CommandConfig[] commandConfigs, Guild guild) {
+        log.info("Registering slash commands.");
+        if (commandConfigs.length > 100) throw new IllegalArgumentException("Cannot add more than 100 commands.");
+        CommandListUpdateAction commandUpdateAction = guild.updateCommands();
         for (CommandConfig config : commandConfigs) {
             if (config.getHandler() != null && !config.getHandler().isEmpty()) {
                 try {
@@ -96,25 +119,51 @@ public class SlashCommands extends ListenerAdapter {
                     e.printStackTrace();
                 }
             } else {
-                System.err.println("Warning: Command \"" + config.getName() + "\" does not have an associated handler class. It will be ignored.");
+                log.warn("Command \"{}\" does not have an associated handler class. It will be ignored.", config.getName());
             }
-            commands.addCommands(config.toData());
+            commandUpdateAction.addCommands(config.toData());
         }
+        return commandUpdateAction;
+    }
 
+    private void updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
+        log.info("Registering custom commands.");
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
         MongoCursor<Document> it = collection.find(eq("guild_id", guild.getId())).iterator();
 
         while (it.hasNext()) {
-
             JsonObject Root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
             String commandName = Root.get("commandname").getAsString();
             String value = Root.get("value").getAsString();
-
             if (value.length() > 100) value = value.substring(0, 97) + "...";
-            commands.addCommands(new CommandData(commandName, value));
+            commandUpdateAction.addCommands(new CommandData(commandName, value));
         }
+    }
 
-        commands.queue();
+    private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) throws ExecutionException, InterruptedException {
+        log.info("Adding command privileges.");
+        var db = new Database();
+        for (var config : commandConfigs) {
+            Long commandId = null;
+            for (Command command : commands) {
+                if (command.getName().equals(config.getName())) {
+                    commandId = command.getIdLong();
+                    break;
+                }
+            }
+            if (commandId == null) throw new IllegalStateException("Could not find id for command " + config.getName());
+            final long cid = commandId;
+            if (config.getPrivileges() != null) {
+                List<CommandPrivilege> p = new ArrayList<>();
+                for (var privilegeConfig : config.getPrivileges()) {
+                    p.add(privilegeConfig.toData(guild, db).get());
+                    log.info("Registering privilege for command {}: {}", config.getName(), Objects.toString(privilegeConfig));
+                }
+                guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {
+                    log.info("Privilege update successful for command {}", config.getName());
+                });
+            }
+        }
     }
 }

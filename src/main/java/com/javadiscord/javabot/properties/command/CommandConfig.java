@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.properties.command;
 
+import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 import java.util.Arrays;
@@ -7,64 +8,20 @@ import java.util.Arrays;
 /**
  * Simple DTO representing a top-level Discord slash command.
  */
+@Data
 public class CommandConfig {
 	private String name;
 	private String description;
+	private boolean enabledByDefault = true;
+	private CommandPrivilegeConfig[] privileges;
 	private OptionConfig[] options;
 	private SubCommandConfig[] subCommands;
 	private SubCommandGroupConfig[] subCommandGroups;
 	private String handler;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public OptionConfig[] getOptions() {
-		return options;
-	}
-
-	public void setOptions(OptionConfig[] options) {
-		this.options = options;
-	}
-
-	public SubCommandConfig[] getSubCommands() {
-		return subCommands;
-	}
-
-	public void setSubCommands(SubCommandConfig[] subCommands) {
-		this.subCommands = subCommands;
-	}
-
-	public SubCommandGroupConfig[] getSubCommandGroups() {
-		return subCommandGroups;
-	}
-
-	public void setSubCommandGroups(SubCommandGroupConfig[] subCommandGroups) {
-		this.subCommandGroups = subCommandGroups;
-	}
-
-	public String getHandler() {
-		return handler;
-	}
-
-	public void setHandler(String handler) {
-		this.handler = handler;
-	}
-
 	public CommandData toData() {
 		CommandData data = new CommandData(this.name, this.description);
+		data.setDefaultEnabled(this.enabledByDefault);
 		if (this.options != null) {
 			for (OptionConfig option : this.options) {
 				data.addOptions(option.toData());
