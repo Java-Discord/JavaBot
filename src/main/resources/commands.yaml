@@ -490,5 +490,16 @@
   description: Interact with the server's economy. Buy, sell, trade, and more!
   handler: com.javadiscord.javabot.economy.EconomyCommandHandler
   subCommands:
-    - name: give
-      description: gives you money!
+    - name: account
+      description: Shows information about your account.
+    - name: send
+      description: Send some of your balance to someone else.
+      options:
+        - name: recipient
+          description: The user that you want to receive the funds.
+          required: true
+          type: USER
+        - name: amount
+          description: The amount of funds to send.
+          required: true
+          type: INTEGER

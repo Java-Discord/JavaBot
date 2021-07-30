@@ -1,17 +1,46 @@
 package com.javadiscord.javabot.economy;
 
-import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.economy.dao.AccountRepository;
 import com.javadiscord.javabot.economy.dao.TransactionRepository;
 import com.javadiscord.javabot.economy.model.Account;
 import com.javadiscord.javabot.economy.model.Transaction;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class EconomyService {
+	private static final Logger log = LoggerFactory.getLogger(EconomyService.class);
+	private final H2DataSource dataSource;
+
+	public Account getOrCreateAccount(long userId) throws SQLException {
+		Connection con = this.dataSource.getConnection();
+		con.setAutoCommit(false);
+		AccountRepository accountRepository = new AccountRepository(con);
+		Account account = accountRepository.getAccount(userId);
+		if (account == null) {
+			account = new Account();
+			account.setUserId(userId);
+			account.setBalance(0);
+			accountRepository.saveNewAccount(account);
+		}
+		con.commit();
+		con.close();
+		return account;
+	}
+
+	public List<Transaction> getRecentTransactions(long userId, int count) throws SQLException {
+		Connection con = this.dataSource.getConnection();
+		con.setReadOnly(true);
+		var transactions = new TransactionRepository(con).getLatestTransactions(userId, count);
+		con.close();
+		return transactions;
+	}
 
 	public Transaction performTransaction(Long fromUserId, Long toUserId, long value) throws SQLException {
 		Transaction t = new Transaction();
@@ -19,7 +48,7 @@ public class EconomyService {
 		t.setToUserId(toUserId);
 		t.setValue(value);
 		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
-		Connection con = Bot.dataSource.getConnection();
+		Connection con = this.dataSource.getConnection();
 		con.setAutoCommit(false);
 		TransactionRepository transactionRepository = new TransactionRepository(con);
 		AccountRepository accountRepository = new AccountRepository(con);

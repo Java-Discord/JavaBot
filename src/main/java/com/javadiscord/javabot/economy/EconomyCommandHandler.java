@@ -1,24 +1,16 @@
 package com.javadiscord.javabot.economy;
 
-import com.javadiscord.javabot.commands.SlashCommandHandler;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import com.javadiscord.javabot.commands.DelegatingCommandHandler;
+import com.javadiscord.javabot.economy.subcommands.AccountSubcommand;
+import com.javadiscord.javabot.economy.subcommands.SendSubcommand;
 
-import java.sql.SQLException;
+import java.util.Map;
 
-public class EconomyCommandHandler implements SlashCommandHandler {
-	@Override
-	public void handle(SlashCommandEvent event) {
-		event.deferReply(true).queue();
-		if (event.getSubcommandName().equals("give")) {
-			try {
-				new EconomyService().performTransaction(null, event.getUser().getIdLong(), 1000);
-				event.getHook().sendMessage("Given!").queue();
-			} catch (SQLException e) {
-				e.printStackTrace();
-				event.getHook().sendMessage("Error: " + e.getMessage()).queue();
-			}
-		} else {
-			event.getHook().sendMessage("Invalid subcommand.").queue();
-		}
+public class EconomyCommandHandler extends DelegatingCommandHandler {
+	public EconomyCommandHandler() {
+		super(Map.of(
+				"account", new AccountSubcommand(),
+				"send", new SendSubcommand()
+		));
 	}
 }

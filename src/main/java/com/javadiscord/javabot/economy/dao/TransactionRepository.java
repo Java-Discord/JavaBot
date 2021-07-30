@@ -1,9 +1,13 @@
 package com.javadiscord.javabot.economy.dao;
 
+import com.javadiscord.javabot.data.DatabaseHelper;
 import com.javadiscord.javabot.economy.model.Transaction;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class TransactionRepository {
@@ -39,6 +43,20 @@ public class TransactionRepository {
 				return this.read(rs);
 			}
 			return null;
+		}
+	}
+
+	public List<Transaction> getLatestTransactions(long userId, int count) throws SQLException {
+		String sql = DatabaseHelper.loadSql("/economy/sql/find_latest_transactions.sql").replace("/* LIMIT */", "LIMIT " + count);
+		try (var stmt = con.prepareStatement(sql)) {
+			stmt.setLong(1, userId);
+			stmt.setLong(2, userId);
+			var rs = stmt.executeQuery();
+			List<Transaction> transactions = new ArrayList<>(count);
+			while (rs.next()) {
+				transactions.add(this.read(rs));
+			}
+			return transactions;
 		}
 	}
 
