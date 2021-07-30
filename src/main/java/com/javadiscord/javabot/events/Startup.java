@@ -14,7 +14,9 @@ import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.util.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -86,7 +88,13 @@ public class Startup extends ListenerAdapter {
         logger.info("Preferred Guild: " + preferredGuild.getName());
         logger.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
+        String[] skipGuilds = new String[]{"861254598046777344", "813817075218776101"};
+        //                                JavaDiscord Emoji Server    Test-Server
+
         for (var guild : event.getJDA().getGuilds()) {
+
+            if(Arrays.asList(skipGuilds).contains(guild.getId())) continue;
+
             new Database().deleteOpenSubmissions(guild);
             new StarboardListener().updateAllSBM(event, guild);
             Bot.slashCommands.registerSlashCommands(guild);
