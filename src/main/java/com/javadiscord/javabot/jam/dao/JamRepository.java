@@ -10,7 +10,7 @@ import java.sql.*;
 @RequiredArgsConstructor
 public class JamRepository {
 	private final Connection con;
-	public void saveJam(Jam jam) throws SQLException, IOException {
+	public void saveJam(Jam jam) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/insert_jam.sql"), Statement.RETURN_GENERATED_KEYS);
 		stmt.setLong(1, jam.getGuildId());
 		if (jam.getName() != null) {
@@ -40,7 +40,7 @@ public class JamRepository {
 			} else {
 				return null;
 			}
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -57,7 +57,7 @@ public class JamRepository {
 			} else {
 				return null;
 			}
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -76,7 +76,7 @@ public class JamRepository {
 		return jam;
 	}
 
-	public void completeJam(Jam jam) throws IOException, SQLException {
+	public void completeJam(Jam jam) throws SQLException {
 		jam.setCompleted(true);
 		jam.setCurrentPhase(null);
 		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/complete_jam.sql"));
@@ -85,7 +85,7 @@ public class JamRepository {
 		stmt.close();
 	}
 
-	public void updateJamPhase(Jam jam, String nextPhaseName) throws IOException, SQLException {
+	public void updateJamPhase(Jam jam, String nextPhaseName) throws SQLException {
 		jam.setCurrentPhase(nextPhaseName);
 		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/update_jam_phase.sql"));
 		stmt.setString(1, nextPhaseName);
@@ -94,7 +94,7 @@ public class JamRepository {
 		stmt.close();
 	}
 
-	public void cancelJam(Jam jam) throws SQLException, IOException {
+	public void cancelJam(Jam jam) throws SQLException {
 		this.completeJam(jam);
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?");
 		stmt.setLong(1, jam.getId());

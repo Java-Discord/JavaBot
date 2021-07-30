@@ -1,3 +1,4 @@
+// Java Jam relations
 CREATE TABLE jam_phase (
     name VARCHAR(64) PRIMARY KEY,
     description VARCHAR(1024) NOT NULL,
@@ -75,4 +76,19 @@ CREATE TABLE jam_message_id (
     PRIMARY KEY (jam_id, message_id),
     message_type VARCHAR(64) NOT NULL,
     UNIQUE (jam_id, message_type)
+);
+
+// Economy relations
+CREATE TABLE economy_account (
+    user_id BIGINT PRIMARY KEY,
+    created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    balance BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE economy_transaction (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    from_user_id BIGINT NULL,
+    to_user_id BIGINT NULL,
+    value BIGINT NOT NULL
 );

@@ -484,3 +484,22 @@
           description: Type 'yes' to confirm that you want to cancel the Jam.
           required: true
           type: STRING
+
+# Economy Commands
+- name: economy
+  description: Interact with the server's economy. Buy, sell, trade, and more!
+  handler: com.javadiscord.javabot.economy.EconomyCommandHandler
+  subCommands:
+    - name: account
+      description: Shows information about your account.
+    - name: send
+      description: Send some of your balance to someone else.
+      options:
+        - name: recipient
+          description: The user that you want to receive the funds.
+          required: true
+          type: USER
+        - name: amount
+          description: The amount of funds to send.
+          required: true
+          type: INTEGER
