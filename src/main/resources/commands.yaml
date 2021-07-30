@@ -350,14 +350,15 @@
       options:
         - {description: New height of the avatar image, name: height, required: true,
            type: INTEGER}
-- description: lists, creates, edits or deletes custom slash commands
+- description: creates, edits or deletes custom slash commands
   name: customcommand
   handler: com.javadiscord.javabot.commands.custom_commands.CustomCommands
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options: []
   subCommands:
-    - description: Lists all custom slash commands
-      name: list
-      options: []
     - description: Creates a custom slash command
       name: create
       options:
@@ -377,14 +378,19 @@
       options:
         - {description: Name of the custom slash command, name: name, required: true,
            type: STRING}
-- description: lists, creates or deletes reaction roles
+- description: Lists all custom slash commands
+  name: customcommands
+  options: []
+  handler: com.javadiscord.javabot.commands.custom_commands.CustomCommandList
+- description: creates or deletes reaction roles
   name: reactionrole
   handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoles
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: staff_rid
   options: []
   subCommands:
-    - description: Lists all reaction roles
-      name: list
-      options: []
     - description: Creates a reaction role
       name: create
       options:
@@ -407,6 +413,10 @@
            type: STRING}
         - {description: 'Label, the button should use', name: button-label, required: true,
            type: STRING}
+- description: Lists all Reaction Roles
+  name: reactionroles
+  options: []
+  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoleList
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard

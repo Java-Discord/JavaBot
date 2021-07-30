@@ -22,12 +22,10 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class CustomCommands implements SlashCommandHandler {
+
     @Override
     public void handle(SlashCommandEvent event) {
         switch (event.getSubcommandName()) {
-            case "list":
-                CustomCommands.list(event);
-                break;
             case "create":
                 create(event,
                     event.getOption("name").getAsString(),
