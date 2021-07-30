@@ -154,7 +154,7 @@ public class SlashCommands extends ListenerAdapter {
             }
             if (commandId == null) throw new IllegalStateException("Could not find id for command " + config.getName());
             final long cid = commandId;
-            if (config.getPrivileges() != null) {
+            if (config.getPrivileges() != null && config.getPrivileges().length > 0) {
                 List<CommandPrivilege> p = new ArrayList<>();
                 for (var privilegeConfig : config.getPrivileges()) {
                     p.add(privilegeConfig.toData(guild, db).get());
