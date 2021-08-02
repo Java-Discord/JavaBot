@@ -6,11 +6,12 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 public class Avatar implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
         OptionMapping option = event.getOption("user");
         User user = option == null ? event.getUser() : option.getAsUser();
@@ -19,6 +20,6 @@ public class Avatar implements SlashCommandHandler {
             .setColor(Constants.GRAY)
             .setAuthor(user.getAsTag() + " | Avatar")
             .setImage(user.getEffectiveAvatarUrl() + "?size=4096");
-        event.replyEmbeds(eb.build()).queue();
+        return event.replyEmbeds(eb.build());
     }
 }

@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
@@ -22,9 +23,7 @@ import java.util.Objects;
 public class ChangeMyMind implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
-        event.deferReply(false).queue();
+    public ReplyAction handle(SlashCommandEvent event) {
         InteractionHook hook = event.getHook();
 
         String encodedSearchTerm = null;
@@ -41,11 +40,11 @@ public class ChangeMyMind implements SlashCommandHandler {
                 MessageEmbed e = null;
                 try {
                     e = new EmbedBuilder()
-                        .setColor(Constants.GRAY)
-                        .setImage(hr.getBody().getObject().getString("message"))
-                        .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                        .setTimestamp(new Date().toInstant())
-                        .build();
+                            .setColor(Constants.GRAY)
+                            .setImage(hr.getBody().getObject().getString("message"))
+                            .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+                            .setTimestamp(new Date().toInstant())
+                            .build();
                 } catch (JSONException jsonException) {
                     jsonException.printStackTrace();
                 }
@@ -63,5 +62,6 @@ public class ChangeMyMind implements SlashCommandHandler {
                 // Shouldn't happen
             }
         });
+        return event.deferReply(false);
     }
 }

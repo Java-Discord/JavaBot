@@ -4,12 +4,12 @@ import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 public class Ping implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         long gatewayPing = event.getJDA().getGatewayPing();
         String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 
@@ -18,6 +18,6 @@ public class Ping implements SlashCommandHandler {
             .setColor(Constants.GRAY)
             .build();
 
-        event.replyEmbeds(e).queue();
+        return event.replyEmbeds(e);
     }
 }

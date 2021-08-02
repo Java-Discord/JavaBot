@@ -30,6 +30,11 @@ public class Jam {
 		return this.name;
 	}
 
+	/**
+	 * Gets the full name for the jam, so that it can be used in sentences of
+	 * the form "The " + getFullName() + " is starting today!".
+	 * @return The full name for the jam, as can be used in a sentence.
+	 */
 	public String getFullName() {
 		if (this.name == null) {
 			return "Jam";

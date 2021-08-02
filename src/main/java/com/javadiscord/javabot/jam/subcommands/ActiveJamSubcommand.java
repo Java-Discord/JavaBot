@@ -1,10 +1,12 @@
 package com.javadiscord.javabot.jam.subcommands;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.jam.dao.JamRepository;
 import com.javadiscord.javabot.jam.model.Jam;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,33 +23,31 @@ public abstract class ActiveJamSubcommand implements SlashCommandHandler {
 	private static final Logger log = LoggerFactory.getLogger(ActiveJamSubcommand.class);
 
 	@Override
-	public void handle(SlashCommandEvent event) {
-		event.deferReply(true).queue();
+	public ReplyAction handle(SlashCommandEvent event) {
 		if (event.getGuild() == null) {
-			event.getHook().sendMessage("This command only be used in a guild.").queue();
-			return;
+			return Responses.warning(event, "This command can only be used in a guild.");
 		}
 
 		try (Connection con = Bot.dataSource.getConnection()) {
 			con.setAutoCommit(false);
 			Jam activeJam = new JamRepository(con).getActiveJam(event.getGuild().getIdLong());
 			if (activeJam == null) {
-				event.getHook().sendMessage("No active Jam in this guild.").queue();
-				return;
+				return Responses.warning(event, "No Active Jam", "There is currently no active jam in this guild.");
 			}
 			try {
-				this.handleJamCommand(event, activeJam, con);
+				var reply = this.handleJamCommand(event, activeJam, con);
 				con.commit();
+				return reply;
 			} catch (Throwable e) {
 				con.rollback();
-				event.getHook().sendMessage("An error occurred: " + e.getMessage()).queue();
 				log.warn("Exception thrown while handling Jam command: " + e.getMessage());
+				return Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```");
 			}
 		} catch (SQLException e) {
-			event.getHook().sendMessage("An SQL error occurred: " + e.getMessage()).queue();
 			e.printStackTrace();
+			return Responses.error(event, "An SQL error occurred.");
 		}
 	}
 
-	protected abstract void handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception;
+	protected abstract ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception;
 }

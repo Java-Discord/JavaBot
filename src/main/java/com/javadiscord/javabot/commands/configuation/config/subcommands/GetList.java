@@ -1,15 +1,16 @@
 package com.javadiscord.javabot.commands.configuation.config.subcommands;
 
-import com.javadiscord.javabot.commands.configuation.config.ConfigCommandHandler;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-public class GetList implements ConfigCommandHandler {
+public class GetList implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
         Database db = new Database();
 
@@ -38,6 +39,6 @@ public class GetList implements ConfigCommandHandler {
                         ", Jam-Ping Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_ping_rid"), false)
                 .build();
 
-        event.replyEmbeds(eb).queue();
+        return event.replyEmbeds(eb);
     }
 }

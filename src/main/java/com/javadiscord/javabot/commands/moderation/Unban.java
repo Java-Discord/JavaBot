@@ -9,39 +9,36 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
 
 public class Unban implements SlashCommandHandler {
-
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.BAN_MEMBERS)) {
-            event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
+        String id = event.getOption("id").getAsString();
+        User author = event.getUser();
 
-            String id = event.getOption("id").getAsString();
-            User author = event.getUser();
+        try {
+            event.getGuild().unban(id).complete();
+            var e = new EmbedBuilder()
+                .setAuthor("Unban")
+                .setColor(Constants.RED)
+                .addField("ID", "```" +id + "```", true)
+                .addField("Moderator", "```" + author.getAsTag() + "```", true)
+                .setFooter("ID: " + id)
+                .setTimestamp(new Date().toInstant())
+                .build();
 
-            try {
-                event.getGuild().unban(id).complete();
-                var e = new EmbedBuilder()
-                    .setAuthor("Unban")
-                    .setColor(Constants.RED)
-                    .addField("ID", "```" +id + "```", true)
-                    .addField("Moderator", "```" + author.getAsTag() + "```", true)
-                    .setFooter("ID: " + id)
-                    .setTimestamp(new Date().toInstant())
-                    .build();
 
-                event.replyEmbeds(e).queue();
-                Misc.sendToLog(event.getGuild(), e);
-
-            } catch (ErrorResponseException e) {
-                event.replyEmbeds(Embeds.emptyError("```User (" + id + ") not found.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            }
+            Misc.sendToLog(event.getGuild(), e);
+            return event.replyEmbeds(e);
+        } catch (ErrorResponseException e) {
+            return event.replyEmbeds(Embeds.emptyError("```User (" + id + ") not found.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
     }
+}
 

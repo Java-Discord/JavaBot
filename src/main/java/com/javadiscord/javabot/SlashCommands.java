@@ -29,7 +29,6 @@ import java.util.concurrent.Executors;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.geoIntersects;
 
 /**
  * This listener is responsible for handling slash commands sent by users in
@@ -59,7 +58,7 @@ public class SlashCommands extends ListenerAdapter {
 
         var command = this.commandsIndex.get(event.getName());
         if (command != null) {
-            command.handle(event);
+            command.handle(event).queue();
             return;
         }
         try {

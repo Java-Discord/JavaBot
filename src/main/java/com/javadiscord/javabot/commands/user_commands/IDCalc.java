@@ -5,16 +5,15 @@ import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;
 
 public class IDCalc implements SlashCommandHandler {
-
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         long id;
         try {
             id = Objects.requireNonNull(event.getOption("id")).getAsLong();
@@ -34,6 +33,6 @@ public class IDCalc implements SlashCommandHandler {
             .addField("Unix-Timestamp", "```" + unixTimeStamp + "```", false)
             .addField("date", "```" + date + "```", false);
 
-        event.replyEmbeds(eb.build()).queue();
+        return event.replyEmbeds(eb.build());
     }
 }

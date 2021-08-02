@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.jam.subcommands;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.jam.dao.JamRepository;
 import com.javadiscord.javabot.jam.model.Jam;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
 import java.sql.Connection;
@@ -20,19 +22,15 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class JamInfoSubcommand implements SlashCommandHandler {
 	@Override
-	public void handle(SlashCommandEvent event) {
-		event.deferReply().queue();
-
+	public ReplyAction handle(SlashCommandEvent event) {
 		Jam jam;
 		try {
 			jam = this.fetchJam(event);
 		} catch (Throwable t) {
-			event.getHook().sendMessage(t.getMessage()).queue();
-			return;
+			return Responses.error(event, t.getMessage());
 		}
 		if (jam == null) {
-			event.getHook().sendMessage("No Jam was found.").queue();
-			return;
+			return Responses.warning(event, "No Jam was found.");
 		}
 
 		event.getJDA().retrieveUserById(jam.getStartedBy()).queue(user -> {
@@ -48,6 +46,7 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 
 			event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
 		});
+		return event.deferReply();
 	}
 
 	private Jam fetchJam(SlashCommandEvent event) {

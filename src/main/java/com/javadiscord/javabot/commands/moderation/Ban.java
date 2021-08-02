@@ -9,23 +9,21 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Instant;
 
 public class Ban implements SlashCommandHandler {
 
     public void ban (Member member, String reason) throws Exception {
-
         new Warn().deleteAllDocs(member.getId());
         member.ban(6, reason).queue();
     }
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.BAN_MEMBERS)) {
-            event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("BAN_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         Member member = event.getOption("user").getAsMember();
@@ -44,11 +42,16 @@ public class Ban implements SlashCommandHandler {
                 .setTimestamp(Instant.now())
                 .build();
 
-        event.replyEmbeds(eb).queue();
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-        try { ban(member, reason); }
-        catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
+        try {
+            ban(member, reason);
+        }
+        catch (Exception e) {
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser()));
+        }
+
+        return event.replyEmbeds(eb);
     }
 }

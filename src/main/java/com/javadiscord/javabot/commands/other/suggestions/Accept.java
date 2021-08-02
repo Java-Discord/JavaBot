@@ -9,12 +9,13 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.OffsetDateTime;
 
 public class Accept implements SlashCommandHandler {
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
 
             Message msg = null;
@@ -47,10 +48,10 @@ public class Accept implements SlashCommandHandler {
                 .setFooter("Accepted by " + event.getUser().getAsTag());
 
             msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_UPVOTE).queue());
-            event.reply("Done!").setEphemeral(true).queue();
+            return event.reply("Done!").setEphemeral(true);
 
         } else {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
     }
 }

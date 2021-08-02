@@ -1,11 +1,13 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
 import java.util.Date;
@@ -13,9 +15,9 @@ import java.util.Date;
 public class ServerInfo implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
-        if (event.getGuild() == null) return;
+        if (event.getGuild() == null) return Responses.warning(event, "This can only be used in a guild.");
         long roleCount = event.getGuild().getRoles().stream().count() - 1;
         long catCount = event.getGuild().getCategories().stream().count();
         long textChannelCount = event.getGuild().getTextChannels().stream().count();
@@ -42,7 +44,9 @@ public class ServerInfo implements SlashCommandHandler {
             .setTimestamp(new Date().toInstant());
 
         if (event.getGuild().getId().equals("648956210850299986")) {
-            event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE, "Website")).queue();
-        } else { event.replyEmbeds(eb.build()).queue(); }
+            return event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE, "Website"));
+        } else {
+            return event.replyEmbeds(eb.build());
+        }
     }
 }

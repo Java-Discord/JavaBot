@@ -1,27 +1,26 @@
 package com.javadiscord.javabot.economy.subcommands.admin;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.economy.EconomyService;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.sql.SQLException;
 
 public class GiveSubcommand implements SlashCommandHandler {
 	@Override
-	public void handle(SlashCommandEvent event) {
-		event.deferReply(true).queue();
+	public ReplyAction handle(SlashCommandEvent event) {
 		OptionMapping userOption = event.getOption("recipient");
 		OptionMapping amountOption = event.getOption("amount");
 		if (userOption == null || amountOption == null) {
-			event.getHook().sendMessage("Missing required arguments.").queue();
-			return;
+			return Responses.warning(event, "Missing required arguments.");
 		}
 
 		if (amountOption.getAsLong() == 0) {
-			event.getHook().sendMessage("Cannot send a value of zero.").queue();
-			return;
+			return Responses.warning(event, "Cannot send a value of zero.");
 		}
 
 		long amount = amountOption.getAsLong();
@@ -43,10 +42,10 @@ public class GiveSubcommand implements SlashCommandHandler {
 			} else {
 				messageTemplate = "Took `%,d` from %s.";
 			}
-			event.getHook().sendMessage(String.format(messageTemplate, t.getValue(), userOption.getAsUser().getAsTag())).queue();
+			return Responses.success(event, "Transaction Complete", String.format(messageTemplate, t.getValue(), userOption.getAsUser().getAsTag()));
 		} catch (SQLException e) {
 			e.printStackTrace();
-			event.getHook().sendMessage("Error: " + e.getMessage()).queue();
+			return Responses.error(event, e.getMessage());
 		}
 	}
 }

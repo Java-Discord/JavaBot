@@ -8,22 +8,19 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
 
 public class ClearQOTW implements SlashCommandHandler {
-
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
-            Member member = event.getOption("user").getAsMember();
+        Member member = event.getOption("user").getAsMember();
         new Database().queryMember(member.getId(), "qotwpoints", 0);
-
             var e = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | QOTW-Points cleared", null, member.getUser().getEffectiveAvatarUrl())
                 .setColor(Constants.RED)
@@ -31,8 +28,7 @@ public class ClearQOTW implements SlashCommandHandler {
                 .setFooter("ID: " + member.getId())
                 .setTimestamp(new Date().toInstant())
                 .build();
-
-            event.replyEmbeds(e).queue();
+        return event.replyEmbeds(e);
     }
 }
 

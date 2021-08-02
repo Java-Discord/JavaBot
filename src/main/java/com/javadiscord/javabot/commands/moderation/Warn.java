@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.time.LocalDateTime;
@@ -63,20 +64,14 @@ public class Warn implements SlashCommandHandler {
     }
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.KICK_MEMBERS)) {
-            event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
-
         Member member = event.getOption("user").getAsMember();
-
         OptionMapping option = event.getOption("reason");
         String reason = option == null ? "None" : option.getAsString();
-
         int warnPoints = getWarnCount(member);
-
         var eb = new EmbedBuilder()
                 .setColor(Constants.YELLOW)
                 .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
@@ -88,12 +83,16 @@ public class Warn implements SlashCommandHandler {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        event.replyEmbeds(eb).queue();
+
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-        try { warn(member, event.getGuild(), reason); }
-        catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
+        try {
+            warn(member, event.getGuild(), reason);
+            return event.replyEmbeds(eb);
+        } catch (Exception e) {
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser()));
+        }
     }
 }
 

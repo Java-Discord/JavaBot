@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
 import java.sql.Connection;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected void handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
 		OptionMapping pageOption = event.getOption("page");
 		OptionMapping userOption = event.getOption("user");
 		int page = 1;
@@ -44,6 +45,6 @@ public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
 			);
 		}
 		embedBuilder.setFooter("Page " + page + ", up to 10 items per page");
-		event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
+		return event.replyEmbeds(embedBuilder.build()).setEphemeral(true);
 	}
 }
