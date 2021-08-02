@@ -10,11 +10,9 @@ import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.util.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -27,16 +25,12 @@ public class Startup extends ListenerAdapter {
     public static String mfurle = "https://cdn.discordapp.com/attachments/838020992882049025/838021012871315486/MalformedURLException.png";
 
     public static MongoClient mongoClient;
-    public static SelfUser bot;
     public static Guild preferredGuild;
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Startup.class);
 
     @Override
-    public void onReady(ReadyEvent event){
-
-        bot = event.getJDA().getSelfUser();
-
+    public void onReady(ReadyEvent event) {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
         rootLogger.setLevel(Level.ERROR);

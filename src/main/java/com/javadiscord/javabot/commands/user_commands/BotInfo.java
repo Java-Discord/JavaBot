@@ -12,12 +12,11 @@ import java.lang.management.RuntimeMXBean;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.javadiscord.javabot.events.Startup.bot;
-
 public class BotInfo implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         long ping = event.getJDA().getGatewayPing();
+        var bot = event.getJDA().getSelfUser();
         String botImage = bot.getAvatarUrl();
         String botTag = bot.getAsTag();
         String botName = bot.getName();

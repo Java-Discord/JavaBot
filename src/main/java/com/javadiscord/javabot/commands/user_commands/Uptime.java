@@ -26,7 +26,7 @@ public class Uptime implements SlashCommandHandler {
         uptimeMS -= TimeUnit.MINUTES.toMillis(uptimeMIN);
         long uptimeSEC = TimeUnit.MILLISECONDS.toSeconds(uptimeMS);
 
-        String botImage = Startup.bot.getAvatarUrl();
+        String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 
         EmbedBuilder eb = new EmbedBuilder()
             .setColor(Constants.GRAY)
