@@ -12,47 +12,44 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
 
 public class Unmute implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-            event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
+        Role muteRole = new Database().getConfigRole(event.getGuild(), "roles.mute_rid");
+        Member member = event.getOption("user").getAsMember();
+        User author = event.getUser();
+        try {
+            var e = new EmbedBuilder()
+                .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
+                .setColor(Constants.RED)
+                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+                .addField("Moderator", "```" + author.getAsTag() + "```", true)
+                .addField("ID", "```" + member.getId() + "```", false)
+                .setFooter("ID: " + member.getId())
+                .setTimestamp(new Date().toInstant())
+                .build();
 
-            Role muteRole = new Database().getConfigRole(event.getGuild(), "roles.mute_rid");
-            Member member = event.getOption("user").getAsMember();
-            User author = event.getUser();
-            try {
+            if (member.getRoles().toString().contains(muteRole.getId())) {
+                event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
 
-                var e = new EmbedBuilder()
-                    .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
-                    .setColor(Constants.RED)
-                    .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                    .addField("Moderator", "```" + author.getAsTag() + "```", true)
-                    .addField("ID", "```" + member.getId() + "```", false)
-                    .setFooter("ID: " + member.getId())
-                    .setTimestamp(new Date().toInstant())
-                    .build();
+                member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
 
-                if (member.getRoles().toString().contains(muteRole.getId())) {
-                    event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
-
-                    member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
-                    event.replyEmbeds(e).queue();
-                    Misc.sendToLog(event.getGuild(), e);
-
-                } else {
-                    event.replyEmbeds(Embeds.emptyError("```I can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-                }
-
-            } catch (HierarchyException e) {
-                event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", author)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                Misc.sendToLog(event.getGuild(), e);
+                return event.replyEmbeds(e);
+            } else {
+                return event.replyEmbeds(Embeds.emptyError("```I can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
             }
+
+        } catch (HierarchyException e) {
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", author)).setEphemeral(Constants.ERR_EPHEMERAL);
+        }
     }
 }

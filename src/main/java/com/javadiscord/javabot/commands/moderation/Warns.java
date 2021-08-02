@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.util.Date;
@@ -21,8 +22,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class Warns implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         OptionMapping warnsOption = event.getOption("user");
         Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
 
@@ -49,6 +49,6 @@ public class Warns implements SlashCommandHandler {
             .setTimestamp(new Date().toInstant())
             .build();
 
-        event.replyEmbeds(e).queue();
+        return event.replyEmbeds(e);
     }
 }

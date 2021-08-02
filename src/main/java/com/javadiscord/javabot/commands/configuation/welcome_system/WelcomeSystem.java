@@ -1,54 +1,43 @@
 package com.javadiscord.javabot.commands.configuation.welcome_system;
 
+import com.javadiscord.javabot.commands.DelegatingCommandHandler;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.configuation.welcome_system.subcommands.*;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class WelcomeSystem implements SlashCommandHandler, WelcomeCommandHandler {
-
-    private final Map<String, WelcomeCommandHandler> welcomeIndex;
-
+public class WelcomeSystem extends DelegatingCommandHandler {
     public WelcomeSystem() {
-
-        this.welcomeIndex = new HashMap<>();
-
-        welcomeIndex.put("list", new GetList());
-        welcomeIndex.put("leave-msg", new SetLeaveMessage());
-        welcomeIndex.put("join-msg", new SetJoinMessage());
-        welcomeIndex.put("channel",new SetWelcomeChannel());
-        welcomeIndex.put("image-width", new SetImageWidth());
-        welcomeIndex.put("image-height", new SetImageHeight());
-        welcomeIndex.put("overlay-url", new SetOverlayUrl());
-        welcomeIndex.put("background-url", new SetBackgroundUrl());
-        welcomeIndex.put("primary-color", new SetPrimaryColor());
-        welcomeIndex.put("secondary-color", new SetSecondaryColor());
-        welcomeIndex.put("avatar-height", new SetAvatarHeight());
-        welcomeIndex.put("avatar-width", new SetAvatarWidth());
-        welcomeIndex.put("avatar-x", new SetAvatarX());
-        welcomeIndex.put("avatar-y", new SetAvatarY());
-        welcomeIndex.put("status", new SetStatus());
+        addSubcommand("list", new GetList());
+        addSubcommand("leave-msg", new SetLeaveMessage());
+        addSubcommand("join-msg", new SetJoinMessage());
+        addSubcommand("channel",new SetWelcomeChannel());
+        addSubcommand("image-width", new SetImageWidth());
+        addSubcommand("image-height", new SetImageHeight());
+        addSubcommand("overlay-url", new SetOverlayUrl());
+        addSubcommand("background-url", new SetBackgroundUrl());
+        addSubcommand("primary-color", new SetPrimaryColor());
+        addSubcommand("secondary-color", new SetSecondaryColor());
+        addSubcommand("avatar-height", new SetAvatarHeight());
+        addSubcommand("avatar-width", new SetAvatarWidth());
+        addSubcommand("avatar-x", new SetAvatarX());
+        addSubcommand("avatar-y", new SetAvatarY());
+        addSubcommand("status", new SetStatus());
     }
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
-
-            var command = welcomeIndex.get(event.getSubcommandName());
-            if (command != null) {
-                command.handle(event);
-            return;
-        }
+        return super.handle(event);
     }
 }
 

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
 import java.util.List;
@@ -15,11 +16,10 @@ import java.util.List;
 public class Purge implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
         if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         int amount = (int) event.getOption("amount").getAsLong();
@@ -34,7 +34,6 @@ public class Purge implements SlashCommandHandler {
                 if (nuke) {
                     event.getTextChannel().createCopy().queue();
                     event.getTextChannel().delete().queue();
-                    return;
                 }
 
                 MessageHistory history = new MessageHistory(event.getChannel());
@@ -48,10 +47,9 @@ public class Purge implements SlashCommandHandler {
                     .setTitle("Successfully deleted **" + amount + " messages** :broom:")
                     .build();
 
-                event.replyEmbeds(e).queue();
-
+                return event.replyEmbeds(e);
             } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
-                event.replyEmbeds(Embeds.purgeError(event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+                return event.replyEmbeds(Embeds.purgeError(event)).setEphemeral(Constants.ERR_EPHEMERAL);
             }
         }
     }

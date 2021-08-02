@@ -8,17 +8,17 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
 
 public class ClearWarns implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
         if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         Member member = event.getOption("user").getAsMember();
@@ -34,8 +34,7 @@ public class ClearWarns implements SlashCommandHandler {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        event.replyEmbeds(e).queue();
-
+        return event.replyEmbeds(e);
     }
 }
 

@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.reaction_roles;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
@@ -19,6 +20,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -28,34 +30,32 @@ import java.util.List;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
+// TODO: Redo implementation of this to be much cleaner.
+@Deprecated(forRemoval = true)
 public class ReactionRoles implements SlashCommandHandler {
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
         switch (event.getSubcommandName()) {
             case "create":
-                create(event,
+                return create(event,
                         event.getOption("channel").getAsMessageChannel(),
                         event.getOption("messageid").getAsString(),
                         event.getOption("emote").getAsString(),
                         event.getOption("button-label").getAsString(),
                         event.getOption("role").getAsRole());
 
-                break;
-
             case "delete":
-                delete(event,
+                return delete(event,
                         event.getOption("messageid").getAsString(),
                         event.getOption("button-label").getAsString(),
                         event.getOption("emote").getAsString());
-                break;
         }
+        return Responses.warning(event, "Unknown subcommand.");
     }
 
-    private void create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, String buttonLabel, Role role) {
-
+    private ReplyAction create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, String buttonLabel, Role role) {
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         MongoDatabase database = mongoClient.getDatabase("other");
@@ -91,22 +91,20 @@ public class ReactionRoles implements SlashCommandHandler {
                     .setTimestamp(new Date().toInstant())
                     .build();
 
-            event.replyEmbeds(e).setEphemeral(true).queue();
+
             Misc.sendToLog(event.getGuild(), e);
 
-            updateMessageComponents(channel.retrieveMessageById(mID).complete());
-
+            channel.retrieveMessageById(mID).queue(this::updateMessageComponents);
+            return event.replyEmbeds(e).setEphemeral(true);
         } else {
-            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.", event.getUser()))
-                    .setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.", event.getUser()))
+                    .setEphemeral(Constants.ERR_EPHEMERAL);
         }
     }
 
-    private void delete(SlashCommandEvent event, String mID, String buttonLabel, String emote) {
-
+    private ReplyAction delete(SlashCommandEvent event, String mID, String buttonLabel, String emote) {
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         MongoDatabase database = mongoClient.getDatabase("other");
@@ -121,9 +119,8 @@ public class ReactionRoles implements SlashCommandHandler {
         try {
             collection.find(criteria).first().toJson();
         } catch (NullPointerException e) {
-            event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.", event.getUser()))
-                    .setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.", event.getUser()))
+                    .setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         collection.deleteOne(criteria);
@@ -138,10 +135,11 @@ public class ReactionRoles implements SlashCommandHandler {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        event.replyEmbeds(e).setEphemeral(true).queue();
+
         Misc.sendToLog(event.getGuild(), e);
 
-        updateMessageComponents(event.getChannel().retrieveMessageById(mID).complete());
+        event.getChannel().retrieveMessageById(mID).queue(this::updateMessageComponents);
+        return event.replyEmbeds(e).setEphemeral(true);
     }
 
     void updateMessageComponents (Message message) {

@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.awt.*;
@@ -21,10 +22,12 @@ import java.util.List;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
+// TODO: Clean up this a lot.
+@Deprecated(forRemoval = true)
 public class Profile implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
         OptionMapping profileOption = event.getOption("user");
         Member member = profileOption == null ? event.getMember() : profileOption.getAsMember();
@@ -140,10 +143,10 @@ public class Profile implements SlashCommandHandler {
                 .addField("Game Activity", "```" + gameActivity + "```", true)
                 .addField("Server joined on", "```" + timeJoined + joinDiff + "```", false)
                 .addField("Account created on", "```" + timeCreated + createDiff + "```", false);
-            event.replyEmbeds(eb.build()).queue();
+            return event.replyEmbeds(eb.build());
 
         } catch (IndexOutOfBoundsException e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(true).queue();
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(true);
         }
     }
 }

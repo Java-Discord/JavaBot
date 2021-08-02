@@ -9,9 +9,9 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
-import java.awt.*;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -20,7 +20,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class CustomCommandList implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
 
         StringBuilder sb = new StringBuilder();
         MongoDatabase database = mongoClient.getDatabase("other");
@@ -48,6 +48,6 @@ public class CustomCommandList implements SlashCommandHandler {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        event.replyEmbeds(e).queue();
+        return event.replyEmbeds(e);
     }
 }

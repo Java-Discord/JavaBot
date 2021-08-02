@@ -5,18 +5,18 @@ import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.javadiscord.javabot.events.Startup.bot;
-
 public class BotInfo implements SlashCommandHandler {
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
         long ping = event.getJDA().getGatewayPing();
+        var bot = event.getJDA().getSelfUser();
         String botImage = bot.getAvatarUrl();
         String botTag = bot.getAsTag();
         String botName = bot.getName();
@@ -50,6 +50,6 @@ public class BotInfo implements SlashCommandHandler {
             .addField("Memory (current Runtime)", "```" + botMemUsed + "MB / " + botMemTotal + "MB```", false)
             .setTimestamp(new Date().toInstant());
 
-        event.replyEmbeds(eb.build()).queue();
+        return event.replyEmbeds(eb.build());
     }
 }

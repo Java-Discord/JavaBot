@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * The main class where the bot is initialized.
@@ -46,6 +48,12 @@ public class Bot {
     public static H2DataSource dataSource;
 
     /**
+     * A general-purpose thread pool that can be used by the bot to execute
+     * tasks outside the main event processing thread.
+     */
+    public static ScheduledExecutorService asyncPool;
+
+    /**
      * The main method that starts the bot. This involves a few steps:
      * <ol>
      *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
@@ -62,6 +70,7 @@ public class Bot {
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();
+        asyncPool = Executors.newScheduledThreadPool(Integer.parseInt(getProperty("asyncPoolSize")));
         JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)

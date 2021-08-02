@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 /**
  * Implement this interface to declare that your class handles certain slash
@@ -18,5 +19,5 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
  * </p>
  */
 public interface SlashCommandHandler {
-	void handle(SlashCommandEvent event);
+	ReplyAction handle(SlashCommandEvent event);
 }

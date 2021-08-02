@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
@@ -12,6 +13,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
 
@@ -24,11 +26,9 @@ public class Mute implements SlashCommandHandler {
     }
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-            event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         Member member = event.getOption("user").getAsMember();
@@ -47,18 +47,21 @@ public class Mute implements SlashCommandHandler {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        event.replyEmbeds(eb).queue();
+
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
         Role muteRole = event.getGuild().getRoleById(new Database().getConfigString(event.getGuild(), "roles.mute_rid"));
 
         if (member.getRoles().contains(muteRole)) {
-            event.replyEmbeds(Embeds.emptyError("```" + member.getUser().getAsTag() + " is already muted```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.emptyError("```" + member.getUser().getAsTag() + " is already muted```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
-        try { mute(member, event.getGuild()); }
-        catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).queue(); }
+        try {
+            mute(member, event.getGuild());
+            return event.replyEmbeds(eb);
+        } catch (Exception e) {
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser()));
+        }
     }
 }

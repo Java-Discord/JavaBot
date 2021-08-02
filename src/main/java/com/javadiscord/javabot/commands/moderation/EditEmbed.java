@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
@@ -9,24 +10,26 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+// TODO: Refactor embed editing interface completely.
+@Deprecated(forRemoval = true)
 public class EditEmbed implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         switch (event.getSubcommandName()) {
-            case "edit": editEmbed(event); break;
-            case "from-message": editEmbedFromLink(event); break;
+            case "edit": return editEmbed(event);
+            case "from-message": return editEmbedFromLink(event);
         }
+        return Responses.warning(event, "Unknown subcommand.");
     }
 
-    void editEmbedFromLink(SlashCommandEvent event) {
+    private ReplyAction editEmbedFromLink(SlashCommandEvent event) {
         String emLink = event.getOption("embed-link").getAsString();
         String msgLink = event.getOption("message-link").getAsString();
 
@@ -38,31 +41,29 @@ public class EditEmbed implements SlashCommandHandler {
             TextChannel emChannel = event.getGuild().getTextChannelById(emValue[5]);
             emMessage = emChannel.retrieveMessageById(emValue[6]).complete();
         } catch (Exception e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         try {
             TextChannel msgChannel = event.getGuild().getTextChannelById(msgValue[5]);
             msgMessage = msgChannel.retrieveMessageById(msgValue[6]).complete();
         } catch (Exception e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         OptionMapping embedOption = event.getOption("title");
         String title = embedOption == null ? emMessage.getEmbeds().get(0).getTitle() : embedOption.getAsString();
 
-            EmbedBuilder eb = new EmbedBuilder()
-                    .setColor(emMessage.getEmbeds().get(0).getColor())
-                    .setTitle(title)
-                    .setDescription(msgMessage.getContentRaw());
+        EmbedBuilder eb = new EmbedBuilder()
+                .setColor(emMessage.getEmbeds().get(0).getColor())
+                .setTitle(title)
+                .setDescription(msgMessage.getContentRaw());
 
-            emMessage.editMessageEmbeds(eb.build()).queue();
-            event.reply("Done!").setEphemeral(true).queue();
+        emMessage.editMessageEmbeds(eb.build()).queue();
+        return event.reply("Done!").setEphemeral(true);
     }
 
-    void editEmbed(SlashCommandEvent event) {
+    private ReplyAction editEmbed(SlashCommandEvent event) {
 
         String link = event.getOption("link").getAsString();
         String[] value = link.split("/");
@@ -72,8 +73,7 @@ public class EditEmbed implements SlashCommandHandler {
             TextChannel channel = event.getGuild().getTextChannelById(value[5]);
             message = channel.retrieveMessageById(value[6]).complete();
         } catch (Exception e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         OptionMapping embedOption = event.getOption("title");
@@ -87,6 +87,6 @@ public class EditEmbed implements SlashCommandHandler {
                 .setDescription(description);
 
         message.editMessageEmbeds(eb.build()).queue();
-        event.reply("Done!").setEphemeral(true).queue();
+        return event.reply("Done!").setEphemeral(true);
     }
 }

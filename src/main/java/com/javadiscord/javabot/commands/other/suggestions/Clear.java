@@ -8,13 +8,14 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
 
 public class Clear implements SlashCommandHandler {
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
         if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
             Message msg = null;
             String messageID = event.getOption("message-id").getAsString();
@@ -38,9 +39,9 @@ public class Clear implements SlashCommandHandler {
                 message1.addReaction(Constants.REACTION_UPVOTE).queue();
                 message1.addReaction(Constants.REACTION_DOWNVOTE).queue();
             });
-            event.reply("Done!").setEphemeral(true).queue();
+            return event.reply("Done!").setEphemeral(true);
         } else {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
     }
 }

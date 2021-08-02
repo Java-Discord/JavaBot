@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -17,8 +18,7 @@ import java.util.Date;
 public class Report implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         OptionMapping option = event.getOption("reason");
         String reason = option == null ? "None" : option.getAsString();
 
@@ -41,7 +41,7 @@ public class Report implements SlashCommandHandler {
         reportChannel.sendMessage("@here").setEmbeds(e.build()).queue();
 
         e.setDescription("Successfully reported " + "``" + member.getUser().getAsTag() + "``!\nYour report has been send to our Moderators");
-        event.replyEmbeds(e.build()).setEphemeral(true).queue();
+        return event.replyEmbeds(e.build()).setEphemeral(true);
     }
 }
 

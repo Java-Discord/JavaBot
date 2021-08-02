@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
@@ -9,27 +10,29 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
+import java.util.function.Function;
 
+// TODO: Refactor embed interface completely.
+@Deprecated(forRemoval = true)
 public class Embed implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         switch (event.getSubcommandName()) {
-            case "create": createEmbed(event); break;
-            case "from-message": createEmbedFromLink(event); break;
+            case "create": return createEmbed(event);
+            case "from-message": return createEmbedFromLink(event);
         }
+        return Responses.warning(event, "Unknown subcommand.");
     }
 
-    void createEmbedFromLink(SlashCommandEvent event) {
-
+    private ReplyAction createEmbedFromLink(SlashCommandEvent event) {
         String link = event.getOption("link").getAsString();
         String[] value = link.split("/");
 
@@ -39,8 +42,7 @@ public class Embed implements SlashCommandHandler {
             TextChannel channel = event.getGuild().getTextChannelById(value[5]);
             message = channel.retrieveMessageById(value[6]).complete();
         } catch (Exception e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         OptionMapping embedOption = event.getOption("title");
@@ -53,48 +55,35 @@ public class Embed implements SlashCommandHandler {
                 .build();
 
         event.getChannel().sendMessageEmbeds(eb).queue();
-        event.reply("Done!").setEphemeral(true).queue();
+        return event.reply("Done!").setEphemeral(true);
     }
 
-    void createEmbed(SlashCommandEvent event) {
+    private ReplyAction createEmbed(SlashCommandEvent event) {
+        Function<String, String> getOpt = s -> {
+            var mapping = event.getOption(s);
+            return mapping == null ? null : mapping.getAsString();
+        };
+        String title = getOpt.apply("title");
+        String description = getOpt.apply("description");
+        String authorname = getOpt.apply("author-name");
+        String url = getOpt.apply("author-url");
+        String iconurl = getOpt.apply("author-iconurl");
+        String thumb = getOpt.apply("thumbnail-url");
+        String img = getOpt.apply("image-url");
+        String color = getOpt.apply("color");
+        try {
+            var eb = new EmbedBuilder();
+            eb.setTitle(title);
+            eb.setDescription(description);
+            eb.setAuthor(authorname, url, iconurl);
+            eb.setImage(img);
+            eb.setThumbnail(thumb);
+            eb.setColor(Color.decode(color));
 
-            OptionMapping embedOption;
-            embedOption = event.getOption("title");
-            String title = embedOption == null ? null : embedOption.getAsString();
+            return event.replyEmbeds(eb.build());
 
-            embedOption = event.getOption("description");
-            String description = embedOption == null ? null : embedOption.getAsString();
-
-            embedOption = event.getOption("author-name");
-            String authorname = embedOption == null ? null : embedOption.getAsString();
-
-            embedOption = event.getOption("author-url");
-            String url = embedOption == null ? null : embedOption.getAsString();
-
-            embedOption = event.getOption("author-iconurl");
-            String iconurl = embedOption == null ? null : embedOption.getAsString();
-
-            embedOption = event.getOption("thumbnail-url");
-            String thumb = embedOption == null ? null : embedOption.getAsString();
-
-            embedOption = event.getOption("image-url");
-            String img = embedOption == null ? null : embedOption.getAsString();
-
-            embedOption = event.getOption("color");
-            String color = embedOption == null ? null : embedOption.getAsString();
-            try {
-                var eb = new EmbedBuilder();
-
-                eb.setTitle(title);
-                eb.setDescription(description);
-                eb.setAuthor(authorname, url, iconurl);
-                eb.setImage(img);
-                eb.setThumbnail(thumb);
-                eb.setColor(Color.decode(color));
-
-
-                event.replyEmbeds(eb.build()).queue();
-
-            } catch (Exception e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+        } catch (Exception e) {
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
+        }
     }
 }

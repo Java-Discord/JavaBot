@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.jam.subcommands;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.jam.dao.JamSubmissionRepository;
 import com.javadiscord.javabot.jam.dao.JamThemeRepository;
 import com.javadiscord.javabot.jam.model.Jam;
@@ -7,6 +8,7 @@ import com.javadiscord.javabot.jam.model.JamSubmission;
 import com.javadiscord.javabot.jam.model.JamTheme;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -22,19 +24,20 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
 	@Override
-	protected void handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
 		if (!activeJam.submissionsAllowed()) {
-			event.getHook().sendMessage("Submissions for the Jam are not permitted at this time.").queue();
-			return;
+			return Responses.warning(event, "Submissions Not Permitted", "The Jam is not currently accepting submissions.");
 		}
 
 		OptionMapping sourceLinkOption = event.getOption("link");
 		OptionMapping descriptionOption = event.getOption("description");
 
-		if (sourceLinkOption == null || descriptionOption == null) throw new IllegalArgumentException("Missing required arguments.");
+		if (sourceLinkOption == null || descriptionOption == null) {
+			return Responses.warning(event, "Missing required arguments.");
+		}
 		String link = sourceLinkOption.getAsString();
 		if (!this.validateLink(link)) {
-			throw new IllegalArgumentException("Source link must link to a valid web page.");
+			return Responses.warning(event, "Invalid Source", "The source link you provide must lead to a valid web page.");
 		}
 
 		JamSubmission submission = new JamSubmission();
@@ -45,7 +48,7 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 		submission.setDescription(descriptionOption.getAsString());
 
 		new JamSubmissionRepository(con).saveSubmission(submission);
-		event.getHook().sendMessage("Thank you for your submission to the Jam.").queue();
+		return Responses.success(event, "Submission Received", "Thank you for your submission to the Jam.");
 	}
 
 	private boolean validateLink(String link) {

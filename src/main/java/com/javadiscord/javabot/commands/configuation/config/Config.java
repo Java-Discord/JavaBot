@@ -1,55 +1,43 @@
 package com.javadiscord.javabot.commands.configuation.config;
 
-import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.commands.DelegatingCommandHandler;
 import com.javadiscord.javabot.commands.configuation.config.subcommands.*;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class Config implements SlashCommandHandler, ConfigCommandHandler {
-
-    private final Map<String, ConfigCommandHandler> configIndex;
-
+// TODO: Replace with file-based config or at least something much less convoluted.
+@Deprecated(forRemoval = true)
+public class Config extends DelegatingCommandHandler {
     public Config() {
+        addSubcommand("list", new GetList());
+        addSubcommand("stats-category", new SetStatsCategory());
+        addSubcommand("stats-message", new SetStatsMessage());
+        addSubcommand("report-channel", new SetReportChannel());
+        addSubcommand("starboard-channel", new SetStarboardChannel());
+        addSubcommand("log-channel", new SetLogChannel());
+        addSubcommand("suggestion-channel", new SetSuggestionChannel());
+        addSubcommand("submission-channel", new SetSubmissionChannel());
+        addSubcommand("mute-role", new SetMuteRole());
+        addSubcommand("staff-role", new SetStaffRole());
+        addSubcommand("dm-qotw", new SetDMQOTWStatus());
+        addSubcommand("lock", new SetLockStatus());
 
-        this.configIndex = new HashMap<>();
-
-        configIndex.put("list", new GetList());
-        configIndex.put("stats-category", new SetStatsCategory());
-        configIndex.put("stats-message", new SetStatsMessage());
-        configIndex.put("report-channel",new SetReportChannel());
-        configIndex.put("starboard-channel",new SetStarboardChannel());
-        configIndex.put("log-channel", new SetLogChannel());
-        configIndex.put("suggestion-channel", new SetSuggestionChannel());
-        configIndex.put("submission-channel", new SetSubmissionChannel());
-        configIndex.put("mute-role", new SetMuteRole());
-        configIndex.put("staff-role", new SetStaffRole());
-        configIndex.put("dm-qotw", new SetDMQOTWStatus());
-        configIndex.put("lock", new SetLockStatus());
-
-        configIndex.put("jam-admin-role", new SetJamAdminRole());
-        configIndex.put("jam-ping-role", new SetJamPingRole());
-        configIndex.put("jam-vote-channel", new SetJamVoteChannel());
-        configIndex.put("jam-announcement-channel", new SetJamAnnouncementChannel());
+        addSubcommand("jam-admin-role", new SetJamAdminRole());
+        addSubcommand("jam-ping-role", new SetJamPingRole());
+        addSubcommand("jam-vote-channel", new SetJamVoteChannel());
+        addSubcommand("jam-announcement-channel", new SetJamAnnouncementChannel());
     }
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+    public ReplyAction handle(SlashCommandEvent event) {
+        if (event.getMember() != null && !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
-        var command = configIndex.get(event.getSubcommandName());
-        if (command != null) {
-            command.handle(event);
-            return;
-        }
+        return super.handle(event);
     }
 }
 

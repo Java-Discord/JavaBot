@@ -1,20 +1,25 @@
 package com.javadiscord.javabot.commands.configuation.welcome_system.subcommands;
 
-import com.javadiscord.javabot.commands.configuation.welcome_system.WelcomeCommandHandler;
+import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.events.UserJoin;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.io.ByteArrayInputStream;
 
-public class GetList implements WelcomeCommandHandler {
+public class GetList implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
+    public ReplyAction handle(SlashCommandEvent event) {
+        Bot.asyncPool.submit(() -> this.send(event));
+        return event.deferReply();
+    }
 
-        event.deferReply().queue();
+    private void send(SlashCommandEvent event) {
         Database db = new Database();
 
         String status;

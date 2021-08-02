@@ -5,6 +5,7 @@ import com.javadiscord.javabot.events.Startup;
 import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -13,8 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class Uptime implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
         long uptimeMS = rb.getUptime();
 
@@ -26,12 +26,12 @@ public class Uptime implements SlashCommandHandler {
         uptimeMS -= TimeUnit.MINUTES.toMillis(uptimeMIN);
         long uptimeSEC = TimeUnit.MILLISECONDS.toSeconds(uptimeMS);
 
-        String botImage = Startup.bot.getAvatarUrl();
+        String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 
         EmbedBuilder eb = new EmbedBuilder()
             .setColor(Constants.GRAY)
             .setAuthor(uptimeDAYS + "d " + uptimeHRS + "h " + uptimeMIN + "min " + uptimeSEC + "s", null, botImage);
 
-        event.replyEmbeds(eb.build()).queue();
+        return event.replyEmbeds(eb.build());
     }
 }

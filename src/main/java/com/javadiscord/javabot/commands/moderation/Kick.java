@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -17,11 +18,9 @@ import java.util.concurrent.TimeUnit;
 public class Kick implements SlashCommandHandler {
 
     @Override
-    public void handle(SlashCommandEvent event) {
-
+    public ReplyAction handle(SlashCommandEvent event) {
         if (!event.getMember().hasPermission(Permission.KICK_MEMBERS)) {
-            event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL).queue();
-            return;
+            return event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
         Member member = event.getOption("user").getAsMember();
@@ -51,10 +50,9 @@ public class Kick implements SlashCommandHandler {
 
             Misc.sendToLog(event.getGuild(), eb);
             member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
-            event.replyEmbeds(eb).queue();
-
+            return event.replyEmbeds(eb);
         } catch (Exception e) {
-            event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue();
+            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
         }
     }
 }

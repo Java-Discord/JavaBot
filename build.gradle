@@ -54,4 +54,7 @@ jar {
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' }
 
 tasks.withType(JavaCompile){ options.encoding = 'UTF-8'}
+tasks.withType( JavaCompile ).configureEach {
+    options.forkOptions.jvmArgs.addAll( ['--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'] )
+}
 test { useJUnitPlatform() }

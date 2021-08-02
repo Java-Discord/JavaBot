@@ -15,6 +15,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Data source that is used to obtain connections to the database.
+ */
 public class H2DataSource {
 	private static final Logger log = LoggerFactory.getLogger(H2DataSource.class);
 
@@ -43,7 +46,7 @@ public class H2DataSource {
 
 	public Connection getConnection() throws SQLException {
 		String fileName = Bot.getProperty("databaseFileName");
-		return DriverManager.getConnection("jdbc:h2:file:./" + fileName);
+		return DriverManager.getConnection("jdbc:h2:file:./" + fileName + ";AUTO_SERVER=TRUE");
 	}
 
 	/**
