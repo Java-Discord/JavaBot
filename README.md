@@ -2,8 +2,6 @@
 
 General utility bot for the [JavaDiscord Community](https://join.javadiscord.net/)
 
-Command list at https://pages.javadiscord.net
-
 # Usage 
 
 To start up, the bot only needs a ``bot.props`` file in the source directory. 
