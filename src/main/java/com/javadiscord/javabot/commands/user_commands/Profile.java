@@ -109,11 +109,9 @@ public class Profile implements SlashCommandHandler {
 
     String getGameActivityType (Activity activity) {
 
-        String type = activity.getType().name().toLowerCase()
+        return activity.getType().name().toLowerCase()
                 .replace("listening", "Listening to")
                 .replace("default", "Playing");
-
-        return type;
     }
 
     String getGameActivityDetails (Activity activity) {
@@ -129,7 +127,7 @@ public class Profile implements SlashCommandHandler {
             if (!(rp.getState() == null)) details +=  " by " + rp.getState();
             details += "`](" + spotifyURL + ")";
 
-        } else details = activity.getName();
+        } else details = "`" + activity.getName() + "`";
 
         return details;
     }
@@ -174,7 +172,7 @@ public class Profile implements SlashCommandHandler {
         TimeUtils tu = new TimeUtils();
 
             var e = new EmbedBuilder()
-                .setTitle(getOnlineStatus(member) + " " + member.getEffectiveName() + "'s Profile")
+                .setTitle(getOnlineStatus(member) + " " + member.getUser().getName() + "'s Profile")
                 .setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
 
                 .setColor(getColor(member))
