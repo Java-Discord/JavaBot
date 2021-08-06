@@ -88,7 +88,7 @@ public class Profile implements SlashCommandHandler {
             if (act.getType().name().equals("CUSTOM_STATUS")) {
                 activity = act;
                 break;
-            } else continue;
+            }
         }
 
         return activity;
