@@ -47,7 +47,7 @@ public class Accept implements SlashCommandHandler {
                 .setTimestamp(timestamp)
                 .setFooter("Accepted by " + event.getUser().getAsTag());
 
-            msg.editMessage(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_UPVOTE).queue());
+            msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_SUCCESS).queue());
             return event.reply("Done!").setEphemeral(true);
 
         } else {

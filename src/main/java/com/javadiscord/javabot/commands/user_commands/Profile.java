@@ -1,93 +1,31 @@
 package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.commands.moderation.Warns;
 import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.TimeUtils;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.RichPresence;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
-import org.bson.Document;
 
 import java.awt.*;
-import java.util.List;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
-
-// TODO: Clean up this a lot.
-@Deprecated(forRemoval = true)
 public class Profile implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
+    String getBadges (Member member) {
 
-        OptionMapping profileOption = event.getOption("user");
-        Member member = profileOption == null ? event.getMember() : profileOption.getAsMember();
+        String badges = "";
 
-        String highestRole;
-        try {
-            highestRole = member.getRoles().get(0).getName();
-        } catch (IndexOutOfBoundsException e) {
-            highestRole = "everyone";
-        }
+        if (member.getUser().isBot()) badges += Constants.BOT;
+        if (!(member.getTimeBoosted() == null)) badges += Constants.SERVER_BOOST;
 
-        String timeJoined = member.getTimeJoined().format(TimeUtils.STANDARD_FORMATTER);
-        String timeCreated = member.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-
-        Color color;
-        String colorText;
-        if (member.getColor() == null) {
-            color = new Color(0x2F3136);
-            colorText = "None";
-
-        } else {
-            color = member.getColor();
-            colorText = "#" + Integer.toHexString(member.getColorRaw());
-        }
-
-        String status = member.getOnlineStatus().toString().substring(0, 1).toUpperCase() + member.getOnlineStatus().toString().substring(1).toLowerCase().replace("_", " ");
-        List<Activity> activities = member.getActivities();
-
-        String customStatus, gameActivity;
-
-        try {
-            if (activities.get(0).getType().toString().equalsIgnoreCase("CUSTOM_STATUS")) {
-                customStatus = activities.get(0).getName();
-            } else {
-                customStatus = "None";
-            }
-        } catch (IndexOutOfBoundsException e) {
-            customStatus = "None";
-        }
-
-        try {
-            if (customStatus.equals("None")) {
-                gameActivity = activities.get(0).getName();
-
-            } else {
-                gameActivity = activities.get(1).getName();
-            }
-        } catch (IndexOutOfBoundsException e) {
-            gameActivity = "None";
-        }
-
-        try {
-
-            String statusEmote = status
-                .replace("Online", Constants.ONLINE)
-                .replace("Idle", Constants.IDLE)
-                .replace("Do not disturb", Constants.DND)
-                .replace("Offline", Constants.OFFLINE);
-
-            String badges = member.getUser().getFlags().toString()
+        badges += member.getUser().getFlags().toString()
                 .substring(1, member.getUser().getFlags().toString().length() - 1)
                 .replace(",", "")
                 .replace("PARTNER", Constants.PARTNER)
@@ -101,52 +39,155 @@ public class Profile implements SlashCommandHandler {
                 .replace("BUG_HUNTER_LEVEL_2", Constants.BUG_HUNTER)
                 .replace("VERIFIED_BOT", "");
 
-            String boostBadge, botBadge;
+        return badges;
+    }
 
-            if (!(member.getTimeBoosted() == null)) {
-                boostBadge = Constants.SERVER_BOOST;
-            } else {
-                boostBadge = "";
-            }
+    String getOnlineStatus (Member member) {
 
-            String name = member.getEffectiveName()
-                .replace("```", "");
+        String statusEmote = member.getOnlineStatus().toString()
+                .replace("ONLINE", Constants.ONLINE)
+                .replace("IDLE", Constants.IDLE)
+                .replace("DO_NOT_DISTURB", Constants.DND)
+                .replace("OFFLINE", Constants.OFFLINE);
 
-            if (member.getUser().isBot()) {
-                botBadge = Constants.BOT;
-            } else {
-                botBadge = "";
-            }
+        return statusEmote;
+    }
 
-            MongoDatabase database = mongoClient.getDatabase("userdata");
-            MongoCollection<Document> warns = database.getCollection("warns");
+    Color getColor (Member member) {
 
-            int qotwCount = new Database().getMemberInt(member, "qotwpoints");
-            int warnCount = (int) warns.count(eq("user_id", member.getId()));
+        Color color;
+        if (member.getColor() == null) color = Constants.GRAY;
+        else color = member.getColor();
 
-            TimeUtils tu = new TimeUtils();
-            String joinDiff = " (" + tu.formatDurationToNow(member.getTimeJoined()) + ")";
-            String createDiff = " (" + tu.formatDurationToNow(member.getTimeCreated()) + ")";
+        return color;
+    }
 
-            EmbedBuilder eb = new EmbedBuilder()
-                .setTitle(statusEmote + " " + member.getUser().getAsTag() + " " + botBadge + boostBadge + badges)
-                .setColor(color)
-                .setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
-                .addField("Name", "```" + name + " ```", true)
-                .addField("QOTW", "```" + qotwCount + " (#" + Leaderboard.rank(member.getId()) + ")```", true)
-                .addField("Warnings", "```" + warnCount + "```", true)
-                .addField("ID", "```" + member.getId() + "```", false)
-                .addField("Role Amount", "```" + member.getRoles().size() + " Roles```", true)
-                .addField("Role Color", "```" + colorText + "```", true)
-                .addField("Highest Role", "```@" + highestRole + "```", true)
-                .addField("Custom Status", "```" + customStatus + "```", true)
-                .addField("Game Activity", "```" + gameActivity + "```", true)
-                .addField("Server joined on", "```" + timeJoined + joinDiff + "```", false)
-                .addField("Account created on", "```" + timeCreated + createDiff + "```", false);
-            return event.replyEmbeds(eb.build());
+    String getColorRoleAsMention (Member member) {
 
+        String highestRole;
+        try {
+            highestRole = member.getRoles().get(0).getAsMention();
         } catch (IndexOutOfBoundsException e) {
-            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(true);
+            highestRole = "None";
         }
+
+        return highestRole;
+    }
+
+    String getColorAsHex (Color color) {
+        return "#" + Integer.toHexString(color.getRGB()).toUpperCase();
+    }
+
+    Activity getCustomActivity(Member member) {
+
+        Activity activity = null;
+
+        for (var act : member.getActivities()) {
+
+
+            if (act.getType().name().equals("CUSTOM_STATUS")) {
+                activity = act;
+                break;
+            } else continue;
+        }
+
+        return activity;
+    }
+
+    Activity getGameActivity (Member member) {
+
+        Activity activity = null;
+
+        for (var act : member.getActivities()) {
+
+            if (act.getType().name().equals("CUSTOM_STATUS")) continue;
+            else activity = act; break;
+        }
+
+        return activity;
+    }
+
+    String getGameActivityType (Activity activity) {
+
+        String type = activity.getType().name().toLowerCase()
+                .replace("listening", "Listening to")
+                .replace("default", "Playing");
+
+        return type;
+    }
+
+    String getGameActivityDetails (Activity activity) {
+
+        String details = "";
+
+        if (activity.getName().equals("Spotify")) {
+
+            RichPresence rp = activity.asRichPresence();
+            String spotifyURL = "https://open.spotify.com/track/" + rp.getSyncId();
+
+            details = Constants.SPOTIFY + " [`\"" + rp.getDetails() + "\"";
+            if (!(rp.getState() == null)) details +=  " by " + rp.getState();
+            details += "`](" + spotifyURL + ")";
+
+        } else details = activity.getName();
+
+        return details;
+    }
+
+    String getServerJoinedDate (Member member, TimeUtils tu) {
+
+        long timeJoined = member.getTimeJoined().toInstant().getEpochSecond();
+        String joinDiff = tu.formatDurationToNow(member.getTimeJoined());
+
+        return "<t:" + timeJoined + ":F>" + " (" + joinDiff + " ago)";
+    }
+
+    String getAccountCreatedDate (Member member, TimeUtils tu) {
+
+        long timeCreated = member.getTimeCreated().toInstant().getEpochSecond();
+        String createDiff = tu.formatDurationToNow(member.getTimeCreated());
+
+        return "<t:" + timeCreated + ":F>" + " (" + createDiff + " ago)";
+    }
+
+    String getDescription (Member member) {
+
+        String desc =
+        "**" + member.getUser().getAsTag() + "** " + getBadges(member);
+
+        if (!(getCustomActivity(member) == null)) desc += "\n\"" + getCustomActivity(member).getName() + "\"";
+        if (!(getGameActivity(member) == null)) desc += "\n• " + getGameActivityType(getGameActivity(member)) + " " + getGameActivityDetails(getGameActivity(member));
+
+        desc +=
+                "\n\n⌞ Warnings: `" + new Warns().warnCount(member) + "`" +
+                "\n⌞ QOTW-Points: `" + new Database().getMemberInt(member, "qotwpoints") + " (#" + Leaderboard.rank(member.getId()) + ")`";
+
+        return desc;
+    }
+
+    @Override
+    public ReplyAction handle(SlashCommandEvent event) {
+
+        OptionMapping profileOption = event.getOption("user");
+        Member member = profileOption == null ? event.getMember() : profileOption.getAsMember();
+
+        TimeUtils tu = new TimeUtils();
+
+            var e = new EmbedBuilder()
+                .setTitle(getOnlineStatus(member) + " " + member.getEffectiveName() + "'s Profile")
+                .setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
+
+                .setColor(getColor(member))
+                .setDescription(getDescription(member))
+                .setFooter("ID: " + member.getId());
+
+                if (member.getRoles().size() > 1 ) e.addField("Roles", getColorRoleAsMention(member) + " (+" + (member.getRoles().size() -1) + " other)", true);
+                else if (member.getRoles().size() > 0) e.addField("Roles", getColorRoleAsMention(member), true);
+
+                if (member.getRoles().size() > 0) e.addField("Color", "`" + getColorAsHex(getColor(member)) + "`", true);
+                    e.addField("Server joined on", getServerJoinedDate(member, tu), false)
+                    .addField("Account created on", getAccountCreatedDate(member, tu), true);
+
+            return event.replyEmbeds(e.build());
     }
 }
