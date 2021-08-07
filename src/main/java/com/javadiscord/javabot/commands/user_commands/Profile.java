@@ -78,12 +78,11 @@ public class Profile implements SlashCommandHandler {
         return "#" + Integer.toHexString(color.getRGB()).toUpperCase();
     }
 
-    Activity getCustomActivity(Member member) {
+    Activity getCustomActivity (Member member) {
 
         Activity activity = null;
 
         for (var act : member.getActivities()) {
-
 
             if (act.getType().name().equals("CUSTOM_STATUS")) {
                 activity = act;
@@ -123,9 +122,9 @@ public class Profile implements SlashCommandHandler {
             RichPresence rp = activity.asRichPresence();
             String spotifyURL = "https://open.spotify.com/track/" + rp.getSyncId();
 
-            details = Constants.SPOTIFY + " [`\"" + rp.getDetails() + "\"";
+            details = "[`\"" + rp.getDetails() + "\"";
             if (!(rp.getState() == null)) details +=  " by " + rp.getState();
-            details += "`](" + spotifyURL + ")";
+            details += "`](" + spotifyURL + ") " + Constants.SPOTIFY;
 
         } else details = "`" + activity.getName() + "`";
 
@@ -150,8 +149,8 @@ public class Profile implements SlashCommandHandler {
 
     String getDescription (Member member) {
 
-        String desc =
-        "**" + member.getUser().getAsTag() + "** " + getBadges(member);
+        String desc = "";
+
 
         if (!(getCustomActivity(member) == null)) desc += "\n\"" + getCustomActivity(member).getName() + "\"";
         if (!(getGameActivity(member) == null)) desc += "\n• " + getGameActivityType(getGameActivity(member)) + " " + getGameActivityDetails(getGameActivity(member));
@@ -172,7 +171,7 @@ public class Profile implements SlashCommandHandler {
         TimeUtils tu = new TimeUtils();
 
             var e = new EmbedBuilder()
-                .setTitle(getOnlineStatus(member) + " " + member.getUser().getName() + "'s Profile")
+                .setTitle(getOnlineStatus(member) + " " + member.getUser().getAsTag() + " " + getBadges(member))
                 .setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
 
                 .setColor(getColor(member))
