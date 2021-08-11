@@ -6,3 +6,4 @@ build/
 # H2 Database
 /*.mv.db
 /*.trace.db
+/*.lock.db

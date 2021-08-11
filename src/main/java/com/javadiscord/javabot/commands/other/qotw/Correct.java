@@ -35,7 +35,7 @@ public class Correct {
                     .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
                     .setColor(Constants.GREEN)
                     .addField("Total QOTW-Points", "```" + (qotwPoints + 1) + "```", true)
-                    .addField("Rank", "```#" + Leaderboard.rank(member.getId()) + "```", true)
+                    .addField("Rank", "```#" + new Leaderboard().getQOTWRank(event.getGuild(), member.getId()) + "```", true)
                     .setFooter("ID: " + member.getId())
                     .setTimestamp(new Date().toInstant());
             tc.sendMessage(emb.build()).queue();

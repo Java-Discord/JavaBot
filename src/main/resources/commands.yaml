@@ -420,8 +420,7 @@
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
-  options:
-    - {description: 'If true, uses the old design', name: old, required: false, type: BOOLEAN}
+  options: []
 - description: Displays the given amount of questions in a random order
   name: question
   handler: com.javadiscord.javabot.commands.other.Question
