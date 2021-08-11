@@ -631,3 +631,12 @@
           description: Should data be included in the export?
           required: true
           type: BOOLEAN
+    - name: migrations-list
+      description: Show a list of all database migrations that can be run.
+    - name: migrate
+      description: Run a database migration.
+      options:
+        - name: name
+          description: The name of the migration to run.
+          required: true
+          type: STRING
