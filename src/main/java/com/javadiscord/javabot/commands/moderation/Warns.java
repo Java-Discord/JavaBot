@@ -21,6 +21,13 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class Warns implements SlashCommandHandler {
 
+    public long warnCount (Member member) {
+        MongoDatabase database = mongoClient.getDatabase("userdata");
+        MongoCollection<Document> warns = database.getCollection("warns");
+
+        return warns.countDocuments(eq("user_id", member.getId()));
+    }
+
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         OptionMapping warnsOption = event.getOption("user");
@@ -42,7 +49,7 @@ public class Warns implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
-            .setDescription("```" + member.getUser().getAsTag() + " has been warned " + warns.count(eq("user_id", member.getId())) + " times so far."
+            .setDescription("```" + member.getUser().getAsTag() + " has been warned " + warnCount(member) + " times so far."
                 + "\n\n" + sb + "```")
             .setColor(Constants.YELLOW)
             .setFooter("ID: " + member.getId())

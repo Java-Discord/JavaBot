@@ -23,6 +23,7 @@ public class Constants {
         public static final String REACTION_SUCCESS = "check:861259759151087627";
         public static final String REACTION_UPVOTE = "up_vote:861259760547659786";
         public static final String REACTION_DOWNVOTE = "down_vote:861259759562391572";
+        public static final String SPOTIFY = "<:spotify:873228785091231795>";
 
         public static final String ONLINE = "<:sOnline:861259760467705877>";
         public static final String OFFLINE = "<:sOffline:861259760488677376>";
