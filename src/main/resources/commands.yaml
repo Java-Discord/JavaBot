@@ -517,6 +517,17 @@
           description: A name for this Jam. Typical usage is `'{name} Jam'`.
           required: false
           type: STRING
+    - name: edit-jam
+      description: Edit certain properties of the Jam.
+      options:
+        - name: property
+          description: The name of the property to edit.
+          required: true
+          type: STRING
+        - name: value
+          description: The value of the property.
+          required: true
+          type: STRING
 
     # Theme Commands
     - name: add-theme

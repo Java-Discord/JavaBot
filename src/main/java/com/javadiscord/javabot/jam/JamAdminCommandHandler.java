@@ -9,6 +9,7 @@ public class JamAdminCommandHandler extends DelegatingCommandHandler {
 	public JamAdminCommandHandler() {
 		super(Map.of(
 				"plan-new-jam", new PlanNewJamSubcommand(),
+				"edit-jam", new EditJamSubcommand(),
 				"add-theme", new AddThemeSubcommand(),
 				"list-themes", new ListThemesSubcommand(),
 				"remove-theme", new RemoveThemeSubcommand(),
