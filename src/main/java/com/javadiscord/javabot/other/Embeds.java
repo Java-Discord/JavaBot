@@ -14,7 +14,7 @@ import static com.javadiscord.javabot.events.Startup.iae;
 public class Embeds {
 
     public static MessageEmbed permissionError(String perm, Object ev) {
-		return createErrorEmbed("Sorry, {{mention}}\nTo execute this command you need the **``" + perm + "``** permission.", ev);
+        return createErrorEmbed("Sorry, {{mention}}\nTo execute this command you need the **``" + perm + "``** permission.", ev);
     }
 
     public static MessageEmbed purgeError(Object ev) {
@@ -25,30 +25,30 @@ public class Embeds {
         return createErrorEmbed("Why would you want to " + ex + " yourself? :^)```", ev);
     }
 
-	private static MessageEmbed createErrorEmbed(String text, Object ev) {
-		User user = null;
+    private static MessageEmbed createErrorEmbed(String text, Object ev) {
+        User user = null;
 
-		if (ev instanceof GuildMessageReceivedEvent) {
-			GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
-			event.getMessage().addReaction(Constants.CROSS).complete();
-			user = event.getAuthor();
-		}
+        if (ev instanceof GuildMessageReceivedEvent) {
+            GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
+            event.getMessage().addReaction(Constants.CROSS).complete();
+            user = event.getAuthor();
+        }
 
-		if (ev instanceof SlashCommandEvent) {
-			user = ((SlashCommandEvent) ev).getUser();
-		}
+        if (ev instanceof SlashCommandEvent) {
+            user = ((SlashCommandEvent) ev).getUser();
+        }
 
-		return emptyError(text.replace("{{mention}}", user.getAsMention()), user);
-	}
+        return emptyError(text.replace("{{mention}}", user.getAsMention()), user);
+    }
 
     public static MessageEmbed emptyError(String text, User user) {
-		return new EmbedBuilder()
-				.setTitle("An Error occurred")
-				.setColor(Constants.RED)
-				.setDescription(text)
-				.setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
-				.setTimestamp(Instant.now())
-				.build();
+        return new EmbedBuilder()
+                .setTitle("An Error occurred")
+                .setColor(Constants.RED)
+                .setDescription(text)
+                .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
+                .setTimestamp(Instant.now())
+                .build();
     }
 
     public static MessageEmbed configEmbed(Object ev, String title, String description, String imageLink, String value, boolean showValue, boolean channel, boolean role) {
