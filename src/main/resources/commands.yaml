@@ -614,3 +614,20 @@
           description: The amount of funds to add. Make this negative to subtract.
           required: true
           type: INTEGER
+
+# Database Management Commands
+- name: db-admin
+  description: Administrative tools for managing the server's database.
+  handler: com.javadiscord.javabot.data.commands.DbAdminCommandHandler
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: staff_rid
+  subCommands:
+    - name: export-schema
+      description: Exports the current database schema to an SQL file.
+      options:
+        - name: include-data
+          description: Should data be included in the export?
+          required: true
+          type: BOOLEAN
