@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.properties.command;
 
+import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 import java.util.Arrays;
@@ -7,34 +8,11 @@ import java.util.Arrays;
 /**
  * Simple DTO for a group of Discord subcommands.
  */
+@Data
 public class SubCommandGroupConfig {
 	private String name;
 	private String description;
 	private SubCommandConfig[] subCommands;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public SubCommandConfig[] getSubCommands() {
-		return subCommands;
-	}
-
-	public void setSubCommands(SubCommandConfig[] subCommands) {
-		this.subCommands = subCommands;
-	}
 
 	public SubcommandGroupData toData() {
 		SubcommandGroupData data = new SubcommandGroupData(this.name, this.description);
