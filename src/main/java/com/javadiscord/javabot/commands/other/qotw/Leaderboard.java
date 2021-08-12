@@ -11,8 +11,10 @@ import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
@@ -23,6 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,21 +37,22 @@ import static com.mongodb.client.model.Projections.excludeId;
 
 public class Leaderboard implements SlashCommandHandler {
 
-    private final int LB_WIDTH = 2000;
-    private final int LB_HEIGHT = 3200;
-    private final int LB_HEIGHT_TOP = 3000;
+    private final int LB_WIDTH = 3000;
 
     private final float NAME_SIZE = 65;
-    private final float POINTS_SIZE = 40;
+    private final float PLACEMENT_SIZE = 72;
 
     @Override
     public ReplyAction handle (SlashCommandEvent event) {
 
+        OptionMapping option = event.getOption("amount");
+        long l = option == null ? 10 : option.getAsLong();
+
         Bot.asyncPool.submit(() -> {
-            event.getChannel().sendFile(new ByteArrayInputStream(generateLB(event).toByteArray()), "leaderboard" + ".png").queue();
+            event.getChannel().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
         });
 
-     return event.deferReply(true);
+     return event.deferReply();
     }
 
     public int getQOTWRank(Guild guild, String userid) {
@@ -71,9 +75,9 @@ public class Leaderboard implements SlashCommandHandler {
         return (users.indexOf(userid)) + 1;
     }
 
-    ArrayList<String> getTopUsers (Guild guild, int num) {
+    ArrayList<Member> getTopUsers (Guild guild, int num) {
 
-        ArrayList<String> topUsers = new ArrayList<>();
+        ArrayList<Member> topUsers = new ArrayList<>();
 
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
@@ -87,7 +91,7 @@ public class Leaderboard implements SlashCommandHandler {
             String discordID = Root.get("discord_id").getAsString();
             if (guild.getMemberById(discordID) == null) continue;
 
-            try { topUsers.add(discordID);
+            try { topUsers.add(guild.getMemberById(discordID));
             } catch (Exception e) { e.printStackTrace(); }
 
             placement++;
@@ -96,21 +100,14 @@ public class Leaderboard implements SlashCommandHandler {
         return topUsers;
     }
 
-    ArrayList<BufferedImage> getAvatars (Guild guild, ArrayList<String> list) {
+    BufferedImage getAvatar (String avatarURL)  {
 
-        ArrayList<BufferedImage> imgs = new ArrayList<>();
+        BufferedImage img = null;
+        try {
+             img = ImageIO.read(new URL(avatarURL));
+        } catch (Exception e) { e.printStackTrace(); }
 
-        for (var id : list) {
-
-            try {
-
-                URL avatarURL;
-                if (guild.getMemberById(id) == null) avatarURL = new URL("https://cdn.discordapp.com/attachments/743073853961666563/827477442285142026/DefaultAvatar.png");
-                else avatarURL = new URL(guild.retrieveMemberById(id).complete().getUser().getEffectiveAvatarUrl() + "?size=4096");
-                imgs.add(ImageIO.read(avatarURL));
-            } catch (IOException e) { e.printStackTrace(); continue;}
-        }
-        return imgs;
+        return img;
     }
 
     BufferedImage getImage (String resourcePath) {
@@ -137,17 +134,57 @@ public class Leaderboard implements SlashCommandHandler {
         return font;
     }
 
-     ByteArrayOutputStream generateLB (SlashCommandEvent event) {
+    void drawUserCard (Graphics2D g2d, Member member, int yOffset, boolean drawLeft, boolean topten) {
 
-         int qotwPoints = new Database().getMemberInt(event.getMember(), "qotwpoints");
+        int xOffset = 200;
+        if (!drawLeft) xOffset = 1588;
+        if (topten) xOffset = 894;
+
+        g2d.drawImage(getAvatar(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), xOffset + 185, yOffset + 43, 200, 200, null);
+
+        if (topten) g2d.drawImage(getImage("images/leaderboard/LBSelfCard.png"), xOffset, yOffset, null);
+        else g2d.drawImage(getImage("images/leaderboard/LBCard.png"), xOffset, yOffset, null);
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(getFont(NAME_SIZE));
+
+        int stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
+
+        while (stringWidth > 750) {
+
+            Font currentFont = g2d.getFont();
+            Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
+            g2d.setFont(newFont);
+            stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
+        }
+
+        g2d.drawString(member.getUser().getName(), xOffset + 430, yOffset + 130);
+
+        g2d.setColor(Color.decode("#414A52"));
+        g2d.setFont(getFont(PLACEMENT_SIZE));
+
+        String points;
+        if (new Database().getMemberInt(member, "qotwpoints") == 1) points = new Database().getMemberInt(member, "qotwpoints") + " point";
+        else points = new Database().getMemberInt(member, "qotwpoints") + " points";
+
+        String placement = "#" + getQOTWRank(member.getGuild(), member.getId());
+        g2d.drawString(points, xOffset + 430, yOffset + 210);
+
+        int stringLength = (int) g2d.getFontMetrics().getStringBounds(placement, g2d).getWidth();
+        int start = 185 / 2 - stringLength / 2;
+
+        g2d.drawString(placement, xOffset + start, yOffset + 165);
+    }
+
+     ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {
+
+        int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * 350 + 720;
          boolean topTen = false;
 
-         if (getTopUsers(event.getGuild(), 10).contains(event.getMember().getId())) topTen = true;
+         if (getTopUsers(event.getGuild(), (int) num).contains(event.getMember())) topTen = true;
 
-         BufferedImage bufferedImage;
-
-         if (topTen) bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT_TOP, BufferedImage.TYPE_INT_RGB);
-         else bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
+         if (!topTen) LB_HEIGHT += 350;
+         BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
          Graphics2D g2d = bufferedImage.createGraphics();
 
@@ -159,63 +196,26 @@ public class Leaderboard implements SlashCommandHandler {
                  RenderingHints.KEY_FRACTIONALMETRICS,
                  RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-         g2d.drawImage(getImage("images/LeaderboardBackground.png"), 0, 0, null);
+         g2d.setPaint(Color.decode("#011E2F"));
+         g2d.fillRect(0, 0, LB_WIDTH, LB_HEIGHT);
 
-         g2d.drawImage(getAvatars(event.getGuild(), getTopUsers(event.getGuild(), 3)).get(0), 800, 468, 400, 400, null);
-         g2d.drawImage(getAvatars(event.getGuild(), getTopUsers(event.getGuild(), 3)).get(1), 350, 517, 300, 300, null);
-         g2d.drawImage(getAvatars(event.getGuild(), getTopUsers(event.getGuild(), 3)).get(2), 1350, 517, 300, 300, null);
+         BufferedImage logo = getImage("images/leaderboard/Logo.png");
 
-         g2d.drawImage(getImage("images/LeaderboardOverlay.png"), 0, 0, null);
+         g2d.drawImage(logo, LB_WIDTH / 2 - logo.getWidth() / 2, 110, null);
 
-         g2d.setColor(Color.WHITE);
-         g2d.setFont(getFont(NAME_SIZE));
+         int nameY = 700;
+         boolean drawLeft = true;
 
-         int nameY = 1188;
+         for (var member : getTopUsers(event.getGuild(), (int) num)) {
 
-         for (var memberID : getTopUsers(event.getGuild(), 10)) {
+             if (drawLeft) drawUserCard(g2d, member, nameY, true, false);
+             else drawUserCard(g2d, member, nameY, false, false);
 
-             String tag = event.getGuild().getMemberById(memberID).getUser().getAsTag();
-
-             int stringLength = (int)
-                     g2d.getFontMetrics().getStringBounds(tag, g2d).getWidth();
-             int start = LB_WIDTH / 2 - stringLength / 2;
-             g2d.drawString(tag, start + 0, nameY);
-             nameY = nameY + 180;
+             drawLeft = !drawLeft;
+             if (drawLeft) nameY = nameY + 350;
          }
 
-         g2d.setFont(getFont(POINTS_SIZE));
-         g2d.setColor(new Color(0xA4A4A4));
-
-         int pointsY = 1240;
-
-         for (var memberID : getTopUsers(event.getGuild(), 10)) {
-
-             String points = new Database().getMemberInt(event.getGuild().getMemberById(memberID), "qotwpoints") + " points";
-
-             int stringLength = (int)
-                     g2d.getFontMetrics().getStringBounds(points, g2d).getWidth();
-             int start = LB_WIDTH / 2 - stringLength / 2;
-             g2d.drawString(points, start + 0, pointsY);
-             pointsY = pointsY + 180;
-         }
-
-         g2d.setFont(getFont(NAME_SIZE));
-         g2d.setColor(new Color(0x48494A));
-
-         if (!topTen) {
-
-             String text = event.getUser().getAsTag() + " - " + qotwPoints + " points";
-
-             int stringLength = (int) g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();
-             int start = LB_WIDTH / 2 - stringLength / 2;
-             g2d.drawString(text, start, 3095);
-
-             int dotsStringLength = (int) g2d.getFontMetrics().getStringBounds("...", g2d).getWidth();
-             int dotsStart = LB_WIDTH / 2 - dotsStringLength / 2;
-             g2d.drawString("...", dotsStart, 2970);
-
-            g2d.drawString(getQOTWRank(event.getGuild(), event.getUser().getId()) + ".", 93, 3095);
-         }
+         if (!topTen) drawUserCard(g2d, event.getMember(), nameY, true, true);
 
          g2d.dispose();
 
