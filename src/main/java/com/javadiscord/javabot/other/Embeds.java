@@ -98,6 +98,7 @@ public class Embeds {
     public static MessageEmbed configEmbed(Object ev, String title, String description, String imageLink, String value, boolean showValue, boolean channel) {
         return Embeds.configEmbed(ev, title, description, imageLink, value, showValue, channel, false);
     }
+
     public static MessageEmbed configEmbed (Object ev, String title, String description, String imageLink, String value, boolean showValue) {
         return Embeds.configEmbed(ev, title, description, imageLink, value, showValue, false, false);
     }
