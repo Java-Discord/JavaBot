@@ -3,6 +3,7 @@ package com.javadiscord.javabot.jam.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,6 +17,7 @@ public class Jam {
 	private LocalDateTime createdAt;
 	private long startedBy;
 	private LocalDate startsAt;
+	@Nullable
 	private LocalDate endsAt;
 	private boolean completed;
 	private String currentPhase;

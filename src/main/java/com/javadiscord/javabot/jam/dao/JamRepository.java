@@ -79,7 +79,8 @@ public class JamRepository {
 		jam.setStartedBy(rs.getLong("started_by"));
 		jam.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 		jam.setStartsAt(rs.getDate("starts_at").toLocalDate());
-		jam.setEndsAt(rs.getDate("ends_at").toLocalDate());
+		var rawDate = rs.getDate("ends_at");
+		jam.setEndsAt(rawDate == null ? null : rawDate.toLocalDate());
 		jam.setCompleted(rs.getBoolean("completed"));
 		jam.setCurrentPhase(rs.getString("current_phase"));
 		return jam;
