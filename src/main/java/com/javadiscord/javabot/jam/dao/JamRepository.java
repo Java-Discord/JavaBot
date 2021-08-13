@@ -1,17 +1,19 @@
 package com.javadiscord.javabot.jam.dao;
 
 import com.javadiscord.javabot.jam.model.Jam;
-import com.javadiscord.javabot.data.DatabaseHelper;
 import lombok.RequiredArgsConstructor;
 
-import java.io.IOException;
 import java.sql.*;
 
 @RequiredArgsConstructor
 public class JamRepository {
 	private final Connection con;
+
 	public void saveJam(Jam jam) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/insert_jam.sql"), Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = con.prepareStatement(
+				"INSERT INTO jam (guild_id, name, started_by, starts_at, ends_at) VALUES (?, ?, ?, ?, ?)",
+				Statement.RETURN_GENERATED_KEYS
+		);
 		stmt.setLong(1, jam.getGuildId());
 		if (jam.getName() != null) {
 			stmt.setString(2, jam.getName());
@@ -20,6 +22,12 @@ public class JamRepository {
 		}
 		stmt.setLong(3, jam.getStartedBy());
 		stmt.setDate(4, Date.valueOf(jam.getStartsAt()));
+		if (jam.getEndsAt() == null) {
+			stmt.setNull(5, Types.DATE);
+		} else {
+			stmt.setDate(5, Date.valueOf(jam.getEndsAt()));
+		}
+
 		int rows = stmt.executeUpdate();
 		if (rows == 0) throw new SQLException("New Jam was not inserted.");
 		ResultSet rs = stmt.getGeneratedKeys();
@@ -31,7 +39,7 @@ public class JamRepository {
 
 	public Jam getJam(long id) {
 		try {
-			PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/select_jam_by_id.sql"));
+			PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE id = ?");
 			stmt.setLong(1, id);
 			stmt.execute();
 			ResultSet rs = stmt.getResultSet();
@@ -48,7 +56,7 @@ public class JamRepository {
 
 	public Jam getActiveJam(long guildId) {
 		try {
-			PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/find_active_jams.sql"));
+			PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE guild_id = ? AND completed = FALSE");
 			stmt.setLong(1, guildId);
 			stmt.execute();
 			ResultSet rs = stmt.getResultSet();
@@ -71,6 +79,7 @@ public class JamRepository {
 		jam.setStartedBy(rs.getLong("started_by"));
 		jam.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 		jam.setStartsAt(rs.getDate("starts_at").toLocalDate());
+		jam.setEndsAt(rs.getDate("ends_at").toLocalDate());
 		jam.setCompleted(rs.getBoolean("completed"));
 		jam.setCurrentPhase(rs.getString("current_phase"));
 		return jam;
@@ -79,7 +88,7 @@ public class JamRepository {
 	public void completeJam(Jam jam) throws SQLException {
 		jam.setCompleted(true);
 		jam.setCurrentPhase(null);
-		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/complete_jam.sql"));
+		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET completed = TRUE, current_phase = NULL WHERE id = ?");
 		stmt.setLong(1, jam.getId());
 		stmt.executeUpdate();
 		stmt.close();
@@ -87,7 +96,7 @@ public class JamRepository {
 
 	public void updateJamPhase(Jam jam, String nextPhaseName) throws SQLException {
 		jam.setCurrentPhase(nextPhaseName);
-		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/update_jam_phase.sql"));
+		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET current_phase = ? WHERE id = ?");
 		stmt.setString(1, nextPhaseName);
 		stmt.setLong(2, jam.getId());
 		stmt.executeUpdate();

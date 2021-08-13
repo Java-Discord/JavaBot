@@ -31,7 +31,7 @@ public class JamSubmissionRepository {
 
 	public List<JamSubmission> getSubmissions(Jam jam, int page, Long userId) throws SQLException, IOException {
 		int pageSize = 10;
-		String sql = DatabaseHelper.loadSql("/jam/sql/find_all_submissions.sql")
+		String sql = "SELECT js.* FROM jam_submission js WHERE js.jam_id = ? /* CONDITIONS */ ORDER BY js.created_at LIMIT 10 /* OFFSET */"
 				.replace("/* OFFSET */", "OFFSET " + (page - 1) * pageSize);
 		if (userId != null) {
 			sql = sql.replace("/* CONDITIONS */", "AND js.user_id = ?");
