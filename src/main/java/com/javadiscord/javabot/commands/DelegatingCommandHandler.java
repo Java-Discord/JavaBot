@@ -15,6 +15,7 @@ import java.util.Map;
  */
 public class DelegatingCommandHandler implements SlashCommandHandler {
 	private final Map<String, SlashCommandHandler> subcommandHandlers;
+	private final Map<String, SlashCommandHandler> subcommandGroupHandlers;
 
 	/**
 	 * Constructs the handler with an already-initialized map of subcommands.
@@ -22,6 +23,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	 */
 	public DelegatingCommandHandler(Map<String, SlashCommandHandler> subcommandHandlers) {
 		this.subcommandHandlers = subcommandHandlers;
+		this.subcommandGroupHandlers = new HashMap<>();
 	}
 
 	/**
@@ -30,6 +32,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	 */
 	public DelegatingCommandHandler() {
 		this.subcommandHandlers = new HashMap<>();
+		this.subcommandGroupHandlers = new HashMap<>();
 	}
 
 	/**
@@ -39,6 +42,15 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	 */
 	public Map<String, SlashCommandHandler> getSubcommandHandlers() {
 		return Collections.unmodifiableMap(this.subcommandHandlers);
+	}
+
+	/**
+	 * Gets an unmodifiable map of the subcommand group handlers that this
+	 * handler has registered.
+	 * @return An unmodifiable map containing all registered group handlers.
+	 */
+	public Map<String, SlashCommandHandler> getSubcommandGroupHandlers() {
+		return Collections.unmodifiableMap(this.subcommandGroupHandlers);
 	}
 
 	/**
@@ -54,6 +66,18 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	}
 
 	/**
+	 * Adds a subcommand group handler to this handler.
+	 * @param name The name of the subcommand group. <em>This is case-sensitive.</em>
+	 * @param handler The handler that will be called to handle commands within
+	 *                the given subcommand's name.
+	 * @throws UnsupportedOperationException If this handler was initialized
+	 * with an unmodifiable map of subcommand group handlers.
+	 */
+	protected void addSubcommandGroup(String name, SlashCommandHandler handler) {
+		this.subcommandGroupHandlers.put(name, handler);
+	}
+
+	/**
 	 * Handles slash command events by checking if a subcommand name was given,
 	 * and if so, delegating the handling of the event to that subcommand.
 	 * @param event The event.
@@ -61,6 +85,14 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	 */
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
+		// First we check if the event has specified a subcommand group, and if we have a group handler for it.
+		if (event.getSubcommandGroup() != null) {
+			SlashCommandHandler groupHandler = this.getSubcommandGroupHandlers().get(event.getSubcommandGroup());
+			if (groupHandler != null) {
+				return groupHandler.handle(event);
+			}
+		}
+		// If the event doesn't have a subcommand group, or no handler was found for the group, we just move on to the subcommand.
 		if (event.getSubcommandName() == null) {
 			return this.handleNonSubcommand(event);
 		} else {
