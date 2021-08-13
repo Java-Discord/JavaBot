@@ -11,7 +11,7 @@ public class SetJamPingRole implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         Role role = event.getOption("role").getAsRole();
-        new Database().queryConfig(event.getGuild().getId(), "roles.jam_ping_rid", role.getId());
+        Database.queryConfig(event.getGuild().getId(), "roles.jam_ping_rid", role.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Jam Ping Role", "Jam Ping Role successfully changed to", null, role.getId(), true, false, true));
     }
 }

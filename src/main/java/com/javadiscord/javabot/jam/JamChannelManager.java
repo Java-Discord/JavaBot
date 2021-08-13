@@ -25,9 +25,9 @@ public class JamChannelManager {
 	private final TextChannel votingChannel;
 	private final TextChannel announcementChannel;
 
-	public JamChannelManager(Guild guild, Database database) {
-		this.votingChannel = database.getConfigChannel(guild, "channels.jam_vote_cid");
-		this.announcementChannel = database.getConfigChannel(guild, "channels.jam_announcement_cid");
+	public JamChannelManager(Guild guild) {
+		this.votingChannel = Database.getConfigChannel(guild, "channels.jam_vote_cid");
+		this.announcementChannel = Database.getConfigChannel(guild, "channels.jam_announcement_cid");
 	}
 
 	public void sendErrorMessageAsync(SlashCommandEvent event, String message) {
@@ -200,7 +200,7 @@ public class JamChannelManager {
 	}
 
 	private void pingRole() {
-		Role jamPingRole = new Database().getConfigRole(this.announcementChannel.getGuild(), "roles.jam_ping_rid");
+		Role jamPingRole = Database.getConfigRole(this.announcementChannel.getGuild(), "roles.jam_ping_rid");
 		if (jamPingRole == null) {
 			log.error("Could not find Jam ping role.");
 			return;

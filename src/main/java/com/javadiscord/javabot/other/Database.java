@@ -20,7 +20,11 @@ public class Database {
 
     private static final Logger logger = LoggerFactory.getLogger(Database.class);
 
-    public void deleteOpenSubmissions(Guild guild) {
+    private Database() {
+        throw new UnsupportedOperationException("No instances");
+    }
+
+    public static void deleteOpenSubmissions(Guild guild) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("open_submissions");
 
@@ -42,17 +46,17 @@ public class Database {
         }
     }
 
-    public Document userDoc(Member member) {
+    public static Document userDoc(Member member) {
         return userDoc(member.getUser());
     }
 
-    public Document userDoc(User user) {
+    public static Document userDoc(User user) {
         return new Document("tag", user.getAsTag())
                 .append("discord_id", user.getId())
                 .append("qotwpoints", 0);
     }
 
-    public Document guildDoc(String guildName, String guildID) {
+    public static Document guildDoc(String guildName, String guildID) {
         Document av = new Document("avX", 75)
                 .append("avY", 100)
                 .append("avH", 400)
@@ -112,7 +116,7 @@ public class Database {
         return doc;
     }
 
-    public boolean guildDocExists(Guild guild) {
+    public static boolean guildDocExists(Guild guild) {
         if (guild == null) return false;
 
         MongoDatabase database = mongoClient.getDatabase("other");
@@ -123,7 +127,7 @@ public class Database {
         return true;
     }
 
-    public void insertGuildDoc(Guild guild) {
+    public static void insertGuildDoc(Guild guild) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -132,7 +136,7 @@ public class Database {
         logger.warn("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
     }
 
-    public void queryMember(String memberID, String varName, String newValue) {
+    public static void queryMember(String memberID, String varName, String newValue) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
@@ -140,7 +144,7 @@ public class Database {
         collection.updateOne(query, new Document("$set", new Document(varName, newValue)));
     }
 
-    public void queryMember(String memberID, String varName, int newValue) {
+    public static void queryMember(String memberID, String varName, int newValue) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
@@ -148,7 +152,7 @@ public class Database {
         collection.updateOne(query, new Document("$set", new Document(varName, newValue)));
     }
 
-    public String getMemberString(User user, String varName) {
+    public static String getMemberString(User user, String varName) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
@@ -164,7 +168,7 @@ public class Database {
         }
     }
 
-    public int getMemberInt(Member member, String varName) {
+    public static int getMemberInt(Member member, String varName) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
 
@@ -180,7 +184,7 @@ public class Database {
         }
     }
 
-    public void queryConfig(String guildID, String path, String newValue) {
+    public static void queryConfig(String guildID, String path, String newValue) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -190,7 +194,7 @@ public class Database {
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public void queryConfig(String guildID, String path, int newValue) {
+    public static void queryConfig(String guildID, String path, int newValue) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -200,7 +204,7 @@ public class Database {
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public void queryConfig(String guildID, String path, boolean newValue) {
+    public static void queryConfig(String guildID, String path, boolean newValue) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -210,7 +214,7 @@ public class Database {
         collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
     }
 
-    public String getConfigString(Guild guild, String path) {
+    public static String getConfigString(Guild guild, String path) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -229,7 +233,7 @@ public class Database {
         }
     }
 
-    public int getConfigInt(Guild guild, String path) {
+    public static int getConfigInt(Guild guild, String path) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -247,7 +251,7 @@ public class Database {
         }
     }
 
-    public boolean getConfigBoolean(Guild guild, String path) {
+    public static boolean getConfigBoolean(Guild guild, String path) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
@@ -265,7 +269,7 @@ public class Database {
         }
     }
 
-    public TextChannel getConfigChannel(Guild guild, String path) {
+    public static TextChannel getConfigChannel(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {
             return guild.getTextChannelById(id);
@@ -274,7 +278,7 @@ public class Database {
         }
     }
 
-    public Role getConfigRole(Guild guild, String path) {
+    public static Role getConfigRole(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {
             return guild.getRoleById(id);
@@ -283,7 +287,7 @@ public class Database {
         }
     }
 
-    public String getConfigChannelAsMention(Guild guild, String path) {
+    public static String getConfigChannelAsMention(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {
             return guild.getTextChannelById(id).getAsMention();
@@ -292,7 +296,7 @@ public class Database {
         }
     }
 
-    public String getConfigRoleAsMention(Guild guild, String path) {
+    public static String getConfigRoleAsMention(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {
             return guild.getRoleById(id).getAsMention();

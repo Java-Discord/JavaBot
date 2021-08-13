@@ -12,7 +12,7 @@ public class SetSuggestionChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "channels.suggestion_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "channels.suggestion_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Suggest Channel", "Suggest Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

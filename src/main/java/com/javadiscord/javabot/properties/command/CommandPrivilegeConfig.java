@@ -14,7 +14,7 @@ public class CommandPrivilegeConfig {
 	private boolean enabled = true;
 	private String id;
 
-	public CompletableFuture<CommandPrivilege> toData(Guild guild, Database database) {
+	public CompletableFuture<CommandPrivilege> toData(Guild guild) {
 		if (this.type.equalsIgnoreCase(CommandPrivilege.Type.USER.name())) {
 			return guild.getJDA().retrieveUserById(this.id).submit()
 					.thenCompose(user -> {
@@ -22,7 +22,7 @@ public class CommandPrivilegeConfig {
 						return CompletableFuture.completedFuture(new CommandPrivilege(CommandPrivilege.Type.USER, this.enabled, user.getIdLong()));
 					});
 		} else if (this.type.equalsIgnoreCase(CommandPrivilege.Type.ROLE.name())) {
-			Role role = database.getConfigRole(guild, "roles." + this.id);
+			Role role = Database.getConfigRole(guild, "roles." + this.id);
 			if (role == null) return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid role id. Should refer to a roles.{...} config property."));
 			return CompletableFuture.completedFuture(new CommandPrivilege(CommandPrivilege.Type.ROLE, this.enabled, role.getIdLong()));
 		}

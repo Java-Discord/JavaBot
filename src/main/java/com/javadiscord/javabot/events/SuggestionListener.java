@@ -17,7 +17,7 @@ public class SuggestionListener extends ListenerAdapter {
         try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
         catch (NullPointerException ignored) { return; }
 
-            if (event.getChannel().getId().equals(new Database().getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
+            if (event.getChannel().getId().equals(Database.getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
 
                     EmbedBuilder eb = new EmbedBuilder()
                             .setColor(Constants.GRAY)

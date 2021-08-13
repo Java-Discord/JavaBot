@@ -143,7 +143,6 @@ public class SlashCommands extends ListenerAdapter {
 
     private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) throws ExecutionException, InterruptedException {
         log.info("Adding command privileges for Guild " + guild.getName());
-        var db = new Database();
         for (var config : commandConfigs) {
             Long commandId = null;
             for (Command command : commands) {
@@ -157,7 +156,7 @@ public class SlashCommands extends ListenerAdapter {
             if (config.getPrivileges() != null && config.getPrivileges().length > 0) {
                 List<CommandPrivilege> p = new ArrayList<>();
                 for (var privilegeConfig : config.getPrivileges()) {
-                    p.add(privilegeConfig.toData(guild, db).get());
+                    p.add(privilegeConfig.toData(guild).get());
                     log.info("[{}] Registering privilege for command {}: {}",guild.getName(), config.getName(), Objects.toString(privilegeConfig));
                 }
                 guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {

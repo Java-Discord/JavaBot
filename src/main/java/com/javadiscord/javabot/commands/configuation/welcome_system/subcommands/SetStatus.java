@@ -11,7 +11,7 @@ public class SetStatus implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         boolean status = event.getOption("status").getAsBoolean();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.welcome_status", status);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.welcome_status", status);
         return event.replyEmbeds(Embeds.configEmbed(event, "Welcome System Status changed", "Status successfully changed to ", null, String.valueOf(status), true));
     }
 }

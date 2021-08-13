@@ -21,7 +21,7 @@ public class GuildJoin extends ListenerAdapter {
 
         if (collection.find(eq("guild_id", guild.getId())).first() == null) {
 
-            new Database().insertGuildDoc(guild);
+            Database.insertGuildDoc(guild);
         }
     }
 

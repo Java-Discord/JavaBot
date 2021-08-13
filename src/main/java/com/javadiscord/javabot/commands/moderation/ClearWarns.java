@@ -23,7 +23,7 @@ public class ClearWarns implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
 
-        new Database().queryMember(member.getId(), "warns", 0);
+        Database.queryMember(member.getId(), "warns", 0);
         new Warn().deleteAllDocs(member.getId());
 
         var e = new EmbedBuilder()

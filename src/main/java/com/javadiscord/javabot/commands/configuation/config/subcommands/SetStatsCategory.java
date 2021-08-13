@@ -11,7 +11,7 @@ public class SetStatsCategory implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         String id = event.getOption("id").getAsString();
-        new Database().queryConfig(event.getGuild().getId(), "other.stats_category.stats_cid", id);
+        Database.queryConfig(event.getGuild().getId(), "other.stats_category.stats_cid", id);
         return event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category ID", "Stats-Category ID successfully changed to", null, id, true));
     }
 }

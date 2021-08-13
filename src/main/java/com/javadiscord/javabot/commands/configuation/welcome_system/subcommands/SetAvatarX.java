@@ -11,7 +11,7 @@ public class SetAvatarX implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         int x = (int) event.getOption("x").getAsLong();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avX", x);
+        Database.queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avX", x);
         return event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image (X-Pos)", "Avatar Image ``(X-Position)`` successfully changed to ", null, String.valueOf(x), true));
     }
 }

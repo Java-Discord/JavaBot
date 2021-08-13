@@ -54,18 +54,16 @@ public class UserJoin extends ListenerAdapter {
             member = event.getMember();
         }
 
-        Database db = new Database();
-
         int stringWidth;
-        int imgW = db.getConfigInt(guild, "welcome_system.image.imgW");
-        int imgH = db.getConfigInt(guild, "welcome_system.image.imgH");
-        int avX = db.getConfigInt(guild, "welcome_system.image.avatar.avX");
-        int avY = db.getConfigInt(guild, "welcome_system.image.avatar.avY");
-        int avW = db.getConfigInt(guild, "welcome_system.image.avatar.avW");
-        int avH = db.getConfigInt(guild, "welcome_system.image.avatar.avH");
+        int imgW = Database.getConfigInt(guild, "welcome_system.image.imgW");
+        int imgH = Database.getConfigInt(guild, "welcome_system.image.imgH");
+        int avX = Database.getConfigInt(guild, "welcome_system.image.avatar.avX");
+        int avY = Database.getConfigInt(guild, "welcome_system.image.avatar.avY");
+        int avW = Database.getConfigInt(guild, "welcome_system.image.avatar.avW");
+        int avH = Database.getConfigInt(guild, "welcome_system.image.avatar.avH");
 
-        int primCol = db.getConfigInt(guild, "welcome_system.image.primCol");
-        int secCol = db.getConfigInt(guild, "welcome_system.image.secCol");
+        int primCol = Database.getConfigInt(guild, "welcome_system.image.primCol");
+        int secCol = Database.getConfigInt(guild, "welcome_system.image.secCol");
 
         float memberSize = 120;
         float countSize = 72;
@@ -75,13 +73,13 @@ public class UserJoin extends ListenerAdapter {
         BufferedImage flagImage = null, botImage = null, avatarImage = null, bgImage = null, overlayImage = null;
 
         try {
-            overlayURL = new URL(db.getConfigString(guild, "welcome_system.image.overlayURL"));
+            overlayURL = new URL(Database.getConfigString(guild, "welcome_system.image.overlayURL"));
         } catch (MalformedURLException e) {
             overlayURL = new URL(iae);
         }
 
         try {
-            bgURL = new URL(db.getConfigString(guild, "welcome_system.image.bgURL"));
+            bgURL = new URL(Database.getConfigString(guild, "welcome_system.image.bgURL"));
         } catch (MalformedURLException e) {
             bgURL = new URL(iae);
         }
@@ -174,7 +172,7 @@ public class UserJoin extends ListenerAdapter {
         if (event.getMember().getUser().isBot()) return;
 
         User user = event.getMember().getUser();
-        TextChannel welcomeChannel = new Database().getConfigChannel(event.getGuild(), "welcome_system.welcome_cid");
+        TextChannel welcomeChannel = Database.getConfigChannel(event.getGuild(), "welcome_system.welcome_cid");
 
         if (!ServerLock.lockStatus(event)) {
 
@@ -184,14 +182,14 @@ public class UserJoin extends ListenerAdapter {
 
                 try {
 
-                    if (new Database().getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {
+                    if (Database.getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {
 
-                        String welcomeMessage = new Database().getConfigString(event.getGuild(), "welcome_system.join_msg")
+                        String welcomeMessage = Database.getConfigString(event.getGuild(), "welcome_system.join_msg")
                                 .replace("{!member}", event.getMember().getAsMention())
                                 .replace("{!membertag}", event.getMember().getUser().getAsTag())
                                 .replace("{!server}", event.getGuild().getName());
 
-                        event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "welcome_system.welcome_cid")).sendMessage(welcomeMessage)
+                        event.getGuild().getTextChannelById(Database.getConfigString(event.getGuild(), "welcome_system.welcome_cid")).sendMessage(welcomeMessage)
                                 .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
                     }
 

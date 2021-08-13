@@ -11,32 +11,29 @@ public class GetList implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-
-        Database db = new Database();
-
         var eb = new EmbedBuilder()
                 .setColor(Constants.GRAY)
                 .setTitle("Bot Configuration")
 
-                .addField("Lock Status", "Locked: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
-                        "\nCount: `" + db.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
+                .addField("Lock Status", "Locked: `" + Database.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
+                        "\nCount: `" + Database.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
 
-                .addField("Question of the Week", "Submission Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.submission_cid")
-                        + "\nSubmission-Status: `" + db.getConfigBoolean(event.getGuild(), "other.qotw.dm-qotw") + "`", true)
+                .addField("Question of the Week", "Submission Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "channels.submission_cid")
+                        + "\nSubmission-Status: `" + Database.getConfigBoolean(event.getGuild(), "other.qotw.dm-qotw") + "`", true)
 
-                .addField("Stats-Category", "Category-ID: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_cid") + "`" +
-                        "\nText: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_text") + "`", false)
+                .addField("Stats-Category", "Category-ID: `" + Database.getConfigString(event.getGuild(), "other.stats_category.stats_cid") + "`" +
+                        "\nText: `" + Database.getConfigString(event.getGuild(), "other.stats_category.stats_text") + "`", false)
 
-                .addField("Channel & Roles", "Report Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.report_cid") +
-                        ", Log Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.log_cid") +
-                        "\nSuggestion Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.suggestion_cid") +
-                        ", Starboard Channel: " + db.getConfigChannelAsMention(event.getGuild(), "other.starboard.starboard_cid") +
-                        "\nJam Announcement Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_announcement_cid") +
-                        ", Jam Vote Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_vote_cid") +
-                        "\n\nMute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid") +
-                        ", Staff Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.staff_rid") +
-                        ", Jam-Admin Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_admin_rid") +
-                        ", Jam-Ping Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_ping_rid"), false)
+                .addField("Channel & Roles", "Report Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "channels.report_cid") +
+                        ", Log Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "channels.log_cid") +
+                        "\nSuggestion Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "channels.suggestion_cid") +
+                        ", Starboard Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "other.starboard.starboard_cid") +
+                        "\nJam Announcement Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "channels.jam_announcement_cid") +
+                        ", Jam Vote Channel: " + Database.getConfigChannelAsMention(event.getGuild(), "channels.jam_vote_cid") +
+                        "\n\nMute Role: " + Database.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid") +
+                        ", Staff Role: " + Database.getConfigRoleAsMention(event.getGuild(), "roles.staff_rid") +
+                        ", Jam-Admin Role: " + Database.getConfigRoleAsMention(event.getGuild(), "roles.jam_admin_rid") +
+                        ", Jam-Ping Role: " + Database.getConfigRoleAsMention(event.getGuild(), "roles.jam_ping_rid"), false)
                 .build();
 
         return event.replyEmbeds(eb);

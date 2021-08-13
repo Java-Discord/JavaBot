@@ -11,7 +11,7 @@ public class SetStaffRole implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         Role role = event.getOption("role").getAsRole();
-        new Database().queryConfig(event.getGuild().getId(), "roles.staff_rid", role.getId());
+        Database.queryConfig(event.getGuild().getId(), "roles.staff_rid", role.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Staff Role", "Staff Role successfully changed to", null, role.getId(), true, false, true));
     }
 }

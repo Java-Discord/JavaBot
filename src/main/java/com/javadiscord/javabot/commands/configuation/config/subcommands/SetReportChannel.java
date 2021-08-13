@@ -11,7 +11,7 @@ public class SetReportChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "channels.report_cid", channel.getId());
+        Database.queryConfig(event.getGuild().getId(), "channels.report_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Report Channel", "Report Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

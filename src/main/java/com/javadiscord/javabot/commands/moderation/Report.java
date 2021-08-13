@@ -24,7 +24,7 @@ public class Report implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
-        MessageChannel reportChannel = new Database().getConfigChannel(event.getGuild(), "channels.report_cid");
+        MessageChannel reportChannel = Database.getConfigChannel(event.getGuild(), "channels.report_cid");
 
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())

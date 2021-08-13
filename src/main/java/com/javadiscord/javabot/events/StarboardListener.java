@@ -29,7 +29,7 @@ public class StarboardListener extends ListenerAdapter {
     void addToSB(Guild guild, MessageChannel channel, Message message) {
 
         changeSBCBool(guild.getId(), channel.getId(), message.getId(), true);
-        TextChannel sc = guild.getTextChannelById(new Database().getConfigString(guild, "other.starboard.starboard_cid"));
+        TextChannel sc = guild.getTextChannelById(Database.getConfigString(guild, "other.starboard.starboard_cid"));
 
         var eb = new EmbedBuilder()
                 .setAuthor("Jump to message", message.getJumpUrl())
@@ -42,7 +42,7 @@ public class StarboardListener extends ListenerAdapter {
                  try {
                      Message.Attachment attachment = message.getAttachments().get(0);
 
-                     sc.sendMessage(new Database().getConfigString(guild, "other.starboard.starboard_emote")
+                     sc.sendMessage(Database.getConfigString(guild, "other.starboard.starboard_emote")
                              + " " + getStarCount(guild.getId(), channel.getId(), message.getId()) + " | " + message.getTextChannel().getAsMention()).setEmbeds(eb.build())
                              .addFile(attachment.retrieveInputStream().get(), "attachment." + attachment.getFileExtension())
                              .queue((msg) -> {
@@ -53,7 +53,7 @@ public class StarboardListener extends ListenerAdapter {
 
              } else {
 
-                 sc.sendMessage(new Database().getConfigString(guild, "other.starboard.starboard_emote")
+                 sc.sendMessage(Database.getConfigString(guild, "other.starboard.starboard_emote")
                          + " " + getStarCount(guild.getId(), channel.getId(), message.getId()) + " | " + message.getTextChannel().getAsMention()).setEmbeds(eb.build())
                          .queue((msg) -> {
                              String eMID = msg.getId();
@@ -68,7 +68,7 @@ public class StarboardListener extends ListenerAdapter {
         Message msg = null;
 
         if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) {
-            msg = guild.getTextChannelById(new Database().getConfigString(guild, "other.starboard.starboard_cid"))
+            msg = guild.getTextChannelById(Database.getConfigString(guild, "other.starboard.starboard_cid"))
                     .retrieveMessageById(getSBCString(guild.getId(), cID, mID, "starboard_embed")).complete();
         }
 
@@ -80,7 +80,7 @@ public class StarboardListener extends ListenerAdapter {
             if (i > 10) starLevel = "starboard_emote2";
             if (i > 25) starLevel = "starboard_emote3";
 
-            msg.editMessage(new Database().getConfigString(guild, "other.starboard." + starLevel)
+            msg.editMessage(Database.getConfigString(guild, "other.starboard." + starLevel)
                     + " " + getStarCount(guild.getId(), cID, mID) + " | " +
                     tc.getAsMention()).queue();
         } else {
@@ -118,14 +118,14 @@ public class StarboardListener extends ListenerAdapter {
             } catch (ErrorResponseException e) {
 
                 if (root.get("isInSBC").getAsBoolean()) {
-                    new Database().getConfigChannel(guild, "other.starboard.starboard_cid")
+                    Database.getConfigChannel(guild, "other.starboard.starboard_cid")
                             .retrieveMessageById(root.get("starboard_embed").getAsString()).complete().delete().queue();
                 }
                 collection.deleteOne(doc);
                 continue;
             }
 
-            String emote = new Database().getConfigString(guild, "other.starboard.starboard_emote");
+            String emote = Database.getConfigString(guild, "other.starboard.starboard_emote");
 
             if (msg.getReactions().isEmpty()) {
                 setEmoteCount(0, guild.getId(), cID, mID);
@@ -295,7 +295,7 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
         if (event.getMember().getUser().isBot()) return;
 
-        if (!event.getReactionEmote().getName().equals(new Database().getConfigString(event.getGuild(), "other.starboard.starboard_emote")))
+        if (!event.getReactionEmote().getName().equals(Database.getConfigString(event.getGuild(), "other.starboard.starboard_emote")))
             return;
 
         String gID = event.getGuild().getId();
@@ -318,7 +318,7 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
         if (event.getMember().getUser().isBot()) return;
 
-        if (!event.getReactionEmote().getName().equals(new Database().getConfigString(event.getGuild(), "other.starboard.starboard_emote"))) return;
+        if (!event.getReactionEmote().getName().equals(Database.getConfigString(event.getGuild(), "other.starboard.starboard_emote"))) return;
 
         String gID = event.getGuild().getId();
         String cID = event.getChannel().getId();
@@ -346,7 +346,7 @@ public class StarboardListener extends ListenerAdapter {
         JsonObject Root = JsonParser.parseString(doc.toJson()).getAsJsonObject();
         String var = Root.get("starboard_embed").getAsString();
 
-        new Database().getConfigChannel(event.getGuild(), "other.starboard.starboard_cid").retrieveMessageById(var).complete().delete().queue();
+        Database.getConfigChannel(event.getGuild(), "other.starboard.starboard_cid").retrieveMessageById(var).complete().delete().queue();
         collection.deleteOne(doc);
     }
 }

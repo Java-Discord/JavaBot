@@ -20,33 +20,31 @@ public class GetList implements SlashCommandHandler {
     }
 
     private void send(SlashCommandEvent event) {
-        Database db = new Database();
-
         String status;
-        if (db.getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) status = "enabled";
+        if (Database.getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) status = "enabled";
         else status = "disabled";
 
         var eb = new EmbedBuilder()
                 .setTitle("Welcome System Configuration")
                 .setColor(Constants.GRAY)
 
-                .addField("Image", "Width, Height: `" + db.getConfigString(event.getGuild(), "welcome_system.image.imgW") +
-                        "`, `" + db.getConfigString(event.getGuild(), "welcome_system.image.imgH") +
-                        "`\n[Overlay](" + db.getConfigString(event.getGuild(), "welcome_system.image.overlayURL") +
-                        "), [Background](" + db.getConfigString(event.getGuild(), "welcome_system.image.bgURL") + ")", false)
+                .addField("Image", "Width, Height: `" + Database.getConfigString(event.getGuild(), "welcome_system.image.imgW") +
+                        "`, `" + Database.getConfigString(event.getGuild(), "welcome_system.image.imgH") +
+                        "`\n[Overlay](" + Database.getConfigString(event.getGuild(), "welcome_system.image.overlayURL") +
+                        "), [Background](" + Database.getConfigString(event.getGuild(), "welcome_system.image.bgURL") + ")", false)
 
-                .addField("Color", "Primary Color: `#" + Integer.toHexString(db.getConfigInt(event.getGuild(), "welcome_system.image.primCol")) +
-                        "`\nSecondary Color: `#" + Integer.toHexString(db.getConfigInt(event.getGuild(), "welcome_system.image.secCol")) + "`", true)
+                .addField("Color", "Primary Color: `#" + Integer.toHexString(Database.getConfigInt(event.getGuild(), "welcome_system.image.primCol")) +
+                        "`\nSecondary Color: `#" + Integer.toHexString(Database.getConfigInt(event.getGuild(), "welcome_system.image.secCol")) + "`", true)
 
-                .addField("Avatar Image", "Width, Height: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avW") +
-                        "`,`" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avH") +
-                        "`\nX, Y: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avX") +
-                        "`, `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avY") + "`", true)
+                .addField("Avatar Image", "Width, Height: `" + Database.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avW") +
+                        "`,`" + Database.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avH") +
+                        "`\nX, Y: `" + Database.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avX") +
+                        "`, `" + Database.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avY") + "`", true)
 
-                .addField("Messages", "Join: `" + db.getConfigString(event.getGuild(), "welcome_system.join_msg") +
-                        "`\nLeave: `" + db.getConfigString(event.getGuild(), "welcome_system.leave_msg") + "`", false)
+                .addField("Messages", "Join: `" + Database.getConfigString(event.getGuild(), "welcome_system.join_msg") +
+                        "`\nLeave: `" + Database.getConfigString(event.getGuild(), "welcome_system.leave_msg") + "`", false)
 
-                .addField("Channel", db.getConfigChannelAsMention(event.getGuild(), "welcome_system.welcome_cid"), true)
+                .addField("Channel", Database.getConfigChannelAsMention(event.getGuild(), "welcome_system.welcome_cid"), true)
                 .addField("Status", "``" + status + "``", true);
 
         try {
