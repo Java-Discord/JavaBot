@@ -3,7 +3,9 @@ package com.javadiscord.javabot.commands.other.qotw;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -37,7 +39,11 @@ import static com.mongodb.client.model.Projections.excludeId;
 
 public class Leaderboard implements SlashCommandHandler {
 
+    private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
+
     private final int LB_WIDTH = 3000;
+    private final int CARD_HEIGHT = 350;
+    private final int EMPTY_SPACE = 700;
 
     private final float NAME_SIZE = 65;
     private final float PLACEMENT_SIZE = 72;
@@ -47,6 +53,8 @@ public class Leaderboard implements SlashCommandHandler {
 
         OptionMapping option = event.getOption("amount");
         long l = option == null ? 10 : option.getAsLong();
+
+        if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
 
         Bot.asyncPool.submit(() -> {
             event.getChannel().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
@@ -103,8 +111,7 @@ public class Leaderboard implements SlashCommandHandler {
     BufferedImage getAvatar (String avatarURL)  {
 
         BufferedImage img = null;
-        try {
-             img = ImageIO.read(new URL(avatarURL));
+        try { img = ImageIO.read(new URL(avatarURL));
         } catch (Exception e) { e.printStackTrace(); }
 
         return img;
@@ -136,8 +143,13 @@ public class Leaderboard implements SlashCommandHandler {
 
     void drawUserCard (Graphics2D g2d, Member member, int yOffset, boolean drawLeft, boolean topten) {
 
+        // LEFT
         int xOffset = 200;
+
+        // RIGHT
         if (!drawLeft) xOffset = 1588;
+
+        // CENTER
         if (topten) xOffset = 894;
 
         g2d.drawImage(getAvatar(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), xOffset + 185, yOffset + 43, 200, 200, null);
@@ -163,12 +175,14 @@ public class Leaderboard implements SlashCommandHandler {
         g2d.setColor(Color.decode("#414A52"));
         g2d.setFont(getFont(PLACEMENT_SIZE));
 
-        String points;
-        if (new Database().getMemberInt(member, "qotwpoints") == 1) points = new Database().getMemberInt(member, "qotwpoints") + " point";
-        else points = new Database().getMemberInt(member, "qotwpoints") + " points";
+        String text;
+        int points = new Database().getMemberInt(member, "qotwpoints");
+
+        if (points == 1) text = points + " point";
+        else text = points + " points";
 
         String placement = "#" + getQOTWRank(member.getGuild(), member.getId());
-        g2d.drawString(points, xOffset + 430, yOffset + 210);
+        g2d.drawString(text, xOffset + 430, yOffset + 210);
 
         int stringLength = (int) g2d.getFontMetrics().getStringBounds(placement, g2d).getWidth();
         int start = 185 / 2 - stringLength / 2;
@@ -178,12 +192,12 @@ public class Leaderboard implements SlashCommandHandler {
 
      ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {
 
-        int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * 350 + 720;
+        int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE;
          boolean topTen = false;
 
          if (getTopUsers(event.getGuild(), (int) num).contains(event.getMember())) topTen = true;
 
-         if (!topTen) LB_HEIGHT += 350;
+         if (!topTen) LB_HEIGHT += CARD_HEIGHT;
          BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
          Graphics2D g2d = bufferedImage.createGraphics();
@@ -196,15 +210,17 @@ public class Leaderboard implements SlashCommandHandler {
                  RenderingHints.KEY_FRACTIONALMETRICS,
                  RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-         g2d.setPaint(Color.decode("#011E2F"));
+         g2d.setPaint(BACKGROUND_COLOR);
          g2d.fillRect(0, 0, LB_WIDTH, LB_HEIGHT);
 
          BufferedImage logo = getImage("images/leaderboard/Logo.png");
 
          g2d.drawImage(logo, LB_WIDTH / 2 - logo.getWidth() / 2, 110, null);
 
-         int nameY = 700;
+         int nameY = EMPTY_SPACE;
          boolean drawLeft = true;
+
+         event.getHook().sendMessage("Fetching user data... (" + getTopUsers(event.getGuild(), (int) num).size() + ") " + Constants.LOADING).queue();
 
          for (var member : getTopUsers(event.getGuild(), (int) num)) {
 
@@ -212,7 +228,7 @@ public class Leaderboard implements SlashCommandHandler {
              else drawUserCard(g2d, member, nameY, false, false);
 
              drawLeft = !drawLeft;
-             if (drawLeft) nameY = nameY + 350;
+             if (drawLeft) nameY = nameY + CARD_HEIGHT;
          }
 
          if (!topTen) drawUserCard(g2d, event.getMember(), nameY, true, true);
@@ -223,7 +239,7 @@ public class Leaderboard implements SlashCommandHandler {
          try { ImageIO.write(bufferedImage, "png", outputStream);
          } catch (IOException e) { e.printStackTrace(); }
 
-         event.getHook().sendMessage("Done!").queue();
+         event.getHook().editOriginal("Done!").queue();
          return outputStream;
      }
 }
