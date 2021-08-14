@@ -3,6 +3,7 @@ package com.javadiscord.javabot.jam.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,13 +17,23 @@ public class Jam {
 	private LocalDateTime createdAt;
 	private long startedBy;
 	private LocalDate startsAt;
+	@Nullable
+	private LocalDate endsAt;
 	private boolean completed;
 	private String currentPhase;
 
+	/**
+	 * @return True if the jam currently allows submissions. This is only the
+	 * case during the {@link JamPhase#SUBMISSION} phase.
+	 */
 	public boolean submissionsAllowed() {
 		return this.currentPhase.equals(JamPhase.SUBMISSION);
 	}
 
+	/**
+	 * Gets the name of the jam, or an empty string if the jam doesn't have one.
+	 * @return The jam's name, or an empty string.
+	 */
 	public String getNameOrEmpty() {
 		if (this.name == null) {
 			return "";

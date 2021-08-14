@@ -43,6 +43,9 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 					.addField("Started by", user.getAsTag(), true)
 					.addField("Starts at", jam.getStartsAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy")), true)
 					.addField("Current phase", jam.getCurrentPhase(), true);
+			if (jam.getEndsAt() != null) {
+				embedBuilder.addField("Ends at", jam.getEndsAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy")), true);
+			}
 
 			event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
 		});

@@ -2,7 +2,6 @@ package com.javadiscord.javabot.jam.dao;
 
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamTheme;
-import com.javadiscord.javabot.data.DatabaseHelper;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
@@ -14,7 +13,10 @@ import java.util.List;
 public class JamThemeRepository {
 	private final Connection con;
 	public void addTheme(Jam jam, JamTheme theme) throws SQLException, IOException {
-		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/add_theme.sql"), Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = con.prepareStatement(
+				"INSERT INTO jam_theme (jam_id, name, description) VALUES (?, ?, ?)",
+				Statement.RETURN_GENERATED_KEYS
+		);
 		stmt.setLong(1, jam.getId());
 		stmt.setString(2, theme.getName());
 		stmt.setString(3, theme.getDescription());
@@ -24,22 +26,16 @@ public class JamThemeRepository {
 	}
 
 	public List<JamTheme> getThemes(Jam jam) throws SQLException, IOException {
-		con.setReadOnly(true);
-		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/get_jam_themes.sql"));
-		stmt.setLong(1, jam.getId());
-		stmt.execute();
-		ResultSet rs = stmt.getResultSet();
-		List<JamTheme> themes = new ArrayList<>();
-		while (rs.next()) {
-			themes.add(this.readTheme(rs, jam));
-		}
-		stmt.close();
-		return themes;
+		return this.fetchThemes(jam, "SELECT * FROM jam_theme WHERE jam_id = ? ORDER BY name");
 	}
 
 	public List<JamTheme> getAcceptedThemes(Jam jam) throws SQLException {
+		return this.fetchThemes(jam, "SELECT * FROM jam_theme WHERE accepted = TRUE AND jam_id = ? ORDER BY name");
+	}
+
+	private List<JamTheme> fetchThemes(Jam jam, String sql) throws SQLException {
 		con.setReadOnly(true);
-		PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam_theme WHERE accepted = TRUE AND jam_id = ? ORDER BY name");
+		PreparedStatement stmt = con.prepareStatement(sql);
 		stmt.setLong(1, jam.getId());
 		stmt.execute();
 		ResultSet rs = stmt.getResultSet();
