@@ -1,0 +1,2 @@
+ALTER TABLE jam
+    ADD COLUMN ends_at DATE NULL DEFAULT NULL AFTER starts_at;
