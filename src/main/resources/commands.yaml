@@ -651,3 +651,41 @@
           description: The name of the migration to run.
           required: true
           type: STRING
+
+# Question of the Week Admin Commands
+- name: qotw
+  description: Administrative tools for managing the Question of the Week.
+  handler: com.javadiscord.javabot.qotw.QOTWCommandHandler
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: staff_rid
+  subCommandGroups:
+    - name: questions-queue
+      description: Commands for interacting with the set of QOTW questions that are in queue.
+      subCommands:
+        - name: list
+          description: Show a list of all questions in the queue.
+          options:
+            - name: page
+              description: The page of results to get.
+              required: false
+              type: INTEGER
+        - name: add
+          description: Add a question to the queue.
+          options:
+            - name: question
+              description: The question to add.
+              required: true
+              type: STRING
+            - name: priority
+              description: The priority to give the question. Questions with higher priority show up first.
+              required: false
+              type: INTEGER
+        - name: remove
+          description: Removes a question from the queue.
+          options:
+            - name: id
+              description: The id of the question to remove.
+              required: true
+              type: INTEGER
