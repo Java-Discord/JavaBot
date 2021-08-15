@@ -4,7 +4,6 @@ import com.javadiscord.javabot.data.DatabaseHelper;
 import com.javadiscord.javabot.economy.model.Transaction;
 import lombok.RequiredArgsConstructor;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

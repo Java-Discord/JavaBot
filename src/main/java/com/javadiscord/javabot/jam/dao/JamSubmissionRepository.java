@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.jam.dao;
 
+import com.javadiscord.javabot.data.DatabaseHelper;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamSubmission;
-import com.javadiscord.javabot.data.DatabaseHelper;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;

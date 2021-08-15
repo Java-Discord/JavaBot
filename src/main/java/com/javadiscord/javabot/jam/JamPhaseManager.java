@@ -4,7 +4,6 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamPhase;
 import com.javadiscord.javabot.jam.phase_transitions.*;
-import com.javadiscord.javabot.other.Database;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.slf4j.Logger;

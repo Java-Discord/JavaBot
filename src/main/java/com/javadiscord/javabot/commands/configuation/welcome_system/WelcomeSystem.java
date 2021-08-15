@@ -1,16 +1,12 @@
 package com.javadiscord.javabot.commands.configuation.welcome_system;
 
 import com.javadiscord.javabot.commands.DelegatingCommandHandler;
-import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.configuation.welcome_system.subcommands.*;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class WelcomeSystem extends DelegatingCommandHandler {

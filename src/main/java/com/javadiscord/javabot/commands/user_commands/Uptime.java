@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.events.Startup;
 import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;

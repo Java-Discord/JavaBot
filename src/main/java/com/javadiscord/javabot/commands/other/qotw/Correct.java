@@ -38,10 +38,10 @@ public class Correct {
                     .addField("Rank", "```#" + new Leaderboard().getQOTWRank(event.getGuild(), member.getId()) + "```", true)
                     .setFooter("ID: " + member.getId())
                     .setTimestamp(new Date().toInstant());
-            tc.sendMessage(emb.build()).queue();
+            tc.sendMessageEmbeds(emb.build()).queue();
 
         } catch (Exception e) {
-            tc.sendMessage(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event.getUser())).queue();
+            tc.sendMessageEmbeds(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event.getUser())).queue();
         }
     }
 }

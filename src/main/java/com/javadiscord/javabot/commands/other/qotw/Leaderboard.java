@@ -10,27 +10,21 @@ import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import javax.imageio.ImageIO;
-import javax.print.attribute.standard.MediaSize;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -40,6 +34,8 @@ import static com.mongodb.client.model.Projections.excludeId;
 public class Leaderboard implements SlashCommandHandler {
 
     private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
+    private final Color PRIMARY_COLOR = Color.WHITE;
+    private final Color SECONDARY_COLOR = Color.decode("#414A52");
 
     private final int LB_WIDTH = 3000;
     private final int CARD_HEIGHT = 350;
@@ -157,7 +153,7 @@ public class Leaderboard implements SlashCommandHandler {
         if (topten) g2d.drawImage(getImage("images/leaderboard/LBSelfCard.png"), xOffset, yOffset, null);
         else g2d.drawImage(getImage("images/leaderboard/LBCard.png"), xOffset, yOffset, null);
 
-        g2d.setColor(Color.WHITE);
+        g2d.setColor(PRIMARY_COLOR);
         g2d.setFont(getFont(NAME_SIZE));
 
         int stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
@@ -172,7 +168,7 @@ public class Leaderboard implements SlashCommandHandler {
 
         g2d.drawString(member.getUser().getName(), xOffset + 430, yOffset + 130);
 
-        g2d.setColor(Color.decode("#414A52"));
+        g2d.setColor(SECONDARY_COLOR);
         g2d.setFont(getFont(PLACEMENT_SIZE));
 
         String text;
@@ -187,7 +183,7 @@ public class Leaderboard implements SlashCommandHandler {
         int stringLength = (int) g2d.getFontMetrics().getStringBounds(placement, g2d).getWidth();
         int start = 185 / 2 - stringLength / 2;
 
-        g2d.drawString(placement, xOffset + start, yOffset + 165);
+        g2d.drawString(placement, xOffset + start, yOffset + 173);
     }
 
      ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {

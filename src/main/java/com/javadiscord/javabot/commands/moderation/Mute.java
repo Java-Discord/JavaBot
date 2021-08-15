@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.commands.moderation;
 
-import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
