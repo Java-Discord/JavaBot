@@ -3,6 +3,7 @@ package com.javadiscord.javabot.economy.subcommands.admin;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.economy.EconomyNotificationService;
 import com.javadiscord.javabot.economy.EconomyService;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -35,7 +36,8 @@ public class GiveSubcommand implements SlashCommandHandler {
 
 		try {
 			var service = new EconomyService(Bot.dataSource);
-			var t = service.performTransaction(fromUserId, toUserId, amount);
+			var t = service.performTransaction(fromUserId, toUserId, amount, event);
+			new EconomyNotificationService().sendTransactionNotification(t, event);
 			String messageTemplate;
 			if (fromUserId == null) {
 				messageTemplate = "Gave `%,d` to %s.";

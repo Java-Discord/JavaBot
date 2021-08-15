@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.economy.dao;
 
 import com.javadiscord.javabot.economy.model.Account;
+import com.javadiscord.javabot.economy.model.AccountPreferences;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
@@ -16,6 +17,10 @@ public class AccountRepository {
 		PreparedStatement stmt = this.con.prepareStatement("INSERT INTO economy_account (user_id, balance) VALUES (?, ?)");
 		stmt.setLong(1, account.getUserId());
 		stmt.setLong(2, account.getBalance());
+		stmt.executeUpdate();
+		stmt.close();
+		stmt = this.con.prepareStatement("INSERT INTO economy_account_preferences (user_id) VALUES (?)");
+		stmt.setLong(1, account.getUserId());
 		stmt.executeUpdate();
 		stmt.close();
 	}
@@ -44,5 +49,19 @@ public class AccountRepository {
 		account.setUserId(rs.getLong("user_id"));
 		account.setBalance(rs.getLong("balance"));
 		return account;
+	}
+
+	public AccountPreferences getPreferences(long userId) throws SQLException {
+		try (var stmt = this.con.prepareStatement("SELECT * FROM economy_account_preferences WHERE user_id = ?")) {
+			stmt.setLong(1, userId);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				AccountPreferences prefs = new AccountPreferences();
+				prefs.setUserId(userId);
+				prefs.setReceiveTransactionDms(rs.getBoolean("receive_transaction_dms"));
+				return prefs;
+			}
+			return null;
+		}
 	}
 }

@@ -3,6 +3,7 @@ package com.javadiscord.javabot.economy.subcommands;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
+import com.javadiscord.javabot.economy.EconomyNotificationService;
 import com.javadiscord.javabot.economy.EconomyService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -15,7 +16,6 @@ import java.sql.SQLException;
 public class SendSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
-		event.deferReply(true).queue();
 		OptionMapping userOption = event.getOption("recipient");
 		OptionMapping amountOption = event.getOption("amount");
 		if (userOption == null || amountOption == null) {
@@ -40,7 +40,8 @@ public class SendSubcommand implements SlashCommandHandler {
 			if (account.getBalance() < amount) {
 				return Responses.warning(event, String.format("Your balance of `%,d` is not sufficient to send the funds.", account.getBalance()));
 			}
-			var t = service.performTransaction(fromUser.getIdLong(), toUser.getIdLong(), amount);
+			var t = service.performTransaction(fromUser.getIdLong(), toUser.getIdLong(), amount, event);
+			new EconomyNotificationService().sendTransactionNotification(t, event);
 			account = service.getOrCreateAccount(fromUser.getIdLong());
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("Transaction Successful")

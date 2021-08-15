@@ -6,6 +6,7 @@ import com.javadiscord.javabot.economy.dao.TransactionRepository;
 import com.javadiscord.javabot.economy.model.Account;
 import com.javadiscord.javabot.economy.model.Transaction;
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class EconomyService {
 		return transactions;
 	}
 
-	public Transaction performTransaction(Long fromUserId, Long toUserId, long value) throws SQLException {
+	public Transaction performTransaction(Long fromUserId, Long toUserId, long value, SlashCommandEvent event) throws SQLException {
 		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
 		if (Objects.equals(fromUserId, toUserId)) throw new IllegalArgumentException("Sender and recipient cannot be the same.");
 
@@ -56,6 +57,7 @@ public class EconomyService {
 		con.setAutoCommit(false);
 		TransactionRepository transactionRepository = new TransactionRepository(con);
 		AccountRepository accountRepository = new AccountRepository(con);
+		// Deduct the amount from the sender's account balance.
 		if (fromUserId != null) {
 			Account account = accountRepository.getAccount(fromUserId);
 			if (account == null) {
@@ -68,6 +70,7 @@ public class EconomyService {
 			account.updateBalance(-value);
 			accountRepository.updateAccount(account);
 		}
+		// Add the amount to the receiver's account balance.
 		if (toUserId != null) {
 			Account account = accountRepository.getAccount(toUserId);
 			if (account == null) {
