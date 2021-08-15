@@ -43,7 +43,7 @@ public class EconomyService {
 		return transactions;
 	}
 
-	public Transaction performTransaction(Long fromUserId, Long toUserId, long value) throws SQLException {
+	public Transaction performTransaction(Long fromUserId, Long toUserId, long value, String message) throws SQLException {
 		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
 		if (Objects.equals(fromUserId, toUserId)) throw new IllegalArgumentException("Sender and recipient cannot be the same.");
 
@@ -51,6 +51,7 @@ public class EconomyService {
 		t.setFromUserId(fromUserId);
 		t.setToUserId(toUserId);
 		t.setValue(value);
+		t.setMessage(message);
 
 		Connection con = this.dataSource.getConnection();
 		con.setAutoCommit(false);

@@ -13,7 +13,10 @@ public class TransactionRepository {
 	private final Connection con;
 
 	public void saveNewTransaction(Transaction t) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("INSERT INTO economy_transaction (from_user_id, to_user_id, value) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = con.prepareStatement(
+				"INSERT INTO economy_transaction (from_user_id, to_user_id, value, message) VALUES (?, ?, ?, ?)",
+				Statement.RETURN_GENERATED_KEYS
+		);
 		if (t.getFromUserId() != null) {
 			stmt.setLong(1, t.getFromUserId());
 		} else {
@@ -25,6 +28,11 @@ public class TransactionRepository {
 			stmt.setNull(2, Types.BIGINT);
 		}
 		stmt.setLong(3, t.getValue());
+		if (t.getMessage() != null) {
+			stmt.setString(4, t.getMessage());
+		} else {
+			stmt.setNull(4, Types.VARCHAR);
+		}
 		stmt.executeUpdate();
 		ResultSet rs = stmt.getGeneratedKeys();
 		if (rs.next()) {
@@ -66,6 +74,7 @@ public class TransactionRepository {
 		t.setFromUserId(rs.getObject("from_user_id", Long.class));
 		t.setToUserId(rs.getObject("to_user_id", Long.class));
 		t.setValue(rs.getLong("value"));
+		t.setMessage(rs.getString("message"));
 		return t;
 	}
 }

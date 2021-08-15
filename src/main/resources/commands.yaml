@@ -604,6 +604,10 @@
           description: The amount of funds to send.
           required: true
           type: INTEGER
+        - name: message
+          description: A message to provide with the transaction. 127 characters at most.
+          required: false
+          type: STRING
     - name: preferences
       description: Update your account preferences.
       options:
@@ -636,6 +640,10 @@
           description: The amount of funds to add. Make this negative to subtract.
           required: true
           type: INTEGER
+        - name: message
+          description: A message to provide with the transaction. 127 characters at most.
+          required: false
+          type: STRING
 
 # Database Management Commands
 - name: db-admin

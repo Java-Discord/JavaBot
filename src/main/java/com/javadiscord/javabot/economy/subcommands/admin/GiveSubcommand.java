@@ -16,6 +16,7 @@ public class GiveSubcommand implements SlashCommandHandler {
 	public ReplyAction handle(SlashCommandEvent event) {
 		OptionMapping userOption = event.getOption("recipient");
 		OptionMapping amountOption = event.getOption("amount");
+		OptionMapping messageOption = event.getOption("message");
 		if (userOption == null || amountOption == null) {
 			return Responses.warning(event, "Missing required arguments.");
 		}
@@ -27,16 +28,23 @@ public class GiveSubcommand implements SlashCommandHandler {
 		long amount = amountOption.getAsLong();
 		Long fromUserId = null;
 		Long toUserId = null;
+		String message = null;
 		if (amount > 0) {
 			toUserId = userOption.getAsUser().getIdLong();
 		} else {
 			fromUserId = userOption.getAsUser().getIdLong();
 			amount *= -1;
 		}
+		if (messageOption != null) {
+			message = messageOption.getAsString();
+			if (message.length() > 127) {
+				return Responses.warning(event, "Message is longer than 127 characters.");
+			}
+		}
 
 		try {
 			var service = new EconomyService(Bot.dataSource);
-			var t = service.performTransaction(fromUserId, toUserId, amount);
+			var t = service.performTransaction(fromUserId, toUserId, amount, message);
 			new EconomyNotificationService().sendTransactionNotification(t, event);
 			String messageTemplate;
 			if (fromUserId == null) {
