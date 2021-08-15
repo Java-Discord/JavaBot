@@ -50,7 +50,7 @@ public class Leaderboard implements SlashCommandHandler {
         OptionMapping option = event.getOption("amount");
         long l = option == null ? 10 : option.getAsLong();
 
-        if (l > 50 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
+        if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
 
         Bot.asyncPool.submit(() -> {
             event.getChannel().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
@@ -91,9 +91,11 @@ public class Leaderboard implements SlashCommandHandler {
         int placement = 1;
         while (doc.hasNext() && placement <= num) {
 
-            JsonObject Root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
-            String discordID = Root.get("discord_id").getAsString();
+            JsonObject root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
+            String discordID = root.get("discord_id").getAsString();
+
             if (guild.getMemberById(discordID) == null) continue;
+            if (root.get("qotwpoints").getAsInt() == 0) continue;
 
             try { topUsers.add(guild.getMemberById(discordID));
             } catch (Exception e) { e.printStackTrace(); }
