@@ -40,7 +40,7 @@ public class SendSubcommand implements SlashCommandHandler {
 			if (account.getBalance() < amount) {
 				return Responses.warning(event, String.format("Your balance of `%,d` is not sufficient to send the funds.", account.getBalance()));
 			}
-			var t = service.performTransaction(fromUser.getIdLong(), toUser.getIdLong(), amount, event);
+			var t = service.performTransaction(fromUser.getIdLong(), toUser.getIdLong(), amount);
 			new EconomyNotificationService().sendTransactionNotification(t, event);
 			account = service.getOrCreateAccount(fromUser.getIdLong());
 			EmbedBuilder embedBuilder = new EmbedBuilder()

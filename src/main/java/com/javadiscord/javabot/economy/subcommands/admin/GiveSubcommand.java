@@ -36,7 +36,7 @@ public class GiveSubcommand implements SlashCommandHandler {
 
 		try {
 			var service = new EconomyService(Bot.dataSource);
-			var t = service.performTransaction(fromUserId, toUserId, amount, event);
+			var t = service.performTransaction(fromUserId, toUserId, amount);
 			new EconomyNotificationService().sendTransactionNotification(t, event);
 			String messageTemplate;
 			if (fromUserId == null) {
