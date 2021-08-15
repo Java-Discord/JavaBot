@@ -33,7 +33,13 @@ public class EconomyNotificationService {
 							var fromUser = event.getJDA().retrieveUserById(transaction.getFromUserId()).complete();
 							fromUserName = fromUser.getAsTag();
 						}
-						var message = String.format("You have received `%,d` credits from **%s**.", transaction.getValue(), fromUserName);
+						var message = String.format(
+								"You have received `%,d` credits from **%s**.\n" +
+								"For more information, please use the `/economy account` command anywhere in the Java Discord server.\n" +
+								"If you would like to stop receiving these notifications, please change your preferences with the `/economy preferences` command.",
+								transaction.getValue(),
+								fromUserName
+						);
 						EmbedBuilder embedBuilder = new EmbedBuilder()
 								.setTitle("Transaction Notification")
 								.setDescription(message)

@@ -64,4 +64,12 @@ public class AccountRepository {
 			return null;
 		}
 	}
+
+	public void savePreferences(AccountPreferences prefs) throws SQLException {
+		try (var stmt = this.con.prepareStatement("UPDATE economy_account_preferences SET receive_transaction_dms = ? WHERE user_id = ?")) {
+			stmt.setBoolean(1, prefs.isReceiveTransactionDms());
+			stmt.setLong(2, prefs.getUserId());
+			stmt.executeUpdate();
+		}
+	}
 }

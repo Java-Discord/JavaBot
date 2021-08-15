@@ -604,6 +604,17 @@
           description: The amount of funds to send.
           required: true
           type: INTEGER
+    - name: preferences
+      description: Update your account preferences.
+      options:
+        - name: preference
+          description: The name of the preference you want to update.
+          required: true
+          type: STRING
+        - name: value
+          description: The updated value for the preference.
+          required: true
+          type: STRING
 
 # Admin Economy Commands
 - name: economy-admin

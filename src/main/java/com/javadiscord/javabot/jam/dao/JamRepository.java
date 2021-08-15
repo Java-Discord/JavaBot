@@ -9,7 +9,7 @@ import java.sql.*;
 public class JamRepository {
 	private final Connection con;
 
-	public void saveJam(Jam jam) throws SQLException {
+	public void saveNewJam(Jam jam) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO jam (guild_id, name, started_by, starts_at, ends_at) VALUES (?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
@@ -34,6 +34,20 @@ public class JamRepository {
 		if (rs.next()) {
 			jam.setId(rs.getLong(1));
 		}
+		stmt.close();
+	}
+
+	public void updateJam(Jam jam) throws SQLException {
+		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET name = ?, starts_at = ?, ends_at = ? WHERE id = ?");
+		stmt.setString(1, jam.getName());
+		stmt.setDate(2, Date.valueOf(jam.getStartsAt()));
+		if (jam.getEndsAt() == null) {
+			stmt.setNull(3, Types.DATE);
+		} else {
+			stmt.setDate(3, Date.valueOf(jam.getEndsAt()));
+		}
+		stmt.setLong(4, jam.getId());
+		stmt.executeUpdate();
 		stmt.close();
 	}
 
