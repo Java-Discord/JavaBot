@@ -56,6 +56,7 @@ public class EconomyService {
 		con.setAutoCommit(false);
 		TransactionRepository transactionRepository = new TransactionRepository(con);
 		AccountRepository accountRepository = new AccountRepository(con);
+		// Deduct the amount from the sender's account balance.
 		if (fromUserId != null) {
 			Account account = accountRepository.getAccount(fromUserId);
 			if (account == null) {
@@ -68,6 +69,7 @@ public class EconomyService {
 			account.updateBalance(-value);
 			accountRepository.updateAccount(account);
 		}
+		// Add the amount to the receiver's account balance.
 		if (toUserId != null) {
 			Account account = accountRepository.getAccount(toUserId);
 			if (account == null) {

@@ -42,7 +42,7 @@ public class EditJamSubcommand extends ActiveJamSubcommand {
 					return Responses.warning(event, "Invalid date; Expected dd-MM-yyyy format.");
 				}
 			}
-			new JamRepository(con).saveJam(jam);
+			new JamRepository(con).updateJam(jam);
 			return Responses.success(event, "Jam End Date Updated", "The " + jam.getFullName() + " has had its end date updated to " + value);
 		});
 	}

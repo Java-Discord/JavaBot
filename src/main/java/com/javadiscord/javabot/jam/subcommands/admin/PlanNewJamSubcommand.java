@@ -54,7 +54,7 @@ public class PlanNewJamSubcommand implements SlashCommandHandler {
 			jam.setStartedBy(event.getUser().getIdLong());
 			jam.setStartsAt(startsAt);
 			jam.setCompleted(false);
-			jamRepository.saveJam(jam);
+			jamRepository.saveNewJam(jam);
 			return Responses.success(event, "Jam Created", "Jam has been created! *Jam ID = `" + jam.getId() + "`*. Use `/jam info` for more info.");
 		} catch (Exception e) {
 			return Responses.error(event, "Error occurred while creating the Jam: " + e.getMessage());
