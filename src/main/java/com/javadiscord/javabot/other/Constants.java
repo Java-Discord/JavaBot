@@ -17,6 +17,8 @@ public class Constants {
 
         //              EMOTES
 
+        public static final String LOADING = "<a:loading:861259761605279764>";
+
         public static final String FAILURE = "<:abort:861259758509752331>";
         public static final String SUCCESS = "<:check:861259759151087627>";
         public static final String REACTION_FAILURE = "abort:861259758509752331";

@@ -157,7 +157,7 @@ public class Profile implements SlashCommandHandler {
 
         desc +=
                 "\n\n⌞ Warnings: `" + new Warns().warnCount(member) + "`" +
-                "\n⌞ QOTW-Points: `" + new Database().getMemberInt(member, "qotwpoints") + " (#" + Leaderboard.rank(member.getId()) + ")`";
+                "\n⌞ QOTW-Points: `" + new Database().getMemberInt(member, "qotwpoints") + " (#" + new Leaderboard().getQOTWRank(member.getGuild(), member.getId()) + ")`";
 
         return desc;
     }
