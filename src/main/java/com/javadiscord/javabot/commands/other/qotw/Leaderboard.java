@@ -54,7 +54,7 @@ public class Leaderboard implements SlashCommandHandler {
         OptionMapping option = event.getOption("amount");
         long l = option == null ? 10 : option.getAsLong();
 
-        if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
+        if (l > 50 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
 
         Bot.asyncPool.submit(() -> {
             event.getChannel().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
@@ -192,7 +192,7 @@ public class Leaderboard implements SlashCommandHandler {
 
      ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {
 
-        int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE;
+        int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE + 20;
          boolean topTen = false;
 
          if (getTopUsers(event.getGuild(), (int) num).contains(event.getMember())) topTen = true;

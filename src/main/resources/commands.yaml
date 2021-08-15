@@ -421,7 +421,7 @@
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
   options:
-    - {description: Amount of users to display (2-30), name: amount, required: false, type: INTEGER}
+    - {description: Amount of users to display (2-50), name: amount, required: false, type: INTEGER}
 - description: Displays the given amount of questions in a random order
   name: question
   handler: com.javadiscord.javabot.commands.other.Question
