@@ -5,8 +5,8 @@ import com.google.gson.JsonParser;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
@@ -14,8 +14,6 @@ import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -101,6 +99,14 @@ public class Database {
     public Document userDoc (Member member) {
 
         return userDoc(member.getUser());
+    }
+
+    public Document versionDoc(JDA jda) {
+
+        Document doc = new Document("name", jda.getSelfUser().getAsTag())
+                .append("version", "v00-00.00");
+
+        return doc;
     }
 
     public Document userDoc(User user) {

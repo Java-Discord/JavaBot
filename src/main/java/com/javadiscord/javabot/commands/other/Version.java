@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
@@ -16,17 +17,22 @@ public class Version implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        return event.reply(getVersion());
+        return event.reply(getVersion(event.getJDA()));
     }
 
-    public String getVersion () {
+    public String getVersion (JDA jda) {
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
+        try {
+            MongoDatabase database = mongoClient.getDatabase("other");
+            MongoCollection<Document> collection = database.getCollection("config");
 
-        String doc = collection.find(eq("name", "Java#9523")).first().toJson();
-        JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
+            String doc = collection.find(eq("name", jda.getSelfUser().getAsTag())).first().toJson();
+            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
 
-        return Root.get("version").getAsString();
+            return root.get("version").getAsString();
+
+        } catch (Exception e) {
+            return "v00-00.00";
+        }
     }
 }

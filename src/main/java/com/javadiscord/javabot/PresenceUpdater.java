@@ -98,9 +98,9 @@ public class PresenceUpdater extends ListenerAdapter {
      */
     public static PresenceUpdater standardActivities() {
         return new PresenceUpdater(List.of(
-            jda -> Activity.watching("javadiscord.net" + " | " + new Version().getVersion()),
-            jda -> Activity.listening(Startup.preferredGuild.getMemberCount() + " members" + " | " + new Version().getVersion()),
-            jda -> Activity.watching("/help" + " | " + new Version().getVersion())
+            jda -> Activity.watching("javadiscord.net" + " | " + new Version().getVersion(jda)),
+            jda -> Activity.listening(Startup.preferredGuild.getMemberCount() + " members" + " | " + new Version().getVersion(jda)),
+            jda -> Activity.watching("/help" + " | " + new Version().getVersion(jda))
         ), 35, TimeUnit.SECONDS);
     }
 }

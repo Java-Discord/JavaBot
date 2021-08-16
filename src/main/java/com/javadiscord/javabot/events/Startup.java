@@ -44,7 +44,7 @@ public class Startup extends ListenerAdapter {
             while (fReader.hasNextLine()) {
                 sb.append(fReader.nextLine() + "\n");
             }
-            System.out.println("\n" + sb.toString().replace("{!version}", new Version().getVersion()));
+            System.out.println("\n" + sb.toString().replace("{!version}", new Version().getVersion(event.getJDA())));
 
         } catch (Exception e) { logger.error("* textfiles/startup.txt not found"); }
 
