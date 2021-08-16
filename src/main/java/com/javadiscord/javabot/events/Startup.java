@@ -9,6 +9,7 @@ import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoException;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -31,21 +32,10 @@ public class Startup extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event) {
+
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
         rootLogger.setLevel(Level.ERROR);
-
-        try {
-            MongoClientURI uri = new MongoClientURI(Bot.getProperty("mongologin", "default"));
-            mongoClient = new MongoClient(uri);
-
-            logger.info("Successfully connected to Database");
-
-        } catch (Exception e) {
-
-            logger.error("Couldn't connect to Database... Shutting down...");
-            System.exit(0);
-        }
 
         try {
             StringBuilder sb = new StringBuilder();
@@ -85,13 +75,29 @@ public class Startup extends ListenerAdapter {
         String[] skipGuilds = new String[]{"861254598046777344", "813817075218776101"};
         //                                JavaDiscord Emoji Server    Test-Server
 
+        try {
+
+        MongoClientURI uri = new MongoClientURI(Bot.getProperty("mongologin", "default"));
+        mongoClient = new MongoClient(uri);
+
+        new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());
+
         for (var guild : event.getJDA().getGuilds()) {
 
-            if(Arrays.asList(skipGuilds).contains(guild.getId())) continue;
+            if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
 
             new Database().deleteOpenSubmissions(guild);
             new StarboardListener().updateAllSBM(event, guild);
             Bot.slashCommands.registerSlashCommands(guild);
+        }
+
+        logger.info("Successfully connected to Database");
+
+        } catch (MongoException e) {
+
+            logger.error("Couldn't connect to MongoDB (" + e.getClass().getSimpleName() + ") Shutting down...");
+            e.printStackTrace();
+            System.exit(0);
         }
     }
 }
