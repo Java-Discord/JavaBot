@@ -64,12 +64,12 @@ public class Database {
             if (dbs.equals("other")) collection = otherCollections;
 
                 for (var cols : collection) {
-                    if (!(getCollections(mongoClient, "userdata").contains(cols))) {
+                    if (!(getCollections(mongoClient, dbs).contains(cols))) {
 
                         logger.warn("MongoDB: Missing Collection in Database " + dbs + ": " + cols + ". Creating one now.");
                         mongoClient.getDatabase(dbs).createCollection(cols);
 
-                        if (cols.equals("config")) for (var guild : guilds) insertGuildDoc(guild);
+                        if (dbs.equals("other") && cols.equals("config")) for (var guild : guilds) insertGuildDoc(guild);
                     }
                 }
         }
