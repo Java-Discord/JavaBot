@@ -3,13 +3,18 @@ package com.javadiscord.javabot.other;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
@@ -18,6 +23,55 @@ import static com.mongodb.client.model.Filters.eq;
 public class Database {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Database.class);
+
+    private static final String[] databases = new String[]{"userdata", "other"};
+    private static final String[] userdataCollections = new String[]{"potential_bot_list", "users", "warns"};
+    private static final String[] otherCollections = new String[]{"config", "customcommands", "expert_questions", "open_submissions", "reactionroles", "starboard_messages", "submission_messages"};
+
+    List<String> getDatabases(MongoClient mongoClient) {
+
+        List<String> databaseNames = new ArrayList<>();
+
+        for (var e : mongoClient.listDatabaseNames()) {
+            databaseNames.add(e);
+        }
+
+        return databaseNames;
+    }
+
+    List<String> getCollections(MongoClient mongoClient, String database) {
+
+        List<String> collections = new ArrayList<>();
+
+        for (var e : mongoClient.getDatabase(database).listCollectionNames()) {
+            collections.add(e);
+        }
+
+        return collections;
+    }
+
+    public void databaseCheck (MongoClient mongoClient, List<Guild> guilds) {
+
+        for (var dbs : databases) {
+            if (!(getDatabases(mongoClient).contains(dbs))) {
+                logger.warn("MongoDB: Missing Database: " + dbs + ". Creating one now.");
+            }
+
+            String[] collection = null;
+            if (dbs.equals("userdata")) collection = userdataCollections;
+            if (dbs.equals("other")) collection = otherCollections;
+
+                for (var cols : collection) {
+                    if (!(getCollections(mongoClient, dbs).contains(cols))) {
+
+                        logger.warn("MongoDB: Missing Collection in Database " + dbs + ": " + cols + ". Creating one now.");
+                        mongoClient.getDatabase(dbs).createCollection(cols);
+
+                        if (dbs.equals("other") && cols.equals("config")) for (var guild : guilds) insertGuildDoc(guild);
+                    }
+                }
+        }
+    }
 
     public void deleteOpenSubmissions (Guild guild) {
 
@@ -47,6 +101,14 @@ public class Database {
         return userDoc(member.getUser());
     }
 
+    public Document versionDoc(JDA jda) {
+
+        Document doc = new Document("name", jda.getSelfUser().getAsTag())
+                .append("version", "v00-00.00");
+
+        return doc;
+    }
+
     public Document userDoc(User user) {
 
         Document doc = new Document("tag", user.getAsTag())
@@ -56,7 +118,7 @@ public class Database {
         return doc;
     }
 
-    public Document guildDoc (String guildName, String guildID) {
+    public Document guildDoc (Guild guild) {
 
         Document av = new Document("avX", 75)
                 .append("avY", 100)
@@ -84,10 +146,10 @@ public class Database {
                 .append("jam_announcement_cid", "None")
                 .append("jam_vote_cid", "None");
 
-        Document roles = new Document("mute_rid", "None")
-                .append("staff_rid", "None")
-                .append("jam_admin_rid", "None")
-                .append("jam_ping_rid", "None");
+        Document roles = new Document("mute_rid", guild.getId())
+                .append("staff_rid", guild.getId())
+                .append("jam_admin_rid", guild.getId())
+                .append("jam_ping_rid", guild.getId());
 
         Document stats = new Document("stats_cid", "None")
                 .append("stats_text", "None");
@@ -107,8 +169,8 @@ public class Database {
                 .append("server_lock", lock)
                 .append("starboard", sb);
 
-        Document doc = new Document("name", guildName)
-                .append("guild_id", guildID)
+        Document doc = new Document("name", guild.getName())
+                .append("guild_id", guild.getId())
                 .append("welcome_system", ws)
                 .append("channels", channels)
                 .append("roles", roles)
@@ -133,9 +195,9 @@ public class Database {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        collection.insertOne(guildDoc(guild.getName(), guild.getId()));
+        collection.insertOne(guildDoc(guild));
 
-        logger.warn("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
+        logger.info("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
     }
 
     public void queryMember(String memberID, String varName, String newValue) {
