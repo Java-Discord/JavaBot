@@ -30,7 +30,7 @@ public class StarboardListener extends ListenerAdapter {
         String messageId = channel.getId();
 
         Database db = new Database();
-        db.changeSBCBool(guildId, channelId, messageId, true);
+        db.changeStarboardChannelBool(guildId, channelId, messageId, true);
         TextChannel sc = guild.getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"));
 
         EmbedBuilder eb = new EmbedBuilder()
@@ -51,7 +51,7 @@ public class StarboardListener extends ListenerAdapter {
                 e.printStackTrace();
             }
         }
-        msgAction.queue(sbMsg -> db.querySBDString(guildId, channelId, messageId, "starboard_embed", sbMsg.getId()));
+        msgAction.queue(sbMsg -> db.queryStarboardString(guildId, channelId, messageId, "starboard_embed", sbMsg.getId()));
     }
 
     void updateSB(Guild guild, String cID, String mID) {
@@ -59,7 +59,7 @@ public class StarboardListener extends ListenerAdapter {
         Database db = new Database();
         String gID = guild.getId();
 
-        String sbcEmbedId = db.getSBCString(gID, cID, mID, "starboard_embed");
+        String sbcEmbedId = db.getStarboardChannelString(gID, cID, mID, "starboard_embed");
         if (sbcEmbedId == null) {
             return;
         }
@@ -82,7 +82,7 @@ public class StarboardListener extends ListenerAdapter {
                     + starCount + " | " + tc.getAsMention()).queue();
         } else {
             sbMsg.delete().queue();
-            db.deleteSBMessage(gID, cID, mID);
+            db.deleteStarboardMessage(gID, cID, mID);
         }
     }
 
@@ -133,10 +133,10 @@ public class StarboardListener extends ListenerAdapter {
                     .orElse(0);
             
             db.setEmoteCount(gID, cID, mID, reactionCount);
-            if (!db.getSBCBool(gID, cID, mID) && reactionCount >= 3) {
+            if (!db.isMessageOnStarboard(gID, cID, mID) && reactionCount >= 3) {
                 addToSB(guild, guild.getTextChannelById(cID), msg);
             }
-            if (db.getSBCString(gID, cID, mID, "starboard_embed") != null) {
+            if (db.getStarboardChannelString(gID, cID, mID, "starboard_embed") != null) {
                 updateSB(guild, cID, mID);
             }
         }
@@ -158,18 +158,18 @@ public class StarboardListener extends ListenerAdapter {
         String cID = event.getChannel().getId();
         String mID = event.getMessageId();
 
-        if (db.sbDocExists(gID, cID, mID)) {
+        if (db.starboardDocExists(gID, cID, mID)) {
 
             int starCount = db.getStarCount(gID, cID, mID);
             db.setEmoteCount(gID, cID, mID, starCount + 1);
-            if (db.getSBCBool(gID, cID, mID))
+            if (db.isMessageOnStarboard(gID, cID, mID))
                 updateSB(guild, cID, mID);
             else if (starCount >= 3)
                 addToSB(guild, event.getChannel(),
                         event.getChannel().retrieveMessageById(event.getMessageId()).complete());
 
         } else {
-            db.createSBDoc(gID, cID, mID);
+            db.createStarboardDoc(gID, cID, mID);
         }
     }
 
@@ -188,18 +188,18 @@ public class StarboardListener extends ListenerAdapter {
         String cID = event.getChannel().getId();
         String mID = event.getMessageId();
 
-        if (db.sbDocExists(gID, cID, mID)) {
+        if (db.starboardDocExists(gID, cID, mID)) {
 
             int starCount = db.getStarCount(gID, cID, mID);
             db.setEmoteCount(gID, cID, mID, starCount - 1);
-            if (db.getSBCBool(gID, cID, mID))
+            if (db.isMessageOnStarboard(gID, cID, mID))
                 updateSB(event.getGuild(), cID, mID);
             else if (starCount >= 3)
                 addToSB(event.getGuild(), event.getChannel(),
                         event.getChannel().retrieveMessageById(event.getMessageId()).complete());
 
         } else {
-            db.createSBDoc(gID, cID, mID);
+            db.createStarboardDoc(gID, cID, mID);
         }
     }
 

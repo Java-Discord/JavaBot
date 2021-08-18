@@ -23,6 +23,13 @@ public class Database {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Database.class);
 
+    /**
+     * A map of database names and collection names.
+     *
+     * <p>The key is the database name. The value is
+     * an array of all collections that should be in
+     * the corresponding database.</p>
+     */
     private static final Map<String, String[]> DB_COLS = new HashMap<>();
     static {
         DB_COLS.put("userdata", new String[] { "potential_bot_list", "users", "warns" });
@@ -288,7 +295,7 @@ public class Database {
         }
     }
 
-    private void querySB(String guildId, String channelId, String messageId, String prop, Object newValue) {
+    private void queryStarboard(String guildId, String channelId, String messageId, String prop, Object newValue) {
         Document setData = new Document(prop, newValue);
         Document update = new Document("$set", setData);
 
@@ -300,19 +307,19 @@ public class Database {
                 .updateOne(query, update);
     }
 
-    public void querySBDString(String gID, String cID, String mID, String value, String newValue) {
-        querySB(gID, cID, mID, value, newValue);
+    public void queryStarboardString(String gID, String cID, String mID, String value, String newValue) {
+        queryStarboard(gID, cID, mID, value, newValue);
     }
 
-    public void changeSBCBool(String gID, String cID, String mID, boolean sbc) {
-        querySB(gID, cID, mID, "isInSBC", sbc);
+    public void changeStarboardChannelBool(String gID, String cID, String mID, boolean sbc) {
+        queryStarboard(gID, cID, mID, "isInSBC", sbc);
     }
 
     public void setEmoteCount(String gID, String cID, String mID, int value) {
-        querySB(gID, cID, mID, "starcount", value);
+        queryStarboard(gID, cID, mID, "starcount", value);
     }
 
-    public boolean sbDocExists(String gID, String cID, String mID) {
+    public boolean starboardDocExists(String gID, String cID, String mID) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
@@ -324,7 +331,7 @@ public class Database {
         return first != null && first.getString("guild_id") != null;
     }
 
-    public void createSBDoc(String gID, String cID, String mID) {
+    public void createStarboardDoc(String gID, String cID, String mID) {
         Document doc = new Document("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID)
@@ -349,13 +356,13 @@ public class Database {
                 .first();
 
         if (first == null) {
-            new Database().createSBDoc(gID, cID, mID);
+            new Database().createStarboardDoc(gID, cID, mID);
             return 0;
         }
         return first.getInteger("starcount", 0);
     }
 
-    public boolean getSBCBool(String gID, String cID, String mID) {
+    public boolean isMessageOnStarboard(String gID, String cID, String mID) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
@@ -367,7 +374,7 @@ public class Database {
         return first != null && first.getBoolean("isInSBC");
     }
 
-    public String getSBCString(String gID, String cID, String mID, String value) {
+    public String getStarboardChannelString(String gID, String cID, String mID, String value) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
@@ -378,7 +385,7 @@ public class Database {
         return first == null ? null : first.getString(value);
     }
 
-    public void deleteSBMessage(String gID, String cID, String mID) {
+    public void deleteStarboardMessage(String gID, String cID, String mID) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
