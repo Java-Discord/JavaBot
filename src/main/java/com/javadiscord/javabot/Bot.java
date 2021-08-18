@@ -3,6 +3,7 @@ package com.javadiscord.javabot;
 import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.MultiProperties;
+import com.javadiscord.javabot.properties.config.BotConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.util.Properties;
@@ -31,6 +33,8 @@ public class Bot {
         MultiProperties.getClasspathResource("bot.properties").orElseThrow(),
         Path.of("bot.props")
     );
+
+    private static BotConfig config;
 
     /**
      * A reference to the slash command listener that's the main point of
@@ -67,6 +71,12 @@ public class Bot {
     public static void main(String[] args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 
+        try {
+            config = BotConfig.load(Path.of("config.json"));
+        } catch (IOException e) {
+            config = new BotConfig(Path.of("config.json"));
+            config.save();
+        }
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();
