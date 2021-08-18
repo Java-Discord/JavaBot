@@ -1,11 +1,8 @@
 package com.javadiscord.javabot.other;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -14,7 +11,9 @@ import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
@@ -24,65 +23,54 @@ public class Database {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Database.class);
 
-    private static final String[] databases = new String[]{"userdata", "other"};
-    private static final String[] userdataCollections = new String[]{"potential_bot_list", "users", "warns"};
-    private static final String[] otherCollections = new String[]{"config", "customcommands", "expert_questions", "open_submissions", "reactionroles", "starboard_messages", "submission_messages"};
+    /**
+     * A map of database names and collection names.
+     *
+     * <p>The key is the database name. The value is
+     * an array of all collections that should be in
+     * the corresponding database.</p>
+     */
+    private static final Map<String, String[]> DB_COLS = new HashMap<>();
+    static {
+        DB_COLS.put("userdata", new String[] { "potential_bot_list", "users", "warns" });
+        DB_COLS.put("other", new String[] { "config", "customcommands", "expert_questions",
+                "open_submissions", "reactionroles", "starboard_messages", "submission_messages" });
+    }
 
     List<String> getDatabases(MongoClient mongoClient) {
-
-        List<String> databaseNames = new ArrayList<>();
-
-        for (var e : mongoClient.listDatabaseNames()) {
-            databaseNames.add(e);
-        }
-
-        return databaseNames;
+        return mongoClient.listDatabaseNames().into(new ArrayList<>());
     }
 
     List<String> getCollections(MongoClient mongoClient, String database) {
-
-        List<String> collections = new ArrayList<>();
-
-        for (var e : mongoClient.getDatabase(database).listCollectionNames()) {
-            collections.add(e);
-        }
-
-        return collections;
+        return mongoClient.getDatabase(database).listCollectionNames().into(new ArrayList<>());
     }
 
-    public void databaseCheck (MongoClient mongoClient, List<Guild> guilds) {
-
-        for (var dbs : databases) {
-            if (!(getDatabases(mongoClient).contains(dbs))) {
-                logger.warn("MongoDB: Missing Database: " + dbs + ". Creating one now.");
+    public void databaseCheck(MongoClient mongoClient, List<Guild> guilds) {
+        for (Map.Entry<String, String[]> entry : DB_COLS.entrySet()) {
+            String dbName = entry.getKey();
+            String[] collection = entry.getValue();
+            if (!getDatabases(mongoClient).contains(dbName)) {
+                logger.warn("MongoDB: Missing Database: {}. Creating one now.", dbName);
             }
 
-            String[] collection = null;
-            if (dbs.equals("userdata")) collection = userdataCollections;
-            if (dbs.equals("other")) collection = otherCollections;
-
-                for (var cols : collection) {
-                    if (!(getCollections(mongoClient, dbs).contains(cols))) {
-
-                        logger.warn("MongoDB: Missing Collection in Database " + dbs + ": " + cols + ". Creating one now.");
-                        mongoClient.getDatabase(dbs).createCollection(cols);
-
-                        if (dbs.equals("other") && cols.equals("config")) for (var guild : guilds) insertGuildDoc(guild);
-                    }
+            for (var cols : collection) {
+                if (!getCollections(mongoClient, dbName).contains(cols)) {
+                    logger.warn("MongoDB: Missing Collection in Database {}: {}. Creating one now.", dbName, cols);
+                    mongoClient.getDatabase(dbName).createCollection(cols);
                 }
+            }
         }
+        guilds.forEach(this::insertGuildDoc);
     }
 
-    public void deleteOpenSubmissions (Guild guild) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("open_submissions");
+    public void deleteOpenSubmissions(Guild guild) {
+        MongoCollection<Document> collection = mongoClient
+                .getDatabase("other")
+                .getCollection("open_submissions");
 
         for (var document : collection.find(eq("guild_id", guild.getId()))) {
-
-            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String messageId = root.get("message_id").getAsString();
-            String userId = root.get("user_id").getAsString();
+            String messageId = document.getString("message_id");
+            String userId = document.getString("user_id");
 
             User user = preferredGuild.retrieveMemberById(userId).complete().getUser();
             Message msg = user.openPrivateChannel().complete().retrieveMessageById(messageId).complete();
@@ -96,29 +84,22 @@ public class Database {
         }
     }
 
-    public Document userDoc (Member member) {
-
+    public Document userDoc(Member member) {
         return userDoc(member.getUser());
     }
 
     public Document versionDoc(JDA jda) {
-
-        Document doc = new Document("name", jda.getSelfUser().getAsTag())
+        return new Document("name", jda.getSelfUser().getAsTag())
                 .append("version", "v00-00.00");
-
-        return doc;
     }
 
     public Document userDoc(User user) {
-
-        Document doc = new Document("tag", user.getAsTag())
+        return new Document("tag", user.getAsTag())
                 .append("discord_id", user.getId())
                 .append("qotwpoints", 0);
-
-        return doc;
     }
 
-    public Document guildDoc (Guild guild) {
+    public Document guildDoc(Guild guild) {
 
         Document av = new Document("avX", 75)
                 .append("avY", 100)
@@ -128,8 +109,10 @@ public class Database {
         Document wi = new Document("avatar", av)
                 .append("imgW", 1920)
                 .append("imgH", 600)
-                .append("overlayURL", "https://cdn.discordapp.com/attachments/744899463591624815/827303132098461696/WelcomeOverlay_NoShadow.png")
-                .append("bgURL", "https://cdn.discordapp.com/attachments/744899463591624815/840928322661122048/WelcomeBG.png")
+                .append("overlayURL",
+                        "https://cdn.discordapp.com/attachments/744899463591624815/827303132098461696/WelcomeOverlay_NoShadow.png")
+                .append("bgURL",
+                        "https://cdn.discordapp.com/attachments/744899463591624815/840928322661122048/WelcomeBG.png")
                 .append("primCol", "16777215")
                 .append("secCol", "16720173");
 
@@ -169,253 +152,245 @@ public class Database {
                 .append("server_lock", lock)
                 .append("starboard", sb);
 
-        Document doc = new Document("name", guild.getName())
+        return new Document("name", guild.getName())
                 .append("guild_id", guild.getId())
                 .append("welcome_system", ws)
                 .append("channels", channels)
                 .append("roles", roles)
                 .append("other", other);
-
-        return doc;
     }
 
     public boolean guildDocExists(Guild guild) {
+        if (guild == null)
+            return false;
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        if (guild == null) return false;
-        if (collection.find(eq("guild_id", guild.getId())).first() == null) return false;
-
-        return true;
+        return mongoClient.getDatabase("other")
+                .getCollection("config")
+                .find(eq("guild_id", guild.getId()))
+                .first() != null;
     }
 
-    public void insertGuildDoc (Guild guild) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        collection.insertOne(guildDoc(guild));
-
-        logger.info("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
+    public void insertGuildDoc(Guild guild) {
+        mongoClient.getDatabase("other")
+                .getCollection("config")
+                .insertOne(guildDoc(guild));
+        logger.info("Added Database entry for Guild \"{}\" ({})", guild.getName(), guild.getId());
     }
 
-    public void queryMember(String memberID, String varName, String newValue) {
+    public void queryMember(String memberID, String varName, Object newValue) {
+        Document setData = new Document(varName, newValue);
+        Document update = new Document("$set", setData);
 
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-
-        Document Query = new Document();
-        Query.append("discord_id", memberID);
-
-        Document SetData = new Document();
-        SetData.append(varName, newValue);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(Query, update);
-    }
-
-    public void queryMember(String memberID, String varName, int newValue) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-
-        Document Query = new Document();
-        Query.append("discord_id", memberID);
-
-        Document SetData = new Document();
-        SetData.append(varName, newValue);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(Query, update);
+        Document query = new Document("discord_id", memberID);
+        mongoClient.getDatabase("userdata")
+                .getCollection("users")
+                .updateOne(query, update);
     }
 
     public String getMemberString(User user, String varName) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-
-        try {
-            String doc = collection.find(eq("discord_id", user.getId())).first().toJson();
-
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            String var = Root.get(varName).getAsString();
-            return var;
-
-        } catch (NullPointerException e) {
-
+        MongoCollection<Document> collection = mongoClient
+                .getDatabase("userdata")
+                .getCollection("users");
+        Document userDoc = collection
+                .find(eq("discord_id", user.getId()))
+                .first();
+        if (userDoc == null) {
             collection.insertOne(userDoc(user));
             return "0";
         }
+        return userDoc.get(varName, "0");
     }
 
     public int getMemberInt(Member member, String varName) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-
-        try {
-            String doc = collection.find(eq("discord_id", member.getUser().getId())).first().toJson();
-
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            int var = Root.get(varName).getAsInt();
-            return var;
-
-        } catch (NullPointerException e) {
-
+        MongoCollection<Document> collection = mongoClient
+                .getDatabase("userdata")
+                .getCollection("users");
+        Document userDoc = collection
+                .find(eq("discord_id", member.getId()))
+                .first();
+        if (userDoc == null) {
             collection.insertOne(userDoc(member));
             return 0;
         }
+        return userDoc.getInteger(varName, 0);
     }
 
-    public void queryConfig(String guildID, String path, String newValue) {
+    public void queryConfig(String guildID, String path, Object newValue) {
+        BasicDBObject setData = new BasicDBObject(path, newValue);
+        BasicDBObject update = new BasicDBObject("$set", setData);
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        Document query = new Document();
-        query.append("guild_id", guildID);
-
-        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
+        Document query = new Document("guild_id", guildID);
+        mongoClient.getDatabase("userdata")
+                .getCollection("users")
+                .updateOne(query, update);
     }
 
-    public void queryConfig(String guildID, String path, int newValue) {
+    private <T> T getConfig(Guild guild, String path, T defaultValue) {
+        try {
+            Document doc = mongoClient
+                    .getDatabase("other")
+                    .getCollection("config")
+                    .find(eq("guild_id", guild.getId()))
+                    .first();
+            String[] splittedPath = path.split("\\.");
+            int pathLen = splittedPath.length - 1;
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        Document query = new Document();
-        query.append("guild_id", guildID);
-
-        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
-    }
-
-    public void queryConfig(String guildID, String path, boolean newValue) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        Document query = new Document();
-        query.append("guild_id", guildID);
-
-        collection.updateOne(query, new BasicDBObject("$set", new BasicDBObject(path, newValue)));
+            for (int i = 0; i < pathLen; ++i) {
+                doc = doc.get(splittedPath[i], Document.class);
+            }
+            return doc.get(splittedPath[pathLen], defaultValue);
+        } catch (Exception e) {
+            if (!guildDocExists(guild)) {
+                insertGuildDoc(guild);
+            }
+            return defaultValue;
+        }
     }
 
     public String getConfigString(Guild guild, String path) {
+        return getConfig(guild, path, "None");
+    }
 
-        String var = null;
+    public int getConfigInt(Guild guild, String path) {
+        return getConfig(guild, path, 0);
+    }
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
+    public boolean getConfigBoolean(Guild guild, String path) {
+        return getConfig(guild, path, false);
+    }
 
+    public TextChannel getConfigChannel(Guild guild, String path) {
+        String id = getConfigString(guild, path);
         try {
-            String doc = collection.find(eq("guild_id", guild.getId())).first().toJson();
-            String[] splittedPath = path.split("\\.");
+            return guild.getTextChannelById(id);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
-            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
+    public Role getConfigRole(Guild guild, String path) {
+        String id = getConfigString(guild, path);
+        try {
+            return guild.getRoleById(id);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
-            var = root.get(splittedPath[splittedPath.length - 1]).getAsString();
-            
-            return var;
-
-        } catch (Exception e) {
-
-            if (var == null) return "None";
-            if (guildDocExists(guild)) insertGuildDoc(guild);
+    public String getConfigChannelAsMention(Guild guild, String path) {
+        String id = getConfigString(guild, path);
+        try {
+            return guild.getTextChannelById(id).getAsMention();
+        } catch (NumberFormatException e) {
             return "None";
         }
     }
 
-    public int getConfigInt(Guild guild, String path) {
-
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
+    public String getConfigRoleAsMention(Guild guild, String path) {
+        String id = getConfigString(guild, path);
         try {
-            String doc = collection.find(eq("guild_id", guild.getId())).first().toJson();
-            String[] splittedPath = path.split("\\.");
+            return guild.getRoleById(id).getAsMention();
+        } catch (NumberFormatException e) {
+            return "None";
+        }
+    }
 
-            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
-            int var = root.get(splittedPath[splittedPath.length - 1]).getAsInt();
+    private void queryStarboard(String guildId, String channelId, String messageId, String prop, Object newValue) {
+        Document setData = new Document(prop, newValue);
+        Document update = new Document("$set", setData);
 
-            return var;
+        Document query = new Document("guild_id", guildId)
+                .append("channel_id", channelId)
+                .append("message_id", messageId);
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .updateOne(query, update);
+    }
 
-        } catch (Exception e) {
+    public void queryStarboardString(String gID, String cID, String mID, String value, String newValue) {
+        queryStarboard(gID, cID, mID, value, newValue);
+    }
 
-            if (guildDocExists(guild)) insertGuildDoc(guild);
+    public void changeStarboardChannelBool(String gID, String cID, String mID, boolean sbc) {
+        queryStarboard(gID, cID, mID, "isInSBC", sbc);
+    }
+
+    public void setEmoteCount(String gID, String cID, String mID, int value) {
+        queryStarboard(gID, cID, mID, "starcount", value);
+    }
+
+    public boolean starboardDocExists(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        Document first = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first != null && first.getString("guild_id") != null;
+    }
+
+    public void createStarboardDoc(String gID, String cID, String mID) {
+        Document doc = new Document("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID)
+                .append("starcount", 1)
+                .append("isInSBC", false)
+                .append("starboard_embed", "null");
+
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .insertOne(doc);
+    }
+
+    public int getStarCount(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+
+        Document first = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+
+        if (first == null) {
+            new Database().createStarboardDoc(gID, cID, mID);
             return 0;
         }
+        return first.getInteger("starcount", 0);
     }
 
-    public boolean getConfigBoolean (Guild guild, String path) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("config");
-
-        try {
-            String doc = collection.find(eq("guild_id", guild.getId())).first().toJson();
-            String[] splittedPath = path.split("\\.");
-
-            JsonObject root = JsonParser.parseString(doc).getAsJsonObject();
-            for (int i = 0; i < splittedPath.length - 1; i++) root = root.get(splittedPath[i]).getAsJsonObject();
-            boolean var = root.get(splittedPath[splittedPath.length - 1]).getAsBoolean();
-
-            return var;
-
-        } catch (Exception e) {
-
-            if (guildDocExists(guild)) insertGuildDoc(guild);
-            return false;
-        }
+    public boolean isMessageOnStarboard(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        Document first = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first != null && first.getBoolean("isInSBC");
     }
 
-    public TextChannel getConfigChannel (Guild guild, String path) {
-
-        String id = getConfigString(guild, path);
-        return guild.getTextChannelById(id);
+    public String getStarboardChannelString(String gID, String cID, String mID, String value) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        Document first = mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first == null ? null : first.getString(value);
     }
 
-    public Role getConfigRole (Guild guild, String path) {
-
-        String id = getConfigString(guild, path);
-        Role role;
-
-        try {
-            role = guild.getRoleById(id);
-        } catch (Exception e) {
-            role = null;
-        }
-
-        return role;
+    public void deleteStarboardMessage(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .deleteOne(criteria);
     }
-
-    public String getConfigChannelAsMention (Guild guild, String path) {
-
-            String mention;
-            String id = getConfigString(guild, path);
-
-            try { mention = guild.getTextChannelById(id).getAsMention(); }
-            catch (NumberFormatException e) { mention = "None"; }
-
-        return mention;
-    }
-
-    public String getConfigRoleAsMention (Guild guild, String path) {
-
-        String mention;
-        String id = getConfigString(guild, path);
-
-        try { mention = guild.getRoleById(id).getAsMention(); }
-        catch (NumberFormatException e) { mention = "None"; }
-
-        return mention;
-    }
-
 }

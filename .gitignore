@@ -3,6 +3,12 @@
 build/
 /bot.props
 
+# Eclipse settings
+.classpath
+.project
+.settings/
+bin/
+
 # H2 Database
 /*.mv.db
 /*.trace.db
