@@ -42,11 +42,11 @@ public class Ban implements SlashCommandHandler {
                 .setTimestamp(Instant.now())
                 .build();
 
-        Misc.sendToLog(event.getGuild(), eb);
-        member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
-
         try {
             ban(member, reason);
+
+            Misc.sendToLog(event.getGuild(), eb);
+            member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
         }
         catch (Exception e) {
             return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser()));
