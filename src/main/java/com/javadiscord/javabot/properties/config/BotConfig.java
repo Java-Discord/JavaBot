@@ -57,7 +57,8 @@ public class BotConfig {
 				.serializeNulls()
 				.setPrettyPrinting()
 				.create();
-		gson.toJson(this, Files.newBufferedWriter(this.filePath));
-		System.out.println("Config Json: " + gson.toJson(this));
+		var writer = Files.newBufferedWriter(this.filePath);
+		gson.toJson(this, writer);
+		writer.flush();
 	}
 }
