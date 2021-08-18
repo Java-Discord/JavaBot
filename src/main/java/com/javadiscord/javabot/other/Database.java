@@ -287,4 +287,103 @@ public class Database {
             return "None";
         }
     }
+
+    private void querySB(String guildId, String channelId, String messageId, String prop, Object newValue) {
+        Document setData = new Document(prop, newValue);
+        Document update = new Document("$set", setData);
+
+        Document query = new Document("guild_id", guildId)
+                .append("channel_id", channelId)
+                .append("message_id", messageId);
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .updateOne(query, update);
+    }
+
+    public void querySBDString(String gID, String cID, String mID, String value, String newValue) {
+        querySB(gID, cID, mID, value, newValue);
+    }
+
+    public void changeSBCBool(String gID, String cID, String mID, boolean sbc) {
+        querySB(gID, cID, mID, "isInSBC", sbc);
+    }
+
+    public void setEmoteCount(String gID, String cID, String mID, int value) {
+        querySB(gID, cID, mID, "starcount", value);
+    }
+
+    public boolean sbDocExists(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        Document first = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first != null && first.getString("guild_id") != null;
+    }
+
+    public void createSBDoc(String gID, String cID, String mID) {
+        Document doc = new Document("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID)
+                .append("starcount", 1)
+                .append("isInSBC", false)
+                .append("starboard_embed", "null");
+
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .insertOne(doc);
+    }
+
+    public int getStarCount(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+
+        Document first = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+
+        if (first == null) {
+            new Database().createSBDoc(gID, cID, mID);
+            return 0;
+        }
+        return first.getInteger("starcount", 0);
+    }
+
+    public boolean getSBCBool(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        Document first = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first != null && first.getBoolean("isInSBC");
+    }
+
+    public String getSBCString(String gID, String cID, String mID, String value) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        Document first = mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first == null ? null : first.getString(value);
+    }
+
+    public void deleteSBMessage(String gID, String cID, String mID) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .deleteOne(criteria);
+    }
 }

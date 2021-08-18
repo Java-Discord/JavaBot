@@ -87,7 +87,7 @@ public class Startup extends ListenerAdapter {
             if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
 
             new Database().deleteOpenSubmissions(guild);
-            new StarboardListener().updateAllSBM(event, guild);
+            new StarboardListener().updateAllSBM(guild);
             Bot.slashCommands.registerSlashCommands(guild);
         }
 

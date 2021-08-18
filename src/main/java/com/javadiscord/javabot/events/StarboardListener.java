@@ -1,24 +1,22 @@
 package com.javadiscord.javabot.events;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+
 import org.bson.Document;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -27,326 +25,201 @@ import static com.mongodb.client.model.Filters.eq;
 public class StarboardListener extends ListenerAdapter {
 
     void addToSB(Guild guild, MessageChannel channel, Message message) {
+        String guildId = guild.getId();
+        String channelId = channel.getId();
+        String messageId = channel.getId();
 
-        changeSBCBool(guild.getId(), channel.getId(), message.getId(), true);
-        TextChannel sc = guild.getTextChannelById(new Database().getConfigString(guild, "other.starboard.starboard_cid"));
+        Database db = new Database();
+        db.changeSBCBool(guildId, channelId, messageId, true);
+        TextChannel sc = guild.getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"));
 
-        var eb = new EmbedBuilder()
+        EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Jump to message", message.getJumpUrl())
                 .setFooter(message.getAuthor().getAsTag(), message.getAuthor().getEffectiveAvatarUrl())
                 .setColor(Constants.GRAY)
                 .setDescription(message.getContentRaw());
-
-             if (!message.getAttachments().isEmpty()) {
-
-                 try {
-                     Message.Attachment attachment = message.getAttachments().get(0);
-
-                     sc.sendMessage(new Database().getConfigString(guild, "other.starboard.starboard_emote")
-                             + " " + getStarCount(guild.getId(), channel.getId(), message.getId()) + " | " + message.getTextChannel().getAsMention()).setEmbeds(eb.build())
-                             .addFile(attachment.retrieveInputStream().get(), "attachment." + attachment.getFileExtension())
-                             .queue((msg) -> {
-                                 String eMID = msg.getId();
-                                 querySBDString(guild.getId(), channel.getId(), message.getId(), "starboard_embed", eMID);
-                             });
-                 } catch (Exception e) { e.printStackTrace(); }
-
-             } else {
-
-                 sc.sendMessage(new Database().getConfigString(guild, "other.starboard.starboard_emote")
-                         + " " + getStarCount(guild.getId(), channel.getId(), message.getId()) + " | " + message.getTextChannel().getAsMention()).setEmbeds(eb.build())
-                         .queue((msg) -> {
-                             String eMID = msg.getId();
-                             querySBDString(guild.getId(), channel.getId(), message.getId(), "starboard_embed", eMID);
-                         });
-             }
+        MessageAction msgAction = sc
+                .sendMessage(db.getConfigString(guild, "other.starboard.starboard_emote") + " " +
+                        db.getStarCount(guildId, channelId, messageId) + " | " + message.getTextChannel().getAsMention())
+                .setEmbeds(eb.build());
+        if (!message.getAttachments().isEmpty()) {
+            try {
+                Message.Attachment attachment = message.getAttachments().get(0);
+                msgAction.addFile(attachment.retrieveInputStream().get(),
+                        "attachment." + attachment.getFileExtension());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        msgAction.queue(sbMsg -> db.querySBDString(guildId, channelId, messageId, "starboard_embed", sbMsg.getId()));
+    }
 
     void updateSB(Guild guild, String cID, String mID) {
 
-        TextChannel tc = guild.getTextChannelById(cID);
-        Message msg = null;
+        Database db = new Database();
+        String gID = guild.getId();
 
-        if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) {
-            msg = guild.getTextChannelById(new Database().getConfigString(guild, "other.starboard.starboard_cid"))
-                    .retrieveMessageById(getSBCString(guild.getId(), cID, mID, "starboard_embed")).complete();
+        String sbcEmbedId = db.getSBCString(gID, cID, mID, "starboard_embed");
+        if (sbcEmbedId == null) {
+            return;
         }
 
-        if (getStarCount(guild.getId(), cID, mID) > 0) {
+        Message sbMsg = guild
+                .getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"))
+                .retrieveMessageById(sbcEmbedId)
+                .complete();
 
+        int starCount = db.getStarCount(gID, cID, mID);
+        if (starCount > 0) {
             String starLevel = "starboard_emote";
-            int i = getStarCount(guild.getId(), cID, mID);
+            if (starCount > 10)
+                starLevel = "starboard_emote2";
+            if (starCount > 25)
+                starLevel = "starboard_emote3";
 
-            if (i > 10) starLevel = "starboard_emote2";
-            if (i > 25) starLevel = "starboard_emote3";
-
-            msg.editMessage(new Database().getConfigString(guild, "other.starboard." + starLevel)
-                    + " " + getStarCount(guild.getId(), cID, mID) + " | " +
-                    tc.getAsMention()).queue();
+            TextChannel tc = guild.getTextChannelById(cID);
+            sbMsg.editMessage(db.getConfigString(guild, "other.starboard." + starLevel) + " "
+                    + starCount + " | " + tc.getAsMention()).queue();
         } else {
-            if (!(msg == null)) msg.delete().queue();
-
-            MongoDatabase database = mongoClient.getDatabase("other");
-            MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-            BasicDBObject criteria = new BasicDBObject("guild_id", guild.getId())
-                    .append("channel_id", cID)
-                    .append("message_id", mID);
-
-            collection.deleteOne(criteria);
+            sbMsg.delete().queue();
+            db.deleteSBMessage(gID, cID, mID);
         }
     }
 
-    public void updateAllSBM(ReadyEvent event, Guild guild) {
+    public void updateAllSBM(Guild guild) {
 
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-        MongoCursor<Document> it = collection.find(eq("guild_id", guild.getId())).iterator();
+        String gID = guild.getId();
+        MongoCollection<Document> collection = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages");
+        MongoCursor<Document> it = collection.find(eq("guild_id", gID)).iterator();
 
+        Database db = new Database();
         while (it.hasNext()) {
-
             Document doc = it.next();
-            JsonObject root = JsonParser.parseString(doc.toJson()).getAsJsonObject();
 
-            String cID = root.get("channel_id").getAsString();
-            String mID = root.get("message_id").getAsString();
+            String cID = doc.getString("channel_id");
+            String mID = doc.getString("message_id");
 
             Message msg = null;
 
             try {
                 msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
             } catch (ErrorResponseException e) {
-
-                if (root.get("isInSBC").getAsBoolean()) {
-                    new Database().getConfigChannel(guild, "other.starboard.starboard_cid")
-                            .retrieveMessageById(root.get("starboard_embed").getAsString()).complete().delete().queue();
+                if (doc.getBoolean("isInSBC").booleanValue()) {
+                    db.getConfigChannel(guild, "other.starboard.starboard_cid")
+                            .retrieveMessageById(doc.getString("starboard_embed"))
+                            .complete()
+                            .delete()
+                            .queue();
                 }
                 collection.deleteOne(doc);
                 continue;
             }
 
-            String emote = new Database().getConfigString(guild, "other.starboard.starboard_emote");
+            String emote = db.getConfigString(guild, "other.starboard.starboard_emote");
 
             if (msg.getReactions().isEmpty()) {
-                setEmoteCount(0, guild.getId(), cID, mID);
-                updateSB(event.getJDA().getGuildById(guild.getId()), cID, mID);
+                db.setEmoteCount(gID, cID, mID, 0);
+                updateSB(guild, cID, mID);
             }
 
-            for (int i = msg.getReactions().size(); i > 0; i--) {
-
-                if (!msg.getReactions().get(i - 1).getReactionEmote().getName().equals(emote)) return;
-
-                setEmoteCount(msg.getReactions().get(i - 1).getCount(), guild.getId(), cID, mID);
-                if (msg.getReactions().get(i - 1).getCount() >= 3 && !getSBCBool(guild.getId(), cID, mID)) addToSB(guild, guild.getTextChannelById(cID), msg);
-                if (!(getSBCString(guild.getId(), cID, mID, "starboard_embed").equals("null"))) updateSB(event.getJDA().getGuildById(guild.getId()), cID, mID);
+            int reactionCount = msg
+                    .getReactions()
+                    .stream()
+                    .filter(r -> r.getReactionEmote().getName().equals(emote))
+                    .findFirst()
+                    .map(MessageReaction::getCount)
+                    .orElse(0);
+            
+            db.setEmoteCount(gID, cID, mID, reactionCount);
+            if (!db.getSBCBool(gID, cID, mID) && reactionCount >= 3) {
+                addToSB(guild, guild.getTextChannelById(cID), msg);
+            }
+            if (db.getSBCString(gID, cID, mID, "starboard_embed") != null) {
+                updateSB(guild, cID, mID);
             }
         }
+        it.close();
     }
-
-    void setEmoteCount(int value, String gID, String cID, String mID) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        Document query = new Document("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        Document SetData = new Document();
-        SetData.append("starcount", value);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(query, update);
-    }
-
-    void changeSBCBool(String gID, String cID, String mID, boolean sbc) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        Document query = new Document("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        Document SetData = new Document();
-        SetData.append("isInSBC", sbc);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(query, update);
-    }
-
-    void querySBDString(String gID, String cID, String mID, String value, String newValue) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        Document query = new Document("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        Document SetData = new Document();
-        SetData.append(value, newValue);
-
-        Document update = new Document();
-        update.append("$set", SetData);
-
-        collection.updateOne(query, update);
-    }
-
-    int getStarCount(String gID, String cID, String mID) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        int sc;
-
-        try {
-            String doc = collection.find(criteria).first().toJson();
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            sc = Root.get("starcount").getAsInt();
-        } catch (NullPointerException e) {
-
-            createSBDoc(gID, cID, mID);
-            sc = 0;
-        }
-
-        return sc;
-
-    }
-
-    boolean getSBCBool(String gID, String cID, String mID) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        String doc = collection.find(criteria).first().toJson();
-        JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-
-        return Root.get("isInSBC").getAsBoolean();
-
-    }
-
-    String getSBCString(String gID, String cID, String mID, String value) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        String doc = collection.find(criteria).first().toJson();
-        JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-
-        return Root.get(value).getAsString();
-
-    }
-
-    void createSBDoc(String gID, String cID, String mID) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        Document doc = new Document("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID)
-                .append("starcount", 1)
-                .append("isInSBC", false)
-                .append("starboard_embed", "null");
-
-        collection.insertOne(doc);
-    }
-
-    boolean sbDocExists(String gID, String cID, String mID) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
-
-        boolean exists;
-
-        try {
-            String doc = collection.find(eq("guild_id", gID)).first().toJson();
-
-            JsonObject Root = JsonParser.parseString(doc).getAsJsonObject();
-            String var = Root.get("guild_id").getAsString();
-            exists = true;
-
-        } catch (Exception e) {
-            exists = false;
-        }
-
-        return exists;
-    }
-
 
     @Override
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
-        if (event.getMember().getUser().isBot()) return;
+        if (event.getUser().isBot())
+            return;
 
-        if (!event.getReactionEmote().getName().equals(new Database().getConfigString(event.getGuild(), "other.starboard.starboard_emote")))
+        Database db = new Database();
+        Guild guild = event.getGuild();
+        if (!event.getReactionEmote().getName()
+                .equals(db.getConfigString(guild, "other.starboard.starboard_emote")))
+            return;
+
+        String gID = guild.getId();
+        String cID = event.getChannel().getId();
+        String mID = event.getMessageId();
+
+        if (db.sbDocExists(gID, cID, mID)) {
+
+            int starCount = db.getStarCount(gID, cID, mID);
+            db.setEmoteCount(gID, cID, mID, starCount + 1);
+            if (db.getSBCBool(gID, cID, mID))
+                updateSB(guild, cID, mID);
+            else if (starCount >= 3)
+                addToSB(guild, event.getChannel(),
+                        event.getChannel().retrieveMessageById(event.getMessageId()).complete());
+
+        } else {
+            db.createSBDoc(gID, cID, mID);
+        }
+    }
+
+    @Override
+    public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
+        if (event.getUser().isBot())
+            return;
+
+        Database db = new Database();
+
+        if (!event.getReactionEmote().getName()
+                .equals(db.getConfigString(event.getGuild(), "other.starboard.starboard_emote")))
             return;
 
         String gID = event.getGuild().getId();
         String cID = event.getChannel().getId();
         String mID = event.getMessageId();
 
-        if (sbDocExists(gID, cID, mID)) {
+        if (db.sbDocExists(gID, cID, mID)) {
 
-            setEmoteCount(getStarCount(gID, cID, mID) + 1, gID, cID, mID);
-            if (getSBCBool(gID, cID, mID)) updateSB(event.getGuild(), cID, mID);
-            else if (getStarCount(gID, cID, mID) >= 3)
-                addToSB(event.getGuild(), event.getChannel(), event.getChannel().retrieveMessageById(event.getMessageId()).complete());
+            int starCount = db.getStarCount(gID, cID, mID);
+            db.setEmoteCount(gID, cID, mID, starCount - 1);
+            if (db.getSBCBool(gID, cID, mID))
+                updateSB(event.getGuild(), cID, mID);
+            else if (starCount >= 3)
+                addToSB(event.getGuild(), event.getChannel(),
+                        event.getChannel().retrieveMessageById(event.getMessageId()).complete());
 
         } else {
-            createSBDoc(gID, cID, mID);
+            db.createSBDoc(gID, cID, mID);
         }
     }
 
     @Override
-    public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
-        if (event.getMember().getUser().isBot()) return;
-
-        if (!event.getReactionEmote().getName().equals(new Database().getConfigString(event.getGuild(), "other.starboard.starboard_emote"))) return;
-
-        String gID = event.getGuild().getId();
-        String cID = event.getChannel().getId();
-        String mID = event.getMessageId();
-
-        if (sbDocExists(gID, cID, mID)) {
-
-            setEmoteCount(getStarCount(gID, cID, mID) - 1, gID, cID, mID);
-            if (getSBCBool(gID, cID, mID)) updateSB(event.getGuild(), cID, mID);
-            else if (getStarCount(gID, cID, mID) >= 3)
-                addToSB(event.getGuild(), event.getChannel(), event.getChannel().retrieveMessageById(event.getMessageId()).complete());
-
-        } else { createSBDoc(gID, cID, mID); }
-    }
-
-    @Override
     public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
-
-        MongoDatabase database = mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("starboard_messages");
+        MongoCollection<Document> collection = mongoClient
+                .getDatabase("other")
+                .getCollection("starboard_messages");
 
         Document doc = collection.find(eq("message_id", event.getMessageId())).first();
-        if (doc == null) return;
+        if (doc == null)
+            return;
+        
+        String var = doc.getString("starboard_embed");
 
-        JsonObject Root = JsonParser.parseString(doc.toJson()).getAsJsonObject();
-        String var = Root.get("starboard_embed").getAsString();
-
-        new Database().getConfigChannel(event.getGuild(), "other.starboard.starboard_cid").retrieveMessageById(var).complete().delete().queue();
+        new Database().getConfigChannel(event.getGuild(), "other.starboard.starboard_cid")
+                .retrieveMessageById(var)
+                .complete()
+                .delete()
+                .queue();
         collection.deleteOne(doc);
     }
 }
