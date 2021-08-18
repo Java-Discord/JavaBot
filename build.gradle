@@ -1,10 +1,12 @@
-plugins { id 'java' }
+plugins {
+    id 'java'
+    id'com.github.johnrengelman.shadow' version '5.2.0'
+}
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 16
+targetCompatibility = 16
 
 group 'com.dynxsty.bot'
-version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -32,25 +34,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
     testCompileOnly 'org.projectlombok:lombok:1.18.20'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
-
-//    [JDA:feature/threads]
-//    compile 'com.github.dv8fromtheworld:jda:a85ca7eeb2b423712cc25e98eff2b72f20395fe3'
-
 }
 
-jar {
-    archiveFileName="javabot.zip"
-    from {
-        configurations.runtime.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-
-        configurations.compile.findAll{ !it.name.endsWith('pom') } .collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
+jar{
     manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "com.javadiscord.javabot.Bot") }
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' }
+}
 
 tasks.withType(JavaCompile){ options.encoding = 'UTF-8'}
 tasks.withType( JavaCompile ).configureEach {
