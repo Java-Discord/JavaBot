@@ -3,6 +3,7 @@ package com.javadiscord.javabot.other;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.UpdateOptions;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
+import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
 
 public class Database {
 
@@ -217,12 +220,14 @@ public class Database {
     }
 
     public void queryConfig(String guildID, String path, Object newValue) {
+
         BasicDBObject setData = new BasicDBObject(path, newValue);
         BasicDBObject update = new BasicDBObject("$set", setData);
 
         Document query = new Document("guild_id", guildID);
-        mongoClient.getDatabase("userdata")
-                .getCollection("users")
+
+        mongoClient.getDatabase("other")
+                .getCollection("config")
                 .updateOne(query, update);
     }
 
@@ -295,18 +300,6 @@ public class Database {
         } catch (NumberFormatException e) {
             return "None";
         }
-    }
-
-    private void queryStarboard(String guildId, String channelId, String messageId, String prop, Object newValue) {
-        Document setData = new Document(prop, newValue);
-        Document update = new Document("$set", setData);
-
-        Document query = new Document("guild_id", guildId)
-                .append("channel_id", channelId)
-                .append("message_id", messageId);
-        mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .updateOne(query, update);
     }
 
     public boolean isMessageOnStarboard(String gID, String cID, String mID) {
