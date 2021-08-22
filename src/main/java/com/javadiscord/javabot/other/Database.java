@@ -309,71 +309,29 @@ public class Database {
                 .updateOne(query, update);
     }
 
-    public void queryStarboardString(String gID, String cID, String mID, String value, String newValue) {
-        queryStarboard(gID, cID, mID, value, newValue);
-    }
-
-    public void changeStarboardChannelBool(String gID, String cID, String mID, boolean sbc) {
-        queryStarboard(gID, cID, mID, "isInSBC", sbc);
-    }
-
-    public void setEmoteCount(String gID, String cID, String mID, int value) {
-        queryStarboard(gID, cID, mID, "starcount", value);
-    }
-
-    public boolean starboardDocExists(String gID, String cID, String mID) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-        Document first = mongoClient
-                .getDatabase("other")
-                .getCollection("starboard_messages")
-                .find(criteria)
-                .first();
-        return first != null && first.getString("guild_id") != null;
-    }
-
-    public void createStarboardDoc(String gID, String cID, String mID) {
-        Document doc = new Document("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID)
-                .append("starcount", 1)
-                .append("isInSBC", false)
-                .append("starboard_embed", "null");
-
-        mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .insertOne(doc);
-    }
-
-    public int getStarCount(String gID, String cID, String mID) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        Document first = mongoClient
-                .getDatabase("other")
-                .getCollection("starboard_messages")
-                .find(criteria)
-                .first();
-
-        if (first == null) {
-            new Database().createStarboardDoc(gID, cID, mID);
-            return 0;
-        }
-        return first.getInteger("starcount", 0);
-    }
-
     public boolean isMessageOnStarboard(String gID, String cID, String mID) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
+
         Document first = mongoClient
                 .getDatabase("other")
                 .getCollection("starboard_messages")
                 .find(criteria)
                 .first();
-        return first != null && first.getBoolean("isInSBC");
+
+        return first != null;
+    }
+
+    public void createStarboardDoc(String gID, String cID, String mID, String eMID) {
+        Document doc = new Document("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID)
+                .append("starboard_embed", eMID);
+
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .insertOne(doc);
     }
 
     public String getStarboardChannelString(String gID, String cID, String mID, String value) {
@@ -385,26 +343,5 @@ public class Database {
                 .find(criteria)
                 .first();
         return first == null ? null : first.getString(value);
-    }
-
-    public boolean getStarboardChannelBoolean(String gID, String cID, String mID, String value) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        Document first = mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .find(criteria)
-                .first();
-        return first.getBoolean(value);
-    }
-
-    public void deleteStarboardMessage(String gID, String cID, String mID) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-        mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .deleteOne(criteria);
     }
 }
