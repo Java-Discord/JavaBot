@@ -73,6 +73,10 @@ public class SlashCommands extends ListenerAdapter {
 
             JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
             String value = Root.get("value").getAsString();
+            value = value
+                    .replace("{!membercount}", String.valueOf(event.getGuild().getMemberCount()))
+                    .replace("{!servername}", event.getGuild().getName())
+                    .replace("{!serverid}", event.getGuild().getId());
 
             event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
 
