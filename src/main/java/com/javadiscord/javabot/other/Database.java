@@ -60,10 +60,12 @@ public class Database {
                 }
             }
         }
-        guilds.forEach(this::insertGuildDoc);
+        for (var g : guilds) if (!guildDocExists(g)) insertGuildDoc(g);
     }
 
     public void deleteOpenSubmissions(Guild guild) {
+        logger.info("[{}] Deleting Open Submissions", guild.getName());
+
         MongoCollection<Document> collection = mongoClient
                 .getDatabase("other")
                 .getCollection("open_submissions");
@@ -161,13 +163,12 @@ public class Database {
     }
 
     public boolean guildDocExists(Guild guild) {
-        if (guild == null)
-            return false;
+        if (guild == null) return false;
 
-        return mongoClient.getDatabase("other")
+        return !(mongoClient.getDatabase("other")
                 .getCollection("config")
                 .find(eq("guild_id", guild.getId()))
-                .first() != null;
+                .first() == null);
     }
 
     public void insertGuildDoc(Guild guild) {
@@ -240,6 +241,7 @@ public class Database {
             }
             return doc.get(splittedPath[pathLen], defaultValue);
         } catch (Exception e) {
+            e.printStackTrace();
             if (!guildDocExists(guild)) {
                 insertGuildDoc(guild);
             }
@@ -383,6 +385,18 @@ public class Database {
                 .find(criteria)
                 .first();
         return first == null ? null : first.getString(value);
+    }
+
+    public boolean getStarboardChannelBoolean(String gID, String cID, String mID, String value) {
+        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID);
+
+        Document first = mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .find(criteria)
+                .first();
+        return first.getBoolean(value);
     }
 
     public void deleteStarboardMessage(String gID, String cID, String mID) {

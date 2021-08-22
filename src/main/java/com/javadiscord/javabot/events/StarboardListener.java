@@ -18,11 +18,16 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import org.bson.Document;
+import org.slf4j.LoggerFactory;
+
+import java.time.OffsetDateTime;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class StarboardListener extends ListenerAdapter {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(StarboardListener.class);
 
     void addToSB(Guild guild, MessageChannel channel, Message message) {
         String guildId = guild.getId();
@@ -60,14 +65,18 @@ public class StarboardListener extends ListenerAdapter {
         String gID = guild.getId();
 
         String sbcEmbedId = db.getStarboardChannelString(gID, cID, mID, "starboard_embed");
-        if (sbcEmbedId == null) {
-            return;
-        }
 
-        Message sbMsg = guild
+        if (sbcEmbedId == null || sbcEmbedId.equals("null")) return;
+        if (!(db.getStarboardChannelBoolean(gID, cID, mID, "isInSBC"))) return;
+        Message sbMsg;
+
+        try {
+            sbMsg = guild
                 .getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"))
-                .retrieveMessageById(sbcEmbedId)
-                .complete();
+                .retrieveMessageById(sbcEmbedId).complete();
+        } catch (Exception e) { return; }
+
+        if (sbMsg == null) return;
 
         int starCount = db.getStarCount(gID, cID, mID);
         if (starCount > 0) {
@@ -87,6 +96,7 @@ public class StarboardListener extends ListenerAdapter {
     }
 
     public void updateAllSBM(Guild guild) {
+        logger.info("[{}] Updating Starboard Messages", guild.getName());
 
         String gID = guild.getId();
         MongoCollection<Document> collection = mongoClient
@@ -101,17 +111,27 @@ public class StarboardListener extends ListenerAdapter {
             String cID = doc.getString("channel_id");
             String mID = doc.getString("message_id");
 
-            Message msg = null;
+            Message msg;
+
+
 
             try {
                 msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
+
+                if (doc.getBoolean("isInSBC") && msg.getTimeCreated().isBefore(OffsetDateTime.now().minusWeeks(2))) {
+                    collection.deleteOne(doc); continue;
+                }
+
             } catch (ErrorResponseException e) {
-                if (doc.getBoolean("isInSBC").booleanValue()) {
-                    db.getConfigChannel(guild, "other.starboard.starboard_cid")
-                            .retrieveMessageById(doc.getString("starboard_embed"))
-                            .complete()
-                            .delete()
-                            .queue();
+
+                if (doc.getBoolean("isInSBC")) {
+                    try {
+                        db.getConfigChannel(guild, "other.starboard.starboard_cid")
+                                .retrieveMessageById(doc.getString("starboard_embed"))
+                                .complete()
+                                .delete()
+                                .queue();
+                    } catch (ErrorResponseException exception) { collection.deleteOne(doc); continue; }
                 }
                 collection.deleteOne(doc);
                 continue;
