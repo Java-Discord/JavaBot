@@ -1,65 +1,37 @@
 package com.javadiscord.javabot.properties.command;
 
-import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Simple DTO representing a top-level Discord slash command.
  */
-@Data
-public class CommandConfig {
-	private String name;
-	private String description;
-	private boolean enabledByDefault = true;
-	private CommandPrivilegeConfig[] privileges;
-	private OptionConfig[] options;
-	private SubCommandConfig[] subCommands;
-	private SubCommandGroupConfig[] subCommandGroups;
-	private String handler;
+public record CommandConfig(String name, String description, boolean enabledByDefault, List<CommandPrivilegeConfig> privileges, List<OptionConfig> options, List<SubCommandConfig> subCommands, List<SubCommandGroupConfig> subCommandGroups, String handler) {
 
 	public CommandData toData() {
 		CommandData data = new CommandData(this.name, this.description);
 		data.setDefaultEnabled(this.enabledByDefault);
 		if (this.options != null) {
-			for (OptionConfig option : this.options) {
-				data.addOptions(option.toData());
-			}
+			this.options.stream().map(OptionConfig::toData).forEach(data::addOptions);
 		}
 		if (this.subCommands != null) {
-			for (SubCommandConfig subCommand : this.subCommands) {
-				data.addSubcommands(subCommand.toData());
-			}
+			this.subCommands.stream().map(SubCommandConfig::toData).forEach(data::addSubcommands);
 		}
 		if (this.subCommandGroups != null) {
-			for (SubCommandGroupConfig group : this.subCommandGroups) {
-				data.addSubcommandGroups(group.toData());
-			}
+			this.subCommandGroups.stream().map(SubCommandGroupConfig::toData).forEach(data::addSubcommandGroups);
 		}
 		return data;
 	}
 
-	@Override
-	public String toString() {
-		return "CommandConfig{" +
-			"name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", options=" + Arrays.toString(options) +
-			", subCommands=" + Arrays.toString(subCommands) +
-			", subCommandGroups=" + Arrays.toString(subCommandGroups) +
-			", handler=" + handler +
-			'}';
-	}
-
 	public static CommandConfig fromData(CommandData data) {
-		CommandConfig c = new CommandConfig();
-		c.setName(data.getName());
-		c.setDescription(data.getDescription());
-		c.setOptions(data.getOptions().stream().map(OptionConfig::fromData).toArray(OptionConfig[]::new));
-		c.setSubCommands(data.getSubcommands().stream().map(SubCommandConfig::fromData).toArray(SubCommandConfig[]::new));
-		c.setSubCommandGroups(data.getSubcommandGroups().stream().map(SubCommandGroupConfig::fromData).toArray(SubCommandGroupConfig[]::new));
-		c.setHandler(null);
-		return c;
+		return new CommandConfig(data.getName(),
+				data.getDescription(),
+				true,
+				null,
+				data.getOptions().stream().map(OptionConfig::fromData).toList(),
+				data.getSubcommands().stream().map(SubCommandConfig::fromData).toList(),
+				data.getSubcommandGroups().stream().map(SubCommandGroupConfig::fromData).toList(),
+				null);
 	}
 }

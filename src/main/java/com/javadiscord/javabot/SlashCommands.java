@@ -115,15 +115,15 @@ public class SlashCommands extends ListenerAdapter {
         if (commandConfigs.length > 100) throw new IllegalArgumentException("Cannot add more than 100 commands.");
         CommandListUpdateAction commandUpdateAction = guild.updateCommands();
         for (CommandConfig config : commandConfigs) {
-            if (config.getHandler() != null && !config.getHandler().isEmpty()) {
+            if (config.handler() != null && !config.handler().isEmpty()) {
                 try {
-                    Class<?> handlerClass = Class.forName(config.getHandler());
-                    this.commandsIndex.put(config.getName(), (SlashCommandHandler) handlerClass.getConstructor().newInstance());
+                    Class<?> handlerClass = Class.forName(config.handler());
+                    this.commandsIndex.put(config.name(), (SlashCommandHandler) handlerClass.getConstructor().newInstance());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
-                log.warn("Command \"{}\" does not have an associated handler class. It will be ignored.", config.getName());
+                log.warn("Command \"{}\" does not have an associated handler class. It will be ignored.", config.name());
             }
             commandUpdateAction.addCommands(config.toData());
         }
@@ -151,21 +151,21 @@ public class SlashCommands extends ListenerAdapter {
         for (var config : commandConfigs) {
             Long commandId = null;
             for (Command command : commands) {
-                if (command.getName().equals(config.getName())) {
+                if (command.getName().equals(config.name())) {
                     commandId = command.getIdLong();
                     break;
                 }
             }
-            if (commandId == null) throw new IllegalStateException("Could not find id for command " + config.getName());
+            if (commandId == null) throw new IllegalStateException("Could not find id for command " + config.name());
             final long cid = commandId;
-            if (config.getPrivileges() != null && config.getPrivileges().length > 0) {
+            if (config.privileges() != null && config.privileges().size() > 0) {
                 List<CommandPrivilege> p = new ArrayList<>();
-                for (var privilegeConfig : config.getPrivileges()) {
+                for (var privilegeConfig : config.privileges()) {
                     p.add(privilegeConfig.toData(guild, db).get());
-                    log.info("[{}] Registering privilege for command {}: {}",guild.getName(), config.getName(), Objects.toString(privilegeConfig));
+                    log.info("[{}] Registering privilege for command {}: {}",guild.getName(), config.name(), Objects.toString(privilegeConfig));
                 }
                 guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {
-                    log.info("[{}] Privilege update successful for command {}", guild.getName(), config.getName());
+                    log.info("[{}] Privilege update successful for command {}", guild.getName(), config.name());
                 });
             }
         }

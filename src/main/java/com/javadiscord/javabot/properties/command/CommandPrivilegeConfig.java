@@ -8,12 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import java.util.concurrent.CompletableFuture;
 
-@Data
-public class CommandPrivilegeConfig {
-	private String type;
-	private boolean enabled = true;
-	private String id;
-
+public record CommandPrivilegeConfig(String type, boolean enabled, String id) {
 	public CompletableFuture<CommandPrivilege> toData(Guild guild, Database database) {
 		if (this.type.equalsIgnoreCase(CommandPrivilege.Type.USER.name())) {
 			return guild.getJDA().retrieveUserById(this.id).submit()

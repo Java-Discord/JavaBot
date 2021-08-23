@@ -1,43 +1,26 @@
 package com.javadiscord.javabot.properties.command;
 
 import lombok.Data;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Simple DTO for a Discord subcommand.
  */
-@Data
-public class SubCommandConfig {
-	private String name;
-	private String description;
-	private OptionConfig[] options;
-
+public record SubCommandConfig(String name, String description, List<OptionConfig> options) {
 	public SubcommandData toData() {
 		SubcommandData data = new SubcommandData(this.name, this.description);
 		if (this.options != null) {
-			for (OptionConfig oc : this.options) {
-				data.addOptions(oc.toData());
-			}
+			this.options.stream().map(OptionConfig::toData).forEach(data::addOptions);
 		}
 		return data;
 	}
 
-	@Override
-	public String toString() {
-		return "SubCommandConfig{" +
-			"name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", options=" + Arrays.toString(options) +
-			'}';
-	}
-
 	public static SubCommandConfig fromData(SubcommandData data) {
-		SubCommandConfig c = new SubCommandConfig();
-		c.setName(data.getName());
-		c.setDescription(data.getDescription());
-		c.setOptions(data.getOptions().stream().map(OptionConfig::fromData).toArray(OptionConfig[]::new));
-		return c;
+		return new SubCommandConfig(data.getName(),
+				data.getDescription(),
+				data.getOptions().stream().map(OptionConfig::fromData).toList());
 	}
 }
