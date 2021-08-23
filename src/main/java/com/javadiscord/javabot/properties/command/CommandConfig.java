@@ -7,7 +7,9 @@ import java.util.List;
 /**
  * Simple DTO representing a top-level Discord slash command.
  */
-public record CommandConfig(String name, String description, boolean enabledByDefault, List<CommandPrivilegeConfig> privileges, List<OptionConfig> options, List<SubCommandConfig> subCommands, List<SubCommandGroupConfig> subCommandGroups, String handler) {
+public record CommandConfig(String name, String description, boolean enabledByDefault,
+							List<CommandPrivilegeConfig> privileges, List<OptionConfig> options, List<SubCommandConfig> subCommands,
+							List<SubCommandGroupConfig> subCommandGroups, String handler) {
 
 	public CommandData toData() {
 		CommandData data = new CommandData(this.name, this.description);
