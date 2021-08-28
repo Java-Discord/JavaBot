@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.util.Properties;
@@ -34,7 +33,7 @@ public class Bot {
         Path.of("bot.props")
     );
 
-    private static BotConfig config;
+    public static BotConfig config;
 
     /**
      * A reference to the slash command listener that's the main point of
@@ -70,13 +69,7 @@ public class Bot {
      */
     public static void main(String[] args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
-
-        try {
-            config = BotConfig.load(Path.of("config.json"));
-        } catch (IOException e) {
-            config = new BotConfig(Path.of("config.json"));
-            config.save();
-        }
+        config = BotConfig.loadOrCreate(Path.of("config.json"));
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();
