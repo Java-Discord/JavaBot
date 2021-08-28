@@ -7,11 +7,14 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.util.Objects;
+
 public class SetJamVoteChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "channels.jam_vote_cid", channel.getId());
+        MessageChannel channel = Objects.requireNonNull(event.getOption("channel")).getAsMessageChannel();
+        assert channel != null;
+        new Database().queryConfig(Objects.requireNonNull(event.getGuild()).getId(), "channels.jam_vote_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Jam Vote Channel", "Jam Vote Channel successfully changed to", null, channel.getId(), true, true));
     }
 }
