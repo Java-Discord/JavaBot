@@ -5,13 +5,11 @@ import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamSubmission;
 import com.javadiscord.javabot.jam.model.JamTheme;
 import com.javadiscord.javabot.other.Colors;
-import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.properties.config.JamConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -20,14 +18,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JamChannelManager {
-	private static final Logger log = LoggerFactory.getLogger(JamChannelManager.class);
-
 	private final TextChannel votingChannel;
 	private final TextChannel announcementChannel;
+	private final Role jamPingRole;
 
-	public JamChannelManager(Guild guild, Database database) {
-		this.votingChannel = database.getConfigChannel(guild, "channels.jam_vote_cid");
-		this.announcementChannel = database.getConfigChannel(guild, "channels.jam_announcement_cid");
+	public JamChannelManager(Guild guild, JamConfig jamConfig) {
+		this.votingChannel = guild.getTextChannelById(jamConfig.getVotingChannelId());
+		this.announcementChannel = guild.getTextChannelById(jamConfig.getAnnouncementChannelId());
+		this.jamPingRole = guild.getRoleById(jamConfig.getPingRoleId());
 	}
 
 	public void sendErrorMessageAsync(SlashCommandEvent event, String message) {
@@ -200,11 +198,6 @@ public class JamChannelManager {
 	}
 
 	private void pingRole() {
-		Role jamPingRole = new Database().getConfigRole(this.announcementChannel.getGuild(), "roles.jam_ping_rid");
-		if (jamPingRole == null) {
-			log.error("Could not find Jam ping role.");
-			return;
-		}
-		this.announcementChannel.sendMessage(jamPingRole.getAsMention()).queue();
+		this.announcementChannel.sendMessage(this.jamPingRole.getAsMention()).queue();
 	}
 }
