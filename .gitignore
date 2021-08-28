@@ -2,6 +2,7 @@
 .idea/
 build/
 /bot.props
+/config.json
 
 # Eclipse settings
 .classpath
