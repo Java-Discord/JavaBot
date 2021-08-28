@@ -9,4 +9,6 @@ public class JamConfig {
 
 	private long pingRoleId;
 	private long adminRoleId;
+
+	private String jamEmbedColor = "#fc5a03";
 }

@@ -19,7 +19,7 @@ public class ListThemesSubcommand extends ActiveJamSubcommand {
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(activeJam);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("Themes for Jam " + activeJam.getId())
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")));
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()));
 		for (JamTheme theme : themes) {
 			embedBuilder.addField(theme.getName(), theme.getDescription(), false);
 		}

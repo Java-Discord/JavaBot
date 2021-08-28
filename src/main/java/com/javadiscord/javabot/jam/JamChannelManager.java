@@ -48,7 +48,7 @@ public class JamChannelManager {
 		this.removeAllMessages(this.votingChannel);
 		EmbedBuilder voteEmbedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s Theme Voting", jam.getFullName()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()))
 				.setDescription("Vote for your preferred themes for the upcoming Jam.");
 		for (int i = 0; i < themes.size(); i++) {
 			JamTheme theme = themes.get(i);
@@ -60,7 +60,7 @@ public class JamChannelManager {
 		}
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s Theme Voting Has Started!", jam.getFullName()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()))
 				.setDescription("Go to " + votingChannel.getAsMention() + " to cast your votes, and decide what theme will be chosen for the Jam!");
 		announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
 		this.pingRole();
@@ -70,7 +70,7 @@ public class JamChannelManager {
 	public void sendChosenThemeMessage(Map<JamTheme, Integer> votes, JamTheme winner) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("The %s's Theme Has Been Chosen!", winner.getJam().getFullName()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()))
 				.setDescription("The theme will be **" + winner.getName() + "**\n> " + winner.getDescription())
 				.addField(
 						"Submitting",
@@ -110,7 +110,7 @@ public class JamChannelManager {
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("Voting Has Begun!")
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()))
 				.setDescription(String.format("Go to %s to vote for who you think should win the %s.", votingChannel.getAsMention(), jam.getFullName()));
 		announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
 		this.pingRole();
@@ -135,7 +135,7 @@ public class JamChannelManager {
 		String username = this.getSubmissionUserName(submission, event);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s has won the %s!", username, submission.getJam().getFullName()), submission.getSourceLink())
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()))
 				.setDescription(String.format("> %s\nCheck out their project here:\n%s\nThey earned **%d** votes.", submission.getDescription(), submission.getSourceLink(), voteCounts.get(submission)));
 		this.addRunnerUpSubmissionFields(embedBuilder, voteCounts, List.of(submission), event);
 
@@ -147,7 +147,7 @@ public class JamChannelManager {
 	public void sendMultipleWinnersMessage(List<JamSubmission> submissions, Map<JamSubmission, Integer> voteCounts, SlashCommandEvent event) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("There Are Multiple Winners of the %s!", submissions.get(0).getJam()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")));
+				.setColor(Color.decode(Bot.config.getJamConfig().getJamEmbedColor()));
 		for (var submission : submissions) {
 			String username = this.getSubmissionUserName(submission, event);
 			embedBuilder.addField(

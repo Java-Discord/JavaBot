@@ -2,7 +2,6 @@ package com.javadiscord.javabot;
 
 import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
-import com.javadiscord.javabot.properties.MultiProperties;
 import com.javadiscord.javabot.properties.config.BotConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -14,7 +13,6 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,17 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * The main class where the bot is initialized.
  */
 public class Bot {
-    /**
-     * Loads the bot properties, first from the internal classpath properties
-     * file, and then any properties file in the current working directory will
-     * take precedence over that.
-     */
-    private static final Properties properties = new MultiProperties(
-        MultiProperties.getClasspathResource("bot.properties").orElseThrow(),
-        Path.of("bot.props")
-    );
-
-    public static BotConfig config;
+    public static BotConfig config = BotConfig.loadOrCreate(Path.of("config.json"));
 
     /**
      * A reference to the slash command listener that's the main point of
@@ -69,12 +57,11 @@ public class Bot {
      */
     public static void main(String[] args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
-        config = BotConfig.loadOrCreate(Path.of("config.json"));
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();
-        asyncPool = Executors.newScheduledThreadPool(Integer.parseInt(getProperty("asyncPoolSize")));
-        JDA jda = JDABuilder.createDefault(properties.getProperty("token", "null"))
+        asyncPool = Executors.newScheduledThreadPool(config.getSystemsConfig().getAsyncPoolSize());
+        JDA jda = JDABuilder.createDefault(config.getSystemsConfig().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ACTIVITY)
@@ -102,27 +89,6 @@ public class Bot {
                 new StarboardListener(),
                 new ButtonClickListener()
         );
-    }
-
-    /**
-     * Gets the value of a property from the bot's loaded properties.
-     * @see Properties#getProperty(String)
-     * @param key The name of the property to get.
-     * @return The value of the property, or <code>null</code> if none was found.
-     */
-    public static String getProperty(String key) {
-        return properties.getProperty(key);
-    }
-
-    /**
-     * Gets the value of a property from the bot's loaded properties.
-     * @see Properties#getProperty(String, String)
-     * @param key The name of the property to get.
-     * @param defaultValue The value to return if no property was found.
-     * @return The value of the property, or the default value.
-     */
-    public static String getProperty(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
     }
 }
 

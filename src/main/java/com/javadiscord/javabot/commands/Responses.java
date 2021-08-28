@@ -14,15 +14,15 @@ import java.time.Instant;
  */
 public final class Responses {
 	public static ReplyAction success(SlashCommandEvent event, String title, String message) {
-		return reply(event, title, message, "responses.success", true);
+		return reply(event, title, message, Bot.config.getSlashCommandConfig().getInfoColor(), true);
 	}
 
 	public static ReplyAction info(SlashCommandEvent event, String title, String messsage) {
-		return reply(event, title, messsage, "responses.info", true);
+		return reply(event, title, messsage, Bot.config.getSlashCommandConfig().getInfoColor(), true);
 	}
 
 	public static ReplyAction error(SlashCommandEvent event, String message) {
-		return reply(event, "An Error Occurred", message, "responses.error", true);
+		return reply(event, "An Error Occurred", message, Bot.config.getSlashCommandConfig().getErrorColor(), true);
 	}
 
 	public static ReplyAction warning(SlashCommandEvent event, String message) {
@@ -30,13 +30,13 @@ public final class Responses {
 	}
 
 	public static ReplyAction warning(SlashCommandEvent event, String title, String message) {
-		return reply(event, title, message, "responses.warning", true);
+		return reply(event, title, message, Bot.config.getSlashCommandConfig().getWarningColor(), true);
 	}
 
-	private static ReplyAction reply(SlashCommandEvent event, String title, String message, String colorProperty, boolean ephemeral) {
+	private static ReplyAction reply(SlashCommandEvent event, String title, String message, String colorHex, boolean ephemeral) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTimestamp(Instant.now())
-				.setColor(Color.decode(Bot.getProperty(colorProperty)));
+				.setColor(Color.decode(colorHex));
 		if (title != null && !title.isBlank()) {
 			embedBuilder.setTitle(title);
 		}

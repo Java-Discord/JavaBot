@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -21,6 +23,8 @@ import java.nio.file.Path;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
 public class BotConfig {
+	private SystemsConfig systemsConfig;
+	private SlashCommandConfig slashCommandConfig;
 	private ModerationConfig moderationConfig;
 	private QOTWConfig qotwConfig;
 	private WelcomeConfig welcomeConfig;
@@ -33,16 +37,24 @@ public class BotConfig {
 	private transient Path filePath;
 
 	/**
-	 * Constructs a new empty configuration.
+	 * Constructs a new empty configuration, creating a new instance of each
+	 * sub-config object using its no-args constructor.
 	 * @param filePath The path to the configuration file.
 	 */
 	public BotConfig(Path filePath) {
 		this.filePath = filePath;
-		this.moderationConfig = new ModerationConfig();
-		this.qotwConfig = new QOTWConfig();
-		this.welcomeConfig = new WelcomeConfig();
-		this.starBoardConfig = new StarBoardConfig();
-		this.jamConfig = new JamConfig();
+		for (var field : this.getClass().getDeclaredFields()) {
+			int modifiers = field.getModifiers();
+			if (!Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers)) {
+				try {
+					Constructor<?> constructor = field.getType().getDeclaredConstructor();
+					field.set(this, constructor.newInstance());
+				} catch (ReflectiveOperationException e) {
+					log.error("Could not set field {} to a new instance of {}.", field.getName(), field.getType().getSimpleName());
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/**
