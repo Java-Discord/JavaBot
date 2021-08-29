@@ -23,7 +23,7 @@ public class CancelSubcommand extends ActiveJamSubcommand {
 		if (confirmOption == null || !confirmOption.getAsString().equals("yes")) {
 			return Responses.warning(event, "Invalid confirmation. Type `yes` to confirm cancellation.");
 		}
-		TextChannel announcementChannel = Objects.requireNonNull(event.getGuild()).getTextChannelById(Bot.config.getJam().getAnnouncementChannelId());
+		TextChannel announcementChannel = Bot.config.getJam().getAnnouncementChannel(Objects.requireNonNull(event.getGuild()));
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
 		new JamRepository(con).cancelJam(activeJam);

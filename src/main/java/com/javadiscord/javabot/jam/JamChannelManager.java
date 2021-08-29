@@ -23,9 +23,9 @@ public class JamChannelManager {
 	private final Role jamPingRole;
 
 	public JamChannelManager(Guild guild, JamConfig jamConfig) {
-		this.votingChannel = guild.getTextChannelById(jamConfig.getVotingChannelId());
-		this.announcementChannel = guild.getTextChannelById(jamConfig.getAnnouncementChannelId());
-		this.jamPingRole = guild.getRoleById(jamConfig.getPingRoleId());
+		this.votingChannel = jamConfig.getVotingChannel(guild);
+		this.announcementChannel = jamConfig.getAnnouncementChannel(guild);
+		this.jamPingRole = jamConfig.getPingRole(guild);
 	}
 
 	public void sendErrorMessageAsync(SlashCommandEvent event, String message) {
