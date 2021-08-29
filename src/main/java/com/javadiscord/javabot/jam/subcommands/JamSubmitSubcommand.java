@@ -51,6 +51,12 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 		return Responses.success(event, "Submission Received", "Thank you for your submission to the Jam.");
 	}
 
+	/**
+	 * Determines if an HTTP link refers to a legitimate web page.
+	 * @param link The link to check.
+	 * @return True if the link leads to a web page that could be requested, or
+	 * false if not.
+	 */
 	private boolean validateLink(String link) {
 		if (!URL_PATTERN.matcher(link).matches()) return false;
 		try {
@@ -63,6 +69,16 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 		}
 	}
 
+	/**
+	 * Determines the name of the Jam theme that the user is making a submission
+	 * for. It is only required that the user specify explicitly the theme they
+	 * are submitting for, when the jam has more than one active theme.
+	 * @param con The database connection.
+	 * @param activeJam The jam.
+	 * @param event The event which triggered this method.
+	 * @return The name of the theme.
+	 * @throws SQLException If a database error occurs.
+	 */
 	private String getThemeName(Connection con, Jam activeJam, SlashCommandEvent event) throws SQLException {
 		List<JamTheme> possibleThemes = new JamThemeRepository(con).getAcceptedThemes(activeJam);
 		String themeName = null;

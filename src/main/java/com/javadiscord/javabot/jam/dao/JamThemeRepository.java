@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JamThemeRepository {
 	private final Connection con;
-	public void addTheme(Jam jam, JamTheme theme) throws SQLException, IOException {
+	public void addTheme(Jam jam, JamTheme theme) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO jam_theme (jam_id, name, description) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
@@ -25,7 +25,7 @@ public class JamThemeRepository {
 		stmt.close();
 	}
 
-	public List<JamTheme> getThemes(Jam jam) throws SQLException, IOException {
+	public List<JamTheme> getThemes(Jam jam) throws SQLException {
 		return this.fetchThemes(jam, "SELECT * FROM jam_theme WHERE jam_id = ? ORDER BY name");
 	}
 
