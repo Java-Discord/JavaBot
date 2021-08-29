@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class Unmute implements SlashCommandHandler {
 
@@ -23,7 +24,7 @@ public class Unmute implements SlashCommandHandler {
         if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
             return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
-        Role muteRole = new Database().getConfigRole(event.getGuild(), "roles.mute_rid");
+        Role muteRole = Bot.config.getModeration().getMuteRole(Objects.requireNonNull(event.getGuild()));
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
         try {

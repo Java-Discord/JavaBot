@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.StatsCategory;
 import net.dv8tion.jda.api.entities.Emote;
@@ -7,16 +8,16 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.List;
+import java.util.Objects;
 
 public class UserLeave extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-
         if (!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
-            if (new Database().getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {
+            if (Bot.config.getWelcome().isEnabled()) {
 
-                String leaveMessage = new Database().getConfigString(event.getGuild(), "welcome_system.leave_msg");
+                String leaveMessage = Objects.requireNonNull(Bot.config.getWelcome().getLeaveMessageTemplate());
                 String replacedText;
 
                 if (event.getUser().isBot()) {
@@ -31,7 +32,7 @@ public class UserLeave extends ListenerAdapter {
                         .replace("{!membertag}", event.getUser().getAsTag())
                         .replace("{!server}", event.getGuild().getName());
 
-                event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "welcome_system.welcome_cid")).sendMessage(replacedText2).queue();
+                Bot.config.getWelcome().getChannel(event.getGuild()).sendMessage(replacedText2).queue();
             }
 
             StatsCategory.update(event.getGuild());

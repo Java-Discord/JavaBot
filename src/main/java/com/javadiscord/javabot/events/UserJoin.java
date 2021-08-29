@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static com.javadiscord.javabot.events.Startup.iae;
@@ -185,14 +186,13 @@ public class UserJoin extends ListenerAdapter {
 
                 try {
 
-                    if (new Database().getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {
-
-                        String welcomeMessage = new Database().getConfigString(event.getGuild(), "welcome_system.join_msg")
+                    if (Bot.config.getWelcome().isEnabled()) {
+                        String welcomeMessage = Objects.requireNonNull(Bot.config.getWelcome().getJoinMessageTemplate())
                                 .replace("{!member}", event.getMember().getAsMention())
                                 .replace("{!membertag}", event.getMember().getUser().getAsTag())
                                 .replace("{!server}", event.getGuild().getName());
 
-                        event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "welcome_system.welcome_cid")).sendMessage(welcomeMessage)
+                        Bot.config.getWelcome().getChannel(event.getGuild()).sendMessage(welcomeMessage)
                                 .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
                     }
 

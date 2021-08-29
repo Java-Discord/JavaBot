@@ -254,18 +254,22 @@ public class Database {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public String getConfigString(Guild guild, String path) {
         return getConfig(guild, path, "None");
     }
 
+    @Deprecated(forRemoval = true)
     public int getConfigInt(Guild guild, String path) {
         return getConfig(guild, path, 0);
     }
 
+    @Deprecated(forRemoval = true)
     public boolean getConfigBoolean(Guild guild, String path) {
         return getConfig(guild, path, false);
     }
 
+    @Deprecated(forRemoval = true)
     public TextChannel getConfigChannel(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {
@@ -275,15 +279,7 @@ public class Database {
         }
     }
 
-    public Role getConfigRole(Guild guild, String path) {
-        String id = getConfigString(guild, path);
-        try {
-            return guild.getRoleById(id);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
+    @Deprecated(forRemoval = true)
     public String getConfigChannelAsMention(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {
@@ -293,6 +289,7 @@ public class Database {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public String getConfigRoleAsMention(Guild guild, String path) {
         String id = getConfigString(guild, path);
         try {

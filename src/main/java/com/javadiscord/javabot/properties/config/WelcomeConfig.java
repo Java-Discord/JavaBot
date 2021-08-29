@@ -1,6 +1,8 @@
 package com.javadiscord.javabot.properties.config;
 
 import lombok.Data;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +17,10 @@ public class WelcomeConfig {
 
 	@Nullable
 	private ImageConfig imageConfig;
+
+	public TextChannel getChannel(Guild guild) {
+		return guild.getTextChannelById(this.channelId);
+	}
 
 	@Data
 	public static class ImageConfig {

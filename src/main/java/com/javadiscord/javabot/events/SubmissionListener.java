@@ -2,6 +2,7 @@ package com.javadiscord.javabot.events;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
@@ -102,7 +103,7 @@ public class SubmissionListener extends ListenerAdapter {
 
         Guild guild = Startup.preferredGuild;
 
-            if (!new Database().getConfigBoolean(guild, "other.qotw.dm-qotw")) return;
+            if (!Bot.config.getQotw().isDmEnabled()) return;
 
                 try {
 
