@@ -81,6 +81,7 @@ public class Startup extends ListenerAdapter {
         mongoClient = new MongoClient(uri);
 
         new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());
+        logger.info("Successfully connected to Database");
 
         for (var guild : event.getJDA().getGuilds()) {
 
@@ -91,11 +92,11 @@ public class Startup extends ListenerAdapter {
             Bot.slashCommands.registerSlashCommands(guild);
         }
 
-        logger.info("Successfully connected to Database");
+
 
         } catch (MongoException e) {
 
-            logger.error("Couldn't connect to MongoDB (" + e.getClass().getSimpleName() + ") Shutting down...");
+            logger.error("Couldn't connect to MongoDB ({}) Shutting down...", e.getClass().getSimpleName());
             e.printStackTrace();
             System.exit(0);
         }

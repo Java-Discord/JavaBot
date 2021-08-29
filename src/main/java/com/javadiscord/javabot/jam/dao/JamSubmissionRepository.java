@@ -17,7 +17,7 @@ import java.util.List;
 public class JamSubmissionRepository {
 	private final Connection con;
 
-	public List<JamSubmission> getSubmissions(Jam jam) throws SQLException, IOException {
+	public List<JamSubmission> getSubmissions(Jam jam) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/find_latest_submissions.sql"));
 		stmt.setLong(1, jam.getId());
 		ResultSet rs = stmt.executeQuery();
@@ -29,7 +29,7 @@ public class JamSubmissionRepository {
 		return submissions;
 	}
 
-	public List<JamSubmission> getSubmissions(Jam jam, int page, Long userId) throws SQLException, IOException {
+	public List<JamSubmission> getSubmissions(Jam jam, int page, Long userId) throws SQLException {
 		int pageSize = 10;
 		String sql = "SELECT js.* FROM jam_submission js WHERE js.jam_id = ? /* CONDITIONS */ ORDER BY js.created_at LIMIT 10 /* OFFSET */"
 				.replace("/* OFFSET */", "OFFSET " + (page - 1) * pageSize);

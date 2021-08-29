@@ -30,13 +30,13 @@ public class GetList implements SlashCommandHandler {
                 .setTitle("Welcome System Configuration")
                 .setColor(Constants.GRAY)
 
-                .addField("Image", "Width, Height: `" + db.getConfigString(event.getGuild(), "welcome_system.image.imgW") +
-                        "`, `" + db.getConfigString(event.getGuild(), "welcome_system.image.imgH") +
+                .addField("Image", "Width, Height: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.imgW") +
+                        "`, `" + db.getConfigInt(event.getGuild(), "welcome_system.image.imgH") +
                         "`\n[Overlay](" + db.getConfigString(event.getGuild(), "welcome_system.image.overlayURL") +
                         "), [Background](" + db.getConfigString(event.getGuild(), "welcome_system.image.bgURL") + ")", false)
 
-                .addField("Color", "Primary Color: `#" + Integer.toHexString(db.getConfigInt(event.getGuild(), "welcome_system.image.primCol")) +
-                        "`\nSecondary Color: `#" + Integer.toHexString(db.getConfigInt(event.getGuild(), "welcome_system.image.secCol")) + "`", true)
+                .addField("Color", "Primary Color: `#" + Integer.toHexString(Integer.parseInt(db.getConfigString(event.getGuild(), "welcome_system.image.primCol"))) +
+                        "`\nSecondary Color: `#" + Integer.toHexString(Integer.parseInt(db.getConfigString(event.getGuild(), "welcome_system.image.secCol"))) + "`", true)
 
                 .addField("Avatar Image", "Width, Height: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avW") +
                         "`,`" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avH") +
@@ -50,7 +50,12 @@ public class GetList implements SlashCommandHandler {
                 .addField("Status", "``" + status + "``", true);
 
         try {
-            event.getHook().editOriginalEmbeds(eb.build()).addFile(new ByteArrayInputStream(new UserJoin().generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
+            event.getHook().sendMessageEmbeds(eb.build())
+                    .addFile(
+                            new ByteArrayInputStream(
+                            new UserJoin().generateImage(event, false, false)),
+                            event.getMember().getId() + ".png")
+                    .queue();
         } catch (Exception e) { e.printStackTrace(); }
     }
 }

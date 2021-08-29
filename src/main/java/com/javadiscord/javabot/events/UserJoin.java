@@ -65,8 +65,8 @@ public class UserJoin extends ListenerAdapter {
         int avW = db.getConfigInt(guild, "welcome_system.image.avatar.avW");
         int avH = db.getConfigInt(guild, "welcome_system.image.avatar.avH");
 
-        int primCol = db.getConfigInt(guild, "welcome_system.image.primCol");
-        int secCol = db.getConfigInt(guild, "welcome_system.image.secCol");
+        int primCol = Integer.parseInt(db.getConfigString(guild, "welcome_system.image.primCol"));
+        int secCol = Integer.parseInt(db.getConfigString(guild, "welcome_system.image.secCol"));
 
         float memberSize = 120;
         float countSize = 72;

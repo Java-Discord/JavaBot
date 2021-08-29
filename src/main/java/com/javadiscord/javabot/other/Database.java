@@ -3,6 +3,7 @@ package com.javadiscord.javabot.other;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.UpdateOptions;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
+import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
 
 public class Database {
 
@@ -60,10 +63,12 @@ public class Database {
                 }
             }
         }
-        guilds.forEach(this::insertGuildDoc);
+        for (var g : guilds) if (!guildDocExists(g)) insertGuildDoc(g);
     }
 
     public void deleteOpenSubmissions(Guild guild) {
+        logger.info("[{}] Deleting Open Submissions", guild.getName());
+
         MongoCollection<Document> collection = mongoClient
                 .getDatabase("other")
                 .getCollection("open_submissions");
@@ -161,13 +166,12 @@ public class Database {
     }
 
     public boolean guildDocExists(Guild guild) {
-        if (guild == null)
-            return false;
+        if (guild == null) return false;
 
-        return mongoClient.getDatabase("other")
+        return !(mongoClient.getDatabase("other")
                 .getCollection("config")
                 .find(eq("guild_id", guild.getId()))
-                .first() != null;
+                .first() == null);
     }
 
     public void insertGuildDoc(Guild guild) {
@@ -216,12 +220,14 @@ public class Database {
     }
 
     public void queryConfig(String guildID, String path, Object newValue) {
+
         BasicDBObject setData = new BasicDBObject(path, newValue);
         BasicDBObject update = new BasicDBObject("$set", setData);
 
         Document query = new Document("guild_id", guildID);
-        mongoClient.getDatabase("userdata")
-                .getCollection("users")
+
+        mongoClient.getDatabase("other")
+                .getCollection("config")
                 .updateOne(query, update);
     }
 
@@ -240,6 +246,7 @@ public class Database {
             }
             return doc.get(splittedPath[pathLen], defaultValue);
         } catch (Exception e) {
+            e.printStackTrace();
             if (!guildDocExists(guild)) {
                 insertGuildDoc(guild);
             }
@@ -295,83 +302,29 @@ public class Database {
         }
     }
 
-    private void queryStarboard(String guildId, String channelId, String messageId, String prop, Object newValue) {
-        Document setData = new Document(prop, newValue);
-        Document update = new Document("$set", setData);
-
-        Document query = new Document("guild_id", guildId)
-                .append("channel_id", channelId)
-                .append("message_id", messageId);
-        mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .updateOne(query, update);
-    }
-
-    public void queryStarboardString(String gID, String cID, String mID, String value, String newValue) {
-        queryStarboard(gID, cID, mID, value, newValue);
-    }
-
-    public void changeStarboardChannelBool(String gID, String cID, String mID, boolean sbc) {
-        queryStarboard(gID, cID, mID, "isInSBC", sbc);
-    }
-
-    public void setEmoteCount(String gID, String cID, String mID, int value) {
-        queryStarboard(gID, cID, mID, "starcount", value);
-    }
-
-    public boolean starboardDocExists(String gID, String cID, String mID) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-        Document first = mongoClient
-                .getDatabase("other")
-                .getCollection("starboard_messages")
-                .find(criteria)
-                .first();
-        return first != null && first.getString("guild_id") != null;
-    }
-
-    public void createStarboardDoc(String gID, String cID, String mID) {
-        Document doc = new Document("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID)
-                .append("starcount", 1)
-                .append("isInSBC", false)
-                .append("starboard_embed", "null");
-
-        mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .insertOne(doc);
-    }
-
-    public int getStarCount(String gID, String cID, String mID) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-
-        Document first = mongoClient
-                .getDatabase("other")
-                .getCollection("starboard_messages")
-                .find(criteria)
-                .first();
-
-        if (first == null) {
-            new Database().createStarboardDoc(gID, cID, mID);
-            return 0;
-        }
-        return first.getInteger("starcount", 0);
-    }
-
     public boolean isMessageOnStarboard(String gID, String cID, String mID) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
+
         Document first = mongoClient
                 .getDatabase("other")
                 .getCollection("starboard_messages")
                 .find(criteria)
                 .first();
-        return first != null && first.getBoolean("isInSBC");
+
+        return first != null;
+    }
+
+    public void createStarboardDoc(String gID, String cID, String mID, String eMID) {
+        Document doc = new Document("guild_id", gID)
+                .append("channel_id", cID)
+                .append("message_id", mID)
+                .append("starboard_embed", eMID);
+
+        mongoClient.getDatabase("other")
+                .getCollection("starboard_messages")
+                .insertOne(doc);
     }
 
     public String getStarboardChannelString(String gID, String cID, String mID, String value) {
@@ -383,14 +336,5 @@ public class Database {
                 .find(criteria)
                 .first();
         return first == null ? null : first.getString(value);
-    }
-
-    public void deleteStarboardMessage(String gID, String cID, String mID) {
-        BasicDBObject criteria = new BasicDBObject("guild_id", gID)
-                .append("channel_id", cID)
-                .append("message_id", mID);
-        mongoClient.getDatabase("other")
-                .getCollection("starboard_messages")
-                .deleteOne(criteria);
     }
 }

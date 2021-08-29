@@ -60,6 +60,7 @@ public class SlashCommands extends ListenerAdapter {
             command.handle(event).queue();
             return;
         }
+
         try {
             BasicDBObject criteria = new BasicDBObject()
                     .append("guild_id", event.getGuild().getId())
@@ -71,7 +72,10 @@ public class SlashCommands extends ListenerAdapter {
             Document it = collection.find(criteria).first();
 
             JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
-            String value = Root.get("value").getAsString();
+            String value = Root.get("value").getAsString()
+                .replace("{!membercount}", String.valueOf(event.getGuild().getMemberCount()))
+                .replace("{!servername}", event.getGuild().getName())
+                .replace("{!serverid}", event.getGuild().getId());
 
             event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
 
