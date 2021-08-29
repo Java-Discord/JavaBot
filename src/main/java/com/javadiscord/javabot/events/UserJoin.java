@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.ServerLock;
 import com.javadiscord.javabot.other.StatsCategory;
@@ -174,7 +175,7 @@ public class UserJoin extends ListenerAdapter {
         if (event.getMember().getUser().isBot()) return;
 
         User user = event.getMember().getUser();
-        TextChannel welcomeChannel = new Database().getConfigChannel(event.getGuild(), "welcome_system.welcome_cid");
+        TextChannel welcomeChannel = event.getGuild().getTextChannelById(Bot.config.getWelcome().getChannelId());
 
         if (!ServerLock.lockStatus(event)) {
 

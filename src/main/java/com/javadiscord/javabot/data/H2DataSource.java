@@ -45,7 +45,7 @@ public class H2DataSource {
 	}
 
 	public Connection getConnection() throws SQLException {
-		String fileName = Bot.config.getSystemsConfig().getH2DatabaseFileName();
+		String fileName = Bot.config.getSystems().getH2DatabaseFileName();
 		return DriverManager.getConnection("jdbc:h2:file:./" + fileName + ";AUTO_SERVER=TRUE");
 	}
 
@@ -56,7 +56,7 @@ public class H2DataSource {
 	 * @throws IOException If an error occurs while searching for the file.
 	 */
 	private boolean databaseFileExists() throws IOException {
-		String fileName = Bot.config.getSystemsConfig().getH2DatabaseFileName();
+		String fileName = Bot.config.getSystems().getH2DatabaseFileName();
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + fileName + ".*");
 		return Files.walk(Path.of(""))
 				.anyMatch(matcher::matches);

@@ -60,8 +60,8 @@ public class Bot {
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();
-        asyncPool = Executors.newScheduledThreadPool(config.getSystemsConfig().getAsyncPoolSize());
-        JDA jda = JDABuilder.createDefault(config.getSystemsConfig().getJdaBotToken())
+        asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
+        JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ACTIVITY)

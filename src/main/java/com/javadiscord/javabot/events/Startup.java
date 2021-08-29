@@ -77,7 +77,7 @@ public class Startup extends ListenerAdapter {
 
         try {
 
-        MongoClientURI uri = new MongoClientURI(Bot.config.getSystemsConfig().getMongoDatabaseUrl());
+        MongoClientURI uri = new MongoClientURI(Bot.config.getSystems().getMongoDatabaseUrl());
         mongoClient = new MongoClient(uri);
 
         new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());

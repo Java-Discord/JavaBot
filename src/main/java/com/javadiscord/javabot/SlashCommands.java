@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
 import com.mongodb.BasicDBObject;
@@ -143,7 +142,6 @@ public class SlashCommands extends ListenerAdapter {
 
     private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) throws ExecutionException, InterruptedException {
         log.info("Adding command privileges for Guild " + guild.getName());
-        var db = new Database();
         for (var config : commandConfigs) {
             Long commandId = null;
             for (Command command : commands) {
@@ -157,8 +155,12 @@ public class SlashCommands extends ListenerAdapter {
             if (config.getPrivileges() != null && config.getPrivileges().length > 0) {
                 List<CommandPrivilege> p = new ArrayList<>();
                 for (var privilegeConfig : config.getPrivileges()) {
-                    p.add(privilegeConfig.toData(guild, db).get());
-                    log.info("[{}] Registering privilege for command {}: {}",guild.getName(), config.getName(), Objects.toString(privilegeConfig));
+                    try {
+                        p.add(privilegeConfig.toData(guild, Bot.config).get());
+                        log.info("[{}] Registering privilege for command {}: {}", guild.getName(), config.getName(), Objects.toString(privilegeConfig));
+                    } catch (Exception e) {
+                        log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
+                    }
                 }
                 guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {
                     log.info("[{}] Privilege update successful for command {}", guild.getName(), config.getName());

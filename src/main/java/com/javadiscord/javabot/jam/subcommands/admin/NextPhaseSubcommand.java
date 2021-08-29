@@ -14,7 +14,7 @@ import java.sql.Connection;
 public class NextPhaseSubcommand extends ActiveJamSubcommand {
 	@Override
 	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) {
-		var channelManager = new JamChannelManager(event.getGuild(), Bot.config.getJamConfig());
+		var channelManager = new JamChannelManager(event.getGuild(), Bot.config.getJam());
 		new JamPhaseManager(activeJam, event, channelManager).nextPhase();
 		return Responses.success(event, "Jam Phase Updated", "The jam's phase is now being updated.");
 	}

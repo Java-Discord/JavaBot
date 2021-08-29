@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -24,7 +24,7 @@ public class Report implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
-        MessageChannel reportChannel = new Database().getConfigChannel(event.getGuild(), "channels.report_cid");
+        MessageChannel reportChannel = event.getGuild().getTextChannelById(Bot.config.getModeration().getReportChannelId());
 
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
