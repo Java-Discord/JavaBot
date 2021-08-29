@@ -1,11 +1,14 @@
 package com.javadiscord.javabot.commands.configuation.config.subcommands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+
+import java.util.Objects;
 
 public class GetList implements SlashCommandHandler {
 
@@ -21,8 +24,8 @@ public class GetList implements SlashCommandHandler {
                 .addField("Lock Status", "Locked: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
                         "\nCount: `" + db.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
 
-                .addField("Question of the Week", "Submission Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.submission_cid")
-                        + "\nSubmission-Status: `" + db.getConfigBoolean(event.getGuild(), "other.qotw.dm-qotw") + "`", true)
+                .addField("Question of the Week", "Submission Channel: " + Bot.config.getQotw().getSubmissionChannel(Objects.requireNonNull(event.getGuild())).getAsMention()
+                        + "\nSubmission-Status: `" + Bot.config.getQotw().isDmEnabled() + "`", true)
 
                 .addField("Stats-Category", "Category-ID: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_cid") + "`" +
                         "\nText: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_text") + "`", false)

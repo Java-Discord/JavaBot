@@ -21,7 +21,10 @@ import java.util.concurrent.ScheduledExecutorService;
  * The main class where the bot is initialized.
  */
 public class Bot {
-    public static BotConfig config = BotConfig.loadOrCreate(Path.of("config.json"));
+    /**
+     * The set of configuration properties that this bot uses.
+     */
+    public static BotConfig config;
 
     /**
      * A reference to the slash command listener that's the main point of
@@ -48,6 +51,7 @@ public class Bot {
      * The main method that starts the bot. This involves a few steps:
      * <ol>
      *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
+     *     <li>Loading the configuration JSON file.</li>
      *     <li>Initializing the {@link SlashCommands} listener (which reads command data from a YAML file).</li>
      *     <li>Creating and configuring the {@link JDA} instance that enables the bot's Discord connectivity.</li>
      *     <li>Adding event listeners to the bot.</li>
@@ -57,6 +61,7 @@ public class Bot {
      */
     public static void main(String[] args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
+        config = BotConfig.loadOrCreate(Path.of("config.json"));
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();
