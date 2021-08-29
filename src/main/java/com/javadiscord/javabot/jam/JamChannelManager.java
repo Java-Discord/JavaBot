@@ -38,7 +38,7 @@ public class JamChannelManager {
 	private final TextChannel announcementChannel;
 
 	/**
-	 * The role which is pinged for annoucements about the jam.
+	 * The role which is pinged for announcements about the jam.
 	 */
 	private final Role jamPingRole;
 
