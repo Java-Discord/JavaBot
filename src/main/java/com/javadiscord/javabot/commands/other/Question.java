@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 
@@ -38,7 +39,7 @@ public class Question implements SlashCommandHandler {
             StringBuilder sb = new StringBuilder();
             while (i > 0) {
 
-                String JSON = collection.aggregate(Arrays.asList(Aggregates.sample(1))).first().toJson();
+                String JSON = collection.aggregate(List.of(Aggregates.sample(1))).first().toJson();
                 JsonObject root = JsonParser.parseString(JSON).getAsJsonObject();
 
                 String text = root.get("text").getAsString();
