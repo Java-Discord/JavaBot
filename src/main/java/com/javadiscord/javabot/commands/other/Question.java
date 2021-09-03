@@ -44,7 +44,7 @@ public class Question implements SlashCommandHandler {
                 String text = root.get("text").getAsString();
                 if (!(sb.toString().contains(text))) {
 
-                    sb.append("• " + text + "\n");
+                    sb.append("• ").append(text).append("\n");
                     i--;
                 } else {
                     continue;

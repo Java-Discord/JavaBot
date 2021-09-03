@@ -42,7 +42,7 @@ public class Startup extends ListenerAdapter {
             Scanner fReader = new Scanner(getClass().getClassLoader().getResourceAsStream("textfiles/startup.txt"));
 
             while (fReader.hasNextLine()) {
-                sb.append(fReader.nextLine() + "\n");
+                sb.append(fReader.nextLine()).append("\n");
             }
             System.out.println("\n" + sb.toString().replace("{!version}", new Version().getVersion(event.getJDA())));
 

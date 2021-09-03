@@ -43,8 +43,7 @@ public class Warns implements SlashCommandHandler {
             JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
             String reason = root.get("reason").getAsString();
             String date = root.get("date").getAsString();
-            sb.append("[Date] " + date +
-                "\n[Reason] " + reason + "\n\n");
+            sb.append("[Date] ").append(date).append("\n[Reason] ").append(reason).append("\n\n");
         }
 
         var e = new EmbedBuilder()
