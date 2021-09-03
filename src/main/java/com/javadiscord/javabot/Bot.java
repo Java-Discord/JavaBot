@@ -61,7 +61,7 @@ public class Bot {
      */
     public static void main(String[] args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
-        config = BotConfig.loadOrCreate(Path.of("config.json"));
+        config = new BotConfig(Path.of("config"));
         slashCommands = new SlashCommands();
         dataSource = new H2DataSource();
         dataSource.initDatabase();

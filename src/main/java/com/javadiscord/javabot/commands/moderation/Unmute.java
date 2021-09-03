@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.util.Date;
-import java.util.Objects;
 
 public class Unmute implements SlashCommandHandler {
 
@@ -24,7 +23,7 @@ public class Unmute implements SlashCommandHandler {
         if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
             return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
-        Role muteRole = Bot.config.getModeration().getMuteRole(Objects.requireNonNull(event.getGuild()));
+        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
         try {

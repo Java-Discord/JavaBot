@@ -14,15 +14,15 @@ import java.time.Instant;
  */
 public final class Responses {
 	public static ReplyAction success(SlashCommandEvent event, String title, String message) {
-		return reply(event, title, message, Bot.config.getSlashCommand().getInfoColor(), true);
+		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
 	public static ReplyAction info(SlashCommandEvent event, String title, String messsage) {
-		return reply(event, title, messsage, Bot.config.getSlashCommand().getInfoColor(), true);
+		return reply(event, title, messsage, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
 	public static ReplyAction error(SlashCommandEvent event, String message) {
-		return reply(event, "An Error Occurred", message, Bot.config.getSlashCommand().getErrorColor(), true);
+		return reply(event, "An Error Occurred", message, Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor(), true);
 	}
 
 	public static ReplyAction warning(SlashCommandEvent event, String message) {
@@ -30,7 +30,7 @@ public final class Responses {
 	}
 
 	public static ReplyAction warning(SlashCommandEvent event, String title, String message) {
-		return reply(event, title, message, Bot.config.getSlashCommand().getWarningColor(), true);
+		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor(), true);
 	}
 
 	private static ReplyAction reply(SlashCommandEvent event, String title, String message, String colorHex, boolean ephemeral) {

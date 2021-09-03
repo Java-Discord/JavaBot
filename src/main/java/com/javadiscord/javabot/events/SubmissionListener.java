@@ -5,13 +5,11 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -41,9 +39,7 @@ public class SubmissionListener extends ListenerAdapter {
                 .setTimestamp(new Date().toInstant())
                 .build();
 
-        TextChannel subChannel = guild.getTextChannelById(new Database().getConfigString(guild, "channels.submission_cid"));
-
-        subChannel.sendMessageEmbeds(eb).setActionRows(ActionRow.of(
+        Bot.config.get(guild).getQotw().getSubmissionChannel().sendMessageEmbeds(eb).setActionRows(ActionRow.of(
                 Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
                 Button.danger("submission:decline:" + event.getUser().getId(), "Decline")))
                 .queue(m -> {
@@ -103,7 +99,7 @@ public class SubmissionListener extends ListenerAdapter {
 
         Guild guild = Startup.preferredGuild;
 
-            if (!Bot.config.getQotw().isDmEnabled()) return;
+            if (!Bot.config.get(guild).getQotw().isDmEnabled()) return;
 
                 try {
 

@@ -22,7 +22,7 @@ public class CommandPrivilegeConfig {
 						return CompletableFuture.completedFuture(new CommandPrivilege(CommandPrivilege.Type.USER, this.enabled, user.getIdLong()));
 					});
 		} else if (this.type.equalsIgnoreCase(CommandPrivilege.Type.ROLE.name())) {
-			Long roleId = botConfig.resolve(this.id);
+			Long roleId = botConfig.get(guild).resolve(this.id);
 			if (roleId == null) return CompletableFuture.failedFuture(new IllegalArgumentException("Missing role id."));
 			Role role = guild.getRoleById(roleId);
 			if (role == null) return CompletableFuture.failedFuture(new IllegalArgumentException("Role could not be found for id " + roleId));

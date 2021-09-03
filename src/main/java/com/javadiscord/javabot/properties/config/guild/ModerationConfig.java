@@ -1,35 +1,37 @@
-package com.javadiscord.javabot.properties.config;
+package com.javadiscord.javabot.properties.config.guild;
 
+import com.javadiscord.javabot.properties.config.GuildConfigItem;
 import lombok.Data;
-import net.dv8tion.jda.api.entities.Guild;
+import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 @Data
-public class ModerationConfig {
+@EqualsAndHashCode(callSuper = true)
+public class ModerationConfig extends GuildConfigItem {
 	private long reportChannelId;
 	private long logChannelId;
 	private long suggestionChannelId;
 	private long muteRoleId;
 	private long staffRoleId;
 
-	public TextChannel getReportChannel(Guild guild) {
+	public TextChannel getReportChannel() {
 		return guild.getTextChannelById(this.reportChannelId);
 	}
 
-	public TextChannel getLogChannel(Guild guild) {
+	public TextChannel getLogChannel() {
 		return guild.getTextChannelById(this.logChannelId);
 	}
 
-	public TextChannel getSuggestionChannel(Guild guild) {
+	public TextChannel getSuggestionChannel() {
 		return guild.getTextChannelById(this.suggestionChannelId);
 	}
 
-	public Role getMuteRole(Guild guild) {
+	public Role getMuteRole() {
 		return guild.getRoleById(this.muteRoleId);
 	}
 
-	public Role getStaffRole(Guild guild) {
+	public Role getStaffRole() {
 		return guild.getRoleById(this.staffRoleId);
 	}
 }

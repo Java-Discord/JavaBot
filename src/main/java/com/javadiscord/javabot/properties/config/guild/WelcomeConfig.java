@@ -1,13 +1,15 @@
-package com.javadiscord.javabot.properties.config;
+package com.javadiscord.javabot.properties.config.guild;
 
+import com.javadiscord.javabot.properties.config.GuildConfigItem;
 import lombok.Data;
-import net.dv8tion.jda.api.entities.Guild;
+import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import javax.annotation.Nullable;
 
 @Data
-public class WelcomeConfig {
+@EqualsAndHashCode(callSuper = true)
+public class WelcomeConfig extends GuildConfigItem {
 	@Nullable
 	private String joinMessageTemplate;
 	@Nullable
@@ -18,7 +20,7 @@ public class WelcomeConfig {
 	@Nullable
 	private ImageConfig imageConfig;
 
-	public TextChannel getChannel(Guild guild) {
+	public TextChannel getChannel() {
 		return guild.getTextChannelById(this.channelId);
 	}
 

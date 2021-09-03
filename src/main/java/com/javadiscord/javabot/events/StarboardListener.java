@@ -30,7 +30,8 @@ public class StarboardListener extends ListenerAdapter {
         String mID = message.getId();
 
         Database db = new Database();
-        TextChannel sc = guild.getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"));
+        var config = Bot.config.get(guild).getStarBoard();
+        TextChannel sc = config.getChannel();
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Jump to message", message.getJumpUrl())
@@ -64,7 +65,7 @@ public class StarboardListener extends ListenerAdapter {
 
         String var = doc.getString("starboard_embed");
 
-        Bot.config.getStarBoard().getChannel(guild)
+        Bot.config.get(guild).getStarBoard().getChannel()
                 .retrieveMessageById(var)
                 .complete()
                 .delete()
@@ -84,8 +85,7 @@ public class StarboardListener extends ListenerAdapter {
         Message sbMsg;
 
         try {
-            sbMsg = guild
-                .getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"))
+            sbMsg = Bot.config.get(guild).getStarBoard().getChannel()
                 .retrieveMessageById(sbcEmbedId).complete();
         } catch (Exception e) { return; }
 

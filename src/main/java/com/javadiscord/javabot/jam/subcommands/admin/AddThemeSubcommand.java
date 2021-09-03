@@ -5,6 +5,7 @@ import com.javadiscord.javabot.jam.dao.JamThemeRepository;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamTheme;
 import com.javadiscord.javabot.jam.subcommands.ActiveJamSubcommand;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class AddThemeSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
 		OptionMapping nameOption = event.getOption("name");
 		OptionMapping descriptionOption = event.getOption("description");
 		if (nameOption == null || descriptionOption == null) {

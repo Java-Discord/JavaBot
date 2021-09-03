@@ -15,9 +15,10 @@ public class UserLeave extends ListenerAdapter {
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
         if (!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
-            if (Bot.config.getWelcome().isEnabled()) {
+            var welcomeConfig = Bot.config.get(event.getGuild()).getWelcome();
+            if (welcomeConfig.isEnabled()) {
 
-                String leaveMessage = Objects.requireNonNull(Bot.config.getWelcome().getLeaveMessageTemplate());
+                String leaveMessage = Objects.requireNonNull(welcomeConfig.getLeaveMessageTemplate());
                 String replacedText;
 
                 if (event.getUser().isBot()) {
@@ -32,7 +33,7 @@ public class UserLeave extends ListenerAdapter {
                         .replace("{!membertag}", event.getUser().getAsTag())
                         .replace("{!server}", event.getGuild().getName());
 
-                Bot.config.getWelcome().getChannel(event.getGuild()).sendMessage(replacedText2).queue();
+                welcomeConfig.getChannel().sendMessage(replacedText2).queue();
             }
 
             StatsCategory.update(event.getGuild());

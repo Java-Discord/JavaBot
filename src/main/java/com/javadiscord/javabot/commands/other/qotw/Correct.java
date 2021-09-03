@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.other.qotw;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
@@ -15,8 +16,7 @@ public class Correct {
     public static void correct(ButtonClickEvent event, Member member) {
 
         String check;
-        TextChannel tc;
-        tc = event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "channels.log_cid"));
+        TextChannel tc = Bot.config.get(event.getGuild()).getModeration().getLogChannel();
         check = event.getGuild().getEmotesByName("check", false).get(0).getAsMention();
 
         int qotwPoints = new Database().getMemberInt(member, "qotwpoints");

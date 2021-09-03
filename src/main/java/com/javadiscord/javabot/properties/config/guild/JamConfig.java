@@ -1,12 +1,14 @@
-package com.javadiscord.javabot.properties.config;
+package com.javadiscord.javabot.properties.config.guild;
 
+import com.javadiscord.javabot.properties.config.GuildConfigItem;
 import lombok.Data;
-import net.dv8tion.jda.api.entities.Guild;
+import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 @Data
-public class JamConfig {
+@EqualsAndHashCode(callSuper = true)
+public class JamConfig extends GuildConfigItem {
 	private long announcementChannelId;
 	private long votingChannelId;
 
@@ -15,19 +17,19 @@ public class JamConfig {
 
 	private String jamEmbedColor = "#fc5a03";
 
-	public TextChannel getAnnouncementChannel(Guild guild) {
+	public TextChannel getAnnouncementChannel() {
 		return guild.getTextChannelById(this.announcementChannelId);
 	}
 
-	public TextChannel getVotingChannel(Guild guild) {
+	public TextChannel getVotingChannel() {
 		return guild.getTextChannelById(this.votingChannelId);
 	}
 
-	public Role getPingRole(Guild guild) {
+	public Role getPingRole() {
 		return guild.getRoleById(this.pingRoleId);
 	}
 
-	public Role getAdminRole(Guild guild) {
+	public Role getAdminRole() {
 		return guild.getRoleById(this.adminRoleId);
 	}
 }

@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -17,7 +17,7 @@ public class SuggestionListener extends ListenerAdapter {
         try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
         catch (NullPointerException ignored) { return; }
 
-            if (event.getChannel().getId().equals(new Database().getConfigString(event.getGuild(), "channels.suggestion_cid"))) {
+            if (event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel())) {
 
                     EmbedBuilder eb = new EmbedBuilder()
                             .setColor(Constants.GRAY)

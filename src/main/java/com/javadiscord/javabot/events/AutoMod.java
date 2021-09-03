@@ -1,9 +1,9 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.moderation.Mute;
 import com.javadiscord.javabot.commands.moderation.Warn;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -103,7 +103,7 @@ public class AutoMod extends ListenerAdapter {
                 if (spamCount > 5) {
                     if (!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).getFileExtension().equals("java")) return;
 
-                    Role muteRole = event.getGuild().getRoleById(new Database().getConfigString(event.getGuild(), "roles.mute_rid"));
+                    Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
                     if (member.getRoles().contains(muteRole)) return;
 
                     var eb = new EmbedBuilder()

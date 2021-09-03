@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class Mutelist implements SlashCommandHandler {
 
@@ -26,7 +25,7 @@ public class Mutelist implements SlashCommandHandler {
 
         String res = "";
         int memberSize;
-        Role muteRole = Bot.config.getModeration().getMuteRole(Objects.requireNonNull(event.getGuild()));
+        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
 
         try {
             List<Member> members = event.getGuild().getMembersWithRoles(muteRole);

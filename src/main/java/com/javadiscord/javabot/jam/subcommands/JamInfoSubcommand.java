@@ -36,7 +36,7 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 		event.getJDA().retrieveUserById(jam.getStartedBy()).queue(user -> {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("Jam Information")
-					.setColor(Color.decode(Bot.config.getJam().getJamEmbedColor()))
+					.setColor(Color.decode(Bot.config.get(event.getGuild()).getJam().getJamEmbedColor()))
 					.addField("Id", Long.toString(jam.getId()), true)
 					.addField("Name", jam.getFullName(), true)
 					.addField("Created at", jam.getCreatedAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' kk:mm:ss 'UTC'")), true)
