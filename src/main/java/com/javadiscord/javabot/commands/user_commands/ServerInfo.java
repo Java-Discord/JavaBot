@@ -18,11 +18,11 @@ public class ServerInfo implements SlashCommandHandler {
     public ReplyAction handle(SlashCommandEvent event) {
 
         if (event.getGuild() == null) return Responses.warning(event, "This can only be used in a guild.");
-        long roleCount = event.getGuild().getRoles().stream().count() - 1;
-        long catCount = event.getGuild().getCategories().stream().count();
-        long textChannelCount = event.getGuild().getTextChannels().stream().count();
-        long voiceChannelCount = event.getGuild().getVoiceChannels().stream().count();
-        long channelCount = event.getGuild().getChannels().stream().count() - catCount;
+        long roleCount = (long) event.getGuild().getRoles().size() - 1;
+        long catCount = event.getGuild().getCategories().size();
+        long textChannelCount = event.getGuild().getTextChannels().size();
+        long voiceChannelCount = event.getGuild().getVoiceChannels().size();
+        long channelCount = (long) event.getGuild().getChannels().size() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
         String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
