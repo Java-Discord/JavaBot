@@ -16,22 +16,22 @@ public class ModerationConfig extends GuildConfigItem {
 	private long staffRoleId;
 
 	public TextChannel getReportChannel() {
-		return guild.getTextChannelById(this.reportChannelId);
+		return this.getGuild().getTextChannelById(this.reportChannelId);
 	}
 
 	public TextChannel getLogChannel() {
-		return guild.getTextChannelById(this.logChannelId);
+		return this.getGuild().getTextChannelById(this.logChannelId);
 	}
 
 	public TextChannel getSuggestionChannel() {
-		return guild.getTextChannelById(this.suggestionChannelId);
+		return this.getGuild().getTextChannelById(this.suggestionChannelId);
 	}
 
 	public Role getMuteRole() {
-		return guild.getRoleById(this.muteRoleId);
+		return this.getGuild().getRoleById(this.muteRoleId);
 	}
 
 	public Role getStaffRole() {
-		return guild.getRoleById(this.staffRoleId);
+		return this.getGuild().getRoleById(this.staffRoleId);
 	}
 }

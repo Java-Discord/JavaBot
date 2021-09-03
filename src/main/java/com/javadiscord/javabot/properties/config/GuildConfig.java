@@ -49,13 +49,13 @@ public class GuildConfig {
 
 	private void setGuild(Guild guild) {
 		this.guild = guild;
-		this.slashCommand.setGuild(guild);
-		this.moderation.setGuild(guild);
-		this.qotw.setGuild(guild);
-		this.welcome.setGuild(guild);
-		this.stats.setGuild(guild);
-		this.starBoard.setGuild(guild);
-		this.jam.setGuild(guild);
+		this.slashCommand.setGuildConfig(this);
+		this.moderation.setGuildConfig(this);
+		this.qotw.setGuildConfig(this);
+		this.welcome.setGuildConfig(this);
+		this.stats.setGuildConfig(this);
+		this.starBoard.setGuildConfig(this);
+		this.jam.setGuildConfig(this);
 	}
 
 	/**
@@ -108,7 +108,9 @@ public class GuildConfig {
 	 * Attempts to resolve a configuration property value by its name, using a
 	 * '.' to concatenate property names. For example, the {@link JamConfig} has
 	 * a property called <code>pingRoleId</code>. We can resolve it via the
-	 * full name <code>jamConfig.pingRoleId</code>.
+	 * full name <code>jam.pingRoleId</code>, using the <code>jam</code> field
+	 * of {@link GuildConfig} followed by the <code>pingRoleId</code> field from
+	 * {@link JamConfig}.
 	 * @param propertyName The name of the property.
 	 * @param <T> The type of the property.
 	 * @return The value of the property, if found, or null otherwise.

@@ -15,6 +15,6 @@ public class StarBoardConfig extends GuildConfigItem {
 	private List<String> emotes = new ArrayList<>();
 
 	public TextChannel getChannel() {
-		return guild.getTextChannelById(this.channelId);
+		return this.getGuild().getTextChannelById(this.channelId);
 	}
 }

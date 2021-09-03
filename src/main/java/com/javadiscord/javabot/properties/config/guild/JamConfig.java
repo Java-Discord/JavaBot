@@ -18,18 +18,18 @@ public class JamConfig extends GuildConfigItem {
 	private String jamEmbedColor = "#fc5a03";
 
 	public TextChannel getAnnouncementChannel() {
-		return guild.getTextChannelById(this.announcementChannelId);
+		return this.getGuild().getTextChannelById(this.announcementChannelId);
 	}
 
 	public TextChannel getVotingChannel() {
-		return guild.getTextChannelById(this.votingChannelId);
+		return this.getGuild().getTextChannelById(this.votingChannelId);
 	}
 
 	public Role getPingRole() {
-		return guild.getRoleById(this.pingRoleId);
+		return this.getGuild().getRoleById(this.pingRoleId);
 	}
 
 	public Role getAdminRole() {
-		return guild.getRoleById(this.adminRoleId);
+		return this.getGuild().getRoleById(this.adminRoleId);
 	}
 }

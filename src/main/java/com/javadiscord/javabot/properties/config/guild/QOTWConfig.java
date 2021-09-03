@@ -12,6 +12,6 @@ public class QOTWConfig extends GuildConfigItem {
 	private long submissionChannelId;
 
 	public TextChannel getSubmissionChannel() {
-		return guild.getTextChannelById(this.submissionChannelId);
+		return this.getGuild().getTextChannelById(this.submissionChannelId);
 	}
 }

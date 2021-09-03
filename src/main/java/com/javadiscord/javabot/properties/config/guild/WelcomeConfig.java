@@ -21,7 +21,7 @@ public class WelcomeConfig extends GuildConfigItem {
 	private ImageConfig imageConfig;
 
 	public TextChannel getChannel() {
-		return guild.getTextChannelById(this.channelId);
+		return this.getGuild().getTextChannelById(this.channelId);
 	}
 
 	@Data
