@@ -59,7 +59,6 @@ public class Startup extends ListenerAdapter {
             try {
                 preferredGuild = event.getJDA().getGuildById(guildOrder[i]);
                 if (event.getJDA().getGuilds().contains(preferredGuild)) break;
-                else continue;
 
             } catch (Exception ignored) {}
         }

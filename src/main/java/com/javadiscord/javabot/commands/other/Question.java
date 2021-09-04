@@ -47,8 +47,6 @@ public class Question implements SlashCommandHandler {
 
                     sb.append("• ").append(text).append("\n");
                     i--;
-                } else {
-                    continue;
                 }
             }
 
