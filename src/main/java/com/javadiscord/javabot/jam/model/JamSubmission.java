@@ -18,8 +18,7 @@ public class JamSubmission {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof JamSubmission)) return false;
-		JamSubmission that = (JamSubmission) o;
+		if (!(o instanceof JamSubmission that)) return false;
 		return getId() == that.getId();
 	}
 

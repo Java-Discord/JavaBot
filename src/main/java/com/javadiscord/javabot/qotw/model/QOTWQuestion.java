@@ -23,8 +23,7 @@ public class QOTWQuestion implements Comparable<QOTWQuestion> {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof QOTWQuestion)) return false;
-		QOTWQuestion that = (QOTWQuestion) o;
+		if (!(o instanceof QOTWQuestion that)) return false;
 		if (this.getId() == that.getId()) return true;
 		return this.getText().equals(that.getText()) && this.getGuildId() == that.getGuildId() && this.getCreatedBy() == that.getCreatedBy() && this.getPriority() == that.getPriority() && this.isUsed() == that.isUsed();
 	}

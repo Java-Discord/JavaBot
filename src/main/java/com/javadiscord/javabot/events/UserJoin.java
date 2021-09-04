@@ -33,22 +33,19 @@ public class UserJoin extends ListenerAdapter {
         Guild guild = null;
         Member member = null;
 
-        if (ev instanceof net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent) {
-            net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
+        if (ev instanceof GuildMessageReceivedEvent event) {
 
             guild = event.getGuild();
             member = event.getMember();
         }
 
-        if (ev instanceof net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent) {
-            net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent event = (GuildMemberJoinEvent) ev;
+        if (ev instanceof GuildMemberJoinEvent event) {
 
             guild = event.getGuild();
             member = event.getMember();
         }
 
-        if (ev instanceof net.dv8tion.jda.api.events.interaction.SlashCommandEvent) {
-            net.dv8tion.jda.api.events.interaction.SlashCommandEvent event = (SlashCommandEvent) ev;
+        if (ev instanceof SlashCommandEvent event) {
 
             guild = event.getGuild();
             member = event.getMember();
