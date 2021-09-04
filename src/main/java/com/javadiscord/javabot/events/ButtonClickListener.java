@@ -27,15 +27,9 @@ public class ButtonClickListener extends ListenerAdapter {
 		MongoDatabase database = mongoClient.getDatabase("other");
 		String[] id = event.getComponentId().split(":");
 		switch (id[0]) {
-			case "dm-submission":
-				this.handleDmSubmission(database, guild, event);
-				break;
-			case "submission":
-				this.handleSubmission(database, guild, event);
-				break;
-			case "reactionroles":
-				this.handleReactionRoles(database, guild, event);
-				break;
+			case "dm-submission" -> this.handleDmSubmission(database, guild, event);
+			case "submission" -> this.handleSubmission(database, guild, event);
+			case "reactionroles" -> this.handleReactionRoles(database, guild, event);
 		}
 	}
 
@@ -46,8 +40,8 @@ public class ButtonClickListener extends ListenerAdapter {
 		String text = root.get("text").getAsString();
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
-			case "send": new SubmissionListener().dmSubmissionSend(event, text); break;
-			case "cancel": new SubmissionListener().dmSubmissionCancel(event); break;
+			case "send" -> new SubmissionListener().dmSubmissionSend(event, text);
+			case "cancel" -> new SubmissionListener().dmSubmissionCancel(event);
 		}
 		openSubmissions.deleteOne(document);
 	}
@@ -59,8 +53,8 @@ public class ButtonClickListener extends ListenerAdapter {
 		String userID = root.get("user_id").getAsString();
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
-			case "approve": new SubmissionListener().submissionApprove(event, userID); break;
-			case "decline": new SubmissionListener().submissionDecline(event); break;
+			case "approve" -> new SubmissionListener().submissionApprove(event, userID);
+			case "decline" -> new SubmissionListener().submissionDecline(event);
 		}
 		submissionMessages.deleteOne(document);
 	}

@@ -25,11 +25,11 @@ public class Embed implements SlashCommandHandler {
             return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
-        switch (event.getSubcommandName()) {
-            case "create": return createEmbed(event);
-            case "from-message": return createEmbedFromLink(event);
-        }
-        return Responses.warning(event, "Unknown subcommand.");
+        return switch (event.getSubcommandName()) {
+            case "create" -> createEmbed(event);
+            case "from-message" -> createEmbedFromLink(event);
+            default -> Responses.warning(event, "Unknown subcommand.");
+        };
     }
 
     private ReplyAction createEmbedFromLink(SlashCommandEvent event) {
