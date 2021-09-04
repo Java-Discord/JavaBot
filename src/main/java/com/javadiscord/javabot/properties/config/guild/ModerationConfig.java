@@ -14,6 +14,7 @@ public class ModerationConfig extends GuildConfigItem {
 	private long suggestionChannelId;
 	private long muteRoleId;
 	private long staffRoleId;
+	private int purgeMaxMessageCount = 1000;
 
 	public TextChannel getReportChannel() {
 		return this.getGuild().getTextChannelById(this.reportChannelId);

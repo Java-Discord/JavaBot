@@ -153,7 +153,8 @@
       - type: ROLE
         id: moderation.staffRoleId
   options: []
-- description: Deletes the given amount of messages in a channel
+
+- description: Deletes messages from a channel.
   name: purge
   handler: com.javadiscord.javabot.commands.moderation.Purge
   enabledByDefault: false
@@ -161,10 +162,19 @@
       - type: ROLE
         id: moderation.staffRoleId
   options:
-    - {description: the amount of messages you want to delete (2-100), name: amount,
-       required: true, type: INTEGER}
-    - {description: 'If true, creates a copy- and deletes the current channel', name: nuke-channel,
-       required: false, type: BOOLEAN}
+    - name: amount
+      description: Number of messages to remove. If left blank, all messages will be removed.
+      type: INTEGER
+      required: false
+    - name: user
+      description: The user whose messages to remove. If left blank, messages from any user are removed.
+      type: USER
+      required: false
+    - name: archive
+      description: If true, save removed messages in an archive.
+      type: BOOLEAN
+      required: false
+
 - description: Reports a member
   name: report
   handler: com.javadiscord.javabot.commands.moderation.Report
