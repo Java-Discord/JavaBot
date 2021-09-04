@@ -33,8 +33,8 @@ public class Embeds {
             user = event.getAuthor();
         }
 
-        if (ev instanceof SlashCommandEvent) {
-            user = ((SlashCommandEvent) ev).getUser();
+        if (ev instanceof SlashCommandEvent sev) {
+            user = sev.getUser();
         }
 
         return emptyError(text.replace("{{mention}}", user.getAsMention()), user);
