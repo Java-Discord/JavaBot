@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.configuation.config.subcommands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
@@ -14,6 +15,7 @@ public class GetList implements SlashCommandHandler {
 
         Database db = new Database();
 
+        var c = Bot.config.get(event.getGuild());
         var eb = new EmbedBuilder()
                 .setColor(Constants.GRAY)
                 .setTitle("Bot Configuration")
@@ -21,22 +23,22 @@ public class GetList implements SlashCommandHandler {
                 .addField("Lock Status", "Locked: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
                         "\nCount: `" + db.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
 
-                .addField("Question of the Week", "Submission Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.submission_cid")
-                        + "\nSubmission-Status: `" + db.getConfigBoolean(event.getGuild(), "other.qotw.dm-qotw") + "`", true)
+                .addField("Question of the Week", "Submission Channel: " + c.getQotw().getSubmissionChannel().getAsMention()
+                        + "\nSubmission-Status: `" + c.getQotw().isDmEnabled() + "`", true)
 
-                .addField("Stats-Category", "Category-ID: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_cid") + "`" +
-                        "\nText: `" + db.getConfigString(event.getGuild(), "other.stats_category.stats_text") + "`", false)
+                .addField("Stats-Category", "Category-ID: `" + c.getStats().getCategoryId() + "`" +
+                        "\nText: `" + c.getStats().getMemberCountMessageTemplate() + "`", false)
 
-                .addField("Channel & Roles", "Report Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.report_cid") +
-                        ", Log Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.log_cid") +
-                        "\nSuggestion Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.suggestion_cid") +
-                        ", Starboard Channel: " + db.getConfigChannelAsMention(event.getGuild(), "other.starboard.starboard_cid") +
-                        "\nJam Announcement Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_announcement_cid") +
-                        ", Jam Vote Channel: " + db.getConfigChannelAsMention(event.getGuild(), "channels.jam_vote_cid") +
-                        "\n\nMute Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.mute_rid") +
-                        ", Staff Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.staff_rid") +
-                        ", Jam-Admin Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_admin_rid") +
-                        ", Jam-Ping Role: " + db.getConfigRoleAsMention(event.getGuild(), "roles.jam_ping_rid"), false)
+                .addField("Channel & Roles", "Report Channel: " + c.getModeration().getReportChannel().getAsMention() +
+                        ", Log Channel: " + c.getModeration().getLogChannel().getAsMention() +
+                        "\nSuggestion Channel: " + c.getModeration().getSuggestionChannel().getAsMention() +
+                        ", Starboard Channel: " + c.getStarBoard().getChannel().getAsMention() +
+                        "\nJam Announcement Channel: " + c.getJam().getAnnouncementChannel().getAsMention() +
+                        ", Jam Vote Channel: " + c.getJam().getVotingChannel().getAsMention() +
+                        "\n\nMute Role: " + c.getModeration().getMuteRole().getAsMention() +
+                        ", Staff Role: " + c.getModeration().getStaffRole().getAsMention() +
+                        ", Jam-Admin Role: " + c.getJam().getAdminRole().getAsMention() +
+                        ", Jam-Ping Role: " + c.getJam().getPingRole().getAsMention(), false)
                 .build();
 
         return event.replyEmbeds(eb);

@@ -4,7 +4,7 @@ import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.jam.dao.JamRepository;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.subcommands.ActiveJamSubcommand;
-import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -17,12 +17,12 @@ import java.sql.Connection;
  */
 public class CancelSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
 		OptionMapping confirmOption = event.getOption("confirm");
 		if (confirmOption == null || !confirmOption.getAsString().equals("yes")) {
 			return Responses.warning(event, "Invalid confirmation. Type `yes` to confirm cancellation.");
 		}
-		TextChannel announcementChannel = new Database().getConfigChannel(event.getGuild(), "channels.jam_announcement_cid");
+		TextChannel announcementChannel = config.getAnnouncementChannel();
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
 		new JamRepository(con).cancelJam(activeJam);

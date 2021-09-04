@@ -19,10 +19,10 @@ import java.time.Instant;
  */
 public final class Responses {
 	public static ReplyAction success(SlashCommandEvent event, String title, String message) {
-		return reply(event, title, message, "responses.success", true);
+		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
-	public static WebhookMessageAction<Message> success(InteractionHook hook, String title, String message) {
+public static WebhookMessageAction<Message> success(InteractionHook hook, String title, String message) {
 		return reply(hook, title, message, "responses.success", true);
 	}
 
@@ -35,7 +35,7 @@ public final class Responses {
 	}
 
 	public static ReplyAction error(SlashCommandEvent event, String message) {
-		return reply(event, "An Error Occurred", message, "responses.error", true);
+		return reply(event, "An Error Occurred", message, Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor(), true);
 	}
 
 	public static WebhookMessageAction<Message> error(InteractionHook hook, String message) {
@@ -51,10 +51,10 @@ public final class Responses {
 	}
 
 	public static ReplyAction warning(SlashCommandEvent event, String title, String message) {
-		return reply(event, title, message, "responses.warning", true);
+		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor(), true);
 	}
 
-	public static WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message) {
+public static WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message) {
 		return reply(hook, title, message, "responses.warning", true);
 	}
 

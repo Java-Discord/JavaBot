@@ -1,26 +1,20 @@
 package com.javadiscord.javabot.events;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-
 import org.bson.Document;
 import org.slf4j.LoggerFactory;
-
-import java.time.OffsetDateTime;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -36,7 +30,8 @@ public class StarboardListener extends ListenerAdapter {
         String mID = message.getId();
 
         Database db = new Database();
-        TextChannel sc = guild.getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"));
+        var config = Bot.config.get(guild).getStarBoard();
+        TextChannel sc = config.getChannel();
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Jump to message", message.getJumpUrl())
@@ -70,7 +65,7 @@ public class StarboardListener extends ListenerAdapter {
 
         String var = doc.getString("starboard_embed");
 
-        new Database().getConfigChannel(guild, "other.starboard.starboard_cid")
+        Bot.config.get(guild).getStarBoard().getChannel()
                 .retrieveMessageById(var)
                 .complete()
                 .delete()
@@ -90,8 +85,7 @@ public class StarboardListener extends ListenerAdapter {
         Message sbMsg;
 
         try {
-            sbMsg = guild
-                .getTextChannelById(db.getConfigString(guild, "other.starboard.starboard_cid"))
+            sbMsg = Bot.config.get(guild).getStarBoard().getChannel()
                 .retrieveMessageById(sbcEmbedId).complete();
         } catch (Exception e) { return; }
 
