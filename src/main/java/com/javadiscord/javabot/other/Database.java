@@ -4,7 +4,10 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
@@ -251,52 +254,19 @@ public class Database {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public String getConfigString(Guild guild, String path) {
         return getConfig(guild, path, "None");
     }
 
+    @Deprecated(forRemoval = true)
     public int getConfigInt(Guild guild, String path) {
         return getConfig(guild, path, 0);
     }
 
+    @Deprecated(forRemoval = true)
     public boolean getConfigBoolean(Guild guild, String path) {
         return getConfig(guild, path, false);
-    }
-
-    public TextChannel getConfigChannel(Guild guild, String path) {
-        String id = getConfigString(guild, path);
-        try {
-            return guild.getTextChannelById(id);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    public Role getConfigRole(Guild guild, String path) {
-        String id = getConfigString(guild, path);
-        try {
-            return guild.getRoleById(id);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    public String getConfigChannelAsMention(Guild guild, String path) {
-        String id = getConfigString(guild, path);
-        try {
-            return guild.getTextChannelById(id).getAsMention();
-        } catch (NumberFormatException e) {
-            return "None";
-        }
-    }
-
-    public String getConfigRoleAsMention(Guild guild, String path) {
-        String id = getConfigString(guild, path);
-        try {
-            return guild.getRoleById(id).getAsMention();
-        } catch (NumberFormatException e) {
-            return "None";
-        }
     }
 
     public boolean isMessageOnStarboard(String gID, String cID, String mID) {

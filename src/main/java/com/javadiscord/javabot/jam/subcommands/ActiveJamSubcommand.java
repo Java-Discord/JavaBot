@@ -5,6 +5,7 @@ import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.jam.dao.JamRepository;
 import com.javadiscord.javabot.jam.model.Jam;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import java.sql.SQLException;
  * An abstract subcommand type that's used by any Jam subcommand which should
  * only operate in the context of an Active Java Jam. This parent class will
  * handle opening a connection to the data source and fetching the active jam,
- * so that clients only need to implement {@link ActiveJamSubcommand#handleJamCommand(SlashCommandEvent, Jam, Connection)}.
+ * so that clients only need to implement {@link ActiveJamSubcommand#handleJamCommand(SlashCommandEvent, Jam, Connection, JamConfig)}.
  */
 public abstract class ActiveJamSubcommand implements SlashCommandHandler {
 	private static final Logger log = LoggerFactory.getLogger(ActiveJamSubcommand.class);
@@ -35,7 +36,7 @@ public abstract class ActiveJamSubcommand implements SlashCommandHandler {
 				return Responses.warning(event, "No Active Jam", "There is currently no active jam in this guild.");
 			}
 			try {
-				var reply = this.handleJamCommand(event, activeJam, con);
+				var reply = this.handleJamCommand(event, activeJam, con, Bot.config.get(event.getGuild()).getJam());
 				con.commit();
 				return reply;
 			} catch (Throwable e) {
@@ -49,5 +50,5 @@ public abstract class ActiveJamSubcommand implements SlashCommandHandler {
 		}
 	}
 
-	protected abstract ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception;
+	protected abstract ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception;
 }
