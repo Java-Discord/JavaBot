@@ -18,7 +18,7 @@ import java.util.Date;
 
 public class Mute implements SlashCommandHandler {
 
-    public void mute (Member member, Guild guild) throws Exception {
+    public void mute (Member member, Guild guild) {
 
         Role muteRole = guild.getRoleById(new Database().getConfigString(guild, "roles.mute_rid"));
         guild.addRoleToMember(member.getId(), muteRole).complete();
