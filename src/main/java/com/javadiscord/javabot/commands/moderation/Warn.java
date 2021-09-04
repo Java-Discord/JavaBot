@@ -60,7 +60,7 @@ public class Warn implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
-        return (int) warns.count(eq("user_id", member.getId()));
+        return (int) warns.count(eq("user_id", member.getId())); // TODO: Replace with countDocuments
     }
 
     @Override

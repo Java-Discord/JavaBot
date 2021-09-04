@@ -31,7 +31,7 @@ public class Question implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("expert_questions");
 
-        long l = collection.count();
+        long l = collection.count(); // TODO: Replace with countDocuments()
 
         if (!(num > l) && num > 0) {
             int i = num;
