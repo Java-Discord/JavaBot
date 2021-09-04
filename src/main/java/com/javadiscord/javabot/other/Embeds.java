@@ -28,8 +28,7 @@ public class Embeds {
     private static MessageEmbed createErrorEmbed(String text, Object ev) {
         User user = null;
 
-        if (ev instanceof GuildMessageReceivedEvent) {
-            GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
+        if (ev instanceof GuildMessageReceivedEvent event) {
             event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
