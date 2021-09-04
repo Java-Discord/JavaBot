@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Startup extends ListenerAdapter {
 
-    public static String iae = "https://cdn.discordapp.com/attachments/838019016395063328/838019031628906496/IllegalArgumentException.png";
-    public static String mfurle = "https://cdn.discordapp.com/attachments/838020992882049025/838021012871315486/MalformedURLException.png";
+    public static final String iae = "https://cdn.discordapp.com/attachments/838019016395063328/838019031628906496/IllegalArgumentException.png";
+    public static final String mfurle = "https://cdn.discordapp.com/attachments/838020992882049025/838021012871315486/MalformedURLException.png";
 
     public static MongoClient mongoClient;
     public static Guild preferredGuild;
