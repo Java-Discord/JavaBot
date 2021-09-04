@@ -39,7 +39,7 @@ public static WebhookMessageAction<Message> success(InteractionHook hook, String
 	}
 
 	public static WebhookMessageAction<Message> error(InteractionHook hook, String message) {
-		return reply(hook, "An Error Occurred", message, "errorColor", true);
+		return reply(hook, "An Error Occurred", message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getErrorColor(), true);
 	}
 
 	public static ReplyAction warning(SlashCommandEvent event, String message) {
