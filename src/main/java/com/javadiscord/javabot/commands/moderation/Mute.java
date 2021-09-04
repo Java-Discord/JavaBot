@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,9 +18,8 @@ import java.util.Date;
 
 public class Mute implements SlashCommandHandler {
 
-    public void mute (Member member, Guild guild) throws Exception {
-
-        Role muteRole = guild.getRoleById(new Database().getConfigString(guild, "roles.mute_rid"));
+    public void mute (Member member, Guild guild) {
+        Role muteRole = Bot.config.get(guild).getModeration().getMuteRole();
         guild.addRoleToMember(member.getId(), muteRole).complete();
     }
 
@@ -50,7 +49,7 @@ public class Mute implements SlashCommandHandler {
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-        Role muteRole = event.getGuild().getRoleById(new Database().getConfigString(event.getGuild(), "roles.mute_rid"));
+        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
 
         if (member.getRoles().contains(muteRole)) {
             return event.replyEmbeds(Embeds.emptyError("```" + member.getUser().getAsTag() + " is already muted```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);

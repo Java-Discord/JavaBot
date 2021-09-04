@@ -6,6 +6,7 @@ import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamPhase;
 import com.javadiscord.javabot.jam.model.JamTheme;
 import com.javadiscord.javabot.jam.subcommands.ActiveJamSubcommand;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
@@ -15,7 +16,7 @@ import java.util.Objects;
 
 public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
 		if (activeJam.getCurrentPhase() == null || !activeJam.getCurrentPhase().equals(JamPhase.THEME_PLANNING)) {
 			return Responses.warning(event, "Themes can only be removed during theme planning.");
 		}

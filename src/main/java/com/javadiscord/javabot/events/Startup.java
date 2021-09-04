@@ -32,6 +32,8 @@ public class Startup extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event) {
+        // Initialize all guild-specific configuration.
+        Bot.config.loadGuilds(event.getJDA().getGuilds());
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
@@ -77,7 +79,7 @@ public class Startup extends ListenerAdapter {
 
         try {
 
-        MongoClientURI uri = new MongoClientURI(Bot.getProperty("mongologin", "default"));
+        MongoClientURI uri = new MongoClientURI(Bot.config.getSystems().getMongoDatabaseUrl());
         mongoClient = new MongoClient(uri);
 
         new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());

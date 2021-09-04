@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -25,7 +25,7 @@ public class Mutelist implements SlashCommandHandler {
 
         String res = "";
         int memberSize;
-        Role muteRole = new Database().getConfigRole(event.getGuild(), "roles.mute_rid");
+        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
 
         try {
             List<Member> members = event.getGuild().getMembersWithRoles(muteRole);

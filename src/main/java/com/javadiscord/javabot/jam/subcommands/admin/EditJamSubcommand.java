@@ -4,6 +4,7 @@ import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.jam.dao.JamRepository;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.subcommands.ActiveJamSubcommand;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -48,7 +49,7 @@ public class EditJamSubcommand extends ActiveJamSubcommand {
 	}
 
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
 		OptionMapping propertyNameOption = event.getOption("property");
 		OptionMapping propertyValueOption = event.getOption("value");
 		if (propertyNameOption == null || propertyValueOption == null) {

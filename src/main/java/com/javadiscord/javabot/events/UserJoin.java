@@ -1,6 +1,6 @@
 package com.javadiscord.javabot.events;
 
-import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.ServerLock;
 import com.javadiscord.javabot.other.StatsCategory;
 import com.javadiscord.javabot.other.TimeUtils;
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static com.javadiscord.javabot.events.Startup.iae;
@@ -54,18 +55,18 @@ public class UserJoin extends ListenerAdapter {
             member = event.getMember();
         }
 
-        Database db = new Database();
+        var config = Bot.config.get(guild).getWelcome();
 
         int stringWidth;
-        int imgW = db.getConfigInt(guild, "welcome_system.image.imgW");
-        int imgH = db.getConfigInt(guild, "welcome_system.image.imgH");
-        int avX = db.getConfigInt(guild, "welcome_system.image.avatar.avX");
-        int avY = db.getConfigInt(guild, "welcome_system.image.avatar.avY");
-        int avW = db.getConfigInt(guild, "welcome_system.image.avatar.avW");
-        int avH = db.getConfigInt(guild, "welcome_system.image.avatar.avH");
+        int imgW = config.getImageConfig().getWidth();
+        int imgH = config.getImageConfig().getHeight();
+        int avX = config.getImageConfig().getAvatarConfig().getX();
+        int avY = config.getImageConfig().getAvatarConfig().getY();
+        int avW = config.getImageConfig().getAvatarConfig().getWidth();
+        int avH = config.getImageConfig().getAvatarConfig().getHeight();
 
-        int primCol = Integer.parseInt(db.getConfigString(guild, "welcome_system.image.primCol"));
-        int secCol = Integer.parseInt(db.getConfigString(guild, "welcome_system.image.secCol"));
+        int primCol = config.getImageConfig().getPrimaryColor();
+        int secCol = config.getImageConfig().getSecondaryColor();
 
         float memberSize = 120;
         float countSize = 72;
@@ -75,13 +76,13 @@ public class UserJoin extends ListenerAdapter {
         BufferedImage flagImage = null, botImage = null, avatarImage = null, bgImage = null, overlayImage = null;
 
         try {
-            overlayURL = new URL(db.getConfigString(guild, "welcome_system.image.overlayURL"));
+            overlayURL = new URL(config.getImageConfig().getOverlayImageUrl());
         } catch (MalformedURLException e) {
             overlayURL = new URL(iae);
         }
 
         try {
-            bgURL = new URL(db.getConfigString(guild, "welcome_system.image.bgURL"));
+            bgURL = new URL(config.getImageConfig().getBackgroundImageUrl());
         } catch (MalformedURLException e) {
             bgURL = new URL(iae);
         }
@@ -174,7 +175,8 @@ public class UserJoin extends ListenerAdapter {
         if (event.getMember().getUser().isBot()) return;
 
         User user = event.getMember().getUser();
-        TextChannel welcomeChannel = new Database().getConfigChannel(event.getGuild(), "welcome_system.welcome_cid");
+        var welcomeConfig = Bot.config.get(event.getGuild()).getWelcome();
+        TextChannel welcomeChannel = event.getGuild().getTextChannelById(welcomeConfig.getChannelId());
 
         if (!ServerLock.lockStatus(event)) {
 
@@ -184,14 +186,13 @@ public class UserJoin extends ListenerAdapter {
 
                 try {
 
-                    if (new Database().getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) {
-
-                        String welcomeMessage = new Database().getConfigString(event.getGuild(), "welcome_system.join_msg")
+                    if (welcomeConfig.isEnabled()) {
+                        String welcomeMessage = Objects.requireNonNull(welcomeConfig.getJoinMessageTemplate())
                                 .replace("{!member}", event.getMember().getAsMention())
                                 .replace("{!membertag}", event.getMember().getUser().getAsTag())
                                 .replace("{!server}", event.getGuild().getName());
 
-                        event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "welcome_system.welcome_cid")).sendMessage(welcomeMessage)
+                        welcomeConfig.getChannel().sendMessage(welcomeMessage)
                                 .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
                     }
 
