@@ -43,14 +43,11 @@ public class Profile implements SlashCommandHandler {
     }
 
     String getOnlineStatus (Member member) {
-
-        String statusEmote = member.getOnlineStatus().toString()
+        return member.getOnlineStatus().toString()
                 .replace("ONLINE", Constants.ONLINE)
                 .replace("IDLE", Constants.IDLE)
                 .replace("DO_NOT_DISTURB", Constants.DND)
                 .replace("OFFLINE", Constants.OFFLINE);
-
-        return statusEmote;
     }
 
     Color getColor (Member member) {

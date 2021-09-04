@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 
@@ -30,7 +31,7 @@ public class Question implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("expert_questions");
 
-        long l = collection.count();
+        long l = collection.count(); // TODO: Replace with countDocuments()
 
         if (!(num > l) && num > 0) {
             int i = num;
@@ -38,16 +39,14 @@ public class Question implements SlashCommandHandler {
             StringBuilder sb = new StringBuilder();
             while (i > 0) {
 
-                String JSON = collection.aggregate(Arrays.asList(Aggregates.sample(1))).first().toJson();
+                String JSON = collection.aggregate(List.of(Aggregates.sample(1))).first().toJson();
                 JsonObject root = JsonParser.parseString(JSON).getAsJsonObject();
 
                 String text = root.get("text").getAsString();
                 if (!(sb.toString().contains(text))) {
 
-                    sb.append("• " + text + "\n");
+                    sb.append("• ").append(text).append("\n");
                     i--;
-                } else {
-                    continue;
                 }
             }
 

@@ -28,14 +28,13 @@ public class Embeds {
     private static MessageEmbed createErrorEmbed(String text, Object ev) {
         User user = null;
 
-        if (ev instanceof GuildMessageReceivedEvent) {
-            GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
+        if (ev instanceof GuildMessageReceivedEvent event) {
             event.getMessage().addReaction(Constants.CROSS).complete();
             user = event.getAuthor();
         }
 
-        if (ev instanceof SlashCommandEvent) {
-            user = ((SlashCommandEvent) ev).getUser();
+        if (ev instanceof SlashCommandEvent sev) {
+            user = sev.getUser();
         }
 
         return emptyError(text.replace("{{mention}}", user.getAsMention()), user);
@@ -57,15 +56,13 @@ public class Embeds {
         User user = null;
         Guild guild = null;
 
-        if (ev instanceof SlashCommandEvent) {
-            SlashCommandEvent event = (SlashCommandEvent) ev;
+        if (ev instanceof SlashCommandEvent event) {
 
             user = event.getUser();
             guild = event.getGuild();
         }
 
-        if (ev instanceof GuildMessageReceivedEvent) {
-            GuildMessageReceivedEvent event = (GuildMessageReceivedEvent) ev;
+        if (ev instanceof GuildMessageReceivedEvent event) {
 
             user = event.getAuthor();
             guild = event.getGuild();

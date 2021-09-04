@@ -29,20 +29,17 @@ public class CustomCommands implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        switch (event.getSubcommandName()) {
-            case "create":
-                return create(event,
+        return switch (event.getSubcommandName()) {
+            case "create" -> create(event,
                     event.getOption("name").getAsString(),
                     event.getOption("text").getAsString());
-            case "edit":
-                return edit(event,
+            case "edit" -> edit(event,
                     event.getOption("name").getAsString(),
                     event.getOption("text").getAsString());
-            case "delete":
-                return delete(event,
+            case "delete" -> delete(event,
                     event.getOption("name").getAsString());
-        }
-        return Responses.warning(event, "Unknown subcommand.");
+            default -> Responses.warning(event, "Unknown subcommand.");
+        };
     }
 
     public static boolean docExists(String guildID, String commandName) {
@@ -71,7 +68,7 @@ public class CustomCommands implements SlashCommandHandler {
             JsonObject Root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
             String commandName = Root.get("commandname").getAsString();
 
-            sb.append("/" + commandName + "\n");
+            sb.append("/").append(commandName).append("\n");
         }
 
         String description;

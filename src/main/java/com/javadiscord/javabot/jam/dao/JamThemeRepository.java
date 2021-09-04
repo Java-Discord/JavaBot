@@ -4,7 +4,6 @@ import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamTheme;
 import lombok.RequiredArgsConstructor;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

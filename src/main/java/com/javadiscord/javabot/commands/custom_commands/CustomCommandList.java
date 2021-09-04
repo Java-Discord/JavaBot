@@ -32,7 +32,7 @@ public class CustomCommandList implements SlashCommandHandler {
             JsonObject Root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
             String commandName = Root.get("commandname").getAsString();
 
-            sb.append("/" + commandName + "\n");
+            sb.append("/").append(commandName).append("\n");
         }
 
         String description;

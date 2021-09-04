@@ -15,7 +15,7 @@ import java.time.Instant;
 
 public class Ban implements SlashCommandHandler {
 
-    public void ban (Member member, String reason) throws Exception {
+    public void ban (Member member, String reason) {
         new Warn().deleteAllDocs(member.getId());
         member.ban(6, reason).queue();
     }

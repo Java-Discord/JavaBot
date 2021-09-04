@@ -18,8 +18,7 @@ public class JamTheme {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof JamTheme)) return false;
-		JamTheme jamTheme = (JamTheme) o;
+		if (!(o instanceof JamTheme jamTheme)) return false;
 		return Objects.equals(getJam(), jamTheme.getJam()) && Objects.equals(getName(), jamTheme.getName());
 	}
 

@@ -22,11 +22,11 @@ public class EditEmbed implements SlashCommandHandler {
             return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
 
-        switch (event.getSubcommandName()) {
-            case "edit": return editEmbed(event);
-            case "from-message": return editEmbedFromLink(event);
-        }
-        return Responses.warning(event, "Unknown subcommand.");
+        return switch (event.getSubcommandName()) {
+            case "edit" -> editEmbed(event);
+            case "from-message" -> editEmbedFromLink(event);
+            default -> Responses.warning(event, "Unknown subcommand.");
+        };
     }
 
     private ReplyAction editEmbedFromLink(SlashCommandEvent event) {

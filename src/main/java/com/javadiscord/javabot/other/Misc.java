@@ -49,11 +49,11 @@ public class Misc {
         StringBuilder sb = new StringBuilder();
         for (int guildAmount = guildList.size(); guildAmount > 0; guildAmount--) {
 
-            sb.append(", " + guildList.get(guildAmount - 1).getName());
+            sb.append(", ").append(guildList.get(guildAmount - 1).getName());
 
-                    if (showID && showMemCount) sb.append(" (" + guildList.get(guildAmount - 1).getId() + ", " + guildList.get(guildAmount - 1).getMemberCount() + " members)");
-                    else if (showID && !showMemCount) sb.append(" (" + guildList.get(guildAmount - 1).getId() + ")");
-                    else if (!showID && showMemCount) sb.append(" (" + guildList.get(guildAmount - 1).getMemberCount() + " members)");
+                    if (showID && showMemCount) sb.append(" (").append(guildList.get(guildAmount - 1).getId()).append(", ").append(guildList.get(guildAmount - 1).getMemberCount()).append(" members)");
+                    else if (showID && !showMemCount) sb.append(" (").append(guildList.get(guildAmount - 1).getId()).append(")");
+                    else if (!showID && showMemCount) sb.append(" (").append(guildList.get(guildAmount - 1).getMemberCount()).append(" members)");
         }
 
         return sb.substring(2);

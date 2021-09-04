@@ -35,22 +35,19 @@ import static com.mongodb.client.model.Filters.eq;
 public class ReactionRoles implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        switch (event.getSubcommandName()) {
-            case "create":
-                return create(event,
-                        event.getOption("channel").getAsMessageChannel(),
-                        event.getOption("messageid").getAsString(),
-                        event.getOption("emote").getAsString(),
-                        event.getOption("button-label").getAsString(),
-                        event.getOption("role").getAsRole());
-
-            case "delete":
-                return delete(event,
-                        event.getOption("messageid").getAsString(),
-                        event.getOption("button-label").getAsString(),
-                        event.getOption("emote").getAsString());
-        }
-        return Responses.warning(event, "Unknown subcommand.");
+        return switch (event.getSubcommandName()) {
+            case "create" -> create(event,
+                    event.getOption("channel").getAsMessageChannel(),
+                    event.getOption("messageid").getAsString(),
+                    event.getOption("emote").getAsString(),
+                    event.getOption("button-label").getAsString(),
+                    event.getOption("role").getAsRole());
+            case "delete" -> delete(event,
+                    event.getOption("messageid").getAsString(),
+                    event.getOption("button-label").getAsString(),
+                    event.getOption("emote").getAsString());
+            default -> Responses.warning(event, "Unknown subcommand.");
+        };
     }
 
     private ReplyAction create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, String buttonLabel, Role role) {

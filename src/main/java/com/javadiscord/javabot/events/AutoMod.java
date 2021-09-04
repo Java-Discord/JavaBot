@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class AutoMod extends ListenerAdapter {
 
-    private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)\\/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}\\/)\\w+");
+    private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
     private String cleanString(String input) {
         input = input.replaceAll("\\p{C}", "");
@@ -94,10 +94,9 @@ public class AutoMod extends ListenerAdapter {
                 List<Message> history = event.getChannel().getIterableHistory().complete().stream()
                         .limit(10).filter(msg -> !msg.equals(event.getMessage())).collect(Collectors.toList());
 
-                int spamCount = history.stream()
-                    .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
-                    .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6)
-                    .collect(Collectors.toList()).size();
+                int spamCount = (int) history.stream()
+                        .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
+                        .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
 
 
                 if (spamCount > 5) {
