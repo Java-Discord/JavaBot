@@ -37,7 +37,14 @@ public class ReactionRoleList implements SlashCommandHandler {
             String emoteName = root.get("emote").getAsString();
             String label = root.get("button_label").getAsString();
 
-            sb.append("#ReactionRole").append(i).append("\n[CID] ").append(channelID).append("\n[MID] ").append(messageID).append("\n[RID] ").append(roleID).append("\n[Label] ").append(label).append("\n[Emote] ").append(emoteName).append("\n\n");
+            sb.append("#ReactionRole")
+                    .append(i)
+                    .append("\n[CID] ").append(channelID)
+                    .append("\n[MID] ").append(messageID)
+                    .append("\n[RID] ").append(roleID)
+                    .append("\n[Label] ").append(label)
+                    .append("\n[Emote] ").append(emoteName)
+                    .append("\n\n");
         }
 
         String description;
