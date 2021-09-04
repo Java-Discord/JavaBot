@@ -5,7 +5,6 @@ import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamSubmission;
 import lombok.RequiredArgsConstructor;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

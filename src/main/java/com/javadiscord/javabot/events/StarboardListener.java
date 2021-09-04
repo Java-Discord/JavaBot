@@ -20,8 +20,6 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
-import java.time.OffsetDateTime;
-
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
