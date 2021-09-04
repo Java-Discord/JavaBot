@@ -191,9 +191,7 @@ public class Leaderboard implements SlashCommandHandler {
      ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {
 
         int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE + 20;
-         boolean topTen = false;
-
-         if (getTopUsers(event.getGuild(), (int) num).contains(event.getMember())) topTen = true;
+         boolean topTen = getTopUsers(event.getGuild(), (int) num).contains(event.getMember());
 
          if (!topTen) LB_HEIGHT += CARD_HEIGHT;
          BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -222,8 +220,7 @@ public class Leaderboard implements SlashCommandHandler {
 
          for (var member : getTopUsers(event.getGuild(), (int) num)) {
 
-             if (drawLeft) drawUserCard(g2d, member, nameY, true, false);
-             else drawUserCard(g2d, member, nameY, false, false);
+             drawUserCard(g2d, member, nameY, drawLeft, false);
 
              drawLeft = !drawLeft;
              if (drawLeft) nameY = nameY + CARD_HEIGHT;

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class AutoMod extends ListenerAdapter {
 
-    private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)\\/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}\\/)\\w+");
+    private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
     private String cleanString(String input) {
         input = input.replaceAll("\\p{C}", "");
