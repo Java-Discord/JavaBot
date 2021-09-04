@@ -34,6 +34,7 @@ public class Startup extends ListenerAdapter {
     public void onReady(ReadyEvent event) {
         // Initialize all guild-specific configuration.
         Bot.config.loadGuilds(event.getJDA().getGuilds());
+        Bot.config.flush();
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
