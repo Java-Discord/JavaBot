@@ -56,7 +56,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
 - description: Clears all warns from the given user.
   name: clearwarns
   options:
@@ -66,7 +66,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
 - description: Clears all QOTW-points from the given user.
   name: clearqotw
   options:
@@ -76,14 +76,14 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
 - description: Edits an embed
   name: editembed
   handler: com.javadiscord.javabot.commands.moderation.EditEmbed
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Edits an embed
@@ -104,7 +104,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Creates a new Embed
@@ -131,7 +131,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to kick, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -141,7 +141,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to mute, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -151,7 +151,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
 
 - description: Deletes messages from a channel.
@@ -160,7 +160,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - name: amount
       description: Number of messages to remove. If left blank, all messages will be removed.
@@ -187,7 +187,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The ID of the user you want to unban, name: id, required: true,
        type: STRING}
@@ -197,7 +197,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to unmute, name: user, required: true, type: USER}
 - description: Warns a member
@@ -206,7 +206,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to warn, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -222,7 +222,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Shows the current config
@@ -295,7 +295,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Sends the current welcome system config
@@ -366,7 +366,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Creates a custom slash command
@@ -398,7 +398,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Creates a reaction role
@@ -438,7 +438,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: Amount of questions, name: amount, required: true, type: INTEGER}
 - description: Accepts the given submissions
@@ -447,7 +447,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: clears the given submissions
@@ -456,7 +456,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: declines the given submissions
@@ -465,7 +465,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: Adds a response to the given submissions
@@ -474,7 +474,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
     - {description: Text of the response, name: text, required: true, type: STRING}
@@ -514,7 +514,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: jam_admin_rid
+      id: jam.adminRoleId
   subCommands:
     - name: plan-new-jam
       description: Creates a new Java Jam for the future.
@@ -637,7 +637,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   subCommands:
     - name: give
       description: Give a user's account some funds (or subtract funds with a negative value).
@@ -662,7 +662,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   subCommands:
     - name: export-schema
       description: Exports the current database schema to an SQL file.
@@ -688,7 +688,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   subCommandGroups:
     - name: questions-queue
       description: Commands for interacting with the set of QOTW questions that are in queue.

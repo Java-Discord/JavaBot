@@ -1,17 +1,14 @@
 package com.javadiscord.javabot.jam;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamSubmission;
 import com.javadiscord.javabot.jam.model.JamTheme;
 import com.javadiscord.javabot.other.Colors;
-import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
@@ -25,26 +22,14 @@ import java.util.Map;
  * to record votes.
  */
 public class JamChannelManager {
-	private static final Logger log = LoggerFactory.getLogger(JamChannelManager.class);
-
-	/**
-	 * The channel in which voting messages are sent and users vote.
-	 */
-	private final TextChannel votingChannel;
-
-	/**
-	 * The channel in which announcements are sent regarding the jam.
-	 */
-	private final TextChannel announcementChannel;
+	private final JamConfig config;
 
 	/**
 	 * Constructs the channel manager.
-	 * @param guild The guild that the channel manager is for.
-	 * @param database The database used to fetch various configuration properties.
+	 * @param jamConfig The config for the jam.
 	 */
-	public JamChannelManager(Guild guild, Database database) {
-		this.votingChannel = database.getConfigChannel(guild, "channels.jam_vote_cid");
-		this.announcementChannel = database.getConfigChannel(guild, "channels.jam_announcement_cid");
+	public JamChannelManager(JamConfig jamConfig) {
+		this.config = jamConfig;
 	}
 
 	/**
@@ -66,7 +51,7 @@ public class JamChannelManager {
 	 * voted on that theme.
 	 */
 	public Map<JamTheme, List<Long>> getThemeVotes(long messageId, List<JamTheme> themes) {
-		Message themeVotingMessage = votingChannel.retrieveMessageById(messageId).complete();
+		Message themeVotingMessage = this.config.getVotingChannel().retrieveMessageById(messageId).complete();
 		Map<JamTheme, List<Long>> votes = new HashMap<>();
 		for (int i = 0; i < themes.size(); i++) {
 			List<User> users = themeVotingMessage.retrieveReactionUsers(JamPhaseManager.REACTION_NUMBERS[i]).complete();
@@ -88,24 +73,24 @@ public class JamChannelManager {
 	 * @return The id of the message which was generated.
 	 */
 	public long sendThemeVotingMessages(Jam jam, List<JamTheme> themes) {
-		this.removeAllMessages(this.votingChannel);
+		this.removeAllMessages(this.config.getVotingChannel());
 		EmbedBuilder voteEmbedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s Theme Voting", jam.getFullName()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(this.config.getJamEmbedColor()))
 				.setDescription("Vote for your preferred themes for the upcoming Jam.");
 		for (int i = 0; i < themes.size(); i++) {
 			JamTheme theme = themes.get(i);
 			voteEmbedBuilder.addField(JamPhaseManager.REACTION_NUMBERS[i] + " " + theme.getName(), theme.getDescription(), false);
 		}
-		Message themeVoteMessage = votingChannel.sendMessageEmbeds(voteEmbedBuilder.build()).complete();
+		Message themeVoteMessage = this.config.getVotingChannel().sendMessageEmbeds(voteEmbedBuilder.build()).complete();
 		for (int i = 0; i < themes.size(); i++) {
 			themeVoteMessage.addReaction(JamPhaseManager.REACTION_NUMBERS[i]).complete();
 		}
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s Theme Voting Has Started!", jam.getFullName()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
-				.setDescription("Go to " + votingChannel.getAsMention() + " to cast your votes, and decide what theme will be chosen for the Jam!");
-		announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+				.setColor(Color.decode(this.config.getJamEmbedColor()))
+				.setDescription("Go to " + this.config.getVotingChannel().getAsMention() + " to cast your votes, and decide what theme will be chosen for the Jam!");
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
 		this.pingRole();
 		return themeVoteMessage.getIdLong();
 	}
@@ -119,7 +104,7 @@ public class JamChannelManager {
 	public void sendChosenThemeMessage(Map<JamTheme, Integer> votes, JamTheme winner) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("The %s's Theme Has Been Chosen!", winner.getJam().getFullName()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(this.config.getJamEmbedColor()))
 				.setDescription("The theme will be **" + winner.getName() + "**\n> " + winner.getDescription())
 				.addField(
 						"Submitting",
@@ -136,8 +121,8 @@ public class JamChannelManager {
 		for (Map.Entry<JamTheme, Integer> entry : votes.entrySet()) {
 			embedBuilder.addField(entry.getKey().getName(), entry.getValue() + " votes", true);
 		}
-		this.announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
-		this.removeAllMessages(votingChannel);
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
+		this.removeAllMessages(this.config.getVotingChannel());
 		this.pingRole();
 	}
 
@@ -151,7 +136,7 @@ public class JamChannelManager {
 	 * users will react with votes on.
 	 */
 	public Map<JamSubmission, Long> sendSubmissionVotingMessage(Jam jam, List<JamSubmission> submissions, JDA jda) {
-		this.removeAllMessages(this.votingChannel);
+		this.removeAllMessages(this.config.getVotingChannel());
 		Map<JamSubmission, Long> messageIds = new HashMap<>();
 		for (JamSubmission submission : submissions) {
 			User user = jda.getUserById(submission.getUserId());
@@ -161,16 +146,16 @@ public class JamChannelManager {
 					.setColor(Colors.randomPastel())
 					.setTimestamp(submission.getCreatedAt())
 					.addField("Description", submission.getDescription(), false);
-			Message message = votingChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+			Message message = this.config.getVotingChannel().sendMessageEmbeds(embedBuilder.build()).complete();
 			message.addReaction(JamPhaseManager.SUBMISSION_VOTE_UNICODE).complete();
 			messageIds.put(submission, message.getIdLong());
 		}
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("Voting Has Begun!")
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
-				.setDescription(String.format("Go to %s to vote for who you think should win the %s.", votingChannel.getAsMention(), jam.getFullName()));
-		announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+				.setColor(Color.decode(this.config.getJamEmbedColor()))
+				.setDescription(String.format("Go to %s to vote for who you think should win the %s.", this.config.getVotingChannel().getAsMention(), jam.getFullName()));
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
 		this.pingRole();
 		return messageIds;
 	}
@@ -187,7 +172,7 @@ public class JamChannelManager {
 		Map<JamSubmission, List<Long>> votesMap = new HashMap<>();
 		OffsetDateTime cutoff = OffsetDateTime.now();
 		for (var entry : submissionMessageMap.entrySet()) {
-			Message message = votingChannel.retrieveMessageById(entry.getValue()).complete();
+			Message message = this.config.getVotingChannel().retrieveMessageById(entry.getValue()).complete();
 			Guild guild = message.getGuild();
 			List<User> users = message.retrieveReactionUsers(JamPhaseManager.SUBMISSION_VOTE_UNICODE).complete();
 			votesMap.put(
@@ -252,7 +237,7 @@ public class JamChannelManager {
 	 * could be determined for a jam.
 	 */
 	public void sendNoWinnersMessage() {
-		announcementChannel.sendMessage("No winning submission could be determined.").complete();
+		this.config.getAnnouncementChannel().sendMessage("No winning submission could be determined.").complete();
 	}
 
 	/**
@@ -267,13 +252,13 @@ public class JamChannelManager {
 		String username = this.getSubmissionUserName(submission, event);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s has won the %s!", username, submission.getJam().getFullName()), submission.getSourceLink())
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")))
+				.setColor(Color.decode(this.config.getJamEmbedColor()))
 				.setDescription(String.format("> %s\nCheck out their project here:\n%s\nThey earned **%d** votes.", submission.getDescription(), submission.getSourceLink(), voteCounts.get(submission)));
 		this.addRunnerUpSubmissionFields(embedBuilder, voteCounts, List.of(submission), event);
 
-		this.announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
 		this.pingRole();
-		this.removeAllMessages(this.votingChannel);
+		this.removeAllMessages(this.config.getVotingChannel());
 	}
 
 	/**
@@ -287,7 +272,7 @@ public class JamChannelManager {
 	public void sendMultipleWinnersMessage(List<JamSubmission> submissions, Map<JamSubmission, Integer> voteCounts, SlashCommandEvent event) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("There Are Multiple Winners of the %s!", submissions.get(0).getJam()))
-				.setColor(Color.decode(Bot.getProperty("jamEmbedColor")));
+				.setColor(Color.decode(this.config.getJamEmbedColor()));
 		for (var submission : submissions) {
 			String username = this.getSubmissionUserName(submission, event);
 			embedBuilder.addField(
@@ -298,9 +283,9 @@ public class JamChannelManager {
 		}
 		this.addRunnerUpSubmissionFields(embedBuilder, voteCounts, submissions, event);
 
-		this.announcementChannel.sendMessageEmbeds(embedBuilder.build()).complete();
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
 		this.pingRole();
-		this.removeAllMessages(this.votingChannel);
+		this.removeAllMessages(this.config.getVotingChannel());
 	}
 
 	/**
@@ -365,11 +350,6 @@ public class JamChannelManager {
 	 * for the jam-ping role, to alert all members of that role.
 	 */
 	private void pingRole() {
-		Role jamPingRole = new Database().getConfigRole(this.announcementChannel.getGuild(), "roles.jam_ping_rid");
-		if (jamPingRole == null) {
-			log.error("Could not find Jam ping role.");
-			return;
-		}
-		this.announcementChannel.sendMessage(jamPingRole.getAsMention()).queue();
+		this.config.getAnnouncementChannel().sendMessage(this.config.getPingRole().getAsMention()).queue();
 	}
 }

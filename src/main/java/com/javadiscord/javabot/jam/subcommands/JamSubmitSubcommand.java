@@ -6,6 +6,7 @@ import com.javadiscord.javabot.jam.dao.JamThemeRepository;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamSubmission;
 import com.javadiscord.javabot.jam.model.JamTheme;
+import com.javadiscord.javabot.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -24,7 +25,7 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
 		if (!activeJam.submissionsAllowed()) {
 			return Responses.warning(event, "Submissions Not Permitted", "The Jam is not currently accepting submissions.");
 		}

@@ -4,7 +4,6 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.events.UserJoin;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -20,33 +19,30 @@ public class GetList implements SlashCommandHandler {
     }
 
     private void send(SlashCommandEvent event) {
-        Database db = new Database();
-
-        String status;
-        if (db.getConfigBoolean(event.getGuild(), "welcome_system.welcome_status")) status = "enabled";
-        else status = "disabled";
+        var config = Bot.config.get(event.getGuild()).getWelcome();
+        String status = config.isEnabled() ? "enabled" : "disabled";
 
         var eb = new EmbedBuilder()
                 .setTitle("Welcome System Configuration")
                 .setColor(Constants.GRAY)
 
-                .addField("Image", "Width, Height: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.imgW") +
-                        "`, `" + db.getConfigInt(event.getGuild(), "welcome_system.image.imgH") +
-                        "`\n[Overlay](" + db.getConfigString(event.getGuild(), "welcome_system.image.overlayURL") +
-                        "), [Background](" + db.getConfigString(event.getGuild(), "welcome_system.image.bgURL") + ")", false)
+                .addField("Image", "Width, Height: `" + config.getImageConfig().getWidth() +
+                        "`, `" + config.getImageConfig().getHeight() +
+                        "`\n[Overlay](" + config.getImageConfig().getOverlayImageUrl() +
+                        "), [Background](" + config.getImageConfig().getBackgroundImageUrl() + ")", false)
 
-                .addField("Color", "Primary Color: `#" + Integer.toHexString(Integer.parseInt(db.getConfigString(event.getGuild(), "welcome_system.image.primCol"))) +
-                        "`\nSecondary Color: `#" + Integer.toHexString(Integer.parseInt(db.getConfigString(event.getGuild(), "welcome_system.image.secCol"))) + "`", true)
+                .addField("Color", "Primary Color: `#" + Integer.toHexString(config.getImageConfig().getPrimaryColor()) +
+                        "`\nSecondary Color: `#" + Integer.toHexString(config.getImageConfig().getSecondaryColor()) + "`", true)
 
-                .addField("Avatar Image", "Width, Height: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avW") +
-                        "`,`" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avH") +
-                        "`\nX, Y: `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avX") +
-                        "`, `" + db.getConfigInt(event.getGuild(), "welcome_system.image.avatar.avY") + "`", true)
+                .addField("Avatar Image", "Width, Height: `" + config.getImageConfig().getAvatarConfig().getWidth() +
+                        "`,`" + config.getImageConfig().getAvatarConfig().getHeight() +
+                        "`\nX, Y: `" + config.getImageConfig().getAvatarConfig().getX() +
+                        "`, `" + config.getImageConfig().getAvatarConfig().getY() + "`", true)
 
-                .addField("Messages", "Join: `" + db.getConfigString(event.getGuild(), "welcome_system.join_msg") +
-                        "`\nLeave: `" + db.getConfigString(event.getGuild(), "welcome_system.leave_msg") + "`", false)
+                .addField("Messages", "Join: `" + config.getJoinMessageTemplate() +
+                        "`\nLeave: `" + config.getLeaveMessageTemplate() + "`", false)
 
-                .addField("Channel", db.getConfigChannelAsMention(event.getGuild(), "welcome_system.welcome_cid"), true)
+                .addField("Channel", config.getChannel().getAsMention(), true)
                 .addField("Status", "``" + status + "``", true);
 
         try {
