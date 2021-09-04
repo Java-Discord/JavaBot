@@ -162,7 +162,7 @@ public class SlashCommands extends ListenerAdapter {
                 List<CommandPrivilege> p = new ArrayList<>();
                 for (var privilegeConfig : config.getPrivileges()) {
                     p.add(privilegeConfig.toData(guild, db).get());
-                    log.info("[{}] Registering privilege for command {}: {}",guild.getName(), config.getName(), Objects.toString(privilegeConfig));
+                    log.info("[{}] Registering privilege for command {}: {}",guild.getName(), config.getName(), privilegeConfig);
                 }
                 guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {
                     log.info("[{}] Privilege update successful for command {}", guild.getName(), config.getName());
