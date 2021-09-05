@@ -151,4 +151,28 @@ public class GuildConfig {
 			return null;
 		}
 	}
+
+	/**
+	 * Attempts to set the value of a configuration property, using recursion to
+	 * traverse the properties in nested objects until the matching field is
+	 * found.
+	 * @param fieldNames The array of field names.
+	 * @param parent The object in which to look for root-level fields.
+	 * @param value The value to set the field to.
+	 */
+	private void setRecursive(String[] fieldNames, Object parent, Object value) {
+		if (fieldNames.length == 0) throw new IllegalStateException("Attempted to call setRecursive without any field names.");
+		try {
+			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
+			field.setAccessible(true);
+			if (fieldNames.length == 1) {
+				// TODO: Apply validation with annotations!
+				field.set(parent, value);
+			} else {
+				setRecursive(Arrays.copyOfRange(fieldNames, 1, fieldNames.length), field.get(parent), value);
+			}
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 }
