@@ -175,6 +175,35 @@
       type: BOOLEAN
       required: false
 
+- name: prune
+  description: Removes members from the server.
+  handler: com.javadiscord.javabot.commands.moderation.Prune
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: pattern
+      description: A regular expression pattern to use, to remove members whose contains a match with the pattern.
+      type: STRING
+      required: false
+    - name: before
+      description: "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC."
+      type: STRING
+      required: false
+    - name: after
+      description: "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC."
+      type: STRING
+      required: false
+    - name: reason
+      description: The reason for issuing the prune command. This will be provided as the reason for each ban.
+      type: STRING
+      required: false
+    - name: delete-days-of-history
+      description: The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.
+      type: INTEGER
+      required: false
+
 - description: Reports a member
   name: report
   handler: com.javadiscord.javabot.commands.moderation.Report
