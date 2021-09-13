@@ -8,6 +8,7 @@ import com.javadiscord.javabot.other.Constants;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -41,7 +42,8 @@ public class SubmissionListener extends ListenerAdapter {
 
         Bot.config.get(guild).getQotw().getSubmissionChannel().sendMessageEmbeds(eb).setActionRows(ActionRow.of(
                 Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
-                Button.danger("submission:decline:" + event.getUser().getId(), "Decline")))
+                Button.danger("submission:decline:" + event.getUser().getId(), "Decline"),
+                Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️")))
                 .queue(m -> {
 
                     MongoCollection<Document> submission_messages = database.getCollection("submission_messages");
@@ -86,6 +88,11 @@ public class SubmissionListener extends ListenerAdapter {
                         Button.danger("submission:decline:" + event.getUser().getId(), "Declined by " + event.getMember().getUser().getAsTag()).asDisabled())
                 )
                 .queue();
+    }
+
+    public void submissionDelete (ButtonClickEvent event) {
+
+        event.getHook().deleteOriginal().queue();
     }
 
     @Override

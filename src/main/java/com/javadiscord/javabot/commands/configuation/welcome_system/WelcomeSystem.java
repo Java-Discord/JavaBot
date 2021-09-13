@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.commands.configuation.welcome_system;
 
 import com.javadiscord.javabot.commands.DelegatingCommandHandler;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.configuation.welcome_system.subcommands.*;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Embeds;
@@ -33,7 +34,8 @@ public class WelcomeSystem extends DelegatingCommandHandler {
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
         }
-        return super.handle(event);
+        try { return super.handle(event);
+        } catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
     }
 }
 

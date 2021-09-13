@@ -55,6 +55,7 @@ public class ButtonClickListener extends ListenerAdapter {
 		switch (id[1]) {
 			case "approve" -> new SubmissionListener().submissionApprove(event, userID);
 			case "decline" -> new SubmissionListener().submissionDecline(event);
+			case "delete" -> new SubmissionListener().submissionDelete(event);
 		}
 		submissionMessages.deleteOne(document);
 	}
