@@ -44,7 +44,7 @@ public class Kick implements SlashCommandHandler {
         try {
 
             member.kick(reason).queueAfter(3, TimeUnit.SECONDS);
-            new Database().queryMember(member.getId(), "warns", 0);
+            new Database().setMemberEntry(member.getId(), "warns", 0);
 
             new Warn().deleteAllDocs(member.getId());
 

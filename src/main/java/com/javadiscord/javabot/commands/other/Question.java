@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
