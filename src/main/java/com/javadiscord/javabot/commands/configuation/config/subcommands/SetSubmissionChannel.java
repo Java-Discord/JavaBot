@@ -11,7 +11,7 @@ public class SetSubmissionChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "channels.submission_cid", channel.getId());
+        //new Database().queryConfig(event.getGuild().getId(), "channels.submission_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "QOTW-Submission Channel", "QOTW-Submission Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

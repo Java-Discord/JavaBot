@@ -10,7 +10,7 @@ public class SetLockStatus implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         boolean status = event.getOption("locked").getAsBoolean();
-        new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", status);
+        //new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", status);
         return event.replyEmbeds(Embeds.configEmbed(event, "Lock Status changed", "Lock Status successfully changed to ", null, Boolean.toString(status), true));
     }
 }

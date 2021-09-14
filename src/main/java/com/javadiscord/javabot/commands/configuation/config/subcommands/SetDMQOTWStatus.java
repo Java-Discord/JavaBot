@@ -10,7 +10,7 @@ public class SetDMQOTWStatus implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         boolean status = event.getOption("enabled").getAsBoolean();
-        new Database().queryConfig(event.getGuild().getId(), "other.qotw.dm-qotw", status);
+        //new Database().queryConfig(event.getGuild().getId(), "other.qotw.dm-qotw", status);
         return event.replyEmbeds(Embeds.configEmbed(
                 event,
                 "QOTW-DM Status",

@@ -19,9 +19,10 @@ public class GuildJoin extends ListenerAdapter {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        if (collection.find(eq("guild_id", guild.getId())).first() == null) {
+        // TODO: fix this using the new file based config
 
-            new Database().insertGuildDoc(guild);
+        if (collection.find(eq("guild_id", guild.getId())).first() == null) {
+            //new Database().insertGuildDoc(guild);
         }
     }
 

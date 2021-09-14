@@ -11,7 +11,7 @@ public class SetLeaveMessage implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         String message = event.getOption("message").getAsString();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.leave_msg", message);
+        //new Database().queryConfig(event.getGuild().getId(), "welcome_system.leave_msg", message);
         return event.replyEmbeds(Embeds.configEmbed(event, "Leave Message", "Leave Message successfully changed to", null, event.getOption("message").getAsString(), true));
     }
 }

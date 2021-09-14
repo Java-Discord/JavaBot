@@ -23,21 +23,20 @@ public class ServerLock {
     public static void checkLock(GuildMemberJoinEvent event, User user) {
 
         if (isNewAccount(event, user) && !isInPBL(user)) {
-
             incrementLock(event, user);
             addToPBL(user);
         }
-
         else {
-
             if (!isInPBL(user)) {
-
-                new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
+                // TODO: fix this using the new file based config
+                //new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
                 deletePBL();
             }
         }
 
-        if (new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count") >= 5) {
+        // TODO: fix this using the new file based config
+
+        if (false) {//new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count") >= 5) {
 
             lockServer(event);
         }
@@ -46,9 +45,11 @@ public class ServerLock {
 
     public static void incrementLock(GuildMemberJoinEvent event, User user) {
 
-        int lockCount = new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count");
+        // TODO: fix this using the new file based config
+
+        int lockCount = 0; //new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count");
         lockCount = lockCount + 1;
-        new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
+        //new Database().queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
 
         String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
         String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
@@ -81,8 +82,11 @@ public class ServerLock {
         }
 
         Database db = new Database();
-        db.queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", true);
-        db.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
+
+        // TODO: fix this using the new file based config
+
+        //db.queryConfig(event.getGuild().getId(), "other.server_lock.lock_status", true);
+        //db.queryConfig(event.getGuild().getId(), "other.server_lock.lock_count", 0);
         deletePBL();
 
         Misc.sendToLog(event.getGuild(), "**SERVER LOCKED!** @here");
@@ -90,12 +94,14 @@ public class ServerLock {
 
     public static boolean lockStatus (GuildMemberJoinEvent event) {
 
-        return new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status");
+        // TODO: fix this using the new file based config
+        return false;//new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status");
     }
 
     public static boolean isNewAccount (GuildMemberJoinEvent event, User user) {
 
-        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) && !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
+        // TODO: fix this using the new file based config
+        return false; //user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) && !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
     }
 
     public static boolean isInPBL (User user) {
@@ -105,13 +111,8 @@ public class ServerLock {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("potential_bot_list");
 
-        try {
-            String doc = collection.find(eq("discord_id", user.getId())).first().toJson();
-
-        } catch (NullPointerException e) {
-            isInPBL = false;
-        }
-
+        try { String doc = collection.find(eq("discord_id", user.getId())).first().toJson();
+        } catch (NullPointerException e) { isInPBL = false; }
         return isInPBL;
     }
 

@@ -11,7 +11,7 @@ public class SetImageWidth implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         int width = (int) event.getOption("width").getAsLong();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.imgW", width);
+        //new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.imgW", width);
         return event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Width", "Welcome Image Width successfully changed to ", null, String.valueOf(width), true));
     }
 }

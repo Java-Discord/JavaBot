@@ -11,7 +11,7 @@ public class SetJamVoteChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "channels.jam_vote_cid", channel.getId());
+        //new Database().queryConfig(event.getGuild().getId(), "channels.jam_vote_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Jam Vote Channel", "Jam Vote Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

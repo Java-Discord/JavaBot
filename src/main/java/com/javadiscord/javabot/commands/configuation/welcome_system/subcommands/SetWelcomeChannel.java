@@ -11,7 +11,7 @@ public class SetWelcomeChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.welcome_cid", channel.getId());
+        //new Database().queryConfig(event.getGuild().getId(), "welcome_system.welcome_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Welcome Channel", "Welcome Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

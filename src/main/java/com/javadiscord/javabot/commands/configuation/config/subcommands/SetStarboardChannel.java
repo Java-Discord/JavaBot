@@ -11,7 +11,7 @@ public class SetStarboardChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "other.starboard.starboard_cid", channel.getId());
+        //new Database().queryConfig(event.getGuild().getId(), "other.starboard.starboard_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Starboard Channel", "Starboard Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

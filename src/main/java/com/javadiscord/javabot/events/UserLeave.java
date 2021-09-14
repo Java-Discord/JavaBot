@@ -14,7 +14,10 @@ public class UserLeave extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-        if (!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
+
+        // TODO: fix this using the new file based config
+
+        if (true) {//!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
             var welcomeConfig = Bot.config.get(event.getGuild()).getWelcome();
             if (welcomeConfig.isEnabled()) {
 

@@ -13,7 +13,7 @@ public class SetOverlayUrl implements SlashCommandHandler {
     public ReplyAction handle(SlashCommandEvent event) {
         String url = event.getOption("url").getAsString();
         if (Misc.isImage(url)) {
-            new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.overlayURL", url);
+            //new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.overlayURL", url);
             return event.replyEmbeds(Embeds.configEmbed(event, "Welcome Image Overlay", "Welcome Image Overlay successfully changed to ", Misc.checkImage(url), url, true));
         } else {
             return event.replyEmbeds(Embeds.emptyError("```URL must be a valid HTTP(S) or Attachment URL.```", event.getUser()));

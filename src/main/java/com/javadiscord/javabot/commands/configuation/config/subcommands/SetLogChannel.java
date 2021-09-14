@@ -11,7 +11,7 @@ public class SetLogChannel implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         MessageChannel channel = event.getOption("channel").getAsMessageChannel();
-        new Database().queryConfig(event.getGuild().getId(), "channels.log_cid", channel.getId());
+        //new Database().queryConfig(event.getGuild().getId(), "channels.log_cid", channel.getId());
         return event.replyEmbeds(Embeds.configEmbed(event, "Log Channel", "Log Channel successfully changed to", null, channel.getId(), true, true));
     }
 }

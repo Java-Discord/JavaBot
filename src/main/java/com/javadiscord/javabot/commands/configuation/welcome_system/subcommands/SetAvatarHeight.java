@@ -11,7 +11,7 @@ public class SetAvatarHeight implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         int height = (int) event.getOption("height").getAsLong();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avH", height);
+        //new Database().queryConfig(event.getGuild().getId(), "welcome_system.image.avatar.avH", height);
         return event.replyEmbeds(Embeds.configEmbed(event, "Avatar Image Height", "Avatar Image Height successfully changed to ", null, String.valueOf(height), true));
     }
 }

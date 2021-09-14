@@ -11,7 +11,7 @@ public class SetJoinMessage implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         String message = event.getOption("message").getAsString();
-        new Database().queryConfig(event.getGuild().getId(), "welcome_system.join_msg", message);
+        //new Database().queryConfig(event.getGuild().getId(), "welcome_system.join_msg", message);
         return event.replyEmbeds(Embeds.configEmbed(event, "Welcome Message", "Welcome Message successfully changed to", null, message, true));
     }
 }

@@ -11,7 +11,7 @@ public class SetStatsMessage implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         String message = event.getOption("message").getAsString();
-        new Database().queryConfig(event.getGuild().getId(), "other.stats_category.stats_text", message);
+        //new Database().queryConfig(event.getGuild().getId(), "other.stats_category.stats_text", message);
         return event.replyEmbeds(Embeds.configEmbed(event, "Stats-Category Message", "Stats-Category Message successfully changed to", null, message, true));
     }
 }
