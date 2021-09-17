@@ -23,6 +23,12 @@
     - {description: The id the bot will convert into a human-readable timestamp, name: id,
        required: true, type: STRING}
   handler: com.javadiscord.javabot.commands.user_commands.IDCalc
+- description: Let the bot say everything you want
+  name: say
+  options:
+    - {description: The text the bot should say, name: text,
+       required: true, type: STRING}
+  handler: com.javadiscord.javabot.commands.moderation.Say
 - description: Turns your text-input into a lmgtfy-link
   name: lmgtfy
   options:
