@@ -1,5 +1,6 @@
 package com.javadiscord.javabot;
 
+import com.javadiscord.javabot.commands.reaction_roles.HelpRole;
 import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.properties.config.BotConfig;
@@ -92,7 +93,9 @@ public class Bot {
                 new AutoMod(),
                 new SubmissionListener(),
                 new StarboardListener(),
-                new ButtonClickListener()
+                new ButtonClickListener(),
+                new HelpRole()
+
         );
     }
 }
