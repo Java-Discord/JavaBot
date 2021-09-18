@@ -3,6 +3,7 @@ package com.javadiscord.javabot.properties.config.guild;
 import com.javadiscord.javabot.properties.config.GuildConfigItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -15,6 +16,14 @@ public class ModerationConfig extends GuildConfigItem {
 	private long muteRoleId;
 	private long staffRoleId;
 	private int purgeMaxMessageCount = 1000;
+	private long helpGuidelinesChannelId;
+	private long helpGuidelinesMessageId;
+	private String helpRoleImoji = ":white_check_mark";
+
+
+	public TextChannel getHelpGuidelinesChannel(){return this.getGuild().getTextChannelById(helpGuidelinesChannelId);}
+
+	public Message getHelpGuidelinesMessage(){ return this.getGuild().getTextChannelById(helpGuidelinesChannelId).getHistory().getMessageById(helpGuidelinesMessageId);}
 
 	public TextChannel getReportChannel() {
 		return this.getGuild().getTextChannelById(this.reportChannelId);
