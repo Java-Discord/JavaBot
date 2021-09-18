@@ -80,7 +80,8 @@ public class Embed implements SlashCommandHandler {
             eb.setThumbnail(thumb);
             eb.setColor(Color.decode(color));
 
-            return event.replyEmbeds(eb.build());
+            event.getChannel().sendMessageEmbeds(eb.build()).queue();
+            return event.reply("Done!").setEphemeral(true);
 
         } catch (Exception e) {
             return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
