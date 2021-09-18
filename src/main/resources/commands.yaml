@@ -125,6 +125,16 @@
       options:
         - { description: Link of the original Message, name: link, required: true, type: STRING }
         - { description: Title of the embed, name: title, required: false, type: STRING }
+- description: Let the bot say everything you want
+  name: say
+  options:
+    - {description: The text the bot should say, name: text,
+       required: true, type: STRING}
+  handler: com.javadiscord.javabot.commands.moderation.Say
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: moderation.staffRoleId
 - description: Kicks a member
   name: kick
   handler: com.javadiscord.javabot.commands.moderation.Kick
