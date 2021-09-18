@@ -29,143 +29,80 @@ import static com.javadiscord.javabot.events.Startup.iae;
 
 public class UserJoin extends ListenerAdapter {
 
-    public byte[] generateImage(Object ev, boolean forceFlag, boolean forceBot) throws MalformedURLException {
+    public static final float NAME_SIZE = 120;
+    public static final float MEMBERCOUNT_SIZE = 72;
+    public static final float MAX_STRING_SIZE = 1300;
 
-        Guild guild = null;
-        Member member = null;
-
-        if (ev instanceof GuildMessageReceivedEvent event) {
-
-            guild = event.getGuild();
-            member = event.getMember();
-        }
-
-        if (ev instanceof GuildMemberJoinEvent event) {
-
-            guild = event.getGuild();
-            member = event.getMember();
-        }
-
-        if (ev instanceof SlashCommandEvent event) {
-
-            guild = event.getGuild();
-            member = event.getMember();
-        }
+    public byte[] generateImage(Guild guild, Member member) throws Exception {
 
         var config = Bot.config.get(guild).getWelcome();
+        var avatarConfig = config.getImageConfig().getAvatarConfig();
 
-        int stringWidth;
-        int imgW = config.getImageConfig().getWidth();
-        int imgH = config.getImageConfig().getHeight();
-        int avX = config.getImageConfig().getAvatarConfig().getX();
-        int avY = config.getImageConfig().getAvatarConfig().getY();
-        int avW = config.getImageConfig().getAvatarConfig().getWidth();
-        int avH = config.getImageConfig().getAvatarConfig().getHeight();
+        URL overlayURL = new URL(config.getImageConfig().getOverlayImageUrl());
+        URL bgURL = new URL(config.getImageConfig().getBackgroundImageUrl());
 
-        int primCol = config.getImageConfig().getPrimaryColor();
-        int secCol = config.getImageConfig().getSecondaryColor();
+        BufferedImage overlayImage = ImageIO.read(overlayURL);
+        BufferedImage bgImage = ImageIO.read(bgURL);
 
-        float memberSize = 120;
-        float countSize = 72;
+        BufferedImage bufferedImage = new BufferedImage(config.getImageConfig().getWidth(),
+                config.getImageConfig().getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = bufferedImage.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        Font CountFont, MemberFont;
-        URL overlayURL, bgURL, avatarURL;
-        BufferedImage flagImage = null, botImage = null, avatarImage = null, bgImage = null, overlayImage = null;
+        URL avatarURL = new URL(member.getUser().getEffectiveAvatarUrl() + "?size=4096");
+        BufferedImage avatarImage = ImageIO.read(avatarURL);
+        BufferedImage botIcon = ImageIO.read(Objects.requireNonNull(UserJoin.class.getClassLoader().getResourceAsStream("images/BotIcon.png")));
+
+        Font memberCountFont, nameFont;
 
         try {
-            overlayURL = new URL(config.getImageConfig().getOverlayImageUrl());
-        } catch (MalformedURLException e) {
-            overlayURL = new URL(iae);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+            nameFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(UserJoin.class.getClassLoader()
+                    .getResourceAsStream("fonts/Uni-Sans-Heavy.ttf"))).deriveFont(NAME_SIZE);
+            memberCountFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(UserJoin.class.getClassLoader()
+                    .getResourceAsStream("fonts/Uni-Sans-Heavy.ttf"))).deriveFont(MEMBERCOUNT_SIZE);
+
+            ge.registerFont(nameFont);
+            ge.registerFont(memberCountFont);
+        } catch (IOException | FontFormatException e) {
+            nameFont = new Font("Arial", Font.PLAIN, (int) NAME_SIZE);
+            memberCountFont = new Font("Arial", Font.PLAIN, (int) MEMBERCOUNT_SIZE);
         }
 
-        try {
-            bgURL = new URL(config.getImageConfig().getBackgroundImageUrl());
-        } catch (MalformedURLException e) {
-            bgURL = new URL(iae);
-        }
+        g2d.drawImage(bgImage, 0, 0, null);
+        g2d.drawImage(avatarImage, avatarConfig.getX(), avatarConfig.getY(), avatarConfig.getWidth(), avatarConfig.getHeight(), null);
+        g2d.drawImage(overlayImage, 0, 0, null);
 
-        try {
-            overlayImage = ImageIO.read(overlayURL);
-        } catch (IOException e) { e.printStackTrace();}
+        g2d.setColor(new Color(config.getImageConfig().getPrimaryColor()));
+        g2d.setFont(nameFont);
 
+        int stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getAsTag());
 
-        try {
-            bgImage = ImageIO.read(bgURL);
-        } catch (IOException e) { e.printStackTrace();}
-
-            BufferedImage bufferedImage = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = bufferedImage.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-            g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-
-            try {
-
-                avatarURL = new URL(member.getUser().getEffectiveAvatarUrl() + "?size=4096");
-                avatarImage = ImageIO.read(avatarURL);
-                botImage = ImageIO.read(UserJoin.class.getClassLoader().getResourceAsStream("images/BotIcon.png"));
-                flagImage = ImageIO.read(UserJoin.class.getClassLoader().getResourceAsStream("images/FlagIcon.png"));
-
-            } catch (IOException e) { e.printStackTrace(); }
-
-            try {
-                MemberFont = Font.createFont(Font.TRUETYPE_FONT, UserJoin.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(memberSize);
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
-                ge.registerFont(MemberFont);
-            } catch (IOException | FontFormatException e) {
-                MemberFont = new Font("Arial", Font.PLAIN, 120);
-            }
-
-            try {
-                CountFont = Font.createFont(Font.TRUETYPE_FONT, UserJoin.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(countSize);
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
-                ge.registerFont(CountFont);
-            } catch (IOException | FontFormatException e) {
-                CountFont = new Font("Arial", Font.PLAIN, 120);
-            }
-
-            g2d.drawImage(bgImage, 0, 0, null);
-            g2d.drawImage(avatarImage, avX, avY, avW, avH, null);
-            g2d.drawImage(overlayImage, 0, 0, null);
-
-            g2d.setColor(new Color(primCol));
-            g2d.setFont(MemberFont);
-
+        while (stringWidth > MAX_STRING_SIZE) {
+            Font currentFont = g2d.getFont();
+            Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
+            g2d.setFont(newFont);
             stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getAsTag());
-
-            while (stringWidth > 1300) {
-
-                Font currentFont = g2d.getFont();
-                Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
-                g2d.setFont(newFont);
-                stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getAsTag());
-            }
-
-            g2d.drawString(member.getUser().getAsTag(), 550, 305);
-
-            g2d.setColor(new Color(secCol));
-            g2d.setFont(CountFont);
-            g2d.drawString("Member #" + guild.getMemberCount(), 550, 380);
-
-            if (member.getUser().isBot() || forceBot) {
-                g2d.drawImage(botImage, 340, 400, null);
-            }
-
-            if (member.getUser().getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) || forceFlag) {
-                g2d.drawImage(flagImage, 340, 350, null);
-            }
-
-            g2d.dispose();
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-            try {
-                ImageIO.write(bufferedImage, "png", outputStream);
-            } catch (IOException e) { e.printStackTrace(); }
-
-            return outputStream.toByteArray();
         }
+
+        g2d.drawString(member.getUser().getAsTag(), 550, 305);
+
+        g2d.setColor(new Color(config.getImageConfig().getSecondaryColor()));
+        g2d.setFont(memberCountFont);
+        g2d.drawString("Member #" + guild.getMemberCount(), 550, 380);
+
+        if (member.getUser().isBot()) {
+            g2d.drawImage(botIcon, 340, 400, null);
+        }
+        g2d.dispose();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        try { ImageIO.write(bufferedImage, "png", outputStream);
+        } catch (IOException e) { e.printStackTrace(); }
+        return outputStream.toByteArray();
+    }
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
@@ -176,74 +113,29 @@ public class UserJoin extends ListenerAdapter {
         TextChannel welcomeChannel = event.getGuild().getTextChannelById(welcomeConfig.getChannelId());
 
         if (!ServerLock.lockStatus(event)) {
-
             ServerLock.checkLock(event, user);
-
             CompletableFuture.runAsync(() -> {
 
-                try {
+                if (welcomeConfig.isEnabled()) {
+                    String welcomeMessage = Objects.requireNonNull(welcomeConfig.getJoinMessageTemplate())
+                            .replace("{!member}", event.getMember().getAsMention())
+                            .replace("{!membertag}", event.getMember().getUser().getAsTag())
+                            .replace("{!server}", event.getGuild().getName());
 
-                    if (welcomeConfig.isEnabled()) {
-                        String welcomeMessage = Objects.requireNonNull(welcomeConfig.getJoinMessageTemplate())
-                                .replace("{!member}", event.getMember().getAsMention())
-                                .replace("{!membertag}", event.getMember().getUser().getAsTag())
-                                .replace("{!server}", event.getGuild().getName());
-
-                        welcomeConfig.getChannel().sendMessage(welcomeMessage)
-                                .addFile(new ByteArrayInputStream(generateImage(event, false, false)), event.getMember().getId() + ".png").queue();
-                    }
-
-                    StatsCategory.update(event.getGuild());
-
-                } catch (Exception e) { e.printStackTrace(); }
+                    try {
+                    welcomeConfig.getChannel().sendMessage(welcomeMessage)
+                            .addFile(new ByteArrayInputStream(generateImage(event.getGuild(), event.getMember())), event.getMember().getId() + ".png").queue();
+                    } catch (Exception e) { e.printStackTrace(); }
+                }
+                StatsCategory.update(event.getGuild());
             });
-
-
         } else {
-
-            user.openPrivateChannel().complete().sendMessage(ServerLock.lockEmbed(event.getGuild())).queue();
+            if (user.hasPrivateChannel()) user.openPrivateChannel().complete()
+                    .sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
             event.getMember().kick().complete();
 
             String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
             welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
-
-        }
-    }
-
-    @Override
-    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-        try { if (event.getMember().getUser().isBot() || event.getMember() == null) return; }
-        catch (NullPointerException ignored) { return; }
-
-        String[] args = event.getMessage().getContentDisplay().split(" ");
-
-        if (args[0].equalsIgnoreCase("!generateImage") && event.getMember().getId().equals("810481402390118400")) {
-
-            boolean imgFlag = false;
-            boolean imgBot = false;
-
-            if (args.length > 1) {
-                switch (args[1]) {
-                    case "imgBot":
-                        imgBot = true;
-                        break;
-                    case "imgFlag":
-                        imgFlag = true;
-                        break;
-                    default:
-                }
-            }
-
-            boolean finalImgFlag = imgFlag;
-            boolean finalImgBot = imgBot;
-
-            CompletableFuture.runAsync(() -> {
-
-                try {
-                    event.getChannel().sendFile(new ByteArrayInputStream(generateImage(event, finalImgFlag, finalImgBot)), event.getMember().getId() + ".png").queue();
-                }
-                catch (MalformedURLException e) { e.printStackTrace(); }
-            });
         }
     }
 }
