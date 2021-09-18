@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.entities.Guild;

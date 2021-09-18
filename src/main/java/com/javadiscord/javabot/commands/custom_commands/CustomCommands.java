@@ -6,18 +6,15 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
-import java.awt.*;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -80,7 +77,7 @@ public class CustomCommands implements SlashCommandHandler {
             .setTitle("Custom Slash Command List")
             .setDescription(description)
             .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-            .setColor(new Color(0x2F3136))
+            .setColor(Constants.GRAY)
             .setTimestamp(new Date().toInstant())
             .build();
 
@@ -88,8 +85,6 @@ public class CustomCommands implements SlashCommandHandler {
     }
 
     private ReplyAction create(SlashCommandEvent event, String commandName, String value) {
-        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-
             MongoDatabase database = mongoClient.getDatabase("other");
             MongoCollection<Document> collection = database.getCollection("customcommands");
 
@@ -107,28 +102,24 @@ public class CustomCommands implements SlashCommandHandler {
                     .addField("Name", "```" + "/" + commandName + "```", false)
                     .addField("Value", "```" + value + "```", false)
                     .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(new Color(0x2F3136))
+                    .setColor(Constants.GRAY)
                     .setTimestamp(new Date().toInstant())
                     .build();
 
                 Bot.slashCommands.registerSlashCommands(event.getGuild());
                 return event.replyEmbeds(e);
-            } else {
-                return event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called " + "``" + "/" + commandName + "`` already exists.", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
-            }
-        } else {
-            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
+            } else return Responses.error(event, "A Custom Slash Command called " + "``" + "/" + commandName + "`` already exists.");
+
     }
 
     private ReplyAction edit(SlashCommandEvent event, String commandName, String value) {
-        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+
             MongoDatabase database = mongoClient.getDatabase("other");
             MongoCollection<Document> collection = database.getCollection("customcommands");
 
-            if (docExists(event.getGuild().getId(), commandName)) {
-                return event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
-            } else {
+            if (docExists(event.getGuild().getId(), commandName)) return Responses.error(event,
+                    "A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.");
+            else {
                 BasicDBObject criteria = new BasicDBObject()
                     .append("guild_id", event.getGuild().getId())
                     .append("commandname", commandName);
@@ -148,27 +139,23 @@ public class CustomCommands implements SlashCommandHandler {
                     .addField("Name", "```" + "/" + commandName + "```", false)
                     .addField("Value", "```" + value + "```", false)
                     .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(new Color(0x2F3136))
+                    .setColor(Constants.GRAY)
                     .setTimestamp(new Date().toInstant())
                     .build();
 
                 Bot.slashCommands.registerSlashCommands(event.getGuild());
                 return event.replyEmbeds(e);
             }
-        } else {
-            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
     }
 
     private ReplyAction delete(SlashCommandEvent event, String commandName) {
-        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
             MongoDatabase database = mongoClient.getDatabase("other");
             MongoCollection<Document> collection = database.getCollection("customcommands");
 
-            if (docExists(event.getGuild().getId(), commandName)) {
-                return event.replyEmbeds(Embeds.emptyError("A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
-            } else {
+            if (docExists(event.getGuild().getId(), commandName)) return Responses.error(event,
+                    "A Custom Slash Command called ```" + "/" + commandName + "``` does not exist.");
+            else {
 
                 BasicDBObject criteria = new BasicDBObject()
                     .append("guild_id", event.getGuild().getId())
@@ -182,15 +169,12 @@ public class CustomCommands implements SlashCommandHandler {
                     .setTitle("Custom Slash Command deleted")
                     .addField("Name", "```" + "/" + commandName + "```", false)
                     .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(new Color(0x2F3136))
+                    .setColor(Constants.GRAY)
                     .setTimestamp(new Date().toInstant())
                     .build();
 
                 Bot.slashCommands.registerSlashCommands(event.getGuild());
                 return event.replyEmbeds(e);
             }
-        } else {
-            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
     }
 }

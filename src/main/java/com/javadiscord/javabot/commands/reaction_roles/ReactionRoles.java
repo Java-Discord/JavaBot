@@ -5,14 +5,12 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -51,9 +49,6 @@ public class ReactionRoles implements SlashCommandHandler {
     }
 
     private ReplyAction create(SlashCommandEvent event, MessageChannel channel, String mID, String emote, String buttonLabel, Role role) {
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("reactionroles");
@@ -93,16 +88,11 @@ public class ReactionRoles implements SlashCommandHandler {
 
             channel.retrieveMessageById(mID).queue(this::updateMessageComponents);
             return event.replyEmbeds(e).setEphemeral(true);
-        } else {
-            return event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.", event.getUser()))
-                    .setEphemeral(Constants.ERR_EPHEMERAL);
-        }
+        } else return Responses.error(event,
+                "A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` already exists.");
     }
 
     private ReplyAction delete(SlashCommandEvent event, String mID, String buttonLabel, String emote) {
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
 
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("reactionroles");
@@ -116,8 +106,8 @@ public class ReactionRoles implements SlashCommandHandler {
         try {
             collection.find(criteria).first().toJson();
         } catch (NullPointerException e) {
-            return event.replyEmbeds(Embeds.emptyError("A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.", event.getUser()))
-                    .setEphemeral(Constants.ERR_EPHEMERAL);
+            return Responses.error(event,
+                    "A Reaction Role on message `" + mID + "` with emote `" + emote + "` and Button Label `" + buttonLabel + "` does not exist.");
         }
 
         collection.deleteOne(criteria);

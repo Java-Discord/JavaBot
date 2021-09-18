@@ -1,12 +1,11 @@
 package com.javadiscord.javabot.commands.moderation;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -20,9 +19,7 @@ public class Unmute implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-            return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
+
         Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
@@ -44,12 +41,10 @@ public class Unmute implements SlashCommandHandler {
 
                 Misc.sendToLog(event.getGuild(), e);
                 return event.replyEmbeds(e);
-            } else {
-                return event.replyEmbeds(Embeds.emptyError("```I can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
-            }
+            } else return Responses.error(event, "```Can't unmute " + member.getUser().getAsTag() + ", they aren't muted.```");
 
         } catch (HierarchyException e) {
-            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", author)).setEphemeral(Constants.ERR_EPHEMERAL);
+            return Responses.error(event, e.getMessage());
         }
     }
 }

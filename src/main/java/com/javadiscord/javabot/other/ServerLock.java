@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.bson.Document;
 
-import java.time.OffsetDateTime;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
