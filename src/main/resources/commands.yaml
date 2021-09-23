@@ -443,9 +443,9 @@
     - description: Creates a reaction role
       name: create
       options:
-        - {description: 'Message, the Reaction Role should be created on', name: messageid,
+        - {description: 'Message, the Reaction Role should be created on', name: message-id,
            required: true, type: STRING}
-        - { description: 'Label, the Button should use', name: button-label, required: true,
+        - { description: 'Label, the Button should use', name: label, required: true,
             type: STRING}
         - {description: 'Role, the Button should add upon use', name: role, required: true,
            type: ROLE}
@@ -456,9 +456,9 @@
     - description: Deletes a reaction role
       name: delete
       options:
-        - {description: 'Message, the reaction role is on', name: messageid, required: true,
+        - {description: 'Message, the reaction role is on', name: message-id, required: true,
            type: STRING}
-        - {description: 'Label, the button should use', name: button-label, required: true,
+        - {description: 'Label, the button should use', name: label, required: true,
            type: STRING}
 - description: Lists all Reaction Roles
   name: reactionroles

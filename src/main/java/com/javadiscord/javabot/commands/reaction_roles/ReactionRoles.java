@@ -36,8 +36,8 @@ public class ReactionRoles implements SlashCommandHandler {
     }
 
     private ReplyAction createReactionRole(SlashCommandEvent event) {
-        var message =  event.getChannel().retrieveMessageById(event.getOption("messageid").getAsString()).complete();
-        var buttonLabel = event.getOption("button-label").getAsString();
+        var message =  event.getChannel().retrieveMessageById(event.getOption("message-id").getAsString()).complete();
+        var buttonLabel = event.getOption("label").getAsString();
         var role = event.getOption("role").getAsRole();
 
         boolean permanent = event.getOption("permanent") != null && event.getOption("permanent").getAsBoolean();
@@ -63,8 +63,8 @@ public class ReactionRoles implements SlashCommandHandler {
     }
 
     private ReplyAction deleteReactionRole(SlashCommandEvent event) {
-        var message = event.getChannel().retrieveMessageById(event.getOption("messageid").getAsString()).complete();
-        String buttonLabel = event.getOption("button-label").getAsString();
+        var message = event.getChannel().retrieveMessageById(event.getOption("message-id").getAsString()).complete();
+        String buttonLabel = event.getOption("label").getAsString();
 
         List<Button> buttons = new ArrayList<>(message.getActionRows().get(0).getButtons());
         for (var ignored : message.getActionRows().get(0).getButtons()) buttons.removeIf(x -> x.getLabel().equals(buttonLabel));
