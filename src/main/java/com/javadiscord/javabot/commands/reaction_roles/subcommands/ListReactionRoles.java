@@ -1,4 +1,4 @@
-package com.javadiscord.javabot.commands.reaction_roles;
+package com.javadiscord.javabot.commands.reaction_roles.subcommands;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,7 +17,7 @@ import java.util.Date;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
-public class ReactionRoleList implements SlashCommandHandler {
+public class ListReactionRoles implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {

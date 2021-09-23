@@ -463,7 +463,7 @@
 - description: Lists all Reaction Roles
   name: reactionroles
   options: []
-  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoleList
+  handler: com.javadiscord.javabot.commands.reaction_roles.subcommands.ListReactionRoles
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard

@@ -22,13 +22,11 @@ public class InteractionListener extends ListenerAdapter {
 	@Override
 	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
-
 		event.deferEdit().queue();
 
 		Guild guild = preferredGuild;
 		MongoDatabase database = mongoClient.getDatabase("other");
 		String[] id = event.getComponentId().split(":");
-		System.out.println(event.getComponentId());
 		switch (id[0]) {
 			case "dm-submission" -> this.handleDmSubmission(database, guild, event);
 			case "submission" -> this.handleSubmission(database, guild, event);
@@ -66,16 +64,18 @@ public class InteractionListener extends ListenerAdapter {
 	private void handleReactionRoles(ButtonClickEvent event) {
 		String[] id = event.getComponentId().split(":");
 		String roleID = id[1];
-		boolean b = Boolean.parseBoolean(id[2]);
+		boolean permanent = Boolean.parseBoolean(id[2]);
 
 		Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
 		Role role = event.getGuild().getRoleById(roleID);
 
 		if (member.getRoles().contains(role)) {
-			if (!b) {
+			if (!permanent) {
 				event.getGuild().removeRoleFromMember(member, role).queue();
 				event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
-			} else event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+			} else {
+				event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+			}
 		} else {
 			event.getGuild().addRoleToMember(member, role).queue();
 			event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
