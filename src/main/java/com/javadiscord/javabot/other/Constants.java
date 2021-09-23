@@ -14,6 +14,7 @@ public class Constants {
         public static final String WEBSITE  = "https://javadiscord.net";
         public static final String HELP_LINK  = "https://pages.javadiscord.net/archived/commands"; //Archived, /help is unnecessary due to slash-commands
         public static final String QOTW_LINK  = "https://pages.javadiscord.net/qotw/qotw";
+        public static final String GITHUB_LINK = "https://github.com/Java-Discord/JavaBot/";
 
         //              EMOTES
 
