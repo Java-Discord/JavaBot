@@ -443,29 +443,27 @@
     - description: Creates a reaction role
       name: create
       options:
-        - {description: 'Channel, the reaction role should be created in', name: channel,
-           required: true, type: CHANNEL}
-        - {description: 'Message, the reaction role should be created on', name: messageid,
+        - {description: 'Message, the Reaction Role should be created on', name: message-id,
            required: true, type: STRING}
-        - {description: 'Emote, the reaction role should use', name: emote, required: true,
-           type: STRING}
-        - { description: 'Label, the button should use', name: button-label, required: true,
+        - { description: 'Label, the Button should use', name: label, required: true,
             type: STRING}
-        - {description: 'Role, the reaction role should add', name: role, required: true,
+        - {description: 'Role, the Button should add upon use', name: role, required: true,
            type: ROLE}
+        - {description: 'It set to true, doesnt let you remove the Role afterwards', name: permanent, required: false,
+            type: BOOLEAN}
+        - {description: 'Emote, the Button should use', name: emote, required: false,
+            type: STRING}
     - description: Deletes a reaction role
       name: delete
       options:
-        - {description: 'Message, the reaction role is on', name: messageid, required: true,
+        - {description: 'Message, the reaction role is on', name: message-id, required: true,
            type: STRING}
-        - {description: 'Emote, the reaction role is using', name: emote, required: true,
-           type: STRING}
-        - {description: 'Label, the button should use', name: button-label, required: true,
+        - {description: 'Label, the button should use', name: label, required: true,
            type: STRING}
 - description: Lists all Reaction Roles
   name: reactionroles
   options: []
-  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoleList
+  handler: com.javadiscord.javabot.commands.reaction_roles.subcommands.ListReactionRoles
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
