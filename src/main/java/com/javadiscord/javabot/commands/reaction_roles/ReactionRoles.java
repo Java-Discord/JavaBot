@@ -53,14 +53,13 @@ public class ReactionRoles implements SlashCommandHandler {
                 .setColor(Constants.GRAY)
                 .addField("Channel", "<#" + event.getChannel().getId() + ">", true)
                 .addField("Role", role.getAsMention(), true)
-                .addField("MessageID", "```" + message + "```", false)
-                .addField("Emote", "```" + emote + "```", true)
-                .addField("Button Label", "```" + buttonLabel + "```", true)
+                .addField("MessageID", "```" + message.getId() + "```", false);
+        if (emote != null) e.addField("Emote", "```" + emote + "```", true);
+                e.addField("Button Label", "```" + buttonLabel + "```", true)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant())
-                .build();
-        Misc.sendToLog(event.getGuild(), e);
-        return event.replyEmbeds(e).setEphemeral(true);
+                .setTimestamp(new Date().toInstant());
+        Misc.sendToLog(event.getGuild(), e.build());
+        return event.replyEmbeds(e.build()).setEphemeral(true);
     }
 
     private ReplyAction deleteReactionRole(SlashCommandEvent event) {
