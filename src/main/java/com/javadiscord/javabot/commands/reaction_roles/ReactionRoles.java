@@ -13,7 +13,6 @@ public class ReactionRoles extends DelegatingCommandHandler {
     public ReactionRoles() {
         addSubcommand("create", new CreateReactionRole());
         addSubcommand("delete", new DeleteReactionRole());
-        addSubcommand("list", new ListReactionRoles());
     }
 
     @Override
