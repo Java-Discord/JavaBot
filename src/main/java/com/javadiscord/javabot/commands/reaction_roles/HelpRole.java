@@ -19,17 +19,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  * @author Snape25
  */
 
-public class HelpRole  extends ListenerAdapter {
+public class HelpRole extends ListenerAdapter {
 
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
-        if (event.getChannelType() == ChannelType.TEXT) {
             if (!event.getUser().isBot()) {
                 String emote = "";
 
                 /** Get required values from
                  * @see ModerationConfig
                  */
+
                 TextChannel helpChannel = Bot.config.get(event.getGuild()).getModeration().getHelpGuidelinesChannel();
                 Long MessageId = Bot.config.get(event.getGuild()).getModeration().getHelpGuidelinesMessageId();
                 Role HelpRole =Bot.config.get(event.getGuild()).getModeration().getVerifiedHelpRole();
@@ -46,13 +46,11 @@ public class HelpRole  extends ListenerAdapter {
                     }
                 }
             }
-        }
     }
 
 
     @Override
     public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
-        if (event.getChannelType() == ChannelType.TEXT) {
             if (!event.getUser().isBot()) {
                 String emote = "";
 
@@ -76,7 +74,6 @@ public class HelpRole  extends ListenerAdapter {
                     }
                 }
             }
-        }
     }
 
 
