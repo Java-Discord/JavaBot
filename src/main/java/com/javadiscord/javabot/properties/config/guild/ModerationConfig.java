@@ -19,7 +19,9 @@ public class ModerationConfig extends GuildConfigItem {
 	private long helpGuidelinesChannelId;
 	private long helpGuidelinesMessageId;
 	private String helpRoleImoji = ":white_check_mark";
+	private long verifiedHelpRoleId;
 
+	public Role getVerifiedHelpRole(){ return this.getGuild().getRoleById(this.verifiedHelpRoleId); }
 
 	public TextChannel getHelpGuidelinesChannel(){return this.getGuild().getTextChannelById(helpGuidelinesChannelId);}
 
