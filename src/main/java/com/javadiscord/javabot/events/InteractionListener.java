@@ -2,6 +2,7 @@ package com.javadiscord.javabot.events;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -16,7 +17,10 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
-public class ButtonClickListener extends ListenerAdapter {
+public class InteractionListener extends ListenerAdapter {
+
+	// TODO: add Context-Menu Commands (once they're available in JDA)
+
 	@Override
 	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
@@ -30,7 +34,15 @@ public class ButtonClickListener extends ListenerAdapter {
 			case "dm-submission" -> this.handleDmSubmission(database, guild, event);
 			case "submission" -> this.handleSubmission(database, guild, event);
 			case "reactionroles" -> this.handleReactionRoles(database, guild, event);
+			case "help-role" -> this.handleHelpRole(event);
 		}
+	}
+
+	private void handleHelpRole(ButtonClickEvent event) {
+		Role role = Bot.config.get(event.getGuild()).getHelp().getHelpRole();
+		if (!event.getMember().getRoles().contains(role))
+			event.getHook().sendMessage("Successfully verified!").setEphemeral(true).queue();
+		else event.getHook().sendMessage("You are already verified!").setEphemeral(true).queue();
 	}
 
 	private void handleDmSubmission(MongoDatabase database, Guild guild, ButtonClickEvent event) {
