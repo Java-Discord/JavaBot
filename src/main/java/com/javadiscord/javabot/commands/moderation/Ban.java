@@ -23,6 +23,7 @@ public class Ban implements SlashCommandHandler {
     public ReplyAction handle(SlashCommandEvent event) {
 
         Member member = event.getOption("user").getAsMember();
+
         OptionMapping option = event.getOption("reason");
         String reason = option == null ? "None" : option.getAsString();
 
@@ -41,10 +42,13 @@ public class Ban implements SlashCommandHandler {
             ban(member, reason);
 
             Misc.sendToLog(event.getGuild(), eb);
-            if (member.getUser().hasPrivateChannel()) member.getUser().openPrivateChannel().complete()
-                            .sendMessageEmbeds(eb).queue();
+            if (member.getUser().hasPrivateChannel()) member.getUser().openPrivateChannel().complete().
+                    sendMessageEmbeds(eb).queue();
         }
-        catch (Exception e) { return Responses.error(event, e.getMessage()); }
+        catch (Exception e) {
+            return Responses.error(event, e.getMessage());
+        }
+
         return event.replyEmbeds(eb);
     }
 }

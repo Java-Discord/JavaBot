@@ -33,7 +33,6 @@ public class GuildConfig {
 	private StatsConfig stats;
 	private StarBoardConfig starBoard;
 	private JamConfig jam;
-	private HelpConfig help;
 
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;
@@ -45,7 +44,6 @@ public class GuildConfig {
 		this.stats = new StatsConfig();
 		this.starBoard = new StarBoardConfig();
 		this.jam = new JamConfig();
-		this.help = new HelpConfig();
 		this.setGuild(guild);
 	}
 
@@ -58,7 +56,6 @@ public class GuildConfig {
 		this.stats.setGuildConfig(this);
 		this.starBoard.setGuildConfig(this);
 		this.jam.setGuildConfig(this);
-		this.help.setGuildConfig(this);
 	}
 
 	/**

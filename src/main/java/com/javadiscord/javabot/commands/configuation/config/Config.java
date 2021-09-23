@@ -37,10 +37,8 @@ public class Config extends DelegatingCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
 
-        return Responses.error(event, "This command is currently not available.");
-
-        //try { return super.handle(event);
-        //} catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
+        try { return super.handle(event);
+        } catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
     }
 
     public MessageEmbed configEmbed (String configName, String newValue) {
