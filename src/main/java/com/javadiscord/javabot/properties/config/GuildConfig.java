@@ -153,6 +153,16 @@ public class GuildConfig {
 	}
 
 	/**
+	 * Attempts to set a configuration property's value by its name, using '.'
+	 * to concatenate property names, similar to {@link GuildConfig#resolve(String)}.
+	 * @param propertyName The name of the property to set.
+	 * @param value The value to set.
+	 */
+	public void set(String propertyName, Object value) {
+		this.setRecursive(propertyName.split("\\."), this, value);
+	}
+
+	/**
 	 * Attempts to set the value of a configuration property, using recursion to
 	 * traverse the properties in nested objects until the matching field is
 	 * found.
@@ -172,7 +182,7 @@ public class GuildConfig {
 				setRecursive(Arrays.copyOfRange(fieldNames, 1, fieldNames.length), field.get(parent), value);
 			}
 		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalArgumentException(e);
 		}
 	}
 }
