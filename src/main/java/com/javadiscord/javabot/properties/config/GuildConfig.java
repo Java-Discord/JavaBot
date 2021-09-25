@@ -11,10 +11,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 /**
  * A collection of guild-specific configuration items, each of which represents
@@ -112,44 +110,19 @@ public class GuildConfig {
 	 * of {@link GuildConfig} followed by the <code>pingRoleId</code> field from
 	 * {@link JamConfig}.
 	 * @param propertyName The name of the property.
-	 * @param <T> The type of the property.
 	 * @return The value of the property, if found, or null otherwise.
 	 */
 	@Nullable
-	public <T> T resolve(String propertyName) {
-		return this.resolveRecursive(propertyName.split("\\."), this);
-	}
-
-	/**
-	 * Recursively resolves a property based on a sequential array of field
-	 * names to traverse. If there's only one field name present, we will try
-	 * to find the field in the given parent object and return its value. If
-	 * there are more field names, however, get the value of the first field
-	 * from the parent, and recursively check the fields of that value.
-	 * @param fieldNames The array of field names.
-	 * @param parent The object in which to look for root-level fields.
-	 * @param <T> The expected return type.
-	 * @return The object which was resolved, or null otherwise.
-	 */
-	@Nullable
-	@SuppressWarnings("unchecked")
-	private <T> T resolveRecursive(String[] fieldNames, Object parent) {
-		if (fieldNames.length == 0) return null;
-		try {
-			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
-			field.setAccessible(true);
-			Object value = field.get(parent);
-			if (fieldNames.length == 1) {
-				return (T) value;
-			} else if (value != null) {
-				return resolveRecursive(Arrays.copyOfRange(fieldNames, 1, fieldNames.length), value);
-			} else {
+	public Object resolve(String propertyName) throws UnknownPropertyException {
+		var result = ReflectionUtils.resolveField(propertyName, this);
+		return result.map(pair -> {
+			try {
+				return pair.getFirst().get(pair.getSecond());
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
 				return null;
 			}
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			log.warn("Reflection error occurred while resolving property " + Arrays.toString(fieldNames) + " of object of type " + parent.getClass().getSimpleName(), e);
-			return null;
-		}
+		}).orElse(null);
 	}
 
 	/**
@@ -158,31 +131,15 @@ public class GuildConfig {
 	 * @param propertyName The name of the property to set.
 	 * @param value The value to set.
 	 */
-	public void set(String propertyName, Object value) {
-		this.setRecursive(propertyName.split("\\."), this, value);
-	}
-
-	/**
-	 * Attempts to set the value of a configuration property, using recursion to
-	 * traverse the properties in nested objects until the matching field is
-	 * found.
-	 * @param fieldNames The array of field names.
-	 * @param parent The object in which to look for root-level fields.
-	 * @param value The value to set the field to.
-	 */
-	private void setRecursive(String[] fieldNames, Object parent, Object value) {
-		if (fieldNames.length == 0) throw new IllegalStateException("Attempted to call setRecursive without any field names.");
-		try {
-			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
-			field.setAccessible(true);
-			if (fieldNames.length == 1) {
-				// TODO: Apply validation with annotations!
-				field.set(parent, value);
-			} else {
-				setRecursive(Arrays.copyOfRange(fieldNames, 1, fieldNames.length), field.get(parent), value);
+	public void set(String propertyName, String value) throws UnknownPropertyException {
+		var result = ReflectionUtils.resolveField(propertyName, this);
+		result.ifPresent(pair -> {
+			try {
+				ReflectionUtils.set(pair.getFirst(), pair.getSecond(), value);
+				this.flush();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
 			}
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new IllegalArgumentException(e);
-		}
+		});
 	}
 }
