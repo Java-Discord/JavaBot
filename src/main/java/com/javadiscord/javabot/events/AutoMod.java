@@ -4,7 +4,6 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.moderation.Mute;
 import com.javadiscord.javabot.commands.moderation.Warn;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -59,7 +58,7 @@ public class AutoMod extends ListenerAdapter {
                     member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
                     try { new Warn().warn(event.getMember(), event.getGuild(), "Automod: Mention Spam"); }
-                    catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getAuthor())).queue(); }
+                    catch (Exception e) { event.getChannel().sendMessage(e.getMessage()).queue(); }
 
                     event.getMessage().delete().complete();
                 }
@@ -86,7 +85,7 @@ public class AutoMod extends ListenerAdapter {
                     member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
                     try { new Warn().warn(event.getMember(), event.getGuild(), "Automod: Advertising"); }
-                    catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getAuthor())).queue(); }
+                    catch (Exception e) { event.getChannel().sendMessage(e.getMessage()).queue(); }
 
                     event.getMessage().delete().complete();
                 }
@@ -121,7 +120,7 @@ public class AutoMod extends ListenerAdapter {
                     member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
                     try { new Mute().mute(event.getMember(), event.getGuild()); }
-                    catch (Exception e) { event.getChannel().sendMessageEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getAuthor())).queue(); }
+                    catch (Exception e) { event.getChannel().sendMessage(e.getMessage()).queue(); }
                 }
             }
         }

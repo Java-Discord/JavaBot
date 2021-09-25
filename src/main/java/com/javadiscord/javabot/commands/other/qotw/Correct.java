@@ -1,47 +1,40 @@
 package com.javadiscord.javabot.commands.other.qotw;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
+import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 
 import java.util.Date;
 
 public class Correct {
 
-    public static void correct(ButtonClickEvent event, Member member) {
+    public void correct(ButtonClickEvent event, Member member) {
 
-        String check;
-        TextChannel tc = Bot.config.get(event.getGuild()).getModeration().getLogChannel();
-        check = event.getGuild().getEmotesByName("check", false).get(0).getAsMention();
+        int qotwPoints = new Database().getMemberInt(member, "qotwpoints") + 1;
+        new Database().setMemberEntry(member.getId(), "qotwpoints", qotwPoints);
 
-        int qotwPoints = new Database().getMemberInt(member, "qotwpoints");
-        new Database().queryMember(member.getId(), "qotwpoints", qotwPoints + 1);
-
-        EmbedBuilder eb = new EmbedBuilder()
-                .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
+        var eb = new EmbedBuilder()
+                .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
                 .setColor(Constants.GREEN)
-                .setDescription("Your answer was correct! " + check + "\nYou've been granted **1 QOTW-Point!** (Total: " + (qotwPoints + 1) + ")")
-                .setTimestamp(new Date().toInstant());
+                .addField("Total QOTW-Points", "```" + qotwPoints + "```", true)
+                .addField("Rank", "```#" + new Leaderboard().getQOTWRank(event.getGuild(), member.getId()) + "```", true)
+                .setFooter("ID: " + member.getId())
+                .setTimestamp(new Date().toInstant())
+                .build();
+        Misc.sendToLog(event.getGuild(), eb);
 
-        try {
-            member.getUser().openPrivateChannel().complete().sendMessage(eb.build()).queue();
-
-            EmbedBuilder emb = new EmbedBuilder()
-                    .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
-                    .setColor(Constants.GREEN)
-                    .addField("Total QOTW-Points", "```" + (qotwPoints + 1) + "```", true)
-                    .addField("Rank", "```#" + new Leaderboard().getQOTWRank(event.getGuild(), member.getId()) + "```", true)
-                    .setFooter("ID: " + member.getId())
-                    .setTimestamp(new Date().toInstant());
-            tc.sendMessageEmbeds(emb.build()).queue();
-
-        } catch (Exception e) {
-            tc.sendMessageEmbeds(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event.getUser())).queue();
-        }
+        if (!member.getUser().hasPrivateChannel()) Misc.sendToLog(event.getGuild(), "> Couldn't send Message to User " + member.getUser().getAsTag());
+        member.getUser().openPrivateChannel().complete()
+                .sendMessageEmbeds(new EmbedBuilder()
+                        .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
+                        .setColor(Constants.GREEN)
+                        .setDescription("Your answer was correct! " + Constants.SUCCESS +
+                                "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
+                        .setTimestamp(new Date().toInstant())
+                        .build())
+                .queue();
     }
 }

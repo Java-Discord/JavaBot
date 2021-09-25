@@ -1,15 +1,18 @@
 package com.javadiscord.javabot.commands.configuation.config;
 
 import com.javadiscord.javabot.commands.DelegatingCommandHandler;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.configuation.config.subcommands.*;
 import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
-import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.util.Date;
+
 // TODO: Replace with file-based config or at least something much less convoluted.
-@Deprecated(forRemoval = true)
+@Deprecated
 public class Config extends DelegatingCommandHandler {
     public Config() {
         addSubcommand("list", new GetList());
@@ -33,11 +36,21 @@ public class Config extends DelegatingCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (event.getMember() != null && !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-            return event.replyEmbeds(Embeds.permissionError("ADMINISTRATOR", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
 
-        return super.handle(event);
+        return Responses.error(event, "This command is currently not available.");
+
+        //try { return super.handle(event);
+        //} catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
+    }
+
+    public MessageEmbed configEmbed (String configName, String newValue) {
+        var embed = new EmbedBuilder()
+                .setColor(Constants.GRAY)
+                .setAuthor("Config: " + configName)
+                .setDescription("Successfully set ``" + configName + "`` to " + newValue)
+                .setTimestamp(new Date().toInstant())
+                .build();
+        return embed;
     }
 }
 

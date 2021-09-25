@@ -11,7 +11,7 @@ public class Help implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         var e = new EmbedBuilder()
-            .setDescription("Visit **[this page](" + Constants.HELP_LINK + ")** for a full list of Commands")
+            .setDescription("Visit **[this page](" + Constants.HELP_LINK + ")** for a full list of Commands \n \n *Please note that this site is deprecated as we moved to Slash-Commands in [#11](https://github.com/Java-Discord/JavaBot/pull/11)*")
             .setColor(Constants.GRAY)
             .build();
 

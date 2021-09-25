@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -25,7 +26,11 @@ public class Warns implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
-        return warns.countDocuments(eq("user_id", member.getId()));
+        BasicDBObject criteria = new BasicDBObject()
+                .append("guild_id", member.getGuild().getId())
+                .append("user_id", member.getId());
+
+        return warns.countDocuments(criteria);
     }
 
     @Override

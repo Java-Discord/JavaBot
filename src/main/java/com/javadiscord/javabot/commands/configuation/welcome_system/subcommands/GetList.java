@@ -49,7 +49,7 @@ public class GetList implements SlashCommandHandler {
             event.getHook().sendMessageEmbeds(eb.build())
                     .addFile(
                             new ByteArrayInputStream(
-                            new UserJoin().generateImage(event, false, false)),
+                            new UserJoin().generateImage(event.getGuild(), event.getMember())),
                             event.getMember().getId() + ".png")
                     .queue();
         } catch (Exception e) { e.printStackTrace(); }

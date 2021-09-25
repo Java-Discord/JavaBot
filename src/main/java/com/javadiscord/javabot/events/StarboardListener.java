@@ -39,8 +39,10 @@ public class StarboardListener extends ListenerAdapter {
                 .setColor(Constants.GRAY)
                 .setDescription(message.getContentRaw());
 
+        // TODO: fix this using the new file based config
+
         MessageAction msgAction = sc
-                .sendMessage(db.getConfigString(guild, "other.starboard.starboard_emote") + " " +
+                .sendMessage("db.getConfigString(guild, other.starboard.starboard_emote)" + " " +
                         starCount + " | " + message.getTextChannel().getAsMention())
                 .setEmbeds(eb.build());
 
@@ -98,8 +100,10 @@ public class StarboardListener extends ListenerAdapter {
             if (reactionCount > 25)
                 starLevel = "starboard_emote3";
 
+            // TODO: fix this using the new file based config
+
             TextChannel tc = guild.getTextChannelById(cID);
-            sbMsg.editMessage(db.getConfigString(guild, "other.starboard." + starLevel) + " "
+            sbMsg.editMessage("db.getConfigString(guild, other.starboard. + starLevel)" + " "
                     + reactionCount + " | " + tc.getAsMention()).queue();
 
         } else { removeFromSB(guild, mID); }
@@ -127,7 +131,9 @@ public class StarboardListener extends ListenerAdapter {
             try { msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
             } catch (ErrorResponseException e) { collection.deleteOne(doc); continue; }
 
-            String emote = db.getConfigString(guild, "other.starboard.starboard_emote");
+            // TODO: fix this using the new file based config
+
+            String emote = "";//db.getConfigString(guild, "other.starboard.starboard_emote");
             if (msg.getReactions().isEmpty()) updateSB(guild, cID, mID, 0);
 
             int reactionCount = msg
@@ -153,8 +159,10 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
         if (event.getUser().isBot()) return;
 
+        // TODO: fix this using the new file based config
+
         Database db = new Database();
-        String sbEmote = db.getConfigString(event.getGuild(), "other.starboard.starboard_emote");
+        String sbEmote = "";//db.getConfigString(event.getGuild(), "other.starboard.starboard_emote");
 
         if (!event.getReactionEmote().getName().equals(sbEmote)) return;
 
@@ -180,8 +188,10 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
         if (event.getUser().isBot()) return;
 
+        // TODO: fix this using the new file based config
+
         Database db = new Database();
-        String sbEmote = db.getConfigString(event.getGuild(), "other.starboard.starboard_emote");
+        String sbEmote = ""; //db.getConfigString(event.getGuild(), "other.starboard.starboard_emote");
 
         if (!event.getReactionEmote().getName().equals(sbEmote)) return;
 

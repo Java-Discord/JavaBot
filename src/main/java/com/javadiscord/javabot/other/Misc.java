@@ -14,26 +14,16 @@ public class Misc {
 
     public static String checkImage (String input) {
 
-        try {
-            ImageIO.read(new URL(input));
-        } catch (Exception e) {
-            input = iae;
-        }
-
+        try { ImageIO.read(new URL(input));
+        } catch (Exception e) { input = iae; }
         return input;
     }
 
     public static boolean isImage (String input) {
 
-        boolean b = true;
-
-        try {
-            ImageIO.read(new URL(input));
-        } catch (Exception e) {
-            b = false;
-        }
-
-        return b;
+        try { ImageIO.read(new URL(input));
+        } catch (Exception e) { return false; }
+        return true;
     }
 
     public static void sendToLog(Guild guild, MessageEmbed embed) {
@@ -55,7 +45,6 @@ public class Misc {
                     else if (showID && !showMemCount) sb.append(" (").append(guildList.get(guildAmount - 1).getId()).append(")");
                     else if (!showID && showMemCount) sb.append(" (").append(guildList.get(guildAmount - 1).getMemberCount()).append(" members)");
         }
-
         return sb.substring(2);
     }
 }

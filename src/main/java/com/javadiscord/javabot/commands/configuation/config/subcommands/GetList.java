@@ -20,8 +20,8 @@ public class GetList implements SlashCommandHandler {
                 .setColor(Constants.GRAY)
                 .setTitle("Bot Configuration")
 
-                .addField("Lock Status", "Locked: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
-                        "\nCount: `" + db.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
+                //.addField("Lock Status", "Locked: `" + db.getConfigBoolean(event.getGuild(), "other.server_lock.lock_status") + "`" +
+                //        "\nCount: `" + db.getConfigInt(event.getGuild(), "other.server_lock.lock_count") + "/5`", true)
 
                 .addField("Question of the Week", "Submission Channel: " + c.getQotw().getSubmissionChannel().getAsMention()
                         + "\nSubmission-Status: `" + c.getQotw().isDmEnabled() + "`", true)

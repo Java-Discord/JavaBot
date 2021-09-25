@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.jam.subcommands.admin;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.jam.dao.JamThemeRepository;
 import com.javadiscord.javabot.jam.model.Jam;
 import com.javadiscord.javabot.jam.model.JamTheme;

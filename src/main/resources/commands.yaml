@@ -125,6 +125,16 @@
       options:
         - { description: Link of the original Message, name: link, required: true, type: STRING }
         - { description: Title of the embed, name: title, required: false, type: STRING }
+- description: Let the bot say everything you want
+  name: say
+  options:
+    - {description: The text the bot should say, name: text,
+       required: true, type: STRING}
+  handler: com.javadiscord.javabot.commands.moderation.Say
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: moderation.staffRoleId
 - description: Kicks a member
   name: kick
   handler: com.javadiscord.javabot.commands.moderation.Kick
@@ -173,6 +183,35 @@
     - name: archive
       description: If true, save removed messages in an archive.
       type: BOOLEAN
+      required: false
+
+- name: prune
+  description: Removes members from the server.
+  handler: com.javadiscord.javabot.commands.moderation.Prune
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: pattern
+      description: A regular expression pattern to use, to remove members whose contains a match with the pattern.
+      type: STRING
+      required: false
+    - name: before
+      description: "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC."
+      type: STRING
+      required: false
+    - name: after
+      description: "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC."
+      type: STRING
+      required: false
+    - name: reason
+      description: The reason for issuing the prune command. This will be provided as the reason for each ban.
+      type: STRING
+      required: false
+    - name: delete-days-of-history
+      description: The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.
+      type: INTEGER
       required: false
 
 - description: Reports a member
@@ -404,29 +443,27 @@
     - description: Creates a reaction role
       name: create
       options:
-        - {description: 'Channel, the reaction role should be created in', name: channel,
-           required: true, type: CHANNEL}
-        - {description: 'Message, the reaction role should be created on', name: messageid,
+        - {description: 'Message, the Reaction Role should be created on', name: message-id,
            required: true, type: STRING}
-        - {description: 'Emote, the reaction role should use', name: emote, required: true,
-           type: STRING}
-        - { description: 'Label, the button should use', name: button-label, required: true,
+        - { description: 'Label, the Button should use', name: label, required: true,
             type: STRING}
-        - {description: 'Role, the reaction role should add', name: role, required: true,
+        - {description: 'Role, the Button should add upon use', name: role, required: true,
            type: ROLE}
+        - {description: 'It set to true, doesnt let you remove the Role afterwards', name: permanent, required: false,
+            type: BOOLEAN}
+        - {description: 'Emote, the Button should use', name: emote, required: false,
+            type: STRING}
     - description: Deletes a reaction role
       name: delete
       options:
-        - {description: 'Message, the reaction role is on', name: messageid, required: true,
+        - {description: 'Message, the reaction role is on', name: message-id, required: true,
            type: STRING}
-        - {description: 'Emote, the reaction role is using', name: emote, required: true,
-           type: STRING}
-        - {description: 'Label, the button should use', name: button-label, required: true,
+        - {description: 'Label, the button should use', name: label, required: true,
            type: STRING}
 - description: Lists all Reaction Roles
   name: reactionroles
   options: []
-  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoleList
+  handler: com.javadiscord.javabot.commands.reaction_roles.subcommands.ListReactionRoles
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
