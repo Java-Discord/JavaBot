@@ -3,7 +3,6 @@ package com.javadiscord.javabot;
 import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.help.HelpChannelListener;
-import com.javadiscord.javabot.help.HelpChannelUpdater;
 import com.javadiscord.javabot.properties.config.BotConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -18,7 +17,6 @@ import java.time.ZoneOffset;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The main class where the bot is initialized.
@@ -77,7 +75,6 @@ public class Bot {
                 .addEventListeners(slashCommands)
                 .build();
         addEventListeners(jda);
-        asyncPool.scheduleAtFixedRate(new HelpChannelUpdater(jda), 1, 1, TimeUnit.SECONDS);
     }
 
     /**

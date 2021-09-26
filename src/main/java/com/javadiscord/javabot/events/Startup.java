@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.Version;
+import com.javadiscord.javabot.help.HelpChannelUpdater;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
@@ -92,6 +93,10 @@ public class Startup extends ListenerAdapter {
             new Database().deleteOpenSubmissions(guild);
             new StarboardListener().updateAllSBM(guild);
             Bot.slashCommands.registerSlashCommands(guild);
+
+            // Schedule the help channel updater to run periodically for each guild.
+            var helpConfig = Bot.config.get(guild).getHelp();
+            Bot.asyncPool.scheduleAtFixedRate(new HelpChannelUpdater(event.getJDA(), helpConfig), 5, helpConfig.getUpdateIntervalSeconds(), TimeUnit.SECONDS);
         }
 
 

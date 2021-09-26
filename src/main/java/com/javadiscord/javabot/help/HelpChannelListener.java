@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * more designated help channels.
  */
 public class HelpChannelListener extends ListenerAdapter {
+
 	@Override
 	public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
@@ -19,11 +20,12 @@ public class HelpChannelListener extends ListenerAdapter {
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		TextChannel channel = event.getChannel();
 		Category category = channel.getParent();
-		if (category == null) return;
+		if (category == null || !category.equals(config.getHelpChannelCategory())) return;
+		var channelManager = new HelpChannelManager(config);
+
+		// If a message was sent in an open text channel, reserve it.
 		if (channel.getName().startsWith(config.getOpenChannelPrefix())) {
-			String rawChannelName = channel.getName().substring(config.getOpenChannelPrefix().length());
-			channel.getManager().setName(config.getReservedChannelPrefix() + rawChannelName).queue();
-			channel.getManager().setPosition(category.getTextChannels().size()).queue();
+			channelManager.reserve(channel, event.getAuthor());
 		}
 	}
 }
