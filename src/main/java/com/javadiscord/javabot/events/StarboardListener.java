@@ -5,6 +5,7 @@ import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
@@ -19,12 +20,10 @@ import org.slf4j.LoggerFactory;
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
+@Slf4j
 public class StarboardListener extends ListenerAdapter {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(StarboardListener.class);
-
     void addToSB(Guild guild, MessageChannel channel, Message message, int starCount) {
-
         String gID = guild.getId();
         String cID = channel.getId();
         String mID = message.getId();
@@ -39,10 +38,8 @@ public class StarboardListener extends ListenerAdapter {
                 .setColor(Constants.GRAY)
                 .setDescription(message.getContentRaw());
 
-        // TODO: fix this using the new file based config
-
         MessageAction msgAction = sc
-                .sendMessage("db.getConfigString(guild, other.starboard.starboard_emote)" + " " +
+                .sendMessage(Bot.config.get(guild).getStarBoard().getEmotes().get(0) + " " +
                         starCount + " | " + message.getTextChannel().getAsMention())
                 .setEmbeds(eb.build());
 
@@ -64,9 +61,7 @@ public class StarboardListener extends ListenerAdapter {
 
         Document doc = collection.find(eq("message_id", mID)).first();
         if (doc == null) return;
-
         String var = doc.getString("starboard_embed");
-
         Bot.config.get(guild).getStarBoard().getChannel()
                 .retrieveMessageById(var)
                 .complete()
@@ -77,13 +72,10 @@ public class StarboardListener extends ListenerAdapter {
     }
 
     void updateSB(Guild guild, String cID, String mID, int reactionCount) {
-
         Database db = new Database();
         String gID = guild.getId();
-
         String sbcEmbedId = db.getStarboardChannelString(gID, cID, mID, "starboard_embed");
         if (sbcEmbedId == null) return;
-
         Message sbMsg;
 
         try {
@@ -93,24 +85,23 @@ public class StarboardListener extends ListenerAdapter {
 
         if (sbMsg == null) return;
 
+        var config = Bot.config.get(guild).getStarBoard();
         if (reactionCount > 0) {
-            String starLevel = "starboard_emote";
+            String starEmote = config.getEmotes().get(0);
             if (reactionCount > 10)
-                starLevel = "starboard_emote2";
+                starEmote = config.getEmotes().get(1);
             if (reactionCount > 25)
-                starLevel = "starboard_emote3";
-
-            // TODO: fix this using the new file based config
+                starEmote = config.getEmotes().get(2);
 
             TextChannel tc = guild.getTextChannelById(cID);
-            sbMsg.editMessage("db.getConfigString(guild, other.starboard. + starLevel)" + " "
+            sbMsg.editMessage(starEmote + " "
                     + reactionCount + " | " + tc.getAsMention()).queue();
 
         } else { removeFromSB(guild, mID); }
     }
 
     public void updateAllSBM(Guild guild) {
-        logger.info("[{}] Updating Starboard Messages", guild.getName());
+        log.info("[{}] Updating Starboard Messages", guild.getName());
 
         String gID = guild.getId();
         MongoCollection<Document> collection = mongoClient
@@ -125,15 +116,12 @@ public class StarboardListener extends ListenerAdapter {
 
             String cID = doc.getString("channel_id");
             String mID = doc.getString("message_id");
-
             Message msg;
 
             try { msg = guild.getTextChannelById(cID).retrieveMessageById(mID).complete();
             } catch (ErrorResponseException e) { collection.deleteOne(doc); continue; }
 
-            // TODO: fix this using the new file based config
-
-            String emote = "";//db.getConfigString(guild, "other.starboard.starboard_emote");
+            String emote = Bot.config.get(guild).getStarBoard().getEmotes().get(0);
             if (msg.getReactions().isEmpty()) updateSB(guild, cID, mID, 0);
 
             int reactionCount = msg
@@ -159,10 +147,8 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
         if (event.getUser().isBot()) return;
 
-        // TODO: fix this using the new file based config
-
         Database db = new Database();
-        String sbEmote = "";//db.getConfigString(event.getGuild(), "other.starboard.starboard_emote");
+        String sbEmote = Bot.config.get(event.getGuild()).getStarBoard().getEmotes().get(0);
 
         if (!event.getReactionEmote().getName().equals(sbEmote)) return;
 
@@ -188,10 +174,8 @@ public class StarboardListener extends ListenerAdapter {
     public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
         if (event.getUser().isBot()) return;
 
-        // TODO: fix this using the new file based config
-
         Database db = new Database();
-        String sbEmote = ""; //db.getConfigString(event.getGuild(), "other.starboard.starboard_emote");
+        String sbEmote = Bot.config.get(event.getGuild()).getStarBoard().getEmotes().get(0);
 
         if (!event.getReactionEmote().getName().equals(sbEmote)) return;
 
