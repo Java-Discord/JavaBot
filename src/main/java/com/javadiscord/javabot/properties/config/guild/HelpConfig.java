@@ -20,12 +20,33 @@ public class HelpConfig extends GuildConfigItem {
 	private long categoryId;
 
 	/**
-	 * The strategy to use when naming help channels.
+	 * The strategy to use when naming help channels. This is only used when
+	 * {@link HelpConfig#recycleChannels} is set to false.
 	 */
 	private String channelNamingStrategy = "animal";
 
 	/**
-	 * The number of open help channels to maintain.
+	 * If true, the system will manage a fixed set of help channels which are
+	 * created in advance. If false, the system will create and remove channels
+	 * as needed to maintain the {@link HelpConfig#preferredOpenChannelCount}.
+	 * Note that if this is true, the preferred open channel count is ignored.
+	 */
+	private boolean recycleChannels = false;
+
+	/**
+	 * The string which is shown as the 'topic' for open channels.
+	 */
+	private String openChannelTopic = "Ask your question here!";
+
+	/**
+	 * The message that's sent in a recycled help channel to tell users that it
+	 * is now open for someone to ask a question.
+	 */
+	private String reopenedChannelMessage = "**This channel is no longer reserved. Feel free to ask your question here!**";
+
+	/**
+	 * The number of open help channels to maintain. If fewer than this many
+	 * open channels exist, the system will try to create more.
 	 */
 	private int preferredOpenChannelCount = 3;
 
@@ -40,13 +61,6 @@ public class HelpConfig extends GuildConfigItem {
 	 * has already asked a question and is in the process of getting an answer.
 	 */
 	private String reservedChannelPrefix = "\u26D4";
-
-	/**
-	 * The string which is prefixed to any inactive reserved help channel, where
-	 * a user has asked a question but the channel has been inactive for a set
-	 * amount of time.
-	 */
-	private String inactiveChannelPrefix = "\uD83D\uDFE0";
 
 	/**
 	 * The number of minutes of inactivity before a channel is considered inactive.
