@@ -3,6 +3,7 @@ package com.javadiscord.javabot.other;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -34,9 +35,9 @@ public class Database {
      */
     private static final Map<String, String[]> DB_COLS = new HashMap<>();
     static {
-        DB_COLS.put("userdata", new String[] { "potential_bot_list", "users", "warns" });
-        DB_COLS.put("other", new String[] { "config", "customcommands", "expert_questions",
-                "open_submissions", "reactionroles", "starboard_messages", "submission_messages" });
+        DB_COLS.put("userdata", new String[] {"potential_bot_list", "users", "warns"});
+        DB_COLS.put("other", new String[] {"config", "customcommands", "expert_questions",
+                "open_submissions", "reactionroles", "starboard_messages", "submission_messages"});
     }
 
     List<String> getDatabases(MongoClient mongoClient) {
@@ -61,6 +62,7 @@ public class Database {
                 }
             }
         }
+        for (var g : guilds) if (!guildDocExists(g)) insertGuildDoc(g);
     }
 
     public void deleteOpenSubmissions(Guild guild) {
@@ -92,6 +94,34 @@ public class Database {
                 .append("qotwpoints", 0);
     }
 
+    public Document guildDoc (String guildID) {
+        Document lock = new Document("lock_status", false)
+                .append("lock_count", 0);
+
+        Document other = new Document()
+                .append("server_lock", lock);
+
+        Document doc = new Document()
+                .append("guild_id", guildID)
+                .append("other", other);
+        return doc;
+    }
+
+    public boolean guildDocExists(Guild guild) {
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+        if (guild == null) return false;
+        if (collection.find(eq("guild_id", guild.getId())).first() == null) return false;
+        return true;
+    }
+
+    public void insertGuildDoc (Guild guild) {
+        MongoDatabase database = mongoClient.getDatabase("other");
+        MongoCollection<Document> collection = database.getCollection("config");
+        collection.insertOne(guildDoc(guild.getId()));
+        logger.warn("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
+    }
+
     public void setMemberEntry(String memberID, String path, Object newValue) {
         Document setData = new Document(path, newValue);
         Document update = new Document("$set", setData);
@@ -119,25 +149,59 @@ public class Database {
         } catch (Exception e) { e.printStackTrace(); return defaultValue; }
     }
 
-    public String getMemberString(Member member, String path) {
-        return getMember(member, path, "None");
-    }
-
     public int getMemberInt(Member member, String path) {
         return getMember(member, path, 0);
+    }
+
+    private <T> T getConfig(Guild guild, String path, T defaultValue) {
+        try {
+            Document doc = mongoClient
+                    .getDatabase("other")
+                    .getCollection("config")
+                    .find(eq("guild_id", guild.getId()))
+                    .first();
+            String[] splittedPath = path.split("\\.");
+            int pathLen = splittedPath.length - 1;
+
+            for (int i = 0; i < pathLen; ++i) {
+                doc = doc.get(splittedPath[i], Document.class);
+            }
+            return doc.get(splittedPath[pathLen], defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (!guildDocExists(guild)) {
+                insertGuildDoc(guild);
+            }
+            return defaultValue;
+        }
+    }
+
+    public boolean getConfigBoolean(Guild guild, String path) {
+        return getConfig(guild, path, false);
+    }
+
+    public int getConfigInt(Guild guild, String path) {
+        return getConfig(guild, path, 0);
+    }
+
+    public void setConfigEntry(String guildID, String path, Object newValue) {
+        BasicDBObject setData = new BasicDBObject(path, newValue);
+        BasicDBObject update = new BasicDBObject("$set", setData);
+        Document query = new Document("guild_id", guildID);
+        mongoClient.getDatabase("other")
+                .getCollection("config")
+                .updateOne(query, update);
     }
 
     public boolean isMessageOnStarboard(String gID, String cID, String mID) {
         BasicDBObject criteria = new BasicDBObject("guild_id", gID)
                 .append("channel_id", cID)
                 .append("message_id", mID);
-
         Document first = mongoClient
                 .getDatabase("other")
                 .getCollection("starboard_messages")
                 .find(criteria)
                 .first();
-
         return first != null;
     }
 

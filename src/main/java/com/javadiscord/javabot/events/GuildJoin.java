@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,10 +19,8 @@ public class GuildJoin extends ListenerAdapter {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
 
-        // TODO: fix this using the new file based config
-
         if (collection.find(eq("guild_id", guild.getId())).first() == null) {
-            //new Database().insertGuildDoc(guild);
+            new Database().insertGuildDoc(guild);
         }
     }
 
