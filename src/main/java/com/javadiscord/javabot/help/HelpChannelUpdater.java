@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.help;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.properties.config.guild.HelpConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
@@ -27,7 +28,6 @@ public class HelpChannelUpdater implements Runnable {
 		this.channelManager = new HelpChannelManager(config);
 	}
 
-
 	@Override
 	public void run() {
 		var category = config.getHelpChannelCategory();
@@ -41,7 +41,7 @@ public class HelpChannelUpdater implements Runnable {
 				openChannelCount++;
 			}
 		}
-		while (openChannelCount < config.getPreferredOpenChannelCount()) {
+		while (!this.config.isRecycleChannels() && openChannelCount < config.getPreferredOpenChannelCount()) {
 			channelManager.openNew();
 			openChannelCount++;
 		}
@@ -58,11 +58,11 @@ public class HelpChannelUpdater implements Runnable {
 	 *     <li>
 	 *         If the most recent message is an activity check message, and it
 	 *         has stuck around long enough without any response, then the
-	 *         channel will be removed.
+	 *         channel will be unreserved.
 	 *     </li>
 	 *     <li>
 	 *         If for some reason we can't retrieve the owner of the channel,
-	 *         like if they left the server, the channel will be removed.
+	 *         like if they left the server, the channel will be unreserved.
 	 *     </li>
 	 * </ul>
 	 * @param channel The channel to check.
@@ -70,15 +70,15 @@ public class HelpChannelUpdater implements Runnable {
 	private void checkReservedChannel(TextChannel channel) {
 		User owner = this.channelManager.getReservedChannelOwner(channel);
 		if (owner == null) {
-			log.info("Removing reserved channel {} because no owner could be found.", channel.getAsMention());
-			channel.delete().queue();
+			log.info("Unreserving channel {} because no owner could be found.", channel.getAsMention());
+			this.channelManager.unreserveChannel(channel);
 			return;
 		}
 		channel.getHistory().retrievePast(1).queue(messages -> {
 			Message mostRecentMessage = messages.isEmpty() ? null : messages.get(0);
 			if (mostRecentMessage == null) {
-				log.info("Removing reserved channel {} because no recent messages could be found.", channel.getAsMention());
-				channel.delete().queue();
+				log.info("Unreserving channel {} because no recent messages could be found.", channel.getAsMention());
+				this.channelManager.unreserveChannel(channel);
 				return;
 			}
 
@@ -88,12 +88,12 @@ public class HelpChannelUpdater implements Runnable {
 				mostRecentMessage.getContentRaw().contains("Are you finished with this channel?") &&
 				mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())
 			) {
-				log.info("Removing reserved channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
+				log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
 				channel.sendMessage(String.format(
-						"%s, this channel will be closed in 30 seconds due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
+						"%s, this channel will be unreserved in 30 seconds due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
 						owner.getAsMention()
 				)).queue();
-				channel.delete().queueAfter(30, TimeUnit.SECONDS);
+				Bot.asyncPool.schedule(() -> this.channelManager.unreserveChannel(channel), 30, TimeUnit.SECONDS);
 				return;
 			}
 
@@ -114,9 +114,18 @@ public class HelpChannelUpdater implements Runnable {
 		});
 	}
 
+	/**
+	 * Checks an open help channel to ensure it's in the correct state.
+	 * @param channel The channel to check.
+	 * @return True if the channel is in a working state, or false otherwise.
+	 */
 	private boolean checkOpenChannel(TextChannel channel) {
-		boolean isEmpty = channel.getHistoryFromBeginning(1).complete().isEmpty();
-		if (!isEmpty) {
+		var history = channel.getHistory().retrievePast(1).complete();
+		var lastMessage = history.isEmpty() ? null : history.get(0);
+		if (lastMessage != null && !this.config.isRecycleChannels()) {
+			// If we're not recycling channels, we want to keep all open channels fresh.
+			// Any open channel with a message in it should be immediately become reserved.
+			// However, network issues or other things could cause this to fail, so we clean up here.
 			log.info("Removing non-empty open channel {}.", channel.getAsMention());
 			channel.delete().complete();
 			return false;

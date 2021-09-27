@@ -36,7 +36,7 @@ public class HelpChannelManager {
 		if (category == null) throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
 		String name = this.config.getChannelNamingStrategy().getName(category.getTextChannels(), config);
 		category.createTextChannel(name).queue(channel -> {
-			channel.getManager().setPosition(0).setTopic("Ask a question here!").queue();
+			channel.getManager().setPosition(0).setTopic(this.config.getOpenChannelTopic()).queue();
 			log.info("Created new help channel {}.", channel.getAsMention());
 		});
 	}
@@ -57,7 +57,10 @@ public class HelpChannelManager {
 						reservingUser.getId()
 				)).queue();
 		log.info("Reserved channel {} for {}.", channel.getAsMention(), reservingUser.getAsTag());
-		openNew(); // Open a new channel immediately, to keep things balanced.
+		if (!this.config.isRecycleChannels()) {
+			// Open a new channel right away to maintain the preferred number of open channels.
+			openNew();
+		}
 	}
 
 	/**
@@ -75,5 +78,22 @@ public class HelpChannelManager {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Unreserves a channel after it no longer needs to be reserved.
+	 * @param channel The channel to unreserve.
+	 */
+	public void unreserveChannel(TextChannel channel) {
+		if (this.config.isRecycleChannels()) {
+			String rawName = channel.getName().substring(this.config.getReservedChannelPrefix().length());
+			channel.getManager()
+					.setName(this.config.getOpenChannelPrefix() + rawName)
+					.setTopic(this.config.getOpenChannelTopic())
+					.setPosition(0).queue();
+			channel.sendMessage(this.config.getReopenedChannelMessage()).queue();
+		} else {
+			channel.delete().queue();
+		}
 	}
 }
