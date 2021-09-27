@@ -45,6 +45,12 @@ public class HelpConfig extends GuildConfigItem {
 	private String reopenedChannelMessage = "**This channel is no longer reserved. Feel free to ask your question here!**";
 
 	/**
+	 * The message that's sent as soon as a user asks a question in an open help
+	 * channel. This is only sent if it's not null.
+	 */
+	private String reservedChannelMessage = null;
+
+	/**
 	 * The number of open help channels to maintain. If fewer than this many
 	 * open channels exist, the system will try to create more.
 	 */

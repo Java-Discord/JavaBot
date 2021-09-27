@@ -55,7 +55,11 @@ public class HelpChannelManager {
 						"Reserved for %s\n(_id=%s_)",
 						reservingUser.getAsTag(),
 						reservingUser.getId()
-				)).queue();
+				)).queue(unused -> {
+					if (config.getReservedChannelMessage() != null) {
+						channel.sendMessage(config.getReservedChannelMessage()).queue();
+					}
+				});
 		log.info("Reserved channel {} for {}.", channel.getAsMention(), reservingUser.getAsTag());
 		if (!this.config.isRecycleChannels()) {
 			// Open a new channel right away to maintain the preferred number of open channels.
