@@ -20,7 +20,8 @@ public class HelpConfig extends GuildConfigItem {
 	private long categoryId;
 
 	/**
-	 * The strategy to use when naming help channels.
+	 * The strategy to use when naming help channels. This is only used when
+	 * {@link HelpConfig#recycleChannels} is set to false.
 	 */
 	private String channelNamingStrategy = "animal";
 
