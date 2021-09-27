@@ -39,7 +39,7 @@ public class HelpConfig extends GuildConfigItem {
 	 * The string which is prefixed to any reserved help channel, where a user
 	 * has already asked a question and is in the process of getting an answer.
 	 */
-	private String reservedChannelPrefix = "⛔";
+	private String reservedChannelPrefix = "\u26D4";
 
 	/**
 	 * The string which is prefixed to any inactive reserved help channel, where
