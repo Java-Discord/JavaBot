@@ -2,11 +2,12 @@ package com.javadiscord.javabot.events;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.help.HelpChannelManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
+import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bson.Document;
@@ -15,6 +16,7 @@ import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.javadiscord.javabot.events.Startup.preferredGuild;
 import static com.mongodb.client.model.Filters.eq;
 
+@Slf4j
 public class InteractionListener extends ListenerAdapter {
 
 	// TODO: add Context-Menu Commands (once they're available in JDA)
@@ -31,6 +33,7 @@ public class InteractionListener extends ListenerAdapter {
 			case "dm-submission" -> this.handleDmSubmission(database, guild, event);
 			case "submission" -> this.handleSubmission(database, guild, event);
 			case "reaction-role" -> this.handleReactionRoles(event);
+			case "help-channel" -> this.handleHelpChannel(event, id[1]);
 		}
 	}
 
@@ -79,6 +82,32 @@ public class InteractionListener extends ListenerAdapter {
 		} else {
 			event.getGuild().addRoleToMember(member, role).queue();
 			event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
+		}
+	}
+
+	private void handleHelpChannel(ButtonClickEvent event, String action) {
+		var config = Bot.config.get(event.getGuild()).getHelp();
+		var channelManager = new HelpChannelManager(config);
+		TextChannel channel = event.getTextChannel();
+		User owner = channelManager.getReservedChannelOwner(channel);
+		if (owner == null) {
+			return; // This channel will be pruned automatically.
+		}
+
+		if (
+			event.getUser().equals(owner) ||
+			(event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
+		) {
+			if (action.equals("done")) {
+				log.info("Removing reserved channel {} because it was marked as done.", channel.getAsMention());
+				channel.delete().queue();
+			} else if (action.equals("not-done")) {
+				if (event.getMessage() != null) {
+					log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
+					event.getMessage().delete().queue();
+					channel.sendMessage("Okay, we'll keep this channel reserved for you, and check again in **" + config.getInactivityTimeoutMinutes() + "** minutes.").queue();
+				}
+			}
 		}
 	}
 }

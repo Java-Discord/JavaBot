@@ -2,6 +2,7 @@ package com.javadiscord.javabot;
 
 import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
+import com.javadiscord.javabot.help.HelpChannelListener;
 import com.javadiscord.javabot.properties.config.BotConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -92,7 +93,8 @@ public class Bot {
                 new AutoMod(),
                 new SubmissionListener(),
                 new StarboardListener(),
-                new InteractionListener()
+                new InteractionListener(),
+                new HelpChannelListener()
         );
     }
 }

@@ -25,6 +25,7 @@ public class GuildConfig {
 	private transient Path file;
 
 	private SlashCommandConfig slashCommand;
+	private HelpConfig help;
 	private ModerationConfig moderation;
 	private QOTWConfig qotw;
 	private WelcomeConfig welcome;
@@ -36,6 +37,7 @@ public class GuildConfig {
 		this.file = file;
 		// Initialize all config items.
 		this.slashCommand = new SlashCommandConfig();
+		this.help = new HelpConfig();
 		this.moderation = new ModerationConfig();
 		this.qotw = new QOTWConfig();
 		this.welcome = new WelcomeConfig();
@@ -47,12 +49,21 @@ public class GuildConfig {
 
 	private void setGuild(Guild guild) {
 		this.guild = guild;
+		if (this.slashCommand == null) this.slashCommand = new SlashCommandConfig();
 		this.slashCommand.setGuildConfig(this);
+		if (this.help == null) this.help = new HelpConfig();
+		this.help.setGuildConfig(this);
+		if (this.moderation == null) this.moderation = new ModerationConfig();
 		this.moderation.setGuildConfig(this);
+		if (this.qotw == null) this.qotw = new QOTWConfig();
 		this.qotw.setGuildConfig(this);
+		if (this.welcome == null) this.welcome = new WelcomeConfig();
 		this.welcome.setGuildConfig(this);
+		if (this.stats == null) this.stats = new StatsConfig();
 		this.stats.setGuildConfig(this);
+		if (this.starBoard == null) this.starBoard = new StarBoardConfig();
 		this.starBoard.setGuildConfig(this);
+		if (this.jam == null) this.jam = new JamConfig();
 		this.jam.setGuildConfig(this);
 	}
 
