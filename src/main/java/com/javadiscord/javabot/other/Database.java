@@ -89,7 +89,7 @@ public class Database {
     }
 
     public Document userDoc(User user) {
-        return new Document("tag", user.getAsTag())
+        return new Document()
                 .append("discord_id", user.getId())
                 .append("qotwpoints", 0);
     }
