@@ -170,6 +170,15 @@
       - type: ROLE
         id: moderation.staffRoleId
   options: []
+- description: Grants one QOTW-Points to the given member upon use
+  name: correct
+  handler: com.javadiscord.javabot.commands.other.qotw.Correct
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - {description: The member you want to grant a point, name: member, required: true, type: USER}
 
 - description: Deletes messages from a channel.
   name: purge

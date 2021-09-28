@@ -115,11 +115,25 @@ public class Database {
         return true;
     }
 
+    public boolean userDocExists(User user) {
+        MongoDatabase database = mongoClient.getDatabase("userdata");
+        MongoCollection<Document> collection = database.getCollection("users");
+        if (collection.find(eq("discord_id", user.getId())).first() == null) return false;
+        return true;
+    }
+
     public void insertGuildDoc (Guild guild) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
         collection.insertOne(guildDoc(guild.getId()));
-        logger.warn("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
+        logger.info("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
+    }
+
+    public void insertUserDoc (User user) {
+        MongoDatabase database = mongoClient.getDatabase("userdata");
+        MongoCollection<Document> collection = database.getCollection("users");
+        collection.insertOne(userDoc(user));
+        logger.info("Added Database entry for User \"" + user.getAsTag() + "\" (" + user.getId() + ")");
     }
 
     public void setMemberEntry(String memberID, String path, Object newValue) {
@@ -133,6 +147,10 @@ public class Database {
     }
 
     private <T> T getMember(Member member, String path, T defaultValue) {
+        if (!userDocExists(member.getUser())) {
+            insertUserDoc(member.getUser());
+            return getMember(member, path, defaultValue);
+        }
         try {
             Document doc = mongoClient
                     .getDatabase("userdata")

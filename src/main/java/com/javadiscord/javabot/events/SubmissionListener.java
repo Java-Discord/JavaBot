@@ -72,11 +72,11 @@ public class SubmissionListener extends ListenerAdapter {
 
     public void submissionApprove (ButtonClickEvent event, String userID) {
 
-        new Correct().correct(event, event.getGuild().getMemberById(userID));
+        new Correct().correct(event.getGuild(), event.getGuild().retrieveMemberById(userID).complete());
 
         event.getHook().editOriginalEmbeds(event.getMessage().getEmbeds().get(0))
                 .setActionRows(ActionRow.of(
-                        Button.success("submission:approve:" + event.getUser().getId(), "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())
+                        Button.success("submission:approve:" + userID, "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())
                 ).queue();
     }
 
@@ -102,7 +102,6 @@ public class SubmissionListener extends ListenerAdapter {
         Guild guild = Startup.preferredGuild;
 
             if (!Bot.config.get(guild).getQotw().isDmEnabled()) return;
-
                 try {
                     EmbedBuilder submissionEb = new EmbedBuilder()
                             .setColor(Constants.GRAY)
@@ -118,7 +117,6 @@ public class SubmissionListener extends ListenerAdapter {
                     Document document = collection.find(eq("guild_id", guild.getId())).first();
 
                     if (!(document == null)) {
-
                         JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
                         String messageId = root.get("message_id").getAsString();
                         Message msg = event.getAuthor().openPrivateChannel().complete().retrieveMessageById(messageId).complete();
@@ -127,7 +125,6 @@ public class SubmissionListener extends ListenerAdapter {
                                 .setActionRows(ActionRow.of(
                                         Button.danger("dm-submission:canceled:" + event.getAuthor().getId(), "Process canceled").asDisabled()))
                                 .queue();
-
                         collection.deleteOne(document);
                     }
 
