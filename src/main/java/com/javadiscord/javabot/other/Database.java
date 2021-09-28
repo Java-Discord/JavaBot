@@ -88,10 +88,63 @@ public class Database {
         }
     }
 
-    public Document userDoc(User user) {
+    public Document userDoc(String userId) {
         return new Document()
-                .append("discord_id", user.getId())
+                .append("discord_id", userId)
                 .append("qotwpoints", 0);
+    }
+
+    public boolean userDocExists(String userId) {
+        MongoDatabase database = mongoClient.getDatabase("userdata");
+        MongoCollection<Document> collection = database.getCollection("users");
+        if (collection.find(eq("discord_id", userId)).first() == null) return false;
+        return true;
+    }
+
+    public void insertUserDoc (String userId) {
+        MongoDatabase database = mongoClient.getDatabase("userdata");
+        MongoCollection<Document> collection = database.getCollection("users");
+        collection.insertOne(userDoc(userId));
+        logger.info("Added Database entry for User " + userId);
+    }
+
+    public void setMemberEntry(String memberID, String path, Object newValue) {
+        if (!userDocExists(memberID)) {
+            insertUserDoc(memberID);
+            setMemberEntry(memberID, path, newValue);
+        }
+        Document setData = new Document(path, newValue);
+        Document update = new Document("$set", setData);
+
+        Document query = new Document("discord_id", memberID);
+        mongoClient.getDatabase("userdata")
+                .getCollection("users")
+                .updateOne(query, update);
+    }
+
+    private <T> T getMember(Member member, String path, T defaultValue) {
+        if (!userDocExists(member.getId())) {
+            insertUserDoc(member.getId());
+            return getMember(member, path, defaultValue);
+        }
+        try {
+            Document doc = mongoClient
+                    .getDatabase("userdata")
+                    .getCollection("users")
+                    .find(eq("discord_id", member.getId()))
+                    .first();
+            String[] splittedPath = path.split("\\.");
+            int pathLen = splittedPath.length - 1;
+
+            for (int i = 0; i < pathLen; ++i) {
+                doc = doc.get(splittedPath[i], Document.class);
+            }
+            return doc.get(splittedPath[pathLen], defaultValue);
+        } catch (Exception e) { e.printStackTrace(); return defaultValue; }
+    }
+
+    public int getMemberInt(Member member, String path) {
+        return getMember(member, path, 0);
     }
 
     public Document guildDoc (String guildID) {
@@ -115,60 +168,11 @@ public class Database {
         return true;
     }
 
-    public boolean userDocExists(User user) {
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-        if (collection.find(eq("discord_id", user.getId())).first() == null) return false;
-        return true;
-    }
-
     public void insertGuildDoc (Guild guild) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
         collection.insertOne(guildDoc(guild.getId()));
         logger.info("Added Database entry for Guild \"" + guild.getName() + "\" (" + guild.getId() + ")");
-    }
-
-    public void insertUserDoc (User user) {
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
-        collection.insertOne(userDoc(user));
-        logger.info("Added Database entry for User \"" + user.getAsTag() + "\" (" + user.getId() + ")");
-    }
-
-    public void setMemberEntry(String memberID, String path, Object newValue) {
-        Document setData = new Document(path, newValue);
-        Document update = new Document("$set", setData);
-
-        Document query = new Document("discord_id", memberID);
-        mongoClient.getDatabase("userdata")
-                .getCollection("users")
-                .updateOne(query, update);
-    }
-
-    private <T> T getMember(Member member, String path, T defaultValue) {
-        if (!userDocExists(member.getUser())) {
-            insertUserDoc(member.getUser());
-            return getMember(member, path, defaultValue);
-        }
-        try {
-            Document doc = mongoClient
-                    .getDatabase("userdata")
-                    .getCollection("users")
-                    .find(eq("discord_id", member.getId()))
-                    .first();
-            String[] splittedPath = path.split("\\.");
-            int pathLen = splittedPath.length - 1;
-
-            for (int i = 0; i < pathLen; ++i) {
-                doc = doc.get(splittedPath[i], Document.class);
-            }
-            return doc.get(splittedPath[pathLen], defaultValue);
-        } catch (Exception e) { e.printStackTrace(); return defaultValue; }
-    }
-
-    public int getMemberInt(Member member, String path) {
-        return getMember(member, path, 0);
     }
 
     private <T> T getConfig(Guild guild, String path, T defaultValue) {
