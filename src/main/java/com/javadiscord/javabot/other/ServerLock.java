@@ -44,8 +44,8 @@ public class ServerLock {
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor()))
-                .setAuthor(user.getAsTag() + " | Potential Bot! (" + lockCount  + "/5)")
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setAuthor(user.getAsTag() + " | Potential Bot! (" + lockCount  + "/5)", null, user.getEffectiveAvatarUrl())
                 .setThumbnail(user.getEffectiveAvatarUrl())
                 .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
                 .setFooter("ID: " + user.getId())
