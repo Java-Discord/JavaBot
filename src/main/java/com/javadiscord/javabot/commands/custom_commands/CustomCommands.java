@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -15,6 +14,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
+import java.awt.*;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -77,7 +77,8 @@ public class CustomCommands implements SlashCommandHandler {
             .setTitle("Custom Slash Command List")
             .setDescription(description)
             .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-            .setColor(Constants.GRAY)
+            .setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
             .setTimestamp(new Date().toInstant())
             .build();
 
@@ -102,7 +103,8 @@ public class CustomCommands implements SlashCommandHandler {
                     .addField("Name", "```" + "/" + commandName + "```", false)
                     .addField("Value", "```" + value + "```", false)
                     .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(Constants.GRAY)
+                    .setColor(Color.decode(
+                            Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                     .setTimestamp(new Date().toInstant())
                     .build();
 
@@ -139,7 +141,8 @@ public class CustomCommands implements SlashCommandHandler {
                     .addField("Name", "```" + "/" + commandName + "```", false)
                     .addField("Value", "```" + value + "```", false)
                     .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(Constants.GRAY)
+                    .setColor(Color.decode(
+                            Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                     .setTimestamp(new Date().toInstant())
                     .build();
 
@@ -169,7 +172,8 @@ public class CustomCommands implements SlashCommandHandler {
                     .setTitle("Custom Slash Command deleted")
                     .addField("Name", "```" + "/" + commandName + "```", false)
                     .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                    .setColor(Constants.GRAY)
+                    .setColor(Color.decode(
+                            Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                     .setTimestamp(new Date().toInstant())
                     .build();
 

@@ -15,7 +15,8 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.bson.Document;
-import org.slf4j.LoggerFactory;
+
+import java.awt.*;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -35,7 +36,8 @@ public class StarboardListener extends ListenerAdapter {
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Jump to message", message.getJumpUrl())
                 .setFooter(message.getAuthor().getAsTag(), message.getAuthor().getEffectiveAvatarUrl())
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(guild).getSlashCommand().getDefaultColor()))
                 .setDescription(message.getContentRaw());
 
         MessageAction msgAction = sc
@@ -101,7 +103,8 @@ public class StarboardListener extends ListenerAdapter {
     }
 
     public void updateAllSBM(Guild guild) {
-        log.info("[{}] Updating Starboard Messages", guild.getName());
+        log.info("{}[{}]{} Updating Starboard Messages",
+                Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
 
         String gID = guild.getId();
         MongoCollection<Document> collection = mongoClient

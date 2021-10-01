@@ -2,8 +2,8 @@ package com.javadiscord.javabot.commands.reaction_roles.subcommands;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
+import java.awt.*;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -58,7 +59,8 @@ public class ListReactionRoles implements SlashCommandHandler {
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role List")
                 .setDescription(description)
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();

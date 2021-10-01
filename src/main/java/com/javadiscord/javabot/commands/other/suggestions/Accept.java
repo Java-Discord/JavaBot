@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.time.OffsetDateTime;
 
 public class Accept implements SlashCommandHandler {
@@ -30,7 +31,8 @@ public class Accept implements SlashCommandHandler {
             OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
             var eb = new EmbedBuilder()
-                .setColor(Constants.GREEN)
+                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
+                            .getSuccessColor()))
                 .setAuthor(name, null, iconUrl);
 
             try {
@@ -45,7 +47,8 @@ public class Accept implements SlashCommandHandler {
                 .setTimestamp(timestamp)
                 .setFooter("Accepted by " + event.getUser().getAsTag());
 
-            msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_SUCCESS).queue());
+            msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(Bot.config.get(event.getGuild())
+                    .getEmote().getSuccessReaction()).queue());
             return event.reply("Done!").setEphemeral(true);
     }
 }

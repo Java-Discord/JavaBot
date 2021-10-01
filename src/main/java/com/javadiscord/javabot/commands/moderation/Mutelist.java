@@ -36,7 +36,8 @@ public class Mutelist implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
                 .setAuthor("Mutelist (" + memberSize + ")")
-                .setColor(new Color(0x2F3136))
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setDescription(res)
                 .setTimestamp(new Date().toInstant())
                 .build();

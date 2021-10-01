@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.util.Date;
 
 public class ServerInfo implements SlashCommandHandler {
@@ -27,7 +29,8 @@ public class ServerInfo implements SlashCommandHandler {
         String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
-            .setColor(Constants.GRAY)
+            .setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
             .setThumbnail(event.getGuild().getIconUrl())
             .setAuthor(event.getGuild().getName(), null, event.getGuild().getIconUrl())
             .addField("Name", "```" + event.getGuild().getName() + "```", true)
@@ -43,7 +46,7 @@ public class ServerInfo implements SlashCommandHandler {
             .setTimestamp(new Date().toInstant());
 
         if (event.getGuild().getId().equals("648956210850299986")) {
-            return event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE, "Website"));
+            return event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE_LINK, "Website"));
         } else {
             return event.replyEmbeds(eb.build());
         }

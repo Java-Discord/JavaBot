@@ -1,17 +1,17 @@
 package com.javadiscord.javabot.commands.other.qotw;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.util.Date;
 
 public class Correct implements SlashCommandHandler {
@@ -23,7 +23,8 @@ public class Correct implements SlashCommandHandler {
 
         var eb = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Constants.GREEN)
+                .setColor(Color.decode(Bot.config.get(guild).getSlashCommand()
+                        .getSuccessColor()))
                 .addField("Total QOTW-Points", "```" + qotwPoints + "```", true)
                 .addField("Rank", "```#" + new Leaderboard().getQOTWRank(guild, member.getId()) + "```", true)
                 .setFooter("ID: " + member.getId())
@@ -36,8 +37,9 @@ public class Correct implements SlashCommandHandler {
             member.getUser().openPrivateChannel().complete()
                     .sendMessageEmbeds(new EmbedBuilder()
                             .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
-                            .setColor(Constants.GREEN)
-                            .setDescription("Your answer was correct! " + Constants.SUCCESS +
+                            .setColor(Color.decode(Bot.config.get(guild).getSlashCommand()
+                                    .getSuccessColor()))
+                            .setDescription("Your answer was correct! " + Bot.config.get(guild).getEmote().getSuccessEmote() +
                                     "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
                             .setTimestamp(new Date().toInstant())
                             .build())

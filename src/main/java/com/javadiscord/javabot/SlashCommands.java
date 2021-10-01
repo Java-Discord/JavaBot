@@ -8,7 +8,6 @@ import com.javadiscord.javabot.properties.command.CommandConfig;
 import com.javadiscord.javabot.properties.command.CommandDataConfig;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -22,6 +21,8 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -77,7 +78,8 @@ public class SlashCommands extends ListenerAdapter {
                 .replace("{!servername}", event.getGuild().getName())
                 .replace("{!serverid}", event.getGuild().getId());
 
-            event.replyEmbeds(new EmbedBuilder().setColor(Constants.GRAY).setDescription(value).build()).queue();
+            event.replyEmbeds(new EmbedBuilder().setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())).setDescription(value).build()).queue();
 
         } catch (Exception e) {
             event.reply("Oops, this command isnt registered, yet").queue();
@@ -110,7 +112,8 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private CommandListUpdateAction updateCommands(CommandConfig[] commandConfigs, Guild guild) {
-        log.info("Registering slash commands for Guild " + guild.getName());
+        log.info("{}[{}]{} Registering slash commands",
+                Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
         if (commandConfigs.length > 100) throw new IllegalArgumentException("Cannot add more than 100 commands.");
         CommandListUpdateAction commandUpdateAction = guild.updateCommands();
         for (CommandConfig config : commandConfigs) {
@@ -130,13 +133,13 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private void updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
-        log.info("Registering custom commands for Guild " + guild.getName());
+        log.info("{}[{}]{} Registering custom commands",
+                Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
-        MongoCursor<Document> it = collection.find(eq("guild_id", guild.getId())).iterator();
 
-        while (it.hasNext()) {
-            JsonObject Root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
+        for (Document document : collection.find(eq("guild_id", guild.getId()))) {
+            JsonObject Root = JsonParser.parseString(document.toJson()).getAsJsonObject();
             String commandName = Root.get("commandname").getAsString();
             String value = Root.get("value").getAsString();
             if (value.length() > 100) value = value.substring(0, 97) + "...";
@@ -145,7 +148,8 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) throws ExecutionException, InterruptedException {
-        log.info("Adding command privileges for Guild " + guild.getName());
+        log.info("{}[{}]{} Adding command privileges",
+                Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
         for (var config : commandConfigs) {
             Long commandId = null;
             for (Command command : commands) {
@@ -161,13 +165,15 @@ public class SlashCommands extends ListenerAdapter {
                 for (var privilegeConfig : config.getPrivileges()) {
                     try {
                         p.add(privilegeConfig.toData(guild, Bot.config).get());
-                        log.info("[{}] Registering privilege for command {}: {}", guild.getName(), config.getName(), Objects.toString(privilegeConfig));
+                        log.info("\t{}[{}]{} Registering privilege: {}",
+                                Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, Objects.toString(privilegeConfig));
                     } catch (Exception e) {
                         log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
                     }
                 }
                 guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {
-                    log.info("[{}] Privilege update successful for command {}", guild.getName(), config.getName());
+                    log.info("{}[{}]{} Privilege update successful for command {}",
+                            Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET, config.getName());
                 });
             }
         }

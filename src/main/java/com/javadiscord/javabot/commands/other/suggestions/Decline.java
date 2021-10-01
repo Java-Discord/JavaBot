@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -46,7 +46,8 @@ public class Decline implements SlashCommandHandler {
                 .setTimestamp(timestamp)
                 .setFooter("Declined by " + event.getUser().getAsTag());
 
-            msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(Constants.REACTION_FAILURE).queue());
+            msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(
+                    Bot.config.get(event.getGuild()).getEmote().getFailureEmote()).queue());
             return event.reply("Done!").setEphemeral(true);
     }
 }

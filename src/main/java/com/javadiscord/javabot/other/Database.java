@@ -66,7 +66,8 @@ public class Database {
     }
 
     public void deleteOpenSubmissions(Guild guild) {
-        logger.info("[{}] Deleting Open Submissions", guild.getName());
+        logger.info("{}[{}]{} Deleting Open Submissions",
+                Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
 
         MongoCollection<Document> collection = mongoClient
                 .getDatabase("other")

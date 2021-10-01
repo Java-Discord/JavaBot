@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.commands.reaction_roles.subcommands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,7 +58,8 @@ public class CreateReactionRole implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role created")
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .addField("Channel", "<#" + event.getChannel().getId() + ">", true)
                 .addField("Role", role.getAsMention(), true)
                 .addField("MessageID", "```" + message.getId() + "```", false);

@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.other.Constants;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -17,6 +16,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 
+import java.awt.*;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -32,7 +32,8 @@ public class SubmissionListener extends ListenerAdapter {
         MongoDatabase database = mongoClient.getDatabase("other");
 
         var eb = new EmbedBuilder()
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor()))
                 .setAuthor("Submission by " + event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
                 .setDescription(text)
                 .setFooter("ID: " + event.getUser().getId())
@@ -104,7 +105,8 @@ public class SubmissionListener extends ListenerAdapter {
             if (!Bot.config.get(guild).getQotw().isDmEnabled()) return;
                 try {
                     EmbedBuilder submissionEb = new EmbedBuilder()
-                            .setColor(Constants.GRAY)
+                            .setColor(Color.decode(
+                                    Bot.config.get(event.getAuthor().getMutualGuilds().get(0)).getSlashCommand().getDefaultColor()))
                             .setAuthor("Question of the Week | Submission", null, event.getAuthor().getEffectiveAvatarUrl())
                             .setDescription(message)
                             .addField("Current Guild", guild.getName() + " `(" + guild.getId() + ")`", false)

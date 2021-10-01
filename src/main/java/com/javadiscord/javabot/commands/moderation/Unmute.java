@@ -3,7 +3,6 @@ package com.javadiscord.javabot.commands.moderation;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.util.Date;
 
 public class Unmute implements SlashCommandHandler {
@@ -26,7 +26,8 @@ public class Unmute implements SlashCommandHandler {
         try {
             var e = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Constants.RED)
+                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
+                            .getErrorColor()))
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + author.getAsTag() + "```", true)
                 .addField("ID", "```" + member.getId() + "```", false)
