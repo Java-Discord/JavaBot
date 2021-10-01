@@ -30,16 +30,12 @@ public class HelpChannelUpdater implements Runnable {
 
 	@Override
 	public void run() {
-		var category = config.getHelpChannelCategory();
-		if (category == null) throw new IllegalStateException("Missing required help channel category. Cannot update help channels.");
-		var channels = category.getTextChannels();
 		int openChannelCount = 0;
-		for (var channel : channels) {
-			if (channelManager.isReserved(channel)) {
-				this.checkReservedChannel(channel);
-			} else if (channelManager.isOpen(channel) && this.checkOpenChannel(channel)) {
-				openChannelCount++;
-			}
+		for (var channel : config.getReservedChannelCategory().getTextChannels()) {
+			this.checkReservedChannel(channel);
+		}
+		for (var channel : config.getOpenChannelCategory().getTextChannels()) {
+			if (this.checkOpenChannel(channel)) openChannelCount++;
 		}
 		while (!this.config.isRecycleChannels() && openChannelCount < config.getPreferredOpenChannelCount()) {
 			channelManager.openNew();
@@ -89,6 +85,7 @@ public class HelpChannelUpdater implements Runnable {
 				mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())
 			) {
 				log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
+				mostRecentMessage.delete().queue();
 				channel.sendMessage(String.format(
 						"%s, this channel will be unreserved in 30 seconds due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
 						owner.getAsMention()

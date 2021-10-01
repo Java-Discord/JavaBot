@@ -20,6 +20,6 @@ public class AnimalNamingStrategy implements ChannelNamingStrategy {
 	@Override
 	public String getName(List<TextChannel> channels, HelpConfig config) {
 		String name = ANIMALS[ThreadLocalRandom.current().nextInt(ANIMALS.length)];
-		return config.getOpenChannelPrefix() + "help-" + name;
+		return "help-" + name;
 	}
 }

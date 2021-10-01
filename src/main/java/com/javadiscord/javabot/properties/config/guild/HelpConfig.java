@@ -15,9 +15,14 @@ import net.dv8tion.jda.api.entities.Category;
 @EqualsAndHashCode(callSuper = true)
 public class HelpConfig extends GuildConfigItem {
 	/**
-	 * The id of the channel category that all help channels are in.
+	 * The id of the channel category that contains all open channels.
 	 */
-	private long categoryId;
+	private long openCategoryId;
+
+	/**
+	 * The id of the channel category that contains all reserved channels.
+	 */
+	private long reservedCategoryId;
 
 	/**
 	 * The strategy to use when naming help channels. This is only used when
@@ -57,18 +62,6 @@ public class HelpConfig extends GuildConfigItem {
 	private int preferredOpenChannelCount = 3;
 
 	/**
-	 * The string which is prefixed to any open help channel, where users are
-	 * free to ask a question.
-	 */
-	private String openChannelPrefix = "\uD83D\uDFE2";
-
-	/**
-	 * The string which is prefixed to any reserved help channel, where a user
-	 * has already asked a question and is in the process of getting an answer.
-	 */
-	private String reservedChannelPrefix = "\u26D4";
-
-	/**
 	 * The number of minutes of inactivity before a channel is considered inactive.
 	 */
 	private int inactivityTimeoutMinutes = 30;
@@ -85,8 +78,12 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private long updateIntervalSeconds = 60;
 
-	public Category getHelpChannelCategory() {
-		return getGuild().getCategoryById(this.categoryId);
+	public Category getOpenChannelCategory() {
+		return getGuild().getCategoryById(this.openCategoryId);
+	}
+
+	public Category getReservedChannelCategory() {
+		return getGuild().getCategoryById(this.reservedCategoryId);
 	}
 
 	public ChannelNamingStrategy getChannelNamingStrategy() {
