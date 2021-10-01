@@ -55,10 +55,10 @@ public class Startup extends ListenerAdapter {
 
         if (preferredGuild == null) preferredGuild = event.getJDA().getGuilds().get(0);
 
-        log.info("Logged in as {}{}",
-                Constants.TEXT_WHITE, event.getJDA().getSelfUser().getAsTag());
-        log.info("Preferred Guild: {}{}",
-                Constants.TEXT_WHITE, preferredGuild.getName());
+        log.info("Logged in as {}{}{}",
+                Constants.TEXT_WHITE, event.getJDA().getSelfUser().getAsTag(), Constants.TEXT_RESET);
+        log.info("Preferred Guild: {}{}{}",
+                Constants.TEXT_WHITE, preferredGuild.getName(), Constants.TEXT_RESET);
         log.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         String[] skipGuilds = new String[]{"861254598046777344", "813817075218776101"};
