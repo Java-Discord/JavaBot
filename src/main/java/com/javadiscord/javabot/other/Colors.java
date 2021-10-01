@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Colors {
+
 	public static Color randomPastel() {
 		Random rand = ThreadLocalRandom.current();
 		float hue = rand.nextFloat();

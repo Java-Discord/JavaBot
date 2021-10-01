@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -29,14 +29,16 @@ public class Clear implements SlashCommandHandler {
             OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
             var eb = new EmbedBuilder()
-                .setColor(new Color(0x2F3136))
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setAuthor(name, null, iconUrl)
                 .setDescription(description)
                 .setTimestamp(timestamp);
 
+            var config = Bot.config.get(event.getGuild()).getEmote();
             msg.editMessageEmbeds(eb.build()).queue(message1 -> {
-                message1.addReaction(Constants.REACTION_UPVOTE).queue();
-                message1.addReaction(Constants.REACTION_DOWNVOTE).queue();
+                message1.addReaction(config.getUpvoteReaction()).queue();
+                message1.addReaction(config.getDownvoteReaction()).queue();
             });
             return event.reply("Done!").setEphemeral(true);
     }

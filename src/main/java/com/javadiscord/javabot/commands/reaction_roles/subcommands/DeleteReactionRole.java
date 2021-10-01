@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.commands.reaction_roles.subcommands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,8 @@ public class DeleteReactionRole implements SlashCommandHandler {
                 .setTitle("Reaction Role removed")
                 .addField("MessageID", "```" + message.getId() + "```", false)
                 .addField("Button Label", "```" + buttonLabel + "```", true)
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();

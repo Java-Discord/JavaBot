@@ -3,7 +3,6 @@ package com.javadiscord.javabot.events;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.moderation.Mute;
 import com.javadiscord.javabot.commands.moderation.Warn;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -13,6 +12,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import java.awt.*;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -43,7 +43,8 @@ public class AutoMod extends ListenerAdapter {
                     int warnPoints = new Warn().getWarnCount(member);
 
                     var eb = new EmbedBuilder()
-                            .setColor(Constants.YELLOW)
+                            .setColor(Color.decode(
+                                    Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor()))
                             .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
                             .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                             .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
@@ -70,7 +71,8 @@ public class AutoMod extends ListenerAdapter {
                     int warnPoints = new Warn().getWarnCount(member);
 
                     var eb = new EmbedBuilder()
-                            .setColor(Constants.YELLOW)
+                            .setColor(Color.decode(
+                                    Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor()))
                             .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
                             .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                             .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
@@ -105,7 +107,8 @@ public class AutoMod extends ListenerAdapter {
                     if (member.getRoles().contains(muteRole)) return;
 
                     var eb = new EmbedBuilder()
-                            .setColor(Constants.RED)
+                            .setColor(Color.decode(
+                                    Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor()))
                             .setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
                             .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                             .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)

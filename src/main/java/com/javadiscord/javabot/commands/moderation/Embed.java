@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -44,7 +44,8 @@ public class Embed implements SlashCommandHandler {
         String title = embedOption == null ? null : embedOption.getAsString();
 
         var eb = new EmbedBuilder()
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setTitle(title)
                 .setDescription(message.getContentRaw())
                 .build();

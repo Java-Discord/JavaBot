@@ -2,8 +2,8 @@ package com.javadiscord.javabot.other;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.bson.Document;
 
+import java.awt.*;
 import java.time.OffsetDateTime;
 import java.util.Date;
 
@@ -42,7 +43,8 @@ public class ServerLock {
         String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
 
         EmbedBuilder eb = new EmbedBuilder()
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor()))
                 .setAuthor(user.getAsTag() + " | Potential Bot! (" + lockCount  + "/5)")
                 .setThumbnail(user.getEffectiveAvatarUrl())
                 .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
@@ -103,8 +105,9 @@ public class ServerLock {
 
     public static MessageEmbed lockEmbed (Guild guild) {
         return new EmbedBuilder()
-        .setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE, guild.getIconUrl())
-        .setColor(Constants.GRAY)
+        .setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
+        .setColor(Color.decode(
+                Bot.config.get(guild).getSlashCommand().getDefaultColor()))
         .setDescription("""
         Unfortunately, this server is currently locked. Please try to join again later.
         Contact ``Dynxsty#7666`` or ``Moon™#3424`` for more info."""

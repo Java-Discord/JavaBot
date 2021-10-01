@@ -7,8 +7,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class SlashCommandConfig extends GuildConfigItem {
-	private String warningColor = "#eba434";
-	private String errorColor = "#eb3434";
-	private String infoColor = "#34a2eb";
-	private String successColor = "#49de62";
+	private String defaultColor = "#2F3136";
+	private String warningColor = "#EBA434";
+	private String errorColor = "#EB3434";
+	private String infoColor = "#34A2EB";
+	private String successColor = "#49DE62";
 }
