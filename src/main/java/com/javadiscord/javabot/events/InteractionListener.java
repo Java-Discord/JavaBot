@@ -109,7 +109,7 @@ public class InteractionListener extends ListenerAdapter {
 				if (event.getMessage() != null) {
 					event.getMessage().delete().queue();
 				}
-				channelManager.unreserveChannel(channel);
+				channelManager.unreserveChannel(channel).queue();
 			} else if (action.equals("not-done")) {
 				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
 				if (event.getMessage() != null) {

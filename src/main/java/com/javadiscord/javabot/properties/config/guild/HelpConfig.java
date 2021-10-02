@@ -23,6 +23,12 @@ public class HelpConfig extends GuildConfigItem {
 	private long reservedCategoryId;
 
 	/**
+	 * The id of the channel category where dormant channels are put when they
+	 * aren't needed in the open category (due to preferred channel count).
+	 */
+	private long dormantCategoryId;
+
+	/**
 	 * The strategy to use when naming help channels. This is only used when
 	 * {@link HelpConfig#recycleChannels} is set to false.
 	 */
@@ -76,12 +82,27 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private long updateIntervalSeconds = 60;
 
+	/**
+	 * The number of channels which can be reserved by a single user at any time.
+	 */
+	private int maxReservedChannelsPerUser = 3;
+
+	/**
+	 * The message which is sent to users who aren't allowed to reserve a help
+	 * channel.
+	 */
+	private String reservationNotAllowedMessage = "You are not allowed to reserve this help channel. Please try again later.";
+
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);
 	}
 
 	public Category getReservedChannelCategory() {
 		return getGuild().getCategoryById(this.reservedCategoryId);
+	}
+
+	public Category getDormantChannelCategory() {
+		return getGuild().getCategoryById(this.dormantCategoryId);
 	}
 
 	public ChannelNamingStrategy getChannelNamingStrategy() {

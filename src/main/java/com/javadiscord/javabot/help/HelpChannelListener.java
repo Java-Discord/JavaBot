@@ -20,14 +20,19 @@ public class HelpChannelListener extends ListenerAdapter {
 
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		TextChannel channel = event.getChannel();
+		var manager = new HelpChannelManager(config);
 
 		// If a message was sent in an open text channel, reserve it.
 		if (config.getOpenChannelCategory().equals(channel.getParent())) {
-			try {
-				new HelpChannelManager(config).reserve(channel, event.getAuthor(), event.getMessage());
-			} catch (SQLException e) {
-				e.printStackTrace();
-				channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
+			if (manager.mayUserReserveChannel(event.getAuthor())) {
+				try {
+					manager.reserve(channel, event.getAuthor(), event.getMessage());
+				} catch (SQLException e) {
+					e.printStackTrace();
+					channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
+				}
+			} else {
+				event.getMessage().reply(config.getReservationNotAllowedMessage()).queue();
 			}
 		}
 	}
