@@ -3,6 +3,7 @@ package com.javadiscord.javabot.properties.config.guild;
 import com.javadiscord.javabot.help.AlphabetNamingStrategy;
 import com.javadiscord.javabot.help.AnimalNamingStrategy;
 import com.javadiscord.javabot.help.ChannelNamingStrategy;
+import com.javadiscord.javabot.help.CoffeeNamingStrategy;
 import com.javadiscord.javabot.properties.config.GuildConfigItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -90,6 +91,7 @@ public class HelpConfig extends GuildConfigItem {
 		return switch (this.channelNamingStrategy) {
 			case "alphabet" -> new AlphabetNamingStrategy();
 			case "animal" -> new AnimalNamingStrategy();
+			case "coffee" -> new CoffeeNamingStrategy();
 			default -> throw new IllegalArgumentException("Invalid channel naming strategy.");
 		};
 	}
