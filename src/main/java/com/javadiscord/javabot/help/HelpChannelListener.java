@@ -24,7 +24,7 @@ public class HelpChannelListener extends ListenerAdapter {
 		// If a message was sent in an open text channel, reserve it.
 		if (config.getOpenChannelCategory().equals(channel.getParent())) {
 			try {
-				new HelpChannelManager(config).reserve(channel, event.getAuthor());
+				new HelpChannelManager(config).reserve(channel, event.getAuthor(), event.getMessage());
 			} catch (SQLException e) {
 				e.printStackTrace();
 				channel.sendMessage("An error occurred and this channel could not be reserved.").queue();

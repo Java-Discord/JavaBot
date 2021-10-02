@@ -19,7 +19,7 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 		var owner = channelManager.getReservedChannelOwner(channel);
 		if (
 			config.getReservedChannelCategory().equals(channel.getParent()) &&
-			(
+			(// Check that the user is either the one who reserved the channel, or a staff member.
 				event.getUser().equals(owner) ||
 				(event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
 			)
