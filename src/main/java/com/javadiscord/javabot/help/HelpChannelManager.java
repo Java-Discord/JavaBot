@@ -85,7 +85,8 @@ public class HelpChannelManager {
 			stmt.setLong(2, reservingUser.getIdLong());
 			stmt.executeUpdate();
 		}
-		channel.getManager().setParent(config.getReservedChannelCategory()).complete();
+		var target = config.getReservedChannelCategory();
+		channel.getManager().setParent(target).sync(target).queue();
 		message.pin().queue();
 		if (config.getReservedChannelMessage() != null) {
 			message.reply(config.getReservedChannelMessage()).queue();
@@ -96,7 +97,8 @@ public class HelpChannelManager {
 		if (this.config.isRecycleChannels()) {
 			var dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
 			if (!dormantChannels.isEmpty()) {
-				dormantChannels.get(0).getManager().setParent(this.config.getOpenChannelCategory()).queue();
+				var targetCategory = this.config.getOpenChannelCategory();
+				dormantChannels.get(0).getManager().setParent(targetCategory).sync(targetCategory).queue();
 			} else {
 				logChannel.sendMessage("Warning: No dormant channels were available to replenish an open channel that was just reserved.").queue();
 			}
@@ -142,8 +144,8 @@ public class HelpChannelManager {
 						channel.retrievePinnedMessages()
 								.flatMap(messages -> RestAction.allOf(messages.stream().map(Message::unpin).toList())),
 						getOpenChannelCount() >= config.getPreferredOpenChannelCount()
-								? channel.getManager().setParent(config.getDormantChannelCategory())
-								: channel.getManager().setParent(config.getOpenChannelCategory()),
+								? channel.getManager().setParent(config.getDormantChannelCategory()).sync(config.getDormantChannelCategory())
+								: channel.getManager().setParent(config.getOpenChannelCategory()).sync(config.getOpenChannelCategory()),
 						channel.sendMessage(this.config.getReopenedChannelMessage())
 				);
 			} catch (SQLException e) {
