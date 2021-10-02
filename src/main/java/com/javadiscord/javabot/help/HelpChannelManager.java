@@ -1,12 +1,12 @@
 package com.javadiscord.javabot.help;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.properties.config.guild.HelpConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.Objects;
-import java.util.regex.Pattern;
+import java.sql.SQLException;
 
 /**
  * This manager is responsible for all the main interactions that affect the
@@ -21,18 +21,18 @@ public class HelpChannelManager {
 	}
 
 	public boolean isOpen(TextChannel channel) {
-		return channel.getName().startsWith(config.getOpenChannelPrefix());
+		return config.getOpenChannelCategory().equals(channel.getParent());
 	}
 
 	public boolean isReserved(TextChannel channel) {
-		return channel.getName().startsWith(config.getReservedChannelPrefix());
+		return config.getReservedChannelCategory().equals(channel.getParent());
 	}
 
 	/**
 	 * Opens a text channel so that it is ready for a new question.
 	 */
 	public void openNew() {
-		var category = config.getHelpChannelCategory();
+		var category = config.getOpenChannelCategory();
 		if (category == null) throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
 		String name = this.config.getChannelNamingStrategy().getName(category.getTextChannels(), config);
 		category.createTextChannel(name).queue(channel -> {
@@ -46,20 +46,17 @@ public class HelpChannelManager {
 	 * @param channel The channel to reserve.
 	 * @param reservingUser The user who is reserving the channel.
 	 */
-	public void reserve(TextChannel channel, User reservingUser) {
-		String rawChannelName = channel.getName().substring(config.getOpenChannelPrefix().length());
-		channel.getManager()
-				.setName(config.getReservedChannelPrefix() + rawChannelName)
-				.setPosition(Objects.requireNonNull(channel.getParent()).getTextChannels().size())
-				.setTopic(String.format(
-						"Reserved for %s\n(_id=%s_)",
-						reservingUser.getAsTag(),
-						reservingUser.getId()
-				)).queue(unused -> {
-					if (config.getReservedChannelMessage() != null) {
-						channel.sendMessage(config.getReservedChannelMessage()).queue();
-					}
-				});
+	public void reserve(TextChannel channel, User reservingUser) throws SQLException {
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id) VALUES (?, ?)");
+			stmt.setLong(1, channel.getIdLong());
+			stmt.setLong(2, reservingUser.getIdLong());
+			stmt.executeUpdate();
+		}
+		channel.getManager().setParent(config.getReservedChannelCategory()).complete();
+		if (config.getReservedChannelMessage() != null) {
+			channel.sendMessage(config.getReservedChannelMessage()).queue();
+		}
 		log.info("Reserved channel {} for {}.", channel.getAsMention(), reservingUser.getAsTag());
 		if (!this.config.isRecycleChannels()) {
 			// Open a new channel right away to maintain the preferred number of open channels.
@@ -73,15 +70,20 @@ public class HelpChannelManager {
 	 * @return The user who reserved the channel, or null.
 	 */
 	public User getReservedChannelOwner(TextChannel channel) {
-		var pattern = Pattern.compile("\\(_id=(\\d+)_\\)");
-		if (channel.getTopic() != null) {
-			var matcher = pattern.matcher(channel.getTopic());
-			if (matcher.find()) {
-				String id = matcher.group(1);
-				return channel.getJDA().retrieveUserById(id).complete();
+		User user = null;
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("SELECT * FROM reserved_help_channels WHERE channel_id = ?");
+			stmt.setLong(1, channel.getIdLong());
+			var rs = stmt.executeQuery();
+			if (rs.next()) {
+				long userId = rs.getLong("user_id");
+				user = channel.getJDA().retrieveUserById(userId).complete();
 			}
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		return null;
+		return user;
 	}
 
 	/**
@@ -90,12 +92,15 @@ public class HelpChannelManager {
 	 */
 	public void unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			String rawName = channel.getName().substring(this.config.getReservedChannelPrefix().length());
-			channel.getManager()
-					.setName(this.config.getOpenChannelPrefix() + rawName)
-					.setTopic(this.config.getOpenChannelTopic())
-					.setPosition(0).queue();
-			channel.sendMessage(this.config.getReopenedChannelMessage()).queue();
+			try (var con = Bot.dataSource.getConnection()) {
+				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
+				stmt.setLong(1, channel.getIdLong());
+				stmt.executeUpdate();
+				channel.getManager().setParent(config.getOpenChannelCategory()).queue();
+				channel.sendMessage(this.config.getReopenedChannelMessage()).queue();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		} else {
 			channel.delete().queue();
 		}

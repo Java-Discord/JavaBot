@@ -18,9 +18,11 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 		var channelManager = new HelpChannelManager(config);
 		var owner = channelManager.getReservedChannelOwner(channel);
 		if (
-			config.getHelpChannelCategory().equals(channel.getParent()) &&
-			channelManager.isReserved(channel) &&
-			(event.getUser().equals(owner) || event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
+			config.getReservedChannelCategory().equals(channel.getParent()) &&
+			(
+				event.getUser().equals(owner) ||
+				(event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
+			)
 		) {
 			channelManager.unreserveChannel(channel);
 			return Responses.success(event, "Channel Unreserved", "The channel has been unreserved.");

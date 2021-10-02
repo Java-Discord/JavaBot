@@ -15,6 +15,6 @@ public class AlphabetNamingStrategy implements ChannelNamingStrategy {
 
 	@Override
 	public String getName(List<TextChannel> channels, HelpConfig config) {
-		return config.getOpenChannelPrefix() + "help-" + ALPHABET.charAt(ThreadLocalRandom.current().nextInt(ALPHABET.length()));
+		return "help-" + ALPHABET.charAt(ThreadLocalRandom.current().nextInt(ALPHABET.length()));
 	}
 }
