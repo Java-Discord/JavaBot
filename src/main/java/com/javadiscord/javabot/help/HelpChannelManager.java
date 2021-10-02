@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import java.sql.SQLException;
 
@@ -29,6 +30,33 @@ public class HelpChannelManager {
 
 	public boolean isReserved(TextChannel channel) {
 		return config.getReservedChannelCategory().equals(channel.getParent());
+	}
+
+	public int getOpenChannelCount() {
+		return config.getOpenChannelCategory().getTextChannels().size();
+	}
+
+	/**
+	 * Determines if the given user is allowed to reserve a help channel.
+	 * @param user The user who is trying to reserve a channel.
+	 * @return True if the user can reserve it, or false if not.
+	 */
+	public boolean mayUserReserveChannel(User user) {
+		var member = this.config.getGuild().getMember(user);
+		// Only allow guild members.
+		if (member == null) return false;
+		// Don't allow muted users.
+		if (member.getRoles().contains(Bot.config.get(this.config.getGuild()).getModeration().getMuteRole())) return false;
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?");
+			stmt.setLong(1, user.getIdLong());
+			var rs = stmt.executeQuery();
+			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			logChannel.sendMessage("Error while checking if a user can reserve a help channel: " + e.getMessage()).queue();
+			return false;
+		}
 	}
 
 	/**
@@ -63,9 +91,17 @@ public class HelpChannelManager {
 			message.reply(config.getReservedChannelMessage()).queue();
 		}
 		log.info("Reserved channel {} for {}.", channel.getAsMention(), reservingUser.getAsTag());
-		if (!this.config.isRecycleChannels()) {
-			// Open a new channel right away to maintain the preferred number of open channels.
-			openNew();
+
+		// Now that an open channel has been reserved, try and compensate by creating a new one or pulling one from storage.
+		if (this.config.isRecycleChannels()) {
+			var dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
+			if (!dormantChannels.isEmpty()) {
+				dormantChannels.get(0).getManager().setParent(this.config.getOpenChannelCategory()).queue();
+			} else {
+				logChannel.sendMessage("Warning: No dormant channels were available to replenish an open channel that was just reserved.").queue();
+			}
+		} else {
+			this.openNew();
 		}
 	}
 
@@ -96,21 +132,26 @@ public class HelpChannelManager {
 	 * Unreserves a channel after it no longer needs to be reserved.
 	 * @param channel The channel to unreserve.
 	 */
-	public void unreserveChannel(TextChannel channel) {
+	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
 			try (var con = Bot.dataSource.getConnection()) {
 				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
-				channel.retrievePinnedMessages().queue(messages -> messages.forEach(m -> m.unpin().queue()));
-				channel.getManager().setParent(config.getOpenChannelCategory()).queue();
-				channel.sendMessage(this.config.getReopenedChannelMessage()).queue();
+				return RestAction.allOf(
+						channel.retrievePinnedMessages()
+								.flatMap(messages -> RestAction.allOf(messages.stream().map(Message::unpin).toList())),
+						getOpenChannelCount() >= config.getPreferredOpenChannelCount()
+								? channel.getManager().setParent(config.getDormantChannelCategory())
+								: channel.getManager().setParent(config.getOpenChannelCategory()),
+						channel.sendMessage(this.config.getReopenedChannelMessage())
+				);
 			} catch (SQLException e) {
 				e.printStackTrace();
-				logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage()).queue();
+				return logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage());
 			}
 		} else {
-			channel.delete().queue();
+			return channel.delete();
 		}
 	}
 }

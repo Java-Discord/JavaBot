@@ -24,7 +24,7 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 				(event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
 			)
 		) {
-			channelManager.unreserveChannel(channel);
+			channelManager.unreserveChannel(channel).queue();
 			return Responses.success(event, "Channel Unreserved", "The channel has been unreserved.");
 		}
 		return Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.");
