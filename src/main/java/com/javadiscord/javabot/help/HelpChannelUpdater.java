@@ -141,7 +141,8 @@ public class HelpChannelUpdater implements Runnable {
 			if (this.config.isRecycleChannels()) {
 				var dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
 				if (!dormantChannels.isEmpty()) {
-					dormantChannels.get(0).getManager().setParent(this.config.getOpenChannelCategory()).queue();
+					var target = this.config.getOpenChannelCategory();
+					dormantChannels.get(0).getManager().setParent(target).sync(target).queue();
 					openChannelCount++;
 				} else {
 					log.warn("Could not find a dormant channel to replenish open channels.");
@@ -155,7 +156,8 @@ public class HelpChannelUpdater implements Runnable {
 		while (openChannelCount > this.config.getPreferredOpenChannelCount()) {
 			var channel = this.config.getOpenChannelCategory().getTextChannels().get(0);
 			if (this.config.isRecycleChannels()) {
-				channel.getManager().setParent(this.config.getDormantChannelCategory()).queue();
+				var target = this.config.getDormantChannelCategory();
+				channel.getManager().setParent(target).sync(target).queue();
 			} else {
 				channel.delete().queue();
 			}
