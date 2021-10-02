@@ -3,8 +3,10 @@ package com.javadiscord.javabot.help;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.properties.config.guild.HelpConfig;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import java.sql.SQLException;
 
@@ -15,9 +17,11 @@ import java.sql.SQLException;
 @Slf4j
 public class HelpChannelManager {
 	private final HelpConfig config;
+	private final TextChannel logChannel;
 
 	public HelpChannelManager(HelpConfig config) {
 		this.config = config;
+		this.logChannel = Bot.config.get(config.getGuild()).getModeration().getLogChannel();
 	}
 
 	public boolean isOpen(TextChannel channel) {
@@ -45,8 +49,9 @@ public class HelpChannelManager {
 	 * Reserves a text channel for a user.
 	 * @param channel The channel to reserve.
 	 * @param reservingUser The user who is reserving the channel.
+	 * @param message The message the user sent in the channel.
 	 */
-	public void reserve(TextChannel channel, User reservingUser) throws SQLException {
+	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
 		try (var con = Bot.dataSource.getConnection()) {
 			var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id) VALUES (?, ?)");
 			stmt.setLong(1, channel.getIdLong());
@@ -54,8 +59,9 @@ public class HelpChannelManager {
 			stmt.executeUpdate();
 		}
 		channel.getManager().setParent(config.getReservedChannelCategory()).complete();
+		message.pin().queue();
 		if (config.getReservedChannelMessage() != null) {
-			channel.sendMessage(config.getReservedChannelMessage()).queue();
+			message.reply(config.getReservedChannelMessage()).queue();
 		}
 		log.info("Reserved channel {} for {}.", channel.getAsMention(), reservingUser.getAsTag());
 		if (!this.config.isRecycleChannels()) {
@@ -82,6 +88,7 @@ public class HelpChannelManager {
 			stmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			logChannel.sendMessage("Error occurred while getting reserved channel owner: " + e.getMessage()).queue();
 		}
 		return user;
 	}
@@ -96,10 +103,16 @@ public class HelpChannelManager {
 				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
+				channel.retrievePinnedMessages()
+						.map(messages -> RestAction.allOf(messages.stream()
+								.map(Message::unpin)
+								.toList()))
+						.queue();
 				channel.getManager().setParent(config.getOpenChannelCategory()).queue();
 				channel.sendMessage(this.config.getReopenedChannelMessage()).queue();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage()).queue();
 			}
 		} else {
 			channel.delete().queue();
