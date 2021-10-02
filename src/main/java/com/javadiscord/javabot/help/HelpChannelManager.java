@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.RestAction;
 
 import java.sql.SQLException;
 
@@ -103,11 +102,7 @@ public class HelpChannelManager {
 				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
-				channel.retrievePinnedMessages()
-						.map(messages -> RestAction.allOf(messages.stream()
-								.map(Message::unpin)
-								.toList()))
-						.queue();
+				channel.retrievePinnedMessages().queue(messages -> messages.forEach(m -> m.unpin().queue()));
 				channel.getManager().setParent(config.getOpenChannelCategory()).queue();
 				channel.sendMessage(this.config.getReopenedChannelMessage()).queue();
 			} catch (SQLException e) {
