@@ -34,6 +34,9 @@ public class HelpChannelListener extends ListenerAdapter {
 			} else {
 				event.getMessage().reply(config.getReservationNotAllowedMessage()).queue();
 			}
+		} else if (config.getDormantChannelCategory().equals(channel.getParent())) {
+			// Prevent anyone from sending messages in dormant channels.
+			event.getMessage().delete().queue();
 		}
 	}
 }

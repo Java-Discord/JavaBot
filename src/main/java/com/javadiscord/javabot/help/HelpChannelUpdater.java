@@ -75,8 +75,7 @@ public class HelpChannelUpdater implements Runnable {
 
 			// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
 			if (
-				mostRecentMessage.getAuthor().equals(this.jda.getSelfUser()) &&
-				mostRecentMessage.getContentRaw().contains("Are you finished with this channel?") &&
+				isActivityCheck(mostRecentMessage) &&
 				mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())
 			) {
 				log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
@@ -91,7 +90,10 @@ public class HelpChannelUpdater implements Runnable {
 			}
 
 			// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
-			if (mostRecentMessage.getTimeCreated().plusMinutes(config.getInactivityTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+			if (
+					!isActivityCheck(mostRecentMessage) &&
+					mostRecentMessage.getTimeCreated().plusMinutes(config.getInactivityTimeoutMinutes()).isBefore(OffsetDateTime.now())
+			) {
 				log.info("Sending inactivity check to {} because of no activity after {} minutes.", channel.getAsMention(), config.getInactivityTimeoutMinutes());
 				return channel.sendMessage(String.format(
 						"Hey %s, it looks like this channel is inactive. Are you finished with this channel?\n\n> _If no response is received after %d minutes, this channel will be removed._",
@@ -163,5 +165,17 @@ public class HelpChannelUpdater implements Runnable {
 			}
 			openChannelCount--;
 		}
+	}
+
+	/**
+	 * Determines if a message is an 'activity check', which is a special type
+	 * of message the bot sends to users to check if they're still using a help
+	 * channel.
+	 * @param message The message to check.
+	 * @return True if the message is an activity check or false otherwise.
+	 */
+	private boolean isActivityCheck(Message message) {
+		return message.getAuthor().equals(this.jda.getSelfUser()) &&
+				message.getContentRaw().contains("Are you finished with this channel?");
 	}
 }
