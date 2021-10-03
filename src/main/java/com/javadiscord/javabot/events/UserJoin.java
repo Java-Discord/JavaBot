@@ -2,7 +2,6 @@ package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.ServerLock;
-import com.javadiscord.javabot.other.StatsCategory;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -121,7 +120,6 @@ public class UserJoin extends ListenerAdapter {
                             .addFile(new ByteArrayInputStream(generateImage(event.getGuild(), event.getMember())), event.getMember().getId() + ".png").queue();
                     } catch (Exception e) { e.printStackTrace(); }
                 }
-                StatsCategory.update(event.getGuild());
             });
         } else {
             if (user.hasPrivateChannel()) user.openPrivateChannel().complete()
