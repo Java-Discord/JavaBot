@@ -4,6 +4,7 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.properties.config.guild.HelpConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -87,7 +88,14 @@ public class HelpChannelManager {
 		}
 		var target = config.getReservedChannelCategory();
 		channel.getManager().setParent(target).sync(target).queue();
-		message.pin().queue();
+		// Pin the message, then immediately try and delete the annoying "message has been pinned" message.
+		message.pin().queue(unused -> channel.getHistory().retrievePast(10).queue(messages -> {
+			for (var msg : messages) {
+				if (msg.getType().equals(MessageType.CHANNEL_PINNED_ADD)) {
+					msg.delete().queue();
+				}
+			}
+		}));
 		if (config.getReservedChannelMessage() != null) {
 			message.reply(config.getReservedChannelMessage()).queue();
 		}
