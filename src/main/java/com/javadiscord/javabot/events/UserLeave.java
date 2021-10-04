@@ -2,7 +2,6 @@ package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.StatsCategory;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -32,7 +31,6 @@ public class UserLeave extends ListenerAdapter {
                         .replace("{!server}", event.getGuild().getName());
                 welcomeConfig.getChannel().sendMessage(replacedText2).queue();
             }
-            StatsCategory.update(event.getGuild());
         }
     }
 }
