@@ -24,7 +24,24 @@ public class HelpChannelListener extends ListenerAdapter {
 
 		// If a message was sent in an open text channel, reserve it.
 		if (config.getOpenChannelCategory().equals(channel.getParent())) {
-			if (manager.mayUserReserveChannel(event.getAuthor())) {
+			// Check if the message that was sent is referencing another.
+			// If so, try and reserve the channel for the original message's author.
+			if (event.getMessage().getMessageReference() != null) {
+				event.getMessage().getMessageReference().resolve().queue(message -> {
+					if (message.getAuthor().isBot() || message.getAuthor().isSystem()) return;
+					event.getGuild().retrieveMember(message.getAuthor()).queue(member -> {
+						if (member != null) {
+							try {
+								manager.reserve(channel, member.getUser(), message);
+							} catch (SQLException e) {
+								e.printStackTrace();
+								channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
+							}
+						}
+					});
+				});
+			// Otherwise, it's just a single message, so check if the author is allowed to reserve.
+			} else if (manager.mayUserReserveChannel(event.getAuthor())) {
 				try {
 					manager.reserve(channel, event.getAuthor(), event.getMessage());
 				} catch (SQLException e) {
