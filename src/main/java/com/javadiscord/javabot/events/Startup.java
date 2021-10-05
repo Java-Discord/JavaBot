@@ -86,8 +86,6 @@ public class Startup extends ListenerAdapter {
             Bot.asyncPool.scheduleAtFixedRate(new HelpChannelUpdater(event.getJDA(), helpConfig), 5, helpConfig.getUpdateIntervalSeconds(), TimeUnit.SECONDS);
         }
 
-
-
         } catch (MongoException e) {
 
             log.error("Couldn't connect to MongoDB ({}) Shutting down...", e.getClass().getSimpleName());

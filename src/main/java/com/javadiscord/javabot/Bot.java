@@ -89,6 +89,7 @@ public class Bot {
                 new UserLeave(),
                 new Startup(),
                 PresenceUpdater.standardActivities(),
+                new StatsUpdater(),
                 new SuggestionListener(),
                 new AutoMod(),
                 new SubmissionListener(),
