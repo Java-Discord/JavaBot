@@ -18,21 +18,19 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * this class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
+ */
 public class AutoMod extends ListenerAdapter {
 
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        try {
-            if (event.getMember().getUser().isBot() || event.getMember() == null)
-                return;
-        } catch (NullPointerException ignored) {
-            return;
-        }
+        if (event.getMember() == null
+                || event.getMember().getUser().isBot()
+                || event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) return;
 
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE))
-            return;
 
         Member member = event.getMember();
 
@@ -48,31 +46,32 @@ public class AutoMod extends ListenerAdapter {
         }
 
         // spam
-        int spamCount = (int) event.getChannel().getIterableHistory().complete().stream()
-                .limit(10).filter(msg -> !msg.equals(event.getMessage()))
-                        // filter for spam
-                .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
-                .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
+        event.getChannel().getHistory().retrievePast(10).queue(messages -> {
+            int spamCount = (int) messages.stream().filter(msg -> !msg.equals(event.getMessage()))
+                    // filter for spam
+                    .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
+                    .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
 
-        if (spamCount > 5) {
-            handleSpam(event, member);
-        }
+            if (spamCount > 5) {
+                handleSpam(event, member);
+            }
+        });
+
     }
 
     /**
-     * Handles potencial spam messages
+     * Handles potential spam messages
      * @param event the message event
      * @param member the member to be potentially warned
      */
     private void handleSpam(@NotNull GuildMessageReceivedEvent event, Member member) {
         // java files -> not spam
-        if (!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).getFileExtension().equals("java"))
-            return;
+        if (!event.getMessage().getAttachments().isEmpty()
+                && event.getMessage().getAttachments().get(0).getFileExtension().equals("java")) return;
 
         Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
-        if (member.getRoles().contains(muteRole))
-            return;
-        
+        if (member.getRoles().contains(muteRole)) return;
+
         var eb = new EmbedBuilder()
                 .setColor(Color.decode(
                         Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor()))
@@ -87,7 +86,7 @@ public class AutoMod extends ListenerAdapter {
 
         event.getChannel().sendMessageEmbeds(eb).queue();
         Misc.sendToLog(event.getGuild(), eb);
-        member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
+        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
         // mute
         try {
@@ -120,7 +119,7 @@ public class AutoMod extends ListenerAdapter {
 
         event.getChannel().sendMessageEmbeds(eb).queue();
         Misc.sendToLog(event.getGuild(), eb);
-        member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
+        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
         try {
             new Warn().warn(event.getMember(), event.getGuild(), reason);
@@ -128,7 +127,7 @@ public class AutoMod extends ListenerAdapter {
             event.getChannel().sendMessage(e.getMessage()).queue();
         }
 
-        event.getMessage().delete().complete();
+        event.getMessage().delete().queue();
     }
 
 
