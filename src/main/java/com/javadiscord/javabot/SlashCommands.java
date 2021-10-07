@@ -161,7 +161,7 @@ public class SlashCommands extends ListenerAdapter {
 
     @NotNull
     private List<CommandPrivilege> getCommandPrivileges(Guild guild, CommandConfig config) {
-        if(config.getPrivileges() == null) return Collections.emptyList();
+        if(config == null || config.getPrivileges() == null) return Collections.emptyList();
         List<CommandPrivilege> privileges = new ArrayList<>();
         for (var privilegeConfig : config.getPrivileges()) {
             try {
