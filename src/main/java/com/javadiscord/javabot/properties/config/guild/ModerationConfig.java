@@ -14,6 +14,8 @@ public class ModerationConfig extends GuildConfigItem {
 	private long suggestionChannelId;
 	private long muteRoleId;
 	private long staffRoleId;
+	private long shareKnowledgeChannelId;
+	private int shareKnowledgeMessageDeleteThreshold;
 	private int purgeMaxMessageCount = 1000;
 
 	public TextChannel getReportChannel() {
@@ -26,6 +28,10 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public TextChannel getSuggestionChannel() {
 		return this.getGuild().getTextChannelById(this.suggestionChannelId);
+	}
+
+	public TextChannel getShareKnowledgeChannel() {
+		return this.getGuild().getTextChannelById(this.shareKnowledgeChannelId);
 	}
 
 	public Role getMuteRole() {
