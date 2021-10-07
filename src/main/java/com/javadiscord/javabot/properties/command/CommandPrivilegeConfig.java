@@ -5,6 +5,7 @@ import com.javadiscord.javabot.properties.config.UnknownPropertyException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
@@ -19,7 +20,9 @@ public class CommandPrivilegeConfig {
 
 	public CommandPrivilege toData(Guild guild, BotConfig botConfig) {
 		if (this.type.equalsIgnoreCase(CommandPrivilege.Type.USER.name())) {
-			return new CommandPrivilege(CommandPrivilege.Type.USER, this.enabled, Long.parseLong(id));
+			Member member = guild.getMemberById(id);
+			if (member == null) throw new IllegalArgumentException("Member could not be found for id " + id);
+			return new CommandPrivilege(CommandPrivilege.Type.USER, this.enabled, member.getIdLong());
 		} else if (this.type.equalsIgnoreCase(CommandPrivilege.Type.ROLE.name())) {
 			Long roleId = null;
 			try {
