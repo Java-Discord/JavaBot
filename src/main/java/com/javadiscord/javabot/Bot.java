@@ -70,6 +70,7 @@ public class Bot {
         asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
         JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ACTIVITY)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
