@@ -20,7 +20,6 @@ public class GuildJoin extends ListenerAdapter {
         MongoCollection<Document> collection = database.getCollection("config");
 
         if (collection.find(eq("guild_id", guild.getId())).first() == null) {
-
             new Database().insertGuildDoc(guild);
         }
     }
@@ -28,7 +27,7 @@ public class GuildJoin extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
-
+        Bot.config.addGuild(event.getGuild());
         for (var guild : event.getJDA().getGuilds()) {
             Bot.slashCommands.registerSlashCommands(guild);
         }

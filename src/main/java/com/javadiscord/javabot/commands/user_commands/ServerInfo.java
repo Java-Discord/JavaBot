@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Constants;
@@ -18,17 +19,18 @@ public class ServerInfo implements SlashCommandHandler {
     public ReplyAction handle(SlashCommandEvent event) {
 
         if (event.getGuild() == null) return Responses.warning(event, "This can only be used in a guild.");
-        long roleCount = event.getGuild().getRoles().stream().count() - 1;
-        long catCount = event.getGuild().getCategories().stream().count();
-        long textChannelCount = event.getGuild().getTextChannels().stream().count();
-        long voiceChannelCount = event.getGuild().getVoiceChannels().stream().count();
-        long channelCount = event.getGuild().getChannels().stream().count() - catCount;
+        long roleCount = (long) event.getGuild().getRoles().size() - 1;
+        long catCount = event.getGuild().getCategories().size();
+        long textChannelCount = event.getGuild().getTextChannels().size();
+        long voiceChannelCount = event.getGuild().getVoiceChannels().size();
+        long channelCount = (long) event.getGuild().getChannels().size() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
         String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
-            .setColor(Constants.GRAY)
+            .setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
             .setThumbnail(event.getGuild().getIconUrl())
             .setAuthor(event.getGuild().getName(), null, event.getGuild().getIconUrl())
             .addField("Name", "```" + event.getGuild().getName() + "```", true)
@@ -44,7 +46,7 @@ public class ServerInfo implements SlashCommandHandler {
             .setTimestamp(new Date().toInstant());
 
         if (event.getGuild().getId().equals("648956210850299986")) {
-            return event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE, "Website"));
+            return event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE_LINK, "Website"));
         } else {
             return event.replyEmbeds(eb.build());
         }

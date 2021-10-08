@@ -1,8 +1,7 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -12,6 +11,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -24,11 +24,12 @@ public class Report implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
         User author = event.getUser();
-        MessageChannel reportChannel = new Database().getConfigChannel(event.getGuild(), "channels.report_cid");
+        MessageChannel reportChannel = Bot.config.get(event.getGuild()).getModeration().getReportChannel();
 
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
-            .setColor(Constants.GRAY)
+            .setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
             .addField("Name", "```" + member.getUser().getAsTag() + "```", false)
             .addField("ID", "```" + member.getId() + "```", true)
             .addField("Reported by", "```" + author.getAsTag() + "```", true)

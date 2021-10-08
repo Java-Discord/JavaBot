@@ -17,6 +17,13 @@
   name: help
   options: []
   handler: com.javadiscord.javabot.commands.user_commands.Help
+
+# Help commands
+- name: unreserve
+  description: Unreserves this help channel so that others can use it.
+  handler: com.javadiscord.javabot.help.UnreserveCommandHandler
+  options: []
+
 - description: Generates a human-readable timestamp out of a Discord-ID
   name: idcalc
   options:
@@ -62,7 +69,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
 - description: Clears all warns from the given user.
   name: clearwarns
   options:
@@ -72,7 +79,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
 - description: Clears all QOTW-points from the given user.
   name: clearqotw
   options:
@@ -82,14 +89,14 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
 - description: Edits an embed
   name: editembed
   handler: com.javadiscord.javabot.commands.moderation.EditEmbed
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Edits an embed
@@ -110,7 +117,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Creates a new Embed
@@ -131,13 +138,23 @@
       options:
         - { description: Link of the original Message, name: link, required: true, type: STRING }
         - { description: Title of the embed, name: title, required: false, type: STRING }
+- description: Let the bot say everything you want
+  name: say
+  options:
+    - {description: The text the bot should say, name: text,
+       required: true, type: STRING}
+  handler: com.javadiscord.javabot.commands.moderation.Say
+  enabledByDefault: false
+  privileges:
+      - type: ROLE
+        id: moderation.staffRoleId
 - description: Kicks a member
   name: kick
   handler: com.javadiscord.javabot.commands.moderation.Kick
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to kick, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -147,7 +164,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to mute, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -157,20 +174,68 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
-- description: Deletes the given amount of messages in a channel
+- description: Grants one QOTW-Points to the given member upon use
+  name: correct
+  handler: com.javadiscord.javabot.commands.other.qotw.Correct
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - {description: The member you want to grant a point, name: member, required: true, type: USER}
+
+- description: Deletes messages from a channel.
   name: purge
   handler: com.javadiscord.javabot.commands.moderation.Purge
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
-    - {description: the amount of messages you want to delete (2-100), name: amount,
-       required: true, type: INTEGER}
-    - {description: 'If true, creates a copy- and deletes the current channel', name: nuke-channel,
-       required: false, type: BOOLEAN}
+    - name: amount
+      description: Number of messages to remove. If left blank, all messages will be removed.
+      type: INTEGER
+      required: false
+    - name: user
+      description: The user whose messages to remove. If left blank, messages from any user are removed.
+      type: USER
+      required: false
+    - name: archive
+      description: If true, save removed messages in an archive.
+      type: BOOLEAN
+      required: false
+
+- name: prune
+  description: Removes members from the server.
+  handler: com.javadiscord.javabot.commands.moderation.Prune
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: pattern
+      description: A regular expression pattern to use, to remove members whose contains a match with the pattern.
+      type: STRING
+      required: false
+    - name: before
+      description: "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC."
+      type: STRING
+      required: false
+    - name: after
+      description: "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC."
+      type: STRING
+      required: false
+    - name: reason
+      description: The reason for issuing the prune command. This will be provided as the reason for each ban.
+      type: STRING
+      required: false
+    - name: delete-days-of-history
+      description: The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.
+      type: INTEGER
+      required: false
+
 - description: Reports a member
   name: report
   handler: com.javadiscord.javabot.commands.moderation.Report
@@ -183,7 +248,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The ID of the user you want to unban, name: id, required: true,
        type: STRING}
@@ -193,7 +258,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to unmute, name: user, required: true, type: USER}
 - description: Warns a member
@@ -202,7 +267,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: The user you want to warn, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
@@ -212,157 +277,46 @@
   options:
     - {description: 'If given, shows the warn count of the given user', name: user,
        required: false, type: USER}
-- description: Shows the config for the current guild
+
+# Configuration
+- description: Manage configuration for this guild.
   name: config
-  handler: com.javadiscord.javabot.commands.configuation.config.Config
+  handler: com.javadiscord.javabot.commands.configuation.Config
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
-    - description: Shows the current config
-      name: list
+    - name: list
+      description: Get a list of all configuration properties, and their current values.
       options: []
-    - description: Changes the id of the stats category
-      name: stats-category
+    - name: get
+      description: Get the current value of a configuration property.
       options:
-        - {description: ID of the new stats category, name: id, required: true, type: STRING}
-    - description: Changes the message of the stats category
-      name: stats-message
+        - name: property
+          description: The name of a property.
+          required: true
+          type: STRING
+    - name: set
+      description: Sets the value of a configuration property.
       options:
-        - {description: New text of the stats category, name: message, required: true,
-           type: STRING}
-    - description: Changes the report channel
-      name: report-channel
-      options:
-        - {description: New report channel, name: channel, required: true, type: CHANNEL}
-    - description: Changes the report channel
-      name: starboard-channel
-      options:
-        - { description: New report channel, name: channel, required: true, type: CHANNEL }
-    - description: Changes the log channel
-      name: log-channel
-      options:
-        - {description: the new log channel, name: channel, required: true, type: CHANNEL}
-    - description: Changes the suggestion channel
-      name: suggestion-channel
-      options:
-        - {description: New suggestion channel, name: channel, required: true, type: CHANNEL}
-    - description: Changes the submission channel
-      name: submission-channel
-      options:
-        - {description: New submission channel, name: channel, required: true, type: CHANNEL}
-    - description: Changes the mute role
-      name: mute-role
-      options:
-        - {description: New mute role, name: role, required: true, type: ROLE}
-    - description: Changes the Staff role
-      name: staff-role
-      options:
-        - { description: New Staff role, name: role, required: true, type: ROLE }
-    - description: Changes the state of dm-qotw
-      name: dm-qotw
-      options:
-        - {description: State of dm-qotw, name: enabled, required: true, type: BOOLEAN}
-    - description: Changes the state of the server lock
-      name: lock
-      options:
-        - {description: State of the server lock, name: locked, required: true, type: BOOLEAN}
-    - description: Changes the Jam Admin Role
-      name: jam-admin-role
-      options:
-        - {description: New Jam Admin role, name: role, required: true, type: ROLE}
-    - description: Changes the Jam Ping Role
-      name: jam-ping-role
-      options:
-        - { description: New Jam Ping role, name: role, required: true, type: ROLE }
-    - description: Changes the Jam Announcement Channel
-      name: jam-announcement-channel
-      options:
-        - { description: New Jam Announcement Channel, name: channel, required: true, type: CHANNEL }
-    - description: Changes the Jam Vote Channel
-      name: jam-vote-channel
-      options:
-        - { description: New Jam Vote Channel, name: channel, required: true, type: CHANNEL }
-- description: edits the welcome image config
-  name: welcome
-  handler: com.javadiscord.javabot.commands.configuation.welcome_system.WelcomeSystem
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: staff_rid
-  options: []
-  subCommands:
-    - description: Sends the current welcome system config
-      name: list
-      options: []
-    - description: Changes the leave message
-      name: leave-msg
-      options:
-        - {description: New leave message, name: message, required: true, type: STRING}
-    - description: Changes the welcome message
-      name: join-msg
-      options:
-        - {description: New welcome message, name: message, required: true, type: STRING}
-    - description: Changes the Welcome-System status
-      name: status
-      options:
-        - {description: Status of the Welcome-System, name: status, required: true, type: BOOLEAN}
-    - description: Changes the welcome channel
-      name: channel
-      options:
-        - {description: New welcome channel, name: channel, required: true, type: CHANNEL}
-    - description: Changes the welcome image width
-      name: image-width
-      options:
-        - {description: New welcome image width, name: width, required: true, type: INTEGER}
-    - description: Changes the welcome image height
-      name: image-height
-      options:
-        - {description: New welcome image height, name: height, required: true, type: INTEGER}
-    - description: Changes the welcome image overlay url
-      name: overlay-url
-      options:
-        - {description: New welcome image url, name: url, required: true, type: STRING}
-    - description: Changes the welcome image background url
-      name: background-url
-      options:
-        - {description: New welcome image background url, name: url, required: true, type: STRING}
-    - description: Changes the primary color (tag)
-      name: primary-color
-      options:
-        - {description: New primary color (e.g. ff0000), name: color, required: true,
-           type: STRING}
-    - description: Changes the secondary color (member count)
-      name: secondary-color
-      options:
-        - {description: New secondary color (e.g. ff0000), name: color, required: true,
-           type: STRING}
-    - description: Changes the x-position of the avatar image
-      name: avatar-x
-      options:
-        - {description: New x-position of the avatar image, name: x, required: true, type: INTEGER}
-    - description: Changes the y-position of the avatar image
-      name: avatar-y
-      options:
-        - {description: New y-position of the avatar image, name: y, required: true, type: INTEGER}
-    - description: Changes the width of the avatar image
-      name: avatar-width
-      options:
-        - {description: New width of the avatar image, name: width, required: true, type: INTEGER}
-    - description: Changes the height of the avatar image
-      name: avatar-height
-      options:
-        - {description: New height of the avatar image, name: height, required: true,
-           type: INTEGER}
+        - name: property
+          description: The name of a property.
+          required: true
+          type: STRING
+        - name: value
+          description: The value to set for the property.
+          required: true
+          type: STRING
+
 - description: creates, edits or deletes custom slash commands
   name: customcommand
   handler: com.javadiscord.javabot.commands.custom_commands.CustomCommands
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Creates a custom slash command
@@ -394,35 +348,33 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options: []
   subCommands:
     - description: Creates a reaction role
       name: create
       options:
-        - {description: 'Channel, the reaction role should be created in', name: channel,
-           required: true, type: CHANNEL}
-        - {description: 'Message, the reaction role should be created on', name: messageid,
+        - {description: 'Message, the Reaction Role should be created on', name: message-id,
            required: true, type: STRING}
-        - {description: 'Emote, the reaction role should use', name: emote, required: true,
-           type: STRING}
-        - { description: 'Label, the button should use', name: button-label, required: true,
+        - { description: 'Label, the Button should use', name: label, required: true,
             type: STRING}
-        - {description: 'Role, the reaction role should add', name: role, required: true,
+        - {description: 'Role, the Button should add upon use', name: role, required: true,
            type: ROLE}
+        - {description: 'It set to true, doesnt let you remove the Role afterwards', name: permanent, required: false,
+            type: BOOLEAN}
+        - {description: 'Emote, the Button should use', name: emote, required: false,
+            type: STRING}
     - description: Deletes a reaction role
       name: delete
       options:
-        - {description: 'Message, the reaction role is on', name: messageid, required: true,
+        - {description: 'Message, the reaction role is on', name: message-id, required: true,
            type: STRING}
-        - {description: 'Emote, the reaction role is using', name: emote, required: true,
-           type: STRING}
-        - {description: 'Label, the button should use', name: button-label, required: true,
+        - {description: 'Label, the button should use', name: label, required: true,
            type: STRING}
 - description: Lists all Reaction Roles
   name: reactionroles
   options: []
-  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoleList
+  handler: com.javadiscord.javabot.commands.reaction_roles.subcommands.ListReactionRoles
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
@@ -434,7 +386,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: Amount of questions, name: amount, required: true, type: INTEGER}
 - description: Accepts the given submissions
@@ -443,7 +395,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: clears the given submissions
@@ -452,7 +404,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: declines the given submissions
@@ -461,7 +413,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: Adds a response to the given submissions
@@ -470,7 +422,7 @@
   enabledByDefault: false
   privileges:
       - type: ROLE
-        id: staff_rid
+        id: moderation.staffRoleId
   options:
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
     - {description: Text of the response, name: text, required: true, type: STRING}
@@ -510,7 +462,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: jam_admin_rid
+      id: jam.adminRoleId
   subCommands:
     - name: plan-new-jam
       description: Creates a new Java Jam for the future.
@@ -633,7 +585,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   subCommands:
     - name: give
       description: Give a user's account some funds (or subtract funds with a negative value).
@@ -658,7 +610,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   subCommands:
     - name: export-schema
       description: Exports the current database schema to an SQL file.
@@ -684,7 +636,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: staff_rid
+      id: moderation.staffRoleId
   subCommandGroups:
     - name: questions-queue
       description: Commands for interacting with the set of QOTW questions that are in queue.

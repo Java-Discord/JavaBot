@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -191,9 +190,7 @@ public class Leaderboard implements SlashCommandHandler {
      ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {
 
         int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE + 20;
-         boolean topTen = false;
-
-         if (getTopUsers(event.getGuild(), (int) num).contains(event.getMember())) topTen = true;
+         boolean topTen = getTopUsers(event.getGuild(), (int) num).contains(event.getMember());
 
          if (!topTen) LB_HEIGHT += CARD_HEIGHT;
          BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -212,25 +209,21 @@ public class Leaderboard implements SlashCommandHandler {
          g2d.fillRect(0, 0, LB_WIDTH, LB_HEIGHT);
 
          BufferedImage logo = getImage("images/leaderboard/Logo.png");
-
          g2d.drawImage(logo, LB_WIDTH / 2 - logo.getWidth() / 2, 110, null);
 
          int nameY = EMPTY_SPACE;
          boolean drawLeft = true;
 
-         event.getHook().sendMessage("Fetching user data... (" + getTopUsers(event.getGuild(), (int) num).size() + ") " + Constants.LOADING).queue();
+         event.getHook().sendMessage("Fetching user data... (" + getTopUsers(event.getGuild(), (int) num).size() + ") "
+                 + Bot.config.get(event.getGuild()).getEmote().getLoadingEmote()).queue();
 
          for (var member : getTopUsers(event.getGuild(), (int) num)) {
-
-             if (drawLeft) drawUserCard(g2d, member, nameY, true, false);
-             else drawUserCard(g2d, member, nameY, false, false);
-
+             drawUserCard(g2d, member, nameY, drawLeft, false);
              drawLeft = !drawLeft;
              if (drawLeft) nameY = nameY + CARD_HEIGHT;
          }
 
          if (!topTen) drawUserCard(g2d, event.getMember(), nameY, true, true);
-
          g2d.dispose();
 
          ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

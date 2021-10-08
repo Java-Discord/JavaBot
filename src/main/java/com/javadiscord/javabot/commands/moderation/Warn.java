@@ -1,15 +1,14 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import com.javadiscord.javabot.other.TimeUtils;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -17,6 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -60,20 +60,19 @@ public class Warn implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
-        return (int) warns.count(eq("user_id", member.getId()));
+        return (int) warns.count(eq("user_id", member.getId())); // TODO: Replace with countDocuments
     }
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (!event.getMember().hasPermission(Permission.KICK_MEMBERS)) {
-            return event.replyEmbeds(Embeds.permissionError("KICK_MEMBERS", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
+
         Member member = event.getOption("user").getAsMember();
         OptionMapping option = event.getOption("reason");
         String reason = option == null ? "None" : option.getAsString();
         int warnPoints = getWarnCount(member);
         var eb = new EmbedBuilder()
-                .setColor(Constants.YELLOW)
+                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
+                        .getWarningColor()))
                 .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + event.getUser().getAsTag() + "```", true)
@@ -91,7 +90,7 @@ public class Warn implements SlashCommandHandler {
             warn(member, event.getGuild(), reason);
             return event.replyEmbeds(eb);
         } catch (Exception e) {
-            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser()));
+            return Responses.error(event, e.getMessage());
         }
     }
 }

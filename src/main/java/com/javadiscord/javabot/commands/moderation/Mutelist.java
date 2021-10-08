@@ -1,11 +1,8 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -19,13 +16,10 @@ public class Mutelist implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-            return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
 
         String res = "";
         int memberSize;
-        Role muteRole = new Database().getConfigRole(event.getGuild(), "roles.mute_rid");
+        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
 
         try {
             List<Member> members = event.getGuild().getMembersWithRoles(muteRole);
@@ -42,7 +36,8 @@ public class Mutelist implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
                 .setAuthor("Mutelist (" + memberSize + ")")
-                .setColor(new Color(0x2F3136))
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setDescription(res)
                 .setTimestamp(new Date().toInstant())
                 .build();

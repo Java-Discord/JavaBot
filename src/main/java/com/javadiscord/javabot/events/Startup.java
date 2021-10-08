@@ -4,49 +4,39 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.commands.other.Version;
+import com.javadiscord.javabot.help.HelpChannelUpdater;
+import com.javadiscord.javabot.other.Constants;
 import com.javadiscord.javabot.other.Database;
 import com.javadiscord.javabot.other.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-
+@Slf4j
 public class Startup extends ListenerAdapter {
 
-    public static String iae = "https://cdn.discordapp.com/attachments/838019016395063328/838019031628906496/IllegalArgumentException.png";
-    public static String mfurle = "https://cdn.discordapp.com/attachments/838020992882049025/838021012871315486/MalformedURLException.png";
+    public static final String iae = "https://cdn.discordapp.com/attachments/838019016395063328/838019031628906496/IllegalArgumentException.png";
 
     public static MongoClient mongoClient;
     public static Guild preferredGuild;
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Startup.class);
-
     @Override
     public void onReady(ReadyEvent event) {
+        // Initialize all guild-specific configuration.
+        Bot.config.loadGuilds(event.getJDA().getGuilds());
+        Bot.config.flush();
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
         rootLogger.setLevel(Level.ERROR);
-
-        try {
-            StringBuilder sb = new StringBuilder();
-            Scanner fReader = new Scanner(getClass().getClassLoader().getResourceAsStream("textfiles/startup.txt"));
-
-            while (fReader.hasNextLine()) {
-                sb.append(fReader.nextLine() + "\n");
-            }
-            System.out.println("\n" + sb.toString().replace("{!version}", new Version().getVersion(event.getJDA())));
-
-        } catch (Exception e) { logger.error("* textfiles/startup.txt not found"); }
 
         try { TimeUnit.MILLISECONDS.sleep(500); }
         catch (InterruptedException e) { e.printStackTrace(); }
@@ -59,30 +49,30 @@ public class Startup extends ListenerAdapter {
             try {
                 preferredGuild = event.getJDA().getGuildById(guildOrder[i]);
                 if (event.getJDA().getGuilds().contains(preferredGuild)) break;
-                else continue;
 
             } catch (Exception ignored) {}
         }
 
         if (preferredGuild == null) preferredGuild = event.getJDA().getGuilds().get(0);
 
-        logger.info("Bot is ready!");
-        logger.info("Logged in as " + event.getJDA().getSelfUser().getAsTag());
-
-        logger.info("Preferred Guild: " + preferredGuild.getName());
-        logger.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
+        log.info("Logged in as {}{}{}",
+                Constants.TEXT_WHITE, event.getJDA().getSelfUser().getAsTag(), Constants.TEXT_RESET);
+        log.info("Preferred Guild: {}{}{}",
+                Constants.TEXT_WHITE, preferredGuild.getName(), Constants.TEXT_RESET);
+        log.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
         String[] skipGuilds = new String[]{"861254598046777344", "813817075218776101"};
-        //                                JavaDiscord Emoji Server    Test-Server
+        //                               JavaDiscord Emoji Server    Test-Server
 
         try {
 
-        MongoClientURI uri = new MongoClientURI(Bot.getProperty("mongologin", "default"));
+        MongoClientURI uri = new MongoClientURI(Bot.config.getSystems().getMongoDatabaseUrl());
         mongoClient = new MongoClient(uri);
 
         new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());
-        logger.info("Successfully connected to Database");
+        log.info("Successfully connected to MongoDB");
 
+        log.info("Starting Guild initialization\n");
         for (var guild : event.getJDA().getGuilds()) {
 
             if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
@@ -90,13 +80,15 @@ public class Startup extends ListenerAdapter {
             new Database().deleteOpenSubmissions(guild);
             new StarboardListener().updateAllSBM(guild);
             Bot.slashCommands.registerSlashCommands(guild);
+
+            // Schedule the help channel updater to run periodically for each guild.
+            var helpConfig = Bot.config.get(guild).getHelp();
+            Bot.asyncPool.scheduleAtFixedRate(new HelpChannelUpdater(event.getJDA(), helpConfig), 5, helpConfig.getUpdateIntervalSeconds(), TimeUnit.SECONDS);
         }
-
-
 
         } catch (MongoException e) {
 
-            logger.error("Couldn't connect to MongoDB ({}) Shutting down...", e.getClass().getSimpleName());
+            log.error("Couldn't connect to MongoDB ({}) Shutting down...", e.getClass().getSimpleName());
             e.printStackTrace();
             System.exit(0);
         }

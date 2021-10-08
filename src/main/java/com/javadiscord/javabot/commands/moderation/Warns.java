@@ -2,10 +2,10 @@ package com.javadiscord.javabot.commands.moderation;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
+import java.awt.*;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -25,7 +26,11 @@ public class Warns implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
-        return warns.countDocuments(eq("user_id", member.getId()));
+        BasicDBObject criteria = new BasicDBObject()
+                .append("guild_id", member.getGuild().getId())
+                .append("user_id", member.getId());
+
+        return warns.countDocuments(criteria);
     }
 
     @Override
@@ -37,21 +42,20 @@ public class Warns implements SlashCommandHandler {
         MongoCollection<Document> warns = database.getCollection("warns");
 
         StringBuilder sb = new StringBuilder();
-        MongoCursor<Document> it = warns.find(eq("user_id", member.getId())).iterator();
 
-        while (it.hasNext()) {
-            JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
+        for (Document document : warns.find(eq("user_id", member.getId()))) {
+            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
             String reason = root.get("reason").getAsString();
             String date = root.get("date").getAsString();
-            sb.append("[Date] " + date +
-                "\n[Reason] " + reason + "\n\n");
+            sb.append("[Date] ").append(date).append("\n[Reason] ").append(reason).append("\n\n");
         }
 
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
             .setDescription("```" + member.getUser().getAsTag() + " has been warned " + warnCount(member) + " times so far."
                 + "\n\n" + sb + "```")
-            .setColor(Constants.YELLOW)
+            .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
+                        .getWarningColor()))
             .setFooter("ID: " + member.getId())
             .setTimestamp(new Date().toInstant())
             .build();

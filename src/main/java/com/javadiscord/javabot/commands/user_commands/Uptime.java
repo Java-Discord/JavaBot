@@ -1,19 +1,20 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.TimeUnit;
 
 public class Uptime implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
+    public String getUptime() {
+
         RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
         long uptimeMS = rb.getUptime();
 
@@ -25,12 +26,18 @@ public class Uptime implements SlashCommandHandler {
         uptimeMS -= TimeUnit.MINUTES.toMillis(uptimeMIN);
         long uptimeSEC = TimeUnit.MILLISECONDS.toSeconds(uptimeMS);
 
+        return String.format("%sd %sh %smin %ss",
+                uptimeDAYS, uptimeHRS, uptimeMIN, uptimeSEC);
+    }
+
+    @Override
+    public ReplyAction handle(SlashCommandEvent event) {
         String botImage = event.getJDA().getSelfUser().getAvatarUrl();
+        var e = new EmbedBuilder()
+            .setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setAuthor(getUptime(), null, botImage);
 
-        EmbedBuilder eb = new EmbedBuilder()
-            .setColor(Constants.GRAY)
-            .setAuthor(uptimeDAYS + "d " + uptimeHRS + "h " + uptimeMIN + "min " + uptimeSEC + "s", null, botImage);
-
-        return event.replyEmbeds(eb.build());
+        return event.replyEmbeds(e.build());
     }
 }

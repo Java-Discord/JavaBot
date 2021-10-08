@@ -1,10 +1,12 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+
+import java.awt.*;
 
 public class Ping implements SlashCommandHandler {
 
@@ -15,7 +17,8 @@ public class Ping implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
             .setAuthor(gatewayPing + "ms", null, botImage)
-            .setColor(Constants.GRAY)
+            .setColor(Color.decode(
+                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
             .build();
 
         return event.replyEmbeds(e);

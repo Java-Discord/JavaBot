@@ -1,11 +1,9 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -21,15 +19,12 @@ public class Embed implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (!event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
 
-        switch (event.getSubcommandName()) {
-            case "create": return createEmbed(event);
-            case "from-message": return createEmbedFromLink(event);
-        }
-        return Responses.warning(event, "Unknown subcommand.");
+        return switch (event.getSubcommandName()) {
+            case "create" -> createEmbed(event);
+            case "from-message" -> createEmbedFromLink(event);
+            default -> Responses.warning(event, "Unknown subcommand.");
+        };
     }
 
     private ReplyAction createEmbedFromLink(SlashCommandEvent event) {
@@ -42,14 +37,15 @@ public class Embed implements SlashCommandHandler {
             TextChannel channel = event.getGuild().getTextChannelById(value[5]);
             message = channel.retrieveMessageById(value[6]).complete();
         } catch (Exception e) {
-            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
+            return Responses.error(event, e.getMessage());
         }
 
         OptionMapping embedOption = event.getOption("title");
         String title = embedOption == null ? null : embedOption.getAsString();
 
         var eb = new EmbedBuilder()
-                .setColor(Constants.GRAY)
+                .setColor(Color.decode(
+                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                 .setTitle(title)
                 .setDescription(message.getContentRaw())
                 .build();
@@ -80,10 +76,11 @@ public class Embed implements SlashCommandHandler {
             eb.setThumbnail(thumb);
             eb.setColor(Color.decode(color));
 
-            return event.replyEmbeds(eb.build());
+            event.getChannel().sendMessageEmbeds(eb.build()).queue();
+            return event.reply("Done!").setEphemeral(true);
 
         } catch (Exception e) {
-            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
+            return Responses.error(event, e.getMessage());
         }
     }
 }

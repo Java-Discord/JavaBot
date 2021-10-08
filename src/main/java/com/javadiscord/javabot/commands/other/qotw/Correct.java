@@ -1,47 +1,58 @@
 package com.javadiscord.javabot.commands.other.qotw;
 
-import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
+import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
+import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.util.Date;
 
-public class Correct {
+public class Correct implements SlashCommandHandler {
 
-    public static void correct(ButtonClickEvent event, Member member) {
+    public void correct(Guild guild, Member member) {
 
-        String check;
-        TextChannel tc;
-        tc = event.getGuild().getTextChannelById(new Database().getConfigString(event.getGuild(), "channels.log_cid"));
-        check = event.getGuild().getEmotesByName("check", false).get(0).getAsMention();
+        int qotwPoints = new Database().getMemberInt(member, "qotwpoints") + 1;
+        new Database().setMemberEntry(member.getId(), "qotwpoints", qotwPoints);
 
-        int qotwPoints = new Database().getMemberInt(member, "qotwpoints");
-        new Database().queryMember(member.getId(), "qotwpoints", qotwPoints + 1);
+        var eb = new EmbedBuilder()
+                .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
+                .setColor(Color.decode(Bot.config.get(guild).getSlashCommand()
+                        .getSuccessColor()))
+                .addField("Total QOTW-Points", "```" + qotwPoints + "```", true)
+                .addField("Rank", "```#" + new Leaderboard().getQOTWRank(guild, member.getId()) + "```", true)
+                .setFooter("ID: " + member.getId())
+                .setTimestamp(new Date().toInstant())
+                .build();
+        Misc.sendToLog(guild, eb);
 
-        EmbedBuilder eb = new EmbedBuilder()
-                .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Constants.GREEN)
-                .setDescription("Your answer was correct! " + check + "\nYou've been granted **1 QOTW-Point!** (Total: " + (qotwPoints + 1) + ")")
-                .setTimestamp(new Date().toInstant());
-
-        try {
-            member.getUser().openPrivateChannel().complete().sendMessage(eb.build()).queue();
-
-            EmbedBuilder emb = new EmbedBuilder()
-                    .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
-                    .setColor(Constants.GREEN)
-                    .addField("Total QOTW-Points", "```" + (qotwPoints + 1) + "```", true)
-                    .addField("Rank", "```#" + new Leaderboard().getQOTWRank(event.getGuild(), member.getId()) + "```", true)
-                    .setFooter("ID: " + member.getId())
-                    .setTimestamp(new Date().toInstant());
-            tc.sendMessageEmbeds(emb.build()).queue();
-
-        } catch (Exception e) {
-            tc.sendMessageEmbeds(Embeds.emptyError("```Couldn't send message <:abort:759740784882089995> (" + member.getUser().getAsTag() + ")```", event.getUser())).queue();
+        if (!member.getUser().hasPrivateChannel()) {
+            Misc.sendToLog(guild, "> Couldn't send Message to User " + member.getUser().getAsTag());
+            member.getUser().openPrivateChannel().complete()
+                    .sendMessageEmbeds(new EmbedBuilder()
+                            .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
+                            .setColor(Color.decode(Bot.config.get(guild).getSlashCommand()
+                                    .getSuccessColor()))
+                            .setDescription("Your answer was correct! " + Bot.config.get(guild).getEmote().getSuccessEmote() +
+                                    "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
+                            .setTimestamp(new Date().toInstant())
+                            .build())
+                    .queue();
         }
     }
+
+    @Override
+    public ReplyAction handle(SlashCommandEvent event) {
+        Member mem = event.getOption("member").getAsMember();
+        correct(event.getGuild(), mem);
+        return Responses.success(event, "Correct",
+                "Successfully granted Member **" + mem.getUser().getAsTag() + "** one QOTW-Point!");
+    }
+
 }

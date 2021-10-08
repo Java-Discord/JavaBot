@@ -1,7 +1,7 @@
 package com.javadiscord.javabot;
 
-import com.javadiscord.javabot.commands.other.Version;
 import com.javadiscord.javabot.events.Startup;
+import com.javadiscord.javabot.other.Constants;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -98,9 +98,10 @@ public class PresenceUpdater extends ListenerAdapter {
      */
     public static PresenceUpdater standardActivities() {
         return new PresenceUpdater(List.of(
-            jda -> Activity.watching("javadiscord.net" + " | " + new Version().getVersion(jda)),
-            jda -> Activity.listening(Startup.preferredGuild.getMemberCount() + " members" + " | " + new Version().getVersion(jda)),
-            jda -> Activity.watching("/help" + " | " + new Version().getVersion(jda))
+            jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
+            jda -> Activity.watching("/help" + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
+            jda -> Activity.watching(Constants.QOTW_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
+            jda -> Activity.watching(Constants.GITHUB_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members")
         ), 35, TimeUnit.SECONDS);
     }
 }

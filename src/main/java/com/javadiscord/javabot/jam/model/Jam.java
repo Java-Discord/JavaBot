@@ -57,8 +57,7 @@ public class Jam {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof Jam)) return false;
-		Jam jam = (Jam) o;
+		if (!(o instanceof Jam jam)) return false;
 		return getId() == jam.getId();
 	}
 

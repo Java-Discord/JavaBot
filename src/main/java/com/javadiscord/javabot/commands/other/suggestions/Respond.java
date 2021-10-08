@@ -1,10 +1,8 @@
 package com.javadiscord.javabot.commands.other.suggestions;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -17,12 +15,12 @@ import java.time.OffsetDateTime;
 public class Respond implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            Message msg = null;
+
+            Message msg;
             String messageID = event.getOption("message-id").getAsString();
             String text = event.getOption("text").getAsString();
             try { msg = event.getChannel().retrieveMessageById(messageID).complete(); }
-            catch (IllegalArgumentException | ErrorResponseException e) { event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL).queue(); }
+            catch (IllegalArgumentException | ErrorResponseException e) { return Responses.error(event, e.getMessage()); }
 
             MessageEmbed msgEmbed = msg.getEmbeds().get(0);
 
@@ -40,10 +38,7 @@ public class Respond implements SlashCommandHandler {
                 .setTimestamp(timestamp)
                 .build();
 
-            msg.editMessage(e).queue();
+            msg.editMessageEmbeds(e).queue();
             return event.reply("Done!").setEphemeral(true);
-        } else {
-            return event.replyEmbeds(Embeds.permissionError("MESSAGE_MANAGE", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
     }
 }

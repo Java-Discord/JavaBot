@@ -1,12 +1,10 @@
 package com.javadiscord.javabot.commands.moderation;
 
+import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Embeds;
 import com.javadiscord.javabot.other.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -14,21 +12,18 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
+import java.awt.*;
 import java.util.Date;
 
 public class Mute implements SlashCommandHandler {
 
-    public void mute (Member member, Guild guild) throws Exception {
-
-        Role muteRole = guild.getRoleById(new Database().getConfigString(guild, "roles.mute_rid"));
+    public void mute (Member member, Guild guild) {
+        Role muteRole = Bot.config.get(guild).getModeration().getMuteRole();
         guild.addRoleToMember(member.getId(), muteRole).complete();
     }
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        if (!event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
-            return event.replyEmbeds(Embeds.permissionError("MANAGE_ROLES", event)).setEphemeral(Constants.ERR_EPHEMERAL);
-        }
 
         Member member = event.getOption("user").getAsMember();
 
@@ -36,7 +31,8 @@ public class Mute implements SlashCommandHandler {
         String reason = option == null ? "None" : option.getAsString();
 
         var eb = new EmbedBuilder()
-                .setColor(Constants.RED)
+                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
+                        .getErrorColor()))
                 .setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + event.getUser().getAsTag() + "```", true)
@@ -50,17 +46,17 @@ public class Mute implements SlashCommandHandler {
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-        Role muteRole = event.getGuild().getRoleById(new Database().getConfigString(event.getGuild(), "roles.mute_rid"));
+        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
 
         if (member.getRoles().contains(muteRole)) {
-            return event.replyEmbeds(Embeds.emptyError("```" + member.getUser().getAsTag() + " is already muted```", event.getUser())).setEphemeral(Constants.ERR_EPHEMERAL);
+            return Responses.error(event, "```" + member.getUser().getAsTag() + " is already muted```");
         }
 
         try {
             mute(member, event.getGuild());
             return event.replyEmbeds(eb);
         } catch (Exception e) {
-            return event.replyEmbeds(Embeds.emptyError("```" + e.getMessage() + "```", event.getUser()));
+            return Responses.error(event, e.getMessage());
         }
     }
 }

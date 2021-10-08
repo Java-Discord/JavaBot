@@ -31,21 +31,13 @@ public class JamPhaseManager {
 	 * of its life cycle.
 	 */
 	public void nextPhase() {
-		JamPhaseTransition transition = null;
-		switch (jam.getCurrentPhase()) {
-			case JamPhase.THEME_PLANNING:
-				transition = new ToThemeVotingTransition();
-				break;
-			case JamPhase.THEME_VOTING:
-				transition = new ToSubmissionTransition();
-				break;
-			case JamPhase.SUBMISSION:
-				transition = new ToSubmissionVotingTransition();
-				break;
-			case JamPhase.SUBMISSION_VOTING:
-				transition = new ToCompletionTransition();
-				break;
-		}
+		JamPhaseTransition transition = switch (jam.getCurrentPhase()) {
+			case JamPhase.THEME_PLANNING -> new ToThemeVotingTransition();
+			case JamPhase.THEME_VOTING -> new ToSubmissionTransition();
+			case JamPhase.SUBMISSION -> new ToSubmissionVotingTransition();
+			case JamPhase.SUBMISSION_VOTING -> new ToCompletionTransition();
+			default -> null;
+		};
 		if (transition != null) {
 			this.doTransition(transition);
 		}

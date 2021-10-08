@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Constants;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.json.JSONException;
 
+import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +41,8 @@ public class ChangeMyMind implements SlashCommandHandler {
                 MessageEmbed e = null;
                 try {
                     e = new EmbedBuilder()
-                            .setColor(Constants.GRAY)
+                            .setColor(Color.decode(
+                                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
                             .setImage(hr.getBody().getObject().getString("message"))
                             .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                             .setTimestamp(new Date().toInstant())
