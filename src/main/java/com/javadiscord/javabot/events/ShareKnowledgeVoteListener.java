@@ -12,6 +12,10 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemove
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Listens for messages and reactions in #share-knowledge.
+ * Automatically deletes messages below a certain score.
+ */
 public class ShareKnowledgeVoteListener extends ListenerAdapter {
 
     @Override
@@ -77,12 +81,12 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
 
         int eval = upvotes - downvotes;
 
-        if (eval < config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
+        if (eval <= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
             message.delete().queue();
             message.getAuthor().openPrivateChannel()
-                    .queue(channel -> channel.sendMessage("Your Message in <#" + 
-                            config.getModeration().getShareKnowledgeChannel().getId() +
-                            "> has been deleted by popular vote").queue());
+                    .queue(channel -> channel.sendMessage("Your Message in" +
+                            config.getModeration().getShareKnowledgeChannel().getAsMention() +
+                            " has been removed due to community feedback").queue());
         }
     }
 }
