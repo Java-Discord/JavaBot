@@ -95,7 +95,8 @@ public class Bot {
                 new SubmissionListener(),
                 new StarboardListener(),
                 new InteractionListener(),
-                new HelpChannelListener()
+                new HelpChannelListener(),
+                new ShareKnowledgeVoteListener()
         );
     }
 }
