@@ -49,10 +49,6 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 
     private boolean memberHasHelperRole(SlashCommandEvent event) {
         return event.getMember() != null &&
-                event.getMember().getRoles().contains(getHelperRole(event.getGuild()));
-    }
-
-    private Role getHelperRole(Guild guild) {
-        return Bot.config.get(guild).getRoles().lookupRoleByName("helper", guild);
+                event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getHelp().getHelperRole());
     }
 }
