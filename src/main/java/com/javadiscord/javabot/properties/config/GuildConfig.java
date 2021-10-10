@@ -33,7 +33,6 @@ public class GuildConfig {
 	private StarBoardConfig starBoard;
 	private JamConfig jam;
 	private EmoteConfig emote;
-	private RolesConfig roles;
 
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;
