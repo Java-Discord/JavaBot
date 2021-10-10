@@ -30,6 +30,11 @@ dependencies {
     // H2 Database
     implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 
+    // Retrofit
+    implementation group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.9.0'
+    implementation group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.9.0'
+
+
     // Lombok Annotations
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'

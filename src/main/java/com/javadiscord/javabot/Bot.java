@@ -96,7 +96,8 @@ public class Bot {
                 new StarboardListener(),
                 new InteractionListener(),
                 new HelpChannelListener(),
-                new ShareKnowledgeVoteListener()
+                new ShareKnowledgeVoteListener(),
+                new GistListener()
         );
     }
 }
