@@ -81,7 +81,7 @@ public class SlashCommands extends ListenerAdapter {
                     Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())).setDescription(value).build()).queue();
 
         } catch (Exception e) {
-            event.reply("Oops, this command isnt registered, yet").queue();
+            event.reply("Oops, this command isn't registered, yet").queue();
         }
     }
 
@@ -148,7 +148,7 @@ public class SlashCommands extends ListenerAdapter {
 
         Map<String, Collection<? extends CommandPrivilege>> map = new HashMap<>();
 
-        for(Command command: commands) {
+        for(Command command : commands) {
             List<CommandPrivilege> privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
             if(!privileges.isEmpty()) {
                 map.put(command.getId(), privileges);
@@ -156,7 +156,7 @@ public class SlashCommands extends ListenerAdapter {
         }
 
         guild.updateCommandPrivileges(map)
-                .queue(success -> log.info("Commands updated succuessfully"), error -> log.info("Commands update failed"));
+                .queue(success -> log.info("Commands updated successfully"), error -> log.info("Commands update failed"));
     }
 
     @NotNull
@@ -181,7 +181,7 @@ public class SlashCommands extends ListenerAdapter {
                 return config;
             }
         }
-        log.warn("Could not find CommandConfig for command :{}", name);
+        log.warn("Could not find CommandConfig for command: {}", name);
         return null;
     }
 }

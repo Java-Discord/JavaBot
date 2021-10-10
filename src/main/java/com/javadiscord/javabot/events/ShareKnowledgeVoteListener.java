@@ -49,6 +49,7 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
     }
 
     private void onReactionEvent (GenericGuildMessageReactionEvent event) {
+        if (event.getUser().isBot() || event.getUser().isSystem()) return;
         if (isInvalidEvent(event)) return;
 
         var config = Bot.config.get(event.getGuild());
@@ -81,10 +82,10 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
 
         int eval = upvotes - downvotes;
 
-        if (eval <= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
+        if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
             message.delete().queue();
             message.getAuthor().openPrivateChannel()
-                    .queue(channel -> channel.sendMessage("Your Message in" +
+                    .queue(channel -> channel.sendMessage("Your Message in " +
                             config.getModeration().getShareKnowledgeChannel().getAsMention() +
                             " has been removed due to community feedback").queue());
         }
