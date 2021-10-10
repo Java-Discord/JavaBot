@@ -81,6 +81,7 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
                 .orElse(0);
 
         int eval = upvotes - downvotes;
+        if (eval < 0) eval = eval / -1;
 
         if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
             message.delete().queue();
