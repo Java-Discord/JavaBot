@@ -99,12 +99,14 @@ public class SlashCommands extends ListenerAdapter {
     public void registerSlashCommands(Guild guild) {
         CommandConfig[] commandConfigs = CommandDataConfig.load();
         var commandUpdateAction = this.updateCommands(commandConfigs, guild);
-        this.updateCustomCommands(commandUpdateAction, guild);
+        var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
 
-        // Add privileges to the commands, after the commands have been registered.
-        commandUpdateAction.queue(commands ->
-                this.addCommandPrivileges(commands, commandConfigs, guild));
-        }
+        commandUpdateAction.queue(commands ->{
+            // Add privileges to the non-custom commands, after the commands have been registered.
+            commands.removeIf(cmd->customCommandNames.contains(cmd.getName()));
+            this.addCommandPrivileges(commands, commandConfigs, guild);
+        });
+    }
 
 
     private CommandListUpdateAction updateCommands(CommandConfig[] commandConfigs, Guild guild) {
@@ -128,19 +130,22 @@ public class SlashCommands extends ListenerAdapter {
         return commandUpdateAction;
     }
 
-    private void updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
+    private Set<String> updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
         log.info("{}[{}]{} Registering custom commands",
                 Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
 
+        Set<String> customCommandNames=new HashSet<>();
         for (Document document : collection.find(eq("guild_id", guild.getId()))) {
             JsonObject Root = JsonParser.parseString(document.toJson()).getAsJsonObject();
             String commandName = Root.get("commandname").getAsString();
             String value = Root.get("value").getAsString();
             if (value.length() > 100) value = value.substring(0, 97) + "...";
             commandUpdateAction.addCommands(new CommandData(commandName, value));
+            customCommandNames.add(commandName);
         }
+        return customCommandNames;
     }
 
     private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) {

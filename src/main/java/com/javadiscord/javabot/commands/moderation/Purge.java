@@ -4,7 +4,6 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.TimeUtils;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -23,7 +22,6 @@ import java.util.List;
 /**
  * This command deletes messages from a channel.
  */
-@Slf4j
 public class Purge implements SlashCommandHandler {
 
     @Override

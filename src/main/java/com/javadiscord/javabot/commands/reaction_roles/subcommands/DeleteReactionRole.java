@@ -22,7 +22,7 @@ public class DeleteReactionRole implements SlashCommandHandler {
         String buttonLabel = event.getOption("label").getAsString();
 
         List<Button> buttons = new ArrayList<>(message.getActionRows().get(0).getButtons());
-        for (var ignored : message.getActionRows().get(0).getButtons()) buttons.removeIf(x -> x.getLabel().equals(buttonLabel));
+        buttons.removeIf(button -> button.getLabel().equals(buttonLabel));
         if (!buttons.isEmpty()) {
             message.editMessageComponents(ActionRow.of(buttons)).queue();
         } else {

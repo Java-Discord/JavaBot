@@ -82,10 +82,7 @@ public class ServerLock {
     public static boolean isInPBL (User user) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-
-        try { String doc = collection.find(eq("discord_id", user.getId())).first().toJson();
-        } catch (NullPointerException e) { return false; }
-        return true;
+        return collection.find(eq("discord_id", user.getId())).first() != null;
     }
 
     public static void addToPotentialBotList(User user) {
