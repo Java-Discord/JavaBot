@@ -52,7 +52,7 @@ public class Leaderboard implements SlashCommandHandler {
         if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
 
         Bot.asyncPool.submit(() -> {
-            event.getChannel().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
+            event.getHook().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
         });
 
      return event.deferReply();
@@ -214,9 +214,6 @@ public class Leaderboard implements SlashCommandHandler {
          int nameY = EMPTY_SPACE;
          boolean drawLeft = true;
 
-         event.getHook().sendMessage("Fetching user data... (" + getTopUsers(event.getGuild(), (int) num).size() + ") "
-                 + Bot.config.get(event.getGuild()).getEmote().getLoadingEmote().getAsMention()).queue();
-
          for (var member : getTopUsers(event.getGuild(), (int) num)) {
              drawUserCard(g2d, member, nameY, drawLeft, false);
              drawLeft = !drawLeft;
@@ -230,7 +227,6 @@ public class Leaderboard implements SlashCommandHandler {
          try { ImageIO.write(bufferedImage, "png", outputStream);
          } catch (IOException e) { e.printStackTrace(); }
 
-         event.getHook().editOriginal("Done!").queue();
          return outputStream;
      }
 }
