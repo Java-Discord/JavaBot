@@ -29,16 +29,15 @@ public class Clear implements SlashCommandHandler {
             OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
             var eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setAuthor(name, null, iconUrl)
                 .setDescription(description)
                 .setTimestamp(timestamp);
 
             var config = Bot.config.get(event.getGuild()).getEmote();
             msg.editMessageEmbeds(eb.build()).queue(message1 -> {
-                message1.addReaction(config.getUpvoteReaction()).queue();
-                message1.addReaction(config.getDownvoteReaction()).queue();
+                message1.addReaction(config.getUpvoteEmote()).queue();
+                message1.addReaction(config.getDownvoteEmote()).queue();
             });
             return event.reply("Done!").setEphemeral(true);
     }

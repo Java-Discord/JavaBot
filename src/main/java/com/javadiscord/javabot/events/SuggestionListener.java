@@ -22,7 +22,7 @@ public class SuggestionListener extends ListenerAdapter {
 
             var config = Bot.config.get(event.getGuild());
                 var eb = new EmbedBuilder()
-                        .setColor(Color.decode(config.getSlashCommand().getDefaultColor()))
+                        .setColor(config.getSlashCommand().getDefaultColor())
                         .setImage(null)
                         .setAuthor(event.getAuthor().getAsTag() + " · Suggestion", null, event.getAuthor().getEffectiveAvatarUrl())
                         .setTimestamp(new Date().toInstant())
@@ -33,14 +33,14 @@ public class SuggestionListener extends ListenerAdapter {
                     Message.Attachment attachment = event.getMessage().getAttachments().get(0);
                     try {
                         event.getChannel().sendFile(attachment.retrieveInputStream().get(), "attachment." + attachment.getFileExtension()).setEmbeds(eb).queue(message -> {
-                            message.addReaction(config.getEmote().getUpvoteReaction()).queue();
-                            message.addReaction(config.getEmote().getDownvoteReaction()).queue();
+                            message.addReaction(config.getEmote().getUpvoteEmote()).queue();
+                            message.addReaction(config.getEmote().getDownvoteEmote()).queue();
                         });
                     } catch (Exception e) { event.getChannel().sendMessage(e.getMessage()).queue(); }
                 } else {
                     event.getChannel().sendMessageEmbeds(eb).queue(message -> {
-                        message.addReaction(config.getEmote().getUpvoteReaction()).queue();
-                        message.addReaction(config.getEmote().getDownvoteReaction()).queue();
+                        message.addReaction(config.getEmote().getUpvoteEmote()).queue();
+                        message.addReaction(config.getEmote().getDownvoteEmote()).queue();
                     });
                 }
                 event.getMessage().delete().queue();

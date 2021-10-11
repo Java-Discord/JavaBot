@@ -31,8 +31,7 @@ public class Accept implements SlashCommandHandler {
             OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
             var eb = new EmbedBuilder()
-                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                            .getSuccessColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getSuccessColor())
                 .setAuthor(name, null, iconUrl);
 
             try {
@@ -48,7 +47,7 @@ public class Accept implements SlashCommandHandler {
                 .setFooter("Accepted by " + event.getUser().getAsTag());
 
             msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(Bot.config.get(event.getGuild())
-                    .getEmote().getSuccessReaction()).queue());
+                    .getEmote().getSuccessEmote()).queue());
             return event.reply("Done!").setEphemeral(true);
     }
 }

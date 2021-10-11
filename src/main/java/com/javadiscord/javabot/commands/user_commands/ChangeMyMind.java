@@ -41,8 +41,7 @@ public class ChangeMyMind implements SlashCommandHandler {
                 MessageEmbed e = null;
                 try {
                     e = new EmbedBuilder()
-                            .setColor(Color.decode(
-                                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                             .setImage(hr.getBody().getObject().getString("message"))
                             .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                             .setTimestamp(new Date().toInstant())

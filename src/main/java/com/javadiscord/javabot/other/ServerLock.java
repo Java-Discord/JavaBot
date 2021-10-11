@@ -43,8 +43,7 @@ public class ServerLock {
         String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
 
         EmbedBuilder eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setAuthor(user.getAsTag() + " | Potential Bot! (" + lockCount  + "/5)", null, user.getEffectiveAvatarUrl())
                 .setThumbnail(user.getEffectiveAvatarUrl())
                 .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
@@ -103,8 +102,7 @@ public class ServerLock {
     public static MessageEmbed lockEmbed (Guild guild) {
         return new EmbedBuilder()
         .setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
-        .setColor(Color.decode(
-                Bot.config.get(guild).getSlashCommand().getDefaultColor()))
+        .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
         .setDescription("""
         Unfortunately, this server is currently locked. Please try to join again later.
         Contact ``Dynxsty#7666`` or ``Moon™#3424`` for more info."""

@@ -33,7 +33,7 @@ public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("Submissions")
-				.setColor(Color.decode(config.getJamEmbedColor()));
+				.setColor(config.getJamEmbedColor());
 		for (JamSubmission sub : submissions) {
 			User user = event.getJDA().getUserById(sub.getUserId());
 			String userName = user == null ? "Unknown user" : user.getAsTag();

@@ -54,12 +54,12 @@ public class CreateReactionRole implements SlashCommandHandler {
         } else {
             buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel));
         }
+
         message.editMessageComponents(ActionRow.of(buttons)).queue();
 
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role created")
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .addField("Channel", "<#" + event.getChannel().getId() + ">", true)
                 .addField("Role", role.getAsMention(), true)
                 .addField("MessageID", "```" + message.getId() + "```", false);
@@ -67,6 +67,7 @@ public class CreateReactionRole implements SlashCommandHandler {
         e.addField("Button Label", "```" + buttonLabel + "```", true)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant());
+
         Misc.sendToLog(event.getGuild(), e.build());
         return event.replyEmbeds(e.build()).setEphemeral(true);
     }

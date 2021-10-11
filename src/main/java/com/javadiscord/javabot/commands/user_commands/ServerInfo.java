@@ -29,8 +29,7 @@ public class ServerInfo implements SlashCommandHandler {
         String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
 
         EmbedBuilder eb = new EmbedBuilder()
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .setThumbnail(event.getGuild().getIconUrl())
             .setAuthor(event.getGuild().getName(), null, event.getGuild().getIconUrl())
             .addField("Name", "```" + event.getGuild().getName() + "```", true)

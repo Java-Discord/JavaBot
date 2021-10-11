@@ -34,8 +34,7 @@ public class Uptime implements SlashCommandHandler {
     public ReplyAction handle(SlashCommandEvent event) {
         String botImage = event.getJDA().getSelfUser().getAvatarUrl();
         var e = new EmbedBuilder()
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .setAuthor(getUptime(), null, botImage);
 
         return event.replyEmbeds(e.build());

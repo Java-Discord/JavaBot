@@ -29,8 +29,7 @@ public class Kick implements SlashCommandHandler {
 
         var eb = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Kick", null, member.getUser().getEffectiveAvatarUrl())
-            .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                        .getErrorColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
             .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
             .addField("Moderator", "```" + moderatorTag + "```", true)
             .addField("ID", "```" + member.getId() + "```", false)

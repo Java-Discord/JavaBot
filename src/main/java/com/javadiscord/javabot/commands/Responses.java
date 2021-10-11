@@ -63,12 +63,12 @@ public static WebhookMessageAction<Message> warning(InteractionHook hook, String
 	 * @param event The event to reply to.
 	 * @param title The title of the reply message.
 	 * @param message The message to send.
-	 * @param colorProperty The color of the embed.
+	 * @param color The color of the embed.
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The reply action.
 	 */
-	private static ReplyAction reply(SlashCommandEvent event, @Nullable String title, String message, String colorProperty, boolean ephemeral) {
-		return event.replyEmbeds(buildEmbed(title, message, colorProperty)).setEphemeral(ephemeral);
+	private static ReplyAction reply(SlashCommandEvent event, @Nullable String title, String message, Color color, boolean ephemeral) {
+		return event.replyEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 
 	/**
@@ -76,18 +76,18 @@ public static WebhookMessageAction<Message> warning(InteractionHook hook, String
 	 * @param hook The interaction hook to send a message to.
 	 * @param title The title of the message.
 	 * @param message The message to send.
-	 * @param colorProperty The color of the embed.
+	 * @param color The color of the embed.
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The webhook message action.
 	 */
-	private static WebhookMessageAction<Message> reply(InteractionHook hook, @Nullable String title, String message, String colorProperty, boolean ephemeral) {
-		return hook.sendMessageEmbeds(buildEmbed(title, message, colorProperty)).setEphemeral(ephemeral);
+	private static WebhookMessageAction<Message> reply(InteractionHook hook, @Nullable String title, String message, Color color, boolean ephemeral) {
+		return hook.sendMessageEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 
-	private static MessageEmbed buildEmbed(@Nullable String title, String message, String colorProperty) {
+	private static MessageEmbed buildEmbed(@Nullable String title, String message, Color color) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTimestamp(Instant.now())
-				.setColor(Color.decode(colorProperty));
+				.setColor(color);
 		if (title != null && !title.isBlank()) {
 			embedBuilder.setTitle(title);
 		}

@@ -33,8 +33,7 @@ public class DeleteReactionRole implements SlashCommandHandler {
                 .setTitle("Reaction Role removed")
                 .addField("MessageID", "```" + message.getId() + "```", false)
                 .addField("Button Label", "```" + buttonLabel + "```", true)
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();

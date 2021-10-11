@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.awt.*;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class JamConfig extends GuildConfigItem {
@@ -15,7 +17,9 @@ public class JamConfig extends GuildConfigItem {
 	private long pingRoleId;
 	private long adminRoleId;
 
-	private String jamEmbedColor = "#fc5a03";
+	private String jamEmbedColorHex = "#fc5a03";
+
+	public Color getJamEmbedColor() { return Color.decode(this.jamEmbedColorHex); }
 
 	public TextChannel getAnnouncementChannel() {
 		return this.getGuild().getTextChannelById(this.announcementChannelId);

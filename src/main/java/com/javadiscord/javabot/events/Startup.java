@@ -74,10 +74,8 @@ public class Startup extends ListenerAdapter {
 
         log.info("Starting Guild initialization\n");
         for (var guild : event.getJDA().getGuilds()) {
-
             if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
 
-            new Database().deleteOpenSubmissions(guild);
             new StarboardListener().updateAllSBM(guild);
             Bot.slashCommands.registerSlashCommands(guild);
 

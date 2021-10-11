@@ -19,8 +19,7 @@ public class Avatar implements SlashCommandHandler {
         User user = option == null ? event.getUser() : option.getAsUser();
 
         EmbedBuilder eb = new EmbedBuilder()
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .setAuthor(user.getAsTag() + " | Avatar")
             .setImage(user.getEffectiveAvatarUrl() + "?size=4096");
         return event.replyEmbeds(eb.build());

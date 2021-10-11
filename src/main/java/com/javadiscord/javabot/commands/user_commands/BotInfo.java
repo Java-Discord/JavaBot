@@ -20,8 +20,7 @@ public class BotInfo implements SlashCommandHandler {
         var bot = event.getJDA().getSelfUser();
 
         var e = new EmbedBuilder()
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .setThumbnail(bot.getEffectiveAvatarUrl())
             .setAuthor(bot.getName() + " | Info", null, bot.getEffectiveAvatarUrl())
             .addField("OS", "```" + System.getProperty("os.name") + "```", true)

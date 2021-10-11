@@ -24,6 +24,11 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class Bot {
     /**
+     * A reference to the JDA instance
+     */
+    public static JDA jda;
+
+    /**
      * The set of configuration properties that this bot uses.
      */
     public static BotConfig config;
@@ -68,7 +73,7 @@ public class Bot {
         dataSource = new H2DataSource();
         dataSource.initDatabase();
         asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
-        JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
+        jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)

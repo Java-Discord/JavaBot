@@ -23,8 +23,7 @@ public class Correct implements SlashCommandHandler {
 
         var eb = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Color.decode(Bot.config.get(guild).getSlashCommand()
-                        .getSuccessColor()))
+                .setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
                 .addField("Total QOTW-Points", "```" + qotwPoints + "```", true)
                 .addField("Rank", "```#" + new Leaderboard().getQOTWRank(guild, member.getId()) + "```", true)
                 .setFooter("ID: " + member.getId())
@@ -37,8 +36,7 @@ public class Correct implements SlashCommandHandler {
             member.getUser().openPrivateChannel().complete()
                     .sendMessageEmbeds(new EmbedBuilder()
                             .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
-                            .setColor(Color.decode(Bot.config.get(guild).getSlashCommand()
-                                    .getSuccessColor()))
+                            .setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
                             .setDescription("Your answer was correct! " + Bot.config.get(guild).getEmote().getSuccessEmote() +
                                     "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
                             .setTimestamp(new Date().toInstant())
