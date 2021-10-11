@@ -36,8 +36,7 @@ public class Database {
     private static final Map<String, String[]> DB_COLS = new HashMap<>();
     static {
         DB_COLS.put("userdata", new String[] {"potential_bot_list", "users", "warns"});
-        DB_COLS.put("other", new String[] {"config", "customcommands", "expert_questions",
-                "open_submissions", "reactionroles", "starboard_messages", "submission_messages"});
+        DB_COLS.put("other", new String[] {"config", "customcommands", "expert_questions", "starboard_messages"});
     }
 
     List<String> getDatabases(MongoClient mongoClient) {

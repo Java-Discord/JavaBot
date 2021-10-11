@@ -365,10 +365,6 @@
            type: STRING}
         - {description: 'Label, the button should use', name: label, required: true,
            type: STRING}
-- description: Lists all Reaction Roles
-  name: reactionroles
-  options: []
-  handler: com.javadiscord.javabot.commands.reaction_roles.subcommands.ListReactionRoles
 - description: Generates the question of the week leaderboard
   name: leaderboard
   handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard

@@ -23,11 +23,8 @@ public class DeleteReactionRole implements SlashCommandHandler {
 
         List<Button> buttons = new ArrayList<>(message.getActionRows().get(0).getButtons());
         for (var ignored : message.getActionRows().get(0).getButtons()) buttons.removeIf(x -> x.getLabel().equals(buttonLabel));
-        if (!buttons.isEmpty()) {
-            message.editMessageComponents(ActionRow.of(buttons)).queue();
-        } else {
-            message.editMessageComponents().queue();
-        }
+        if (!buttons.isEmpty()) { message.editMessageComponents(ActionRow.of(buttons)).queue();
+        } else { message.editMessageComponents().queue(); }
 
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role removed")

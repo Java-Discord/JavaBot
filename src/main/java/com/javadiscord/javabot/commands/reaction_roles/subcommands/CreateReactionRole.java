@@ -49,11 +49,9 @@ public class CreateReactionRole implements SlashCommandHandler {
         String emote = event.getOption("emote") == null ? null : event.getOption("emote").getAsString();
 
         List<Button> buttons = new ArrayList<>(message.getButtons());
-        if (emote != null) {
-            buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel, Emoji.fromMarkdown(emote)));
-        } else {
-            buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel));
-        }
+        if (emote != null) { buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel, Emoji.fromMarkdown(emote)));}
+        else { buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel)); }
+
         message.editMessageComponents(ActionRow.of(buttons)).queue();
 
         var e = new EmbedBuilder()
@@ -66,6 +64,7 @@ public class CreateReactionRole implements SlashCommandHandler {
         e.addField("Button Label", "```" + buttonLabel + "```", true)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant());
+
         Misc.sendToLog(event.getGuild(), e.build());
         return event.replyEmbeds(e.build()).setEphemeral(true);
     }
