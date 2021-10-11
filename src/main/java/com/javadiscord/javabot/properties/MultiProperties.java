@@ -2,15 +2,8 @@ package com.javadiscord.javabot.properties;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -48,25 +41,4 @@ public class MultiProperties extends Properties {
 		}
 	}
 
-	/**
-	 * Gets a path that leads to a classpath resource.
-	 * @param name The name of the resource.
-	 * @return An optional that will contain a path to the resource, if it was
-	 * found.
-	 */
-	public static Optional<Path> getClasspathResource(String name) {
-		URL url = Thread.currentThread().getContextClassLoader().getResource(name);
-		if (url == null) return Optional.empty();
-		try {
-			String[] parts = url.toString().split("!");
-			if (parts.length == 2) {
-				FileSystem fs = FileSystems.newFileSystem(URI.create(parts[0]), Map.of());
-				return Optional.of(fs.getPath(parts[1]));
-			}
-			return Optional.of(Path.of(url.toURI()));
-		} catch (URISyntaxException | IOException e) {
-			e.printStackTrace();
-			return Optional.empty();
-		}
-	}
 }

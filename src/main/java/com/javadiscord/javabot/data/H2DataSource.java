@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.stream.Stream;
 
 /**
  * Data source that is used to obtain connections to the database.
@@ -58,7 +59,8 @@ public class H2DataSource {
 	private boolean databaseFileExists() throws IOException {
 		String fileName = Bot.config.getSystems().getH2DatabaseFileName();
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + fileName + ".*");
-		return Files.walk(Path.of(""))
-				.anyMatch(matcher::matches);
+		try(Stream<Path> stream = Files.walk(Path.of(""))){
+			return stream.anyMatch(matcher::matches);
+		}
 	}
 }
