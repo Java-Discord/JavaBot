@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = 16
 targetCompatibility = 16
 
-group 'com.dynxsty.bot'
+group 'com.javadiscord'
 
 repositories {
     mavenCentral()
