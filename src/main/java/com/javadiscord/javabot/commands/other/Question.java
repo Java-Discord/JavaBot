@@ -28,12 +28,12 @@ public class Question implements SlashCommandHandler {
         MongoCollection<Document> collection = database.getCollection("expert_questions");
 
         long l = collection.countDocuments();
-        if (!(num > l) && num > 0) {
+        if (num <= l && num > 0) {
             int i = num;
             StringBuilder sb = new StringBuilder();
             while (i > 0) {
-                String JSON = collection.aggregate(List.of(Aggregates.sample(1))).first().toJson();
-                JsonObject root = JsonParser.parseString(JSON).getAsJsonObject();
+                String json = collection.aggregate(List.of(Aggregates.sample(1))).first().toJson();
+                JsonObject root = JsonParser.parseString(json).getAsJsonObject();
                 String text = root.get("text").getAsString();
                 if (!(sb.toString().contains(text))) {
 

@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.bson.Document;
 
 import java.awt.*;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Date;
 
@@ -48,7 +49,7 @@ public class ServerLock {
                 .setThumbnail(user.getEffectiveAvatarUrl())
                 .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
                 .setFooter("ID: " + user.getId())
-                .setTimestamp(new Date().toInstant());
+                .setTimestamp(Instant.now());
         Misc.sendToLog(event.getGuild(), eb.build());
     }
 

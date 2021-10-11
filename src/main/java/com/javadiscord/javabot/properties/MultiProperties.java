@@ -13,10 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * This class is an extension of the standard Java properties, and supports
  * loading properties from multiple sources.
  */
+@Slf4j
 public class MultiProperties extends Properties {
 	/**
 	 * Initializes the properties from the list of paths, where each path should
@@ -42,7 +45,7 @@ public class MultiProperties extends Properties {
 			try (InputStream is = Files.newInputStream(path)) {
 				props.load(is);
 			} catch (IOException e) {
-				System.err.println("Could not load properties from path: " + path + ", Exception: " + e.getMessage());
+				log.error("Could not load properties from path: " + path,e);
 			}
 			this.putAll(props);
 		}

@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class CreateReactionRole implements SlashCommandHandler {
@@ -66,8 +65,7 @@ public class CreateReactionRole implements SlashCommandHandler {
         if (emote != null) e.addField("Emote", "```" + emote + "```", true);
         e.addField("Button Label", "```" + buttonLabel + "```", true)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant());
-
+                .setTimestamp(Instant.now());
         Misc.sendToLog(event.getGuild(), e.build());
         return event.replyEmbeds(e.build()).setEphemeral(true);
     }

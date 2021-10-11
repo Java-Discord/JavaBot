@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,7 +81,7 @@ public class AutoMod extends ListenerAdapter {
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + "Automod: Spam" + "```", false)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
         event.getChannel().sendMessageEmbeds(eb).queue();
@@ -112,7 +113,7 @@ public class AutoMod extends ListenerAdapter {
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
         event.getChannel().sendMessageEmbeds(eb).queue();

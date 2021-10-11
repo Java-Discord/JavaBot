@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class Unban implements SlashCommandHandler {
     @Override
@@ -28,7 +28,7 @@ public class Unban implements SlashCommandHandler {
                 .addField("ID", "```" + id + "```", true)
                 .addField("Moderator", "```" + author.getAsTag() + "```", true)
                 .setFooter("ID: " + id)
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
 

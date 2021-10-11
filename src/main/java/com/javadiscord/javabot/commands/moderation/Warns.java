@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -56,7 +56,7 @@ public class Warns implements SlashCommandHandler {
                 + "\n\n" + sb + "```")
             .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
             .setFooter("ID: " + member.getId())
-            .setTimestamp(new Date().toInstant())
+            .setTimestamp(Instant.now())
             .build();
 
         return event.replyEmbeds(e);
