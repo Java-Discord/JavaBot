@@ -59,8 +59,7 @@ public class ListReactionRoles implements SlashCommandHandler {
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role List")
                 .setDescription(description)
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setTimestamp(new Date().toInstant())
                 .build();

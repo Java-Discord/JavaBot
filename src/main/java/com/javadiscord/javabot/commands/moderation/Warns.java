@@ -54,8 +54,7 @@ public class Warns implements SlashCommandHandler {
             .setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
             .setDescription("```" + member.getUser().getAsTag() + " has been warned " + warnCount(member) + " times so far."
                 + "\n\n" + sb + "```")
-            .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                        .getWarningColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
             .setFooter("ID: " + member.getId())
             .setTimestamp(new Date().toInstant())
             .build();

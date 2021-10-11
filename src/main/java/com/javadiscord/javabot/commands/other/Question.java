@@ -42,8 +42,7 @@ public class Question implements SlashCommandHandler {
                 }
             }
             var e = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setAuthor("Questions (" + num + ")")
                 .setDescription(sb.toString())
                 .build();

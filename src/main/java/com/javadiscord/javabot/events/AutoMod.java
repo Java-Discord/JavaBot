@@ -73,8 +73,7 @@ public class AutoMod extends ListenerAdapter {
         if (member.getRoles().contains(muteRole)) return;
 
         var eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
                 .setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
@@ -106,8 +105,7 @@ public class AutoMod extends ListenerAdapter {
         int warnPoints = new Warn().getWarnCount(member);
 
         MessageEmbed eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
                 .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)

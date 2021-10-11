@@ -58,8 +58,7 @@ public class CreateReactionRole implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
                 .setTitle("Reaction Role created")
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .addField("Channel", "<#" + event.getChannel().getId() + ">", true)
                 .addField("Role", role.getAsMention(), true)
                 .addField("MessageID", "```" + message.getId() + "```", false);

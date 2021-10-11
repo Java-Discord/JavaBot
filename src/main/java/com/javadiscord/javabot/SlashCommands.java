@@ -77,8 +77,9 @@ public class SlashCommands extends ListenerAdapter {
                 .replace("{!servername}", event.getGuild().getName())
                 .replace("{!serverid}", event.getGuild().getId());
 
-            event.replyEmbeds(new EmbedBuilder().setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())).setDescription(value).build()).queue();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+                    .setDescription(value).build()).queue();
 
         } catch (Exception e) {
             event.reply("Oops, this command isn't registered, yet").queue();

@@ -22,7 +22,7 @@ public class SuggestionListener extends ListenerAdapter {
 
             var config = Bot.config.get(event.getGuild());
                 var eb = new EmbedBuilder()
-                        .setColor(Color.decode(config.getSlashCommand().getDefaultColor()))
+                        .setColor(config.getSlashCommand().getDefaultColor())
                         .setImage(null)
                         .setAuthor(event.getAuthor().getAsTag() + " · Suggestion", null, event.getAuthor().getEffectiveAvatarUrl())
                         .setTimestamp(new Date().toInstant())

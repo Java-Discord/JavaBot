@@ -31,8 +31,7 @@ public class Accept implements SlashCommandHandler {
             OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
             var eb = new EmbedBuilder()
-                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                            .getSuccessColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getSuccessColor())
                 .setAuthor(name, null, iconUrl);
 
             try {

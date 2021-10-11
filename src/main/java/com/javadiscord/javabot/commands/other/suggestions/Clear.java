@@ -29,8 +29,7 @@ public class Clear implements SlashCommandHandler {
             OffsetDateTime timestamp = msg.getEmbeds().get(0).getTimestamp();
 
             var eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setAuthor(name, null, iconUrl)
                 .setDescription(description)
                 .setTimestamp(timestamp);

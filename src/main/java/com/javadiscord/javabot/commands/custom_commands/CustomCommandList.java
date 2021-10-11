@@ -45,8 +45,7 @@ public class CustomCommandList implements SlashCommandHandler {
                 .setTitle("Custom Slash Command List")
                 .setDescription(description)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setTimestamp(new Date().toInstant())
                 .build();
 

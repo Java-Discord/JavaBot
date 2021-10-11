@@ -51,8 +51,7 @@ public class Profile implements SlashCommandHandler {
     }
 
     Color getColor (Member member) {
-        if (member.getColor() == null) return Color.decode(
-                Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor());
+        if (member.getColor() == null) return Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor();
         else return member.getColor();
     }
 

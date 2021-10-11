@@ -24,8 +24,7 @@ public class Unban implements SlashCommandHandler {
             event.getGuild().unban(id).complete();
             var e = new EmbedBuilder()
                 .setAuthor("Unban")
-                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                            .getErrorColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
                 .addField("ID", "```" + id + "```", true)
                 .addField("Moderator", "```" + author.getAsTag() + "```", true)
                 .setFooter("ID: " + id)
