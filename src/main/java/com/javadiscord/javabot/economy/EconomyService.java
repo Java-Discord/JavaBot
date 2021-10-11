@@ -6,8 +6,6 @@ import com.javadiscord.javabot.economy.dao.TransactionRepository;
 import com.javadiscord.javabot.economy.model.Account;
 import com.javadiscord.javabot.economy.model.Transaction;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,7 +14,6 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class EconomyService {
-	private static final Logger log = LoggerFactory.getLogger(EconomyService.class);
 	private final H2DataSource dataSource;
 
 	public Account getOrCreateAccount(long userId) throws SQLException {
