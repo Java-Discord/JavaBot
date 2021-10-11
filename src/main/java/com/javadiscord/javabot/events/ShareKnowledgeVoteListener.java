@@ -25,8 +25,8 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
         var config = Bot.config.get(event.getGuild());
 
         // add upvote and downvote option
-        event.getMessage().addReaction(config.getEmote().getUpvoteReaction()).queue();
-        event.getMessage().addReaction(config.getEmote().getDownvoteReaction()).queue();
+        event.getMessage().addReaction(config.getEmote().getUpvoteEmote()).queue();
+        event.getMessage().addReaction(config.getEmote().getDownvoteEmote()).queue();
     }
 
     @Override
@@ -56,8 +56,8 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
 
         String reactionID = event.getReaction().getReactionEmote().getAsReactionCode();
 
-        String upvoteID = config.getEmote().getUpvoteReaction();
-        String downvoteID = config.getEmote().getDownvoteReaction();
+        String upvoteID = config.getEmote().getUpvoteEmote().getAsMention();
+        String downvoteID = config.getEmote().getDownvoteEmote().getAsMention();
 
         if (!(reactionID.equals(upvoteID) || reactionID.equals(downvoteID))) return;
 

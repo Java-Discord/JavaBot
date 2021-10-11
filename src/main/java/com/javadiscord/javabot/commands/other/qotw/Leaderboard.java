@@ -215,7 +215,7 @@ public class Leaderboard implements SlashCommandHandler {
          boolean drawLeft = true;
 
          event.getHook().sendMessage("Fetching user data... (" + getTopUsers(event.getGuild(), (int) num).size() + ") "
-                 + Bot.config.get(event.getGuild()).getEmote().getLoadingEmote()).queue();
+                 + Bot.config.get(event.getGuild()).getEmote().getLoadingEmote().getAsMention()).queue();
 
          for (var member : getTopUsers(event.getGuild(), (int) num)) {
              drawUserCard(g2d, member, nameY, drawLeft, false);

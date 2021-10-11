@@ -47,7 +47,7 @@ public class Accept implements SlashCommandHandler {
                 .setFooter("Accepted by " + event.getUser().getAsTag());
 
             msg.editMessageEmbeds(eb.build()).queue(message1 -> message1.addReaction(Bot.config.get(event.getGuild())
-                    .getEmote().getSuccessReaction()).queue());
+                    .getEmote().getSuccessEmote()).queue());
             return event.reply("Done!").setEphemeral(true);
     }
 }

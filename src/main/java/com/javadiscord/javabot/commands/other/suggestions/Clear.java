@@ -36,8 +36,8 @@ public class Clear implements SlashCommandHandler {
 
             var config = Bot.config.get(event.getGuild()).getEmote();
             msg.editMessageEmbeds(eb.build()).queue(message1 -> {
-                message1.addReaction(config.getUpvoteReaction()).queue();
-                message1.addReaction(config.getDownvoteReaction()).queue();
+                message1.addReaction(config.getUpvoteEmote()).queue();
+                message1.addReaction(config.getDownvoteEmote()).queue();
             });
             return event.reply("Done!").setEphemeral(true);
     }
