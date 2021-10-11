@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -30,8 +30,8 @@ public class CustomCommandList implements SlashCommandHandler {
 
         while (it.hasNext()) {
 
-            JsonObject Root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
-            String commandName = Root.get("commandname").getAsString();
+            JsonObject root = JsonParser.parseString(it.next().toJson()).getAsJsonObject();
+            String commandName = root.get("commandname").getAsString();
 
             sb.append("/").append(commandName).append("\n");
         }
@@ -46,7 +46,7 @@ public class CustomCommandList implements SlashCommandHandler {
                 .setDescription(description)
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
                 .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
         return event.replyEmbeds(e);

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.Date;
 
 public class SuggestionListener extends ListenerAdapter {
@@ -25,7 +26,7 @@ public class SuggestionListener extends ListenerAdapter {
                         .setColor(config.getSlashCommand().getDefaultColor())
                         .setImage(null)
                         .setAuthor(event.getAuthor().getAsTag() + " · Suggestion", null, event.getAuthor().getEffectiveAvatarUrl())
-                        .setTimestamp(new Date().toInstant())
+                        .setTimestamp(Instant.now())
                         .setDescription(event.getMessage().getContentRaw())
                         .build();
 

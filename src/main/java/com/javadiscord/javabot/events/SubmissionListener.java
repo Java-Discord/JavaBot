@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
@@ -47,7 +48,7 @@ public class SubmissionListener extends ListenerAdapter {
                 .setAuthor("Submission by " + event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
                 .setDescription(event.getMessage().getEmbeds().get(0).getDescription())
                 .setFooter("ID: " + event.getUser().getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
         config.getQotw().getSubmissionChannel().sendMessageEmbeds(e).setActionRows(
@@ -145,7 +146,7 @@ public class SubmissionListener extends ListenerAdapter {
                 .setAuthor("Question of the Week | Submission", null, event.getAuthor().getEffectiveAvatarUrl())
                 .setDescription(content)
                 .setFooter("NOTE: spamming submissions may result in a warn")
-                .setTimestamp(new Date().toInstant());
+                .setTimestamp(Instant.now());
 
         event.getChannel().sendMessageEmbeds(e.build()).setActionRows(
                 ActionRow.of(

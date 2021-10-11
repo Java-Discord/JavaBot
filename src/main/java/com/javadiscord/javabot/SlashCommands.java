@@ -71,8 +71,8 @@ public class SlashCommands extends ListenerAdapter {
 
             Document it = collection.find(criteria).first();
 
-            JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
-            String value = Root.get("value").getAsString()
+            JsonObject root = JsonParser.parseString(it.toJson()).getAsJsonObject();
+            String value = root.get("value").getAsString()
                 .replace("{!membercount}", String.valueOf(event.getGuild().getMemberCount()))
                 .replace("{!servername}", event.getGuild().getName())
                 .replace("{!serverid}", event.getGuild().getId());
@@ -138,9 +138,9 @@ public class SlashCommands extends ListenerAdapter {
 
         Set<String> customCommandNames=new HashSet<>();
         for (Document document : collection.find(eq("guild_id", guild.getId()))) {
-            JsonObject Root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String commandName = Root.get("commandname").getAsString();
-            String value = Root.get("value").getAsString();
+            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+            String commandName = root.get("commandname").getAsString();
+            String value = root.get("value").getAsString();
             if (value.length() > 100) value = value.substring(0, 97) + "...";
             commandUpdateAction.addCommands(new CommandData(commandName, value));
             customCommandNames.add(commandName);

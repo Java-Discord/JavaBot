@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class ServerInfo implements SlashCommandHandler {
 
@@ -23,7 +23,7 @@ public class ServerInfo implements SlashCommandHandler {
         long catCount = event.getGuild().getCategories().size();
         long textChannelCount = event.getGuild().getTextChannels().size();
         long voiceChannelCount = event.getGuild().getVoiceChannels().size();
-        long channelCount = (long) event.getGuild().getChannels().size() - catCount;
+        long channelCount = event.getGuild().getChannels().size() - catCount;
 
         String guildDate = event.getGuild().getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
         String createdDiff = " (" + new TimeUtils().formatDurationToNow(event.getGuild().getTimeCreated()) + ")";
@@ -42,7 +42,7 @@ public class ServerInfo implements SlashCommandHandler {
 
             .addField("Member Count", "```" + event.getGuild().getMemberCount() + " members```", false)
             .addField("Server created on", "```" + guildDate + createdDiff + "```", false)
-            .setTimestamp(new Date().toInstant());
+            .setTimestamp(Instant.now());
 
         if (event.getGuild().getId().equals("648956210850299986")) {
             return event.replyEmbeds(eb.build()).addActionRow(Button.link(Constants.WEBSITE_LINK, "Website"));

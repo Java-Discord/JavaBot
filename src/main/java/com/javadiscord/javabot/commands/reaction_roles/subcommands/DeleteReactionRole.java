@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DeleteReactionRole implements SlashCommandHandler {
@@ -35,7 +35,7 @@ public class DeleteReactionRole implements SlashCommandHandler {
                 .addField("Button Label", "```" + buttonLabel + "```", true)
                 .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
         Misc.sendToLog(event.getGuild(), e);
         return event.replyEmbeds(e).setEphemeral(true);
