@@ -15,7 +15,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Transitions the jam to completion, that is, it does the following things:
@@ -52,22 +51,23 @@ public class ToCompletionTransition implements JamPhaseTransition {
 		return voteCounts.entrySet().stream()
 				.filter(entry -> entry.getValue() == highestVoteCount)
 				.map(Map.Entry::getKey)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	public Map<JamSubmission, Integer> recordAndCountVotes(Map<JamSubmission, List<Long>> submissionVotes, Connection con, JamMessageRepository messageRepository) throws SQLException {
-		PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)");
-		Map<JamSubmission, Integer> voteCounts = new HashMap<>();
-		for (var entry : submissionVotes.entrySet()) {
-			submissionVoteStmt.setLong(1, entry.getKey().getId());
-			for (var userId : entry.getValue()) {
-				submissionVoteStmt.setLong(2, userId);
-				submissionVoteStmt.executeUpdate();
+		try(PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)")){
+			Map<JamSubmission, Integer> voteCounts = new HashMap<>();
+			for (var entry : submissionVotes.entrySet()) {
+				submissionVoteStmt.setLong(1, entry.getKey().getId());
+				for (var userId : entry.getValue()) {
+					submissionVoteStmt.setLong(2, userId);
+					submissionVoteStmt.executeUpdate();
+				}
+				voteCounts.put(entry.getKey(), entry.getValue().size());
+				messageRepository.removeMessageId(entry.getKey().getJam(), "submission-" + entry.getKey().getId());
 			}
-			voteCounts.put(entry.getKey(), entry.getValue().size());
-			messageRepository.removeMessageId(entry.getKey().getJam(), "submission-" + entry.getKey().getId());
+			return voteCounts;
 		}
-		return voteCounts;
 	}
 
 	public Map<JamSubmission, Long> getSubmissionMessageIds(List<JamSubmission> submissions, JamMessageRepository messageRepository) throws SQLException {

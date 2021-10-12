@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class Correct implements SlashCommandHandler {
 
@@ -27,7 +27,7 @@ public class Correct implements SlashCommandHandler {
                 .addField("Total QOTW-Points", "```" + qotwPoints + "```", true)
                 .addField("Rank", "```#" + new Leaderboard().getQOTWRank(guild, member.getId()) + "```", true)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
         Misc.sendToLog(guild, eb);
 
@@ -39,7 +39,7 @@ public class Correct implements SlashCommandHandler {
                             .setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
                             .setDescription("Your answer was correct! " + Bot.config.get(guild).getEmote().getSuccessEmote() +
                                     "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
-                            .setTimestamp(new Date().toInstant())
+                            .setTimestamp(Instant.now())
                             .build())
                     .queue();
         }

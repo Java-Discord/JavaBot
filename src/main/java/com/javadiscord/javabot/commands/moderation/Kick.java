@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public class Kick implements SlashCommandHandler {
@@ -35,7 +35,7 @@ public class Kick implements SlashCommandHandler {
             .addField("ID", "```" + member.getId() + "```", false)
             .addField("Reason", "```" + reason + "```", false)
             .setFooter("ID: " + member.getId())
-            .setTimestamp(new Date().toInstant())
+            .setTimestamp(Instant.now())
             .build();
 
         try {

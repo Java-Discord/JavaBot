@@ -12,8 +12,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class Report implements SlashCommandHandler {
 
@@ -36,7 +36,7 @@ public class Report implements SlashCommandHandler {
             .addField("Reported on", "```" + LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER) + "```", true)
             .addField("Reason", "```" + reason + "```", false)
             .setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
-            .setTimestamp(new Date().toInstant());
+            .setTimestamp(Instant.now());
 
         reportChannel.sendMessage("@here").setEmbeds(e.build()).queue();
 

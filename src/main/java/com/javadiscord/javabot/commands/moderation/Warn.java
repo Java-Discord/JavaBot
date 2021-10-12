@@ -17,8 +17,8 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.awt.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -47,7 +47,7 @@ public class Warn implements SlashCommandHandler {
         while (it.hasNext()) { warns.deleteOne(it.next()); }
     }
 
-    public void warn (Member member, Guild guild, String reason) throws Exception {
+    public void warn (Member member, Guild guild, String reason) {
 
         int warnPoints = getWarnCount(member);
 
@@ -60,7 +60,7 @@ public class Warn implements SlashCommandHandler {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> warns = database.getCollection("warns");
 
-        return (int) warns.count(eq("user_id", member.getId())); // TODO: Replace with countDocuments
+        return (int) warns.countDocuments(eq("user_id", member.getId()));
     }
 
     @Override
@@ -78,9 +78,8 @@ public class Warn implements SlashCommandHandler {
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
-
 
         Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();

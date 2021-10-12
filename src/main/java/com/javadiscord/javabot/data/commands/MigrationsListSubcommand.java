@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
 
 /**
  * This subcommand shows a list of all available migrations, and a short preview
@@ -22,7 +21,7 @@ public class MigrationsListSubcommand implements SlashCommandHandler {
 		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("List of Runnable Migrations");
-			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).collect(Collectors.toList());
+			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
 			if (paths.isEmpty()) {
 				embedBuilder.setDescription("There are no migrations to run. Please add them to the `/migrations/` resource directory.");
 				return event.replyEmbeds(embedBuilder.build());

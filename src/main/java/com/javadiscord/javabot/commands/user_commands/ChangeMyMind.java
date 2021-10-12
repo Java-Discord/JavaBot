@@ -18,7 +18,7 @@ import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Objects;
 
 public class ChangeMyMind implements SlashCommandHandler {
@@ -44,13 +44,12 @@ public class ChangeMyMind implements SlashCommandHandler {
                             .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                             .setImage(hr.getBody().getObject().getString("message"))
                             .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                            .setTimestamp(new Date().toInstant())
+                            .setTimestamp(Instant.now())
                             .build();
+                    hook.sendMessageEmbeds(e).queue();
                 } catch (JSONException jsonException) {
                     jsonException.printStackTrace();
                 }
-
-                hook.sendMessageEmbeds(e).queue();
             }
 
             @Override

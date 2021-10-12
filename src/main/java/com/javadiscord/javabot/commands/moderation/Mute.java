@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class Mute implements SlashCommandHandler {
 
@@ -38,7 +38,7 @@ public class Mute implements SlashCommandHandler {
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
 

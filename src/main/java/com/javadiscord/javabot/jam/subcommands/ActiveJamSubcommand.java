@@ -41,7 +41,7 @@ public abstract class ActiveJamSubcommand implements SlashCommandHandler {
 				return reply;
 			} catch (Throwable e) {
 				con.rollback();
-				log.warn("Exception thrown while handling Jam command: " + e.getMessage());
+				log.warn("Exception thrown while handling Jam command: {}", e.getMessage());
 				return Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```");
 			}
 		} catch (SQLException e) {
