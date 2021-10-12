@@ -32,9 +32,11 @@ import java.util.regex.Pattern;
 public class GistListener extends ListenerAdapter {
 
 	private static final Logger log = LoggerFactory.getLogger(GistListener.class);
-	private static final String BASIC_GIST_PATTERN_STRING = ".*https://gist\\.github\\.com/.+?(?=/)/(.+?(?=#|\\s))";
+	private static final String BASIC_GIST_PATTERN_STRING = "https://gist\\.github\\.com/.+/([a-f0-9]{32})";
 	private static final Pattern BASIC_GIST_PATTERN = Pattern.compile(BASIC_GIST_PATTERN_STRING);
-	private static final int GIST_DELAY = 30;
+	private static final String SEEK_LEFT = "U+23EA";
+	private static final String SEEK_RIGHT = "U+23E9";
+	private static final int GIST_DELAY = 15;
 	private static final int SIZE_LIMIT = 1900;
 	private static final List<String> VALID_EMOTES = List.of("⏪", "⏩");
 
@@ -58,6 +60,10 @@ public class GistListener extends ListenerAdapter {
 				.forEach(entry -> handleExpiredGist(event, entry));
 	}
 
+	private boolean isOverMaxTime(Map.Entry<String, GistState> gist) {
+		return Duration.between(gist.getValue().getCreated(), Instant.now()).toMinutes() >= GIST_DELAY;
+	}
+
 	private void handleExpiredGist(ReadyEvent event, Map.Entry<String, GistState> entry) {
 		clearReactionsFromExpiredGist(event, entry);
 		messageMap.entrySet().remove(entry);
@@ -66,12 +72,11 @@ public class GistListener extends ListenerAdapter {
 	private void clearReactionsFromExpiredGist(ReadyEvent event, Map.Entry<String, GistState> entry) {
 		TextChannel channel = event.getJDA().getTextChannelById(entry.getValue().getChannelId());
 		if (channel != null) {
-			channel.retrieveMessageById(entry.getKey()).queue(msg -> msg.clearReactions().queue());
+			channel.retrieveMessageById(entry.getKey()).queue(msg -> {
+				msg.clearReactions(SEEK_LEFT).queue();
+				msg.clearReactions(SEEK_RIGHT).queue();
+			});
 		}
-	}
-
-	private boolean isOverMaxTime(Map.Entry<String, GistState> gist) {
-		return Duration.between(gist.getValue().getCreated(), Instant.now()).toMinutes() >= GIST_DELAY;
 	}
 
 	@Override
@@ -88,9 +93,10 @@ public class GistListener extends ListenerAdapter {
 					List<File> fileList = new ArrayList<>(result.getFiles().values());
 					File file = fileList.get(0);
 					event.getChannel().sendMessage(constructMessage(file)).queue(msg -> {
-						messageMap.put(msg.getId(), new GistState(fileList, 0, Instant.now(), msg.getChannel().getIdLong()));
-						msg.addReaction("U+23EA").submit().thenRun(() -> msg.addReaction("U+23E9").queue());
-
+						if(fileList.size() > 1) {
+							messageMap.put(msg.getId(), new GistState(fileList, 0, Instant.now(), msg.getChannel().getIdLong()));
+							msg.addReaction(SEEK_LEFT).submit().thenRun(() -> msg.addReaction(SEEK_RIGHT).queue());
+						}
 					});
 				}
 
@@ -102,19 +108,15 @@ public class GistListener extends ListenerAdapter {
 		}
 	}
 
-	public Message constructMessage(File file) {
+	private Message constructMessage(File file) {
 		MessageBuilder builder = new MessageBuilder();
 		builder.appendCodeBlock(truncateIfOverSizeLimit(file.getContent()), file.getLanguage());
-		builder.append("Current file: ")
-				.append(file.getFilename())
-				.append(" ")
-				.append("Truncated: ")
-				.append(file.getContent().length() > SIZE_LIMIT);
+		builder.append("Current file: ").append(file.getFilename());
 		return builder.build();
 	}
 
 	private String truncateIfOverSizeLimit(String content) {
-		if(content.length() > SIZE_LIMIT) {
+		if (content.length() > SIZE_LIMIT) {
 			return content.substring(0, SIZE_LIMIT);
 		}
 		return content;
@@ -128,17 +130,16 @@ public class GistListener extends ListenerAdapter {
 
 		GistState state = messageMap.get(event.getMessageId());
 		event.getChannel().retrieveMessageById(event.getMessageId()).queue(msg -> {
-			if (reactionName.equals("⏪")) {
-				handlePreviousFileRequest(msg, state);
-			} else if (reactionName.equals("⏩")) {
-				handleNextFileRequest(msg, state);
+			switch (reactionName) {
+				case "⏪" -> handlePreviousFileRequest(msg, state);
+				case "⏩" -> handleNextFileRequest(msg, state);
 			}
 		});
 		event.getReaction().removeReaction(event.getUser()).queue();
 	}
 
 	private void handleNextFileRequest(@NotNull Message msg, GistState state) {
-		if (state.getPosition() < state.getFiles().size()) {
+		if (state.getPosition() < state.getFiles().size() - 1) {
 			state.setPosition(state.getPosition() + 1);
 			editMessageWithNewFile(state, msg);
 		}
@@ -150,9 +151,9 @@ public class GistListener extends ListenerAdapter {
 	}
 
 	private void handlePreviousFileRequest(@NotNull Message msg, GistState state) {
-			if (state.getPosition() > 0) {
-				state.setPosition(state.getPosition() - 1);
-				editMessageWithNewFile(state, msg);
-			}
+		if (state.getPosition() > 0) {
+			state.setPosition(state.getPosition() - 1);
+			editMessageWithNewFile(state, msg);
+		}
 	}
 }

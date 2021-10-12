@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
@@ -108,7 +108,7 @@ public class Bot {
     private static GithubService createGithubService() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.github.com/")
-                .addConverterFactory(JacksonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         return retrofit.create(GithubService.class);

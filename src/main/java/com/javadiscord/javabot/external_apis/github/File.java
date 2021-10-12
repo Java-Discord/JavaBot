@@ -1,11 +1,10 @@
 package com.javadiscord.javabot.external_apis.github;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @NoArgsConstructor
 @ToString
