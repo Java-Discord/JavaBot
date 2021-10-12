@@ -12,10 +12,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.bson.Document;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -97,7 +95,7 @@ public class ServerLock {
     public static void deletePotentialBotList() {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-        for (Document document : collection.find()) collection.deleteOne(document);
+        collection.deleteMany(new Document());
     }
 
     public static MessageEmbed lockEmbed (Guild guild) {
