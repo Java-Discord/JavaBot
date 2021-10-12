@@ -2,6 +2,8 @@ package com.javadiscord.javabot;
 
 import com.javadiscord.javabot.data.H2DataSource;
 import com.javadiscord.javabot.events.*;
+import com.javadiscord.javabot.events.gist.GistListener;
+import com.javadiscord.javabot.external_apis.github.GithubService;
 import com.javadiscord.javabot.help.HelpChannelListener;
 import com.javadiscord.javabot.properties.config.BotConfig;
 import net.dv8tion.jda.api.JDA;
@@ -11,6 +13,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
@@ -97,8 +101,17 @@ public class Bot {
                 new InteractionListener(),
                 new HelpChannelListener(),
                 new ShareKnowledgeVoteListener(),
-                new GistListener()
+                new GistListener(createGithubService())
         );
+    }
+
+    private static GithubService createGithubService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+
+        return retrofit.create(GithubService.class);
     }
 }
 
