@@ -19,6 +19,11 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.bson.Document;
 
 import java.awt.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
@@ -51,10 +56,12 @@ public class SubmissionListener extends ListenerAdapter {
                 .setTimestamp(Instant.now())
                 .build();
 
-        config.getQotw().getSubmissionChannel().sendMessageEmbeds(e).setActionRows(
+        config.getQotw().getSubmissionChannel().sendMessageEmbeds(e)
+                .setActionRows(
                 ActionRow.of(
                 Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
                 Button.danger("submission:decline:" + event.getUser().getId(), "Decline"),
+                Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw"),
                 Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️")))
                 .queue();
 
@@ -123,6 +130,21 @@ public class SubmissionListener extends ListenerAdapter {
      */
     public void submissionDelete (ButtonClickEvent event) {
         event.getHook().deleteOriginal().queue();
+    }
+
+    /**
+     * Gets called when a moderator presses the "Get Raw" button on a submission.
+     * <p>
+     * Sends a file that contains the Raw Message/Submission content
+     * </p>
+     * @param event the ButtonClickEvent that is triggered upon use. {@link InteractionListener#onButtonClick(ButtonClickEvent)}
+     */
+    public void submissionGetRaw (ButtonClickEvent event) {
+        var description = event.getMessage().getEmbeds().get(0).getDescription();
+        event.getHook()
+                .sendFile(new ByteArrayInputStream(description.getBytes(StandardCharsets.UTF_8)), event.getUser().getId() + ".txt")
+                .addActionRow(Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️"))
+                .queue();
     }
 
     /**
