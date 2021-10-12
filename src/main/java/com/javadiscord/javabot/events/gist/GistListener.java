@@ -28,16 +28,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class GistListener extends ListenerAdapter {
 
+	private static final Logger log = LoggerFactory.getLogger(GistListener.class);
 	private static final String BASIC_GIST_PATTERN_STRING = ".*https://gist\\.github\\.com/.+?(?=/)/(.+?(?=#|\\s))";
 	private static final Pattern BASIC_GIST_PATTERN = Pattern.compile(BASIC_GIST_PATTERN_STRING);
 	private static final int GIST_DELAY = 30;
+	private static final int SIZE_LIMIT = 1900;
+	private static final List<String> VALID_EMOTES = List.of("⏪", "⏩");
+
 	private final GithubService service;
-	private static final int SIZE_LIMIT = 2000;
-	private static final Logger log = LoggerFactory.getLogger(GistListener.class);
 	private final Map<String, GistState> messageMap = new ConcurrentHashMap<>();
 	private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -47,9 +48,14 @@ public class GistListener extends ListenerAdapter {
 
 	@Override
 	public void onReady(@NotNull ReadyEvent event) {
-		executorService.scheduleAtFixedRate(() -> messageMap.entrySet().stream()
+		executorService.scheduleAtFixedRate(() -> pruneExpiredGists(event), GIST_DELAY, GIST_DELAY, TimeUnit.MINUTES);
+	}
+
+	private void pruneExpiredGists(ReadyEvent event) {
+		log.info("Pruning gist cache");
+		messageMap.entrySet().stream()
 				.filter(this::isOverMaxTime)
-				.forEach(entry -> handleExpiredGist(event, entry)), GIST_DELAY, GIST_DELAY, TimeUnit.MINUTES);
+				.forEach(entry -> handleExpiredGist(event, entry));
 	}
 
 	private void handleExpiredGist(ReadyEvent event, Map.Entry<String, GistState> entry) {
@@ -65,7 +71,7 @@ public class GistListener extends ListenerAdapter {
 	}
 
 	private boolean isOverMaxTime(Map.Entry<String, GistState> gist) {
-		return Duration.between(gist.getValue().getCreated(), Instant.now()).toHours() >= GIST_DELAY;
+		return Duration.between(gist.getValue().getCreated(), Instant.now()).toMinutes() >= GIST_DELAY;
 	}
 
 	@Override
@@ -98,34 +104,55 @@ public class GistListener extends ListenerAdapter {
 
 	public Message constructMessage(File file) {
 		MessageBuilder builder = new MessageBuilder();
-		builder.appendCodeBlock(file.getContent(), file.getLanguage());
-		builder.append("Current file: ").append(file.getFilename());
+		builder.appendCodeBlock(truncateIfOverSizeLimit(file.getContent()), file.getLanguage());
+		builder.append("Current file: ")
+				.append(file.getFilename())
+				.append(" ")
+				.append("Truncated: ")
+				.append(file.getContent().length() > SIZE_LIMIT);
 		return builder.build();
+	}
+
+	private String truncateIfOverSizeLimit(String content) {
+		if(content.length() > SIZE_LIMIT) {
+			return content.substring(0, SIZE_LIMIT);
+		}
+		return content;
 	}
 
 	@Override
 	public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
 		if (event.getUser().isBot() || !messageMap.containsKey(event.getMessageId())) return;
+		String reactionName = event.getReaction().getReactionEmote().getName();
+		if (!VALID_EMOTES.contains(reactionName)) return;
+
 		GistState state = messageMap.get(event.getMessageId());
-		if (event.getReaction().getReactionEmote().getName().equals("⏪")) {
-			event.getChannel().retrieveMessageById(event.getMessageId()).queue(msg -> {
-				if (state.getPosition() > 0) {
-					state.setPosition(state.getPosition() - 1);
-				}
-				File file = state.getFiles().get(state.getPosition());
-				msg.editMessage(constructMessage(file)).queue();
-
-			});
-		} else if (event.getReaction().getReactionEmote().getName().equals("⏩")) {
-			event.getChannel().retrieveMessageById(event.getMessageId()).queue(msg -> {
-				if (state.getPosition() < state.getFiles().size()) {
-					state.setPosition(state.getPosition() + 1);
-				}
-				File file = state.getFiles().get(state.getPosition());
-				msg.editMessage(constructMessage(file)).queue();
-
-			});
-		}
+		event.getChannel().retrieveMessageById(event.getMessageId()).queue(msg -> {
+			if (reactionName.equals("⏪")) {
+				handlePreviousFileRequest(msg, state);
+			} else if (reactionName.equals("⏩")) {
+				handleNextFileRequest(msg, state);
+			}
+		});
 		event.getReaction().removeReaction(event.getUser()).queue();
+	}
+
+	private void handleNextFileRequest(@NotNull Message msg, GistState state) {
+		if (state.getPosition() < state.getFiles().size()) {
+			state.setPosition(state.getPosition() + 1);
+			editMessageWithNewFile(state, msg);
+		}
+	}
+
+	private void editMessageWithNewFile(GistState state, Message msg) {
+		File file = state.getFiles().get(state.getPosition());
+		msg.editMessage(constructMessage(file)).queue();
+	}
+
+	private void handlePreviousFileRequest(@NotNull Message msg, GistState state) {
+			if (state.getPosition() > 0) {
+				state.setPosition(state.getPosition() - 1);
+				editMessageWithNewFile(state, msg);
+			}
 	}
 }

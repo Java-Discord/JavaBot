@@ -15,14 +15,4 @@ public class File {
     private String raw_url;
     private Integer size;
     private String content;
-
-    @Override
-    public String toString() {
-        return "File{" +
-                "language='" + language + '\'' +
-                ", rawURL='" + raw_url + '\'' +
-                ", size=" + size +
-                ", content='" + content + '\'' +
-                '}';
-    }
 }
