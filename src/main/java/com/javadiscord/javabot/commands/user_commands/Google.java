@@ -9,7 +9,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class Stackoverflow implements SlashCommandHandler {
+public class Google implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         String query = "";
@@ -20,11 +20,7 @@ public class Stackoverflow implements SlashCommandHandler {
             e.printStackTrace();
         }
         query = query.replace(" ", "+");
-        if (!query.contains("java")) {
-            url = "www.google.com/search?q=".concat(query).concat("+in+java+site%3Astackoverflow.com");
-        } else {
-            url = "www.google.com/search?q=".concat(query).concat("+site%3Astackoverflow.com");
-        }
+        url = "www.google.com/search?q=".concat(query);
         return event.reply(url);
     }
 }
