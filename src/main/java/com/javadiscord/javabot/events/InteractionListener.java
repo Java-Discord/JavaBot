@@ -50,6 +50,7 @@ public class InteractionListener extends ListenerAdapter {
 		switch (id[1]) {
 			case "approve" -> new SubmissionListener().submissionApprove(event);
 			case "decline" -> new SubmissionListener().submissionDecline(event);
+			case "getraw" -> new SubmissionListener().submissionGetRaw(event);
 			case "delete" -> new SubmissionListener().submissionDelete(event);
 		}
 	}
