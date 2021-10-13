@@ -12,15 +12,16 @@ import java.util.Objects;
 public class Google implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        String query = "";
+        String query;
         String url;
         try {
             query = URLEncoder.encode(Objects.requireNonNull(event.getOption("query")).getAsString(), StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            return event.reply(e.getMessage());
         }
-        query = query.replace(" ", "+");
-        url = "www.google.com/search?q=".concat(query);
+        query = query.trim().replace(" ", "+");
+        url = "https://www.google.com/search?q=".concat(query);
         return event.reply(url);
     }
 }
