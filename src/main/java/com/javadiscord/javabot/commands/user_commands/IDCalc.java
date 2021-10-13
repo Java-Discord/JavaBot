@@ -28,8 +28,7 @@ public class IDCalc implements SlashCommandHandler {
 
         EmbedBuilder eb = new EmbedBuilder()
             .setAuthor("ID-Calculator")
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .addField("ID", "```" + id + "```", false)
             .addField("Unix-Timestamp (+ milliseconds)", "```" + unixTimeStampMilliseconds + "```", false)
             .addField("Unix-Timestamp", "```" + unixTimeStamp + "```", false)

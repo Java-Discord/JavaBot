@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class BotInfo implements SlashCommandHandler {
 
@@ -20,8 +20,7 @@ public class BotInfo implements SlashCommandHandler {
         var bot = event.getJDA().getSelfUser();
 
         var e = new EmbedBuilder()
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .setThumbnail(bot.getEffectiveAvatarUrl())
             .setAuthor(bot.getName() + " | Info", null, bot.getEffectiveAvatarUrl())
             .addField("OS", "```" + System.getProperty("os.name") + "```", true)
@@ -29,7 +28,7 @@ public class BotInfo implements SlashCommandHandler {
             .addField("JDK", "```" + System.getProperty("java.version") + "```", true)
             .addField("Ping", "```" + ping + "ms```", true)
             .addField("Uptime", "```" + new Uptime().getUptime() + "```", true)
-            .setTimestamp(new Date().toInstant())
+            .setTimestamp(Instant.now())
             .build();
 
         return event.replyEmbeds(e).addActionRow(

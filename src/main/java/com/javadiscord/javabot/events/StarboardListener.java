@@ -39,8 +39,7 @@ public class StarboardListener extends ListenerAdapter {
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor("Jump to message", message.getJumpUrl())
                 .setFooter(message.getAuthor().getAsTag(), message.getAuthor().getEffectiveAvatarUrl())
-                .setColor(Color.decode(
-                        Bot.config.get(guild).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
                 .setDescription(message.getContentRaw());
 
         MessageAction msgAction = sc

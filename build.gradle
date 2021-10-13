@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = 16
 targetCompatibility = 16
 
-group 'com.dynxsty.bot'
+group 'com.javadiscord'
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 
-    implementation 'net.dv8tion:JDA:4.3.0_309'
+    implementation 'net.dv8tion:JDA:4.3.0_334'
 //    implementation 'com.github.dv8fromtheworld:jda:feature~threads'
     implementation 'org.mongodb:mongodb-driver:3.12.10'
     implementation 'com.google.code.gson:gson:2.8.7'

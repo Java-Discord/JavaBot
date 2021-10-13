@@ -12,9 +12,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.bson.Document;
 
-import java.awt.*;
+import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Date;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -43,13 +42,12 @@ public class ServerLock {
         String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
 
         EmbedBuilder eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setAuthor(user.getAsTag() + " | Potential Bot! (" + lockCount  + "/5)", null, user.getEffectiveAvatarUrl())
                 .setThumbnail(user.getEffectiveAvatarUrl())
                 .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
                 .setFooter("ID: " + user.getId())
-                .setTimestamp(new Date().toInstant());
+                .setTimestamp(Instant.now());
         Misc.sendToLog(event.getGuild(), eb.build());
     }
 
@@ -83,10 +81,7 @@ public class ServerLock {
     public static boolean isInPBL (User user) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-
-        try { String doc = collection.find(eq("discord_id", user.getId())).first().toJson();
-        } catch (NullPointerException e) { return false; }
-        return true;
+        return collection.find(eq("discord_id", user.getId())).first() != null;
     }
 
     public static void addToPotentialBotList(User user) {
@@ -100,14 +95,13 @@ public class ServerLock {
     public static void deletePotentialBotList() {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-        for (Document document : collection.find()) collection.deleteOne(document);
+        collection.deleteMany(new Document());
     }
 
     public static MessageEmbed lockEmbed (Guild guild) {
         return new EmbedBuilder()
         .setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
-        .setColor(Color.decode(
-                Bot.config.get(guild).getSlashCommand().getDefaultColor()))
+        .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
         .setDescription("""
         Unfortunately, this server is currently locked. Please try to join again later.
         Contact ``Dynxsty#7666`` or ``Moon™#3424`` for more info."""

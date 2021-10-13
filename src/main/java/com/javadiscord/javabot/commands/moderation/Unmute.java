@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class Unmute implements SlashCommandHandler {
 
@@ -26,19 +26,18 @@ public class Unmute implements SlashCommandHandler {
         try {
             var e = new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | Unmute", null, member.getUser().getEffectiveAvatarUrl())
-                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                            .getErrorColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + author.getAsTag() + "```", true)
                 .addField("ID", "```" + member.getId() + "```", false)
                 .setFooter("ID: " + member.getId())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
             if (member.getRoles().toString().contains(muteRole.getId())) {
                 event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
 
-                member.getUser().openPrivateChannel().complete().sendMessage(e).queue();
+                member.getUser().openPrivateChannel().complete().sendMessageEmbeds(e).queue();
 
                 Misc.sendToLog(event.getGuild(), e);
                 return event.replyEmbeds(e);

@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.Date;
+import java.time.Instant;
 
 public class Unban implements SlashCommandHandler {
     @Override
@@ -24,12 +24,11 @@ public class Unban implements SlashCommandHandler {
             event.getGuild().unban(id).complete();
             var e = new EmbedBuilder()
                 .setAuthor("Unban")
-                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                            .getErrorColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
                 .addField("ID", "```" + id + "```", true)
                 .addField("Moderator", "```" + author.getAsTag() + "```", true)
                 .setFooter("ID: " + id)
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
 
 

@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import retrofit2.Retrofit;
@@ -26,6 +27,11 @@ import java.util.concurrent.ScheduledExecutorService;
  * The main class where the bot is initialized.
  */
 public class Bot {
+    /**
+     * A reference to the JDA instance
+     */
+    public static JDA jda;
+
     /**
      * The set of configuration properties that this bot uses.
      */
@@ -71,8 +77,9 @@ public class Bot {
         dataSource = new H2DataSource();
         dataSource.initDatabase();
         asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
-        JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
+        jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ACTIVITY)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)

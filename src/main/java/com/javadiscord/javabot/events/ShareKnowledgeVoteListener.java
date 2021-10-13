@@ -25,8 +25,8 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
         var config = Bot.config.get(event.getGuild());
 
         // add upvote and downvote option
-        event.getMessage().addReaction(config.getEmote().getUpvoteReaction()).queue();
-        event.getMessage().addReaction(config.getEmote().getDownvoteReaction()).queue();
+        event.getMessage().addReaction(config.getEmote().getUpvoteEmote()).queue();
+        event.getMessage().addReaction(config.getEmote().getDownvoteEmote()).queue();
     }
 
     @Override
@@ -49,14 +49,15 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
     }
 
     private void onReactionEvent (GenericGuildMessageReactionEvent event) {
+        if (event.getUser().isBot() || event.getUser().isSystem()) return;
         if (isInvalidEvent(event)) return;
 
         var config = Bot.config.get(event.getGuild());
 
         String reactionID = event.getReaction().getReactionEmote().getAsReactionCode();
 
-        String upvoteID = config.getEmote().getUpvoteReaction();
-        String downvoteID = config.getEmote().getDownvoteReaction();
+        String upvoteID = config.getEmote().getUpvoteEmote().getAsMention();
+        String downvoteID = config.getEmote().getDownvoteEmote().getAsMention();
 
         if (!(reactionID.equals(upvoteID) || reactionID.equals(downvoteID))) return;
 
@@ -79,12 +80,12 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
                 .map(MessageReaction::getCount)
                 .orElse(0);
 
-        int eval = upvotes - downvotes;
+        int eval = downvotes - upvotes;
 
-        if (eval <= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
+        if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
             message.delete().queue();
             message.getAuthor().openPrivateChannel()
-                    .queue(channel -> channel.sendMessage("Your Message in" +
+                    .queue(channel -> channel.sendMessage("Your Message in " +
                             config.getModeration().getShareKnowledgeChannel().getAsMention() +
                             " has been removed due to community feedback").queue());
         }

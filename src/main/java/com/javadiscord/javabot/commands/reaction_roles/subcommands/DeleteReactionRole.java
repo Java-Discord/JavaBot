@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DeleteReactionRole implements SlashCommandHandler {
@@ -22,7 +22,7 @@ public class DeleteReactionRole implements SlashCommandHandler {
         String buttonLabel = event.getOption("label").getAsString();
 
         List<Button> buttons = new ArrayList<>(message.getActionRows().get(0).getButtons());
-        for (var ignored : message.getActionRows().get(0).getButtons()) buttons.removeIf(x -> x.getLabel().equals(buttonLabel));
+        buttons.removeIf(button -> button.getLabel().equals(buttonLabel));
         if (!buttons.isEmpty()) {
             message.editMessageComponents(ActionRow.of(buttons)).queue();
         } else {
@@ -33,10 +33,9 @@ public class DeleteReactionRole implements SlashCommandHandler {
                 .setTitle("Reaction Role removed")
                 .addField("MessageID", "```" + message.getId() + "```", false)
                 .addField("Button Label", "```" + buttonLabel + "```", true)
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                .setTimestamp(new Date().toInstant())
+                .setTimestamp(Instant.now())
                 .build();
         Misc.sendToLog(event.getGuild(), e);
         return event.replyEmbeds(e).setEphemeral(true);
