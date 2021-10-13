@@ -12,6 +12,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class StarBoardConfig extends GuildConfigItem {
 	private long channelId;
+	private int reactionThreshold;
 	private List<String> emotes = new ArrayList<>();
 
 	public TextChannel getChannel() {
