@@ -30,38 +30,29 @@ public class InteractionListener extends ListenerAdapter {
 		MongoDatabase database = mongoClient.getDatabase("other");
 		String[] id = event.getComponentId().split(":");
 		switch (id[0]) {
-			case "dm-submission" -> this.handleDmSubmission(database, guild, event);
-			case "submission" -> this.handleSubmission(database, guild, event);
+			case "dm-submission" -> this.handleDmSubmission(event);
+			case "submission" -> this.handleSubmission(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> this.handleHelpChannel(event, id[1]);
 		}
 	}
 
-	private void handleDmSubmission(MongoDatabase database, Guild guild, ButtonClickEvent event) {
-		MongoCollection<Document> openSubmissions = database.getCollection("open_submissions");
-		Document document = openSubmissions.find(eq("guild_id", guild.getId())).first();
-		JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-		String text = root.get("text").getAsString();
+	private void handleDmSubmission(ButtonClickEvent event) {
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
-			case "send" -> new SubmissionListener().dmSubmissionSend(event, text);
+			case "send" -> new SubmissionListener().dmSubmissionSend(event);
 			case "cancel" -> new SubmissionListener().dmSubmissionCancel(event);
 		}
-		openSubmissions.deleteOne(document);
 	}
 
-	private void handleSubmission(MongoDatabase database, Guild guild, ButtonClickEvent event) {
-		MongoCollection<Document> submissionMessages = database.getCollection("submission_messages");
-		Document document = submissionMessages.find(eq("guild_id", guild.getId())).first();
-		JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-		String userID = root.get("user_id").getAsString();
+	private void handleSubmission(ButtonClickEvent event) {
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
-			case "approve" -> new SubmissionListener().submissionApprove(event, userID);
+			case "approve" -> new SubmissionListener().submissionApprove(event);
 			case "decline" -> new SubmissionListener().submissionDecline(event);
+			case "getraw" -> new SubmissionListener().submissionGetRaw(event);
 			case "delete" -> new SubmissionListener().submissionDelete(event);
 		}
-		submissionMessages.deleteOne(document);
 	}
 
 	private void handleReactionRoles(ButtonClickEvent event) {

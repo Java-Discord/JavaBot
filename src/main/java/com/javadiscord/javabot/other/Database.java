@@ -36,8 +36,7 @@ public class Database {
     private static final Map<String, String[]> DB_COLS = new HashMap<>();
     static {
         DB_COLS.put("userdata", new String[] {"potential_bot_list", "users", "warns"});
-        DB_COLS.put("other", new String[] {"config", "customcommands", "expert_questions",
-                "open_submissions", "reactionroles", "starboard_messages", "submission_messages"});
+        DB_COLS.put("other", new String[] {"config", "customcommands", "expert_questions", "starboard_messages"});
     }
 
     List<String> getDatabases(MongoClient mongoClient) {
@@ -63,30 +62,6 @@ public class Database {
             }
         }
         for (var g : guilds) if (!guildDocExists(g)) insertGuildDoc(g);
-    }
-
-    public void deleteOpenSubmissions(Guild guild) {
-        logger.info("{}[{}]{} Deleting Open Submissions",
-                Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
-
-        MongoCollection<Document> collection = mongoClient
-                .getDatabase("other")
-                .getCollection("open_submissions");
-
-        for (var document : collection.find(eq("guild_id", guild.getId()))) {
-            String messageId = document.getString("message_id");
-            String userId = document.getString("user_id");
-
-            User user = preferredGuild.retrieveMemberById(userId).complete().getUser();
-            Message msg = user.openPrivateChannel().complete().retrieveMessageById(messageId).complete();
-
-            msg.editMessageEmbeds(msg.getEmbeds().get(0))
-                    .setActionRows(ActionRow.of(
-                            Button.danger("dm-submission:canceled:" + user.getId(), "Process canceled").asDisabled()))
-                    .queue();
-
-            collection.deleteOne(document);
-        }
     }
 
     public Document userDoc(String userId) {

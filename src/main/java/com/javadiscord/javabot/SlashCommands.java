@@ -18,14 +18,13 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 import static com.javadiscord.javabot.events.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
@@ -72,17 +71,18 @@ public class SlashCommands extends ListenerAdapter {
 
             Document it = collection.find(criteria).first();
 
-            JsonObject Root = JsonParser.parseString(it.toJson()).getAsJsonObject();
-            String value = Root.get("value").getAsString()
+            JsonObject root = JsonParser.parseString(it.toJson()).getAsJsonObject();
+            String value = root.get("value").getAsString()
                 .replace("{!membercount}", String.valueOf(event.getGuild().getMemberCount()))
                 .replace("{!servername}", event.getGuild().getName())
                 .replace("{!serverid}", event.getGuild().getId());
 
-            event.replyEmbeds(new EmbedBuilder().setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())).setDescription(value).build()).queue();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+                    .setDescription(value).build()).queue();
 
         } catch (Exception e) {
-            event.reply("Oops, this command isnt registered, yet").queue();
+            event.reply("Oops, this command isn't registered, yet").queue();
         }
     }
 
@@ -99,17 +99,15 @@ public class SlashCommands extends ListenerAdapter {
     public void registerSlashCommands(Guild guild) {
         CommandConfig[] commandConfigs = CommandDataConfig.load();
         var commandUpdateAction = this.updateCommands(commandConfigs, guild);
-        this.updateCustomCommands(commandUpdateAction, guild);
+        var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
 
-        // Add privileges to the commands, after the commands have been registered.
-        commandUpdateAction.queue(commands -> Executors.newSingleThreadExecutor().submit(() ->{
-            try {
-                this.addCommandPrivileges(commands, commandConfigs, guild);
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Could not add command privileges.", e);
-            }
-        }));
+        commandUpdateAction.queue(commands ->{
+            // Add privileges to the non-custom commands, after the commands have been registered.
+            commands.removeIf(cmd->customCommandNames.contains(cmd.getName()));
+            this.addCommandPrivileges(commands, commandConfigs, guild);
+        });
     }
+
 
     private CommandListUpdateAction updateCommands(CommandConfig[] commandConfigs, Guild guild) {
         log.info("{}[{}]{} Registering slash commands",
@@ -132,50 +130,64 @@ public class SlashCommands extends ListenerAdapter {
         return commandUpdateAction;
     }
 
-    private void updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
+    private Set<String> updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
         log.info("{}[{}]{} Registering custom commands",
                 Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
 
+        Set<String> customCommandNames=new HashSet<>();
         for (Document document : collection.find(eq("guild_id", guild.getId()))) {
-            JsonObject Root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String commandName = Root.get("commandname").getAsString();
-            String value = Root.get("value").getAsString();
+            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+            String commandName = root.get("commandname").getAsString();
+            String value = root.get("value").getAsString();
             if (value.length() > 100) value = value.substring(0, 97) + "...";
             commandUpdateAction.addCommands(new CommandData(commandName, value));
+            customCommandNames.add(commandName);
         }
+        return customCommandNames;
     }
 
-    private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) throws ExecutionException, InterruptedException {
+    private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) {
         log.info("{}[{}]{} Adding command privileges",
                 Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
-        for (var config : commandConfigs) {
-            Long commandId = null;
-            for (Command command : commands) {
-                if (command.getName().equals(config.getName())) {
-                    commandId = command.getIdLong();
-                    break;
-                }
-            }
-            if (commandId == null) throw new IllegalStateException("Could not find id for command " + config.getName());
-            final long cid = commandId;
-            if (config.getPrivileges() != null && config.getPrivileges().length > 0) {
-                List<CommandPrivilege> p = new ArrayList<>();
-                for (var privilegeConfig : config.getPrivileges()) {
-                    try {
-                        p.add(privilegeConfig.toData(guild, Bot.config).get());
-                        log.info("\t{}[{}]{} Registering privilege: {}",
-                                Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, Objects.toString(privilegeConfig));
-                    } catch (Exception e) {
-                        log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
-                    }
-                }
-                guild.updateCommandPrivilegesById(cid, p).queue(commandPrivileges -> {
-                    log.info("{}[{}]{} Privilege update successful for command {}",
-                            Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET, config.getName());
-                });
+
+        Map<String, Collection<? extends CommandPrivilege>> map = new HashMap<>();
+
+        for(Command command : commands) {
+            List<CommandPrivilege> privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
+            if(!privileges.isEmpty()) {
+                map.put(command.getId(), privileges);
             }
         }
+
+        guild.updateCommandPrivileges(map)
+                .queue(success -> log.info("Commands updated successfully"), error -> log.info("Commands update failed"));
+    }
+
+    @NotNull
+    private List<CommandPrivilege> getCommandPrivileges(Guild guild, CommandConfig config) {
+        if(config == null || config.getPrivileges() == null) return Collections.emptyList();
+        List<CommandPrivilege> privileges = new ArrayList<>();
+        for (var privilegeConfig : config.getPrivileges()) {
+            try {
+                privileges.add(privilegeConfig.toData(guild, Bot.config));
+                log.info("\t{}[{}]{} Registering privilege: {}",
+                        Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, Objects.toString(privilegeConfig));
+            } catch (Exception e) {
+                log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
+            }
+        }
+        return privileges;
+    }
+
+    private CommandConfig findCommandConfig(String name, CommandConfig[] configs) {
+        for (CommandConfig config : configs) {
+            if (name.equals(config.getName())) {
+                return config;
+            }
+        }
+        log.warn("Could not find CommandConfig for command: {}", name);
+        return null;
     }
 }

@@ -12,8 +12,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class Report implements SlashCommandHandler {
 
@@ -28,8 +28,7 @@ public class Report implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .addField("Name", "```" + member.getUser().getAsTag() + "```", false)
             .addField("ID", "```" + member.getId() + "```", true)
             .addField("Reported by", "```" + author.getAsTag() + "```", true)
@@ -37,7 +36,7 @@ public class Report implements SlashCommandHandler {
             .addField("Reported on", "```" + LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER) + "```", true)
             .addField("Reason", "```" + reason + "```", false)
             .setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
-            .setTimestamp(new Date().toInstant());
+            .setTimestamp(Instant.now());
 
         reportChannel.sendMessage("@here").setEmbeds(e.build()).queue();
 

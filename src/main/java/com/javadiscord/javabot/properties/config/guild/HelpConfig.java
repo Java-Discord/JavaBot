@@ -5,6 +5,7 @@ import com.javadiscord.javabot.properties.config.GuildConfigItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Role;
 
 /**
  * Configuration for the guild's help system.
@@ -27,6 +28,11 @@ public class HelpConfig extends GuildConfigItem {
 	 * aren't needed in the open category (due to preferred channel count).
 	 */
 	private long dormantCategoryId;
+
+	/**
+	 * The id of the helper role
+	 */
+	private long helperRoleId;
 
 	/**
 	 * The strategy to use when naming help channels. This is only used when
@@ -103,6 +109,10 @@ public class HelpConfig extends GuildConfigItem {
 
 	public Category getDormantChannelCategory() {
 		return getGuild().getCategoryById(this.dormantCategoryId);
+	}
+
+	public Role getHelperRole() {
+		return this.getGuild().getRoleById(this.helperRoleId);
 	}
 
 	public ChannelNamingStrategy getChannelNamingStrategy() {

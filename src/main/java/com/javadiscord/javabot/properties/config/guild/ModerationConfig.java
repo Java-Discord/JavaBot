@@ -14,6 +14,17 @@ public class ModerationConfig extends GuildConfigItem {
 	private long suggestionChannelId;
 	private long muteRoleId;
 	private long staffRoleId;
+
+	/**
+	 * ID of the share-knowledge channel
+	 */
+	private long shareKnowledgeChannelId;
+
+	/**
+	 * The threshold for deleting a message in #share-knowledge. Note that this should be strictly < 0
+	 */
+	private int shareKnowledgeMessageDeleteThreshold;
+
 	private int purgeMaxMessageCount = 1000;
 
 	public TextChannel getReportChannel() {
@@ -26,6 +37,10 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public TextChannel getSuggestionChannel() {
 		return this.getGuild().getTextChannelById(this.suggestionChannelId);
+	}
+
+	public TextChannel getShareKnowledgeChannel() {
+		return this.getGuild().getTextChannelById(this.shareKnowledgeChannelId);
 	}
 
 	public Role getMuteRole() {

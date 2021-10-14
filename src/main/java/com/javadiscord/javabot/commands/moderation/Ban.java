@@ -28,8 +28,7 @@ public class Ban implements SlashCommandHandler {
         String reason = option == null ? "None" : option.getAsString();
 
         var eb = new EmbedBuilder()
-                .setColor(Color.decode(Bot.config.get(event.getGuild()).getSlashCommand()
-                        .getErrorColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
                 .setAuthor(member.getUser().getAsTag() + " | Ban", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
                 .addField("Moderator", "```" + event.getUser().getAsTag() + "```", true)

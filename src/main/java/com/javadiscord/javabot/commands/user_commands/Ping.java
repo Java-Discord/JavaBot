@@ -17,8 +17,7 @@ public class Ping implements SlashCommandHandler {
 
         var e = new EmbedBuilder()
             .setAuthor(gatewayPing + "ms", null, botImage)
-            .setColor(Color.decode(
-                    Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
             .build();
 
         return event.replyEmbeds(e);

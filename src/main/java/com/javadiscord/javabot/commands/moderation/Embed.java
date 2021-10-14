@@ -44,8 +44,7 @@ public class Embed implements SlashCommandHandler {
         String title = embedOption == null ? null : embedOption.getAsString();
 
         var eb = new EmbedBuilder()
-                .setColor(Color.decode(
-                        Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor()))
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setTitle(title)
                 .setDescription(message.getContentRaw())
                 .build();

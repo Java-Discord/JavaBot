@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,10 +32,10 @@ public class PreferencesSubcommand implements SlashCommandHandler {
 	static {
 		preferenceUpdaters.put("receive_transaction_dms", (event, prefs, value) -> {
 			boolean b;
-			BiFunction<String, Stream<String>, Boolean> equalsAnyIgnoreCase = (s, strings) -> strings.anyMatch(str -> str.equalsIgnoreCase(s));
-			if (equalsAnyIgnoreCase.apply(value, Stream.of("yes", "true", "on", "1"))) {
+			BiPredicate<String, Stream<String>> equalsAnyIgnoreCase = (s, strings) -> strings.anyMatch(str -> str.equalsIgnoreCase(s));
+			if (equalsAnyIgnoreCase.test(value, Stream.of("yes", "true", "on", "1"))) {
 				b = true;
-			} else if (equalsAnyIgnoreCase.apply(value, Stream.of("no", "false", "off", "0"))) {
+			} else if (equalsAnyIgnoreCase.test(value, Stream.of("no", "false", "off", "0"))) {
 				b = false;
 			} else {
 				return Responses.warning(event, "Invalid preference value: " + value + ". Only boolean values are accepted.");

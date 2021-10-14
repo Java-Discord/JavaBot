@@ -22,21 +22,21 @@ public class Profile implements SlashCommandHandler {
     String getBadges (Member member) {
         String badges = "";
         var config = Bot.config.get(member.getGuild()).getEmote();
-        if (member.getUser().isBot()) badges += config.getBotBadge();
-        if (member.getTimeBoosted() != null) badges += config.getServerBoostBadge();
+        if (member.getUser().isBot()) badges += config.getBotEmote().getAsMention();
+        if (member.getTimeBoosted() != null) badges += config.getServerBoostEmote().getAsMention();
 
         badges += member.getUser().getFlags().toString()
                 .substring(1, member.getUser().getFlags().toString().length() - 1)
                 .replace(",", "")
-                .replace("PARTNER", config.getPartnerBadge())
-                .replace("HYPESQUAD_BRAVERY", config.getBraveryBadge())
-                .replace("HYPESQUAD_BRILLIANCE", config.getBrillianceBadge())
-                .replace("HYPESQUAD_BALANCE", config.getBalanceBadge())
-                .replace("VERIFIED_DEVELOPER", config.getDevBadge())
-                .replace("EARLY_SUPPORTER", config.getEarlySupporterBadge())
-                .replace("SYSTEM", config.getStaffBadge())
-                .replace("BUG_HUNTER_LEVEL_1", config.getBugHunterBadge())
-                .replace("BUG_HUNTER_LEVEL_2", config.getBugHunterBadge())
+                .replace("PARTNER", config.getPartnerEmote().getAsMention())
+                .replace("HYPESQUAD_BRAVERY", config.getBraveryEmote().getAsMention())
+                .replace("HYPESQUAD_BRILLIANCE", config.getBrillianceEmote().getAsMention())
+                .replace("HYPESQUAD_BALANCE", config.getBalanceEmote().getAsMention())
+                .replace("VERIFIED_DEVELOPER", config.getDevEmote().getAsMention())
+                .replace("EARLY_SUPPORTER", config.getEarlySupporterEmote().getAsMention())
+                .replace("SYSTEM", config.getStaffEmote().getAsMention())
+                .replace("BUG_HUNTER_LEVEL_1", config.getBugHunterEmote().getAsMention())
+                .replace("BUG_HUNTER_LEVEL_2", config.getBugHunterEmote().getAsMention())
                 .replace("VERIFIED_BOT", "");
         return badges;
     }
@@ -44,15 +44,14 @@ public class Profile implements SlashCommandHandler {
     String getOnlineStatus (Member member) {
         var config = Bot.config.get(member.getGuild()).getEmote();
         return member.getOnlineStatus().toString()
-                .replace("ONLINE", config.getOnlineEmote())
-                .replace("IDLE", config.getIdleEmote())
-                .replace("DO_NOT_DISTURB", config.getDndBadge())
-                .replace("OFFLINE", config.getOfflineEmote());
+                .replace("ONLINE", config.getOnlineEmote().getAsMention())
+                .replace("IDLE", config.getIdleEmote().getAsMention())
+                .replace("DO_NOT_DISTURB", config.getDndEmote().getAsMention())
+                .replace("OFFLINE", config.getOfflineEmote().getAsMention());
     }
 
     Color getColor (Member member) {
-        if (member.getColor() == null) return Color.decode(
-                Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor());
+        if (member.getColor() == null) return Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor();
         else return member.getColor();
     }
 
@@ -101,7 +100,7 @@ public class Profile implements SlashCommandHandler {
             String spotifyURL = "https://open.spotify.com/track/" + rp.getSyncId();
 
             details = "[`\"" + rp.getDetails() + "\"";
-            if (!(rp.getState() == null)) details +=  " by " + rp.getState();
+            if (rp.getState() != null) details +=  " by " + rp.getState();
             details += "`](" + spotifyURL + ") " + Bot.config.get(guild).getEmote().getSpotifyEmote();
         } else details = "`" + activity.getName() + "`";
         return details;
@@ -121,8 +120,8 @@ public class Profile implements SlashCommandHandler {
 
     String getDescription (Member member) {
         String desc = "";
-        if (!(getCustomActivity(member) == null)) desc += "\n\"" + getCustomActivity(member).getName() + "\"";
-        if (!(getGameActivity(member) == null)) desc += "\n• " +
+        if (getCustomActivity(member) != null) desc += "\n\"" + getCustomActivity(member).getName() + "\"";
+        if (getGameActivity(member) != null) desc += "\n• " +
                 getGameActivityType(getGameActivity(member)) + " " + getGameActivityDetails(getGameActivity(member), member.getGuild());
         desc +=
                 "\n\n⌞ Warnings: `" + new Warns().warnCount(member) + "`" +
@@ -145,9 +144,9 @@ public class Profile implements SlashCommandHandler {
                 .setFooter("ID: " + member.getId());
 
                 if (member.getRoles().size() > 1 ) e.addField("Roles", getColorRoleAsMention(member) + " (+" + (member.getRoles().size() -1) + " other)", true);
-                else if (member.getRoles().size() > 0) e.addField("Roles", getColorRoleAsMention(member), true);
+                else if (!member.getRoles().isEmpty()) e.addField("Roles", getColorRoleAsMention(member), true);
 
-                if (member.getRoles().size() > 0) e.addField("Color", "`" + getColorAsHex(getColor(member)) + "`", true);
+                if (!member.getRoles().isEmpty()) e.addField("Color", "`" + getColorAsHex(getColor(member)) + "`", true);
                     e.addField("Server joined on", getServerJoinedDate(member, tu), false)
                     .addField("Account created on", getAccountCreatedDate(member, tu), true);
             return event.replyEmbeds(e.build());
