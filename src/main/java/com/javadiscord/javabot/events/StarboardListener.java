@@ -25,7 +25,6 @@ import static com.mongodb.client.model.Filters.eq;
 
 @Slf4j
 public class StarboardListener extends ListenerAdapter {
-    private static final int REACTION_LIMIT = 3;
 
     void addToSB(Guild guild, MessageChannel channel, Message message, int starCount) {
         String guildId = guild.getId();
@@ -99,9 +98,9 @@ public class StarboardListener extends ListenerAdapter {
 
         Document doc = collection.find(eq("message_id", messageId)).first();
         if (doc == null) return;
-        String var = doc.getString("starboard_embed");
+        String embedId = doc.getString("starboard_embed");
         Bot.config.get(guild).getStarBoard().getChannel()
-                .deleteMessageById(var)
+                .deleteMessageById(embedId)
                 .queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
 
         collection.deleteOne(doc);
@@ -128,12 +127,12 @@ public class StarboardListener extends ListenerAdapter {
         String messageId = doc.getString("message_id");
         TextChannel channel = guild.getTextChannelById(channelId);
         if (channel == null) return;
-        String emote = Bot.config.get(guild).getStarBoard().getEmotes().get(0);
+        var config = Bot.config.get(guild).getStarBoard();
 
         channel.retrieveMessageById(messageId).queue(msg -> {
             updateIfEmpty(guild, channelId, messageId, msg);
-            int reactionCount = getReactionCountForEmote(emote, msg);
-            if (!db.isMessageOnStarboard(guildId, channelId, messageId) && reactionCount >= REACTION_LIMIT) {
+            int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), msg);
+            if (!db.isMessageOnStarboard(guildId, channelId, messageId) && reactionCount >= config.getReactionThreshold()) {
                 addToSB(guild, channel, msg, reactionCount);
             } else if (db.getStarboardChannelString(guildId, channelId, messageId, "starboard_embed") != null) {
                 updateSB(guild, channelId, messageId, reactionCount);
@@ -158,42 +157,48 @@ public class StarboardListener extends ListenerAdapter {
         if (event.getUser().isBot()) return;
 
         Database db = new Database();
-        String sbEmote = Bot.config.get(event.getGuild()).getStarBoard().getEmotes().get(0);
+        var config = Bot.config.get(event.getGuild()).getStarBoard();
 
-        if (!event.getReactionEmote().getName().equals(sbEmote)) return;
+        if (!event.getReactionEmote().getName().equals(config.getEmotes().get(0))) return;
 
         String guildId = event.getGuild().getId();
         String channelId = event.getChannel().getId();
         String messageId = event.getMessageId();
 
         event.getChannel().retrieveMessageById(messageId).queue(message -> {
-            int reactionCount = getReactionCountForEmote(sbEmote, message);
-            if (db.isMessageOnStarboard(guildId, channelId, messageId))
+            int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
+
+            if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
                 updateSB(event.getGuild(), channelId, messageId, reactionCount);
-            else if (reactionCount >= REACTION_LIMIT) addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
+            } else if (reactionCount >= config.getReactionThreshold()) {
+                addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
+            }
         });
     }
 
     @Override
     public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
-        if (event.getUser().isBot()) return;
+        if (event.getUser().isBot() || event.getUser().isSystem()) return;
 
         Database db = new Database();
-        String sbEmote = Bot.config.get(event.getGuild()).getStarBoard().getEmotes().get(0);
+        var config = Bot.config.get(event.getGuild()).getStarBoard();
 
-        if (!event.getReactionEmote().getName().equals(sbEmote)) return;
+        if (!event.getReactionEmote().getName().equals(config.getEmotes().get(0))) return;
 
         String guildId = event.getGuild().getId();
         String channelId = event.getChannel().getId();
         String messageId = event.getMessageId();
 
         event.getChannel().retrieveMessageById(messageId).queue(message -> {
-            int reactionCount = getReactionCountForEmote(sbEmote, message);
+            int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
 
-            if (db.isMessageOnStarboard(guildId, channelId, messageId))
+            if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
                 updateSB(event.getGuild(), channelId, messageId, reactionCount);
-            else if (reactionCount >= REACTION_LIMIT) addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
-            else removeMessageFromStarboard(event.getGuild(), messageId);
+            } else if (reactionCount >= config.getReactionThreshold()) {
+                addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
+            } else {
+                removeMessageFromStarboard(event.getGuild(), messageId);
+            }
         });
     }
 
