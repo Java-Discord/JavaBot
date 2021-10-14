@@ -13,9 +13,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.time.Instant;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +50,6 @@ public class AutoMod extends ListenerAdapter {
                     // filter for spam
                     .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
                     .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
-
             if (spamCount > 5) {
                 handleSpam(event, member);
             }
@@ -68,7 +65,7 @@ public class AutoMod extends ListenerAdapter {
     private void handleSpam(@NotNull GuildMessageReceivedEvent event, Member member) {
         // java files -> not spam
         if (!event.getMessage().getAttachments().isEmpty()
-                && event.getMessage().getAttachments().get(0).getFileExtension().equals("java")) return;
+                && "java".equals(event.getMessage().getAttachments().get(0).getFileExtension())) return;
 
         Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
         if (member.getRoles().contains(muteRole)) return;

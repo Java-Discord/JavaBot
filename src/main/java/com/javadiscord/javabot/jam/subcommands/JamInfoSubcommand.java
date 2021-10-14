@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +25,7 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 		Jam jam;
 		try {
 			jam = this.fetchJam(event);
-		} catch (Throwable t) {
+		} catch (RuntimeException t) {
 			return Responses.error(event, t.getMessage());
 		}
 		if (jam == null) {

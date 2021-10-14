@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

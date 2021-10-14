@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.commands.moderation;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -11,7 +12,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -23,6 +23,9 @@ public class Report implements SlashCommandHandler {
         String reason = option == null ? "None" : option.getAsString();
 
         Member member = event.getOption("user").getAsMember();
+        if (member == null) {
+        	return Responses.error(event, "Cannot report a user who is not a member of this server");
+        }
         User author = event.getUser();
         MessageChannel reportChannel = Bot.config.get(event.getGuild()).getModeration().getReportChannel();
 

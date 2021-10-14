@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.awt.*;
 import java.time.Instant;
 
 public class Correct implements SlashCommandHandler {

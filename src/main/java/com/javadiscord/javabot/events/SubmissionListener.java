@@ -1,35 +1,23 @@
 package com.javadiscord.javabot.events;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static com.javadiscord.javabot.events.Startup.preferredGuild;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
 import com.javadiscord.javabot.other.Constants;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
-import org.bson.Document;
-
-import java.awt.*;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
-
-import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.javadiscord.javabot.events.Startup.preferredGuild;
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Contains methods and events used for the QOTW-Submission system.

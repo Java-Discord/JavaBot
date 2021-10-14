@@ -8,8 +8,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.awt.*;
-
 public class Avatar implements SlashCommandHandler {
 
     @Override
