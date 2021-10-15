@@ -133,22 +133,22 @@ public class Profile implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         OptionMapping profileOption = event.getOption("user");
-        Member member = profileOption == null ? event.getMember() : profileOption.getAsMember();
+        Member member = profileOption == null || profileOption.getAsMember() == null ? event.getMember() : profileOption.getAsMember();
         TimeUtils tu = new TimeUtils();
 
-            var e = new EmbedBuilder()
-                .setTitle(getOnlineStatus(member) + " " + member.getUser().getAsTag() + " " + getBadges(member))
-                .setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
-                .setColor(getColor(member))
-                .setDescription(getDescription(member))
-                .setFooter("ID: " + member.getId());
+        var e = new EmbedBuilder()
+            .setTitle(getOnlineStatus(member) + " " + member.getUser().getAsTag() + " " + getBadges(member))
+            .setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
+            .setColor(getColor(member))
+            .setDescription(getDescription(member))
+            .setFooter("ID: " + member.getId());
 
-                if (member.getRoles().size() > 1 ) e.addField("Roles", getColorRoleAsMention(member) + " (+" + (member.getRoles().size() -1) + " other)", true);
-                else if (!member.getRoles().isEmpty()) e.addField("Roles", getColorRoleAsMention(member), true);
+            if (member.getRoles().size() > 1 ) e.addField("Roles", getColorRoleAsMention(member) + " (+" + (member.getRoles().size() -1) + " other)", true);
+            else if (!member.getRoles().isEmpty()) e.addField("Roles", getColorRoleAsMention(member), true);
 
-                if (!member.getRoles().isEmpty()) e.addField("Color", "`" + getColorAsHex(getColor(member)) + "`", true);
-                    e.addField("Server joined on", getServerJoinedDate(member, tu), false)
-                    .addField("Account created on", getAccountCreatedDate(member, tu), true);
+            if (!member.getRoles().isEmpty()) e.addField("Color", "`" + getColorAsHex(getColor(member)) + "`", true);
+            e.addField("Server joined on", getServerJoinedDate(member, tu), false)
+                .addField("Account created on", getAccountCreatedDate(member, tu), true);
             return event.replyEmbeds(e.build());
     }
 }

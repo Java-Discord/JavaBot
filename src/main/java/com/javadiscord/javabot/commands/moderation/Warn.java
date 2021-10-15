@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
