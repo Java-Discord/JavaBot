@@ -86,7 +86,7 @@ public class HelpChannelUpdater implements Runnable {
 			if (!isActivityCheck(mostRecentMessage)) {
 				if (mostRecentMessage.getTimeCreated().plusMinutes(config.getInactivityTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
 					return sendActivityCheck(channel, owner);
-				} else {
+				} else {// The channel is still active, so take this opportunity to remove all old activity check messages.
 					return deleteOldActivityChecks(messages);
 				}
 			}
@@ -165,6 +165,13 @@ public class HelpChannelUpdater implements Runnable {
 				message.getContentRaw().contains("Are you finished with this channel?");
 	}
 
+	/**
+	 * Sends an activity check to the given channel, to check that the owner is
+	 * still using the channel.
+	 * @param channel The channel to send the check to.
+	 * @param owner The owner of the channel.
+	 * @return A rest action that completes when the check has been sent.
+	 */
 	private RestAction<?> sendActivityCheck(TextChannel channel, User owner) {
 		log.info("Sending inactivity check to {} because of no activity after {} minutes.", channel.getAsMention(), config.getInactivityTimeoutMinutes());
 		return channel.sendMessage(String.format(
@@ -178,6 +185,14 @@ public class HelpChannelUpdater implements Runnable {
 		);
 	}
 
+	/**
+	 * Unreserves an inactive channel, which happens after a user ignores the
+	 * activity check for some amount of time.
+	 * @param channel The channel to unreserve.
+	 * @param owner The owner of the channel.
+	 * @param mostRecentMessage The most recent message that was sent.
+	 * @return A rest action that completes once the channel is unreserved.
+	 */
 	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage) {
 		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
 		return RestAction.allOf(
@@ -190,6 +205,11 @@ public class HelpChannelUpdater implements Runnable {
 		);
 	}
 
+	/**
+	 * Removes all old activity check messages from the list of messages.
+	 * @param messages The messages to remove activity checks from.
+	 * @return A rest action that completes when all activity checks are removed.
+	 */
 	private RestAction<?> deleteOldActivityChecks(List<Message> messages) {
 		var deleteActions = messages.stream()
 				.filter(this::isActivityCheck)
