@@ -162,7 +162,7 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private boolean isActivityCheck(Message message) {
 		return message.getAuthor().equals(this.jda.getSelfUser()) &&
-				message.getContentRaw().contains("Are you finished with this channel?");
+			message.getContentRaw().contains("Are you finished with this channel?");
 	}
 
 	/**
@@ -212,8 +212,8 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private RestAction<?> deleteOldActivityChecks(List<Message> messages) {
 		var deleteActions = messages.stream()
-				.filter(this::isActivityCheck)
-				.map(Message::delete).toList();
+			.filter(this::isActivityCheck)
+			.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) {
 			return RestAction.allOf(deleteActions);
 		}
