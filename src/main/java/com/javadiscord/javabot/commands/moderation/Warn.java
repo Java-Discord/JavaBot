@@ -5,9 +5,6 @@ import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.other.Misc;
 import com.javadiscord.javabot.other.TimeUtils;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -24,71 +21,72 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class Warn implements SlashCommandHandler {
 
-    public void addToDatabase(String memID, String guildID, String reason) {
+	public void addToDatabase(String memID, String guildID, String reason) {
+		Document doc = new Document("guild_id", guildID)
+				.append("user_id", memID)
+				.append("date", LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER))
+				.append("reason", reason);
+		mongoClient.getDatabase("userdata")
+				.getCollection("warns")
+				.insertOne(doc);
+	}
 
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> warns = database.getCollection("warns");
+	public void deleteAllDocs(String memID) {
+		mongoClient.getDatabase("userdata")
+				.getCollection("warns")
+				.deleteMany(eq("user_id", memID));
+	}
 
-        Document doc = new Document("guild_id", guildID)
-                .append("user_id", memID)
-                .append("date", LocalDateTime.now().format(TimeUtils.STANDARD_FORMATTER))
-                .append("reason", reason);
+	public void warn(Member member, Guild guild, String reason) throws Exception {
+		int warnPoints = getWarnCount(member);
+		if ((warnPoints + 1) >= 3) {
+			new Ban().ban(member, "3/3 warns");
+		} else {
+			addToDatabase(member.getId(), guild.getId(), reason);
+		}
+	}
 
-        warns.insertOne(doc);
-    }
+	public int getWarnCount(Member member) {
+		return (int) mongoClient.getDatabase("userdata")
+				.getCollection("warns")
+				.countDocuments(eq("user_id", member.getId()));
+	}
 
-    public void deleteAllDocs(String memID) {
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var userOption = event.getOption("user");
+		if (userOption == null) {
+			return Responses.warning(event, "Missing required user.");
+		}
 
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> warns = database.getCollection("warns");
-        MongoCursor<Document> it = warns.find(eq("user_id", memID)).iterator();
+		Member member = userOption.getAsMember();
+		if (member == null) {
+			return Responses.warning(event, "The given user is not a member of this guild.");
+		}
 
-        while (it.hasNext()) { warns.deleteOne(it.next()); }
-    }
+		OptionMapping reasonOption = event.getOption("reason");
+		String reason = reasonOption == null ? "None" : reasonOption.getAsString();
+		int warnPoints = getWarnCount(member);
+		var eb = new EmbedBuilder()
+				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
+				.setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
+				.addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+				.addField("Moderator", "```" + event.getUser().getAsTag() + "```", true)
+				.addField("ID", "```" + member.getId() + "```", false)
+				.addField("Reason", "```" + reason + "```", false)
+				.setFooter("ID: " + member.getId())
+				.setTimestamp(Instant.now())
+				.build();
 
-    public void warn (Member member, Guild guild, String reason) {
+		Misc.sendToLog(event.getGuild(), eb);
+		member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
-        int warnPoints = getWarnCount(member);
-
-        if ((warnPoints + 1) >= 3) { new Ban().ban(member, "3/3 warns"); }
-        else addToDatabase(member.getId(), guild.getId(), reason);
-    }
-
-    public int getWarnCount (Member member) {
-
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> warns = database.getCollection("warns");
-
-        return (int) warns.countDocuments(eq("user_id", member.getId()));
-    }
-
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-
-        Member member = event.getOption("user").getAsMember();
-        OptionMapping option = event.getOption("reason");
-        String reason = option == null ? "None" : option.getAsString();
-        int warnPoints = getWarnCount(member);
-        var eb = new EmbedBuilder()
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
-                .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
-                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                .addField("Moderator", "```" + event.getUser().getAsTag() + "```", true)
-                .addField("ID", "```" + member.getId() + "```", false)
-                .addField("Reason", "```" + reason + "```", false)
-                .setFooter("ID: " + member.getId())
-                .setTimestamp(Instant.now())
-                .build();
-
-        Misc.sendToLog(event.getGuild(), eb);
-        member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
-
-        try {
-            warn(member, event.getGuild(), reason);
-            return event.replyEmbeds(eb);
-        } catch (Exception e) {
-            return Responses.error(event, e.getMessage());
-        }
-    }
+		try {
+			warn(member, event.getGuild(), reason);
+			return event.replyEmbeds(eb);
+		} catch (Exception e) {
+			return Responses.error(event, e.getMessage());
+		}
+	}
 }
 
