@@ -131,6 +131,12 @@ public class AutoMod extends ListenerAdapter {
         event.getMessage().delete().queue();
     }
 
+    /**
+     * Bans a user for the given reason
+     * @param event the event
+     * @param member the user to be banned
+     * @param reason the reason for the ban
+     */
     private void ban (@NotNull GuildMessageReceivedEvent event, Member member, String reason) {
         MessageEmbed eb = new EmbedBuilder()
                 .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
