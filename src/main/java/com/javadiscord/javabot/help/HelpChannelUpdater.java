@@ -12,6 +12,7 @@ import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * Task that updates all help channels in a particular guild.
@@ -66,7 +67,7 @@ public class HelpChannelUpdater implements Runnable {
 			log.info("Unreserving channel {} because no owner could be found.", channel.getAsMention());
 			return this.channelManager.unreserveChannel(channel);
 		}
-		return channel.getHistory().retrievePast(1).map(messages -> {
+		return channel.getHistory().retrievePast(50).map(messages -> {
 			Message mostRecentMessage = messages.isEmpty() ? null : messages.get(0);
 			if (mostRecentMessage == null) {
 				log.info("Unreserving channel {} because no recent messages could be found.", channel.getAsMention());
@@ -78,33 +79,18 @@ public class HelpChannelUpdater implements Runnable {
 				isActivityCheck(mostRecentMessage) &&
 				mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())
 			) {
-				log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
-				return RestAction.allOf(
-						mostRecentMessage.delete(),
-						channel.sendMessage(String.format(
-								"%s, this channel will be unreserved due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
-								owner.getAsMention()
-						)),
-						this.channelManager.unreserveChannel(channel)
-				);
+				return unreserveInactiveChannel(channel, owner, mostRecentMessage);
 			}
 
 			// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
-			if (
-					!isActivityCheck(mostRecentMessage) &&
-					mostRecentMessage.getTimeCreated().plusMinutes(config.getInactivityTimeoutMinutes()).isBefore(OffsetDateTime.now())
-			) {
-				log.info("Sending inactivity check to {} because of no activity after {} minutes.", channel.getAsMention(), config.getInactivityTimeoutMinutes());
-				return channel.sendMessage(String.format(
-						"Hey %s, it looks like this channel is inactive. Are you finished with this channel?\n\n> _If no response is received after %d minutes, this channel will be removed._",
-						owner.getAsMention(),
-						config.getRemoveTimeoutMinutes()
-					))
-					.setActionRow(
-						new ButtonImpl("help-channel:done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
-						new ButtonImpl("help-channel:not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
-					);
+			if (!isActivityCheck(mostRecentMessage)) {
+				if (mostRecentMessage.getTimeCreated().plusMinutes(config.getInactivityTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+					return sendActivityCheck(channel, owner);
+				} else {// The channel is still active, so take this opportunity to remove all old activity check messages.
+					return deleteOldActivityChecks(messages);
+				}
 			}
+
 			// No action needed.
 			return new CompletedRestAction<>(this.jda, null);
 		}).complete();
@@ -176,6 +162,61 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private boolean isActivityCheck(Message message) {
 		return message.getAuthor().equals(this.jda.getSelfUser()) &&
-				message.getContentRaw().contains("Are you finished with this channel?");
+			message.getContentRaw().contains("Are you finished with this channel?");
+	}
+
+	/**
+	 * Sends an activity check to the given channel, to check that the owner is
+	 * still using the channel.
+	 * @param channel The channel to send the check to.
+	 * @param owner The owner of the channel.
+	 * @return A rest action that completes when the check has been sent.
+	 */
+	private RestAction<?> sendActivityCheck(TextChannel channel, User owner) {
+		log.info("Sending inactivity check to {} because of no activity after {} minutes.", channel.getAsMention(), config.getInactivityTimeoutMinutes());
+		return channel.sendMessage(String.format(
+			"Hey %s, it looks like this channel is inactive. Are you finished with this channel?\n\n> _If no response is received after %d minutes, this channel will be removed._",
+			owner.getAsMention(),
+			config.getRemoveTimeoutMinutes()
+		))
+		.setActionRow(
+			new ButtonImpl("help-channel:done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
+			new ButtonImpl("help-channel:not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
+		);
+	}
+
+	/**
+	 * Unreserves an inactive channel, which happens after a user ignores the
+	 * activity check for some amount of time.
+	 * @param channel The channel to unreserve.
+	 * @param owner The owner of the channel.
+	 * @param mostRecentMessage The most recent message that was sent.
+	 * @return A rest action that completes once the channel is unreserved.
+	 */
+	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage) {
+		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
+		return RestAction.allOf(
+			mostRecentMessage.delete(),
+			channel.sendMessage(String.format(
+				"%s, this channel will be unreserved due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
+				owner.getAsMention()
+			)),
+			this.channelManager.unreserveChannel(channel)
+		);
+	}
+
+	/**
+	 * Removes all old activity check messages from the list of messages.
+	 * @param messages The messages to remove activity checks from.
+	 * @return A rest action that completes when all activity checks are removed.
+	 */
+	private RestAction<?> deleteOldActivityChecks(List<Message> messages) {
+		var deleteActions = messages.stream()
+			.filter(this::isActivityCheck)
+			.map(Message::delete).toList();
+		if (!deleteActions.isEmpty()) {
+			return RestAction.allOf(deleteActions);
+		}
+		return new CompletedRestAction<>(this.jda, null);
 	}
 }
