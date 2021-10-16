@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.moderation.Ban;
 import com.javadiscord.javabot.commands.moderation.Mute;
 import com.javadiscord.javabot.commands.moderation.Warn;
 import com.javadiscord.javabot.other.Misc;
@@ -55,6 +56,10 @@ public class AutoMod extends ListenerAdapter {
             }
         });
 
+        // known phishing link
+        if (event.getMessage().getContentRaw().contains("https://discordc.gift/")){
+            ban(event, member, "scam");
+        }
     }
 
     /**
@@ -119,6 +124,31 @@ public class AutoMod extends ListenerAdapter {
 
         try {
             new Warn().warn(event.getMember(), event.getGuild(), reason);
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e.getMessage()).queue();
+        }
+
+        event.getMessage().delete().queue();
+    }
+
+    private void ban (@NotNull GuildMessageReceivedEvent event, Member member, String reason) {
+        MessageEmbed eb = new EmbedBuilder()
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
+                .setAuthor(member.getUser().getAsTag() + " | Ban", null, member.getUser().getEffectiveAvatarUrl())
+                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+                .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
+                .addField("ID", "```" + member.getId() + "```", false)
+                .addField("Reason", "```" + reason + "```", false)
+                .setFooter("ID: " + member.getId())
+                .setTimestamp(Instant.now())
+                .build();
+
+        event.getChannel().sendMessageEmbeds(eb).queue();
+        Misc.sendToLog(event.getGuild(), eb);
+        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
+
+        try {
+            new Ban().ban(member,reason);
         } catch (Exception e) {
             event.getChannel().sendMessage(e.getMessage()).queue();
         }
