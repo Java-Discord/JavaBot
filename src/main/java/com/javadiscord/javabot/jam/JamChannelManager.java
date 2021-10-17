@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import java.awt.*;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;

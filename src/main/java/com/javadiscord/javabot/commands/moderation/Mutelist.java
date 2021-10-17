@@ -8,9 +8,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.awt.*;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 public class Mutelist implements SlashCommandHandler {

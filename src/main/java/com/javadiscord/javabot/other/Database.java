@@ -1,26 +1,23 @@
 package com.javadiscord.javabot.other;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
-import org.bson.Document;
-import org.slf4j.LoggerFactory;
+import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
-import static com.javadiscord.javabot.events.Startup.preferredGuild;
-import static com.mongodb.client.model.Filters.eq;
+import org.bson.Document;
+import org.slf4j.LoggerFactory;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 
 public class Database {
 
@@ -73,15 +70,14 @@ public class Database {
     public boolean userDocExists(String userId) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
-        if (collection.find(eq("discord_id", userId)).first() == null) return false;
-        return true;
+        return collection.find(eq("discord_id", userId)).first() != null;
     }
 
     public void insertUserDoc (String userId) {
         MongoDatabase database = mongoClient.getDatabase("userdata");
         MongoCollection<Document> collection = database.getCollection("users");
         collection.insertOne(userDoc(userId));
-        logger.info("Added Database entry for User " + userId);
+        logger.info("Added Database entry for User {}", userId);
     }
 
     public void setMemberEntry(String memberID, String path, Object newValue) {
@@ -130,18 +126,16 @@ public class Database {
         Document other = new Document()
                 .append("server_lock", lock);
 
-        Document doc = new Document()
+        return new Document()
                 .append("guild_id", guildID)
                 .append("other", other);
-        return doc;
     }
 
     public boolean guildDocExists(Guild guild) {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("config");
         if (guild == null) return false;
-        if (collection.find(eq("guild_id", guild.getId())).first() == null) return false;
-        return true;
+        return (collection.find(eq("guild_id", guild.getId())).first() != null);
     }
 
     public void insertGuildDoc (Guild guild) {
