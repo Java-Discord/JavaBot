@@ -47,10 +47,10 @@ public class SubmissionListener extends ListenerAdapter {
         config.getQotw().getSubmissionChannel().sendMessageEmbeds(e)
                 .setActionRows(
                 ActionRow.of(
-                Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
-                Button.danger("submission:decline:" + event.getUser().getId(), "Decline"),
-                Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw"),
-                Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️")))
+                    Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
+                    Button.danger("submission:decline:" + event.getUser().getId(), "Decline"),
+                    Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw"),
+                    Button.secondary("utils:delete", "🗑️")))
                 .queue();
 
         event.getHook().editOriginalComponents()
@@ -109,16 +109,6 @@ public class SubmissionListener extends ListenerAdapter {
                         "Declined by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
     }
 
-    /**
-     * Gets called when a moderator presses the "🗑️" button on a submission.
-     * <p>
-     * Deletes the submission message.
-     * </p>
-     * @param event the ButtonClickEvent that is triggered upon use. {@link InteractionListener#onButtonClick(ButtonClickEvent)}
-     */
-    public void submissionDelete (ButtonClickEvent event) {
-        event.getHook().deleteOriginal().queue();
-    }
 
     /**
      * Gets called when a moderator presses the "Get Raw" button on a submission.
@@ -131,7 +121,7 @@ public class SubmissionListener extends ListenerAdapter {
         var description = event.getMessage().getEmbeds().get(0).getDescription();
         event.getHook()
                 .sendFile(new ByteArrayInputStream(description.getBytes(StandardCharsets.UTF_8)), event.getUser().getId() + ".txt")
-                .addActionRow(Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️"))
+                .addActionRow(Button.secondary("utils:delete", "🗑️"))
                 .queue();
     }
 
