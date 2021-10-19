@@ -39,8 +39,8 @@ public class InteractionListener extends ListenerAdapter {
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
-			case "kick" -> new Kick().handleKickInteraction(event.getGuild().getMemberById(id[2]), event);
-			case "ban" -> new Ban().handleBanInteraction(event.getGuild().getMemberById(id[2]), event);
+			case "kick" -> new Kick().handleKickInteraction(event.getGuild().getMemberById(id[2]), event).queue();
+			case "ban" -> new Ban().handleBanInteraction(event.getGuild().getMemberById(id[2]), event).queue();
 		}
 	}
 

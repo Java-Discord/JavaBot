@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Instant;
@@ -33,10 +34,7 @@ public class Ban implements SlashCommandHandler {
         try {
             ban(member, reason);
             Misc.sendToLog(event.getGuild(), eb);
-            if (member.getUser().hasPrivateChannel()) {
-                member.getUser().openPrivateChannel().complete().
-                        sendMessageEmbeds(eb).queue();
-            }
+            member.getUser().openPrivateChannel().queue(m -> m.sendMessageEmbeds(eb).queue());
             return event.replyEmbeds(eb);
         }
         catch (Exception e) {
@@ -74,10 +72,9 @@ public class Ban implements SlashCommandHandler {
      * @param member The member that should be banned
      * @param event The ButtonClickEvent, that is triggered upon use.
      */
-    public void handleBanInteraction(Member member, ButtonClickEvent event) {
+    public RestAction<?> handleBanInteraction(Member member, ButtonClickEvent event) {
         if (member == null) {
-            Responses.error(event.getHook(), "Couldn't find member").queue();
-            return;
+            return Responses.error(event.getHook(), "Couldn't find member");
         }
         event.getHook().editOriginalComponents()
                 .setActionRows(
@@ -89,7 +86,7 @@ public class Ban implements SlashCommandHandler {
         new Ban().ban(member, "None");
 
         Misc.sendToLog(event.getGuild(), eb);
-        member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
-        event.replyEmbeds(eb);
+        member.getUser().openPrivateChannel().queue(m -> m.sendMessageEmbeds(eb).queue());
+        return event.replyEmbeds(eb);
     }
 }
