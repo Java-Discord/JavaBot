@@ -45,7 +45,7 @@ public class Report implements SlashCommandHandler {
             .setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
             .setTimestamp(Instant.now());
 
-        reportChannel.sendMessage("@dhere").setEmbeds(e.build())
+        reportChannel.sendMessage("@here").setEmbeds(e.build())
                 .setActionRow(
                         Button.danger("utils:ban:" + member.getId(), "Ban"),
                         Button.danger("utils:kick:" + member.getId(), "Kick"),
