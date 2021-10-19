@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.service.jam;
 
+import com.javadiscord.javabot.data.properties.config.guild.JamConfig;
 import com.javadiscord.javabot.service.jam.model.Jam;
 import com.javadiscord.javabot.service.jam.model.JamSubmission;
 import com.javadiscord.javabot.service.jam.model.JamTheme;
 import com.javadiscord.javabot.utils.Colors;
-import com.javadiscord.javabot.data.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;

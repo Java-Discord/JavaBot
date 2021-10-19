@@ -1,12 +1,12 @@
 package com.javadiscord.javabot.service.jam.subcommands;
 
 import com.javadiscord.javabot.commands.Responses;
+import com.javadiscord.javabot.data.properties.config.guild.JamConfig;
 import com.javadiscord.javabot.service.jam.dao.JamSubmissionRepository;
 import com.javadiscord.javabot.service.jam.dao.JamThemeRepository;
 import com.javadiscord.javabot.service.jam.model.Jam;
 import com.javadiscord.javabot.service.jam.model.JamSubmission;
 import com.javadiscord.javabot.service.jam.model.JamTheme;
-import com.javadiscord.javabot.data.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;

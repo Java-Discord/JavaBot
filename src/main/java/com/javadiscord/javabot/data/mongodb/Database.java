@@ -1,23 +1,21 @@
 package com.javadiscord.javabot.data.mongodb;
 
-import static com.javadiscord.javabot.service.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import org.bson.Document;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bson.Document;
-import org.slf4j.LoggerFactory;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
+import static com.javadiscord.javabot.service.Startup.mongoClient;
+import static com.mongodb.client.model.Filters.eq;
 
 public class Database {
 

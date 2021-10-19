@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.service.jam.subcommands.admin;
 
+import com.javadiscord.javabot.data.properties.config.guild.JamConfig;
 import com.javadiscord.javabot.service.jam.dao.JamSubmissionRepository;
 import com.javadiscord.javabot.service.jam.model.Jam;
 import com.javadiscord.javabot.service.jam.model.JamSubmission;
 import com.javadiscord.javabot.service.jam.subcommands.ActiveJamSubcommand;
-import com.javadiscord.javabot.data.properties.config.guild.JamConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;

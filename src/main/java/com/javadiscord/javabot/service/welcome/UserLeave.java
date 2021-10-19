@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.service.welcome;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.service.help.HelpChannelManager;
 import com.javadiscord.javabot.data.mongodb.Database;
+import com.javadiscord.javabot.service.help.HelpChannelManager;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;

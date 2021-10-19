@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.data.properties.config.guild;
 
-import com.javadiscord.javabot.service.help.*;
 import com.javadiscord.javabot.data.properties.config.GuildConfigItem;
+import com.javadiscord.javabot.service.help.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Category;
