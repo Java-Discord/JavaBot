@@ -1,9 +1,9 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.other.Constants;
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.properties.config.guild.StarBoardConfig;
+import com.javadiscord.javabot.Constants;
+import com.javadiscord.javabot.data.mongodb.Database;
+import com.javadiscord.javabot.data.properties.config.guild.StarBoardConfig;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.bson.Document;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.service.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 @Slf4j

@@ -3,8 +3,8 @@ package com.javadiscord.javabot.commands.moderation;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Misc;
-import com.javadiscord.javabot.other.TimeUtils;
+import com.javadiscord.javabot.utils.Misc;
+import com.javadiscord.javabot.utils.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -16,7 +16,7 @@ import org.bson.Document;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.service.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Warn implements SlashCommandHandler {

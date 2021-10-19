@@ -1,15 +1,9 @@
 package com.javadiscord.javabot.events;
 
-import static com.javadiscord.javabot.events.Startup.preferredGuild;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.other.Constants;
-
+import com.javadiscord.javabot.service.Startup;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,6 +12,12 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+
+import static com.javadiscord.javabot.service.Startup.preferredGuild;
 
 /**
  * Contains methods and events used for the QOTW-Submission system.
