@@ -7,15 +7,19 @@ import com.javadiscord.javabot.utils.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
 
 /**
  * this class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
@@ -26,35 +30,63 @@ public class AutoMod extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        if (event.getMember() == null
-                || event.getMember().getUser().isBot()
-                || event.getMember().hasPermission(Permission.MESSAGE_MANAGE)) return;
-
-
         Member member = event.getMember();
-
+        if (canBypassAutomod(member)) return;
+        checkNewMessageAutomod(event.getMessage());
+    }
+    
+    @Override
+    public void onGuildMessageUpdate(@Nonnull GuildMessageUpdateEvent event) {
+        Member member = event.getMember();
+        if (canBypassAutomod(member)) return;
+        checkContentAutomod(event.getMessage());
+    }
+    
+    /**
+     * Checks if a member can bypass the automod system.
+     * @param member the {@link Member} to check
+     * @return <code>true</code> if the member is allowed to bypass automod, else <code>false</code>
+     */
+    private boolean canBypassAutomod(Member member) {
+        return member == null
+                || member.getUser().isBot()
+                || member.hasPermission(Permission.MESSAGE_MANAGE);
+    }
+    
+    /**
+     * Runs all automod checks that should be run when a message is sent.
+     * @param message the {@link Message} that should be checked
+     */
+    private void checkNewMessageAutomod(@NotNull Message message) {
         // mention spam
-        if (event.getMessage().getMentionedMembers().size() >= 5) {
-            warn(event, member, "Automod: Mention Spam");
-        }
-
-        // Advertising
-        Matcher matcher = inviteURL.matcher(cleanString(event.getMessage().getContentRaw()));
-        if (matcher.find()) {
-            warn(event, member, "Automod: Advertising");
+        if (message.getMentionedMembers().size() >= 5) {
+            warn(message, message.getMember(), "Automod: Mention Spam");
         }
 
         // spam
-        event.getChannel().getHistory().retrievePast(10).queue(messages -> {
-            int spamCount = (int) messages.stream().filter(msg -> !msg.equals(event.getMessage()))
+        message.getChannel().getHistory().retrievePast(10).queue(messages -> {
+            int spamCount = (int) messages.stream().filter(msg -> !msg.equals(message))
                     // filter for spam
-                    .filter(message -> message.getAuthor().equals(event.getAuthor()) && !message.getAuthor().isBot())
-                    .filter(msg -> (event.getMessage().getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
+                    .filter(msg -> msg.getAuthor().equals(message.getAuthor()) && !msg.getAuthor().isBot())
+                    .filter(msg -> (message.getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
             if (spamCount > 5) {
-                handleSpam(event, member);
+                handleSpam(message, message.getMember());
             }
         });
-
+        
+        checkContentAutomod(message);
+    }
+    
+    /**
+     * Runs all automod checks only depend on the message content.
+     * @param message the {@link Message} that should be checked
+     */
+    private void checkContentAutomod(@NotNull Message message) {
+        // Advertising
+        Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
+        if (matcher.find()) {
+            warn(message, message.getMember(), "Automod: Advertising");
+        }
     }
 
     /**
@@ -62,34 +94,34 @@ public class AutoMod extends ListenerAdapter {
      * @param event the message event
      * @param member the member to be potentially warned
      */
-    private void handleSpam(@NotNull GuildMessageReceivedEvent event, Member member) {
+    private void handleSpam(@NotNull Message msg, Member member) {
         // java files -> not spam
-        if (!event.getMessage().getAttachments().isEmpty()
-                && "java".equals(event.getMessage().getAttachments().get(0).getFileExtension())) return;
+        if (!msg.getAttachments().isEmpty()
+                && "java".equals(msg.getAttachments().get(0).getFileExtension())) return;
 
-        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
+        Role muteRole = Bot.config.get(msg.getGuild()).getModeration().getMuteRole();
         if (member.getRoles().contains(muteRole)) return;
 
         var eb = new EmbedBuilder()
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor())
+                .setColor(Bot.config.get(msg.getGuild()).getSlashCommand().getErrorColor())
                 .setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
+                .addField("Moderator", "```" + msg.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + "Automod: Spam" + "```", false)
                 .setFooter("ID: " + member.getId())
                 .setTimestamp(Instant.now())
                 .build();
 
-        event.getChannel().sendMessageEmbeds(eb).queue();
-        Misc.sendToLog(event.getGuild(), eb);
+        msg.getChannel().sendMessageEmbeds(eb).queue();
+        Misc.sendToLog(msg.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
         // mute
         try {
-            new Mute().mute(event.getMember(), event.getGuild());
+            new Mute().mute(msg.getMember(), msg.getGuild());
         } catch (Exception e) {
-            event.getChannel().sendMessage(e.getMessage()).queue();
+            msg.getChannel().sendMessage(e.getMessage()).queue();
         }
     }
 
@@ -99,31 +131,31 @@ public class AutoMod extends ListenerAdapter {
      * @param member the member to be warned
      * @param reason the reason for the warning
      */
-    private void warn (@NotNull GuildMessageReceivedEvent event, Member member, String reason) {
+    private void warn (Message message, Member member, String reason) {
         int warnPoints = new Warn().getWarnCount(member);
 
         MessageEmbed eb = new EmbedBuilder()
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
+                .setColor(Bot.config.get(message.getGuild()).getSlashCommand().getWarningColor())
                 .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
                 .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
+                .addField("Moderator", "```" + message.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
                 .setFooter("ID: " + member.getId())
                 .setTimestamp(Instant.now())
                 .build();
 
-        event.getChannel().sendMessageEmbeds(eb).queue();
-        Misc.sendToLog(event.getGuild(), eb);
+        message.getChannel().sendMessageEmbeds(eb).queue();
+        Misc.sendToLog(message.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
         try {
-            new Warn().warn(event.getMember(), event.getGuild(), reason);
+            new Warn().warn(message.getMember(), message.getGuild(), reason);
         } catch (Exception e) {
-            event.getChannel().sendMessage(e.getMessage()).queue();
+            message.getChannel().sendMessage(e.getMessage()).queue();
         }
 
-        event.getMessage().delete().queue();
+        message.delete().queue();
     }
 
 
