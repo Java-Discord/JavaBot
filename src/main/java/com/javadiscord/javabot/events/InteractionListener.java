@@ -32,6 +32,9 @@ public class InteractionListener extends ListenerAdapter {
 		}
 	}
 
+	/**
+	 * Some utility methods for interactions
+	 */
 	private void handleUtils(ButtonClickEvent event) {
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {

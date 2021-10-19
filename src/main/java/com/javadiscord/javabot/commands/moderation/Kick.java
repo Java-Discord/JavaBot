@@ -49,6 +49,13 @@ public class Kick implements SlashCommandHandler {
         member.kick(reason).queue();
     }
 
+    /**
+     * Returns a kick embed
+     * @param member The member that should be kicked
+     * @param mod The member that kicked the user
+     * @param guild The current guild
+     * @param reason The reason why the member was kicked
+     */
     public MessageEmbed kickEmbed(Member member, Member mod, Guild guild, String reason) {
         return new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | Kick", null, member.getUser().getEffectiveAvatarUrl())
@@ -62,18 +69,21 @@ public class Kick implements SlashCommandHandler {
                 .build();
     }
 
+    /**
+     * Handles an interaction, that should kick a member from the current guild.
+     * @param member The member that should be kick
+     * @param event The ButtonClickEvent, that is triggered upon use.
+     */
     public void handleKickInteraction(Member member, ButtonClickEvent event) {
         if (member == null) {
             Responses.error(event.getHook(), "Couldn't find member").queue();
             return;
         }
-
         event.getHook().editOriginalComponents()
                 .setActionRows(
                         ActionRow.of(
                                 Button.danger("utils:kick", "Kicked " + member.getUser().getAsTag()).asDisabled())
-                )
-                .queue();
+                ).queue();
 
         var eb = new Kick().kickEmbed(member, event.getMember(), event.getGuild(), "None");
         new Kick().kick(member, "None");

@@ -26,7 +26,7 @@ public class Ban implements SlashCommandHandler {
 
         Member member = event.getOption("user").getAsMember();
         if (member == null) {
-            return Responses.error(event, "Cannot kick a user who is not a member of this server");
+            return Responses.error(event, "Cannot ban a user who is not a member of this server");
         }
 
         var eb = banEmbed(member, event.getMember(), event.getGuild(), reason);
@@ -49,6 +49,13 @@ public class Ban implements SlashCommandHandler {
         member.ban(6, reason).queue();
     }
 
+    /**
+     * Returns a ban embed
+     * @param member The member that should be banned
+     * @param mod The member that banned the user
+     * @param guild The current guild
+     * @param reason The reason why the member was banned
+     */
     public MessageEmbed banEmbed(Member member, Member mod, Guild guild, String reason) {
         return new EmbedBuilder()
                 .setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
@@ -62,18 +69,21 @@ public class Ban implements SlashCommandHandler {
                 .build();
     }
 
+    /**
+     * Handles an interaction, that should ban a member from the current guild.
+     * @param member The member that should be banned
+     * @param event The ButtonClickEvent, that is triggered upon use.
+     */
     public void handleBanInteraction(Member member, ButtonClickEvent event) {
         if (member == null) {
             Responses.error(event.getHook(), "Couldn't find member").queue();
             return;
         }
-
         event.getHook().editOriginalComponents()
                 .setActionRows(
                         ActionRow.of(
                                 Button.danger("utils:ban", "Banned " + member.getUser().getAsTag()).asDisabled())
-                )
-                .queue();
+                ).queue();
 
         var eb = new Ban().banEmbed(member, event.getMember(), event.getGuild(), "None");
         new Ban().ban(member, "None");
