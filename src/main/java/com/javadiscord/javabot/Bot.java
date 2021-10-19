@@ -1,9 +1,16 @@
 package com.javadiscord.javabot;
 
-import com.javadiscord.javabot.data.H2DataSource;
+import com.javadiscord.javabot.commands.SlashCommands;
+import com.javadiscord.javabot.data.h2db.H2DataSource;
 import com.javadiscord.javabot.events.*;
-import com.javadiscord.javabot.help.HelpChannelListener;
-import com.javadiscord.javabot.properties.config.BotConfig;
+import com.javadiscord.javabot.service.AutoMod;
+import com.javadiscord.javabot.service.PresenceUpdater;
+import com.javadiscord.javabot.service.Startup;
+import com.javadiscord.javabot.service.StatsUpdater;
+import com.javadiscord.javabot.service.help.HelpChannelListener;
+import com.javadiscord.javabot.data.properties.config.BotConfig;
+import com.javadiscord.javabot.service.welcome.UserJoin;
+import com.javadiscord.javabot.service.welcome.UserLeave;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -91,7 +98,7 @@ public class Bot {
      */
     private static void addEventListeners(JDA jda) {
         jda.addEventListener(
-                new GuildJoin(),
+                new GuildJoinListener(),
                 new UserJoin(),
                 new UserLeave(),
                 new Startup(),

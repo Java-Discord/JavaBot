@@ -1,6 +1,6 @@
 package com.javadiscord.javabot.events;
 
-import static com.javadiscord.javabot.events.Startup.preferredGuild;
+import static com.javadiscord.javabot.service.Startup.preferredGuild;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -8,8 +8,9 @@ import java.time.Instant;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.other.Constants;
+import com.javadiscord.javabot.Constants;
 
+import com.javadiscord.javabot.service.Startup;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;

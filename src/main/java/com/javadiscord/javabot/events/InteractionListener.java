@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.help.HelpChannelManager;
+import com.javadiscord.javabot.service.help.HelpChannelManager;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;

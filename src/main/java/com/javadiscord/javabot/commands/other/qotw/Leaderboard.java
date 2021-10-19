@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Database;
+import com.javadiscord.javabot.data.mongodb.Database;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -26,7 +26,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.service.Startup.mongoClient;
 import static com.mongodb.client.model.Indexes.descending;
 import static com.mongodb.client.model.Projections.excludeId;
 

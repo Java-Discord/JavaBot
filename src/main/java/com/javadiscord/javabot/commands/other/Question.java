@@ -16,7 +16,7 @@ import org.bson.Document;
 
 import java.util.List;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.service.Startup.mongoClient;
 
 public class Question implements SlashCommandHandler {
 
