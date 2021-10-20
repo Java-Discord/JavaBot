@@ -120,7 +120,7 @@ public class JamChannelManager {
 		for (Map.Entry<JamTheme, Integer> entry : votes.entrySet()) {
 			embedBuilder.addField(entry.getKey().getName(), entry.getValue() + " votes", true);
 		}
-		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).queue();
 		this.removeAllMessages(this.config.getVotingChannel());
 		this.pingRole();
 	}
@@ -154,7 +154,7 @@ public class JamChannelManager {
 				.setTitle("Voting Has Begun!")
 				.setColor(this.config.getJamEmbedColor())
 				.setDescription(String.format("Go to %s to vote for who you think should win the %s.", this.config.getVotingChannel().getAsMention(), jam.getFullName()));
-		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).queue();
 		this.pingRole();
 		return messageIds;
 	}
@@ -236,7 +236,7 @@ public class JamChannelManager {
 	 * could be determined for a jam.
 	 */
 	public void sendNoWinnersMessage() {
-		this.config.getAnnouncementChannel().sendMessage("No winning submission could be determined.").complete();
+		this.config.getAnnouncementChannel().sendMessage("No winning submission could be determined.").queue();
 	}
 
 	/**
@@ -255,7 +255,7 @@ public class JamChannelManager {
 				.setDescription(String.format("> %s\nCheck out their project here:\n%s\nThey earned **%d** votes.", submission.getDescription(), submission.getSourceLink(), voteCounts.get(submission)));
 		this.addRunnerUpSubmissionFields(embedBuilder, voteCounts, List.of(submission), event);
 
-		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).queue();
 		this.pingRole();
 		this.removeAllMessages(this.config.getVotingChannel());
 	}
@@ -282,7 +282,7 @@ public class JamChannelManager {
 		}
 		this.addRunnerUpSubmissionFields(embedBuilder, voteCounts, submissions, event);
 
-		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).complete();
+		this.config.getAnnouncementChannel().sendMessageEmbeds(embedBuilder.build()).queue();
 		this.pingRole();
 		this.removeAllMessages(this.config.getVotingChannel());
 	}

@@ -53,8 +53,7 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 
 	private Jam fetchJam(SlashCommandEvent event) {
 		Jam jam;
-		try {
-			Connection con = Bot.dataSource.getConnection();
+		try (Connection con = Bot.dataSource.getConnection()) {
 			JamRepository jamRepository = new JamRepository(con);
 			OptionMapping idOption = event.getOption("id");
 			if (idOption == null) {
@@ -65,7 +64,6 @@ public class JamInfoSubcommand implements SlashCommandHandler {
 			} else {
 				jam = jamRepository.getJam(idOption.getAsLong());
 			}
-			con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error occurred while fetching the Jam info.", e);

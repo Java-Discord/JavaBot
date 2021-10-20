@@ -34,7 +34,7 @@ public class Unmute implements SlashCommandHandler {
                 .build();
 
             if (member.getRoles().toString().contains(muteRole.getId())) {
-                event.getGuild().removeRoleFromMember(member.getId(), muteRole).complete();
+                event.getGuild().removeRoleFromMember(member.getId(), muteRole).queue();
 
                 member.getUser().openPrivateChannel().complete().sendMessageEmbeds(e).queue();
 

@@ -93,7 +93,7 @@ public class HelpChannelUpdater implements Runnable {
 
 			// No action needed.
 			return new CompletedRestAction<>(this.jda, null);
-		}).complete();
+		}).flatMap(action->action);
 	}
 
 	/**

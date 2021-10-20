@@ -122,12 +122,12 @@ public class UserJoin extends ListenerAdapter {
                 }
             });
         } else {
-            if (user.hasPrivateChannel()) user.openPrivateChannel().complete()
-                    .sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
-            event.getMember().kick().complete();
-
-            String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
-            welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
+            if (user.hasPrivateChannel()) user.openPrivateChannel()
+                    .flatMap(channel->channel.sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild()))).queue();
+            event.getMember().kick().queue(unused->{
+                String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
+                welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
+            });
         }
     }
 }

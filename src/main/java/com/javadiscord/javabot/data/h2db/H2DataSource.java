@@ -31,14 +31,13 @@ public class H2DataSource {
 			log.info("H2 database doesn't exist yet. Initializing it now.");
 			InputStream is = getClass().getResourceAsStream("/schema.sql");
 			if (is == null) throw new IOException("Could not load schema.sql.");
-			Connection con = this.getConnection();
-			String sql = new String(is.readAllBytes());
-			for (String query : sql.split(";")) {
-				Statement statement = con.createStatement();
-				statement.executeUpdate(query);
-				statement.close();
+			try (Connection con = this.getConnection();
+					Statement statement = con.createStatement()) {
+				String sql = new String(is.readAllBytes());
+				for (String query : sql.split(";")) {
+					statement.executeUpdate(query);
+				}
 			}
-			con.close();
 			log.info("Successfully initialized H2 database.");
 		} else {
 			log.info("H2 database exists, ready to create connections.");
