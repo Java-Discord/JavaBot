@@ -1,6 +1,8 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.moderation.Ban;
+import com.javadiscord.javabot.commands.moderation.Kick;
 import com.javadiscord.javabot.service.help.HelpChannelManager;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,6 +28,19 @@ public class InteractionListener extends ListenerAdapter {
 			case "submission" -> this.handleSubmission(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> this.handleHelpChannel(event, id[1]);
+			case "utils" -> this.handleUtils(event);
+		}
+	}
+
+	/**
+	 * Some utility methods for interactions
+	 */
+	private void handleUtils(ButtonClickEvent event) {
+		String[] id = event.getComponentId().split(":");
+		switch (id[1]) {
+			case "delete" -> event.getHook().deleteOriginal().queue();
+			case "kick" -> new Kick().handleKickInteraction(event.getGuild().getMemberById(id[2]), event).queue();
+			case "ban" -> new Ban().handleBanInteraction(event.getGuild().getMemberById(id[2]), event).queue();
 		}
 	}
 
@@ -43,7 +58,6 @@ public class InteractionListener extends ListenerAdapter {
 			case "approve" -> new SubmissionListener().submissionApprove(event);
 			case "decline" -> new SubmissionListener().submissionDecline(event);
 			case "getraw" -> new SubmissionListener().submissionGetRaw(event);
-			case "delete" -> new SubmissionListener().submissionDelete(event);
 		}
 	}
 
