@@ -3,7 +3,6 @@ package com.javadiscord.javabot.commands.moderation;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.data.mongodb.Database;
 import com.javadiscord.javabot.utils.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,7 +17,6 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 public class Kick implements SlashCommandHandler {
 
@@ -58,7 +56,7 @@ public class Kick implements SlashCommandHandler {
         return new EmbedBuilder()
                 .setAuthor(member.getUser().getAsTag() + " | Kick", null, member.getUser().getEffectiveAvatarUrl())
                 .setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
-                .addField("Name", member.getUser().getAsMention(), true)
+                .addField("Member", member.getAsMention(), true)
                 .addField("Moderator", mod.getAsMention(), true)
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
@@ -74,6 +72,9 @@ public class Kick implements SlashCommandHandler {
      */
     public RestAction<?> handleKickInteraction(Member member, ButtonClickEvent event) {
         if (member == null) {
+            event.getHook().editOriginalComponents().setActionRows(ActionRow.of(
+                    Button.secondary("dummy-button", "Couldn't find Member").asDisabled())
+            ).queue();
             return Responses.error(event.getHook(), "Couldn't find member");
         }
         event.getHook().editOriginalComponents()
@@ -83,10 +84,13 @@ public class Kick implements SlashCommandHandler {
                 ).queue();
 
         var eb = new Kick().kickEmbed(member, event.getMember(), event.getGuild(), "None");
-        new Kick().kick(member, "None");
+        try {
+            new Kick().kick(member, "None");
+        } catch (Exception e) {
+            return Responses.error(event.getHook(), e.getMessage());
+        }
 
-        Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(m -> m.sendMessageEmbeds(eb).queue());
-        return event.replyEmbeds(eb);
+        return Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageEmbeds(eb);
     }
 }

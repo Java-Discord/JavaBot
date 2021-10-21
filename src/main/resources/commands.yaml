@@ -656,3 +656,20 @@
               description: The id of the question to remove.
               required: true
               type: INTEGER
+
+# Server Lock Commands
+- description: sets the server lock status
+  name: serverlock
+  handler: com.javadiscord.javabot.service.serverlock.ServerLock
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options: []
+  subCommands:
+    - description: sets the server lock status
+      name: set
+      options:
+        - { description: 'sets the server lock status', name: status,
+            required: true, type: BOOLEAN }
+

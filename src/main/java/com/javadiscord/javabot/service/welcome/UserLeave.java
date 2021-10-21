@@ -49,9 +49,11 @@ public class UserLeave extends ListenerAdapter {
             stmt.setLong(1, user.getIdLong());
             var rs = stmt.getResultSet();
             var manager = new HelpChannelManager(Bot.config.get(guild).getHelp());
-            while (rs.next()) {
-                long channelId = rs.getLong("channel_id");
-                manager.unreserveChannel(guild.getTextChannelById(channelId)).queue();
+            if (rs != null) {
+                while (rs.next()) {
+                    long channelId = rs.getLong("channel_id");
+                    manager.unreserveChannel(guild.getTextChannelById(channelId)).queue();
+                }
             }
             stmt.close();
         } catch (SQLException e) {

@@ -3,21 +3,16 @@ package com.javadiscord.javabot.commands.moderation;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.utils.Misc;
-import com.javadiscord.javabot.utils.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 public class Report implements SlashCommandHandler {
 
@@ -36,7 +31,7 @@ public class Report implements SlashCommandHandler {
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
             .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-            .addField("Member", member.getUser().getAsMention(), true)
+            .addField("Member", member.getAsMention(), true)
             .addField("Reported by", author.getAsMention(), true)
             .addField("Channel", event.getTextChannel().getAsMention(), true)
             .addField("Reported on", "<t:" + Instant.now().getEpochSecond() + ":F>", false)

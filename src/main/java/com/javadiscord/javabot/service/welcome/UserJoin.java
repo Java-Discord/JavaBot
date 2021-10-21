@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.service.welcome;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.service.ServerLock;
+import com.javadiscord.javabot.service.serverlock.ServerLock;
 import com.javadiscord.javabot.utils.TimeUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;

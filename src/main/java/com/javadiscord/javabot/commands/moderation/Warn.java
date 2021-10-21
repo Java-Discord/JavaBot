@@ -8,6 +8,7 @@ import com.javadiscord.javabot.utils.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -52,6 +53,19 @@ public class Warn implements SlashCommandHandler {
 				.countDocuments(eq("user_id", member.getId()));
 	}
 
+	public MessageEmbed warnEmbed(Member member, Member mod, Guild guild, String reason, int warnPoints) {
+		return new EmbedBuilder()
+				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
+				.setAuthor(member.getUser().getAsTag() + " | Warn (" + warnPoints + "/3)", null, member.getUser().getEffectiveAvatarUrl())
+				.addField("Member", member.getAsMention(), true)
+				.addField("Moderator", mod.getAsMention(), true)
+				.addField("ID", "```" + member.getId() + "```", false)
+				.addField("Reason", "```" + reason + "```", false)
+				.setFooter(mod.getUser().getAsTag(), mod.getUser().getEffectiveAvatarUrl())
+				.setTimestamp(Instant.now())
+				.build();
+	}
+
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");
@@ -66,18 +80,9 @@ public class Warn implements SlashCommandHandler {
 
 		OptionMapping reasonOption = event.getOption("reason");
 		String reason = reasonOption == null ? "None" : reasonOption.getAsString();
-		int warnPoints = getWarnCount(member);
-		var eb = new EmbedBuilder()
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
-				.setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
-				.addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-				.addField("Moderator", "```" + event.getUser().getAsTag() + "```", true)
-				.addField("ID", "```" + member.getId() + "```", false)
-				.addField("Reason", "```" + reason + "```", false)
-				.setFooter("ID: " + member.getId())
-				.setTimestamp(Instant.now())
-				.build();
 
+		var eb = warnEmbed(member, event.getMember(),
+				event.getGuild(), reason, getWarnCount(member) + 1);
 		Misc.sendToLog(event.getGuild(), eb);
 		member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
 
