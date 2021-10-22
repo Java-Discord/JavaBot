@@ -43,7 +43,7 @@ public class ServerLock extends DelegatingCommandHandler {
     }
 
     /**
-     * Main logic of the server lock system. Checks if the newly joined member should increment the server lock count or not.
+     * Main logic of the server lock system. Decides if the newly joined member should increment the server lock count or not.
      * @param user The user that joined.
      */
     public static void checkLock(GuildMemberJoinEvent event, User user) {
@@ -57,7 +57,8 @@ public class ServerLock extends DelegatingCommandHandler {
             }
         }
         if (new Database().getConfigInt(
-                event.getGuild(), "other.server_lock.lock_count") >= 5)
+                event.getGuild(), "other.server_lock.lock_count")
+                >= Bot.config.get(event.getGuild()).getServerLock().getLockThreshold())
             lockServer(event);
         }
 
@@ -125,7 +126,9 @@ public class ServerLock extends DelegatingCommandHandler {
      * @param user The user that is checked
      */
     public static boolean isNewAccount (GuildMemberJoinEvent event, User user) {
-        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) &&
+        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(
+                Bot.config.get(event.getGuild()).getServerLock().getAccountAgeThreshold()
+        )) &&
                 !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
     }
 
