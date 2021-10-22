@@ -103,9 +103,11 @@ public class ServerLock extends DelegatingCommandHandler {
             String id = root.get("discord_id").getAsString();
 
             User user = event.getGuild().getMemberById(id).getUser();
-            user.openPrivateChannel().queue(
-                    c -> c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(event.getGuild())).queue());
-            event.getGuild().getMemberById(id).kick().queue();
+            user.openPrivateChannel().queue(c -> {
+                c.sendMessage("https://discord.gg/java")
+                        .setEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
+                event.getGuild().getMemberById(id).kick().queue();
+            });
         }
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_status", true);
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);

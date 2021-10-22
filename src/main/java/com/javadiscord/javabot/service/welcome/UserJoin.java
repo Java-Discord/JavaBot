@@ -121,8 +121,11 @@ public class UserJoin extends ListenerAdapter {
                 }
             });
         } else {
-            user.openPrivateChannel().queue(c -> c.sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild())).queue());
-            event.getMember().kick().queue();
+            user.openPrivateChannel().queue(c -> {
+                c.sendMessage("https://discord.gg/java")
+                        .setEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
+                event.getMember().kick().queue();
+            });
 
             String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
             welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
