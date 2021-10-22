@@ -179,9 +179,9 @@ public class ServerLock extends DelegatingCommandHandler {
         return new EmbedBuilder()
         .setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
         .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
-        .setDescription("""
+        .setDescription(String.format("""
         Unfortunately, this server is currently locked. Please try to join again later.
-        Contact ``Dynxsty#7666`` or ``Moon™#3424`` for more info."""
+        Contact the server owner, %s, for more info.""", guild.getOwner().getAsMention())
         ).build();
     }
 }
