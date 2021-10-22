@@ -82,7 +82,7 @@ public class Ban implements SlashCommandHandler {
         event.getHook().editOriginalComponents()
                 .setActionRows(
                         ActionRow.of(
-                                Button.danger("utils:ban", "Banned " + member.getUser().getAsTag()).asDisabled()
+                                Button.danger("dummy-button", "Banned " + member.getUser().getAsTag()).asDisabled()
                 )).queue();
 
         var eb = new Ban().banEmbed(member, event.getMember(), event.getGuild(), "None");

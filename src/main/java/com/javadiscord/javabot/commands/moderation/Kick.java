@@ -80,7 +80,7 @@ public class Kick implements SlashCommandHandler {
         event.getHook().editOriginalComponents()
                 .setActionRows(
                         ActionRow.of(
-                                Button.danger("utils:kick", "Kicked " + member.getUser().getAsTag()).asDisabled())
+                                Button.danger("dummy-button", "Kicked " + member.getUser().getAsTag()).asDisabled())
                 ).queue();
 
         var eb = new Kick().kickEmbed(member, event.getMember(), event.getGuild(), "None");

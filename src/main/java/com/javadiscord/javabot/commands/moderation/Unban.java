@@ -60,7 +60,7 @@ public class Unban implements SlashCommandHandler {
             event.getHook().editOriginalComponents()
                     .setActionRows(
                             ActionRow.of(
-                                    Button.danger("utils:kick", "Unbanned user with ID " + id).asDisabled())
+                                    Button.danger("dummy-button", "Unbanned user with ID " + id).asDisabled())
                     ).queue();
             return event.getChannel().sendMessageEmbeds(unbanEmbed(event.getGuild(), event.getUser(), id));
 
