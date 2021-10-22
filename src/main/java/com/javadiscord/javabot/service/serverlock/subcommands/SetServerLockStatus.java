@@ -6,7 +6,7 @@ import com.javadiscord.javabot.data.mongodb.Database;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-public class SetServerLock implements SlashCommandHandler {
+public class SetServerLockStatus implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {

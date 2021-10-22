@@ -67,7 +67,7 @@ public class Kick implements SlashCommandHandler {
 
     /**
      * Handles an interaction, that should kick a member from the current guild.
-     * @param member The member that should be kick
+     * @param member The member that should be kicked
      * @param event The ButtonClickEvent, that is triggered upon use.
      */
     public RestAction<?> handleKickInteraction(Member member, ButtonClickEvent event) {

@@ -48,6 +48,11 @@ public class Unban implements SlashCommandHandler {
                 .build();
     }
 
+    /**
+     * Handles an interaction, that should unban a user from the current guild.
+     * @param event The ButtonClickEvent, that is triggered upon use.
+     * @param id The Id of the user that should be unbanned.
+     */
     public RestAction<?> handleUnbanInteraction(ButtonClickEvent event, String id) {
         try {
             // TODO: Fix this throwing an exception if the user isn't banned (anymore)

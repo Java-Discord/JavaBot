@@ -7,9 +7,10 @@ import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.commands.DelegatingCommandHandler;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.data.mongodb.Database;
-import com.javadiscord.javabot.service.serverlock.subcommands.SetServerLock;
+import com.javadiscord.javabot.service.serverlock.subcommands.SetServerLockStatus;
 import com.javadiscord.javabot.utils.Misc;
 import com.javadiscord.javabot.utils.TimeUtils;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,7 +32,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class ServerLock extends DelegatingCommandHandler {
 
     public ServerLock() {
-        addSubcommand("set", new SetServerLock());
+        addSubcommand("set", new SetServerLockStatus());
     }
 
     @Override
@@ -41,14 +42,18 @@ public class ServerLock extends DelegatingCommandHandler {
         } catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
     }
 
+    /**
+     * Main logic of the server lock system. Checks if the newly joined member should increment the server lock count or not.
+     * @param user The user that joined.
+     */
     public static void checkLock(GuildMemberJoinEvent event, User user) {
-        if (isNewAccount(event, user) && !isInPBL(user)) {
+        if (isNewAccount(event, user) && !isInPotentialBotList(event.getGuild(), user)) {
             incrementLock(event, user);
-            addToPotentialBotList(user);
+            addToPotentialBotList(event.getGuild(), user);
         } else {
-            if (!isInPBL(user)) {
+            if (!isInPotentialBotList(event.getGuild(), user)) {
                 new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);
-                deletePotentialBotList();
+                deletePotentialBotList(event.getGuild());
             }
         }
         if (new Database().getConfigInt(
@@ -56,6 +61,10 @@ public class ServerLock extends DelegatingCommandHandler {
             lockServer(event);
         }
 
+    /**
+     * Increments the total lock count for the current server by one and sends an embed to the log channel.
+     * @param user The user that joined.
+     */
     public static void incrementLock(GuildMemberJoinEvent event, User user) {
         int lockCount = new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count") + 1;
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
@@ -79,55 +88,91 @@ public class ServerLock extends DelegatingCommandHandler {
                 ).queue();
     }
 
+    /**
+     * Locks the server and kicks all users that are on the "Potential Bot List".
+     */
     public static void lockServer(GuildMemberJoinEvent event) {
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-        for (Document document : collection.find()) {
-            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String discordID = root.get("discord_id").getAsString();
+        var docs = mongoClient
+                .getDatabase("userdata")
+                .getCollection("potential_bot_list")
+                .find(new Document("guild_id", event.getGuild().getId()));
 
-            User user = event.getGuild().getMemberById(discordID).getUser();
+        for (Document document : docs) {
+            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+            String id = root.get("discord_id").getAsString();
+
+            User user = event.getGuild().getMemberById(id).getUser();
             user.openPrivateChannel().queue(
                     c -> c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(event.getGuild())).queue());
-            event.getGuild().getMemberById(discordID).kick().complete();
+            event.getGuild().getMemberById(id).kick().queue();
         }
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_status", true);
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);
-        deletePotentialBotList();
+        deletePotentialBotList(event.getGuild());
 
         Misc.sendToLog(event.getGuild(), "**SERVER LOCKED!** @here");
     }
 
+    /**
+     * Returns the current lock status.
+     */
     public static boolean lockStatus (GuildMemberJoinEvent event) {
         return new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status");
     }
 
+    /**
+     * Checks if the account is older than the set threshold.
+     * @param user The user that is checked
+     */
     public static boolean isNewAccount (GuildMemberJoinEvent event, User user) {
         return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(7)) &&
                 !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
     }
 
-    public static boolean isInPBL (User user) {
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-        return collection.find(eq("discord_id", user.getId())).first() != null;
+    /**
+     * Checks if a user is already in the Potential Bot List.
+     * @param guild The current guild.
+     * @param user The user that is checked.
+     */
+    public static boolean isInPotentialBotList(Guild guild, User user) {
+        return mongoClient
+                .getDatabase("userdata")
+                .getCollection("potential_bot_list")
+                .find(
+                        new BasicDBObject("guildId", guild.getId())
+                                .append("userId", user.getId())
+                ).first() != null;
     }
 
-    public static void addToPotentialBotList(User user) {
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-        Document doc = new Document("tag", user.getAsTag())
-                .append("discord_id", user.getId());
-        collection.insertOne(doc);
+    /**
+     * Adds a user to the Potential Bot List.
+     * @param guild The current guild.
+     * @param user The user that is being added.
+     */
+    public static void addToPotentialBotList(Guild guild, User user) {
+        mongoClient.getDatabase("userdata")
+                .getCollection("potential_bot_list")
+                .insertOne(
+                        new Document("guildId", guild.getId())
+                                .append("userId", user.getId())
+                );
     }
 
-    public static void deletePotentialBotList() {
-        MongoDatabase database = mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("potential_bot_list");
-        collection.deleteMany(new Document());
+    /**
+     * Deletes all Potential Bot List entries for the given guild.
+     * @param guild The current guild.
+     */
+    public static void deletePotentialBotList(Guild guild) {
+        mongoClient.getDatabase("userdata")
+                .getCollection("potential_bot_list")
+                .deleteMany(new BasicDBObject("guildId", guild.getId()));
     }
 
-    public static MessageEmbed lockEmbed (Guild guild) {
+    /**
+     * The embed that is sent when a user tries to join while the server is locked.
+     * @param guild The current guild.
+     */
+    public static MessageEmbed lockEmbed(Guild guild) {
         return new EmbedBuilder()
         .setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
         .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())

@@ -658,7 +658,7 @@
               type: INTEGER
 
 # Server Lock Commands
-- description: sets the server lock status
+- description: Administrative commands for managing the server lock system
   name: serverlock
   handler: com.javadiscord.javabot.service.serverlock.ServerLock
   enabledByDefault: false
