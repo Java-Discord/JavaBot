@@ -93,8 +93,11 @@ public class Ban implements SlashCommandHandler {
         }
 
         member.getUser().openPrivateChannel().queue(m -> m.sendMessageEmbeds(eb).queue());
-        return Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageEmbeds(eb).setActionRow(
-                Button.danger("utils:unban:" + member.getId(), "Unban " + member.getUser().getAsTag())
+        return Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageEmbeds(eb)
+                .setActionRow(
+                        Button.danger(
+                                "utils:unban:" + member.getId(),
+                                "Unban " + member.getUser().getAsTag())
         );
     }
 }

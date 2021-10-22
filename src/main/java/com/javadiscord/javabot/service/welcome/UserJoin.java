@@ -114,7 +114,6 @@ public class UserJoin extends ListenerAdapter {
                             .replace("{!member}", event.getMember().getAsMention())
                             .replace("{!membertag}", event.getMember().getUser().getAsTag())
                             .replace("{!server}", event.getGuild().getName());
-
                     try {
                     welcomeConfig.getChannel().sendMessage(welcomeMessage)
                             .addFile(new ByteArrayInputStream(generateImage(event.getGuild(), event.getMember())), event.getMember().getId() + ".png").queue();
@@ -122,9 +121,8 @@ public class UserJoin extends ListenerAdapter {
                 }
             });
         } else {
-            if (user.hasPrivateChannel()) user.openPrivateChannel().complete()
-                    .sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
-            event.getMember().kick().complete();
+            user.openPrivateChannel().queue(c -> c.sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild())).queue());
+            event.getMember().kick().queue();
 
             String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
             welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
