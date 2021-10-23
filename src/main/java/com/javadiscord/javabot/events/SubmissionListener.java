@@ -85,15 +85,17 @@ public class SubmissionListener extends ListenerAdapter {
     public void submissionApprove (ButtonClickEvent event) {
         var userId = event.getMessage().getEmbeds().get(0)
                 .getFooter().getText().replace("ID: ", "");
-        var member = event.getGuild().retrieveMemberById(userId).complete();
-        new Correct().correct(event.getGuild(), member);
-        log.info("{}[{}]{} Submission by User {} was approved by {}",
-                Constants.TEXT_WHITE, event.getGuild().getName(), Constants.TEXT_RESET,
-                member.getUser().getAsTag(), event.getUser().getAsTag());
+        event.getGuild().retrieveMemberById(userId).queue(member->{
+            new Correct().correct(event.getGuild(), member);
+            log.info("{}[{}]{} Submission by User {} was approved by {}",
+                    Constants.TEXT_WHITE, event.getGuild().getName(), Constants.TEXT_RESET,
+                    member.getUser().getAsTag(), event.getUser().getAsTag());
 
-        event.getHook().editOriginalComponents()
-                .setActionRows(ActionRow.of(Button.success("submission:approve:" + userId,
-                        "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
+            event.getHook().editOriginalComponents()
+                    .setActionRows(ActionRow.of(Button.success("submission:approve:" + userId,
+                            "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
+        });
+       
     }
 
     /**

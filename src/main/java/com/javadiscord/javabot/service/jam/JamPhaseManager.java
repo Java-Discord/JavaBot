@@ -45,33 +45,21 @@ public class JamPhaseManager {
 
 	private void doTransition(JamPhaseTransition transition) {
 		new Thread(() -> {
-			Connection c;
-			try {
-				c = Bot.dataSource.getConnection();
+			Connection bkpCon=null;
+			try (Connection c = Bot.dataSource.getConnection()) {
 				c.setAutoCommit(false);
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return;
-			}
-
-			try {
+				bkpCon=c;
 				transition.transition(jam, event, channelManager, c);
 				c.commit();
 			} catch (Exception e) {
 				log.error("An error occurred while transitioning the Jam phase.", e);
 				channelManager.sendErrorMessageAsync(event, "An error occurred: " + e.getMessage());
 				try {
-					c.rollback();
+					if (bkpCon!=null) bkpCon.rollback();
 				} catch (SQLException ex) {
 					log.error("SEVERE ERROR: Could not rollback changes made during a failed transition to new Jam state.", ex);
 					channelManager.sendErrorMessageAsync(event, "Could not rollback phase change transaction. Please check database for errors: " + ex.getMessage());
 				}
-			}
-
-			try {
-				c.close();
-			} catch (SQLException e) {
-				log.error("Could not close connection while transitioning the Jam phase.", e);
 			}
 		}).start();
 	}

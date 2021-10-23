@@ -66,20 +66,21 @@ public class InteractionListener extends ListenerAdapter {
 		String roleID = id[1];
 		boolean permanent = Boolean.parseBoolean(id[2]);
 
-		Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
-		Role role = event.getGuild().getRoleById(roleID);
+		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member->{
+			Role role = event.getGuild().getRoleById(roleID);
 
-		if (member.getRoles().contains(role)) {
-			if (!permanent) {
-				event.getGuild().removeRoleFromMember(member, role).queue();
-				event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
+			if (member.getRoles().contains(role)) {
+				if (!permanent) {
+					event.getGuild().removeRoleFromMember(member, role).queue();
+					event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
+				} else {
+					event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+				}
 			} else {
-				event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+				event.getGuild().addRoleToMember(member, role).queue();
+				event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
 			}
-		} else {
-			event.getGuild().addRoleToMember(member, role).queue();
-			event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
-		}
+		});
 	}
 
 	private void handleHelpChannel(ButtonClickEvent event, String action) {

@@ -53,8 +53,7 @@ public class PreferencesSubcommand implements SlashCommandHandler {
 			return Responses.warning(event, "Missing required arguments.");
 		}
 
-		try {
-			var con = Bot.dataSource.getConnection();
+		try (var con = Bot.dataSource.getConnection()) {
 			con.setAutoCommit(false);
 			var accountRepository = new AccountRepository(con);
 			var account = accountRepository.getAccount(event.getUser().getIdLong());
@@ -77,7 +76,6 @@ public class PreferencesSubcommand implements SlashCommandHandler {
 			var reply = updater.update(event, prefs, preferenceValueOption.getAsString());
 			accountRepository.savePreferences(prefs);
 			con.commit();
-			con.close();
 			return reply;
 		} catch (SQLException e) {
 			e.printStackTrace();

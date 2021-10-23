@@ -48,8 +48,7 @@ public class PlanNewJamSubcommand implements SlashCommandHandler {
 	}
 
 	private void createNewJam(InteractionHook hook, long guildId, String name, LocalDate startsAt) {
-		try {
-			Connection con = Bot.dataSource.getConnection();
+		try (Connection con = Bot.dataSource.getConnection()) {
 			JamRepository jamRepository = new JamRepository(con);
 
 			Jam activeJam = jamRepository.getActiveJam(guildId);

@@ -39,33 +39,36 @@ public class CreateReactionRole implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        var message =  event.getChannel().retrieveMessageById(event.getOption("message-id").getAsString()).complete();
         var buttonLabel = event.getOption("label").getAsString();
         var role = event.getOption("role").getAsRole();
 
         boolean permanent = event.getOption("permanent") != null && event.getOption("permanent").getAsBoolean();
         String emote = event.getOption("emote") == null ? null : event.getOption("emote").getAsString();
 
-        List<Button> buttons = new ArrayList<>(message.getButtons());
-        if (emote != null) {
-            buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel, Emoji.fromMarkdown(emote)));
-        } else {
-            buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel));
-        }
+        event.getChannel().retrieveMessageById(event.getOption("message-id").getAsString()).queue(message->{
+            List<Button> buttons = new ArrayList<>(message.getButtons());
+            if (emote != null) {
+                buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel, Emoji.fromMarkdown(emote)));
+            } else {
+                buttons.add(Button.of(ButtonStyle.SECONDARY, buttonId(role, permanent), buttonLabel));
+            }
 
-        message.editMessageComponents(ActionRow.of(buttons)).queue();
+            message.editMessageComponents(ActionRow.of(buttons)).queue();
 
-        var e = new EmbedBuilder()
-                .setTitle("Reaction Role created")
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                .addField("Channel", "<#" + event.getChannel().getId() + ">", true)
-                .addField("Role", role.getAsMention(), true)
-                .addField("MessageID", "```" + message.getId() + "```", false);
-        if (emote != null) e.addField("Emote", "```" + emote + "```", true);
-        e.addField("Button Label", "```" + buttonLabel + "```", true)
-                .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                .setTimestamp(Instant.now());
-        Misc.sendToLog(event.getGuild(), e.build());
-        return event.replyEmbeds(e.build()).setEphemeral(true);
+            var e = new EmbedBuilder()
+                    .setTitle("Reaction Role created")
+                    .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+                    .addField("Channel", "<#" + event.getChannel().getId() + ">", true)
+                    .addField("Role", role.getAsMention(), true)
+                    .addField("MessageID", "```" + message.getId() + "```", false);
+            if (emote != null) e.addField("Emote", "```" + emote + "```", true);
+            e.addField("Button Label", "```" + buttonLabel + "```", true)
+                    .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+                    .setTimestamp(Instant.now());
+            Misc.sendToLog(event.getGuild(), e.build());
+            event.replyEmbeds(e.build()).queue();
+        });
+
+        return event.deferReply(true);
     }
 }

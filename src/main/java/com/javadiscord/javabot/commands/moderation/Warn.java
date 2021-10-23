@@ -79,7 +79,7 @@ public class Warn implements SlashCommandHandler {
 				.build();
 
 		Misc.sendToLog(event.getGuild(), eb);
-		member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb).queue();
+		member.getUser().openPrivateChannel().map(chan->chan.sendMessageEmbeds(eb)).queue();
 
 		try {
 			warn(member, event.getGuild(), reason);

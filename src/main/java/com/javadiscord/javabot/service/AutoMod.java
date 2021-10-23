@@ -119,7 +119,7 @@ public class AutoMod extends ListenerAdapter {
 
         // mute
         try {
-            new Mute().mute(msg.getMember(), msg.getGuild());
+            new Mute().mute(msg.getMember(), msg.getGuild()).queue(success->{},e->msg.getChannel().sendMessage(e.getMessage()).queue());
         } catch (Exception e) {
             msg.getChannel().sendMessage(e.getMessage()).queue();
         }

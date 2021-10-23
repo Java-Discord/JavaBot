@@ -32,15 +32,15 @@ public class Correct implements SlashCommandHandler {
 
         if (!member.getUser().hasPrivateChannel()) {
             Misc.sendToLog(guild, "> Couldn't send Message to User " + member.getUser().getAsTag());
-            member.getUser().openPrivateChannel().complete()
-                    .sendMessageEmbeds(new EmbedBuilder()
+            member.getUser().openPrivateChannel().queue(channel->
+                channel.sendMessageEmbeds(new EmbedBuilder()
                             .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
                             .setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
                             .setDescription("Your answer was correct! " + Bot.config.get(guild).getEmote().getSuccessEmote() +
                                     "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
                             .setTimestamp(Instant.now())
                             .build())
-                    .queue();
+                    .queue());
         }
     }
 

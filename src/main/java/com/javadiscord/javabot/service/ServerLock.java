@@ -63,8 +63,8 @@ public class ServerLock {
             String discordID = root.get("discord_id").getAsString();
 
             User user = event.getGuild().getMemberById(discordID).getUser();
-            user.openPrivateChannel().complete().sendMessageEmbeds(lockEmbed(event.getGuild())).queue();
-            event.getGuild().getMemberById(discordID).kick().complete();
+            user.openPrivateChannel().flatMap(channel->channel.sendMessageEmbeds(lockEmbed(event.getGuild()))).queue();
+            event.getGuild().getMemberById(discordID).kick().queue();
         }
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_status", true);
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);

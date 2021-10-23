@@ -48,8 +48,8 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.getRoles().contains(Bot.config.get(this.config.getGuild()).getModeration().getMuteRole())) return false;
-		try (var con = Bot.dataSource.getConnection()) {
-			var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?");
+		try (var con = Bot.dataSource.getConnection();
+				var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -80,8 +80,8 @@ public class HelpChannelManager {
 	 * @param message The message the user sent in the channel.
 	 */
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
-		try (var con = Bot.dataSource.getConnection()) {
-			var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id) VALUES (?, ?)");
+		try (var con = Bot.dataSource.getConnection();
+				var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id) VALUES (?, ?)")) {
 			stmt.setLong(1, channel.getIdLong());
 			stmt.setLong(2, reservingUser.getIdLong());
 			stmt.executeUpdate();
@@ -91,7 +91,7 @@ public class HelpChannelManager {
 		// Pin the message, then immediately try and delete the annoying "message has been pinned" message.
 		message.pin().queue(unused -> channel.getHistory().retrievePast(10).queue(messages -> {
 			for (var msg : messages) {
-				if (msg.getType().equals(MessageType.CHANNEL_PINNED_ADD)) {
+				if (msg.getType() == MessageType.CHANNEL_PINNED_ADD) {
 					msg.delete().queue();
 				}
 			}
@@ -121,21 +121,19 @@ public class HelpChannelManager {
 	 * @return The user who reserved the channel, or null.
 	 */
 	public User getReservedChannelOwner(TextChannel channel) {
-		User user = null;
-		try (var con = Bot.dataSource.getConnection()) {
-			var stmt = con.prepareStatement("SELECT * FROM reserved_help_channels WHERE channel_id = ?");
+		try (var con = Bot.dataSource.getConnection();
+				var stmt = con.prepareStatement("SELECT * FROM reserved_help_channels WHERE channel_id = ?")) {
 			stmt.setLong(1, channel.getIdLong());
 			var rs = stmt.executeQuery();
 			if (rs.next()) {
 				long userId = rs.getLong("user_id");
-				user = channel.getJDA().retrieveUserById(userId).complete();
+				return channel.getJDA().retrieveUserById(userId).complete();
 			}
-			stmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			logChannel.sendMessage("Error occurred while getting reserved channel owner: " + e.getMessage()).queue();
 		}
-		return user;
+		return null;
 	}
 
 	/**
@@ -144,8 +142,8 @@ public class HelpChannelManager {
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			try (var con = Bot.dataSource.getConnection()) {
-				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
+			try (var con = Bot.dataSource.getConnection();
+					var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
 				return RestAction.allOf(
