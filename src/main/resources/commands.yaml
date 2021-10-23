@@ -313,20 +313,44 @@
         id: moderation.staffRoleId
   options: []
   subCommands:
-    - description: Creates a custom slash command
-      name: create
+    - name: create
+      description: Creates a custom slash command
       options:
-        - {description: Name of the custom slash command, name: name, required: true,
-           type: STRING}
-        - {description: Content of the custom slash command, name: text, required: true,
-           type: STRING}
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+        - name: text
+          description: Content of the custom slash command
+          required: true
+          type: STRING
+        - name: reply
+          description: If set to True, will reply on use
+          required: false
+          type: BOOLEAN
+        - name: embed
+          description: If set to True, will send the content in an embed
+          required: false
+          type: BOOLEAN
     - description: Edits a custom slash command
       name: edit
       options:
-        - {description: Name of the custom slash command, name: name, required: true,
-           type: STRING}
-        - {description: Content of the custom slash command, name: text, required: true,
-           type: STRING}
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+        - name: text
+          description: Content of the custom slash command
+          required: true
+          type: STRING
+        - name: reply
+          description: If set to True, will reply on use
+          required: false
+          type: BOOLEAN
+        - name: embed
+          description: If set to True, will send the content in an embed
+          required: false
+          type: BOOLEAN
     - description: Deletes a custom slash command
       name: delete
       options:

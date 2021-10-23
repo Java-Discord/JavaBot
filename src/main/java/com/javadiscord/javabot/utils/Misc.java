@@ -3,6 +3,7 @@ package com.javadiscord.javabot.utils;
 import com.javadiscord.javabot.Bot;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.GenericEvent;
 
 import java.util.List;
 
@@ -27,5 +28,12 @@ public class Misc {
                     else if (!showID && showMemCount) sb.append(" (").append(guildList.get(guildAmount - 1).getMemberCount()).append(" members)");
         }
         return sb.substring(2);
+    }
+
+    public static String replaceTextVariables(Guild guild, String string) {
+        return string
+                .replace("{!membercount}", String.valueOf(guild.getMemberCount()))
+                .replace("{!servername}", guild.getName())
+                .replace("{!serverid}", guild.getId());
     }
 }
