@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -120,7 +122,9 @@ public class SlashCommands extends ListenerAdapter {
             String commandName = root.get("commandName").getAsString();
             String value = root.get("value").getAsString();
             if (value.length() > 100) value = value.substring(0, 97) + "...";
-            commandUpdateAction.addCommands(new CommandData(commandName, value));
+            commandUpdateAction.addCommands(
+                    new CommandData(commandName, value)
+                    .addOption(OptionType.BOOLEAN, "reply", "If set to True, will reply on use", false));
             customCommandNames.add(commandName);
         }
         return customCommandNames;
@@ -185,6 +189,9 @@ public class SlashCommands extends ListenerAdapter {
         String value = Misc.replaceTextVariables(event.getGuild(), root.get("value").getAsString());
         boolean embed = root.get("embed").getAsBoolean();
         boolean reply = root.get("reply").getAsBoolean();
+
+        OptionMapping replyOption = event.getOption("reply");
+        if (replyOption != null) reply = replyOption.getAsBoolean();
 
         if (embed) {
             var e = new EmbedBuilder()
