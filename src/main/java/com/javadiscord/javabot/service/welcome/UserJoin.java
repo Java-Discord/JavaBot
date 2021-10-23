@@ -106,7 +106,7 @@ public class UserJoin extends ListenerAdapter {
         TextChannel welcomeChannel = event.getGuild().getTextChannelById(welcomeConfig.getChannelId());
         ServerLock lock = new ServerLock();
 
-        if (!lock.lockStatus(event)) {
+        if (!lock.lockStatus(event.getGuild())) {
             lock.checkLock(event, user);
             CompletableFuture.runAsync(() -> {
 

@@ -11,6 +11,7 @@ import com.javadiscord.javabot.service.serverlock.subcommands.SetServerLockStatu
 import com.javadiscord.javabot.utils.Misc;
 import com.javadiscord.javabot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -29,6 +30,7 @@ import static com.javadiscord.javabot.service.Startup.mongoClient;
 /**
  * Server lock functionality that automatically locks the server if a raid is detected.
  */
+@Slf4j
 public class ServerLock extends DelegatingCommandHandler {
 
     public ServerLock() {
@@ -37,7 +39,6 @@ public class ServerLock extends DelegatingCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-
         try { return super.handle(event);
         } catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
     }
@@ -48,45 +49,16 @@ public class ServerLock extends DelegatingCommandHandler {
      */
     public void checkLock(GuildMemberJoinEvent event, User user) {
         if (isNewAccount(event, user) && !isInPotentialBotList(event.getGuild(), user)) {
-            incrementLock(event, user);
             addToPotentialBotList(event.getGuild(), user);
         } else if (!isInPotentialBotList(event.getGuild(), user)) {
                 new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);
                 deletePotentialBotList(event.getGuild());
             }
-
         if (new Database().getConfigInt(
                 event.getGuild(), "other.server_lock.lock_count")
                 >= Bot.config.get(event.getGuild()).getServerLock().getLockThreshold())
             lockServer(event);
         }
-
-    /**
-     * Increments the total lock count for the current server by one and sends an embed to the log channel.
-     * @param user The user that joined.
-     */
-    public void incrementLock(GuildMemberJoinEvent event, User user) {
-        int lockCount = new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count") + 1;
-        new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
-        String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
-        String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
-
-        var eb = new EmbedBuilder()
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                .setAuthor(user.getAsTag() + " | Potential Bot! (" + lockCount  + "/5)", null, user.getEffectiveAvatarUrl())
-                .setThumbnail(user.getEffectiveAvatarUrl())
-                .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
-                .setFooter("ID: " + user.getId())
-                .setTimestamp(Instant.now())
-                .build();
-
-        Bot.config.get(event.getGuild()).getModeration().getLogChannel()
-                .sendMessageEmbeds(eb)
-                .setActionRow(
-                        Button.danger("utils:ban:" + user.getId(), "Ban"),
-                        Button.danger("utils:kick:" + user.getId(), "Kick")
-                ).queue();
-    }
 
     /**
      * Locks the server and kicks all users that are on the "Potential Bot List".
@@ -108,18 +80,20 @@ public class ServerLock extends DelegatingCommandHandler {
                 event.getGuild().getMemberById(id).kick().queue();
             });
         }
-        new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_status", true);
-        new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);
-        deletePotentialBotList(event.getGuild());
 
+        try {
+            Bot.config.get(event.getGuild()).set("serverLock.locked", "true");
+        } catch (Exception e) { log.error("Couldn't modify lock property"); }
+
+        deletePotentialBotList(event.getGuild());
         Misc.sendToLog(event.getGuild(), "**SERVER LOCKED!** @here");
     }
 
     /**
      * Returns the current lock status.
      */
-    public boolean lockStatus (GuildMemberJoinEvent event) {
-        return new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status");
+    public boolean lockStatus (Guild guild) {
+        return Bot.config.get(guild).getServerLock().isLocked();
     }
 
     /**
@@ -149,7 +123,7 @@ public class ServerLock extends DelegatingCommandHandler {
     }
 
     /**
-     * Adds a user to the Potential Bot List.
+     * Adds a user to the Potential Bot List and sends an embed to the log
      * @param guild The current guild.
      * @param user The user that is being added.
      */
@@ -160,16 +134,41 @@ public class ServerLock extends DelegatingCommandHandler {
                         new Document("guildId", guild.getId())
                                 .append("userId", user.getId())
                 );
+
+        String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
+        String createDiff = " (" + new TimeUtils().formatDurationToNow(user.getTimeCreated()) + " ago)";
+
+        var eb = new EmbedBuilder()
+                .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
+                .setAuthor(user.getAsTag() + " | Potential Bot! (" + getLockCount(guild)  + "/5)", null, user.getEffectiveAvatarUrl())
+                .setThumbnail(user.getEffectiveAvatarUrl())
+                .addField("Account created on", "```" + timeCreated + createDiff + "```", false)
+                .setFooter("ID: " + user.getId())
+                .setTimestamp(Instant.now())
+                .build();
+
+        Bot.config.get(guild).getModeration().getLogChannel()
+                .sendMessageEmbeds(eb)
+                .setActionRow(
+                        Button.danger("utils:ban:" + user.getId(), "Ban"),
+                        Button.danger("utils:kick:" + user.getId(), "Kick")
+                ).queue();
     }
 
     /**
      * Deletes all Potential Bot List entries for the given guild.
      * @param guild The current guild.
      */
-    public static void deletePotentialBotList(Guild guild) {
+    public void deletePotentialBotList(Guild guild) {
         mongoClient.getDatabase("userdata")
                 .getCollection("potential_bot_list")
                 .deleteMany(new BasicDBObject("guildId", guild.getId()));
+    }
+
+    public int getLockCount(Guild guild) {
+        return (int) mongoClient.getDatabase("userdata")
+                .getCollection("potential_bot_list")
+                .countDocuments(new Document("guildId", guild.getId()));
     }
 
     /**
