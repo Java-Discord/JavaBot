@@ -19,7 +19,7 @@ import javax.annotation.CheckReturnValue;
 
 public class Mute implements SlashCommandHandler {
 
-	@CheckReturnValue
+    @CheckReturnValue
     public AuditableRestAction<Void> mute (Member member, Guild guild) {
         Role muteRole = Bot.config.get(guild).getModeration().getMuteRole();
         return guild.addRoleToMember(member.getId(), muteRole);
