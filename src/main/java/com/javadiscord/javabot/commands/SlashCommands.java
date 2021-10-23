@@ -124,7 +124,8 @@ public class SlashCommands extends ListenerAdapter {
             if (value.length() > 100) value = value.substring(0, 97) + "...";
             commandUpdateAction.addCommands(
                     new CommandData(commandName, value)
-                    .addOption(OptionType.BOOLEAN, "reply", "If set to True, will reply on use", false));
+                            .addOption(OptionType.BOOLEAN, "reply", "If set to True, will reply on use", false)
+                            .addOption(OptionType.BOOLEAN, "embed", "If set to True, will send the content in an embed", false));
             customCommandNames.add(commandName);
         }
         return customCommandNames;
@@ -191,6 +192,9 @@ public class SlashCommands extends ListenerAdapter {
 
         OptionMapping replyOption = event.getOption("reply");
         if (replyOption != null) reply = replyOption.getAsBoolean();
+
+        OptionMapping embedOption = event.getOption("embed");
+        if (embedOption != null) embed = embedOption.getAsBoolean();
 
         if (embed) {
             var e = new EmbedBuilder()
