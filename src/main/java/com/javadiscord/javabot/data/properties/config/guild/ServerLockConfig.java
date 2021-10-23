@@ -8,6 +8,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ServerLockConfig extends GuildConfigItem {
-    private int accountAgeThreshold = 7;
+    private int minimumAccountAgeInDays = 7;
     private int lockThreshold = 5;
 }

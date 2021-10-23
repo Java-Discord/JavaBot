@@ -11,8 +11,6 @@ import com.javadiscord.javabot.service.serverlock.subcommands.SetServerLockStatu
 import com.javadiscord.javabot.utils.Misc;
 import com.javadiscord.javabot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -29,6 +27,9 @@ import java.time.OffsetDateTime;
 import static com.javadiscord.javabot.service.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
+/**
+ * Server lock functionality that automatically locks the server if a raid is detected.
+ */
 public class ServerLock extends DelegatingCommandHandler {
 
     public ServerLock() {
@@ -50,12 +51,11 @@ public class ServerLock extends DelegatingCommandHandler {
         if (isNewAccount(event, user) && !isInPotentialBotList(event.getGuild(), user)) {
             incrementLock(event, user);
             addToPotentialBotList(event.getGuild(), user);
-        } else {
-            if (!isInPotentialBotList(event.getGuild(), user)) {
+        } else if (!isInPotentialBotList(event.getGuild(), user)) {
                 new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);
                 deletePotentialBotList(event.getGuild());
             }
-        }
+
         if (new Database().getConfigInt(
                 event.getGuild(), "other.server_lock.lock_count")
                 >= Bot.config.get(event.getGuild()).getServerLock().getLockThreshold())
@@ -129,7 +129,7 @@ public class ServerLock extends DelegatingCommandHandler {
      */
     public static boolean isNewAccount (GuildMemberJoinEvent event, User user) {
         return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(
-                Bot.config.get(event.getGuild()).getServerLock().getAccountAgeThreshold()
+                Bot.config.get(event.getGuild()).getServerLock().getMinimumAccountAgeInDays()
         )) &&
                 !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
     }

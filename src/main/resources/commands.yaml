@@ -670,6 +670,8 @@
     - description: sets the server lock status
       name: set
       options:
-        - { description: 'sets the server lock status', name: status,
-            required: true, type: BOOLEAN }
+        - description: sets the server lock status
+          name: status
+          required: true
+          type: BOOLEAN
 
