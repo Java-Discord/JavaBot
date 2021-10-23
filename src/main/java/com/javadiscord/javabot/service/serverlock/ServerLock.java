@@ -6,8 +6,6 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.commands.DelegatingCommandHandler;
 import com.javadiscord.javabot.commands.Responses;
-import com.javadiscord.javabot.data.mongodb.Database;
-import com.javadiscord.javabot.service.serverlock.subcommands.SetServerLockStatus;
 import com.javadiscord.javabot.utils.Misc;
 import com.javadiscord.javabot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -33,10 +31,6 @@ import static com.javadiscord.javabot.service.Startup.mongoClient;
 @Slf4j
 public class ServerLock extends DelegatingCommandHandler {
 
-    public ServerLock() {
-        addSubcommand("set", new SetServerLockStatus());
-    }
-
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         try { return super.handle(event);
@@ -51,11 +45,9 @@ public class ServerLock extends DelegatingCommandHandler {
         if (isNewAccount(event, user) && !isInPotentialBotList(event.getGuild(), user)) {
             addToPotentialBotList(event.getGuild(), user);
         } else if (!isInPotentialBotList(event.getGuild(), user)) {
-                new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", 0);
                 deletePotentialBotList(event.getGuild());
             }
-        if (new Database().getConfigInt(
-                event.getGuild(), "other.server_lock.lock_count")
+        if (getLockCount(event.getGuild())
                 >= Bot.config.get(event.getGuild()).getServerLock().getLockThreshold())
             lockServer(event);
         }
@@ -104,7 +96,7 @@ public class ServerLock extends DelegatingCommandHandler {
         return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(
                 Bot.config.get(event.getGuild()).getServerLock().getMinimumAccountAgeInDays()
         )) &&
-                !(new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status"));
+                !Bot.config.get(event.getGuild()).getServerLock().isLocked();
     }
 
     /**
