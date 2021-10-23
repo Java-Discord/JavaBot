@@ -2,8 +2,8 @@ package com.javadiscord.javabot.utils;
 
 import com.javadiscord.javabot.Bot;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.GenericEvent;
 
 import java.util.List;
 
@@ -30,10 +30,27 @@ public class Misc {
         return sb.substring(2);
     }
 
+    /**
+     * Utility method that replaces text variables
+     * @param string The string that should be replaced
+     */
     public static String replaceTextVariables(Guild guild, String string) {
         return string
                 .replace("{!membercount}", String.valueOf(guild.getMemberCount()))
                 .replace("{!servername}", guild.getName())
                 .replace("{!serverid}", guild.getId());
+    }
+
+    /**
+     * Utility method that replaces text variables
+     * @param string The string that should be replaced
+     */
+    public static String replaceTextVariables(Member member, String string) {
+        return string
+                .replace("{!membercount}", String.valueOf(member.getGuild().getMemberCount()))
+                .replace("{!servername}", member.getGuild().getName())
+                .replace("{!serverid}", member.getGuild().getId())
+                .replace("{!member}", member.getAsMention())
+                .replace("{!membertag}", member.getUser().getAsTag());
     }
 }

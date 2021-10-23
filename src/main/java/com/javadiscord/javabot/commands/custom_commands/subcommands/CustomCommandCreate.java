@@ -5,9 +5,7 @@ import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.commands.custom_commands.CustomCommands;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -17,6 +15,9 @@ import java.time.Instant;
 
 import static com.javadiscord.javabot.service.Startup.mongoClient;
 
+/**
+ * Subcommand that allows to create Custom Slash Commands. {@link CustomCommands#CustomCommands()}
+ */
 public class CustomCommandCreate implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
