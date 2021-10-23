@@ -25,7 +25,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 
 import static com.javadiscord.javabot.service.Startup.mongoClient;
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Server lock functionality that automatically locks the server if a raid is detected.
@@ -47,7 +46,7 @@ public class ServerLock extends DelegatingCommandHandler {
      * Main logic of the server lock system. Decides if the newly joined member should increment the server lock count or not.
      * @param user The user that joined.
      */
-    public static void checkLock(GuildMemberJoinEvent event, User user) {
+    public void checkLock(GuildMemberJoinEvent event, User user) {
         if (isNewAccount(event, user) && !isInPotentialBotList(event.getGuild(), user)) {
             incrementLock(event, user);
             addToPotentialBotList(event.getGuild(), user);
@@ -66,7 +65,7 @@ public class ServerLock extends DelegatingCommandHandler {
      * Increments the total lock count for the current server by one and sends an embed to the log channel.
      * @param user The user that joined.
      */
-    public static void incrementLock(GuildMemberJoinEvent event, User user) {
+    public void incrementLock(GuildMemberJoinEvent event, User user) {
         int lockCount = new Database().getConfigInt(event.getGuild(), "other.server_lock.lock_count") + 1;
         new Database().setConfigEntry(event.getGuild().getId(), "other.server_lock.lock_count", lockCount);
         String timeCreated = user.getTimeCreated().format(TimeUtils.STANDARD_FORMATTER);
@@ -92,7 +91,7 @@ public class ServerLock extends DelegatingCommandHandler {
     /**
      * Locks the server and kicks all users that are on the "Potential Bot List".
      */
-    public static void lockServer(GuildMemberJoinEvent event) {
+    public void lockServer(GuildMemberJoinEvent event) {
         var docs = mongoClient
                 .getDatabase("userdata")
                 .getCollection("potential_bot_list")
@@ -119,7 +118,7 @@ public class ServerLock extends DelegatingCommandHandler {
     /**
      * Returns the current lock status.
      */
-    public static boolean lockStatus (GuildMemberJoinEvent event) {
+    public boolean lockStatus (GuildMemberJoinEvent event) {
         return new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status");
     }
 
@@ -127,7 +126,7 @@ public class ServerLock extends DelegatingCommandHandler {
      * Checks if the account is older than the set threshold.
      * @param user The user that is checked
      */
-    public static boolean isNewAccount (GuildMemberJoinEvent event, User user) {
+    public boolean isNewAccount (GuildMemberJoinEvent event, User user) {
         return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(
                 Bot.config.get(event.getGuild()).getServerLock().getMinimumAccountAgeInDays()
         )) &&
@@ -139,7 +138,7 @@ public class ServerLock extends DelegatingCommandHandler {
      * @param guild The current guild.
      * @param user The user that is checked.
      */
-    public static boolean isInPotentialBotList(Guild guild, User user) {
+    public boolean isInPotentialBotList(Guild guild, User user) {
         return mongoClient
                 .getDatabase("userdata")
                 .getCollection("potential_bot_list")
@@ -154,7 +153,7 @@ public class ServerLock extends DelegatingCommandHandler {
      * @param guild The current guild.
      * @param user The user that is being added.
      */
-    public static void addToPotentialBotList(Guild guild, User user) {
+    public void addToPotentialBotList(Guild guild, User user) {
         mongoClient.getDatabase("userdata")
                 .getCollection("potential_bot_list")
                 .insertOne(

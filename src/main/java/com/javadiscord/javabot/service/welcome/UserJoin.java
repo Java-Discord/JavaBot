@@ -104,9 +104,10 @@ public class UserJoin extends ListenerAdapter {
         User user = event.getMember().getUser();
         var welcomeConfig = Bot.config.get(event.getGuild()).getWelcome();
         TextChannel welcomeChannel = event.getGuild().getTextChannelById(welcomeConfig.getChannelId());
+        ServerLock lock = new ServerLock();
 
-        if (!ServerLock.lockStatus(event)) {
-            ServerLock.checkLock(event, user);
+        if (!lock.lockStatus(event)) {
+            lock.checkLock(event, user);
             CompletableFuture.runAsync(() -> {
 
                 if (welcomeConfig.isEnabled()) {
