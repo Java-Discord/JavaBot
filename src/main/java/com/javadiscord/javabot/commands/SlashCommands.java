@@ -174,11 +174,10 @@ public class SlashCommands extends ListenerAdapter {
     }
 
     private RestAction<?> handleCustomCommand(SlashCommandEvent event) {
-        MongoCollection<Document> collection = mongoClient
+        String json = mongoClient
                 .getDatabase("other")
-                .getCollection("customcommands");
-
-        String json = collection.find(
+                .getCollection("customcommands")
+                .find(
                 new BasicDBObject()
                         .append("guildId", event.getGuild().getId())
                         .append("commandName", event.getName()))
