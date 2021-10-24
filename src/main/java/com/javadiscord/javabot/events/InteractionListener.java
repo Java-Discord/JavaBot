@@ -5,7 +5,6 @@ import com.javadiscord.javabot.commands.moderation.Ban;
 import com.javadiscord.javabot.commands.moderation.Kick;
 import com.javadiscord.javabot.service.help.HelpChannelManager;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;

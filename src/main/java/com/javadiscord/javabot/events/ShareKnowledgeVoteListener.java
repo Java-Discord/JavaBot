@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
