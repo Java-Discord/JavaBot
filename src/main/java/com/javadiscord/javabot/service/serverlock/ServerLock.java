@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.Constants;
-import com.javadiscord.javabot.commands.DelegatingCommandHandler;
-import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.utils.Misc;
 import com.javadiscord.javabot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -15,9 +13,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import org.bson.Document;
 
 import java.time.Instant;
@@ -29,13 +25,7 @@ import static com.javadiscord.javabot.service.Startup.mongoClient;
  * Server lock functionality that automatically locks the server if a raid is detected.
  */
 @Slf4j
-public class ServerLock extends DelegatingCommandHandler {
-
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        try { return super.handle(event);
-        } catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
-    }
+public class ServerLock {
 
     /**
      * Main logic of the server lock system. Decides if the newly joined member should increment the server lock count or not.
@@ -48,9 +38,10 @@ public class ServerLock extends DelegatingCommandHandler {
                 deletePotentialBotList(event.getGuild());
             }
         if (getLockCount(event.getGuild())
-                >= Bot.config.get(event.getGuild()).getServerLock().getLockThreshold())
+                >= Bot.config.get(event.getGuild()).getServerLock().getLockThreshold()) {
             lockServer(event);
         }
+    }
 
     /**
      * Locks the server and kicks all users that are on the "Potential Bot List".
@@ -59,26 +50,34 @@ public class ServerLock extends DelegatingCommandHandler {
         var docs = mongoClient
                 .getDatabase("userdata")
                 .getCollection("potential_bot_list")
-                .find(new Document("guild_id", event.getGuild().getId()));
+                .find(new Document("guildId", event.getGuild().getId()));
 
         for (Document document : docs) {
             JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String id = root.get("discord_id").getAsString();
+            String id = root.get("userId").getAsString();
 
             User user = event.getGuild().getMemberById(id).getUser();
             user.openPrivateChannel().queue(c -> {
                 c.sendMessage("https://discord.gg/java")
                         .setEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
-                event.getGuild().getMemberById(id).kick().queue();
+                try {
+                    event.getGuild().getMemberById(id).kick().queue();
+                } catch (Exception e) {
+                    Misc.sendToLog(event.getGuild(), String.format("Could not kick member %s%n> `%s`",
+                            event.getUser().getAsTag(), e.getMessage()));
+                }
             });
         }
 
         try {
             Bot.config.get(event.getGuild()).set("serverLock.locked", "true");
-        } catch (Exception e) { log.error("Couldn't modify lock property"); }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Couldn't modify lock property");
+        }
 
         deletePotentialBotList(event.getGuild());
-        Misc.sendToLog(event.getGuild(), "**SERVER LOCKED!** @here");
+        Misc.sendToLog(event.getGuild(), Bot.config.get(event.getGuild()).getServerLock().getLockMessageTemplate());
     }
 
     /**
@@ -93,7 +92,7 @@ public class ServerLock extends DelegatingCommandHandler {
      * @param user The user that is checked
      */
     public boolean isNewAccount (GuildMemberJoinEvent event, User user) {
-        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(
+        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusYears(
                 Bot.config.get(event.getGuild()).getServerLock().getMinimumAccountAgeInDays()
         )) &&
                 !Bot.config.get(event.getGuild()).getServerLock().isLocked();
