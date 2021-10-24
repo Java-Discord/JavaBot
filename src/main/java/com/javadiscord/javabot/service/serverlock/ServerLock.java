@@ -92,7 +92,7 @@ public class ServerLock {
      * @param user The user that is checked
      */
     public boolean isNewAccount (GuildMemberJoinEvent event, User user) {
-        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusYears(
+        return user.getTimeCreated().isAfter(OffsetDateTime.now().minusDays(
                 Bot.config.get(event.getGuild()).getServerLock().getMinimumAccountAgeInDays()
         )) &&
                 !Bot.config.get(event.getGuild()).getServerLock().isLocked();
