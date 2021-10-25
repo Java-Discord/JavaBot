@@ -13,9 +13,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
-import java.time.Instant;
-
 import javax.annotation.CheckReturnValue;
+import java.time.Instant;
 
 public class Mute implements SlashCommandHandler {
 

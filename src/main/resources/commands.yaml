@@ -54,6 +54,54 @@
   name: uptime
   options: []
   handler: com.javadiscord.javabot.commands.user_commands.Uptime
+- description: Creates a poll.
+  name: poll
+  options:
+    - name: title
+      description: The title of your poll
+      required: true
+      type: STRING
+    - name: option-1
+      description: Adds an option
+      required: true
+      type: STRING
+    - name: option-2
+      description: Adds an option
+      required: true
+      type: STRING
+    - name: option-3
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-4
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-5
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-6
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-7
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-8
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-9
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-10
+      description: Adds an option
+      required: false
+      type: STRING
+  handler: com.javadiscord.javabot.commands.user_commands.Poll
 - description: Bans a member.
   name: ban
   options:
