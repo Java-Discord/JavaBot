@@ -92,8 +92,11 @@ public class SubmissionListener extends ListenerAdapter {
                     member.getUser().getAsTag(), event.getUser().getAsTag());
 
             event.getHook().editOriginalComponents()
-                    .setActionRows(ActionRow.of(Button.success("submission:approve:" + userId,
-                            "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
+                    .setActionRows(ActionRow.of(
+                            Button.success("submission:approve:" + userId,
+                                    "Approved by " + event.getMember().getUser().getAsTag()).asDisabled(),
+                            Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw")
+                    )).queue();
         });
        
     }
@@ -107,8 +110,11 @@ public class SubmissionListener extends ListenerAdapter {
      */
     public void submissionDecline (ButtonClickEvent event) {
         event.getHook().editOriginalComponents()
-                .setActionRows(ActionRow.of(Button.danger("submission:decline:" + event.getUser().getId(),
-                        "Declined by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
+                .setActionRows(ActionRow.of(
+                        Button.danger("submission:decline:" + event.getUser().getId(),
+                            "Declined by " + event.getMember().getUser().getAsTag()).asDisabled(),
+                        Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw")
+                )).queue();
     }
 
 
