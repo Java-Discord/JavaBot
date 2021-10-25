@@ -28,7 +28,6 @@ public class GuildConfig {
 	private HelpConfig help;
 	private ModerationConfig moderation;
 	private QOTWConfig qotw;
-	private WelcomeConfig welcome;
 	private StatsConfig stats;
 	private StarBoardConfig starBoard;
 	private JamConfig jam;
@@ -42,7 +41,6 @@ public class GuildConfig {
 		this.help = new HelpConfig();
 		this.moderation = new ModerationConfig();
 		this.qotw = new QOTWConfig();
-		this.welcome = new WelcomeConfig();
 		this.stats = new StatsConfig();
 		this.starBoard = new StarBoardConfig();
 		this.jam = new JamConfig();
@@ -61,8 +59,6 @@ public class GuildConfig {
 		this.moderation.setGuildConfig(this);
 		if (this.qotw == null) this.qotw = new QOTWConfig();
 		this.qotw.setGuildConfig(this);
-		if (this.welcome == null) this.welcome = new WelcomeConfig();
-		this.welcome.setGuildConfig(this);
 		if (this.stats == null) this.stats = new StatsConfig();
 		this.stats.setGuildConfig(this);
 		if (this.starBoard == null) this.starBoard = new StarBoardConfig();
