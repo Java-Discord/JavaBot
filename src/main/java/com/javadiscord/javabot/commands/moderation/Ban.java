@@ -58,7 +58,7 @@ public class Ban implements SlashCommandHandler {
         return new EmbedBuilder()
                 .setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
                 .setAuthor(member.getUser().getAsTag() + " | Ban", null, member.getUser().getEffectiveAvatarUrl())
-                .addField("Name", member.getUser().getAsMention(), true)
+                .addField("Member", member.getAsMention(), true)
                 .addField("Moderator", mod.getAsMention(), true)
                 .addField("ID", "```" + member.getId() + "```", false)
                 .addField("Reason", "```" + reason + "```", false)
@@ -74,19 +74,30 @@ public class Ban implements SlashCommandHandler {
      */
     public RestAction<?> handleBanInteraction(Member member, ButtonClickEvent event) {
         if (member == null) {
+            event.getHook().editOriginalComponents().setActionRows(ActionRow.of(
+                    Button.secondary("dummy-button", "Couldn't find Member").asDisabled())
+            ).queue();
             return Responses.error(event.getHook(), "Couldn't find member");
         }
         event.getHook().editOriginalComponents()
                 .setActionRows(
                         ActionRow.of(
-                                Button.danger("utils:ban", "Banned " + member.getUser().getAsTag()).asDisabled())
-                ).queue();
+                                Button.danger("dummy-button", "Banned " + member.getUser().getAsTag()).asDisabled()
+                )).queue();
 
         var eb = new Ban().banEmbed(member, event.getMember(), event.getGuild(), "None");
-        new Ban().ban(member, "None");
+        try {
+            new Ban().ban(member, "None");
+        } catch (Exception e) {
+            return Responses.error(event.getHook(), e.getMessage());
+        }
 
-        Misc.sendToLog(event.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(m -> m.sendMessageEmbeds(eb).queue());
-        return event.replyEmbeds(eb);
+        return Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageEmbeds(eb)
+                .setActionRow(
+                        Button.danger(
+                                "utils:unban:" + member.getId(),
+                                "Unban " + member.getUser().getAsTag())
+        );
     }
 }

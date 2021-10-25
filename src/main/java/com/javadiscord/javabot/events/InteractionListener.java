@@ -3,6 +3,7 @@ package com.javadiscord.javabot.events;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.moderation.Ban;
 import com.javadiscord.javabot.commands.moderation.Kick;
+import com.javadiscord.javabot.commands.moderation.Unban;
 import com.javadiscord.javabot.service.help.HelpChannelManager;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Role;
@@ -33,6 +34,7 @@ public class InteractionListener extends ListenerAdapter {
 
 	/**
 	 * Some utility methods for interactions
+	 * + May be useful for Context Menu Interactions
 	 */
 	private void handleUtils(ButtonClickEvent event) {
 		String[] id = event.getComponentId().split(":");
@@ -40,6 +42,7 @@ public class InteractionListener extends ListenerAdapter {
 			case "delete" -> event.getHook().deleteOriginal().queue();
 			case "kick" -> new Kick().handleKickInteraction(event.getGuild().getMemberById(id[2]), event).queue();
 			case "ban" -> new Ban().handleBanInteraction(event.getGuild().getMemberById(id[2]), event).queue();
+			case "unban" -> new Unban().handleUnbanInteraction(event, id[2]).queue();
 		}
 	}
 

@@ -33,6 +33,7 @@ public class GuildConfig {
 	private StarBoardConfig starBoard;
 	private JamConfig jam;
 	private EmoteConfig emote;
+	private ServerLockConfig serverLock;
 
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;
@@ -46,6 +47,7 @@ public class GuildConfig {
 		this.starBoard = new StarBoardConfig();
 		this.jam = new JamConfig();
 		this.emote = new EmoteConfig();
+		this.serverLock = new ServerLockConfig();
 		this.setGuild(guild);
 	}
 
@@ -69,6 +71,8 @@ public class GuildConfig {
 		this.jam.setGuildConfig(this);
 		if (this.emote == null) this.emote = new EmoteConfig();
 		this.emote.setGuildConfig(this);
+		if (this.serverLock == null) this.serverLock = new ServerLockConfig();
+		this.serverLock.setGuildConfig(this);
 	}
 
 	/**

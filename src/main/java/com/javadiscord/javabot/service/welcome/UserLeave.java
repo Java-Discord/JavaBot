@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.service.welcome;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.data.mongodb.Database;
 import com.javadiscord.javabot.service.help.HelpChannelManager;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,7 +16,7 @@ public class UserLeave extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-        if (!new Database().getConfigBoolean(event.getGuild(), "other.server_lock.lock_status")) {
+        if (!Bot.config.get(event.getGuild()).getServerLock().isLocked()) {
             var welcomeConfig = Bot.config.get(event.getGuild()).getWelcome();
             if (welcomeConfig.isEnabled()) {
                 String leaveMessage = Objects.requireNonNull(welcomeConfig.getLeaveMessageTemplate());
@@ -49,9 +48,11 @@ public class UserLeave extends ListenerAdapter {
             stmt.setLong(1, user.getIdLong());
             var rs = stmt.getResultSet();
             var manager = new HelpChannelManager(Bot.config.get(guild).getHelp());
-            while (rs.next()) {
-                long channelId = rs.getLong("channel_id");
-                manager.unreserveChannel(guild.getTextChannelById(channelId)).queue();
+            if (rs != null) {
+                while (rs.next()) {
+                    long channelId = rs.getLong("channel_id");
+                    manager.unreserveChannel(guild.getTextChannelById(channelId)).queue();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

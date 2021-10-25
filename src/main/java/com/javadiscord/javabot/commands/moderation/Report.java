@@ -31,7 +31,7 @@ public class Report implements SlashCommandHandler {
         var e = new EmbedBuilder()
             .setAuthor(member.getUser().getAsTag() + " | Report", null, member.getUser().getEffectiveAvatarUrl())
             .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-            .addField("Member", member.getUser().getAsMention(), true)
+            .addField("Member", member.getAsMention(), true)
             .addField("Reported by", author.getAsMention(), true)
             .addField("Channel", event.getTextChannel().getAsMention(), true)
             .addField("Reported on", "<t:" + Instant.now().getEpochSecond() + ":F>", false)

@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.service.welcome;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.service.ServerLock;
+import com.javadiscord.javabot.service.serverlock.ServerLock;
 import com.javadiscord.javabot.utils.TimeUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -104,9 +104,10 @@ public class UserJoin extends ListenerAdapter {
         User user = event.getMember().getUser();
         var welcomeConfig = Bot.config.get(event.getGuild()).getWelcome();
         TextChannel welcomeChannel = event.getGuild().getTextChannelById(welcomeConfig.getChannelId());
+        ServerLock lock = new ServerLock();
 
-        if (!ServerLock.lockStatus(event)) {
-            ServerLock.checkLock(event, user);
+        if (!lock.lockStatus(event.getGuild())) {
+            lock.checkLock(event, user);
             CompletableFuture.runAsync(() -> {
 
                 if (welcomeConfig.isEnabled()) {
@@ -114,7 +115,6 @@ public class UserJoin extends ListenerAdapter {
                             .replace("{!member}", event.getMember().getAsMention())
                             .replace("{!membertag}", event.getMember().getUser().getAsTag())
                             .replace("{!server}", event.getGuild().getName());
-
                     try {
                     welcomeConfig.getChannel().sendMessage(welcomeMessage)
                             .addFile(new ByteArrayInputStream(generateImage(event.getGuild(), event.getMember())), event.getMember().getId() + ".png").queue();
@@ -122,12 +122,14 @@ public class UserJoin extends ListenerAdapter {
                 }
             });
         } else {
-            if (user.hasPrivateChannel()) user.openPrivateChannel()
-                    .flatMap(channel->channel.sendMessageEmbeds(ServerLock.lockEmbed(event.getGuild()))).queue();
-            event.getMember().kick().queue(unused->{
-                String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
-                welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
+            user.openPrivateChannel().queue(c -> {
+                c.sendMessage("https://discord.gg/java")
+                        .setEmbeds(ServerLock.lockEmbed(event.getGuild())).queue();
+                event.getMember().kick().queue();
             });
+
+            String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
+            welcomeChannel.sendMessage("**" + event.getMember().getUser().getAsTag() + "**" + " (" + diff + " old) tried to join this server.").queue();
         }
     }
 }
