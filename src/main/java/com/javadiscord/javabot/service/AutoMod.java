@@ -90,7 +90,7 @@ public class AutoMod extends ListenerAdapter {
 
     /**
      * Handles potential spam messages
-     * @param event the message event
+     * @param msg the message
      * @param member the member to be potentially warned
      */
     private void handleSpam(@NotNull Message msg, Member member) {
@@ -116,9 +116,10 @@ public class AutoMod extends ListenerAdapter {
         Misc.sendToLog(msg.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
-        // mute
         try {
-            new Mute().mute(msg.getMember(), msg.getGuild()).queue(success->{},e->msg.getChannel().sendMessage(e.getMessage()).queue());
+            new Mute().mute(msg.getMember(), msg.getGuild()).queue(
+                    success -> {},
+                    e -> msg.getChannel().sendMessage(e.getMessage()).queue());
         } catch (Exception e) {
             msg.getChannel().sendMessage(e.getMessage()).queue();
         }
@@ -126,7 +127,7 @@ public class AutoMod extends ListenerAdapter {
 
     /**
      * warns the user using the reason
-     * @param event the message event
+     * @param message the message
      * @param member the member to be warned
      * @param reason the reason for the warning
      */
