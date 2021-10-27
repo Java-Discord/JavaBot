@@ -1,22 +1,24 @@
 package com.javadiscord.javabot.service;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.moderation.Ban;
 import com.javadiscord.javabot.commands.moderation.Mute;
 import com.javadiscord.javabot.commands.moderation.Warn;
 import com.javadiscord.javabot.utils.Misc;
+import lombok.SneakyThrows;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.Instant;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,22 +29,25 @@ public class AutoMod extends ListenerAdapter {
 
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
+    @SneakyThrows
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         Member member = event.getMember();
         if (canBypassAutomod(member)) return;
         checkNewMessageAutomod(event.getMessage());
     }
-    
+
+    @SneakyThrows
     @Override
     public void onGuildMessageUpdate(@Nonnull GuildMessageUpdateEvent event) {
         Member member = event.getMember();
         if (canBypassAutomod(member)) return;
         checkContentAutomod(event.getMessage());
     }
-    
+
     /**
      * Checks if a member can bypass the automod system.
+     *
      * @param member the {@link Member} to check
      * @return <code>true</code> if the member is allowed to bypass automod, else <code>false</code>
      */
@@ -51,12 +56,13 @@ public class AutoMod extends ListenerAdapter {
                 || member.getUser().isBot()
                 || member.hasPermission(Permission.MESSAGE_MANAGE);
     }
-    
+
     /**
      * Runs all automod checks that should be run when a message is sent.
+     *
      * @param message the {@link Message} that should be checked
      */
-    private void checkNewMessageAutomod(@NotNull Message message) {
+    private void checkNewMessageAutomod(@NotNull Message message) throws FileNotFoundException {
         // mention spam
         if (message.getMentionedMembers().size() >= 5) {
             warn(message, message.getMember(), "Automod: Mention Spam");
@@ -72,25 +78,71 @@ public class AutoMod extends ListenerAdapter {
                 handleSpam(message, message.getMember());
             }
         });
-        
         checkContentAutomod(message);
+
     }
-    
+
     /**
      * Runs all automod checks only depend on the message content.
+     *
      * @param message the {@link Message} that should be checked
      */
-    private void checkContentAutomod(@NotNull Message message) {
+    private void checkContentAutomod(@NotNull Message message) throws FileNotFoundException {
         // Advertising
         Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
         if (matcher.find()) {
             warn(message, message.getMember(), "Automod: Advertising");
         }
+        final String messageRaw = message.getContentRaw();
+        if (messageRaw.startsWith("http://") || messageRaw.startsWith("https://")) {
+            // only do it for a links, so it won't iterate for each message
+            Scanner fileReader = new Scanner(new File(String.valueOf(getClass().getResourceAsStream("spams.txt"))));
+            while (fileReader.hasNext()) {
+                String domin = fileReader.next();
+                domin = domin.split("\\.")[0];
+                if (messageRaw.contains(domin)) {
+                    new Ban().ban(message.getMember(), "Scam");
+                }
+            }
+            fileReader.close();
+        }
     }
+    /**
+     * Bans a user for the given reason
+     * @param event the event
+     * @param member the user to be banned
+     * @param reason the reason for the ban
+     */
+    private void ban (@NotNull GuildMessageReceivedEvent event, Member member, String reason) {
+        MessageEmbed eb = new EmbedBuilder()
+                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor())
+                .setAuthor(member.getUser().getAsTag() + " | Ban", null, member.getUser().getEffectiveAvatarUrl())
+                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
+                .addField("Moderator", "```" + event.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
+                .addField("ID", "```" + member.getId() + "```", false)
+                .addField("Reason", "```" + reason + "```", false)
+                .setFooter("ID: " + member.getId())
+                .setTimestamp(Instant.now())
+                .build();
+
+        event.getChannel().sendMessageEmbeds(eb).queue();
+        Misc.sendToLog(event.getGuild(), eb);
+        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
+
+        try {
+            new Ban().ban(member,reason);
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e.getMessage()).queue();
+        }
+
+        event.getMessage().delete().queue();
+    }
+
 
     /**
      * Handles potential spam messages
-     * @param msg the message
+     *
+     * @param msg    the message
      * @param member the member to be potentially warned
      */
     private void handleSpam(@NotNull Message msg, Member member) {
@@ -118,7 +170,8 @@ public class AutoMod extends ListenerAdapter {
 
         try {
             new Mute().mute(msg.getMember(), msg.getGuild()).queue(
-                    success -> {},
+                    success -> {
+                    },
                     e -> msg.getChannel().sendMessage(e.getMessage()).queue());
         } catch (Exception e) {
             msg.getChannel().sendMessage(e.getMessage()).queue();
@@ -127,11 +180,12 @@ public class AutoMod extends ListenerAdapter {
 
     /**
      * warns the user using the reason
+     *
      * @param message the message
-     * @param member the member to be warned
-     * @param reason the reason for the warning
+     * @param member  the member to be warned
+     * @param reason  the reason for the warning
      */
-    private void warn (Message message, Member member, String reason) {
+    private void warn(Message message, Member member, String reason) {
         int warnPoints = new Warn().getWarnCount(member);
 
         MessageEmbed eb = new EmbedBuilder()
@@ -161,6 +215,7 @@ public class AutoMod extends ListenerAdapter {
 
     /**
      * returns the original String cleaned up of unused code points and spaces
+     *
      * @param input the input String
      * @return the cleaned-up String
      */
