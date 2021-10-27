@@ -21,7 +21,7 @@
 # Help commands
 - name: unreserve
   description: Unreserves this help channel so that others can use it.
-  handler: com.javadiscord.javabot.help.UnreserveCommandHandler
+  handler: com.javadiscord.javabot.service.help.UnreserveCommandHandler
   options: []
 
 - description: Generates a human-readable timestamp out of a Discord-ID
@@ -60,6 +60,54 @@
   name: uptime
   options: []
   handler: com.javadiscord.javabot.commands.user_commands.Uptime
+- description: Creates a poll.
+  name: poll
+  options:
+    - name: title
+      description: The title of your poll
+      required: true
+      type: STRING
+    - name: option-1
+      description: Adds an option
+      required: true
+      type: STRING
+    - name: option-2
+      description: Adds an option
+      required: true
+      type: STRING
+    - name: option-3
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-4
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-5
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-6
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-7
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-8
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-9
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-10
+      description: Adds an option
+      required: false
+      type: STRING
+  handler: com.javadiscord.javabot.commands.user_commands.Poll
 - description: Bans a member.
   name: ban
   options:
@@ -426,7 +474,7 @@
 # Java Jam Specific Commands
 - name: jam
   description: Interact with Java Jam functionality.
-  handler: com.javadiscord.javabot.jam.JamCommandHandler
+  handler: com.javadiscord.javabot.service.jam.JamCommandHandler
   subCommands:
     - name: info
       description: Shows information about the current state of the Java Jam.
@@ -454,7 +502,7 @@
 # Admin Commands for Java Jam
 - name: jam-admin
   description: Administrator actions for configuring the Java Jam.
-  handler: com.javadiscord.javabot.jam.JamAdminCommandHandler
+  handler: com.javadiscord.javabot.service.jam.JamAdminCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -543,7 +591,7 @@
 # Economy Commands
 - name: economy
   description: Interact with the server's economy. Buy, sell, trade, and more!
-  handler: com.javadiscord.javabot.economy.EconomyCommandHandler
+  handler: com.javadiscord.javabot.service.economy.EconomyCommandHandler
   subCommands:
     - name: account
       description: Shows information about your account.
@@ -577,7 +625,7 @@
 # Admin Economy Commands
 - name: economy-admin
   description: Administrative tools to handle the server's economy.
-  handler: com.javadiscord.javabot.economy.EconomyAdminCommandHandler
+  handler: com.javadiscord.javabot.service.economy.EconomyAdminCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -602,7 +650,7 @@
 # Database Management Commands
 - name: db-admin
   description: Administrative tools for managing the server's database.
-  handler: com.javadiscord.javabot.data.commands.DbAdminCommandHandler
+  handler: com.javadiscord.javabot.data.h2db.commands.DbAdminCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -628,7 +676,7 @@
 # Question of the Week Admin Commands
 - name: qotw
   description: Administrative tools for managing the Question of the Week.
-  handler: com.javadiscord.javabot.qotw.QOTWCommandHandler
+  handler: com.javadiscord.javabot.service.qotw.QOTWCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE

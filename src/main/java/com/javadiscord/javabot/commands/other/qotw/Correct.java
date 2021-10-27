@@ -3,8 +3,8 @@ package com.javadiscord.javabot.commands.other.qotw;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.other.Database;
-import com.javadiscord.javabot.other.Misc;
+import com.javadiscord.javabot.data.mongodb.Database;
+import com.javadiscord.javabot.utils.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -32,15 +32,15 @@ public class Correct implements SlashCommandHandler {
 
         if (!member.getUser().hasPrivateChannel()) {
             Misc.sendToLog(guild, "> Couldn't send Message to User " + member.getUser().getAsTag());
-            member.getUser().openPrivateChannel().complete()
-                    .sendMessageEmbeds(new EmbedBuilder()
+            member.getUser().openPrivateChannel().queue(channel->
+                channel.sendMessageEmbeds(new EmbedBuilder()
                             .setAuthor("Question of the Week", null, member.getUser().getEffectiveAvatarUrl())
                             .setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
                             .setDescription("Your answer was correct! " + Bot.config.get(guild).getEmote().getSuccessEmote() +
                                     "\nYou've been granted **1 QOTW-Point!** (Total: " + qotwPoints + ")")
                             .setTimestamp(Instant.now())
                             .build())
-                    .queue();
+                    .queue());
         }
     }
 

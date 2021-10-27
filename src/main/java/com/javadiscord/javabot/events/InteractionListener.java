@@ -1,9 +1,11 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.help.HelpChannelManager;
+import com.javadiscord.javabot.commands.moderation.Ban;
+import com.javadiscord.javabot.commands.moderation.Kick;
+import com.javadiscord.javabot.commands.moderation.Unban;
+import com.javadiscord.javabot.service.help.HelpChannelManager;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -26,6 +28,21 @@ public class InteractionListener extends ListenerAdapter {
 			case "submission" -> this.handleSubmission(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> this.handleHelpChannel(event, id[1]);
+			case "utils" -> this.handleUtils(event);
+		}
+	}
+
+	/**
+	 * Some utility methods for interactions
+	 * + May be useful for Context Menu Interactions
+	 */
+	private void handleUtils(ButtonClickEvent event) {
+		String[] id = event.getComponentId().split(":");
+		switch (id[1]) {
+			case "delete" -> event.getHook().deleteOriginal().queue();
+			case "kick" -> new Kick().handleKickInteraction(event.getGuild().getMemberById(id[2]), event).queue();
+			case "ban" -> new Ban().handleBanInteraction(event.getGuild().getMemberById(id[2]), event).queue();
+			case "unban" -> new Unban().handleUnbanInteraction(event, id[2]).queue();
 		}
 	}
 
@@ -43,7 +60,6 @@ public class InteractionListener extends ListenerAdapter {
 			case "approve" -> new SubmissionListener().submissionApprove(event);
 			case "decline" -> new SubmissionListener().submissionDecline(event);
 			case "getraw" -> new SubmissionListener().submissionGetRaw(event);
-			case "delete" -> new SubmissionListener().submissionDelete(event);
 		}
 	}
 
@@ -52,20 +68,21 @@ public class InteractionListener extends ListenerAdapter {
 		String roleID = id[1];
 		boolean permanent = Boolean.parseBoolean(id[2]);
 
-		Member member = event.getGuild().retrieveMemberById(event.getUser().getId()).complete();
-		Role role = event.getGuild().getRoleById(roleID);
+		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member->{
+			Role role = event.getGuild().getRoleById(roleID);
 
-		if (member.getRoles().contains(role)) {
-			if (!permanent) {
-				event.getGuild().removeRoleFromMember(member, role).queue();
-				event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
+			if (member.getRoles().contains(role)) {
+				if (!permanent) {
+					event.getGuild().removeRoleFromMember(member, role).queue();
+					event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
+				} else {
+					event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+				}
 			} else {
-				event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+				event.getGuild().addRoleToMember(member, role).queue();
+				event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
 			}
-		} else {
-			event.getGuild().addRoleToMember(member, role).queue();
-			event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
-		}
+		});
 	}
 
 	private void handleHelpChannel(ButtonClickEvent event, String action) {

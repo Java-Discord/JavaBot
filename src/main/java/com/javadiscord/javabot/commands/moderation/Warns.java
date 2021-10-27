@@ -16,7 +16,7 @@ import org.bson.Document;
 
 import java.time.Instant;
 
-import static com.javadiscord.javabot.events.Startup.mongoClient;
+import static com.javadiscord.javabot.service.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
 public class Warns implements SlashCommandHandler {

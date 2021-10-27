@@ -1,15 +1,9 @@
 package com.javadiscord.javabot.events;
 
-import static com.javadiscord.javabot.events.Startup.preferredGuild;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.commands.other.qotw.Correct;
-import com.javadiscord.javabot.other.Constants;
-
+import com.javadiscord.javabot.service.Startup;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,6 +12,12 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+
+import static com.javadiscord.javabot.service.Startup.preferredGuild;
 
 /**
  * Contains methods and events used for the QOTW-Submission system.
@@ -47,10 +47,10 @@ public class SubmissionListener extends ListenerAdapter {
         config.getQotw().getSubmissionChannel().sendMessageEmbeds(e)
                 .setActionRows(
                 ActionRow.of(
-                Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
-                Button.danger("submission:decline:" + event.getUser().getId(), "Decline"),
-                Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw"),
-                Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️")))
+                    Button.success("submission:approve:" + event.getUser().getId(), "Approve"),
+                    Button.danger("submission:decline:" + event.getUser().getId(), "Decline"),
+                    Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw"),
+                    Button.secondary("utils:delete", "🗑️")))
                 .queue();
 
         event.getHook().editOriginalComponents()
@@ -85,15 +85,20 @@ public class SubmissionListener extends ListenerAdapter {
     public void submissionApprove (ButtonClickEvent event) {
         var userId = event.getMessage().getEmbeds().get(0)
                 .getFooter().getText().replace("ID: ", "");
-        var member = event.getGuild().retrieveMemberById(userId).complete();
-        new Correct().correct(event.getGuild(), member);
-        log.info("{}[{}]{} Submission by User {} was approved by {}",
-                Constants.TEXT_WHITE, event.getGuild().getName(), Constants.TEXT_RESET,
-                member.getUser().getAsTag(), event.getUser().getAsTag());
+        event.getGuild().retrieveMemberById(userId).queue(member->{
+            new Correct().correct(event.getGuild(), member);
+            log.info("{}[{}]{} Submission by User {} was approved by {}",
+                    Constants.TEXT_WHITE, event.getGuild().getName(), Constants.TEXT_RESET,
+                    member.getUser().getAsTag(), event.getUser().getAsTag());
 
-        event.getHook().editOriginalComponents()
-                .setActionRows(ActionRow.of(Button.success("submission:approve:" + userId,
-                        "Approved by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
+            event.getHook().editOriginalComponents()
+                    .setActionRows(ActionRow.of(
+                            Button.success("submission:approve:" + userId,
+                                    "Approved by " + event.getMember().getUser().getAsTag()).asDisabled(),
+                            Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw")
+                    )).queue();
+        });
+       
     }
 
     /**
@@ -105,20 +110,13 @@ public class SubmissionListener extends ListenerAdapter {
      */
     public void submissionDecline (ButtonClickEvent event) {
         event.getHook().editOriginalComponents()
-                .setActionRows(ActionRow.of(Button.danger("submission:decline:" + event.getUser().getId(),
-                        "Declined by " + event.getMember().getUser().getAsTag()).asDisabled())).queue();
+                .setActionRows(ActionRow.of(
+                        Button.danger("submission:decline:" + event.getUser().getId(),
+                            "Declined by " + event.getMember().getUser().getAsTag()).asDisabled(),
+                        Button.secondary("submission:getraw:" + event.getUser().getId(), "Get Raw")
+                )).queue();
     }
 
-    /**
-     * Gets called when a moderator presses the "🗑️" button on a submission.
-     * <p>
-     * Deletes the submission message.
-     * </p>
-     * @param event the ButtonClickEvent that is triggered upon use. {@link InteractionListener#onButtonClick(ButtonClickEvent)}
-     */
-    public void submissionDelete (ButtonClickEvent event) {
-        event.getHook().deleteOriginal().queue();
-    }
 
     /**
      * Gets called when a moderator presses the "Get Raw" button on a submission.
@@ -131,7 +129,7 @@ public class SubmissionListener extends ListenerAdapter {
         var description = event.getMessage().getEmbeds().get(0).getDescription();
         event.getHook()
                 .sendFile(new ByteArrayInputStream(description.getBytes(StandardCharsets.UTF_8)), event.getUser().getId() + ".txt")
-                .addActionRow(Button.secondary("submission:delete:" + event.getUser().getId(), "🗑️"))
+                .addActionRow(Button.secondary("utils:delete", "🗑️"))
                 .queue();
     }
 

@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.awt.*;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 // TODO: Refactor embed interface completely.
 @Deprecated(forRemoval = true)
@@ -54,7 +54,7 @@ public class Embed implements SlashCommandHandler {
     }
 
     private ReplyAction createEmbed(SlashCommandEvent event) {
-        Function<String, String> getOpt = s -> {
+        UnaryOperator<String> getOpt = s -> {
             var mapping = event.getOption(s);
             return mapping == null ? null : mapping.getAsString();
         };

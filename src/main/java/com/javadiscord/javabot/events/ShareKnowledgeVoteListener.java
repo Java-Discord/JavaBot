@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
@@ -62,32 +61,32 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
         if (!(reactionID.equals(upvoteID) || reactionID.equals(downvoteID))) return;
 
         String messageID = event.getMessageId();
-        Message message = event.getChannel().retrieveMessageById(messageID).complete();
+        event.getChannel().retrieveMessageById(messageID).queue(message->{
+            int upvotes = message
+                    .getReactions()
+                    .stream()
+                    .filter(reaction -> reaction.getReactionEmote().getAsReactionCode().equals(upvoteID))
+                    .findFirst()
+                    .map(MessageReaction::getCount)
+                    .orElse(0);
 
-        int upvotes = message
-                .getReactions()
-                .stream()
-                .filter(reaction -> reaction.getReactionEmote().getAsReactionCode().equals(upvoteID))
-                .findFirst()
-                .map(MessageReaction::getCount)
-                .orElse(0);
+            int downvotes = message
+                    .getReactions()
+                    .stream()
+                    .filter(reaction -> reaction.getReactionEmote().getAsReactionCode().equals(downvoteID))
+                    .findFirst()
+                    .map(MessageReaction::getCount)
+                    .orElse(0);
 
-        int downvotes = message
-                .getReactions()
-                .stream()
-                .filter(reaction -> reaction.getReactionEmote().getAsReactionCode().equals(downvoteID))
-                .findFirst()
-                .map(MessageReaction::getCount)
-                .orElse(0);
+            int eval = downvotes - upvotes;
 
-        int eval = downvotes - upvotes;
-
-        if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
-            message.delete().queue();
-            message.getAuthor().openPrivateChannel()
-                    .queue(channel -> channel.sendMessage("Your Message in " +
-                            config.getModeration().getShareKnowledgeChannel().getAsMention() +
-                            " has been removed due to community feedback").queue());
-        }
+            if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
+                message.delete().queue();
+                message.getAuthor().openPrivateChannel()
+                        .queue(channel -> channel.sendMessage("Your Message in " +
+                                config.getModeration().getShareKnowledgeChannel().getAsMention() +
+                                " has been removed due to community feedback").queue());
+            }
+        });
     }
 }
