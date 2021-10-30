@@ -6,6 +6,7 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.data.properties.command.CommandConfig;
 import com.javadiscord.javabot.data.properties.command.CommandDataConfig;
+import com.javadiscord.javabot.utils.Misc;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -14,8 +15,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
@@ -59,29 +63,7 @@ public class SlashCommands extends ListenerAdapter {
             return;
         }
 
-        try {
-            BasicDBObject criteria = new BasicDBObject()
-                    .append("guild_id", event.getGuild().getId())
-                    .append("commandname", event.getName());
-
-            MongoDatabase database = mongoClient.getDatabase("other");
-            MongoCollection<Document> collection = database.getCollection("customcommands");
-
-            Document it = collection.find(criteria).first();
-
-            JsonObject root = JsonParser.parseString(it.toJson()).getAsJsonObject();
-            String value = root.get("value").getAsString()
-                .replace("{!membercount}", String.valueOf(event.getGuild().getMemberCount()))
-                .replace("{!servername}", event.getGuild().getName())
-                .replace("{!serverid}", event.getGuild().getId());
-
-            event.replyEmbeds(new EmbedBuilder()
-                    .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                    .setDescription(value).build()).queue();
-
-        } catch (Exception e) {
-            event.reply("Oops, this command isn't registered, yet").queue();
-        }
+        handleCustomCommand(event).queue();
     }
 
     /**
@@ -134,13 +116,16 @@ public class SlashCommands extends ListenerAdapter {
         MongoDatabase database = mongoClient.getDatabase("other");
         MongoCollection<Document> collection = database.getCollection("customcommands");
 
-        Set<String> customCommandNames=new HashSet<>();
-        for (Document document : collection.find(eq("guild_id", guild.getId()))) {
+        Set<String> customCommandNames = new HashSet<>();
+        for (Document document : collection.find(eq("guildId", guild.getId()))) {
             JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String commandName = root.get("commandname").getAsString();
+            String commandName = root.get("commandName").getAsString();
             String value = root.get("value").getAsString();
             if (value.length() > 100) value = value.substring(0, 97) + "...";
-            commandUpdateAction.addCommands(new CommandData(commandName, value));
+            commandUpdateAction.addCommands(
+                    new CommandData(commandName, value)
+                            .addOption(OptionType.BOOLEAN, "reply", "If set to True, will reply on use", false)
+                            .addOption(OptionType.BOOLEAN, "embed", "If set to True, will send the content in an embed", false));
             customCommandNames.add(commandName);
         }
         return customCommandNames;
@@ -187,5 +172,47 @@ public class SlashCommands extends ListenerAdapter {
         }
         log.warn("Could not find CommandConfig for command: {}", name);
         return null;
+    }
+
+    private RestAction<?> handleCustomCommand(SlashCommandEvent event) {
+        String json = mongoClient
+                .getDatabase("other")
+                .getCollection("customcommands")
+                .find(
+                new BasicDBObject()
+                        .append("guildId", event.getGuild().getId())
+                        .append("commandName", event.getName()))
+                .first()
+                .toJson();
+
+        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+        String value = Misc.replaceTextVariables(event.getGuild(), root.get("value").getAsString());
+        boolean embed = root.get("embed").getAsBoolean();
+        boolean reply = root.get("reply").getAsBoolean();
+
+        OptionMapping replyOption = event.getOption("reply");
+        if (replyOption != null) reply = replyOption.getAsBoolean();
+
+        OptionMapping embedOption = event.getOption("embed");
+        if (embedOption != null) embed = embedOption.getAsBoolean();
+
+        if (embed) {
+            var e = new EmbedBuilder()
+                    .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+                    .setDescription(value)
+                    .build();
+
+            if (reply) return event.replyEmbeds(e);
+            else {
+                event.reply("Done!").setEphemeral(true).queue();
+                return event.getChannel().sendMessageEmbeds(e);
+            }
+        } else {
+            if (reply) return event.reply(value);
+            else {
+                event.reply("Done!").setEphemeral(true).queue();
+                return event.getChannel().sendMessage(value);
+            }
+        }
     }
 }
