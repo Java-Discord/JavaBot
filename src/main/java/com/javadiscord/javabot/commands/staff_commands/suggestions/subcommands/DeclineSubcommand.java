@@ -26,8 +26,8 @@ public class DeclineSubcommand implements SlashCommandHandler {
         Message message;
         try {
             message = event.getChannel().retrieveMessageById(messageId).complete();
-        } catch (IllegalArgumentException iae) {
-            return Responses.error(event, iae.getMessage());
+        } catch (Exception exception) {
+            return Responses.error(event, exception.getMessage());
         }
 
         MessageEmbed embed = message.getEmbeds().get(0);
