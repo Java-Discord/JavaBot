@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.service;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.commands.moderation.Mute;
-import com.javadiscord.javabot.commands.moderation.Warn;
+import com.javadiscord.javabot.commands.staff_commands.Mute;
+import com.javadiscord.javabot.commands.staff_commands.Warn;
 import com.javadiscord.javabot.utils.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;

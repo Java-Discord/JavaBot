@@ -127,7 +127,7 @@
   options:
     - {description: The user you want to clear all QOTW-points from, name: user, required: true,
        type: USER}
-  handler: com.javadiscord.javabot.commands.other.qotw.ClearQOTW
+  handler: com.javadiscord.javabot.commands.moderation.qotw.ClearQOTW
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -220,7 +220,7 @@
   options: []
 - description: Grants one QOTW-Points to the given member upon use
   name: correct
-  handler: com.javadiscord.javabot.commands.other.qotw.Correct
+  handler: com.javadiscord.javabot.commands.moderation.qotw.Correct
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -354,7 +354,7 @@
 
 - description: creates, edits or deletes custom slash commands
   name: customcommand
-  handler: com.javadiscord.javabot.commands.custom_commands.CustomCommands
+  handler: com.javadiscord.javabot.commands.moderation.custom_commands.CustomCommands
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -407,10 +407,10 @@
 - description: Lists all custom slash commands
   name: customcommands
   options: []
-  handler: com.javadiscord.javabot.commands.custom_commands.CustomCommandList
+  handler: com.javadiscord.javabot.commands.moderation.custom_commands.CustomCommandList
 - description: creates or deletes reaction roles
   name: reactionrole
-  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoles
+  handler: com.javadiscord.javabot.commands.moderation.reaction_roles.ReactionRoles
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -439,12 +439,12 @@
            type: STRING}
 - description: Generates the question of the week leaderboard
   name: leaderboard
-  handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
+  handler: com.javadiscord.javabot.commands.user_commands.Leaderboard
   options:
     - {description: Amount of users to display (2-30), name: amount, required: false, type: INTEGER}
 - description: Displays the given amount of questions in a random order
   name: question
-  handler: com.javadiscord.javabot.commands.other.Question
+  handler: com.javadiscord.javabot.commands.staff_commands.Question
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -453,7 +453,7 @@
     - {description: Amount of questions, name: amount, required: true, type: INTEGER}
 - description: Accepts the given submissions
   name: accept
-  handler: com.javadiscord.javabot.commands.other.suggestions.Accept
+  handler: com.javadiscord.javabot.commands.moderation.suggestions.Accept
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -462,7 +462,7 @@
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: clears the given submissions
   name: clear
-  handler: com.javadiscord.javabot.commands.other.suggestions.Clear
+  handler: com.javadiscord.javabot.commands.moderation.suggestions.Clear
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -471,7 +471,7 @@
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: declines the given submissions
   name: decline
-  handler: com.javadiscord.javabot.commands.other.suggestions.Decline
+  handler: com.javadiscord.javabot.commands.moderation.suggestions.Decline
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -480,7 +480,7 @@
     - {description: ID of the submission, name: message-id, required: true, type: STRING}
 - description: Adds a response to the given submissions
   name: respond
-  handler: com.javadiscord.javabot.commands.other.suggestions.Respond
+  handler: com.javadiscord.javabot.commands.moderation.suggestions.Respond
   enabledByDefault: false
   privileges:
       - type: ROLE
