@@ -2,7 +2,7 @@ package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.Constants;
-import com.javadiscord.javabot.commands.staff_commands.question_of_the_week.AddQOTWPoint;
+import com.javadiscord.javabot.commands.staff_commands.question_of_the_week.Correct;
 import com.javadiscord.javabot.service.Startup;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -86,7 +86,7 @@ public class SubmissionListener extends ListenerAdapter {
         var userId = event.getMessage().getEmbeds().get(0)
                 .getFooter().getText().replace("ID: ", "");
         event.getGuild().retrieveMemberById(userId).queue(member->{
-            new AddQOTWPoint().correct(event.getGuild(), member);
+            new Correct().correct(event.getGuild(), member);
             log.info("{}[{}]{} Submission by User {} was approved by {}",
                     Constants.TEXT_WHITE, event.getGuild().getName(), Constants.TEXT_RESET,
                     member.getUser().getAsTag(), event.getUser().getAsTag());

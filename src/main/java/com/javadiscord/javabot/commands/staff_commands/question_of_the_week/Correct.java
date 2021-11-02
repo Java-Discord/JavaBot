@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Instant;
 
-public class AddQOTWPoint implements SlashCommandHandler {
+public class Correct implements SlashCommandHandler {
 
     public void correct(Guild guild, Member member) {
 
