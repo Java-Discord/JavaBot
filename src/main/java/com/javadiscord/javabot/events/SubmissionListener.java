@@ -2,7 +2,7 @@ package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.Constants;
-import com.javadiscord.javabot.commands.other.qotw.Correct;
+import com.javadiscord.javabot.commands.staff_commands.question_of_the_week.Correct;
 import com.javadiscord.javabot.service.Startup;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;

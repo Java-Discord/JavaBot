@@ -2,8 +2,7 @@ package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
-import com.javadiscord.javabot.commands.moderation.Warns;
-import com.javadiscord.javabot.commands.other.qotw.Leaderboard;
+import com.javadiscord.javabot.commands.staff_commands.Warns;
 import com.javadiscord.javabot.data.mongodb.Database;
 import com.javadiscord.javabot.utils.TimeUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
