@@ -30,6 +30,10 @@ dependencies {
 
     // H2 Database
     implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+    implementation 'com.zaxxer:HikariCP:5.0.0'
+
+    // Quartz scheduler
+    implementation 'org.quartz-scheduler:quartz:2.3.2'
 
     // Lombok Annotations
     compileOnly 'org.projectlombok:lombok:1.18.22'

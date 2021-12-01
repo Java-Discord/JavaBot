@@ -153,11 +153,14 @@ public class StarboardListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-		if (event.getUser().isBot()) return;
+		if (event.getUser() == null || event.getUser().isBot() || event.getUser().isSystem()) return;
 
 		Database db = new Database();
 		var config = Bot.config.get(event.getGuild()).getStarBoard();
-
+		if (config.getEmotes().isEmpty()) {
+			log.warn("No emotes have been configured for the starboard.");
+			return;
+		}
 		if (!event.getReactionEmote().getName().equals(config.getEmotes().get(0))) return;
 
 		String guildId = event.getGuild().getId();
@@ -177,7 +180,7 @@ public class StarboardListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
-		if (event.getUser().isBot() || event.getUser().isSystem()) return;
+		if (event.getUser() == null || event.getUser().isBot() || event.getUser().isSystem()) return;
 
 		Database db = new Database();
 		var config = Bot.config.get(event.getGuild()).getStarBoard();

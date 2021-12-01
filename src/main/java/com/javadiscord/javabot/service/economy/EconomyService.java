@@ -1,10 +1,10 @@
 package com.javadiscord.javabot.service.economy;
 
-import com.javadiscord.javabot.data.h2db.H2DataSource;
 import com.javadiscord.javabot.service.economy.dao.AccountRepository;
 import com.javadiscord.javabot.service.economy.dao.TransactionRepository;
 import com.javadiscord.javabot.service.economy.model.Account;
 import com.javadiscord.javabot.service.economy.model.Transaction;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class EconomyService {
-	private final H2DataSource dataSource;
+	private final HikariDataSource dataSource;
 
 	public Account getOrCreateAccount(long userId) throws SQLException {
 		try (Connection con = this.dataSource.getConnection()) {

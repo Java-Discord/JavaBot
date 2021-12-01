@@ -14,11 +14,6 @@ public class SystemsConfig {
 	private String jdaBotToken = "";
 
 	/**
-	 * The name of the local H2 database file (excluding file extension).
-	 */
-	private String h2DatabaseFileName = "java_bot";
-
-	/**
 	 * The URL used to log in to the MongoDB instance which this bot uses.
 	 */
 	private String mongoDatabaseUrl = "";
@@ -28,4 +23,19 @@ public class SystemsConfig {
 	 * thread pool.
 	 */
 	private int asyncPoolSize = 4;
+
+	/**
+	 * Configuration for the Hikari connection pool that's used for the bot's
+	 * SQL data source.
+	 */
+	private HikariConfig hikariConfig = new HikariConfig();
+
+	/**
+	 * Configuration settings for the Hikari connection pool.
+	 */
+	@Data
+	public static class HikariConfig {
+		private String jdbcUrl = "jdbc:h2:tcp://localhost:9123/./java_bot";
+		private int maximumPoolSize = 5;
+	}
 }
