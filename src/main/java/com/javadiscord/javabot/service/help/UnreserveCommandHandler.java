@@ -33,7 +33,7 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 	}
 
 	private boolean channelIsInReservedCategory(TextChannel channel, HelpConfig config) {
-		return config.getReservedChannelCategory().equals(channel.getParent());
+		return config.getReservedChannelCategory().equals(channel.getParentCategory());
 	}
 
 	private boolean isUserWhoReservedChannel(SlashCommandEvent event, User owner) {

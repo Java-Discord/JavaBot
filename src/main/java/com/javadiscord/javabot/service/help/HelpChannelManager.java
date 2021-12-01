@@ -26,11 +26,11 @@ public class HelpChannelManager {
 	}
 
 	public boolean isOpen(TextChannel channel) {
-		return config.getOpenChannelCategory().equals(channel.getParent());
+		return config.getOpenChannelCategory().equals(channel.getParentCategory());
 	}
 
 	public boolean isReserved(TextChannel channel) {
-		return config.getReservedChannelCategory().equals(channel.getParent());
+		return config.getReservedChannelCategory().equals(channel.getParentCategory());
 	}
 
 	public int getOpenChannelCount() {

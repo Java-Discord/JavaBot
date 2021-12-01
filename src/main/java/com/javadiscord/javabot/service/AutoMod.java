@@ -10,10 +10,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
@@ -28,14 +27,14 @@ public class AutoMod extends ListenerAdapter {
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
     @Override
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         Member member = event.getMember();
         if (canBypassAutomod(member)) return;
         checkNewMessageAutomod(event.getMessage());
     }
-    
+
     @Override
-    public void onGuildMessageUpdate(@Nonnull GuildMessageUpdateEvent event) {
+    public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
         Member member = event.getMember();
         if (canBypassAutomod(member)) return;
         checkContentAutomod(event.getMessage());
@@ -56,7 +55,7 @@ public class AutoMod extends ListenerAdapter {
      * Runs all automod checks that should be run when a message is sent.
      * @param message the {@link Message} that should be checked
      */
-    private void checkNewMessageAutomod(@NotNull Message message) {
+    private void checkNewMessageAutomod(@Nonnull Message message) {
         // mention spam
         if (message.getMentionedMembers().size() >= 5) {
             warn(message, message.getMember(), "Automod: Mention Spam");
@@ -80,7 +79,7 @@ public class AutoMod extends ListenerAdapter {
      * Runs all automod checks only depend on the message content.
      * @param message the {@link Message} that should be checked
      */
-    private void checkContentAutomod(@NotNull Message message) {
+    private void checkContentAutomod(@Nonnull Message message) {
         // Advertising
         Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
         if (matcher.find()) {
@@ -93,7 +92,7 @@ public class AutoMod extends ListenerAdapter {
      * @param msg the message
      * @param member the member to be potentially warned
      */
-    private void handleSpam(@NotNull Message msg, Member member) {
+    private void handleSpam(@Nonnull Message msg, Member member) {
         // java files -> not spam
         if (!msg.getAttachments().isEmpty()
                 && "java".equals(msg.getAttachments().get(0).getFileExtension())) return;

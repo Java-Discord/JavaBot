@@ -22,7 +22,7 @@ public final class Responses {
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
-public static WebhookMessageAction<Message> success(InteractionHook hook, String title, String message) {
+	public static WebhookMessageAction<Message> success(InteractionHook hook, String title, String message) {
 		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getSuccessColor(), true);
 	}
 
@@ -54,7 +54,7 @@ public static WebhookMessageAction<Message> success(InteractionHook hook, String
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor(), true);
 	}
 
-public static WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message) {
+	public static WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message) {
 		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getWarningColor(), true);
 	}
 
