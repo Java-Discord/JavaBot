@@ -94,9 +94,26 @@ CREATE TABLE economy_transaction (
     message VARCHAR(127)
 );
 
+CREATE TABLE economy_account_preferences (
+    user_id BIGINT PRIMARY KEY,
+    receive_transaction_dms BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+// Help system.
 CREATE TABLE reserved_help_channels (
     channel_id BIGINT PRIMARY KEY,
     reserved_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     user_id BIGINT NOT NULL,
     timeout INT NOT NULL DEFAULT 60
+);
+
+// QOTW
+CREATE TABLE qotw_question (
+    id BIGINT PRIMARY KEY,
+    created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    guild_id BIGINT NOT NULL,
+    created_by BIGINT NOT NULL,
+    text VARCHAR(1024) NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    priority INTEGER NOT NULL DEFAULT 0
 );
