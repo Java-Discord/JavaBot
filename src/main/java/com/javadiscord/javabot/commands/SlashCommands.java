@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.data.properties.command.CommandConfig;
-import com.javadiscord.javabot.data.properties.command.CommandDataConfig;
+import com.javadiscord.javabot.data.properties.command.CommandDataLoader;
 import com.javadiscord.javabot.utils.Misc;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
@@ -101,7 +101,7 @@ public class SlashCommands extends ListenerAdapter {
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerSlashCommands(Guild guild) {
-		CommandConfig[] commandConfigs = CommandDataConfig.load();
+		CommandConfig[] commandConfigs = CommandDataLoader.load("commands.yaml");
 		var commandUpdateAction = this.updateCommands(commandConfigs, guild);
 		var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
 
