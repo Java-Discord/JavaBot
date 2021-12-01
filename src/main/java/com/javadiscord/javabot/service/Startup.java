@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class Startup extends ListenerAdapter {
-
-    public static final String iae = "https://cdn.discordapp.com/attachments/838019016395063328/838019031628906496/IllegalArgumentException.png";
-
     public static MongoClient mongoClient;
     public static Guild preferredGuild;
 
@@ -92,6 +89,8 @@ public class Startup extends ListenerAdapter {
                     helpConfig.getUpdateIntervalSeconds(),
                     TimeUnit.SECONDS
             );
+
+            Bot.config.get(guild).getModeration().getLogChannel().sendMessage("I have just been booted up!").queue();
         }
 
         } catch (MongoException e) {
