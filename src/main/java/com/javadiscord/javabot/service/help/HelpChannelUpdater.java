@@ -11,21 +11,30 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Task that updates all help channels in a particular guild.
  */
 @Slf4j
 public class HelpChannelUpdater implements Runnable {
+	private static final String ACTIVITY_CHECK_MESSAGE = "Hey %s, it looks like this channel is inactive. Are you finished with this channel?\n\n> _If no response is received after %d minutes, this channel will be removed._";
+
 	private final JDA jda;
 	private final HelpConfig config;
 	private final HelpChannelManager channelManager;
+	private final List<ChannelSemanticCheck> semanticChecks;
 
-	public HelpChannelUpdater(JDA jda, HelpConfig config) {
+	public HelpChannelUpdater(JDA jda, HelpConfig config, List<ChannelSemanticCheck> semanticChecks) {
 		this.jda = jda;
 		this.config = config;
+		this.semanticChecks = semanticChecks;
 		this.channelManager = new HelpChannelManager(config);
 	}
 
@@ -74,21 +83,23 @@ public class HelpChannelUpdater implements Runnable {
 				return this.channelManager.unreserveChannel(channel);
 			}
 
-			// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
-			if (
-				isActivityCheck(mostRecentMessage) &&
-				mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())
-			) {
-				return unreserveInactiveChannel(channel, owner, mostRecentMessage);
-			}
-
-			// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
-			if (!isActivityCheck(mostRecentMessage)) {
-				if (mostRecentMessage.getTimeCreated().plusMinutes(config.getInactivityTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
-					return sendActivityCheck(channel, owner);
-				} else {// The channel is still active, so take this opportunity to remove all old activity check messages.
-					return deleteOldActivityChecks(messages);
+			try {
+				// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
+				if (isActivityCheck(mostRecentMessage)) {
+					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+						return unreserveInactiveChannel(channel, owner, mostRecentMessage);
+					}
+				} else {// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
+					int timeout = channelManager.getTimeout(channel);
+					if (mostRecentMessage.getTimeCreated().plusMinutes(timeout).isBefore(OffsetDateTime.now())) {
+						return sendActivityCheck(channel, owner);
+					} else {// The channel is still active, so take this opportunity to clean up the channel.
+						// Also use it to do some introspection on the type of messages sent recently, to see if the bot can provide automated guidance.
+						return RestAction.allOf(deleteOldBotMessages(messages), semanticMessageCheck(channel, owner, messages));
+					}
 				}
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 
 			// No action needed.
@@ -166,6 +177,31 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	/**
+	 * Determines if a message is an activity check affirmative response, which
+	 * the bot usually sends when a user indicates they'd like to keep their
+	 * channel reserved.
+	 * @param message The message to check.
+	 * @return True if the message is an affirmative response to an activity
+	 * check interaction.
+	 */
+	private boolean isActivityCheckAffirmativeResponse(Message message) {
+		return message.getAuthor().equals(this.jda.getSelfUser()) &&
+			message.getContentRaw().contains("Okay, we'll keep this channel reserved for you");
+	}
+
+	/**
+	 * Determines if a message is a channel reservation message that's sent when
+	 * a user first reserves a channel.
+	 * @param message The message to check.
+	 * @return True if the message is a reservation message.
+	 */
+	private boolean isReservationMessage(Message message) {
+		return message.getAuthor().equals(this.jda.getSelfUser()) &&
+				config.getReservedChannelMessage() != null &&
+				message.getContentRaw().contains(config.getReservedChannelMessage());
+	}
+
+	/**
 	 * Sends an activity check to the given channel, to check that the owner is
 	 * still using the channel.
 	 * @param channel The channel to send the check to.
@@ -173,16 +209,12 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes when the check has been sent.
 	 */
 	private RestAction<?> sendActivityCheck(TextChannel channel, User owner) {
-		log.info("Sending inactivity check to {} because of no activity after {} minutes.", channel.getAsMention(), config.getInactivityTimeoutMinutes());
-		return channel.sendMessage(String.format(
-			"Hey %s, it looks like this channel is inactive. Are you finished with this channel?\n\n> _If no response is received after %d minutes, this channel will be removed._",
-			owner.getAsMention(),
-			config.getRemoveTimeoutMinutes()
-		))
-		.setActionRow(
-			new ButtonImpl("help-channel:done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
-			new ButtonImpl("help-channel:not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
-		);
+		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getAsMention());
+		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()))
+			.setActionRow(
+				new ButtonImpl("help-channel:done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
+				new ButtonImpl("help-channel:not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
+			);
 	}
 
 	/**
@@ -210,13 +242,52 @@ public class HelpChannelUpdater implements Runnable {
 	 * @param messages The messages to remove activity checks from.
 	 * @return A rest action that completes when all activity checks are removed.
 	 */
-	private RestAction<?> deleteOldActivityChecks(List<Message> messages) {
+	private RestAction<?> deleteOldBotMessages(List<Message> messages) {
 		var deleteActions = messages.stream()
-			.filter(this::isActivityCheck)
+			.filter(m -> isActivityCheck(m) || isActivityCheckAffirmativeResponse(m))
 			.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) {
 			return RestAction.allOf(deleteActions);
 		}
 		return new CompletedRestAction<>(this.jda, null);
+	}
+
+	/**
+	 * Performs checks on the recent message history of a channel.
+	 * @param channel The channel that the messages belong to.
+	 * @param owner The user who's reserved the channel.
+	 * @param messages The list of messages to analyze, ordered from newest to
+	 *                 oldest.
+	 * @return A rest action that completes when this check is done.
+	 */
+	private RestAction<?> semanticMessageCheck(TextChannel channel, User owner, List<Message> messages) {
+		Message firstMessage = null;
+		for (int i = 0; i < messages.size(); i++) {
+			if (i < messages.size() - 1 && isReservationMessage(messages.get(i))) {
+				firstMessage = messages.get(i + 1);
+				break;
+			}
+		}
+		List<Message> botMessages = messages.stream()
+				.filter(m -> m.getAuthor().equals(jda.getSelfUser()))
+				.collect(Collectors.toCollection(ArrayList::new));
+		// Trim away messages from before the owner's first message.
+		if (firstMessage != null) {
+			final var fm = firstMessage;
+			messages.removeIf(m -> m.getTimeCreated().isBefore(fm.getTimeCreated()));
+			botMessages.removeIf(m -> m.getTimeCreated().isBefore(fm.getTimeCreated()));
+		}
+		// Trim away bot messages from the main list of messages.
+		messages.removeIf(m -> m.getAuthor().isBot() || m.getAuthor().isSystem());
+		List<User> nonOwnerParticipants = messages.stream().map(Message::getAuthor).filter(u -> !u.isBot() && !u.isSystem()).toList();
+		Duration timeSinceFirstMessage = null;
+		if (firstMessage != null) {
+			timeSinceFirstMessage = Duration.between(firstMessage.getTimeCreated(), LocalDateTime.now());
+		}
+		var data = new ChannelSemanticData(firstMessage, timeSinceFirstMessage, nonOwnerParticipants, botMessages);
+		List<RestAction<?>> checkActions = semanticChecks.stream()
+				.map(c -> c.doCheck(channel, owner, messages, data))
+				.collect(Collectors.toList());
+		return RestAction.allOf(checkActions);
 	}
 }

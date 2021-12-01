@@ -15,12 +15,32 @@ public class DbActions {
 	// Hide the constructor.
 	private DbActions () {}
 
+	public static void doAction(ConnectionConsumer consumer) throws SQLException {
+		try (var c = Bot.dataSource.getConnection()) {
+			consumer.consume(c);
+		}
+	}
+
+	public static <T> T map(ConnectionFunction<T> function) throws SQLException {
+		try (var c = Bot.dataSource.getConnection()) {
+			return function.apply(c);
+		}
+	}
+
+	public static <T> T mapQuery(String query, StatementModifier modifier, ResultSetMapper<T> mapper) throws SQLException {
+		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
+			modifier.modify(stmt);
+			var rs = stmt.executeQuery();
+			return mapper.map(rs);
+		}
+	}
+
 	/**
 	 * Does an asynchronous database action using the bot's async pool.
 	 * @param consumer The consumer that will use a connection.
 	 * @return A future that completes when the action is complete.
 	 */
-	public static CompletableFuture<Void> doAction(ConnectionConsumer consumer) {
+	public static CompletableFuture<Void> doAsyncAction(ConnectionConsumer consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try (var c = Bot.dataSource.getConnection()) {
@@ -42,7 +62,7 @@ public class DbActions {
 	 * @param <T> The type of data access object. Usually some kind of repository.
 	 * @return A future that completes when the action is complete.
 	 */
-	public static <T> CompletableFuture<Void> doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
+	public static <T> CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try (var c = Bot.dataSource.getConnection()) {
@@ -56,7 +76,7 @@ public class DbActions {
 		return future;
 	}
 
-	public static <T> CompletableFuture<T> doAction(ConnectionFunction<T> function) {
+	public static <T> CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {
 		CompletableFuture<T> future = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try (var c = Bot.dataSource.getConnection()) {

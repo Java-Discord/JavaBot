@@ -90,5 +90,13 @@ CREATE TABLE economy_transaction (
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     from_user_id BIGINT NULL,
     to_user_id BIGINT NULL,
-    value BIGINT NOT NULL
+    value BIGINT NOT NULL,
+    message VARCHAR(127)
+);
+
+CREATE TABLE reserved_help_channels (
+    channel_id BIGINT PRIMARY KEY,
+    reserved_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    user_id BIGINT NOT NULL,
+    timeout INT NOT NULL DEFAULT 60
 );

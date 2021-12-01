@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.service.help;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.data.h2db.DbActions;
 import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.RestAction;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 /**
  * This manager is responsible for all the main interactions that affect the
@@ -81,9 +83,11 @@ public class HelpChannelManager {
 	 */
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
 		try (var con = Bot.dataSource.getConnection();
-				var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id) VALUES (?, ?)")) {
+				var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id, timeout) VALUES (?, ?, ?)")) {
 			stmt.setLong(1, channel.getIdLong());
 			stmt.setLong(2, reservingUser.getIdLong());
+			int timeout = config.getInactivityTimeouts().get(0);
+			stmt.setInt(3, timeout);
 			stmt.executeUpdate();
 		}
 		var target = config.getReservedChannelCategory();
@@ -161,5 +165,56 @@ public class HelpChannelManager {
 		} else {
 			return channel.delete();
 		}
+	}
+
+	public void setTimeout(TextChannel channel, int timeout) throws SQLException {
+		try (var con = Bot.dataSource.getConnection();
+			 var stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")
+		) {
+			stmt.setInt(1, timeout);
+			stmt.setLong(2, channel.getIdLong());
+			stmt.executeUpdate();
+		}
+	}
+
+	public int getTimeout(TextChannel channel) throws SQLException {
+		try (var con = Bot.dataSource.getConnection();
+			var stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")
+		) {
+			stmt.setLong(1, channel.getIdLong());
+			var rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			} else {
+				throw new SQLException("Could not get timeout for channel_id " + channel.getId());
+			}
+		}
+	}
+
+	public LocalDateTime getReservedAt(TextChannel channel) throws SQLException {
+		return DbActions.mapQuery(
+				"SELECT reserved_at FROM reserved_help_channels WHERE channel_id = ?",
+				s -> s.setLong(1, channel.getIdLong()),
+				rs -> {
+					if (!rs.next()) throw new SQLException("No data!");
+					return rs.getTimestamp(1).toLocalDateTime();
+				}
+		);
+	}
+
+	public int getNextTimeout(TextChannel channel) throws SQLException {
+		if (config.getInactivityTimeouts().isEmpty()) {
+			log.warn("No help channel inactivity timeouts have been configured!");
+			return 60;
+		}
+		int currentTimeout = getTimeout(channel);
+		int maxTimeout = config.getInactivityTimeouts().get(0);
+		for (var t : config.getInactivityTimeouts()) {
+			if (t > currentTimeout) {
+				return t;
+			}
+			if (t > maxTimeout) maxTimeout = t;
+		}
+		return maxTimeout;
 	}
 }

@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.events;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.staff_commands.Ban;
 import com.javadiscord.javabot.commands.staff_commands.Kick;
 import com.javadiscord.javabot.commands.staff_commands.Unban;
@@ -11,6 +12,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
+import java.sql.SQLException;
 
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
@@ -109,10 +112,16 @@ public class InteractionListener extends ListenerAdapter {
 			} else if (action.equals("not-done")) {
 				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
 				event.getMessage().delete().queue();
-				channel.sendMessage(String.format(
-						"Okay, we'll keep this channel reserved for you, and check again in **%d** minutes.",
-						config.getInactivityTimeoutMinutes()
-				)).queue();
+				try {
+					int nextTimeout = channelManager.getNextTimeout(channel);
+					channelManager.setTimeout(channel, nextTimeout);
+					channel.sendMessage(String.format(
+							"Okay, we'll keep this channel reserved for you, and check again in **%d** minutes.",
+							nextTimeout
+					)).queue();
+				} catch (SQLException e) {
+					Responses.error(event.getHook(), "An error occurred while managing this help channel.").queue();
+				}
 			}
 		}
 	}
