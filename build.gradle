@@ -35,6 +35,9 @@ dependencies {
     // Quartz scheduler
     implementation 'org.quartz-scheduler:quartz:2.3.2'
 
+    // NLP
+    implementation 'org.apache.opennlp:opennlp-tools:1.9.4'
+
     // Lombok Annotations
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
