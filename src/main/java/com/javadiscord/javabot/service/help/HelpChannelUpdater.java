@@ -13,7 +13,6 @@ import net.dv8tion.jda.internal.requests.CompletedRestAction;
 
 import java.sql.SQLException;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -282,7 +281,7 @@ public class HelpChannelUpdater implements Runnable {
 		List<User> nonOwnerParticipants = messages.stream().map(Message::getAuthor).filter(u -> !u.isBot() && !u.isSystem()).toList();
 		Duration timeSinceFirstMessage = null;
 		if (firstMessage != null) {
-			timeSinceFirstMessage = Duration.between(firstMessage.getTimeCreated(), LocalDateTime.now());
+			timeSinceFirstMessage = Duration.between(firstMessage.getTimeCreated(), OffsetDateTime.now());
 		}
 		var data = new ChannelSemanticData(firstMessage, timeSinceFirstMessage, nonOwnerParticipants, botMessages);
 		List<RestAction<?>> checkActions = semanticChecks.stream()
