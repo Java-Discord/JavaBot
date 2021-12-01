@@ -21,6 +21,18 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 		var channelManager = new HelpChannelManager(config);
 		var owner = channelManager.getReservedChannelOwner(channel);
 		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
+			var reasonOption = event.getOption("reason");
+			// If someone is unreserving someone else's channel, send the owner a DM if the user provided a reason.
+			if (!owner.equals(event.getUser()) && reasonOption != null) {
+				String reason = reasonOption.getAsString();
+				if (reason.isBlank() || reason.length() < 5) return Responses.warning(event, "The reason you provided is not descriptive enough.");
+				owner.openPrivateChannel().queue(pc -> pc.sendMessageFormat(
+						"Your help channel **%s** has been unreserved by %s for the following reason:\n> %s",
+						channel.getName(),
+						event.getUser().getAsTag(),
+						reason
+				).queue());
+			}
 			channelManager.unreserveChannel(channel).queue();
 			return Responses.success(event, "Channel Unreserved", "The channel has been unreserved.");
 		}
