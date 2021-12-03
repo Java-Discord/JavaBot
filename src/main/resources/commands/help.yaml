@@ -10,6 +10,7 @@
 
 - name: thanks
   description: Show an overview of how a user has been thanked for their help.
+  handler: com.javadiscord.javabot.service.help.ThanksCommandHandler
   options:
     - name: user
       description: The user to check.

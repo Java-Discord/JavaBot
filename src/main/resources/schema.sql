@@ -108,7 +108,7 @@ CREATE TABLE reserved_help_channels (
 );
 
 CREATE TABLE help_channel_thanks (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     channel_id BIGINT NOT NULL,
     thanked_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
