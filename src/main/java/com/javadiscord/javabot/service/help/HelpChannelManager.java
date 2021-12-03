@@ -165,10 +165,12 @@ public class HelpChannelManager {
 		final CompletableFuture<Map<User, List<Message>>> cf = new CompletableFuture<>();
 		Bot.asyncPool.execute(() -> {
 			final Map<User, List<Message>> userMessages = new HashMap<>();
-			while (history.size() < limit) {
+			boolean endFound = false;
+			while (!endFound && history.size() < limit) {
 				var messages = history.retrievePast(50).complete();
 				for (Message msg : messages) {
 					if (msg.getContentRaw().contains(config.getReservedChannelMessage()) || msg.isPinned()) {
+						endFound = true;
 						break;
 					}
 					var user = msg.getAuthor();
@@ -215,10 +217,16 @@ public class HelpChannelManager {
 					components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getAsTag(), ButtonStyle.SUCCESS, false, null));
 				}
 				components.add(new ButtonImpl("help-thank:done", "Unreserve", ButtonStyle.PRIMARY, false, null));
-				var msgAction = interaction.getHook().sendMessage("Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?");
+				interaction.getHook().sendMessage("""
+						Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you.
+						This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively.
+						Otherwise, click the **Unreserve** button simply unreserve your channel.
+						""")
+						.setEphemeral(true).queue();
+				var msgAction = channel.sendMessage("Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?");
 				msgAction = MessageActionUtils.addComponents(msgAction, components);
 				msgAction.queue();
-				try {// Set the channel to timeout in 5 minutes in case the user forgets to click "Unreserve".
+				try {
 					setTimeout(channel, 5);
 				} catch (SQLException e) {
 					e.printStackTrace();

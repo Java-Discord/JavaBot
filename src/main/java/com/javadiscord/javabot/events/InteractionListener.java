@@ -132,18 +132,34 @@ public class InteractionListener extends ListenerAdapter {
 		TextChannel channel = event.getTextChannel();
 		User owner = channelManager.getReservedChannelOwner(channel);
 		if (owner == null) {
-			event.reply("Sorry, but this channel is currently unreserved.").setEphemeral(true).queue();
+			event.getInteraction().getHook().sendMessage("Sorry, but this channel is currently unreserved.").setEphemeral(true).queue();
+			event.getMessage().delete().queue();
 			return;
 		}
 		if (event.getUser().equals(owner)) {
 			if (action.equals("done")) {
+				event.getMessage().delete().queue();
 				channelManager.unreserveChannel(channel).queue();
 			} else {
 				long helperId = Long.parseLong(action);
 				event.getJDA().retrieveUserById(helperId).queue(user -> {
-					event.replyFormat("You thanked %s", user.getAsTag()).setEphemeral(true).queue();
+					event.getInteraction().getHook().sendMessageFormat("You thanked %s", user.getAsTag()).setEphemeral(true).queue();
+					var btn = event.getButton();
+					if (btn != null) {
+						var activeButtons = event.getMessage().getButtons().stream()
+								.filter(b -> !b.isDisabled() && !b.getLabel().equals("Unreserve") && !b.equals(btn))
+								.toList();
+						if (activeButtons.isEmpty()) {// If there are no more people to thank, automatically unreserve the channel.
+							event.getMessage().delete().queue();
+							channelManager.unreserveChannel(channel).queue();
+						} else {// Otherwise,
+							event.editButton(btn.asDisabled()).queue();
+						}
+					}
 				});
 			}
+		} else {
+			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel can thank users.").setEphemeral(true).queue();
 		}
 	}
 }
