@@ -218,6 +218,11 @@ public class HelpChannelManager {
 				var msgAction = interaction.getHook().sendMessage("Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?");
 				msgAction = MessageActionUtils.addComponents(msgAction, components);
 				msgAction.queue();
+				try {// Set the channel to timeout in 5 minutes in case the user forgets to click "Unreserve".
+					setTimeout(channel, 5);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			});
 		} else {// The channel was unreserved by someone other than the owner.
 			if (reason != null) {// The user provided a reason, so check that it's legit, then send a DM to the owner.

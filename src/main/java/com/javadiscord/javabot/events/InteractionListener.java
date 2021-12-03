@@ -132,17 +132,16 @@ public class InteractionListener extends ListenerAdapter {
 		TextChannel channel = event.getTextChannel();
 		User owner = channelManager.getReservedChannelOwner(channel);
 		if (owner == null) {
-			event.getMessage().delete().queue();
+			event.reply("Sorry, but this channel is currently unreserved.").setEphemeral(true).queue();
 			return;
 		}
 		if (event.getUser().equals(owner)) {
 			if (action.equals("done")) {
-				event.getMessage().delete().queue();
 				channelManager.unreserveChannel(channel).queue();
 			} else {
 				long helperId = Long.parseLong(action);
 				event.getJDA().retrieveUserById(helperId).queue(user -> {
-					channel.sendMessageFormat("You thanked %s", user.getAsTag()).queue();
+					event.replyFormat("You thanked %s", user.getAsTag()).setEphemeral(true).queue();
 				});
 			}
 		}
