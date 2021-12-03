@@ -152,6 +152,11 @@ public class InteractionListener extends ListenerAdapter {
 				long helperId = Long.parseLong(action);
 				event.getJDA().retrieveUserById(helperId).queue(user -> {
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", user.getAsTag()).setEphemeral(true).queue();
+					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
+							"User %s has thanked %s!",
+							owner.getAsMention(),
+							user.getAsMention()
+					).queue();
 					var btn = event.getButton();
 					if (btn != null) {
 						var activeButtons = event.getMessage().getButtons().stream()
