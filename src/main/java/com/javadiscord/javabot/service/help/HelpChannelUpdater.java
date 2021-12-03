@@ -86,7 +86,7 @@ public class HelpChannelUpdater implements Runnable {
 				// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
 				if (isActivityCheck(mostRecentMessage)) {
 					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
-						return unreserveInactiveChannel(channel, owner, mostRecentMessage);
+						return unreserveInactiveChannel(channel, owner, mostRecentMessage, messages);
 					}
 				} else {// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
 					int timeout = channelManager.getTimeout(channel);
@@ -222,18 +222,34 @@ public class HelpChannelUpdater implements Runnable {
 	 * @param channel The channel to unreserve.
 	 * @param owner The owner of the channel.
 	 * @param mostRecentMessage The most recent message that was sent.
+	 * @param messages The list of all recent messages, so that the bot can do
+	 *                 some cleanup if needed.
 	 * @return A rest action that completes once the channel is unreserved.
 	 */
-	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage) {
+	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage, List<Message> messages) {
 		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
 		return RestAction.allOf(
 			mostRecentMessage.delete(),
+			deleteThankMessages(messages),
 			channel.sendMessage(String.format(
 				"%s, this channel will be unreserved due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
 				owner.getAsMention()
 			)),
 			this.channelManager.unreserveChannel(channel)
 		);
+	}
+
+	/**
+	 * Deletes any "thank-you" message that the bot sent previously.
+	 * @param messages The list of messages to search through.
+	 * @return A rest action that completes once all thank messages are deleted.
+	 */
+	private RestAction<?> deleteThankMessages(List<Message> messages) {
+		var deleteActions = messages.stream()
+				.filter(m -> m.getContentRaw().equals(HelpChannelManager.THANK_MESSAGE_TEXT))
+				.map(Message::delete).toList();
+		if (!deleteActions.isEmpty()) return RestAction.allOf(deleteActions);
+		return new CompletedRestAction<>(this.jda, null);
 	}
 
 	/**

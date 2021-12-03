@@ -29,6 +29,8 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 public class HelpChannelManager {
+	public static final String THANK_MESSAGE_TEXT = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?";
+
 	private final HelpConfig config;
 	private final TextChannel logChannel;
 
@@ -217,7 +219,7 @@ public class HelpChannelManager {
 				components.add(new ButtonImpl("help-thank:cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
 				interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
 						.setEphemeral(true).queue();
-				var msgAction = channel.sendMessage("Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?");
+				var msgAction = channel.sendMessage(THANK_MESSAGE_TEXT);
 				msgAction = MessageActionUtils.addComponents(msgAction, components);
 				msgAction.queue();
 				try {
