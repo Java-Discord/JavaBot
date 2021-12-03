@@ -140,6 +140,14 @@ public class InteractionListener extends ListenerAdapter {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();
 				channelManager.unreserveChannel(channel).queue();
+			} else if (action.equals("cancel")) {
+				event.getInteraction().getHook().sendMessage("Unreserving of this channel has been cancelled.").setEphemeral(true).queue();
+				event.getMessage().delete().queue();
+				try {
+					channelManager.setTimeout(channel, config.getInactivityTimeouts().get(0));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			} else {
 				long helperId = Long.parseLong(action);
 				event.getJDA().retrieveUserById(helperId).queue(user -> {

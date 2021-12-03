@@ -6,10 +6,7 @@ import com.javadiscord.javabot.data.h2db.DbActions;
 import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
 import com.javadiscord.javabot.utils.MessageActionUtils;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageType;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.Component;
@@ -214,14 +211,11 @@ public class HelpChannelManager {
 				});
 				List<Component> components = new ArrayList<>(25);
 				for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
-					components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getAsTag(), ButtonStyle.SUCCESS, false, null));
+					components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getAsTag(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
 				}
 				components.add(new ButtonImpl("help-thank:done", "Unreserve", ButtonStyle.PRIMARY, false, null));
-				interaction.getHook().sendMessage("""
-						Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you.
-						This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively.
-						Otherwise, click the **Unreserve** button simply unreserve your channel.
-						""")
+				components.add(new ButtonImpl("help-thank:cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
+				interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
 						.setEphemeral(true).queue();
 				var msgAction = channel.sendMessage("Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?");
 				msgAction = MessageActionUtils.addComponents(msgAction, components);
