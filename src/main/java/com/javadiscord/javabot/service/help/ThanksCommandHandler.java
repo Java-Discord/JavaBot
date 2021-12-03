@@ -22,7 +22,7 @@ public class ThanksCommandHandler implements SlashCommandHandler {
 				s -> s.setLong(1, user.getIdLong())
 		);
 		long weekThanks = DbActions.count(
-				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ? AND thanked_at < DATEADD('week', -1, CURRENT_TIMESTAMP(0))",
+				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ? AND thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))",
 				s -> s.setLong(1, user.getIdLong())
 		);
 		var embed = new EmbedBuilder()
