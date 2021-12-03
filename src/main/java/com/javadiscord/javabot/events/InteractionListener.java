@@ -160,7 +160,7 @@ public class InteractionListener extends ListenerAdapter {
 					var btn = event.getButton();
 					if (btn != null) {
 						var activeButtons = event.getMessage().getButtons().stream()
-								.filter(b -> !b.isDisabled() && !b.getLabel().equals("Unreserve") && !b.equals(btn))
+								.filter(b -> !b.isDisabled() && !b.getLabel().equals("Unreserve") && !b.getLabel().equals("Cancel") && !b.equals(btn))
 								.toList();
 						if (activeButtons.isEmpty()) {// If there are no more people to thank, automatically unreserve the channel.
 							event.getMessage().delete().queue();
