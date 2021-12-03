@@ -1,18 +1,30 @@
 package com.javadiscord.javabot.service.help;
 
 import com.javadiscord.javabot.Bot;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.data.h2db.DbActions;
 import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
+import com.javadiscord.javabot.utils.MessageActionUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This manager is responsible for all the main interactions that affect the
@@ -142,8 +154,96 @@ public class HelpChannelManager {
 	}
 
 	/**
+	 * Gets a list of all users that have participated in a reserved help
+	 * channel since it was reserved.
+	 * @param channel The channel to get participants for.
+	 * @return The list of users.
+	 */
+	public CompletableFuture<Map<User, List<Message>>> getParticipantsSinceReserved(TextChannel channel) {
+		int limit = 300;
+		var history = channel.getHistory();
+		final CompletableFuture<Map<User, List<Message>>> cf = new CompletableFuture<>();
+		Bot.asyncPool.execute(() -> {
+			final Map<User, List<Message>> userMessages = new HashMap<>();
+			while (history.size() < limit) {
+				var messages = history.retrievePast(50).complete();
+				for (Message msg : messages) {
+					if (msg.getContentRaw().contains(config.getReservedChannelMessage()) || msg.isPinned()) {
+						break;
+					}
+					var user = msg.getAuthor();
+					if (!user.isBot() && !user.isSystem()) {
+						List<Message> um = userMessages.computeIfAbsent(user, u -> new ArrayList<>());
+						um.add(msg);
+					}
+				}
+			}
+			cf.complete(userMessages);
+		});
+		return cf;
+	}
+
+	/**
+	 * Unreserves a channel from the case that a user has done so via a discord
+	 * interaction.
+	 * @param channel The channel to unreserve.
+	 * @param owner The owner of the reserved channel.
+	 * @param reason The user-supplied reason for unreserving the channel.
+	 * @param interaction The interaction the user did to unreserve the channel.
+	 */
+	public void unreserveChannelByUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
+		var user = interaction.getUser();
+		if (owner.equals(user)) {// The user is unreserving their own channel.
+			// Ask the user for some feedback about the help channel, if possible.
+			getParticipantsSinceReserved(channel).thenAcceptAsync(participants -> {
+				List<User> potentialHelpers = new ArrayList<>(participants.size());
+				for (var entry : participants.entrySet()) {
+					if (!entry.getKey().equals(owner)) potentialHelpers.add(entry.getKey());
+				}
+				if (potentialHelpers.isEmpty()) {
+					Responses.info(interaction.getHook(), "Channel Unreserved", "Your channel has been unreserved.").queue();
+					unreserveChannel(channel).queue();
+					return;
+				}
+				potentialHelpers.sort((o1, o2) -> {
+					int c = Integer.compare(participants.get(o1).size(), participants.get(o2).size());
+					if (c == 0) return o1.getName().compareTo(o2.getName());
+					return c;
+				});
+				List<Component> components = new ArrayList<>(25);
+				for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
+					components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getAsTag(), ButtonStyle.SUCCESS, false, null));
+				}
+				components.add(new ButtonImpl("help-thank:done", "Unreserve", ButtonStyle.PRIMARY, false, null));
+				var msgAction = interaction.getHook().sendMessage("Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?");
+				msgAction = MessageActionUtils.addComponents(msgAction, components);
+				msgAction.queue();
+			});
+		} else {// The channel was unreserved by someone other than the owner.
+			if (reason != null) {// The user provided a reason, so check that it's legit, then send a DM to the owner.
+				if (reason.isBlank() || reason.length() < 5) {
+					Responses.warning(interaction.getHook(), "The reason you provided is not descriptive enough.").queue();
+				} else {
+					Responses.info(interaction.getHook(), "Channel Unreserved", "The channel has been unreserved.").queue();
+					unreserveChannel(channel).queue();
+					owner.openPrivateChannel().queue(pc -> pc.sendMessageFormat(
+							"Your help channel **%s** has been unreserved by %s for the following reason:\n> %s",
+							channel.getName(),
+							user.getAsTag(),
+							reason
+					).queue());
+				}
+			} else {// No reason was provided, so just unreserve.
+				Responses.info(interaction.getHook(), "Channel Unreserved", "The channel has been unreserved.").queue();
+				unreserveChannel(channel).queue();
+			}
+		}
+	}
+
+	/**
 	 * Unreserves a channel after it no longer needs to be reserved.
 	 * @param channel The channel to unreserve.
+	 * @return A rest action that completes when everything is done.
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
@@ -168,6 +268,23 @@ public class HelpChannelManager {
 			}
 		} else {
 			return channel.delete();
+		}
+	}
+
+	public void unreserveAllOwnedChannels(User user) throws SQLException {
+		var channels = DbActions.mapQuery(
+				"SELECT channel_id FROM reserved_help_channels WHERE user_id = ?",
+				s -> s.setLong(1, user.getIdLong()),
+				rs -> {
+					List<TextChannel> c = new ArrayList<>();
+					while (rs.next()) {
+						c.add(user.getJDA().getTextChannelById(rs.getLong(1)));
+					}
+					return c;
+				}
+		);
+		for (var channel : channels) {
+			unreserveChannel(channel);
 		}
 	}
 

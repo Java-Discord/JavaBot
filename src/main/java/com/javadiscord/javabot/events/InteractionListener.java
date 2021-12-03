@@ -31,6 +31,7 @@ public class InteractionListener extends ListenerAdapter {
 			case "submission" -> this.handleSubmission(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> this.handleHelpChannel(event, id[1]);
+			case "help-thank" -> this.handleHelpThank(event, id[1]);
 			case "utils" -> this.handleUtils(event);
 		}
 	}
@@ -106,9 +107,8 @@ public class InteractionListener extends ListenerAdapter {
 			(event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
 		) {
 			if (action.equals("done")) {
-				log.info("Unreserving channel {} because it was marked as done.", channel.getAsMention());
 				event.getMessage().delete().queue();
-				channelManager.unreserveChannel(channel).queue();
+				channelManager.unreserveChannelByUser(channel, owner, null, event);
 			} else if (action.equals("not-done")) {
 				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
 				event.getMessage().delete().queue();
@@ -122,6 +122,28 @@ public class InteractionListener extends ListenerAdapter {
 				} catch (SQLException e) {
 					Responses.error(event.getHook(), "An error occurred while managing this help channel.").queue();
 				}
+			}
+		}
+	}
+
+	private void handleHelpThank(ButtonClickEvent event, String action) {
+		var config = Bot.config.get(event.getGuild()).getHelp();
+		var channelManager = new HelpChannelManager(config);
+		TextChannel channel = event.getTextChannel();
+		User owner = channelManager.getReservedChannelOwner(channel);
+		if (owner == null) {
+			event.getMessage().delete().queue();
+			return;
+		}
+		if (event.getUser().equals(owner)) {
+			if (action.equals("done")) {
+				event.getMessage().delete().queue();
+				channelManager.unreserveChannel(channel).queue();
+			} else {
+				long helperId = Long.parseLong(action);
+				event.getJDA().retrieveUserById(helperId).queue(user -> {
+					channel.sendMessageFormat("You thanked %s", user.getAsTag()).queue();
+				});
 			}
 		}
 	}

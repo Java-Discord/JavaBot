@@ -35,6 +35,16 @@ public class DbActions {
 		}
 	}
 
+	public static int update(String query, Object... params) throws SQLException {
+		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
+			int i = 1;
+			for (var param : params) {
+				stmt.setObject(i++, param);
+			}
+			return stmt.executeUpdate();
+		}
+	}
+
 	/**
 	 * Does an asynchronous database action using the bot's async pool.
 	 * @param consumer The consumer that will use a connection.
