@@ -18,16 +18,6 @@
   options: []
   handler: com.javadiscord.javabot.commands.user_commands.Help
 
-# Help commands
-- name: unreserve
-  description: Unreserves this help channel so that others can use it.
-  handler: com.javadiscord.javabot.service.help.UnreserveCommandHandler
-  options:
-    - name: reason
-      description: The reason why you're unreserving this channel.
-      type: STRING
-      required: false
-
 - description: Generates a human-readable timestamp out of a Discord-ID
   name: idcalc
   options:

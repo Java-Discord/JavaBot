@@ -35,6 +35,18 @@ public class DbActions {
 		}
 	}
 
+	public static long count(String query, StatementModifier modifier) {
+		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
+			modifier.modify(stmt);
+			var rs = stmt.executeQuery();
+			if (!rs.next()) return 0;
+			return rs.getLong(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
 	public static int update(String query, Object... params) throws SQLException {
 		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
 			int i = 1;

@@ -101,7 +101,7 @@ public class SlashCommands extends ListenerAdapter {
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerSlashCommands(Guild guild) {
-		CommandConfig[] commandConfigs = CommandDataLoader.load("commands.yaml");
+		CommandConfig[] commandConfigs = CommandDataLoader.load("commands.yaml", "commands/help.yaml");
 		var commandUpdateAction = this.updateCommands(commandConfigs, guild);
 		var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
 

@@ -1,0 +1,17 @@
+# Help commands
+- name: unreserve
+  description: Unreserves this help channel so that others can use it.
+  handler: com.javadiscord.javabot.service.help.UnreserveCommandHandler
+  options:
+    - name: reason
+      description: The reason why you're unreserving this channel.
+      type: STRING
+      required: false
+
+- name: thanks
+  description: Show an overview of how a user has been thanked for their help.
+  options:
+    - name: user
+      description: The user to check.
+      type: USER
+      required: false
