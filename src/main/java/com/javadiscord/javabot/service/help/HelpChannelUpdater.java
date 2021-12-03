@@ -287,6 +287,7 @@ public class HelpChannelUpdater implements Runnable {
 		List<RestAction<?>> checkActions = semanticChecks.stream()
 				.map(c -> c.doCheck(channel, owner, messages, data))
 				.collect(Collectors.toList());
+		if (checkActions.isEmpty()) return new CompletedRestAction<>(jda, null);
 		return RestAction.allOf(checkActions);
 	}
 }

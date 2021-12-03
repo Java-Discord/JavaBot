@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.internal.requests.CompletedRestAction;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -152,7 +153,10 @@ public class HelpChannelManager {
 				stmt.executeUpdate();
 				return RestAction.allOf(
 						channel.retrievePinnedMessages()
-								.flatMap(messages -> RestAction.allOf(messages.stream().map(Message::unpin).toList())),
+								.flatMap(messages -> {
+									if (messages.isEmpty()) return new CompletedRestAction<>(channel.getJDA(), null);
+									return RestAction.allOf(messages.stream().map(Message::unpin).toList());
+								}),
 						getOpenChannelCount() >= config.getPreferredOpenChannelCount()
 								? channel.getManager().setParent(config.getDormantChannelCategory()).sync(config.getDormantChannelCategory())
 								: channel.getManager().setParent(config.getOpenChannelCategory()).sync(config.getOpenChannelCategory()),
