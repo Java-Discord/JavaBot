@@ -5,6 +5,7 @@ import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.staff_commands.Ban;
 import com.javadiscord.javabot.commands.staff_commands.Kick;
 import com.javadiscord.javabot.commands.staff_commands.Unban;
+import com.javadiscord.javabot.data.h2db.DbActions;
 import com.javadiscord.javabot.service.help.HelpChannelManager;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Role;
@@ -152,11 +153,23 @@ public class InteractionListener extends ListenerAdapter {
 				long helperId = Long.parseLong(action);
 				event.getJDA().retrieveUserById(helperId).queue(user -> {
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", user.getAsTag()).setEphemeral(true).queue();
-					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
-							"User %s has thanked %s!",
-							owner.getAsMention(),
-							user.getAsMention()
-					).queue();
+					try {
+						DbActions.update(
+								"INSERT INTO help_channel_thanks (user_id, channel_id, helper_id) VALUES (?, ?, ?)",
+								owner.getIdLong(),
+								channel.getIdLong(),
+								user.getIdLong()
+						);
+					} catch (SQLException e) {
+						e.printStackTrace();
+						Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
+								"Could not record user %s thanking %s for help in channel %s: %s",
+								owner.getAsTag(),
+								user.getAsTag(),
+								channel.getAsMention(),
+								e.getMessage()
+						).queue();
+					}
 					var btn = event.getButton();
 					if (btn != null) {
 						var activeButtons = event.getMessage().getButtons().stream()

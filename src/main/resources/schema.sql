@@ -107,6 +107,14 @@ CREATE TABLE reserved_help_channels (
     timeout INT NOT NULL DEFAULT 60
 );
 
+CREATE TABLE help_channel_thanks (
+    id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    channel_id BIGINT NOT NULL,
+    thanked_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    helper_id BIGINT NOT NULL
+);
+
 // QOTW
 CREATE TABLE qotw_question (
     id BIGINT PRIMARY KEY,
