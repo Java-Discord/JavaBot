@@ -16,3 +16,7 @@
       description: The user to check.
       type: USER
       required: false
+
+- name: help-guidelines
+  description: Show the server's help guidelines in a simple format.
+  handler: com.javadiscord.javabot.service.help.HelpGuidelinesCommandHandler

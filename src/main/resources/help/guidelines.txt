@@ -1,0 +1,9 @@
+**1.** Try not to ask questions like *"Can I ask ...?"* or *"Can someone help me?"*. Provide a detailed description of your problem right away, so that it's easier for helpers to help you. Provide code snippets (not screenshots) and error messages so that helpers don't have to guess. *Remember, helpers are volunteering their free time to help you!*
+
+**2.** Only ask questions in **✅available** help channels. Asking a question in someone else's **⏳reserved** channel is not polite, and your messages may be removed without notice.
+
+**3.** You may use the `/help-ping` slash command if you feel your question is urgent. *Abusing this will result in warnings and/or a ban.*
+
+**4.** Do not ask for help with exams or homework. You may ask for help with understanding individual concepts and parts of a homework exercise, but homework questions which show little effort on your part will likely go unanswered. *__Exam help is strictly forbidden. Violators will be banned.__*
+
+**5.** Format your code using [Discord's triple-backtick syntax](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-). See the image below for an example. Note that these are [backticks](https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows/254077#254077), not quotes.
