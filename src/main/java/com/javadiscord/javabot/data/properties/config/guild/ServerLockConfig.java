@@ -10,6 +10,7 @@ public class ServerLockConfig extends GuildConfigItem {
     private String locked = "false";
     private int minimumAccountAgeInDays = 7;
     private int lockThreshold = 5;
+    private float minimumSecondsBetweenJoins = 1.0f;
     private String lockMessageTemplate;
 
     public boolean isLocked() {
