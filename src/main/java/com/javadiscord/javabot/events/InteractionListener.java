@@ -90,6 +90,11 @@ public class InteractionListener extends ListenerAdapter {
 		});
 	}
 
+	/**
+	 * Handles button interactions for help channel activity checks.
+	 * @param event The button event.
+	 * @param action The data extracted from the button id.
+	 */
 	private void handleHelpChannel(ButtonClickEvent event, String action) {
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
@@ -98,6 +103,8 @@ public class InteractionListener extends ListenerAdapter {
 		// If a reserved channel doesn't have an owner, it's in an invalid state, but the system will handle it later automatically.
 		if (owner == null) {
 			// Remove the original message, just to make sure no more interactions are sent.
+			event.getInteraction().getHook().sendMessage("Uh oh! It looks like this channel is no longer reserved, so these buttons can't be used.")
+					.setEphemeral(true).queue();
 			event.getMessage().delete().queue();
 			return;
 		}
@@ -109,7 +116,11 @@ public class InteractionListener extends ListenerAdapter {
 		) {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();
-				channelManager.unreserveChannelByUser(channel, owner, null, event);
+				if (event.getUser().equals(owner)) {// If the owner is unreserving their own channel, handle it separately.
+					channelManager.unreserveChannelByUser(channel, owner, null, event);
+				} else {
+					channelManager.unreserveChannel(channel);
+				}
 			} else if (action.equals("not-done")) {
 				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
 				event.getMessage().delete().queue();
@@ -124,9 +135,19 @@ public class InteractionListener extends ListenerAdapter {
 					Responses.error(event.getHook(), "An error occurred while managing this help channel.").queue();
 				}
 			}
+		} else {
+			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel, or moderators, are allowed to use these buttons.")
+					.setEphemeral(true).queue();
 		}
 	}
 
+	/**
+	 * Handles button interactions pertaining to the interaction provided to
+	 * users when they choose to unreserve their channel, giving them options to
+	 * thank helpers or cancel the unreserving.
+	 * @param event The button event.
+	 * @param action The data extracted from the button's id.
+	 */
 	private void handleHelpThank(ButtonClickEvent event, String action) {
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);

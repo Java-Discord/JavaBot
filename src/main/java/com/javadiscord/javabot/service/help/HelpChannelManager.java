@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 public class HelpChannelManager {
-	public static final String THANK_MESSAGE_TEXT = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you?";
+	public static final String THANK_MESSAGE_TEXT = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you? When you're done, click **Unreserve**.";
 
 	private final HelpConfig config;
 	private final TextChannel logChannel;
