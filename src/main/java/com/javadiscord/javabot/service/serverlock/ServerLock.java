@@ -15,10 +15,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Server lock functionality that automatically locks the server if a raid is detected.
@@ -175,10 +177,27 @@ public class ServerLock extends ListenerAdapter {
 			});
 		}
 
+		String membersString = potentialRaiders.stream()
+				.sorted(Comparator.comparing(Member::getTimeJoined).reversed())
+				.map(m -> String.format(
+						"- **%s** joined at `%s`, account is `%s` old.",
+						m.getUser().getAsTag(),
+						m.getTimeJoined().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSS")),
+						TimeUtils.formatDuration(Duration.between(m.getTimeCreated(), OffsetDateTime.now()))
+				))
+				.collect(Collectors.joining("\n"));
+
 		var config = Bot.config.get(guild).getServerLock();
 		config.setLocked("true");
 		Bot.config.get(guild).flush();
-		Misc.sendToLog(guild, config.getLockMessageTemplate());
+		Misc.sendToLogFormat(guild, """
+				**Server Locked** @here
+				The automated locking system has detected that the following %d users may be part of a raid:
+				%s
+				""",
+				potentialRaiders.size(),
+				membersString
+		);
 	}
 
 	/**

@@ -17,6 +17,13 @@ public class Misc {
         Bot.config.get(guild).getModeration().getLogChannel().sendMessage(text).queue();
     }
 
+    public static void sendToLogFormat(Guild guild, String formatText, Object... args) {
+        Bot.config.get(guild).getModeration().getLogChannel().sendMessage(String.format(
+                formatText,
+                args
+        )).queue();
+    }
+
     public static String getGuildList (List<Guild> guildList, boolean showID, boolean showMemCount) {
         StringBuilder sb = new StringBuilder();
         for (int guildAmount = guildList.size(); guildAmount > 0; guildAmount--) {
