@@ -117,11 +117,24 @@ CREATE TABLE help_channel_thanks (
 
 // QOTW
 CREATE TABLE qotw_question (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     guild_id BIGINT NOT NULL,
     created_by BIGINT NOT NULL,
     text VARCHAR(1024) NOT NULL,
     used BOOLEAN NOT NULL DEFAULT FALSE,
     priority INTEGER NOT NULL DEFAULT 0
+);
+
+// Staff Management
+CREATE TABLE staff_application (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    guild_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    name VARCHAR(127) NOT NULL,
+    age INTEGER NOT NULL,
+    email VARCHAR(254) NOT NULL,
+    time_zone VARCHAR(63) NOT NULL,
+    role_id BIGINT NOT NULL
 );

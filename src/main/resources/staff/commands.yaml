@@ -1,0 +1,71 @@
+# Staff Application Commands
+- name: staff-apply
+  description: Apply to become a member of this server's staff.
+  handler: com.javadiscord.javabot.commands.moderation.staff_applications.StaffApplyHandler
+  options:
+    - name: name
+      description: Your real name.
+      required: true
+      type: STRING
+    - name: age
+      description: Your age.
+      required: true
+      type: INTEGER
+    - name: email
+      description: Your email address.
+      required: true
+      type: STRING
+    - name: timezone
+      description: The timezone you live in.
+      required: true
+      type: STRING
+    - name: position
+      description: The position you are applying for.
+      required: true
+      type: INTEGER
+      choices:
+        - name: Bot Dev
+          value: 759736213874671636
+        - name: Website Dev
+          value: 770315357080125440
+        - name: Moderator
+          value: 653644005149638688
+        - name: Community Manager
+          value: 749001355288379544
+        - name: Management
+          value: 653701560609669160
+    - name: extra-remarks
+      description: Anything else you'd like to tell us.
+      required: false
+      type: STRING
+
+- name: staff-applications
+  description: Manage staff applications.
+  handler: com.javadiscord.javabot.commands.moderation.staff_applications.StaffApplicationsHandler
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffApplicationReviewRoleId
+  subCommands:
+    - name: list
+      description: Show a list of all applications.
+      options:
+        - name: page
+          description: The page of applications to show.
+          required: false
+          type: INTEGER
+        - name: show-all
+          description: Include all applications, not just those that are pending.
+          required: false
+          type: BOOLEAN
+    - name: handle
+      description: Accept or reject an application
+      options:
+        - name: application
+          description: The id of the application to handle.
+          required: true
+          type: INTEGER
+        - name: accept
+          description: Whether to accept or reject the application.
+          required: true
+          type: BOOLEAN

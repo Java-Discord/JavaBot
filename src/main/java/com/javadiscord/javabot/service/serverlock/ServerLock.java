@@ -102,7 +102,7 @@ public class ServerLock extends ListenerAdapter {
 		while (it.hasNext()) {
 			var member = it.next();
 			// Check the time between when the previous member joined, and when this one joined.
-			var delta = Duration.between(previousJoin.getTimeJoined(), member.getTimeJoined()).toMillis() / 1000.0f;
+			var delta = Math.abs(Duration.between(previousJoin.getTimeJoined(), member.getTimeJoined()).toMillis() / 1000.0f);
 			if (delta < config.getMinimumSecondsBetweenJoins()) {
 				potentialRaiders.add(previousJoin);
 				potentialRaiders.add(member);
