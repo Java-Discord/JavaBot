@@ -132,8 +132,9 @@ public class ServerLock extends ListenerAdapter {
 	 * @param guild The guild to check.
 	 */
 	private void checkForEndOfRaid(Guild guild) {
-		var potentialRaiders = getPotentialRaiders(guild);
 		var config = Bot.config.get(guild).getServerLock();
+		if (!config.isLocked()) return;
+		var potentialRaiders = getPotentialRaiders(guild);
 		if (potentialRaiders.size() < config.getLockThreshold()) {
 			unlockServer(guild);
 		}
@@ -146,9 +147,9 @@ public class ServerLock extends ListenerAdapter {
 	 */
 	private void rejectUserDuringRaid(GuildMemberJoinEvent event) {
 		event.getUser().openPrivateChannel().queue(c -> {
-			c.sendMessage("https://discord.gg/java")
-					.setEmbeds(lockEmbed(event.getGuild())).queue();
-			event.getMember().kick().queue();
+			c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(event.getGuild())).queue(msg -> {
+				event.getMember().kick().queue();
+			});
 		});
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
 		Misc.sendToLog(event.getGuild(), String.format("**%s** (%s old) tried to join this server.",
@@ -164,13 +165,13 @@ public class ServerLock extends ListenerAdapter {
 	private void lockServer(Guild guild, Collection<Member> potentialRaiders) {
 		for (var member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
-				c.sendMessage("https://discord.gg/java")
-						.setEmbeds(lockEmbed(guild)).queue();
-				try {
-					member.kick().queue();
-				} catch (Exception e) {
-					Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), e.getMessage()));
-				}
+				c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(guild)).queue(msg -> {
+					try {
+						member.kick().queue();
+					} catch (Exception e) {
+						Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), e.getMessage()));
+					}
+				});
 			});
 		}
 
