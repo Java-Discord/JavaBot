@@ -46,6 +46,9 @@ public class ServerLock extends ListenerAdapter {
 				while (members.size() > GUILD_MEMBER_QUEUE_CUTOFF) {
 					members.removeLast();
 				}
+				if (!members.isEmpty()) {
+					checkForEndOfRaid(members.peek().getGuild());
+				}
 			}
 		}, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, TimeUnit.SECONDS);
 	}
@@ -54,7 +57,7 @@ public class ServerLock extends ListenerAdapter {
 	public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
 		var g = event.getGuild();
 		getMemberQueue(g).addFirst(event.getMember());
-		if (isLocked(g) && !checkForEndOfRaid(g)) {
+		if (isLocked(g)) {
 			rejectUserDuringRaid(event);
 		} else {
 			checkForRaid(g);
@@ -127,16 +130,13 @@ public class ServerLock extends ListenerAdapter {
 	/**
 	 * Checks to see if we should unlock the guild.
 	 * @param guild The guild to check.
-	 * @return True if the guild was unlocked, or false if the raid is ongoing.
 	 */
-	private boolean checkForEndOfRaid(Guild guild) {
+	private void checkForEndOfRaid(Guild guild) {
 		var potentialRaiders = getPotentialRaiders(guild);
 		var config = Bot.config.get(guild).getServerLock();
 		if (potentialRaiders.size() < config.getLockThreshold()) {
 			unlockServer(guild);
-			return true;
 		}
-		return false;
 	}
 
 	/**

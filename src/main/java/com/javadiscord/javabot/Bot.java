@@ -10,7 +10,7 @@ import com.javadiscord.javabot.service.Startup;
 import com.javadiscord.javabot.service.StatsUpdater;
 import com.javadiscord.javabot.service.help.HelpChannelListener;
 import com.javadiscord.javabot.service.schedule.ScheduledTasks;
-import com.javadiscord.javabot.service.welcome.UserJoin;
+import com.javadiscord.javabot.service.serverlock.ServerLock;
 import com.javadiscord.javabot.service.welcome.UserLeave;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +105,7 @@ public class Bot {
     private static void addEventListeners(JDA jda) {
         jda.addEventListener(
                 new GuildJoinListener(),
-                new UserJoin(),
+                new ServerLock(),
                 new UserLeave(),
                 new Startup(),
                 PresenceUpdater.standardActivities(),
