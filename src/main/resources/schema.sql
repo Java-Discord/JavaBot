@@ -101,7 +101,8 @@ CREATE TABLE economy_account_preferences (
 
 // Help system.
 CREATE TABLE reserved_help_channels (
-    channel_id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    channel_id BIGINT NOT NULL UNIQUE,
     reserved_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     user_id BIGINT NOT NULL,
     timeout INT NOT NULL DEFAULT 60

@@ -46,17 +46,17 @@ public class MigrateSubcommand implements SlashCommandHandler {
 				try (var con = Bot.dataSource.getConnection()) {
 					for (int i = 0; i < statements.length; i++) {
 						if (statements[i].isBlank()) {
-							event.getChannel().sendMessage("Skipping statement " + i + "; it is blank.").queue();
+							event.getChannel().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();
 							continue;
 						}
 						try (var stmt = con.createStatement()){
 							int rowsUpdated = stmt.executeUpdate(statements[i]);
 							event.getChannel().sendMessageFormat(
-									"Executed statement %d of %d:\n```\n%s\n```\nRows Updated: `%d`", i, statements.length, statements[i], rowsUpdated
+									"Executed statement %d of %d:\n```\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
 							).queue();
 						} catch (SQLException e) {
 							e.printStackTrace();
-							event.getChannel().sendMessage("Error while executing statement " + i + ": " + e.getMessage()).queue();
+							event.getChannel().sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
 							return;
 						}
 					}

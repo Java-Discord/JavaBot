@@ -213,7 +213,10 @@ public class HelpChannelManager {
 				});
 				List<Component> components = new ArrayList<>(25);
 				for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
-					components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getAsTag(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+					var member = channel.getGuild().getMember(helper);
+					if (member != null) {
+						components.add(new ButtonImpl("help-thank:" + helper.getId(), member.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+					}
 				}
 				components.add(new ButtonImpl("help-thank:done", "Unreserve", ButtonStyle.PRIMARY, false, null));
 				components.add(new ButtonImpl("help-thank:cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
