@@ -54,21 +54,21 @@ public class HelpChannelUpdater implements Runnable {
 	 * take certain actions.
 	 * @param channel The channel to check.
 	 * @return A rest action that completes when the check is done.
-	 * @see HelpChannelUpdater#checkReservedChannelHistory(TextChannel, User)
 	 */
+	@SuppressWarnings("unchecked")
 	private RestAction<?> checkReservedChannel(TextChannel channel) {
 		var optionalReservation = channelManager.getReservationForChannel(channel.getIdLong());
 		if (optionalReservation.isEmpty()) {
-			log.info("Unreserving channel {} because no reservation information about it could be found.", channel.getAsMention());
+			log.info("Unreserving channel {} because no reservation information about it could be found.", channel.getName());
 			return channelManager.unreserveChannel(channel);
 		} else {
 			var reservation = optionalReservation.get();
-			return channel.getJDA().retrieveUserById(reservation.getUserId()).map(owner -> {
+			return channel.getJDA().retrieveUserById(reservation.getUserId()).flatMap(owner -> {
 				if (owner == null) {
-					log.info("Unreserving channel {} because no owner could be found.", channel.getAsMention());
-					return this.channelManager.unreserveChannel(channel);
+					log.info("Unreserving channel {} because no owner could be found.", channel.getName());
+					return (RestAction<Object>) this.channelManager.unreserveChannel(channel);
 				}
-				return checkReservedChannelHistory(channel, owner, reservation);
+				return (RestAction<Object>) checkReservedChannelHistory(channel, owner, reservation);
 			});
 		}
 	}
@@ -87,13 +87,14 @@ public class HelpChannelUpdater implements Runnable {
 		return channel.getHistory().retrievePast(50).map(messages -> {
 			Message mostRecentMessage = messages.isEmpty() ? null : messages.get(0);
 			if (mostRecentMessage == null) {
-				log.info("Unreserving channel {} because no recent messages could be found.", channel.getAsMention());
+				log.info("Unreserving channel {} because no recent messages could be found.", channel.getName());
 				return this.channelManager.unreserveChannel(channel);
 			}
 			try {
 				// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
 				if (isActivityCheck(mostRecentMessage)) {
 					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+						log.info("Unreserving channel {} because of no response to activity check.", channel.getName());
 						return unreserveInactiveChannel(channel, owner, mostRecentMessage, messages);
 					}
 				} else {// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
@@ -107,6 +108,7 @@ public class HelpChannelUpdater implements Runnable {
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
+				return new CompletedRestAction<>(this.jda, e);
 			}
 			// No action needed.
 			return new CompletedRestAction<>(this.jda, null);
@@ -126,7 +128,7 @@ public class HelpChannelUpdater implements Runnable {
 					// If we're not recycling channels, we want to keep all open channels fresh.
 					// Any open channel with a message in it should be immediately become reserved.
 					// However, network issues or other things could cause this to fail, so we clean up here.
-					log.info("Removing non-empty open channel {}.", channel.getAsMention());
+					log.info("Removing non-empty open channel {}.", channel.getName());
 					return channel.delete();
 				} else {
 					return new CompletedRestAction<>(this.jda, null);
@@ -216,7 +218,7 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes when the check has been sent.
 	 */
 	private RestAction<?> sendActivityCheck(TextChannel channel, User owner, ChannelReservation reservation) {
-		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getAsMention());
+		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getName());
 		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()))
 			.setActionRow(
 				new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
@@ -235,7 +237,7 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes once the channel is unreserved.
 	 */
 	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage, List<Message> messages) {
-		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getAsMention(), config.getRemoveTimeoutMinutes());
+		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getName(), config.getRemoveTimeoutMinutes());
 		return RestAction.allOf(
 			mostRecentMessage.delete(),
 			deleteThankMessages(messages),
