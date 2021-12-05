@@ -29,7 +29,9 @@ public class HelpChannelInteractionManager {
 		}
 		var reservation = optionalReservation.get();
 		TextChannel channel = event.getTextChannel();
-		event.deferReply(true).queue();
+		if (!event.isAcknowledged()) {
+			event.deferReply(true).queue();
+		}
 		var owner = channelManager.getReservedChannelOwner(channel);
 		// If a reserved channel doesn't have an owner, it's in an invalid state, but the system will handle it later automatically.
 		if (owner == null) {
@@ -97,7 +99,9 @@ public class HelpChannelInteractionManager {
 		}
 		var reservation = optionalReservation.get();
 		TextChannel channel = event.getTextChannel();
-		event.deferReply(true).queue();
+		if (!event.isAcknowledged()) {
+			event.deferReply(true).queue();
+		}
 		var owner = channelManager.getReservedChannelOwner(channel);
 		if (owner == null) {
 			event.getInteraction().getHook().sendMessage("Sorry, but this channel is currently unreserved.").setEphemeral(true).queue();
