@@ -9,6 +9,7 @@ import com.javadiscord.javabot.utils.MessageActionUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -168,7 +169,7 @@ public class HelpChannelManager {
 						break;
 					}
 					var user = msg.getAuthor();
-					if (!user.isBot() && !user.isSystem()) {
+					if (user.getIdLong() == user.getJDA().getSelfUser().getIdLong() || !user.isBot() && !user.isSystem()) {
 						var member = channel.getGuild().retrieveMember(user).complete();
 						List<Message> um = userMessages.computeIfAbsent(member, u -> new ArrayList<>());
 						um.add(msg);
@@ -207,8 +208,13 @@ public class HelpChannelManager {
 		// Ask the user for some feedback about the help channel, if possible.
 		getParticipantsSinceReserved(channel).thenAcceptAsync(participants -> {
 			List<Member> potentialHelpers = new ArrayList<>(participants.size());
+			Set<String> alreadyThanked = Collections.emptySet();
 			for (var entry : participants.entrySet()) {
-				if (!entry.getKey().getUser().equals(owner)) potentialHelpers.add(entry.getKey());
+				if (entry.getKey().getIdLong() == entry.getKey().getJDA().getSelfUser().getIdLong()) {
+					alreadyThanked = removeUnreserveMessagesAndGetUsersAlreadyThanked(entry.getValue());
+				} else if (!entry.getKey().getUser().equals(owner)) {
+					potentialHelpers.add(entry.getKey());
+				}
 			}
 			if (potentialHelpers.isEmpty()) {
 				Responses.info(interaction.getHook(), "Channel Unreserved", "Your channel has been unreserved.").queue();
@@ -222,7 +228,7 @@ public class HelpChannelManager {
 			});
 			List<Component> components = new ArrayList<>(25);
 			for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
-				components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+				components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, alreadyThanked.contains(helper.getId()), Emoji.fromUnicode("❤")));
 			}
 			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, null));
 			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
@@ -257,6 +263,26 @@ public class HelpChannelManager {
 			Responses.info(interaction.getHook(), "Channel Unreserved", "The channel has been unreserved.").queue();
 			unreserveChannel(channel).queue();
 		}
+	}
+
+	private Set<String> removeUnreserveMessagesAndGetUsersAlreadyThanked(List<Message> unreserveMessages){
+		Set<String> usersAlreadyThanked = new HashSet<>();
+		for (Message unreserveMessage : unreserveMessages) {
+			boolean delete = false;
+			for (Button button : unreserveMessage.getButtons()) {
+				String id = button.getId();
+				if (id != null && id.startsWith("help-thank:")) {
+					delete = true;
+					if (button.isDisabled()) {
+						usersAlreadyThanked.add(id.substring(id.indexOf(":","help-thank:".length()) + 1));
+					}
+				}
+			}
+			if (delete) {
+				unreserveMessage.delete().queue();
+			}
+		}
+		return usersAlreadyThanked;
 	}
 
 	/**
