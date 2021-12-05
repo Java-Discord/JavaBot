@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
-import net.dv8tion.jda.internal.requests.DeferredRestAction;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;
@@ -132,22 +131,20 @@ public class HelpChannelManager {
 	 * @param channel The channel to get the owner of.
 	 * @return The user who reserved the channel, or null.
 	 */
-	public RestAction<User> getReservedChannelOwner(TextChannel channel) {
-		return new DeferredRestAction<>(channel.getJDA(), () -> {
-			try {
-				return DbActions.mapQuery(
-						"SELECT user_id FROM reserved_help_channels WHERE channel_id = ?",
-						s -> s.setLong(1, channel.getIdLong()),
-						rs -> {
-							if (rs.next()) return channel.getJDA().retrieveUserById(rs.getLong(1));
-							return new CompletedRestAction<>(channel.getJDA(), null);
-						}
-				);
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return new CompletedRestAction<>(channel.getJDA(), e);
-			}
-		});
+	public User getReservedChannelOwner(TextChannel channel) {
+		try {
+			return DbActions.mapQuery(
+					"SELECT user_id FROM reserved_help_channels WHERE channel_id = ?",
+					s -> s.setLong(1, channel.getIdLong()),
+					rs -> {
+						if (rs.next()) return channel.getJDA().retrieveUserById(rs.getLong(1)).complete();
+						return null;
+					}
+			);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**

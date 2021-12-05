@@ -19,16 +19,15 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 		var channel = event.getTextChannel();
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
-		channelManager.getReservedChannelOwner(channel).queue(owner -> {
-			if (isEligibleToBeUnreserved(event, channel, config, owner)) {
-				var reasonOption = event.getOption("reason");
-				String reason = (reasonOption == null) ? null : reasonOption.getAsString();
-				channelManager.unreserveChannelByUser(channel, owner, reason, event);
-			} else {
-				Responses.warning(event.getInteraction().getHook(), "Could not unreserve this channel. This command only works in help channels you've reserved.").queue();
-			}
-		});
-		return event.deferReply(true);
+		var owner = channelManager.getReservedChannelOwner(channel);
+		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
+			var reasonOption = event.getOption("reason");
+			String reason = (reasonOption == null) ? null : reasonOption.getAsString();
+			channelManager.unreserveChannelByUser(channel, owner, reason, event);
+			return event.deferReply(true);
+		} else {
+			return Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.");
+		}
 	}
 
 	private boolean isEligibleToBeUnreserved(SlashCommandEvent event, TextChannel channel, HelpConfig config, User owner) {
