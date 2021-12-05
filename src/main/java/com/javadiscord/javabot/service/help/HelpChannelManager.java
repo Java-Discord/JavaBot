@@ -222,7 +222,7 @@ public class HelpChannelManager {
 			});
 			List<Component> components = new ArrayList<>(25);
 			for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
-				components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+				components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
 			}
 			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, null));
 			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
