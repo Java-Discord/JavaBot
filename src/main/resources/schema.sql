@@ -110,10 +110,12 @@ CREATE TABLE reserved_help_channels (
 
 CREATE TABLE help_channel_thanks (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    reservation_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     channel_id BIGINT NOT NULL,
     thanked_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-    helper_id BIGINT NOT NULL
+    helper_id BIGINT NOT NULL,
+    CONSTRAINT help_channel_thanks_unique UNIQUE(reservation_id, helper_id)
 );
 
 // QOTW

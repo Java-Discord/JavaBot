@@ -1,6 +1,7 @@
 package com.javadiscord.javabot.service.help;
 
 import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
+import com.javadiscord.javabot.service.help.model.ChannelReservation;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -49,39 +50,46 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	/**
-	 * Performs checks on a reserved channel. This will do several things:
-	 * <ul>
-	 *     <li>
-	 *         If the most recent message in the channel is old enough, it will
-	 *         send an activity check message in the channel, asking the user to
-	 *         confirm whether they're still using it.
-	 *     </li>
-	 *     <li>
-	 *         If the most recent message is an activity check message, and it
-	 *         has stuck around long enough without any response, then the
-	 *         channel will be unreserved.
-	 *     </li>
-	 *     <li>
-	 *         If for some reason we can't retrieve the owner of the channel,
-	 *         like if they left the server, the channel will be unreserved.
-	 *     </li>
-	 * </ul>
+	 * Performs a periodic check on a reserved help channel to see if we need to
+	 * take certain actions.
 	 * @param channel The channel to check.
 	 * @return A rest action that completes when the check is done.
+	 * @see HelpChannelUpdater#checkReservedChannelHistory(TextChannel, User)
 	 */
 	private RestAction<?> checkReservedChannel(TextChannel channel) {
-		User owner = this.channelManager.getReservedChannelOwner(channel);
-		if (owner == null) {
-			log.info("Unreserving channel {} because no owner could be found.", channel.getAsMention());
-			return this.channelManager.unreserveChannel(channel);
+		var optionalReservation = channelManager.getReservationForChannel(channel.getIdLong());
+		if (optionalReservation.isEmpty()) {
+			log.info("Unreserving channel {} because no reservation information about it could be found.", channel.getAsMention());
+			return channelManager.unreserveChannel(channel);
+		} else {
+			var reservation = optionalReservation.get();
+			return channel.getJDA().retrieveUserById(reservation.getUserId()).map(owner -> {
+				if (owner == null) {
+					log.info("Unreserving channel {} because no owner could be found.", channel.getAsMention());
+					return this.channelManager.unreserveChannel(channel);
+				}
+				return checkReservedChannelHistory(channel, owner, reservation);
+			});
 		}
+	}
+
+	/**
+	 * Checks the recent chat history of a reserved help channel to determine
+	 * if we need to take certain actions, like sending an activity check if the
+	 * channel is inactive, or unreserving the channel if a pending activity
+	 * check has not been responded to in a while.
+	 * @param channel The channel to check.
+	 * @param owner The owner of the channel.
+	 * @param reservation The channel reservation data.
+	 * @return A rest action that completes when this check is done.
+	 */
+	private RestAction<?> checkReservedChannelHistory(TextChannel channel, User owner, ChannelReservation reservation) {
 		return channel.getHistory().retrievePast(50).map(messages -> {
 			Message mostRecentMessage = messages.isEmpty() ? null : messages.get(0);
 			if (mostRecentMessage == null) {
 				log.info("Unreserving channel {} because no recent messages could be found.", channel.getAsMention());
 				return this.channelManager.unreserveChannel(channel);
 			}
-
 			try {
 				// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
 				if (isActivityCheck(mostRecentMessage)) {
@@ -91,7 +99,7 @@ public class HelpChannelUpdater implements Runnable {
 				} else {// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
 					int timeout = channelManager.getTimeout(channel);
 					if (mostRecentMessage.getTimeCreated().plusMinutes(timeout).isBefore(OffsetDateTime.now())) {
-						return sendActivityCheck(channel, owner);
+						return sendActivityCheck(channel, owner, reservation);
 					} else {// The channel is still active, so take this opportunity to clean up the channel.
 						// Also use it to do some introspection on the type of messages sent recently, to see if the bot can provide automated guidance.
 						return RestAction.allOf(deleteOldBotMessages(messages), semanticMessageCheck(channel, owner, messages));
@@ -100,7 +108,6 @@ public class HelpChannelUpdater implements Runnable {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-
 			// No action needed.
 			return new CompletedRestAction<>(this.jda, null);
 		}).flatMap(action->action);
@@ -205,14 +212,15 @@ public class HelpChannelUpdater implements Runnable {
 	 * still using the channel.
 	 * @param channel The channel to send the check to.
 	 * @param owner The owner of the channel.
+	 * @param reservation The channel reservation data.
 	 * @return A rest action that completes when the check has been sent.
 	 */
-	private RestAction<?> sendActivityCheck(TextChannel channel, User owner) {
+	private RestAction<?> sendActivityCheck(TextChannel channel, User owner, ChannelReservation reservation) {
 		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getAsMention());
 		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()))
 			.setActionRow(
-				new ButtonImpl("help-channel:done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
-				new ButtonImpl("help-channel:not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
+				new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
+				new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
 			);
 	}
 

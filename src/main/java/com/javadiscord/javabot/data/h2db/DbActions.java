@@ -4,6 +4,7 @@ import com.javadiscord.javabot.Bot;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -33,6 +34,18 @@ public class DbActions {
 			var rs = stmt.executeQuery();
 			return mapper.map(rs);
 		}
+	}
+
+	public static <T> CompletableFuture<T> mapQueryAsync(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {
+		CompletableFuture<T> cf = new CompletableFuture<>();
+		Bot.asyncPool.submit(() -> {
+			try {
+				cf.complete(mapQuery(query, modifier, mapper));
+			} catch (SQLException e) {
+				cf.completeExceptionally(e);
+			}
+		});
+		return cf;
 	}
 
 	public static long count(String query, StatementModifier modifier) {
@@ -108,5 +121,26 @@ public class DbActions {
 			}
 		});
 		return future;
+	}
+
+	/**
+	 * Fetches a single result from the database.
+	 * @param query The query to use.
+	 * @param modifier The query modifier for setting parameters.
+	 * @param mapper The result set mapper. It is assumed to already have its
+	 *               cursor on the first row. Do not call next() on it.
+	 * @param <T> The result type.
+	 * @return An optional that may contain the result, if one was found.
+	 */
+	public static <T> Optional<T> fetchSingleEntity(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {
+		try {
+			return mapQuery(query, modifier, rs -> {
+				if (!rs.next()) return Optional.empty();
+				return Optional.of(mapper.map(rs));
+			});
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
 	}
 }

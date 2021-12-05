@@ -4,6 +4,7 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.data.h2db.DbActions;
 import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
+import com.javadiscord.javabot.service.help.model.ChannelReservation;
 import com.javadiscord.javabot.utils.MessageActionUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
@@ -13,14 +14,12 @@ import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
+import net.dv8tion.jda.internal.requests.DeferredRestAction;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -94,14 +93,11 @@ public class HelpChannelManager {
 	 * @param message The message the user sent in the channel.
 	 */
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
-		try (var con = Bot.dataSource.getConnection();
-				var stmt = con.prepareStatement("INSERT INTO reserved_help_channels (channel_id, user_id, timeout) VALUES (?, ?, ?)")) {
-			stmt.setLong(1, channel.getIdLong());
-			stmt.setLong(2, reservingUser.getIdLong());
-			int timeout = config.getInactivityTimeouts().get(0);
-			stmt.setInt(3, timeout);
-			stmt.executeUpdate();
-		}
+		int timeout = config.getInactivityTimeouts().get(0);
+		DbActions.update(
+				"INSERT INTO reserved_help_channels (channel_id, user_id, timeout) VALUES (?, ?, ?)",
+				channel.getIdLong(), reservingUser.getIdLong(), timeout
+		);
 		var target = config.getReservedChannelCategory();
 		channel.getManager().setParent(target).sync(target).queue();
 		// Pin the message, then immediately try and delete the annoying "message has been pinned" message.
@@ -136,20 +132,22 @@ public class HelpChannelManager {
 	 * @param channel The channel to get the owner of.
 	 * @return The user who reserved the channel, or null.
 	 */
-	public User getReservedChannelOwner(TextChannel channel) {
-		try (var con = Bot.dataSource.getConnection();
-				var stmt = con.prepareStatement("SELECT * FROM reserved_help_channels WHERE channel_id = ?")) {
-			stmt.setLong(1, channel.getIdLong());
-			var rs = stmt.executeQuery();
-			if (rs.next()) {
-				long userId = rs.getLong("user_id");
-				return channel.getJDA().retrieveUserById(userId).complete();
+	public RestAction<User> getReservedChannelOwner(TextChannel channel) {
+		return new DeferredRestAction<>(channel.getJDA(), () -> {
+			try {
+				return DbActions.mapQuery(
+						"SELECT user_id FROM reserved_help_channels WHERE channel_id = ?",
+						s -> s.setLong(1, channel.getIdLong()),
+						rs -> {
+							if (rs.next()) return channel.getJDA().retrieveUserById(rs.getLong(1));
+							return new CompletedRestAction<>(channel.getJDA(), null);
+						}
+				);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return new CompletedRestAction<>(channel.getJDA(), e);
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			logChannel.sendMessage("Error occurred while getting reserved channel owner: " + e.getMessage()).queue();
-		}
-		return null;
+		});
 	}
 
 	/**
@@ -158,12 +156,12 @@ public class HelpChannelManager {
 	 * @param channel The channel to get participants for.
 	 * @return The list of users.
 	 */
-	public CompletableFuture<Map<User, List<Message>>> getParticipantsSinceReserved(TextChannel channel) {
+	public CompletableFuture<Map<Member, List<Message>>> getParticipantsSinceReserved(TextChannel channel) {
 		int limit = 300;
 		var history = channel.getHistory();
-		final CompletableFuture<Map<User, List<Message>>> cf = new CompletableFuture<>();
+		final CompletableFuture<Map<Member, List<Message>>> cf = new CompletableFuture<>();
 		Bot.asyncPool.execute(() -> {
-			final Map<User, List<Message>> userMessages = new HashMap<>();
+			final Map<Member, List<Message>> userMessages = new HashMap<>();
 			boolean endFound = false;
 			while (!endFound && history.size() < limit) {
 				var messages = history.retrievePast(50).complete();
@@ -174,7 +172,8 @@ public class HelpChannelManager {
 					}
 					var user = msg.getAuthor();
 					if (!user.isBot() && !user.isSystem()) {
-						List<Message> um = userMessages.computeIfAbsent(user, u -> new ArrayList<>());
+						var member = channel.getGuild().retrieveMember(user).complete();
+						List<Message> um = userMessages.computeIfAbsent(member, u -> new ArrayList<>());
 						um.add(msg);
 					}
 				}
@@ -193,62 +192,73 @@ public class HelpChannelManager {
 	 * @param interaction The interaction the user did to unreserve the channel.
 	 */
 	public void unreserveChannelByUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
-		var user = interaction.getUser();
-		if (owner.equals(user)) {// The user is unreserving their own channel.
-			// Ask the user for some feedback about the help channel, if possible.
-			getParticipantsSinceReserved(channel).thenAcceptAsync(participants -> {
-				List<User> potentialHelpers = new ArrayList<>(participants.size());
-				for (var entry : participants.entrySet()) {
-					if (!entry.getKey().equals(owner)) potentialHelpers.add(entry.getKey());
-				}
-				if (potentialHelpers.isEmpty()) {
-					Responses.info(interaction.getHook(), "Channel Unreserved", "Your channel has been unreserved.").queue();
-					unreserveChannel(channel).queue();
-					return;
-				}
-				potentialHelpers.sort((o1, o2) -> {
-					int c = Integer.compare(participants.get(o1).size(), participants.get(o2).size());
-					if (c == 0) return o1.getName().compareTo(o2.getName());
-					return c;
-				});
-				List<Component> components = new ArrayList<>(25);
-				for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
-					var member = channel.getGuild().getMember(helper);
-					if (member != null) {
-						components.add(new ButtonImpl("help-thank:" + helper.getId(), member.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
-					}
-				}
-				components.add(new ButtonImpl("help-thank:done", "Unreserve", ButtonStyle.PRIMARY, false, null));
-				components.add(new ButtonImpl("help-thank:cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
-				interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
-						.setEphemeral(true).queue();
-				var msgAction = channel.sendMessage(THANK_MESSAGE_TEXT);
-				msgAction = MessageActionUtils.addComponents(msgAction, components);
-				msgAction.queue();
-				try {
-					setTimeout(channel, 5);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			});
+		if (owner.equals(interaction.getUser())) {// The user is unreserving their own channel.
+			unreserveChannelByOwner(channel, owner, interaction);
 		} else {// The channel was unreserved by someone other than the owner.
-			if (reason != null) {// The user provided a reason, so check that it's legit, then send a DM to the owner.
-				if (reason.isBlank() || reason.length() < 5) {
-					Responses.warning(interaction.getHook(), "The reason you provided is not descriptive enough.").queue();
-				} else {
-					Responses.info(interaction.getHook(), "Channel Unreserved", "The channel has been unreserved.").queue();
-					unreserveChannel(channel).queue();
-					owner.openPrivateChannel().queue(pc -> pc.sendMessageFormat(
-							"Your help channel **%s** has been unreserved by %s for the following reason:\n> %s",
-							channel.getName(),
-							user.getAsTag(),
-							reason
-					).queue());
-				}
-			} else {// No reason was provided, so just unreserve.
+			unreserveChannelByOtherUser(channel, owner, reason, interaction);
+		}
+	}
+
+	private void unreserveChannelByOwner(TextChannel channel, User owner, Interaction interaction) {
+		var optionalReservation = getReservationForChannel(channel.getIdLong());
+		if (optionalReservation.isEmpty()) {
+			log.warn("Could not find current reservation data for channel {}. Unreserving the channel without thanks.", channel.getAsMention());
+			unreserveChannel(channel);
+			return;
+		}
+		var reservation = optionalReservation.get();
+		// Ask the user for some feedback about the help channel, if possible.
+		getParticipantsSinceReserved(channel).thenAcceptAsync(participants -> {
+			List<Member> potentialHelpers = new ArrayList<>(participants.size());
+			for (var entry : participants.entrySet()) {
+				if (!entry.getKey().getUser().equals(owner)) potentialHelpers.add(entry.getKey());
+			}
+			if (potentialHelpers.isEmpty()) {
+				Responses.info(interaction.getHook(), "Channel Unreserved", "Your channel has been unreserved.").queue();
+				unreserveChannel(channel).queue();
+				return;
+			}
+			potentialHelpers.sort((o1, o2) -> {
+				int c = Integer.compare(participants.get(o1).size(), participants.get(o2).size());
+				if (c == 0) return o1.getEffectiveName().compareTo(o2.getEffectiveName());
+				return c;
+			});
+			List<Component> components = new ArrayList<>(25);
+			for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
+				components.add(new ButtonImpl("help-thank:" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+			}
+			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, null));
+			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
+			interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
+					.setEphemeral(true).queue();
+			var msgAction = channel.sendMessage(THANK_MESSAGE_TEXT);
+			msgAction = MessageActionUtils.addComponents(msgAction, components);
+			msgAction.queue();
+			try {
+				setTimeout(channel, 5);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
+		if (reason != null) {// The user provided a reason, so check that it's legit, then send a DM to the owner.
+			if (reason.isBlank() || reason.length() < 5) {
+				Responses.warning(interaction.getHook(), "The reason you provided is not descriptive enough.").queue();
+			} else {
 				Responses.info(interaction.getHook(), "Channel Unreserved", "The channel has been unreserved.").queue();
 				unreserveChannel(channel).queue();
+				owner.openPrivateChannel().queue(pc -> pc.sendMessageFormat(
+						"Your help channel **%s** has been unreserved by %s for the following reason:\n> %s",
+						channel.getName(),
+						interaction.getUser().getAsTag(),
+						reason
+				).queue());
 			}
+		} else {// No reason was provided, so just unreserve.
+			Responses.info(interaction.getHook(), "Channel Unreserved", "The channel has been unreserved.").queue();
+			unreserveChannel(channel).queue();
 		}
 	}
 
@@ -300,6 +310,34 @@ public class HelpChannelManager {
 		}
 	}
 
+	public Optional<ChannelReservation> getReservationForChannel(long channelId) {
+		return DbActions.fetchSingleEntity(
+				"SELECT * FROM reserved_help_channels WHERE channel_id = ?",
+				s -> s.setLong(1, channelId),
+				rs -> new ChannelReservation(
+						rs.getLong("id"),
+						rs.getLong("channel_id"),
+						rs.getTimestamp("reserved_at").toLocalDateTime(),
+						rs.getLong("user_id"),
+						rs.getInt("timeout")
+				)
+		);
+	}
+
+	public Optional<ChannelReservation> getReservation(long id) {
+		return DbActions.fetchSingleEntity(
+				"SELECT * FROM reserved_help_channels WHERE id = ?",
+				s -> s.setLong(1, id),
+				rs -> new ChannelReservation(
+						rs.getLong("id"),
+						rs.getLong("channel_id"),
+						rs.getTimestamp("reserved_at").toLocalDateTime(),
+						rs.getLong("user_id"),
+						rs.getInt("timeout")
+				)
+		);
+	}
+
 	public void setTimeout(TextChannel channel, int timeout) throws SQLException {
 		try (var con = Bot.dataSource.getConnection();
 			 var stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")
@@ -349,5 +387,21 @@ public class HelpChannelManager {
 			if (t > maxTimeout) maxTimeout = t;
 		}
 		return maxTimeout;
+	}
+
+	public Optional<Long> getReservationId(TextChannel channel) {
+		try {
+			return DbActions.mapQuery(
+					"SELECT id FROM reserved_help_channels WHERE channel_id = ?",
+					s -> s.setLong(1, channel.getIdLong()),
+					rs -> {
+						if (rs.next()) return Optional.of(rs.getLong(1));
+						return Optional.empty();
+					}
+			);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
 	}
 }
