@@ -24,7 +24,7 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 				SELECT COUNT(id), helper_id
 				FROM help_channel_thanks
 				GROUP BY helper_id""", event.getGuild()).stream()
-					.limit(10)
+					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
 					.collect(Collectors.joining("\n"));
 			var helpersThisWeek = getCounts("""
@@ -32,14 +32,14 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 				FROM help_channel_thanks
 				WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
 				GROUP BY helper_id""", event.getGuild()).stream()
-					.limit(10)
+					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
 					.collect(Collectors.joining("\n"));
 			var totalHelped = getCounts("""
 				SELECT COUNT(id) AS count, user_id
 				FROM help_channel_thanks
 				GROUP BY user_id""", event.getGuild()).stream()
-					.limit(10)
+					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
 					.collect(Collectors.joining("\n"));
 			var helpedThisWeek = getCounts("""
@@ -47,7 +47,7 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 				FROM help_channel_thanks
 				WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
 				GROUP BY user_id""", event.getGuild()).stream()
-					.limit(10)
+					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
 					.collect(Collectors.joining("\n"));
 			EmbedBuilder embed = new EmbedBuilder()
