@@ -17,6 +17,10 @@
       type: USER
       required: false
 
+- name: thanks-leaderboard
+  description: Show a leaderboard of the most thanked users.
+  handler: com.javadiscord.javabot.service.help.ThanksLeaderboardCommandHandler
+
 - name: help-guidelines
   description: Show the server's help guidelines in a simple format.
   handler: com.javadiscord.javabot.service.help.HelpGuidelinesCommandHandler
