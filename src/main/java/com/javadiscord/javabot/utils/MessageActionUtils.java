@@ -2,13 +2,12 @@ package com.javadiscord.javabot.utils;
 
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Component;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MessageActionUtils {
-	public static MessageAction addComponents(MessageAction action, List<? extends Component> components) {
+	public static List<ActionRow> toActionRows(List<? extends Component> components) {
 		if (components.size() > 25) throw new IllegalArgumentException("Cannot add more than 25 components to a message action.");
 		List<ActionRow> rows = new ArrayList<>(5);
 		List<Component> rowComponents = new ArrayList<>(5);
@@ -22,6 +21,6 @@ public class MessageActionUtils {
 		if (!rowComponents.isEmpty()) {
 			rows.add(ActionRow.of(rowComponents));
 		}
-		return action.setActionRows(rows);
+		return rows;
 	}
 }

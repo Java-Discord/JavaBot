@@ -9,6 +9,7 @@ import com.javadiscord.javabot.utils.MessageActionUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -220,23 +221,30 @@ public class HelpChannelManager {
 				if (c == 0) return o1.getEffectiveName().compareTo(o2.getEffectiveName());
 				return c;
 			});
-			List<Component> components = new ArrayList<>(25);
-			for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 23))) {
-				components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
-			}
-			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, null));
-			components.add(new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌")));
-			interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
-					.setEphemeral(true).queue();
-			var msgAction = channel.sendMessage(THANK_MESSAGE_TEXT);
-			msgAction = MessageActionUtils.addComponents(msgAction, components);
-			msgAction.queue();
+			sendThanksButtonsMessage(potentialHelpers, reservation, interaction, channel);
 			try {
 				setTimeout(channel, 5);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		});
+	}
+
+	private void sendThanksButtonsMessage(List<Member> potentialHelpers, ChannelReservation reservation, Interaction interaction, TextChannel channel) {
+		List<Component> thanksButtons = new ArrayList<>(25);
+		for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 20))) {
+			thanksButtons.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+		}
+		ActionRow controlsRow = ActionRow.of(
+				new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("✅")),
+				new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
+		);
+		interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
+				.setEphemeral(true).queue();
+		List<ActionRow> rows = new ArrayList<>(5);
+		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
+		rows.add(controlsRow);
+		channel.sendMessage(THANK_MESSAGE_TEXT).setActionRows(rows).queue();
 	}
 
 	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {

@@ -4,6 +4,7 @@ import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
 import com.javadiscord.javabot.service.help.model.ChannelReservation;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -221,8 +222,8 @@ public class HelpChannelUpdater implements Runnable {
 		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getName());
 		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()))
 			.setActionRow(
-				new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, null),
-				new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.DANGER, false, null)
+				new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, Emoji.fromUnicode("✅")),
+				new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
 			);
 	}
 
