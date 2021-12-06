@@ -18,6 +18,7 @@ public class QOTWQuestion implements Comparable<QOTWQuestion> {
 	private long createdBy;
 	private String text;
 	private boolean used;
+	private Integer questionNumber;
 	private int priority;
 
 	@Override

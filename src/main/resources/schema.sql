@@ -126,6 +126,7 @@ CREATE TABLE qotw_question (
     created_by BIGINT NOT NULL,
     text VARCHAR(1024) NOT NULL,
     used BOOLEAN NOT NULL DEFAULT FALSE,
+    question_number INTEGER NULL DEFAULT NULL,
     priority INTEGER NOT NULL DEFAULT 0
 );
 

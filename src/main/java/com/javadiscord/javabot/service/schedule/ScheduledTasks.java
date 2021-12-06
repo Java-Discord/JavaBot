@@ -1,9 +1,14 @@
 package com.javadiscord.javabot.service.schedule;
 
+import com.javadiscord.javabot.service.qotw.QOTWJob;
+import com.javadiscord.javabot.service.qotw.QOTWReminderJob;
 import com.javadiscord.javabot.service.schedule.jobs.DiscordApiJob;
 import net.dv8tion.jda.api.JDA;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+
+import java.time.ZoneOffset;
+import java.util.TimeZone;
 
 /**
  * This class is responsible for setting up all scheduled tasks that the bot
@@ -43,7 +48,12 @@ public class ScheduledTasks {
 	 * @throws SchedulerException If an error occurs while adding a task.
 	 */
 	private static void scheduleAllTasks(Scheduler scheduler, JDA jda) throws SchedulerException {
-		// Add scheduled tasks here!
+		// Schedule posting a new QOTW every Monday at 9am.
+		scheduleApiJob(scheduler, jda, QOTWJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.MONDAY, 9, 0));
+
+		// Schedule checking to make sure there's a new QOTW question in the queue.
+		// We schedule this to run daily at 9am, just so we're always aware when the QOTW queue goes empty.
+		scheduleApiJob(scheduler, jda, QOTWReminderJob.class, CronScheduleBuilder.dailyAtHourAndMinute(9, 0));
 	}
 
 	/**
