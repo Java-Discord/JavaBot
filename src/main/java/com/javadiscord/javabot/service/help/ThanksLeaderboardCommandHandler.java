@@ -25,7 +25,7 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 				FROM help_channel_thanks
 				GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
+					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsTag()))
 					.collect(Collectors.joining("\n"));
 			var helpersThisWeek = getCounts("""
 				SELECT COUNT(id), helper_id
@@ -33,14 +33,14 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 				WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
 				GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
+					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsTag()))
 					.collect(Collectors.joining("\n"));
 			var totalHelped = getCounts("""
 				SELECT COUNT(id) AS count, user_id
 				FROM help_channel_thanks
 				GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
+					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsTag()))
 					.collect(Collectors.joining("\n"));
 			var helpedThisWeek = getCounts("""
 				SELECT COUNT(id) AS count, user_id
@@ -48,7 +48,7 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 				WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
 				GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getEffectiveName()))
+					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsTag()))
 					.collect(Collectors.joining("\n"));
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle("Thanks Leaderboard")
@@ -71,7 +71,8 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 						while (rs.next()) {
 							long count = rs.getLong(1);
 							long userId = rs.getLong(2);
-							var member = guild.retrieveMemberById(userId).complete();
+							var member = guild.getMemberById(userId);
+							if (member == null) continue;
 							memberData.add(new Pair<>(member, count));
 						}
 						// Sort with high counts first.
