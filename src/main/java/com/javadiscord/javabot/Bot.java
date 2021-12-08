@@ -105,7 +105,7 @@ public class Bot {
     private static void addEventListeners(JDA jda) {
         jda.addEventListener(
                 new GuildJoinListener(),
-                new ServerLock(),
+                new ServerLock(jda),
                 new UserLeave(),
                 new Startup(),
                 PresenceUpdater.standardActivities(),

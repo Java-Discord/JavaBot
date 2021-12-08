@@ -6,6 +6,7 @@ import com.javadiscord.javabot.utils.Misc;
 import com.javadiscord.javabot.utils.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -40,7 +41,7 @@ public class ServerLock extends ListenerAdapter {
 
 	private final Map<Long, Deque<Member>> guildMemberQueues;
 
-	public ServerLock() {
+	public ServerLock(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
 			for (var entry : guildMemberQueues.entrySet()) {
@@ -48,8 +49,11 @@ public class ServerLock extends ListenerAdapter {
 				while (members.size() > GUILD_MEMBER_QUEUE_CUTOFF) {
 					members.removeLast();
 				}
+				var guild = jda.getGuildById(entry.getKey());
 				if (!members.isEmpty()) {
-					checkForEndOfRaid(members.peek().getGuild());
+					checkForEndOfRaid(guild);
+				} else if (isLocked(guild)) {
+					unlockServer(guild);
 				}
 			}
 		}, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, TimeUnit.SECONDS);
