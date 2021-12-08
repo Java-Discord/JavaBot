@@ -43,6 +43,9 @@ public class ServerLock extends ListenerAdapter {
 
 	public ServerLock(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
+		for (var guild : jda.getGuilds()) {
+			guildMemberQueues.put(guild.getIdLong(), new ConcurrentLinkedDeque<>());
+		}
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
 			for (var entry : guildMemberQueues.entrySet()) {
 				var members = entry.getValue();
