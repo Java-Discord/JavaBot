@@ -107,8 +107,10 @@ public class ServerLock extends ListenerAdapter {
 				potentialRaiders.add(previousJoin);
 				potentialRaiders.add(member);
 			}
+			boolean joinedRecently = member.getTimeCreated().isAfter(accountCreationCutoff);
+			boolean joinedRapidlyAfterOther = delta < config.getMinimumSecondsBetweenJoins();
 			// Check if this user has joined Discord recently.
-			if (member.getTimeCreated().isAfter(accountCreationCutoff)) {
+			if (joinedRecently && joinedRapidlyAfterOther) {
 				potentialRaiders.add(member);
 			}
 			previousJoin = member;
