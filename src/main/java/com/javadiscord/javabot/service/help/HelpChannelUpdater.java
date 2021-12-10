@@ -101,7 +101,11 @@ public class HelpChannelUpdater implements Runnable {
 				} else {// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
 					int timeout = channelManager.getTimeout(channel);
 					if (mostRecentMessage.getTimeCreated().plusMinutes(timeout).isBefore(OffsetDateTime.now())) {
-						return sendActivityCheck(channel, owner, reservation);
+						if (isThankMessage(mostRecentMessage)) {// If the thank message times out, just unreserve already.
+							return channelManager.unreserveChannel(channel);
+						} else {
+							return sendActivityCheck(channel, owner, reservation);
+						}
 					} else {// The channel is still active, so take this opportunity to clean up the channel.
 						// Also use it to do some introspection on the type of messages sent recently, to see if the bot can provide automated guidance.
 						return RestAction.allOf(deleteOldBotMessages(messages), semanticMessageCheck(channel, owner, messages));
@@ -211,6 +215,17 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	/**
+	 * Determines if a message is a "thank" message that's sent when a user
+	 * unreserves their channel.
+	 * @param message The message to check.
+	 * @return True if the message is a thank message.
+	 */
+	private boolean isThankMessage(Message message) {
+		return message.getAuthor().equals(this.jda.getSelfUser()) &&
+				message.getContentRaw().equals(HelpChannelManager.THANK_MESSAGE_TEXT);
+	}
+
+	/**
 	 * Sends an activity check to the given channel, to check that the owner is
 	 * still using the channel.
 	 * @param channel The channel to send the check to.
@@ -257,7 +272,7 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private RestAction<?> deleteThankMessages(List<Message> messages) {
 		var deleteActions = messages.stream()
-				.filter(m -> m.getContentRaw().equals(HelpChannelManager.THANK_MESSAGE_TEXT))
+				.filter(this::isThankMessage)
 				.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) return RestAction.allOf(deleteActions);
 		return new CompletedRestAction<>(this.jda, null);
