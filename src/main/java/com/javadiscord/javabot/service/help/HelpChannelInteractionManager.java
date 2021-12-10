@@ -93,7 +93,8 @@ public class HelpChannelInteractionManager {
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
-			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?").setEphemeral(true).queue();
+			event.getInteraction().getHook().sendMessage("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
+					.setEphemeral(true).queue();
 			event.getMessage().delete().queue();
 			return;
 		}

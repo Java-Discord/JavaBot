@@ -34,7 +34,7 @@ public abstract class DiscordApiJob implements Job {
 	 */
 	public static JobDetail build(Class<? extends DiscordApiJob> jobType, JDA jda) {
 		return JobBuilder.newJob(jobType)
-				.usingJobData(new JobDataMap(Map.of("discord-api", jda)))
+				.usingJobData(new JobDataMap(Map.of("jda", jda)))
 				.build();
 	}
 }

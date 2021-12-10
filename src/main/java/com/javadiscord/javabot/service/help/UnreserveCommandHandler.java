@@ -40,7 +40,7 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 	}
 
 	private boolean isUserWhoReservedChannel(SlashCommandEvent event, User owner) {
-		return event.getUser().equals(owner);
+		return owner != null && event.getUser().equals(owner);
 	}
 
 	private boolean memberHasStaffRole(SlashCommandEvent event) {
