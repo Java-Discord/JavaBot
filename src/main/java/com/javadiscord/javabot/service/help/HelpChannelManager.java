@@ -6,6 +6,7 @@ import com.javadiscord.javabot.data.h2db.DbActions;
 import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
 import com.javadiscord.javabot.service.help.model.ChannelReservation;
 import com.javadiscord.javabot.utils.MessageActionUtils;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.Interaction;
@@ -30,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 public class HelpChannelManager {
 	public static final String THANK_MESSAGE_TEXT = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you? When you're done, click **Unreserve**.";
 
+	@Getter
 	private final HelpConfig config;
 	private final TextChannel logChannel;
 

@@ -24,3 +24,7 @@
 - name: help-guidelines
   description: Show the server's help guidelines in a simple format.
   handler: com.javadiscord.javabot.service.help.HelpGuidelinesCommandHandler
+
+- name: help-ping
+  description: Notify those with the help-ping role that your question is urgent.
+  handler: com.javadiscord.javabot.service.help.HelpPingCommandHandler

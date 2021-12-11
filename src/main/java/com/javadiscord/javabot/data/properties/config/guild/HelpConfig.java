@@ -108,6 +108,11 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private String reservationNotAllowedMessage = "You are not allowed to reserve this help channel. Please try again later.";
 
+	/**
+	 * How often users may use the /help-ping command.
+	 */
+	private int helpPingTimeoutSeconds = 300;
+
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);
 	}
