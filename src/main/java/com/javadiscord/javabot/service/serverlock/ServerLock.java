@@ -37,24 +37,20 @@ public class ServerLock extends ListenerAdapter {
 	/**
 	 * How often to clean the guild member queues, in seconds.
 	 */
-	private static final long GUILD_MEMBER_QUEUE_CLEAN_INTERVAL = 60L;
+	private static final long GUILD_MEMBER_QUEUE_CLEAN_INTERVAL = 30L;
 
 	private final Map<Long, Deque<Member>> guildMemberQueues;
 
 	public ServerLock(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
-		for (var guild : jda.getGuilds()) {
-			guildMemberQueues.put(guild.getIdLong(), new ConcurrentLinkedDeque<>());
-		}
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
-			for (var entry : guildMemberQueues.entrySet()) {
-				var members = entry.getValue();
+			for (var guild : jda.getGuilds()) {
+				var members = getMemberQueue(guild);
 				while (members.size() > GUILD_MEMBER_QUEUE_CUTOFF) {
 					members.removeLast();
 				}
-				var guild = jda.getGuildById(entry.getKey());
 				if (isLocked(guild)) {
-					log.info("Checking if it's safe to unlock the server {}.", guild.getName());
+					log.info("Checking if it's safe to unlock server {}.", guild.getName());
 					if (!members.isEmpty()) {
 						checkForEndOfRaid(guild);
 					} else {
