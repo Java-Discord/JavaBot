@@ -53,10 +53,13 @@ public class ServerLock extends ListenerAdapter {
 					members.removeLast();
 				}
 				var guild = jda.getGuildById(entry.getKey());
-				if (!members.isEmpty()) {
-					checkForEndOfRaid(guild);
-				} else if (isLocked(guild)) {
-					unlockServer(guild);
+				if (isLocked(guild)) {
+					log.info("Checking if it's safe to unlock the server {}.", guild.getName());
+					if (!members.isEmpty()) {
+						checkForEndOfRaid(guild);
+					} else {
+						unlockServer(guild);
+					}
 				}
 			}
 		}, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, TimeUnit.SECONDS);
@@ -148,6 +151,7 @@ public class ServerLock extends ListenerAdapter {
 		var config = Bot.config.get(guild).getServerLock();
 		if (!config.isLocked()) return;
 		var potentialRaiders = getPotentialRaiders(guild);
+		log.info("Found {} potential raiders while checking for end of raid.", potentialRaiders.size());
 		if (potentialRaiders.size() < config.getLockThreshold()) {
 			unlockServer(guild);
 		}
