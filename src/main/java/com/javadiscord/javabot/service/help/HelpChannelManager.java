@@ -95,6 +95,16 @@ public class HelpChannelManager {
 	 * @param message The message the user sent in the channel.
 	 */
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
+		if (!isOpen(channel)) throw new IllegalArgumentException("Can only reserve open channels!");
+		// Check if the database still has this channel marked as reserved (which can happen if an admin manually moves a channel.)
+		var alreadyReservedCount = DbActions.count(
+				"SELECT COUNT(id) FROM reserved_help_channels WHERE channel_id = ?",
+				s -> s.setLong(1, channel.getIdLong())
+		);
+		// If it's marked in the DB as reserved, remove that so that we can reserve it anew.
+		if (alreadyReservedCount > 0) {
+			DbActions.update("DELETE FROM reserved_help_channels WHERE channel_id = ?", channel.getIdLong());
+		}
 		int timeout = config.getInactivityTimeouts().get(0);
 		DbActions.update(
 				"INSERT INTO reserved_help_channels (channel_id, user_id, timeout) VALUES (?, ?, ?)",
