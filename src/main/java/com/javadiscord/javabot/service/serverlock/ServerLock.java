@@ -98,6 +98,7 @@ public class ServerLock extends ListenerAdapter {
 		if (recentJoins.isEmpty()) return new HashSet<>();
 		var config = Bot.config.get(guild).getServerLock();
 		final var accountCreationCutoff = OffsetDateTime.now().minusDays(config.getMinimumAccountAgeInDays());
+		final var memberJoinCutoff = OffsetDateTime.now().minusMinutes(10);
 
 		Set<Member> potentialRaiders = new HashSet<>();
 		var it = recentJoins.iterator();
@@ -114,10 +115,11 @@ public class ServerLock extends ListenerAdapter {
 				potentialRaiders.add(previousJoin);
 				potentialRaiders.add(member);
 			}
-			boolean joinedRecently = member.getTimeCreated().isAfter(accountCreationCutoff);
+			boolean accountCreatedRecently = member.getTimeCreated().isAfter(accountCreationCutoff);
+			boolean joinedRecently = member.getTimeJoined().isAfter(memberJoinCutoff);
 			boolean joinedRapidlyAfterOther = delta < config.getMinimumSecondsBetweenJoins();
 			// Check if this user has joined Discord recently.
-			if (joinedRecently && joinedRapidlyAfterOther) {
+			if (accountCreatedRecently && joinedRecently && joinedRapidlyAfterOther) {
 				potentialRaiders.add(member);
 			}
 			previousJoin = member;
