@@ -14,33 +14,33 @@ import java.sql.SQLException;
  * more designated help channels.
  */
 public class HelpChannelListener extends ListenerAdapter {
-    @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
-        if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT)
-            return;
+	@Override
+	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT)
+			return;
 
-        var config = Bot.config.get(event.getGuild()).getHelp();
-        TextChannel channel = event.getTextChannel();
-        var manager = new HelpChannelManager(config);
+		var config = Bot.config.get(event.getGuild()).getHelp();
+		TextChannel channel = event.getTextChannel();
+		var manager = new HelpChannelManager(config);
 
-        // If a message was sent in an open text channel, reserve it.
-        if (config.getOpenChannelCategory().equals(channel.getParentCategory())) {
-            if (manager.mayUserReserveChannel(event.getAuthor())) {
-                try {
-                    manager.reserve(channel, event.getAuthor(), event.getMessage());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
-                }
-            } else {
-                event.getMessage().replyEmbeds(HelpChannelManager.getHelpChannelEmbed(
-                        config.getReservationNotAllowedMessage(),
-                        config.getReservedColor())
-                ).queue();
-            }
-        } else if (config.getDormantChannelCategory().equals(channel.getParentCategory())) {
-            // Prevent anyone from sending messages in dormant channels.
-            event.getMessage().delete().queue();
-        }
-    }
+		// If a message was sent in an open text channel, reserve it.
+		if (config.getOpenChannelCategory().equals(channel.getParentCategory())) {
+			if (manager.mayUserReserveChannel(event.getAuthor())) {
+				try {
+					manager.reserve(channel, event.getAuthor(), event.getMessage());
+				} catch (SQLException e) {
+					e.printStackTrace();
+					channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
+				}
+			} else {
+				event.getMessage().replyEmbeds(HelpChannelManager.getHelpChannelEmbed(
+						config.getReservationNotAllowedMessage(),
+						config.getReservedColor())
+				).queue();
+			}
+		} else if (config.getDormantChannelCategory().equals(channel.getParentCategory())) {
+			// Prevent anyone from sending messages in dormant channels.
+			event.getMessage().delete().queue();
+		}
+	}
 }
