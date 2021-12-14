@@ -1,8 +1,8 @@
 package com.javadiscord.javabot.service.jam.dao;
 
-import com.javadiscord.javabot.utils.StringResourceCache;
 import com.javadiscord.javabot.service.jam.model.Jam;
 import com.javadiscord.javabot.service.jam.model.JamSubmission;
+import com.javadiscord.javabot.utils.StringResourceCache;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;

@@ -7,9 +7,6 @@ import net.dv8tion.jda.api.JDA;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.time.ZoneOffset;
-import java.util.TimeZone;
-
 /**
  * This class is responsible for setting up all scheduled tasks that the bot
  * should run periodically, using the Quartz {@link Scheduler}. To add new tasks

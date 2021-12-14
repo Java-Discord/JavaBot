@@ -4,14 +4,11 @@ import com.javadiscord.javabot.data.properties.config.guild.HelpConfig;
 import com.javadiscord.javabot.service.help.model.ChannelReservation;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 
 import java.sql.SQLException;

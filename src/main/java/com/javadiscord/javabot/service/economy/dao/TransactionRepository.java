@@ -1,7 +1,7 @@
 package com.javadiscord.javabot.service.economy.dao;
 
-import com.javadiscord.javabot.utils.StringResourceCache;
 import com.javadiscord.javabot.service.economy.model.Transaction;
+import com.javadiscord.javabot.utils.StringResourceCache;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.*;
