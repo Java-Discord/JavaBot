@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Role;
 
+import java.awt.*;
 import java.util.List;
 
 /**
@@ -59,13 +60,24 @@ public class HelpConfig extends GuildConfigItem {
 	 * The message that's sent in a recycled help channel to tell users that it
 	 * is now open for someone to ask a question.
 	 */
-	private String reopenedChannelMessage = "**This channel is no longer reserved. Feel free to ask your question here!**";
+	private String reopenedChannelMessage = "`✅` **This channel is now available!**\nThis channel is no longer reserved. Feel free to ask your question here!";
 
 	/**
 	 * The message that's sent as soon as a user asks a question in an open help
 	 * channel. This is only sent if it's not null.
 	 */
-	private String reservedChannelMessage = null;
+	private String reservedChannelMessage = "`⌛` **This channel has been reserved for your question.**\nPlease use `/unreserve` when you\u0027re finished.";
+
+	/**
+	 * The message that's sent in a recycled help channel to tell users that it
+	 * is now marked as dormant and no more messages can be sent.
+	 */
+	private String dormantChannelMessage = "`\uD83D\uDCA4` **Channel marked as dormant**\nIt is no longer possible to send messages in this channel until it becomes available again. If your question was not answered yet, feel free to claim a new available Help channel.";
+
+	/**
+	 * A short info message that's sent when a user tries to unreserve a channel.
+	 */
+	private String thankMessage = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you? When you're done, click **Unreserve**.";
 
 	/**
 	 * The number of open help channels to maintain. If fewer than this many
@@ -112,6 +124,18 @@ public class HelpConfig extends GuildConfigItem {
 	 * How often users may use the /help-ping command.
 	 */
 	private int helpPingTimeoutSeconds = 300;
+
+	private String availableColorHex = "#23C776";
+
+	private String reservedColorHex = "#E39C22";
+
+	private String dormantColorHex = "#004070";
+
+	public Color getAvailableColor() { return Color.decode(this.availableColorHex); }
+
+	public Color getReservedColor() { return Color.decode(this.reservedColorHex); }
+
+	public Color getDormantColor() { return Color.decode(this.dormantColorHex); }
 
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);
