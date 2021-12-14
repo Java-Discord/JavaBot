@@ -244,7 +244,7 @@ public class HelpChannelUpdater implements Runnable {
      */
     private RestAction<?> sendActivityCheck(TextChannel channel, User owner, ChannelReservation reservation) {
         log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getName());
-        return channel.sendMessageEmbeds(HelpChannelManager.getHelpChannelEmbed(
+        return channel.sendMessage(owner.getAsMention()).setEmbeds(HelpChannelManager.getHelpChannelEmbed(
                 String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()), null))
                 .setActionRow(
                         Button.success("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!"),
