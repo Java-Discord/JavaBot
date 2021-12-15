@@ -85,6 +85,10 @@ public class AutoMod extends ListenerAdapter {
         if (matcher.find()) {
             warn(message, message.getMember(), "Automod: Advertising");
         }
+
+        if(Bot.suspiciousLinks.stream().anyMatch(message.getContentRaw()::contains)) {
+            warn(message, message.getMember(), "Automod: Suspicious Link");
+        }
     }
 
     /**
