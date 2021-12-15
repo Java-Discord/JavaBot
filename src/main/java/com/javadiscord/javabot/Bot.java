@@ -76,6 +76,7 @@ public class Bot {
      *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
      *     <li>Loading the configuration JSON file.</li>
      *     <li>Initializing the {@link SlashCommands} listener (which reads command data from a YAML file).</li>
+     *     <li>Loading list of known scam links</li>
      *     <li>Creating and configuring the {@link JDA} instance that enables the bot's Discord connectivity.</li>
      *     <li>Adding event listeners to the bot.</li>
      * </ol>
