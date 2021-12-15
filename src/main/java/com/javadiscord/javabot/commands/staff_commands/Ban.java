@@ -32,9 +32,12 @@ public class Ban implements SlashCommandHandler {
 
         var eb = banEmbed(member, event.getMember(), event.getGuild(), reason);
         try {
-            ban(member, reason);
+            member.getUser().openPrivateChannel().queue(m -> {
+                m.sendMessage(Bot.config.get(event.getGuild()).getModeration().getBanMessageText()).queue();
+                m.sendMessageEmbeds(eb).queue(mem -> ban(member, reason));
+            });
+
             Misc.sendToLog(event.getGuild(), eb);
-            member.getUser().openPrivateChannel().queue(m -> m.sendMessageEmbeds(eb).queue());
             return event.replyEmbeds(eb);
         }
         catch (Exception e) {
