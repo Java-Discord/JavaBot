@@ -16,11 +16,7 @@ public class Regex implements SlashCommandHandler {
         Pattern pattern = Pattern.compile(event.getOption("regex").getAsString());
         String string = event.getOption("string").getAsString();
 
-        if (pattern.matcher(string).matches()){
-            return event.replyEmbeds(embedBuilder(true, pattern, string).build());
-        } else {
-            return event.replyEmbeds(embedBuilder(false, pattern, string).build());
-        }
+        return event.replyEmbeds(embedBuilder(pattern.matcher(string).matches(), pattern, string).build());
     }
 
     private EmbedBuilder embedBuilder(boolean matches, Pattern pattern, String string){
