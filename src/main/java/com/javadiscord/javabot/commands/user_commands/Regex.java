@@ -2,6 +2,7 @@ package com.javadiscord.javabot.commands.user_commands;
 
 import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.ResponseException;
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import com.javadiscord.javabot.data.properties.config.GuildConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,6 +21,9 @@ public class Regex implements SlashCommandHandler {
 
         Pattern pattern = Pattern.compile(event.getOption("regex").getAsString());
         String string = event.getOption("string").getAsString();
+
+        if (pattern == null) return Responses.warning(event, "Missing required regex pattern.");
+        if (string == null) return Responses.warning(event, "Missing required string.");
 
         return event.replyEmbeds(buildRegexEmbed(pattern.matcher(string).matches(), pattern, string).build());
     }
