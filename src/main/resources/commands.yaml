@@ -96,6 +96,12 @@
       required: false
       type: STRING
   handler: com.javadiscord.javabot.commands.user_commands.Poll
+- description: Checks if the given string matches the regex pattern
+  name: regex
+  options:
+    - { description: The regex pattern, name: regex, required: true, type: STRING }
+    - { description: The string, name: string, required: true, type: STRING }
+  handler: com.javadiscord.javabot.commands.user_commands.Regex
 - description: Bans a member.
   name: ban
   options:
