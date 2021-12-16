@@ -4,7 +4,6 @@ import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.commands.staff_commands.Mute;
 import com.javadiscord.javabot.commands.staff_commands.Warn;
 import com.javadiscord.javabot.utils.Misc;
-import lombok.SneakyThrows;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -16,10 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.time.Instant;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +26,6 @@ public class AutoMod extends ListenerAdapter {
 
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
-    @SneakyThrows
     @Override
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         Member member = event.getMember();
@@ -38,14 +33,13 @@ public class AutoMod extends ListenerAdapter {
         checkNewMessageAutomod(event.getMessage());
     }
 
-    @SneakyThrows
     @Override
     public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
         Member member = event.getMember();
         if (canBypassAutomod(member)) return;
         checkContentAutomod(event.getMessage());
     }
-
+    
     /**
      * Checks if a member can bypass the automod system.
      * @param member the {@link Member} to check
@@ -56,13 +50,12 @@ public class AutoMod extends ListenerAdapter {
                 || member.getUser().isBot()
                 || member.hasPermission(Permission.MESSAGE_MANAGE);
     }
-
+    
     /**
      * Runs all automod checks that should be run when a message is sent.
      * @param message the {@link Message} that should be checked
      */
-=======
-    private void checkNewMessageAutomod(@NotNull Message message) throws FileNotFoundException {
+    private void checkNewMessageAutomod(@Nonnull Message message) {
         // mention spam
         if (message.getMentionedMembers().size() >= 5) {
             warn(message, message.getMember(), "Automod: Mention Spam");
@@ -78,35 +71,22 @@ public class AutoMod extends ListenerAdapter {
                 handleSpam(message, message.getMember());
             }
         });
-
+        
         checkContentAutomod(message);
     }
-
+    
     /**
      * Runs all automod checks only depend on the message content.
      * @param message the {@link Message} that should be checked
      */
-=======
-    private void checkContentAutomod(@NotNull Message message) throws FileNotFoundException {
+    private void checkContentAutomod(@Nonnull Message message) {
         // Advertising
         Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
         if (matcher.find()) {
             warn(message, message.getMember(), "Automod: Advertising");
         }
-        final String messageRaw = message.getContentRaw();
-        if (messageRaw.startsWith("http://") || messageRaw.startsWith("https://")) {
-            // only do it for a links, so it won't iterate for each message
-            Scanner fileReader = new Scanner(new File(String.valueOf(getClass().getResourceAsStream("spams.txt"))));
-            while (fileReader.hasNext()) {
-                String domin = fileReader.next();
-                domin = domin.split("\\.")[0];
-                if (messageRaw.contains(domin)) {
-                    new Ban().ban(message.getMember(), "Scam");
-                }
-            }
-            fileReader.close();
-        }
     }
+
     /**
      * Handles potential spam messages
      * @param msg the message
@@ -189,3 +169,4 @@ public class AutoMod extends ListenerAdapter {
         return input;
     }
 }
+
