@@ -54,10 +54,10 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle("Thanks Leaderboard")
 					.setColor(0x2F3136)
-					.addField("Most Thanked This Week", totalHelpers, false)
-					.addField("Most Thanked All Time", helpersThisWeek, false)
-					.addField("Most Thankful This Week", totalHelped, false)
-					.addField("Most Thankful All Time", helpedThisWeek, false);
+					.addField("Most Thanked This Week", helpersThisWeek, false)
+					.addField("Most Thanked All Time", totalHelpers, false)
+					.addField("Most Thankful This Week", helpedThisWeek, false)
+					.addField("Most Thankful All Time", totalHelped, false);
 			event.getHook().sendMessageEmbeds(embed.build()).queue();
 		});
 		return event.deferReply(false);
