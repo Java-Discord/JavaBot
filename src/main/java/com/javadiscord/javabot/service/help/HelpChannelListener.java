@@ -1,11 +1,12 @@
 package com.javadiscord.javabot.service.help;
 
 import com.javadiscord.javabot.Bot;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 
 /**
@@ -13,17 +14,16 @@ import java.sql.SQLException;
  * more designated help channels.
  */
 public class HelpChannelListener extends ListenerAdapter {
-
 	@Override
-	public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-		if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
+	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) return;
 
 		var config = Bot.config.get(event.getGuild()).getHelp();
-		TextChannel channel = event.getChannel();
+		TextChannel channel = event.getTextChannel();
 		var manager = new HelpChannelManager(config);
 
 		// If a message was sent in an open text channel, reserve it.
-		if (config.getOpenChannelCategory().equals(channel.getParent())) {
+		if (config.getOpenChannelCategory().equals(channel.getParentCategory())) {
 			if (manager.mayUserReserveChannel(event.getAuthor())) {
 				try {
 					manager.reserve(channel, event.getAuthor(), event.getMessage());
@@ -34,7 +34,7 @@ public class HelpChannelListener extends ListenerAdapter {
 			} else {
 				event.getMessage().reply(config.getReservationNotAllowedMessage()).queue();
 			}
-		} else if (config.getDormantChannelCategory().equals(channel.getParent())) {
+		} else if (config.getDormantChannelCategory().equals(channel.getParentCategory())) {
 			// Prevent anyone from sending messages in dormant channels.
 			event.getMessage().delete().queue();
 		}

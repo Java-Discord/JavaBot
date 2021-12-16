@@ -1,6 +1,6 @@
 package com.javadiscord.javabot.service.jam.dao;
 
-import com.javadiscord.javabot.data.h2db.DatabaseHelper;
+import com.javadiscord.javabot.utils.StringResourceCache;
 import com.javadiscord.javabot.service.jam.model.Jam;
 import com.javadiscord.javabot.service.jam.model.JamSubmission;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class JamSubmissionRepository {
 	private final Connection con;
 
 	public List<JamSubmission> getSubmissions(Jam jam) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement(DatabaseHelper.loadSql("/jam/sql/find_latest_submissions.sql"));
+		PreparedStatement stmt = con.prepareStatement(StringResourceCache.load("/jam/sql/find_latest_submissions.sql"));
 		stmt.setLong(1, jam.getId());
 		ResultSet rs = stmt.executeQuery();
 		List<JamSubmission> submissions = new ArrayList<>();

@@ -1,12 +1,14 @@
 plugins {
     id 'java'
-    id'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'checkstyle'
 }
 
 sourceCompatibility = 16
 targetCompatibility = 16
 
 group 'com.javadiscord'
+version '1.0.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -15,13 +17,12 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
-    implementation 'net.dv8tion:JDA:4.3.0_334'
-//    implementation 'com.github.dv8fromtheworld:jda:feature~threads'
+    implementation 'net.dv8tion:JDA:5.0.0-alpha.1'
     implementation 'org.mongodb:mongodb-driver:3.12.10'
-    implementation 'com.google.code.gson:gson:2.8.7'
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'org.yaml:snakeyaml:1.29'
 
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.5'
@@ -29,10 +30,17 @@ dependencies {
 
     // H2 Database
     implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+    implementation 'com.zaxxer:HikariCP:5.0.0'
+
+    // Quartz scheduler
+    implementation 'org.quartz-scheduler:quartz:2.3.2'
+
+    // NLP
+    implementation 'org.apache.opennlp:opennlp-tools:1.9.4'
 
     // Lombok Annotations
-    compileOnly 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
     testCompileOnly 'org.projectlombok:lombok:1.18.20'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
 }
@@ -46,3 +54,8 @@ tasks.withType( JavaCompile ).configureEach {
     options.forkOptions.jvmArgs.addAll( ['--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'] )
 }
 test { useJUnitPlatform() }
+
+checkstyle {
+    toolVersion '9.1'
+    configDirectory.set(new File("checkstyle"))
+}

@@ -26,17 +26,9 @@ public class UserLeave extends ListenerAdapter {
      * @param guild The guild they're leaving.
      */
     private void unreserveAllChannels(User user, Guild guild) {
-        try (var con = Bot.dataSource.getConnection();
-                var stmt = con.prepareStatement("SELECT channel_id FROM reserved_help_channels WHERE user_id = ?")) {
-            stmt.setLong(1, user.getIdLong());
-            var rs = stmt.getResultSet();
+        try {
             var manager = new HelpChannelManager(Bot.config.get(guild).getHelp());
-            if (rs != null) {
-                while (rs.next()) {
-                    long channelId = rs.getLong("channel_id");
-                    manager.unreserveChannel(guild.getTextChannelById(channelId)).queue();
-                }
-            }
+            manager.unreserveAllOwnedChannels(user);
         } catch (SQLException e) {
             e.printStackTrace();
             var logChannel = Bot.config.get(guild).getModeration().getLogChannel();

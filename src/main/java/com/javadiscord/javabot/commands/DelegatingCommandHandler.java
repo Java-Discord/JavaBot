@@ -84,7 +84,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	 * @return The reply action that is sent to the user.
 	 */
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
 		// First we check if the event has specified a subcommand group, and if we have a group handler for it.
 		if (event.getSubcommandGroup() != null) {
 			SlashCommandHandler groupHandler = this.getSubcommandGroupHandlers().get(event.getSubcommandGroup());

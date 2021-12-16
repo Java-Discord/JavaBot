@@ -1,7 +1,7 @@
 package com.javadiscord.javabot;
 
 import com.javadiscord.javabot.commands.SlashCommands;
-import com.javadiscord.javabot.data.h2db.H2DataSource;
+import com.javadiscord.javabot.data.h2db.DbHelper;
 import com.javadiscord.javabot.data.properties.config.BotConfig;
 import com.javadiscord.javabot.events.*;
 import com.javadiscord.javabot.service.AutoMod;
@@ -9,8 +9,11 @@ import com.javadiscord.javabot.service.PresenceUpdater;
 import com.javadiscord.javabot.service.Startup;
 import com.javadiscord.javabot.service.StatsUpdater;
 import com.javadiscord.javabot.service.help.HelpChannelListener;
-import com.javadiscord.javabot.service.welcome.UserJoin;
+import com.javadiscord.javabot.service.schedule.ScheduledTasks;
+import com.javadiscord.javabot.service.serverlock.ServerLock;
 import com.javadiscord.javabot.service.welcome.UserLeave;
+import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -19,6 +22,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
@@ -29,12 +33,8 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * The main class where the bot is initialized.
  */
+@Slf4j
 public class Bot {
-    /**
-     * A reference to the JDA instance
-     */
-    public static JDA jda;
-
     /**
      * The set of configuration properties that this bot uses.
      */
@@ -53,7 +53,7 @@ public class Bot {
      * database that this bot users for certain parts of the application. Use
      * this to obtain a connection and perform transactions.
      */
-    public static H2DataSource dataSource;
+    public static HikariDataSource dataSource;
 
     /**
      * A general-purpose thread pool that can be used by the bot to execute
@@ -76,11 +76,10 @@ public class Bot {
     public static void main(String[] args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
         config = new BotConfig(Path.of("config"));
+        dataSource = DbHelper.initDataSource(config);
         slashCommands = new SlashCommands();
-        dataSource = new H2DataSource();
-        dataSource.initDatabase();
         asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
-        jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
+        var jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -89,6 +88,13 @@ public class Bot {
                 .addEventListeners(slashCommands)
                 .build();
         addEventListeners(jda);
+        try {
+            ScheduledTasks.init(jda);
+            log.info("Initialized scheduled tasks.");
+        } catch (SchedulerException e) {
+            log.error("Could not initialize all scheduled tasks.", e);
+            jda.shutdown();
+        }
     }
 
     /**
@@ -99,7 +105,7 @@ public class Bot {
     private static void addEventListeners(JDA jda) {
         jda.addEventListener(
                 new GuildJoinListener(),
-                new UserJoin(),
+                new ServerLock(jda),
                 new UserLeave(),
                 new Startup(),
                 PresenceUpdater.standardActivities(),

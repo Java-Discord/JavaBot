@@ -19,5 +19,5 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
  * </p>
  */
 public interface SlashCommandHandler {
-	ReplyAction handle(SlashCommandEvent event);
+	ReplyAction handle(SlashCommandEvent event) throws ResponseException;
 }

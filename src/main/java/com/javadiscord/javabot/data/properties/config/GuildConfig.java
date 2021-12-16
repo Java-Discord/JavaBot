@@ -132,7 +132,7 @@ public class GuildConfig {
 		var result = ReflectionUtils.resolveField(propertyName, this);
 		return result.map(pair -> {
 			try {
-				return pair.getFirst().get(pair.getSecond());
+				return pair.first().get(pair.second());
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
 				return null;
@@ -150,7 +150,7 @@ public class GuildConfig {
 		var result = ReflectionUtils.resolveField(propertyName, this);
 		result.ifPresent(pair -> {
 			try {
-				ReflectionUtils.set(pair.getFirst(), pair.getSecond(), value);
+				ReflectionUtils.set(pair.first(), pair.second(), value);
 				this.flush();
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();

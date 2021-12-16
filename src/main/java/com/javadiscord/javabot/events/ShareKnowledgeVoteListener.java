@@ -3,11 +3,11 @@ package com.javadiscord.javabot.events;
 import com.javadiscord.javabot.Bot;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageType;
-import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.events.message.GenericMessageEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,9 +16,8 @@ import org.jetbrains.annotations.NotNull;
  * Automatically deletes messages below a certain score.
  */
 public class ShareKnowledgeVoteListener extends ListenerAdapter {
-
     @Override
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (isInvalidEvent(event)) return;
 
         var config = Bot.config.get(event.getGuild());
@@ -29,26 +28,28 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
+    public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
         onReactionEvent(event);
     }
 
     @Override
-    public void onGuildMessageReactionRemove (@NotNull GuildMessageReactionRemoveEvent event) {
+    public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
         onReactionEvent(event);
     }
 
-    private boolean isInvalidEvent(GenericGuildMessageEvent genericEvent) {
-        if (genericEvent instanceof GuildMessageReceivedEvent event)
-            if (event.getAuthor().isBot() || event.getAuthor().isSystem()
-                    || event.getMessage().getType() == MessageType.THREAD_CREATED) return true;
-
-        return !genericEvent.getChannel().equals(
-                Bot.config.get(genericEvent.getGuild()).getModeration().getShareKnowledgeChannel());
+    private boolean isInvalidEvent(GenericMessageEvent genericEvent) {
+        if (genericEvent instanceof MessageReceivedEvent event &&
+                (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED)) {
+            return true;
+        }
+        if (genericEvent instanceof MessageReactionAddEvent raEvent && raEvent.getUser() != null && (raEvent.getUser().isBot() || raEvent.getUser().isSystem())) {
+            return true;
+        }
+        return !genericEvent.getChannel().equals(Bot.config.get(genericEvent.getGuild()).getModeration().getShareKnowledgeChannel());
     }
 
-    private void onReactionEvent (GenericGuildMessageReactionEvent event) {
-        if (event.getUser().isBot() || event.getUser().isSystem()) return;
+    private void onReactionEvent (GenericMessageReactionEvent event) {
+        if (event.getUser() == null || event.getUser().isBot() || event.getUser().isSystem()) return;
         if (isInvalidEvent(event)) return;
 
         var config = Bot.config.get(event.getGuild());

@@ -21,10 +21,13 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 		var channelManager = new HelpChannelManager(config);
 		var owner = channelManager.getReservedChannelOwner(channel);
 		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
-			channelManager.unreserveChannel(channel).queue();
-			return Responses.success(event, "Channel Unreserved", "The channel has been unreserved.");
+			var reasonOption = event.getOption("reason");
+			String reason = (reasonOption == null) ? null : reasonOption.getAsString();
+			channelManager.unreserveChannelByUser(channel, owner, reason, event);
+			return event.deferReply(true);
+		} else {
+			return Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.");
 		}
-		return Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.");
 	}
 
 	private boolean isEligibleToBeUnreserved(SlashCommandEvent event, TextChannel channel, HelpConfig config, User owner) {
@@ -33,11 +36,11 @@ public class UnreserveCommandHandler implements SlashCommandHandler {
 	}
 
 	private boolean channelIsInReservedCategory(TextChannel channel, HelpConfig config) {
-		return config.getReservedChannelCategory().equals(channel.getParent());
+		return config.getReservedChannelCategory().equals(channel.getParentCategory());
 	}
 
 	private boolean isUserWhoReservedChannel(SlashCommandEvent event, User owner) {
-		return event.getUser().equals(owner);
+		return owner != null && event.getUser().equals(owner);
 	}
 
 	private boolean memberHasStaffRole(SlashCommandEvent event) {

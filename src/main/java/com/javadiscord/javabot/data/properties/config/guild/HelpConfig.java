@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Role;
 
+import java.util.List;
+
 /**
  * Configuration for the guild's help system.
  */
@@ -72,14 +74,21 @@ public class HelpConfig extends GuildConfigItem {
 	private int preferredOpenChannelCount = 3;
 
 	/**
+	 * A list of successive timeouts (in minutes) to use when checking to see if
+	 * a help channel is still active. The bot waits X minutes since the last
+	 * human message before sending an activity check, and waits
+	 */
+	private List<Integer> inactivityTimeouts = List.of(30, 60, 120, 180);
+
+	/**
 	 * The number of minutes of inactivity before a channel is considered inactive.
 	 */
 	private int inactivityTimeoutMinutes = 30;
 
 	/**
-	 * The number of minutes of inactivity before a previously inactive channel
-	 * is removed. This is measured from the time at which the bot determined
-	 * the channel to be inactive.
+	 * The number of minutes to wait before closing an inactive channel. An
+	 * inactive channel is one in which the most recent message is an unanswered
+	 * activity check that was sent by this bot.
 	 */
 	private int removeTimeoutMinutes = 60;
 
@@ -98,6 +107,11 @@ public class HelpConfig extends GuildConfigItem {
 	 * channel.
 	 */
 	private String reservationNotAllowedMessage = "You are not allowed to reserve this help channel. Please try again later.";
+
+	/**
+	 * How often users may use the /help-ping command.
+	 */
+	private int helpPingTimeoutSeconds = 300;
 
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);

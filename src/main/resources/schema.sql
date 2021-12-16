@@ -90,5 +90,55 @@ CREATE TABLE economy_transaction (
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     from_user_id BIGINT NULL,
     to_user_id BIGINT NULL,
-    value BIGINT NOT NULL
+    value BIGINT NOT NULL,
+    message VARCHAR(127)
+);
+
+CREATE TABLE economy_account_preferences (
+    user_id BIGINT PRIMARY KEY,
+    receive_transaction_dms BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+// Help system.
+CREATE TABLE reserved_help_channels (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    channel_id BIGINT NOT NULL UNIQUE,
+    reserved_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    user_id BIGINT NOT NULL,
+    timeout INT NOT NULL DEFAULT 60
+);
+
+CREATE TABLE help_channel_thanks (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    reservation_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    channel_id BIGINT NOT NULL,
+    thanked_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    helper_id BIGINT NOT NULL,
+    CONSTRAINT help_channel_thanks_unique UNIQUE(reservation_id, helper_id)
+);
+
+// QOTW
+CREATE TABLE qotw_question (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    guild_id BIGINT NOT NULL,
+    created_by BIGINT NOT NULL,
+    text VARCHAR(1024) NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    question_number INTEGER NULL DEFAULT NULL,
+    priority INTEGER NOT NULL DEFAULT 0
+);
+
+// Staff Management
+CREATE TABLE staff_application (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    guild_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    name VARCHAR(127) NOT NULL,
+    age INTEGER NOT NULL,
+    email VARCHAR(254) NOT NULL,
+    time_zone VARCHAR(63) NOT NULL,
+    role_id BIGINT NOT NULL
 );

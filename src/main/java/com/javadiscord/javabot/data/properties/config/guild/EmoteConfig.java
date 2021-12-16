@@ -1,6 +1,5 @@
 package com.javadiscord.javabot.data.properties.config.guild;
 
-import com.javadiscord.javabot.Bot;
 import com.javadiscord.javabot.data.properties.config.GuildConfigItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,44 +30,44 @@ public class EmoteConfig extends GuildConfigItem {
     private String earlySupporterId;
     private String botId;
 
-    public Emote getLoadingEmote() { return Bot.jda.getEmoteById(this.loadingId); }
+    public Emote getLoadingEmote() { return getGuild().getJDA().getEmoteById(this.loadingId); }
 
-    public Emote getFailureEmote() { return Bot.jda.getEmoteById(this.failureId); }
+    public Emote getFailureEmote() { return getGuild().getJDA().getEmoteById(this.failureId); }
 
-    public Emote getSuccessEmote() { return Bot.jda.getEmoteById(this.successId); }
+    public Emote getSuccessEmote() { return getGuild().getJDA().getEmoteById(this.successId); }
 
-    public Emote getUpvoteEmote() { return Bot.jda.getEmoteById(this.upvoteId); }
+    public Emote getUpvoteEmote() { return getGuild().getJDA().getEmoteById(this.upvoteId); }
 
-    public Emote getDownvoteEmote() { return Bot.jda.getEmoteById(this.downvoteId); }
+    public Emote getDownvoteEmote() { return getGuild().getJDA().getEmoteById(this.downvoteId); }
 
-    public Emote getSpotifyEmote() { return Bot.jda.getEmoteById(this.spotifyId); }
+    public Emote getSpotifyEmote() { return getGuild().getJDA().getEmoteById(this.spotifyId); }
 
-    public Emote getOnlineEmote() { return Bot.jda.getEmoteById(this.onlineId); }
+    public Emote getOnlineEmote() { return getGuild().getJDA().getEmoteById(this.onlineId); }
 
-    public Emote getOfflineEmote() { return Bot.jda.getEmoteById(this.offlineId); }
+    public Emote getOfflineEmote() { return getGuild().getJDA().getEmoteById(this.offlineId); }
 
-    public Emote getIdleEmote() { return Bot.jda.getEmoteById(this.idleId); }
+    public Emote getIdleEmote() { return getGuild().getJDA().getEmoteById(this.idleId); }
 
-    public Emote getDndEmote() { return Bot.jda.getEmoteById(this.dndId); }
+    public Emote getDndEmote() { return getGuild().getJDA().getEmoteById(this.dndId); }
 
-    public Emote getBalanceEmote() { return Bot.jda.getEmoteById(this.balanceId); }
+    public Emote getBalanceEmote() { return getGuild().getJDA().getEmoteById(this.balanceId); }
 
-    public Emote getBraveryEmote() { return Bot.jda.getEmoteById(this.braveryId); }
+    public Emote getBraveryEmote() { return getGuild().getJDA().getEmoteById(this.braveryId); }
 
-    public Emote getBrillianceEmote() { return Bot.jda.getEmoteById(this.brillianceId); }
+    public Emote getBrillianceEmote() { return getGuild().getJDA().getEmoteById(this.brillianceId); }
 
-    public Emote getDevEmote() { return Bot.jda.getEmoteById(this.devId); }
+    public Emote getDevEmote() { return getGuild().getJDA().getEmoteById(this.devId); }
 
-    public Emote getBugHunterEmote() { return Bot.jda.getEmoteById(this.bugHunterId); }
+    public Emote getBugHunterEmote() { return getGuild().getJDA().getEmoteById(this.bugHunterId); }
 
-    public Emote getStaffEmote() { return Bot.jda.getEmoteById(this.staffId); }
+    public Emote getStaffEmote() { return getGuild().getJDA().getEmoteById(this.staffId); }
 
-    public Emote getServerBoostEmote() { return Bot.jda.getEmoteById(this.serverBoostId); }
+    public Emote getServerBoostEmote() { return getGuild().getJDA().getEmoteById(this.serverBoostId); }
 
-    public Emote getPartnerEmote() { return Bot.jda.getEmoteById(this.partnerId); }
+    public Emote getPartnerEmote() { return getGuild().getJDA().getEmoteById(this.partnerId); }
 
-    public Emote getEarlySupporterEmote() { return Bot.jda.getEmoteById(this.earlySupporterId); }
+    public Emote getEarlySupporterEmote() { return getGuild().getJDA().getEmoteById(this.earlySupporterId); }
 
-    public Emote getBotEmote() { return Bot.jda.getEmoteById(this.botId); }
+    public Emote getBotEmote() { return getGuild().getJDA().getEmoteById(this.botId); }
 }
 

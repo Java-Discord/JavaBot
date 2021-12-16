@@ -8,6 +8,7 @@ import com.javadiscord.javabot.Constants;
 import com.javadiscord.javabot.data.mongodb.Database;
 import com.javadiscord.javabot.events.StarboardListener;
 import com.javadiscord.javabot.service.help.HelpChannelUpdater;
+import com.javadiscord.javabot.service.help.checks.SimpleGreetingCheck;
 import com.javadiscord.javabot.utils.Misc;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -19,13 +20,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class Startup extends ListenerAdapter {
-
-    public static final String iae = "https://cdn.discordapp.com/attachments/838019016395063328/838019031628906496/IllegalArgumentException.png";
-
     public static MongoClient mongoClient;
     public static Guild preferredGuild;
 
@@ -82,7 +81,16 @@ public class Startup extends ListenerAdapter {
 
             // Schedule the help channel updater to run periodically for each guild.
             var helpConfig = Bot.config.get(guild).getHelp();
-            Bot.asyncPool.scheduleAtFixedRate(new HelpChannelUpdater(event.getJDA(), helpConfig), 5, helpConfig.getUpdateIntervalSeconds(), TimeUnit.SECONDS);
+            Bot.asyncPool.scheduleAtFixedRate(
+                    new HelpChannelUpdater(event.getJDA(), helpConfig, List.of(
+                            new SimpleGreetingCheck()
+                    )),
+                    5,
+                    helpConfig.getUpdateIntervalSeconds(),
+                    TimeUnit.SECONDS
+            );
+
+            Bot.config.get(guild).getModeration().getLogChannel().sendMessage("I have just been booted up!").queue();
         }
 
         } catch (MongoException e) {

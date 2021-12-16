@@ -18,24 +18,12 @@
   options: []
   handler: com.javadiscord.javabot.commands.user_commands.Help
 
-# Help commands
-- name: unreserve
-  description: Unreserves this help channel so that others can use it.
-  handler: com.javadiscord.javabot.service.help.UnreserveCommandHandler
-  options: []
-
 - description: Generates a human-readable timestamp out of a Discord-ID
   name: idcalc
   options:
     - {description: The id the bot will convert into a human-readable timestamp, name: id,
        required: true, type: STRING}
   handler: com.javadiscord.javabot.commands.user_commands.IDCalc
-- description: Converts your given query to a Google search.
-  name: google
-  options:
-    - {description: Text that should be converted into a google-link, name: query, required: true,
-       type: STRING}
-  handler: com.javadiscord.javabot.commands.user_commands.Google
 - description: Turns your text-input into a lmgtfy-link
   name: lmgtfy
   options:
@@ -113,7 +101,7 @@
   options:
     - {description: The user you want to ban, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
-  handler: com.javadiscord.javabot.commands.moderation.Ban
+  handler: com.javadiscord.javabot.commands.staff_commands.Ban
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -123,7 +111,7 @@
   options:
     - {description: The user you want to clear all warns from, name: user, required: true,
        type: USER}
-  handler: com.javadiscord.javabot.commands.moderation.ClearWarns
+  handler: com.javadiscord.javabot.commands.staff_commands.ClearWarns
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -133,14 +121,14 @@
   options:
     - {description: The user you want to clear all QOTW-points from, name: user, required: true,
        type: USER}
-  handler: com.javadiscord.javabot.commands.other.qotw.ClearQOTW
+  handler: com.javadiscord.javabot.commands.staff_commands.question_of_the_week.ClearQOTW
   enabledByDefault: false
   privileges:
       - type: ROLE
         id: moderation.staffRoleId
 - description: Edits an embed
   name: editembed
-  handler: com.javadiscord.javabot.commands.moderation.EditEmbed
+  handler: com.javadiscord.javabot.commands.staff_commands.EditEmbed
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -161,7 +149,7 @@
         - { description: Title of the embed, name: title, required: false, type: STRING }
 - description: Sends an embed
   name: embed
-  handler: com.javadiscord.javabot.commands.moderation.Embed
+  handler: com.javadiscord.javabot.commands.staff_commands.Embed
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -189,16 +177,18 @@
 - description: Let the bot say everything you want
   name: say
   options:
-    - {description: The text the bot should say, name: text,
-       required: true, type: STRING}
-  handler: com.javadiscord.javabot.commands.moderation.Say
+    - description: "The text the bot should say"
+      name: text
+      required: true
+      type: STRING
+  handler: com.javadiscord.javabot.commands.staff_commands.Say
   enabledByDefault: false
   privileges:
       - type: ROLE
         id: moderation.staffRoleId
 - description: Kicks a member
   name: kick
-  handler: com.javadiscord.javabot.commands.moderation.Kick
+  handler: com.javadiscord.javabot.commands.staff_commands.Kick
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -208,7 +198,7 @@
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Mutes a member
   name: mute
-  handler: com.javadiscord.javabot.commands.moderation.Mute
+  handler: com.javadiscord.javabot.commands.staff_commands.Mute
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -218,7 +208,7 @@
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Lists all muted members
   name: mutelist
-  handler: com.javadiscord.javabot.commands.moderation.Mutelist
+  handler: com.javadiscord.javabot.commands.staff_commands.Mutelist
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -226,7 +216,7 @@
   options: []
 - description: Grants one QOTW-Points to the given member upon use
   name: correct
-  handler: com.javadiscord.javabot.commands.other.qotw.Correct
+  handler: com.javadiscord.javabot.commands.staff_commands.question_of_the_week.Correct
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -236,7 +226,7 @@
 
 - description: Deletes messages from a channel.
   name: purge
-  handler: com.javadiscord.javabot.commands.moderation.Purge
+  handler: com.javadiscord.javabot.commands.staff_commands.Purge
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -257,7 +247,7 @@
 
 - name: prune
   description: Removes members from the server.
-  handler: com.javadiscord.javabot.commands.moderation.Prune
+  handler: com.javadiscord.javabot.commands.staff_commands.Prune
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -286,13 +276,13 @@
 
 - description: Reports a member
   name: report
-  handler: com.javadiscord.javabot.commands.moderation.Report
+  handler: com.javadiscord.javabot.commands.staff_commands.Report
   options:
     - {description: The user you want to report, name: user, required: true, type: USER}
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Unbans a member
   name: unban
-  handler: com.javadiscord.javabot.commands.moderation.Unban
+  handler: com.javadiscord.javabot.commands.staff_commands.Unban
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -302,7 +292,7 @@
        type: STRING}
 - description: Unmutes a member
   name: unmute
-  handler: com.javadiscord.javabot.commands.moderation.Unmute
+  handler: com.javadiscord.javabot.commands.staff_commands.Unmute
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -311,7 +301,7 @@
     - {description: The user you want to unmute, name: user, required: true, type: USER}
 - description: Warns a member
   name: warn
-  handler: com.javadiscord.javabot.commands.moderation.Warn
+  handler: com.javadiscord.javabot.commands.staff_commands.Warn
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -321,7 +311,7 @@
     - {description: The reason, name: reason, required: false, type: STRING}
 - description: Shows your warn count
   name: warns
-  handler: com.javadiscord.javabot.commands.moderation.Warns
+  handler: com.javadiscord.javabot.commands.staff_commands.Warns
   options:
     - {description: 'If given, shows the warn count of the given user', name: user,
        required: false, type: USER}
@@ -360,27 +350,51 @@
 
 - description: creates, edits or deletes custom slash commands
   name: customcommand
-  handler: com.javadiscord.javabot.commands.custom_commands.CustomCommands
+  handler: com.javadiscord.javabot.commands.staff_commands.custom_commands.CustomCommands
   enabledByDefault: false
   privileges:
       - type: ROLE
         id: moderation.staffRoleId
   options: []
   subCommands:
-    - description: Creates a custom slash command
-      name: create
+    - name: create
+      description: Creates a custom slash command
       options:
-        - {description: Name of the custom slash command, name: name, required: true,
-           type: STRING}
-        - {description: Content of the custom slash command, name: text, required: true,
-           type: STRING}
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+        - name: text
+          description: Content of the custom slash command
+          required: true
+          type: STRING
+        - name: reply
+          description: If set to True, will reply on use
+          required: false
+          type: BOOLEAN
+        - name: embed
+          description: If set to True, will send the content in an embed
+          required: false
+          type: BOOLEAN
     - description: Edits a custom slash command
       name: edit
       options:
-        - {description: Name of the custom slash command, name: name, required: true,
-           type: STRING}
-        - {description: Content of the custom slash command, name: text, required: true,
-           type: STRING}
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+        - name: text
+          description: Content of the custom slash command
+          required: true
+          type: STRING
+        - name: reply
+          description: If set to True, will reply on use
+          required: false
+          type: BOOLEAN
+        - name: embed
+          description: If set to True, will send the content in an embed
+          required: false
+          type: BOOLEAN
     - description: Deletes a custom slash command
       name: delete
       options:
@@ -389,10 +403,10 @@
 - description: Lists all custom slash commands
   name: customcommands
   options: []
-  handler: com.javadiscord.javabot.commands.custom_commands.CustomCommandList
+  handler: com.javadiscord.javabot.commands.staff_commands.custom_commands.CustomCommandList
 - description: creates or deletes reaction roles
   name: reactionrole
-  handler: com.javadiscord.javabot.commands.reaction_roles.ReactionRoles
+  handler: com.javadiscord.javabot.commands.staff_commands.reaction_roles.ReactionRoles
   enabledByDefault: false
   privileges:
       - type: ROLE
@@ -421,55 +435,47 @@
            type: STRING}
 - description: Generates the question of the week leaderboard
   name: leaderboard
-  handler: com.javadiscord.javabot.commands.other.qotw.Leaderboard
+  handler: com.javadiscord.javabot.commands.user_commands.Leaderboard
   options:
     - {description: Amount of users to display (2-30), name: amount, required: false, type: INTEGER}
 - description: Displays the given amount of questions in a random order
   name: question
-  handler: com.javadiscord.javabot.commands.other.Question
+  handler: com.javadiscord.javabot.commands.staff_commands.Question
   enabledByDefault: false
   privileges:
       - type: ROLE
         id: moderation.staffRoleId
   options:
     - {description: Amount of questions, name: amount, required: true, type: INTEGER}
-- description: Accepts the given submissions
-  name: accept
-  handler: com.javadiscord.javabot.commands.other.suggestions.Accept
+- description: Accepts, declines, clears or adds a response to a suggestion.
+  name: suggestion
+  handler: com.javadiscord.javabot.commands.staff_commands.suggestions.Suggestion
   enabledByDefault: false
   privileges:
       - type: ROLE
         id: moderation.staffRoleId
-  options:
-    - {description: ID of the submission, name: message-id, required: true, type: STRING}
-- description: clears the given submissions
-  name: clear
-  handler: com.javadiscord.javabot.commands.other.suggestions.Clear
-  enabledByDefault: false
-  privileges:
-      - type: ROLE
-        id: moderation.staffRoleId
-  options:
-    - {description: ID of the submission, name: message-id, required: true, type: STRING}
-- description: declines the given submissions
-  name: decline
-  handler: com.javadiscord.javabot.commands.other.suggestions.Decline
-  enabledByDefault: false
-  privileges:
-      - type: ROLE
-        id: moderation.staffRoleId
-  options:
-    - {description: ID of the submission, name: message-id, required: true, type: STRING}
-- description: Adds a response to the given submissions
-  name: respond
-  handler: com.javadiscord.javabot.commands.other.suggestions.Respond
-  enabledByDefault: false
-  privileges:
-      - type: ROLE
-        id: moderation.staffRoleId
-  options:
-    - {description: ID of the submission, name: message-id, required: true, type: STRING}
-    - {description: Text of the response, name: text, required: true, type: STRING}
+  subCommands:
+    - name: accept
+      description: "Accepts a suggestion"
+      options:
+        - name: message-id
+          description: "The message id of the suggestion you want to accept."
+          required: true
+          type: STRING
+    - name: decline
+      description: "Declines a suggestion"
+      options:
+        - name: message-id
+          description: "The message id of the suggestion you want to decline."
+          required: true
+          type: STRING
+    - name: clear
+      description: "Clears a suggestion"
+      options:
+        - name: message-id
+          description: "The message id of the suggestion you want to clear."
+          required: true
+          type: STRING
 
 # Java Jam Specific Commands
 - name: jam

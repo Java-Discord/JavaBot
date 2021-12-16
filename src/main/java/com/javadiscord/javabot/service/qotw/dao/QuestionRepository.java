@@ -30,6 +30,32 @@ public class QuestionRepository {
 		stmt.close();
 	}
 
+	public int getNextQuestionNumber() throws SQLException {
+		try (var stmt = con.prepareStatement("""
+			SELECT question_number + 1
+			FROM qotw_question
+			WHERE used = TRUE AND question_number IS NOT NULL
+			ORDER BY created_at DESC LIMIT 1""")) {
+			var rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+			return 1;
+		}
+	}
+
+	public void markUsed(QOTWQuestion question) throws SQLException {
+		if (question.getQuestionNumber() == null) throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
+		try (var stmt = con.prepareStatement("""
+			UPDATE qotw_question
+			SET used = TRUE, question_number = ?
+			WHERE id = ?""")) {
+			stmt.setLong(1, question.getId());
+			stmt.setInt(2, question.getQuestionNumber());
+			stmt.executeUpdate();
+		}
+	}
+
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws SQLException {
 		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT %d OFFSET %d";
 		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, page));
@@ -44,17 +70,22 @@ public class QuestionRepository {
 	}
 
 	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at LIMIT 1");
-		stmt.setLong(1, guildId);
-		ResultSet rs = stmt.executeQuery();
-		Optional<QOTWQuestion> optionalQuestion;
-		if (rs.next()) {
-			optionalQuestion = Optional.of(this.read(rs));
-		} else {
-			optionalQuestion = Optional.empty();
+		try (var stmt = con.prepareStatement("""
+			SELECT *
+			FROM qotw_question
+			WHERE guild_id = ? AND used = FALSE
+			ORDER BY priority DESC, created_at
+			LIMIT 1""")) {
+			stmt.setLong(1, guildId);
+			ResultSet rs = stmt.executeQuery();
+			Optional<QOTWQuestion> optionalQuestion;
+			if (rs.next()) {
+				optionalQuestion = Optional.of(this.read(rs));
+			} else {
+				optionalQuestion = Optional.empty();
+			}
+			return optionalQuestion;
 		}
-		stmt.close();
-		return optionalQuestion;
 	}
 
 	public boolean removeQuestion(long guildId, long id) throws SQLException {
@@ -74,6 +105,8 @@ public class QuestionRepository {
 		question.setCreatedBy(rs.getLong("created_by"));
 		question.setText(rs.getString("text"));
 		question.setUsed(rs.getBoolean("used"));
+		int questionNumber = rs.getInt("question_number");
+		question.setQuestionNumber(rs.wasNull() ? null : questionNumber);
 		question.setPriority(rs.getInt("priority"));
 		return question;
 	}

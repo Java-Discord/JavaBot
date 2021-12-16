@@ -17,6 +17,7 @@ import java.util.Map;
 import static com.javadiscord.javabot.service.Startup.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
+@Deprecated(forRemoval = true)
 public class Database {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Database.class);

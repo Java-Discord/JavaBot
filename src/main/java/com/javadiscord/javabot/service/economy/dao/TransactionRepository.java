@@ -1,6 +1,6 @@
 package com.javadiscord.javabot.service.economy.dao;
 
-import com.javadiscord.javabot.data.h2db.DatabaseHelper;
+import com.javadiscord.javabot.utils.StringResourceCache;
 import com.javadiscord.javabot.service.economy.model.Transaction;
 import lombok.RequiredArgsConstructor;
 
@@ -54,7 +54,7 @@ public class TransactionRepository {
 	}
 
 	public List<Transaction> getLatestTransactions(long userId, int count) throws SQLException {
-		String sql = DatabaseHelper.loadSql("/economy/sql/find_latest_transactions.sql").replace("/* LIMIT */", "LIMIT " + count);
+		String sql = StringResourceCache.load("/economy/sql/find_latest_transactions.sql").replace("/* LIMIT */", "LIMIT " + count);
 		try (var stmt = con.prepareStatement(sql)) {
 			stmt.setLong(1, userId);
 			stmt.setLong(2, userId);
