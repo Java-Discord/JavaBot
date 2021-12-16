@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.service;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.commands.staff_commands.Ban;
 import com.javadiscord.javabot.commands.staff_commands.Mute;
 import com.javadiscord.javabot.commands.staff_commands.Warn;
 import com.javadiscord.javabot.utils.Misc;
@@ -16,13 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,22 +23,6 @@ import java.util.regex.Pattern;
  * this class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
 public class AutoMod extends ListenerAdapter {
-
-    private static List<String> spamUrls;
-
-    public AutoMod() {
-        try {
-            Scanner scanner = new Scanner(new File("filepath"));
-            spamUrls = new ArrayList<>();
-            while (scanner.hasNext()){
-                spamUrls.add(scanner.next());
-            }
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
@@ -62,7 +39,7 @@ public class AutoMod extends ListenerAdapter {
         if (canBypassAutomod(member)) return;
         checkContentAutomod(event.getMessage());
     }
-
+    
     /**
      * Checks if a member can bypass the automod system.
      * @param member the {@link Member} to check
@@ -73,7 +50,7 @@ public class AutoMod extends ListenerAdapter {
                 || member.getUser().isBot()
                 || member.hasPermission(Permission.MESSAGE_MANAGE);
     }
-
+    
     /**
      * Runs all automod checks that should be run when a message is sent.
      * @param message the {@link Message} that should be checked
@@ -94,10 +71,10 @@ public class AutoMod extends ListenerAdapter {
                 handleSpam(message, message.getMember());
             }
         });
-
+        
         checkContentAutomod(message);
     }
-
+    
     /**
      * Runs all automod checks only depend on the message content.
      * @param message the {@link Message} that should be checked
@@ -107,15 +84,6 @@ public class AutoMod extends ListenerAdapter {
         Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
         if (matcher.find()) {
             warn(message, message.getMember(), "Automod: Advertising");
-        }
-        final String messageRaw = message.getContentRaw();
-        if (messageRaw.startsWith("http://") || messageRaw.startsWith("https://")) {
-            // only do it for a links, so it won't iterate for each message
-            for (String spamUrl : spamUrls) {
-                if (messageRaw.contains(spamUrl)){
-                    new Ban().ban(message.getMember(), "Scam");
-                }
-            }
         }
     }
 
