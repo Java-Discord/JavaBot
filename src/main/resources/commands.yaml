@@ -30,6 +30,12 @@
     - {description: Text that will be converted into a lmgtfy-link, name: text, required: true,
        type: STRING}
   handler: com.javadiscord.javabot.commands.user_commands.Lmgtfy
+- description: Generates A Google Link For Given Input
+  name: google
+  options:
+    - {description: Text that will be converted into a google-link, name: text, required: true,
+       type: STRING}
+  handler: com.javadiscord.javabot.commands.user_commands.Google
 - description: Checks the Bot's Gateway Ping
   name: ping
   options: []
