@@ -24,6 +24,12 @@
     - {description: The id the bot will convert into a human-readable timestamp, name: id,
        required: true, type: STRING}
   handler: com.javadiscord.javabot.commands.user_commands.IDCalc
+- description: Converts your given query to a Google search.
+  name: google
+  options:
+    - {description: Text that should be converted into a google-link, name: query, required: true,
+       type: STRING}
+  handler: com.javadiscord.javabot.commands.user_commands.Google
 - description: Turns your text-input into a lmgtfy-link
   name: lmgtfy
   options:
