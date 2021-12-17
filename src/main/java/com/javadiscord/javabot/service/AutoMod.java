@@ -113,7 +113,12 @@ public class AutoMod extends ListenerAdapter {
             // only do it for a links, so it won't iterate for each message
             for (String spamUrl : spamUrls) {
                 if (messageRaw.contains(spamUrl)){
-                    new Ban().ban(message.getMember(), "Scam");
+                    try {
+                        message.delete();
+                        new Warn().warn(message.getMember(), message.getGuild(), "Automod: Suspicious Link");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
