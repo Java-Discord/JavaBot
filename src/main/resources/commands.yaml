@@ -102,11 +102,23 @@
       required: false
       type: STRING
   handler: com.javadiscord.javabot.commands.user_commands.Poll
+- description: Checks if the given string matches the regex pattern
+  name: regex
+  options:
+    - name: regex
+      description: The regex pattern
+      required: true
+      type: STRING
+    - name: string
+      description: The string
+      required: true
+      type: STRING
+  handler: com.javadiscord.javabot.commands.user_commands.Regex
 - description: Bans a member.
   name: ban
   options:
-    - {description: The user you want to ban, name: user, required: true, type: USER}
-    - {description: The reason, name: reason, required: false, type: STRING}
+    - { description: The user you want to ban, name: user, required: true, type: USER }
+    - { description: The reason, name: reason, required: false, type: STRING }
   handler: com.javadiscord.javabot.commands.staff_commands.Ban
   enabledByDefault: false
   privileges:
