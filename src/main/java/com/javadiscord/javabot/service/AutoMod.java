@@ -35,7 +35,7 @@ public class AutoMod extends ListenerAdapter {
 
     public AutoMod() {
         try {
-            Scanner scanner = new Scanner(new File("filepath"));
+            Scanner scanner = new Scanner(new File(String.valueOf(getClass().getResourceAsStream("spamsLinks.txt"))));
             spamUrls = new ArrayList<>();
             while (scanner.hasNext()){
                 spamUrls.add(scanner.next());
