@@ -91,7 +91,7 @@ public class SlashCommands extends ListenerAdapter {
 	}
 
 	/**
-	 * Registers all slash commands defined in help-user.yaml for the given guild
+	 * Registers all slash commands defined in the set YAML-files for the given guild
 	 * so that users can see the commands when they type a "/".
 	 * <p>
 	 *     It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
