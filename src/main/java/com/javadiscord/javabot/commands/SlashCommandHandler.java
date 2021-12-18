@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
  * </p>
  * <p>
  *     To enable this handler for a particular slash command, navigate to that
- *     command's entry in commands.yaml, and add the following property:
+ *     command's entry in the corresponding YAML-file, and add the following property:
  *     <pre><code>
  * handler: com.javadiscord.javabot.commands.MyFullHandlerClassName
  *     </code></pre>

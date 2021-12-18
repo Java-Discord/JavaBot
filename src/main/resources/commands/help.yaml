@@ -1,4 +1,4 @@
-# Help commands
+# /unreserve
 - name: unreserve
   description: Unreserves this help channel so that others can use it.
   handler: com.javadiscord.javabot.service.help.UnreserveCommandHandler
@@ -8,6 +8,7 @@
       type: STRING
       required: false
 
+# /thanks
 - name: thanks
   description: Show an overview of how a user has been thanked for their help.
   handler: com.javadiscord.javabot.service.help.ThanksCommandHandler
@@ -17,14 +18,17 @@
       type: USER
       required: false
 
+# /thanks-leaderboard
 - name: thanks-leaderboard
   description: Show a leaderboard of the most thanked users.
   handler: com.javadiscord.javabot.service.help.ThanksLeaderboardCommandHandler
 
+# /help-guidelines
 - name: help-guidelines
   description: Show the server's help guidelines in a simple format.
   handler: com.javadiscord.javabot.service.help.HelpGuidelinesCommandHandler
 
+# /help-ping
 - name: help-ping
   description: Notify those with the help-ping role that your question is urgent.
   handler: com.javadiscord.javabot.service.help.HelpPingCommandHandler

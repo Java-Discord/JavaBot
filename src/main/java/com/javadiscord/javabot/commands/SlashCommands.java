@@ -39,7 +39,7 @@ import static com.mongodb.client.model.Filters.eq;
  * appropriate {@link SlashCommandHandler}.
  * <p>
  *     The list of valid commands, and their associated handlers, are defined in
- *     the commands.yaml file under the resources directory.
+ *     their corresponding YAML-file under the resources/commands directory.
  * </p>
  */
 public class SlashCommands extends ListenerAdapter {
@@ -91,7 +91,7 @@ public class SlashCommands extends ListenerAdapter {
 	}
 
 	/**
-	 * Registers all slash commands defined in commands.yaml for the given guild
+	 * Registers all slash commands defined in help-user.yaml for the given guild
 	 * so that users can see the commands when they type a "/".
 	 * <p>
 	 *     It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
@@ -101,7 +101,14 @@ public class SlashCommands extends ListenerAdapter {
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerSlashCommands(Guild guild) {
-		CommandConfig[] commandConfigs = CommandDataLoader.load("commands.yaml", "help/commands.yaml");
+		CommandConfig[] commandConfigs = CommandDataLoader.load(
+				"commands/economy.yaml",
+				"commands/help.yaml",
+				"commands/jam.yaml",
+				"commands/qotw.yaml",
+				"commands/staff.yaml",
+				"commands/user.yaml"
+		);
 		var commandUpdateAction = this.updateCommands(commandConfigs, guild);
 		var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
 
