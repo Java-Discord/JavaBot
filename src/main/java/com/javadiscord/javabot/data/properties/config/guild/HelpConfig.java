@@ -59,13 +59,19 @@ public class HelpConfig extends GuildConfigItem {
 	 * The message that's sent in a recycled help channel to tell users that it
 	 * is now open for someone to ask a question.
 	 */
-	private String reopenedChannelMessage = "**This channel is no longer reserved. Feel free to ask your question here!**";
+	private String reopenedChannelMessage = "`✅` **This channel is now available!**\nThis channel is no longer reserved. Feel free to ask your question here!";
 
 	/**
 	 * The message that's sent as soon as a user asks a question in an open help
 	 * channel. This is only sent if it's not null.
 	 */
-	private String reservedChannelMessage = null;
+	private String reservedChannelMessage = "`⌛` **This channel has been reserved for your question.**\nPlease use `/unreserve` when you\u0027re finished.";
+
+	/**
+	 * The message that's sent in a recycled help channel to tell users that it
+	 * is now marked as dormant and no more messages can be sent.
+	 */
+	private String dormantChannelMessage = "`\uD83D\uDCA4` **Channel marked as dormant**\nIt is no longer possible to send messages in this channel until it becomes available again. If your question was not answered yet, feel free to claim a new available Help channel.";
 
 	/**
 	 * The number of open help channels to maintain. If fewer than this many

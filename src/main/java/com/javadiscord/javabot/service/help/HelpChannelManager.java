@@ -130,7 +130,9 @@ public class HelpChannelManager {
 			var dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
 			if (!dormantChannels.isEmpty()) {
 				var targetCategory = this.config.getOpenChannelCategory();
-				dormantChannels.get(0).getManager().setParent(targetCategory).sync(targetCategory).queue();
+				var targetChannel = dormantChannels.get(0);
+				targetChannel.getManager().setParent(targetCategory).sync(targetCategory).queue();
+				targetChannel.sendMessage(config.getReopenedChannelMessage()).queue();
 			} else {
 				logChannel.sendMessage("Warning: No dormant channels were available to replenish an open channel that was just reserved.").queue();
 			}
@@ -254,8 +256,8 @@ public class HelpChannelManager {
 		interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
 				.setEphemeral(true).queue();
 		List<ActionRow> rows = new ArrayList<>(5);
-		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
 		rows.add(controlsRow);
+		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
 		channel.sendMessage(THANK_MESSAGE_TEXT).setActionRows(rows).queue();
 	}
 
@@ -290,6 +292,8 @@ public class HelpChannelManager {
 					var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
+				var dormantCategory = config.getDormantChannelCategory();
+				var openCategory = config.getOpenChannelCategory();
 				return RestAction.allOf(
 						channel.retrievePinnedMessages()
 								.flatMap(messages -> {
@@ -297,9 +301,11 @@ public class HelpChannelManager {
 									return RestAction.allOf(messages.stream().map(Message::unpin).toList());
 								}),
 						getOpenChannelCount() >= config.getPreferredOpenChannelCount()
-								? channel.getManager().setParent(config.getDormantChannelCategory()).sync(config.getDormantChannelCategory())
-								: channel.getManager().setParent(config.getOpenChannelCategory()).sync(config.getOpenChannelCategory()),
-						channel.sendMessage(this.config.getReopenedChannelMessage())
+								? RestAction.allOf(channel.getManager().setParent(dormantCategory).sync(dormantCategory),
+								channel.sendMessage(config.getDormantChannelMessage()))
+
+								: RestAction.allOf(channel.getManager().setParent(openCategory).sync(openCategory),
+								channel.sendMessage(config.getReopenedChannelMessage()))
 				);
 			} catch (SQLException e) {
 				e.printStackTrace();
