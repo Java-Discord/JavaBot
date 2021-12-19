@@ -1,5 +1,6 @@
 package com.javadiscord.javabot.commands.user_commands;
 
+import com.javadiscord.javabot.commands.Responses;
 import com.javadiscord.javabot.commands.SlashCommandHandler;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -18,7 +19,7 @@ public class Google implements SlashCommandHandler {
             query = URLEncoder.encode(Objects.requireNonNull(event.getOption("query")).getAsString(), StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            return event.reply(e.getMessage());
+            return Responses.error(event ,e.getMessage());
         }
         query = query.trim().replace(" ", "+");
         url = "https://www.google.com/search?q=".concat(query);

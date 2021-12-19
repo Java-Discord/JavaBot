@@ -1,7 +1,6 @@
 package com.javadiscord.javabot.service;
 
 import com.javadiscord.javabot.Bot;
-import com.javadiscord.javabot.commands.staff_commands.Ban;
 import com.javadiscord.javabot.commands.staff_commands.Mute;
 import com.javadiscord.javabot.commands.staff_commands.Warn;
 import com.javadiscord.javabot.utils.Misc;
@@ -16,13 +15,13 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,14 +33,10 @@ public class AutoMod extends ListenerAdapter {
     private static List<String> spamUrls;
 
     public AutoMod() {
-        try {
-            Scanner scanner = new Scanner(new File(String.valueOf(getClass().getResourceAsStream("spamsLinks.txt"))));
-            spamUrls = new ArrayList<>();
-            while (scanner.hasNext()){
-                spamUrls.add(scanner.next());
-            }
-            scanner.close();
-        } catch (FileNotFoundException e) {
+        spamUrls = new ArrayList<>();
+        try (var linesStream = Files.lines(Paths.get(getClass().getResource("/spamLinks.txt").toURI()))) {
+            linesStream.forEach(spamUrls::add);
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
 
@@ -114,7 +109,7 @@ public class AutoMod extends ListenerAdapter {
             for (String spamUrl : spamUrls) {
                 if (messageRaw.contains(spamUrl)){
                     try {
-                        message.delete();
+                        message.delete().queue();
                         new Warn().warn(message.getMember(), message.getGuild(), "Automod: Suspicious Link");
                     } catch (Exception e) {
                         e.printStackTrace();
