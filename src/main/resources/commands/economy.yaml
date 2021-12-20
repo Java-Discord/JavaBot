@@ -1,0 +1,63 @@
+# /economy
+- name: economy
+  description: Interact with the server's economy. Buy, sell, trade, and more!
+  subCommands:
+    # /economy account
+    - name: account
+      description: Shows information about your account.
+
+    # /economy send
+    - name: send
+      description: Send some of your balance to someone else.
+      options:
+        - name: recipient
+          description: The user that you want to receive the funds.
+          required: true
+          type: USER
+        - name: amount
+          description: The amount of funds to send.
+          required: true
+          type: INTEGER
+        - name: message
+          description: A message to provide with the transaction. 127 characters at most.
+          required: false
+          type: STRING
+    # /economy preferences
+    - name: preferences
+      description: Update your account preferences.
+      options:
+        - name: preference
+          description: The name of the preference you want to update.
+          required: true
+          type: STRING
+        - name: value
+          description: The updated value for the preference.
+          required: true
+          type: STRING
+  handler: com.javadiscord.javabot.service.economy.EconomyCommandHandler
+
+# /economy-admin
+- name: economy-admin
+  description: Administrative tools to handle the server's economy.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /economy-admin give
+    - name: give
+      description: Give a user's account some funds (or subtract funds with a negative value).
+      options:
+        - name: recipient
+          description: The user that you want to add money to.
+          required: true
+          type: USER
+        - name: amount
+          description: The amount of funds to add. Make this negative to subtract.
+          required: true
+          type: INTEGER
+        - name: message
+          description: A message to provide with the transaction. 127 characters at most.
+          required: false
+          type: STRING
+  handler: com.javadiscord.javabot.service.economy.EconomyAdminCommandHandler

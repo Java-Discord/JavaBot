@@ -98,7 +98,7 @@ public class PresenceUpdater extends ListenerAdapter {
     public static PresenceUpdater standardActivities() {
         return new PresenceUpdater(List.of(
             jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching("/help" + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
+            jda -> Activity.watching(Constants.JAM_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
             jda -> Activity.watching(Constants.QOTW_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members"),
             jda -> Activity.watching(Constants.GITHUB_LINK + " | " + Startup.preferredGuild.getMemberCount()  + " members")
         ), 35, TimeUnit.SECONDS);
