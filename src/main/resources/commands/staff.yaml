@@ -14,7 +14,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: com.javadiscord.javabot.commands.staff_commands.Ban
+  handler: net.javadiscord.javabot.systems.moderation.BanCommand
 
 # /clearwarns
 - name: clearwarns
@@ -28,7 +28,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: com.javadiscord.javabot.commands.staff_commands.ClearWarns
+  handler: net.javadiscord.javabot.systems.moderation.ClearWarnsCommand
 
 # /clearqotw
 - name: clearqotw
@@ -42,7 +42,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: com.javadiscord.javabot.commands.staff_commands.question_of_the_week.ClearQOTW
+  handler: net.javadiscord.javabot.systems.qotw.ClearQOTWCommand
 
 # /editembed
 - name: editembed
@@ -85,7 +85,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.EditEmbed
+  handler: net.javadiscord.javabot.systems.commands.staff.EditEmbedCommand
 
 # /embed
 - name: embed
@@ -144,7 +144,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.Embed
+  handler: net.javadiscord.javabot.systems.commands.staff.EmbedCommand
 
 # /say
 - name: say
@@ -158,7 +158,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: com.javadiscord.javabot.commands.staff_commands.Say
+  handler: net.javadiscord.javabot.systems.commands.staff.SayCommand
 
 # /kick
 - name: kick
@@ -176,7 +176,7 @@
       description: The reason
       required: false
       type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.Kick
+  handler: net.javadiscord.javabot.systems.moderation.KickCommand
 
 # /mute
 - name: mute
@@ -194,7 +194,7 @@
       description: The reason
       required: false
       type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.Mute
+  handler: net.javadiscord.javabot.systems.moderation.MuteCommand
 
 # /mutelist
 - name: mutelist
@@ -203,7 +203,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: com.javadiscord.javabot.commands.staff_commands.Mutelist
+  handler: net.javadiscord.javabot.systems.moderation.MutelistCommand
 
 # /correct
 - name: correct
@@ -217,7 +217,7 @@
       description: The member you want to grant a point
       required: true
       type: USER
-  handler: com.javadiscord.javabot.commands.staff_commands.question_of_the_week.Correct
+  handler: net.javadiscord.javabot.systems.qotw.CorrectCommand
 
 # /purge
 - name: purge
@@ -239,7 +239,7 @@
       description: If true, save removed messages in an archive.
       type: BOOLEAN
       required: false
-  handler: com.javadiscord.javabot.commands.staff_commands.Purge
+  handler: net.javadiscord.javabot.systems.moderation.PurgeCommand
 
 # /prune
 - name: prune
@@ -269,7 +269,7 @@
       description: The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.
       type: INTEGER
       required: false
-  handler: com.javadiscord.javabot.commands.staff_commands.Prune
+  handler: net.javadiscord.javabot.systems.moderation.PruneCommand
 
 # /unban
 - name: unban
@@ -283,7 +283,7 @@
       description: The ID of the user you want to unban
       required: true
       type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.Unban
+  handler: net.javadiscord.javabot.systems.moderation.UnbanCommand
 
 # /unmute
 - name: unmute
@@ -297,7 +297,7 @@
       description: The user you want to unmute
       required: true
       type: USER
-  handler: com.javadiscord.javabot.commands.staff_commands.Unmute
+  handler: net.javadiscord.javabot.systems.moderation.UnmuteCommand
 
 # /warn
 - name: warn
@@ -315,7 +315,7 @@
       description: The reason
       required: false
       type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.Warn
+  handler: net.javadiscord.javabot.systems.moderation.WarnCommand
 
 # /config
 - name: config
@@ -350,7 +350,7 @@
           description: The value to set for the property.
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.commands.configuation.Config
+  handler: net.javadiscord.javabot.systems.configuration.ConfigCommandHandler
 
 # /customcommand
 - name: customcommand
@@ -410,7 +410,12 @@
           description: Name of the custom slash command
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.custom_commands.CustomCommands
+  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandHandler
+
+# /customcommands
+- name: customcommands
+  description: Lists all custom slash commands
+  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandList
 
 # /reactionrole
 - name: reactionrole
@@ -457,7 +462,7 @@
           description: The button's label
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.reaction_roles.ReactionRoles
+  handler: net.javadiscord.javabot.systems.commands.staff.reaction_roles.ReactionRoleCommandHandler
 
 # /question
 - name: question
@@ -471,7 +476,31 @@
       description: Amount of questions
       required: true
       type: INTEGER
-  handler: com.javadiscord.javabot.commands.staff_commands.Question
+  handler: net.javadiscord.javabot.systems.commands.staff.QuestionCommand
+
+# /report
+- name: report
+  description: Reports a member
+  options:
+    - name: user
+      description: The user you want to report
+      required: true
+      type: USER
+    - name: reason
+      description: The reason
+      required: false
+      type: STRING
+  handler: net.javadiscord.javabot.systems.moderation.ReportCommand
+
+# /warns
+- name: warns
+  description: Shows your warn count
+  options:
+    - name: user
+      description: If given, shows the warn count of the given user
+      required: false
+      type: USER
+  handler: net.javadiscord.javabot.systems.moderation.WarnsCommand
 
 # /suggestion
 - name: suggestion
@@ -507,7 +536,7 @@
           description: The message id of the suggestion you want to clear.
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.suggestions.Suggestion
+  handler: net.javadiscord.javabot.systems.commands.staff.suggestions.SuggestionCommandHandler
 
 # /db-admin
 - name: db-admin
@@ -538,12 +567,12 @@
           description: The name of the migration to run.
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.data.h2db.commands.DbAdminCommandHandler
+  handler: net.javadiscord.javabot.data.h2db.commands.DbAdminCommandHandler
 
 # /staff-apply
 #- name: staff-apply
 #  description: Apply to become a member of this server's staff.
-#  handler: com.javadiscord.javabot.commands.moderation.staff_applications.StaffApplyHandler
+#  handler: net.javadiscord.javabot.commands.moderation.staff_applications.StaffApplyHandler
 #  options:
 #    - name: name
 #      description: Your real name.
@@ -584,7 +613,7 @@
 # /staff-applications
 #- name: staff-applications
 #  description: Manage staff applications.
-#  handler: com.javadiscord.javabot.commands.moderation.staff_applications.StaffApplicationsHandler
+#  handler: net.javadiscord.javabot.commands.moderation.staff_applications.StaffApplicationsHandler
 #  enabledByDefault: false
 #  privileges:
 #    - type: ROLE

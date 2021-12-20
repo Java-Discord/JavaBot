@@ -34,7 +34,7 @@
           description: The updated value for the preference.
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.service.economy.EconomyCommandHandler
+  handler: net.javadiscord.javabot.systems.economy.EconomyCommandHandler
 
 # /economy-admin
 - name: economy-admin
@@ -60,4 +60,4 @@
           description: A message to provide with the transaction. 127 characters at most.
           required: false
           type: STRING
-  handler: com.javadiscord.javabot.service.economy.EconomyAdminCommandHandler
+  handler: net.javadiscord.javabot.systems.economy.EconomyAdminCommandHandler
