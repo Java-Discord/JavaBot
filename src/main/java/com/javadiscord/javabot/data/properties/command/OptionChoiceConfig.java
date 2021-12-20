@@ -3,6 +3,8 @@ package com.javadiscord.javabot.data.properties.command;
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
+import java.util.Arrays;
+
 /**
  * DTO for a choice that a slash command option can have.
  */
@@ -24,5 +26,13 @@ public class OptionChoiceConfig {
 		c.setName(choice.getName());
 		c.setValue(choice.getAsString());
 		return c;
+	}
+
+	@Override
+	public String toString() {
+		return "OptionChoiceConfig{" +
+				"name='" + name + '\'' +
+				", value='" + value + '\'' +
+				'}';
 	}
 }

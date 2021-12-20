@@ -26,17 +26,6 @@ public class OptionConfig {
 		return d;
 	}
 
-	@Override
-	public String toString() {
-		return "OptionConfig{" +
-			"name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", type='" + type + '\'' +
-			", required=" + required +
-			", choices=" + Arrays.toString(choices) +
-			'}';
-	}
-
 	public static OptionConfig fromData(OptionData data) {
 		OptionConfig c = new OptionConfig();
 		c.setName(data.getName());
@@ -45,5 +34,16 @@ public class OptionConfig {
 		c.setRequired(data.isRequired());
 		c.setChoices(data.getChoices().stream().map(OptionChoiceConfig::fromData).toArray(OptionChoiceConfig[]::new));
 		return c;
+	}
+
+	@Override
+	public String toString() {
+		return "OptionConfig{" +
+				"name='" + name + '\'' +
+				", description='" + description + '\'' +
+				", type='" + type + '\'' +
+				", required=" + required +
+				", choices=" + Arrays.toString(choices) +
+				'}';
 	}
 }
