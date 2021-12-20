@@ -27,7 +27,7 @@
           description: The name of the theme that you're submitting for. Required when the Jam has multiple themes.
           required: false
           type: STRING
-  handler: com.javadiscord.javabot.service.jam.JamCommandHandler
+  handler: net.javadiscord.javabot.systems.jam.JamCommandHandler
 
 # /jam-admin
 - name: jam-admin
@@ -125,4 +125,4 @@
           description: Type 'yes' to confirm that you want to cancel the Jam.
           required: true
           type: STRING
-  handler: com.javadiscord.javabot.service.jam.JamAdminCommandHandler
+  handler: net.javadiscord.javabot.systems.jam.JamAdminCommandHandler

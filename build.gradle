@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = 16
 targetCompatibility = 16
 
-group 'com.javadiscord'
+group 'net.javadiscord'
 version '1.0.0-SNAPSHOT'
 
 repositories {
@@ -46,7 +46,7 @@ dependencies {
 }
 
 jar{
-    manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "com.javadiscord.javabot.Bot") }
+    manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "net.javadiscord.javabot.Bot") }
 }
 
 tasks.withType(JavaCompile){ options.encoding = 'UTF-8'}

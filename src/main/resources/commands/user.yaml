@@ -6,12 +6,12 @@
       description: If given, shows the profile picture of the given user
       required: false
       type: USER
-  handler: com.javadiscord.javabot.commands.user_commands.Avatar
+  handler: net.javadiscord.javabot.systems.commands.AvatarCommand
 
 # /botinfo
 - name: botinfo
   description: Shows some information about the Bot
-  handler: com.javadiscord.javabot.commands.user_commands.BotInfo
+  handler: net.javadiscord.javabot.systems.commands.BotInfoCommand
 
 # /changemymind
 - name: changemymind
@@ -21,7 +21,7 @@
       description: your text-input
       required: true
       type: STRING
-  handler: com.javadiscord.javabot.commands.user_commands.ChangeMyMind
+  handler: net.javadiscord.javabot.systems.commands.ChangeMyMindCommand
 
 # /idcalc
 - name: idcalc
@@ -31,7 +31,17 @@
       description: The id
       required: true
       type: STRING
-  handler: com.javadiscord.javabot.commands.user_commands.IDCalc
+  handler: net.javadiscord.javabot.systems.commands.IdCalculatorCommand
+
+# /leaderboard
+- name: leaderboard
+  description: Generates the question of the week leaderboard
+  options:
+    - name: amount
+      description: Amount of users to display (2-30)
+      required: false
+      type: INTEGER
+  handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
 
 # /lmgtfy
 - name: lmgtfy
@@ -41,32 +51,12 @@
       description: Text that will be converted into a lmgtfy-link
       required: true
       type: STRING
-  handler: com.javadiscord.javabot.commands.user_commands.Lmgtfy
+  handler: net.javadiscord.javabot.systems.commands.LmgtfyCommand
 
 # /ping
 - name: ping
   description: Checks the Bot's Gateway Ping
-  handler: com.javadiscord.javabot.commands.user_commands.Ping
-
-# /profile
-- name: profile
-  description: Shows your or someon else's profile
-  options:
-    - name: user
-      description: If given, shows the profile of the user
-      required: false
-      type: USER
-  handler: com.javadiscord.javabot.commands.user_commands.Profile
-
-# /serverinfo
-- name: serverinfo
-  description: Shows some information about the current guild
-  handler: com.javadiscord.javabot.commands.user_commands.ServerInfo
-
-# /uptime
-- name: uptime
-  description: Checks the Bot's uptime
-  handler: com.javadiscord.javabot.commands.user_commands.Uptime
+  handler: net.javadiscord.javabot.systems.commands.PingCommand
 
 # /poll
 - name: poll
@@ -116,7 +106,17 @@
       description: Adds an option
       required: false
       type: STRING
-  handler: com.javadiscord.javabot.commands.user_commands.Poll
+  handler: net.javadiscord.javabot.systems.commands.PollCommand
+
+# /profile
+- name: profile
+  description: Shows your or someon else's profile
+  options:
+    - name: user
+      description: If given, shows the profile of the user
+      required: false
+      type: USER
+  handler: net.javadiscord.javabot.systems.commands.ProfileCommand
 
 # /regex
 - name: regex
@@ -131,43 +131,14 @@
       required: true
       type: STRING
   enabledByDefault: false
-  handler: com.javadiscord.javabot.commands.user_commands.Regex
+  handler: net.javadiscord.javabot.systems.commands.RegexCommand
 
-# /report
-- name: report
-  description: Reports a member
-  options:
-    - name: user
-      description: The user you want to report
-      required: true
-      type: USER
-    - name: reason
-      description: The reason
-      required: false
-      type: STRING
-  handler: com.javadiscord.javabot.commands.staff_commands.Report
+# /serverinfo
+- name: serverinfo
+  description: Shows some information about the current guild
+  handler: net.javadiscord.javabot.systems.commands.ServerInfoCommand
 
-# /warns
-- name: warns
-  description: Shows your warn count
-  options:
-    - name: user
-      description: If given, shows the warn count of the given user
-      required: false
-      type: USER
-  handler: com.javadiscord.javabot.commands.staff_commands.Warns
-
-# /customcommands
-- name: customcommands
-  description: Lists all custom slash commands
-  handler: com.javadiscord.javabot.commands.staff_commands.custom_commands.CustomCommandList
-
-# /leaderboard
-- name: leaderboard
-  description: Generates the question of the week leaderboard
-  options:
-    - name: amount
-      description: Amount of users to display (2-30)
-      required: false
-      type: INTEGER
-  handler: com.javadiscord.javabot.commands.user_commands.Leaderboard
+# /uptime
+- name: uptime
+  description: Checks the Bot's uptime
+  handler: net.javadiscord.javabot.systems.commands.UptimeCommand

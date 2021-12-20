@@ -1,7 +1,7 @@
 # /qotw
 - name: qotw
   description: Administrative tools for managing the Question of the Week.
-  handler: com.javadiscord.javabot.service.qotw.QOTWCommandHandler
+  handler: net.javadiscord.javabot.systems.qotw.QOTWCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE

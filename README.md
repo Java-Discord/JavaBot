@@ -9,7 +9,7 @@ To start up, run the bot once, and it will generate a `config` directory. Stop t
 # Commands
 Commands are defined in this bot using a `commands.yaml` configuration file. The data in this file is transformed at startup time into an array of `com.javadiscord.javabot.data.properties.command.CommandConfig` objects using JSON deserialization.
 
-These commands are then used by `com.javadiscord.javabot.commands.SlashCommands#registerSlashCommands(Guild)` to register the defined commands as Discord slash commands which become available to users in guilds and private messages with the bot.
+These commands are then used by `SlashCommands#registerSlashCommands(Guild)` to register the defined commands as Discord slash commands which become available to users in guilds and private messages with the bot.
 
 **Each command MUST define a `handler` property, whose name is the fully-qualified class name of a `SlashCommandHandler`.** When registering commands, the bot will look for such a class, and attempt to create a new instance of it using a no-args constructor. Therefore, make sure that your handler class has a no-args constructor.
 
@@ -18,7 +18,7 @@ To specify that a command should only be allowed to be executed by certain peopl
 ```yaml
 - name: jam-admin
   description: Administrator actions for configuring the Java Jam.
-  handler: com.javadiscord.javabot.service.jam.JamAdminCommandHandler
+  handler: JamAdminCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE
