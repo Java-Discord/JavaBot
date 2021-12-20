@@ -3,7 +3,6 @@ package com.javadiscord.javabot.data.properties.command;
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
 import java.util.Arrays;
 
