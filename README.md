@@ -18,7 +18,7 @@ To specify that a command should only be allowed to be executed by certain peopl
 ```yaml
 - name: jam-admin
   description: Administrator actions for configuring the Java Jam.
-  handler: JamAdminCommandHandler
+  handler: net.javadiscord.javabot.systems.jam.JamAdminCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE
