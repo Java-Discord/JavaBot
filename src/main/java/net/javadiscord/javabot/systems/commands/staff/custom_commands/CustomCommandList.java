@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.custom_commands;
+package net.javadiscord.javabot.systems.commands.staff.custom_commands;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff;
+package net.javadiscord.javabot.systems.commands.staff;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;

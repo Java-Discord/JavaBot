@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.suggestions.subcommands;
+package net.javadiscord.javabot.systems.commands.staff.suggestions.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;

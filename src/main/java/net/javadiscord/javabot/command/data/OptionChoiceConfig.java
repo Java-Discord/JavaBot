@@ -1,9 +1,7 @@
-package com.javadiscord.javabot.data.properties.command;
+package net.javadiscord.javabot.command.data;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
-
-import java.util.Arrays;
 
 /**
  * DTO for a choice that a slash command option can have.

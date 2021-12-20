@@ -85,7 +85,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: net.javadiscord.javabot.systems.staff.EditEmbedCommand
+  handler: net.javadiscord.javabot.systems.commands.staff.EditEmbedCommand
 
 # /embed
 - name: embed
@@ -144,7 +144,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: net.javadiscord.javabot.systems.staff.EmbedCommand
+  handler: net.javadiscord.javabot.systems.commands.staff.EmbedCommand
 
 # /say
 - name: say
@@ -158,7 +158,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.staff.SayCommand
+  handler: net.javadiscord.javabot.systems.commands.staff.SayCommand
 
 # /kick
 - name: kick
@@ -410,12 +410,12 @@
           description: Name of the custom slash command
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler
+  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandHandler
 
 # /customcommands
 - name: customcommands
   description: Lists all custom slash commands
-  handler: net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandList
+  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandList
 
 # /reactionrole
 - name: reactionrole
@@ -462,7 +462,7 @@
           description: The button's label
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.staff.reaction_roles.ReactionRoleCommandHandler
+  handler: net.javadiscord.javabot.systems.commands.staff.reaction_roles.ReactionRoleCommandHandler
 
 # /question
 - name: question
@@ -476,7 +476,7 @@
       description: Amount of questions
       required: true
       type: INTEGER
-  handler: net.javadiscord.javabot.systems.staff.QuestionCommand
+  handler: net.javadiscord.javabot.systems.commands.staff.QuestionCommand
 
 # /report
 - name: report
@@ -536,7 +536,7 @@
           description: The message id of the suggestion you want to clear.
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.staff.suggestions.SuggestionCommandHandler
+  handler: net.javadiscord.javabot.systems.commands.staff.suggestions.SuggestionCommandHandler
 
 # /db-admin
 - name: db-admin

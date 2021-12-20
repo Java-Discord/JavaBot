@@ -1,12 +1,12 @@
-package net.javadiscord.javabot.systems.staff.custom_commands;
+package net.javadiscord.javabot.systems.commands.staff.custom_commands;
 
 import com.mongodb.BasicDBObject;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.events.StartupListener;
-import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CustomCommandCreate;
-import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CustomCommandDelete;
-import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CustomCommandEdit;
+import net.javadiscord.javabot.systems.commands.staff.custom_commands.subcommands.CustomCommandCreate;
+import net.javadiscord.javabot.systems.commands.staff.custom_commands.subcommands.CustomCommandDelete;
+import net.javadiscord.javabot.systems.commands.staff.custom_commands.subcommands.CustomCommandEdit;
 
 /**
  * Handler class for the "/customcommand"-slash commands
