@@ -13,7 +13,7 @@ import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
-import java.awt.*;
+import java.awt.Color;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -68,13 +68,14 @@ public class ModerationService {
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(config.getWarnTimeoutDays());
 			int totalWeight = repo.getTotalSeverityWeight(member.getIdLong(), cutoff);
 			var warnEmbed = buildWarnEmbed(member, severity, reason, warnedBy, warn.getCreatedAt().toInstant(ZoneOffset.UTC), totalWeight);
-			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(warnEmbed).queue());
+			member.getUser().openPrivateChannel().queue(pc ->
+					pc.sendMessage(config.getBanMessageText()).setEmbeds(warnEmbed).queue());
 			config.getLogChannel().sendMessageEmbeds(warnEmbed).queue();
 			if (!quiet && channel.getIdLong() != config.getLogChannelId()) {
 				channel.sendMessageEmbeds(warnEmbed).queue();
 			}
 			if (totalWeight > config.getMaxWarnSeverity()) {
-				ban(member, "Too many warnings.", warnedBy, channel, quiet);
+				ban(member, "Too many warns.", warnedBy, channel, quiet);
 			}
 		});
 	}

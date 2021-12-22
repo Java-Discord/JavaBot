@@ -33,6 +33,9 @@ public enum WarnSeverity {
 		this.weight = weight;
 	}
 
+	/**
+	 * Gets the weight based on the severity.
+	 */
 	public int getWeight() {
 		return this.weight;
 	}

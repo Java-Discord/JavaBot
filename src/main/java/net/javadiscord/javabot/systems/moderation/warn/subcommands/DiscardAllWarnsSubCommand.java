@@ -10,7 +10,7 @@ public class DiscardAllWarnsSubCommand implements SlashCommandHandler {
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
         var userOption = event.getOption("user");
-        if (userOption == null) return Responses.error(event, "User Option may not be null");
+        if (userOption == null) return Responses.error(event, "User cannot be empty!");
         var user = userOption.getAsUser();
         var moderationService = new ModerationService(event.getInteraction());
         moderationService.discardAllWarns(user, event.getUser());

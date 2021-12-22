@@ -109,6 +109,11 @@ public class WarnRepository {
 		}
 	}
 
+	/**
+	 * Reads the given {@link ResultSet} and constructs a new {@link Warn} object.
+	 * @param rs The ResultSet
+	 * @throws SQLException If an error occurs.
+	 */
 	private Warn read(ResultSet rs) throws SQLException {
 		Warn warn = new Warn();
 		warn.setId(rs.getLong("id"));

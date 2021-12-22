@@ -23,7 +23,7 @@ public class WarnsCommand implements SlashCommandHandler {
     public ReplyAction handle(SlashCommandEvent event) {
         OptionMapping warnsOption = event.getOption("user");
         Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
-        if (member == null) return Responses.error(event, "Member may not be null!");
+        if (member == null) return Responses.error(event, "Member is missing.");
         LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
         try (var con = Bot.dataSource.getConnection()) {
             return event.replyEmbeds(buildWarnsEmbed(new WarnRepository(con)
