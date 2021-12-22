@@ -331,7 +331,7 @@
 
     # /warn discard-by-id
     - name: discard-by-id
-      description: Lets you discard a warn by its id
+      description: Discards a singular Warn by its Id
       options:
         - name: id
           description: The warn's id
@@ -340,7 +340,7 @@
 
     # /warn discard-all
     - name: discard-all
-      description: Lets you discard all warns from an user
+      description: Discards all warns from a user
       options:
         - name: user
           description: The user which warns should be discarded
