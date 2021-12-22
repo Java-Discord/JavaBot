@@ -4,12 +4,12 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.util.Misc;
 
 import javax.annotation.Nonnull;
@@ -56,7 +56,15 @@ public class AutoMod extends ListenerAdapter {
     private void checkNewMessageAutomod(@Nonnull Message message) {
         // mention spam
         if (message.getMentionedMembers().size() >= 5) {
-            warn(message, message.getMember(), "Automod: Mention Spam");
+            new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+                    .warn(
+                            message.getAuthor(),
+                            WarnSeverity.MEDIUM,
+                            "Automod: Mention Spam",
+                            message.getJDA().getSelfUser(),
+                            message.getTextChannel(),
+                            false
+                    );
         }
 
         // spam
@@ -81,7 +89,15 @@ public class AutoMod extends ListenerAdapter {
         // Advertising
         Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
         if (matcher.find()) {
-            warn(message, message.getMember(), "Automod: Advertising");
+            new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+                    .warn(
+                            message.getAuthor(),
+                            WarnSeverity.MEDIUM,
+                            "Automod: Advertising",
+                            message.getJDA().getSelfUser(),
+                            message.getTextChannel(),
+                            false
+                    );
         }
     }
 
@@ -113,48 +129,9 @@ public class AutoMod extends ListenerAdapter {
         Misc.sendToLog(msg.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
-        try {
-            new MuteCommand().mute(msg.getMember(), msg.getGuild()).queue(
-                    success -> {},
-                    e -> msg.getChannel().sendMessage(e.getMessage()).queue());
-        } catch (Exception e) {
-            msg.getChannel().sendMessage(e.getMessage()).queue();
-        }
+        // TODO: Replace with Timeout (https://support.discord.com/hc/de/articles/4413305239191-Time-Out-FAQ) once there is JDA implementation
+        new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration()).mute(member, member.getGuild());
     }
-
-    /**
-     * warns the user using the reason
-     * @param message the message
-     * @param member the member to be warned
-     * @param reason the reason for the warning
-     */
-    private void warn (Message message, Member member, String reason) {
-        int warnPoints = new WarnCommand().getWarnCount(member);
-
-        MessageEmbed eb = new EmbedBuilder()
-                .setColor(Bot.config.get(message.getGuild()).getSlashCommand().getWarningColor())
-                .setAuthor(member.getUser().getAsTag() + " | Warn (" + (warnPoints + 1) + "/3)", null, member.getUser().getEffectiveAvatarUrl())
-                .addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-                .addField("Moderator", "```" + message.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
-                .addField("ID", "```" + member.getId() + "```", false)
-                .addField("Reason", "```" + reason + "```", false)
-                .setFooter("ID: " + member.getId())
-                .setTimestamp(Instant.now())
-                .build();
-
-        message.getChannel().sendMessageEmbeds(eb).queue();
-        Misc.sendToLog(message.getGuild(), eb);
-        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
-
-        try {
-            new WarnCommand().warn(message.getMember(), message.getGuild(), reason);
-        } catch (Exception e) {
-            message.getChannel().sendMessage(e.getMessage()).queue();
-        }
-
-        message.delete().queue();
-    }
-
 
     /**
      * returns the original String cleaned up of unused code points and spaces

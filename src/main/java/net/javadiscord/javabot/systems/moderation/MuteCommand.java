@@ -36,21 +36,13 @@ public class MuteCommand implements SlashCommandHandler {
         }
 
         try {
-            mute(member, event.getGuild()).queue(
-                    success -> event.replyEmbeds(eb).queue(),
-                    e -> Responses.error(event, e.getMessage()).queue()
-            );
+            new ModerationService(event.getInteraction()).mute(member, event.getGuild());
             return event.replyEmbeds(eb);
         } catch (Exception e) {
             return Responses.error(event, e.getMessage());
         }
     }
 
-    @CheckReturnValue
-    public AuditableRestAction<Void> mute (Member member, Guild guild) {
-        Role muteRole = Bot.config.get(guild).getModeration().getMuteRole();
-        return guild.addRoleToMember(member.getId(), muteRole);
-    }
 
     public MessageEmbed muteEmbed(Member member, Member mod, Guild guild, String reason) {
         return new EmbedBuilder()

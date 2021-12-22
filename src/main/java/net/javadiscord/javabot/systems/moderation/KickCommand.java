@@ -41,7 +41,6 @@ public class KickCommand implements SlashCommandHandler {
     }
 
     public void kick(Member member, String reason) {
-        new WarnCommand().deleteAllDocs(member.getId());
         member.kick(reason).queue();
     }
 

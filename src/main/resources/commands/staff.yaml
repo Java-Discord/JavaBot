@@ -1,34 +1,24 @@
 # /ban
 - name: ban
-  description: Bans a member.
+  description: Ban a user.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
   options:
     - name: user
-      description: The user you want to ban
-      required: true
+      description: The user to ban.
       type: USER
+      required: true
     - name: reason
-      description: The reason
-      required: false
+      description: The reason for banning this user.
       type: STRING
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.moderation.BanCommand
-
-# /clearwarns
-- name: clearwarns
-  description: Clears all warns from the given user.
-  options:
-    - name: user
-      description: The user you want to clear all warns from
       required: true
-      type: USER
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.moderation.ClearWarnsCommand
+    - name: quiet
+      description: If true, don't send a message in the server channel where the ban is issued.
+      type: BOOLEAN
+      required: false
+  handler: net.javadiscord.javabot.systems.moderation.BanCommand
 
 # /clearqotw
 - name: clearqotw
@@ -301,21 +291,58 @@
 
 # /warn
 - name: warn
-  description: Warns a member
+  description: Commands for managing user warns.
   enabledByDefault: false
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  options:
-    - name: user
-      description: The user you want to warn
-      required: true
-      type: USER
-    - name: reason
-      description: The reason
-      required: false
-      type: STRING
-  handler: net.javadiscord.javabot.systems.moderation.WarnCommand
+  subCommands:
+    # /warn add
+    - name: add
+      description: Sends a warning to a user, and increases their warn severity rating.
+      options:
+        - name: user
+          description: The user to warn.
+          type: USER
+          required: true
+        - name: severity
+          description: How severe was the offense?
+          type: STRING
+          required: true
+          choices:
+            - name: Low
+              value: "LOW"
+            - name: Medium
+              value: "MEDIUM"
+            - name: High
+              value: "HIGH"
+        - name: reason
+          description: The reason for this user's warning.
+          type: STRING
+          required: true
+        - name: quiet
+          description: If true, don't send a message in the server channel where the warn is issued.
+          type: BOOLEAN
+          required: false
+
+    # /warn discard-by-id
+    - name: discard-by-id
+      description: Lets you discard a warn by its id
+      options:
+        - name: id
+          description: The warn's id
+          required: true
+          type: INTEGER
+
+    # /warn discard-all
+    - name: discard-all
+      description: Lets you discard all warns from an user
+      options:
+        - name: user
+          description: The user which warns should be discarded
+          required: true
+          type: USER
+  handler: net.javadiscord.javabot.systems.moderation.warn.WarnCommandHandler
 
 # /config
 - name: config
@@ -500,7 +527,7 @@
       description: If given, shows the warn count of the given user
       required: false
       type: USER
-  handler: net.javadiscord.javabot.systems.moderation.WarnsCommand
+  handler: net.javadiscord.javabot.systems.moderation.warn.WarnsCommand
 
 # /suggestion
 - name: suggestion

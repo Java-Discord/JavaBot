@@ -27,6 +27,10 @@ public class ModerationConfig extends GuildConfigItem {
 
 	private int purgeMaxMessageCount = 1000;
 
+	private int maxWarnSeverity = 100;
+
+	private int warnTimeoutDays = 14;
+
 	private String banMessageText = "Looks like you've been banned from the Java Discord. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
 
 	public TextChannel getReportChannel() {

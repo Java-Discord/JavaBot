@@ -5,8 +5,8 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
-import net.javadiscord.javabot.systems.moderation.BanCommand;
 import net.javadiscord.javabot.systems.moderation.KickCommand;
+import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.UnbanCommand;
 
 @Slf4j
@@ -39,7 +39,12 @@ public class InteractionListener extends ListenerAdapter {
 		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
 			case "kick" -> new KickCommand().handleKickInteraction(event.getGuild().getMemberById(id[2]), event).queue();
-			case "ban" -> new BanCommand().handleBanInteraction(event.getGuild().getMemberById(id[2]), event).queue();
+			case "ban" -> new ModerationService(event.getInteraction())
+					.ban(event.getGuild().getMemberById(id[2]).getUser(),
+							"None",
+							event.getUser(),
+							event.getTextChannel(),
+							false);
 			case "unban" -> new UnbanCommand().handleUnbanInteraction(event, id[2]).queue();
 		}
 	}
