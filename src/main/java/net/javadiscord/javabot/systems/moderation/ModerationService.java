@@ -94,7 +94,7 @@ public class ModerationService {
 	}
 
 	/**
-	 * Clears a warn by discarding the warn with the corresponding id.
+	 * Clears a warn by discarding the Warn with the corresponding id.
 	 * @param id The id of the warn to discard.
 	 * @param clearedBy The user who cleared the warn.
 	 */
@@ -143,20 +143,42 @@ public class ModerationService {
 		} else return false;
 	}
 
+	/**
+	 * Unbans a member.
+	 * @param userId The user's id.
+	 * @param bannedBy The member who is responsible for unbanning this member.
+	 * @param channel The channel in which the unban was issued.
+	 * @param quiet If true, don't send a message in the channel.
+	 */
+	public boolean unban(long userId, Member bannedBy, TextChannel channel, boolean quiet) {
+		var unbanEmbed = buildUnbanEmbed(userId, bannedBy);
+		if (isBanned(channel.getGuild(), userId)) {
+			channel.getGuild().unban(User.fromId(userId)).queue();
+			if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
+			return true;
+		} else return false;
+	}
+
+	private boolean isBanned(Guild guild, long userId) {
+		return guild.retrieveBanList().complete()
+				.stream().map(Guild.Ban::getUser)
+				.map(User::getIdLong).toList().contains(userId);
+	}
+
 	private boolean canBanUser(Member member, Member bannedBy) {
-		var perms = member.getPermissions();
-		if (perms.isEmpty()) return false;
-		return perms.contains(Permission.BAN_MEMBERS) &&
-				!member.getRoles().isEmpty() && !bannedBy.getRoles().isEmpty() &&
-				member.getRoles().get(0).getPosition() > bannedBy.getRoles().get(0).getPosition();
+		var perms = bannedBy.getPermissions();
+		if (!perms.isEmpty() && !perms.contains(Permission.BAN_MEMBERS)) return false;
+		if (member.getRoles().isEmpty()) return true;
+		else return !bannedBy.getRoles().isEmpty() &&
+				member.getRoles().get(0).getPosition() < bannedBy.getRoles().get(0).getPosition();
 	}
 
 	private boolean canKickUser(Member member, Member kickedBy) {
-		var perms = member.getPermissions();
-		if (perms.isEmpty()) return false;
-		return perms.contains(Permission.KICK_MEMBERS) &&
-				!member.getRoles().isEmpty() && !kickedBy.getRoles().isEmpty() &&
-				member.getRoles().get(0).getPosition() > kickedBy.getRoles().get(0).getPosition();
+		var perms = kickedBy.getPermissions();
+		if (!perms.isEmpty() && !perms.contains(Permission.KICK_MEMBERS)) return false;
+		if (member.getRoles().isEmpty()) return true;
+		else return !kickedBy.getRoles().isEmpty() &&
+				member.getRoles().get(0).getPosition() < kickedBy.getRoles().get(0).getPosition();
 	}
 
 	/**
@@ -237,11 +259,22 @@ public class ModerationService {
 	private MessageEmbed buildBanEmbed(Member member, String reason, Member bannedBy) {
 		return new EmbedBuilder()
 				.setColor(Color.RED)
-				.addField("Banned by", bannedBy.getAsMention(), true)
 				.setTitle(String.format("%s | Ban", member.getUser().getAsTag()))
+				.addField("Banned by", bannedBy.getAsMention(), true)
 				.addField("Reason", String.format("```%s```", reason), false)
 				.setTimestamp(Instant.now())
 				.setFooter(bannedBy.getUser().getAsTag(), bannedBy.getEffectiveAvatarUrl())
+				.build();
+	}
+
+	public MessageEmbed buildUnbanEmbed(long userId, Member unbannedBy) {
+		return new EmbedBuilder()
+				.setAuthor("Unban")
+				.setColor(Color.RED)
+				.addField("Unbanned by", unbannedBy.getAsMention(), true)
+				.addField("User Id", String.format("```%s```", userId), false)
+				.setTimestamp(Instant.now())
+				.setFooter(unbannedBy.getUser().getAsTag(), unbannedBy.getEffectiveAvatarUrl())
 				.build();
 	}
 }

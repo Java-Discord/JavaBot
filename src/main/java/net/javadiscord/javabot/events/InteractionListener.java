@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
-import net.javadiscord.javabot.systems.moderation.UnbanCommand;
 
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
@@ -50,7 +49,11 @@ public class InteractionListener extends ListenerAdapter {
 					event.getMember(),
 					event.getTextChannel(),
 					false);
-			case "unban" -> new UnbanCommand().handleUnbanInteraction(event, id[2]).queue();
+			case "unban" -> service.unban(
+					Long.parseLong(id[2]),
+					event.getMember(),
+					event.getTextChannel(),
+					false);
 		}
 	}
 

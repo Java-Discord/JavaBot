@@ -20,7 +20,6 @@ public class BanCommand implements SlashCommandHandler {
 		if (channel.getType() != ChannelType.TEXT) {
 			return Responses.error(event, "This command can only be performed in a server text channel.");
 		}
-
 		var quietOption = event.getOption("quiet");
 		boolean quiet = quietOption != null && quietOption.getAsBoolean();
 
