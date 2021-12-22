@@ -68,8 +68,7 @@ public class ModerationService {
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(config.getWarnTimeoutDays());
 			int totalWeight = repo.getTotalSeverityWeight(member.getIdLong(), cutoff);
 			var warnEmbed = buildWarnEmbed(member, severity, reason, warnedBy, warn.getCreatedAt().toInstant(ZoneOffset.UTC), totalWeight);
-			member.getUser().openPrivateChannel().queue(pc ->
-					pc.sendMessage(config.getBanMessageText()).setEmbeds(warnEmbed).queue());
+			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(warnEmbed).queue());
 			config.getLogChannel().sendMessageEmbeds(warnEmbed).queue();
 			if (!quiet && channel.getIdLong() != config.getLogChannelId()) {
 				channel.sendMessageEmbeds(warnEmbed).queue();
@@ -137,7 +136,8 @@ public class ModerationService {
 		var banEmbed = buildBanEmbed(member, reason, bannedBy);
 		var guild = channel.getGuild();
 		if (canBanUser(member, bannedBy)) {
-			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(banEmbed).queue());
+			member.getUser().openPrivateChannel().queue(pc ->
+					pc.sendMessage(config.getBanMessageText()).setEmbeds(banEmbed).queue());
 			channel.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 			return true;
