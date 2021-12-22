@@ -92,7 +92,7 @@ public class AutoMod extends ListenerAdapter {
             new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
                     .warn(
                             message.getAuthor(),
-                            WarnSeverity.MEDIUM,
+                            WarnSeverity.LOW,
                             "Automod: Advertising",
                             message.getJDA().getSelfUser(),
                             message.getTextChannel(),
@@ -129,7 +129,7 @@ public class AutoMod extends ListenerAdapter {
         Misc.sendToLog(msg.getGuild(), eb);
         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
 
-        // TODO: Replace with Timeout (https://support.discord.com/hc/de/articles/4413305239191-Time-Out-FAQ) once there is JDA implementation
+        // TODO: Replace with Timeout (https://support.discord.com/hc/de/articles/4413305239191-Time-Out-FAQ) once there is a proper JDA Implementation
         new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration()).mute(member, member.getGuild());
     }
 
