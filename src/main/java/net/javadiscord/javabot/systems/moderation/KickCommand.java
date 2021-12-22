@@ -29,7 +29,7 @@ public class KickCommand implements SlashCommandHandler {
 		if (moderationService.kick(member, reason, event.getMember(), channel, quiet)) {
 			return Responses.success(event, "User Kicked", String.format("User %s has been kicked.", member.getUser().getAsTag()));
 		} else {
-			return Responses.warning(event, "You're not permitted to ban this user.");
+			return Responses.warning(event, "You're not permitted to kick this user.");
 		}
 	}
 }
