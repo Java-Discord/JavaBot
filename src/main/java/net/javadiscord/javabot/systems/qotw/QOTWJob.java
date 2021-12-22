@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -17,10 +18,12 @@ import java.time.OffsetDateTime;
 /**
  * Job which posts a new question to the QOTW channel.
  */
+@Slf4j
 public class QOTWJob extends DiscordApiJob {
 	@Override
 	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
 		for (var guild : jda.getGuilds()) {
+			if (Bot.config.get(guild).getModeration().getLogChannel() == null) continue;
 			try (var c = Bot.dataSource.getConnection()) {
 				var repo = new QuestionRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
@@ -33,9 +36,10 @@ public class QOTWJob extends DiscordApiJob {
 						question.setQuestionNumber(repo.getNextQuestionNumber());
 					}
 					var questionChannel = config.getQuestionChannel();
+					if (questionChannel == null) continue;
 					questionChannel.sendMessageEmbeds(buildEmbed(question, jda)).queue(msg -> {
 						questionChannel.crosspostMessageById(msg.getIdLong()).queue();
-						questionChannel.sendMessage("@question-ping").queue();
+						questionChannel.sendMessage(config.getQOTWRole().getAsMention()).queue();
 					});
 					repo.markUsed(question);
 				}
