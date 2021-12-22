@@ -58,10 +58,10 @@ public class AutoMod extends ListenerAdapter {
         if (message.getMentionedMembers().size() >= 5) {
             new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
                     .warn(
-                            message.getAuthor(),
+                            message.getMember(),
                             WarnSeverity.MEDIUM,
                             "Automod: Mention Spam",
-                            message.getJDA().getSelfUser(),
+                            message.getGuild().getMember(message.getJDA().getSelfUser()),
                             message.getTextChannel(),
                             false
                     );
@@ -91,10 +91,10 @@ public class AutoMod extends ListenerAdapter {
         if (matcher.find()) {
             new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
                     .warn(
-                            message.getAuthor(),
+                            message.getMember(),
                             WarnSeverity.LOW,
                             "Automod: Advertising",
-                            message.getJDA().getSelfUser(),
+                            message.getGuild().getMember(message.getJDA().getSelfUser()),
                             message.getTextChannel(),
                             false
                     );

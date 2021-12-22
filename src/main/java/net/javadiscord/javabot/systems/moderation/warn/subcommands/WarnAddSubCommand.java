@@ -17,9 +17,9 @@ public class WarnAddSubCommand implements SlashCommandHandler {
 		if (userOption == null || reasonOption == null || severityOption == null) {
 			return Responses.error(event, "Missing required Arguments.");
 		}
-		var user = userOption.getAsUser();
+		var member = userOption.getAsMember();
 		var severity = WarnSeverity.valueOf(severityOption.getAsString().trim().toUpperCase());
-		if (user.isBot()) return Responses.warning(event, "Cannot warn Bots.");
+		if (member.getUser().isBot()) return Responses.warning(event, "Cannot warn Bots.");
 
 		if (event.getChannel().getType() != ChannelType.TEXT) {
 			return Responses.error(event, "This command can only be performed in a server text channel.");
@@ -28,8 +28,8 @@ public class WarnAddSubCommand implements SlashCommandHandler {
 		boolean quiet = quietOption != null && quietOption.getAsBoolean();
 
 		var moderationService = new ModerationService(event.getInteraction());
-		moderationService.warn(user, severity, reasonOption.getAsString(), event.getUser(), event.getTextChannel(), quiet);
-		return Responses.success(event, "User Warned", String.format("User %s has been warned.", user.getAsTag()));
+		moderationService.warn(member, severity, reasonOption.getAsString(), event.getMember(), event.getTextChannel(), quiet);
+		return Responses.success(event, "User Warned", String.format("User %s has been warned.", member.getUser().getAsTag()));
 	}
 }
 

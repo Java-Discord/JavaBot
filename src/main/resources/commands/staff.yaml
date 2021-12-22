@@ -154,22 +154,22 @@
 - name: kick
   description: Kicks a member
   enabledByDefault: false
-    privileges:
-        - type: ROLE
-          id: moderation.staffRoleId
-    options:
-      - name: user
-        description: The user to kick.
-        type: USER
-        required: true
-      - name: reason
-        description: The reason for kicking this user.
-        type: STRING
-        required: true
-      - name: quiet
-        description: If true, don't send a message in the server channel where the kick is issued.
-        type: BOOLEAN
-        required: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: user
+      description: The user to kick.
+      type: USER
+      required: true
+    - name: reason
+      description: The reason for kicking this user.
+      type: STRING
+      required: true
+    - name: quiet
+      description: If true, don't send a message in the server channel where the kick is issued.
+      type: BOOLEAN
+      required: false
   handler: net.javadiscord.javabot.systems.moderation.KickCommand
 
 # /mute
