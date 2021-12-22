@@ -35,16 +35,22 @@ public class InteractionListener extends ListenerAdapter {
 	 * + May be useful for Context Menu Interactions
 	 */
 	private void handleUtils(ButtonClickEvent event) {
+		var service = new ModerationService(event.getInteraction());
 		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
-			case "kick" -> new KickCommand().handleKickInteraction(event.getGuild().getMemberById(id[2]), event).queue();
-			case "ban" -> new ModerationService(event.getInteraction())
-					.ban(event.getGuild().getMemberById(id[2]).getUser(),
-							"None",
-							event.getUser(),
-							event.getTextChannel(),
-							false);
+			case "kick" -> service.kick(
+					event.getGuild().getMemberById(id[2]),
+					"None",
+					event.getMember(),
+					event.getTextChannel(),
+					false);
+			case "ban" -> service.ban(
+					event.getGuild().getMemberById(id[2]),
+					"None",
+					event.getMember(),
+					event.getTextChannel(),
+					false);
 			case "unban" -> new UnbanCommand().handleUnbanInteraction(event, id[2]).queue();
 		}
 	}
