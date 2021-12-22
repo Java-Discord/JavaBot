@@ -18,7 +18,7 @@ import java.awt.*;
 
 public class ProfileCommand implements SlashCommandHandler {
 
-    String getBadges (Member member) {
+    private String getBadges (Member member) {
         String badges = "";
         var config = Bot.config.get(member.getGuild()).getEmote();
         if (member.getUser().isBot()) badges += config.getBotEmote().getAsMention();
@@ -40,7 +40,7 @@ public class ProfileCommand implements SlashCommandHandler {
         return badges;
     }
 
-    String getOnlineStatus (Member member) {
+    private String getOnlineStatus (Member member) {
         var config = Bot.config.get(member.getGuild()).getEmote();
         return member.getOnlineStatus().toString()
                 .replace("ONLINE", config.getOnlineEmote().getAsMention())
@@ -49,12 +49,12 @@ public class ProfileCommand implements SlashCommandHandler {
                 .replace("OFFLINE", config.getOfflineEmote().getAsMention());
     }
 
-    Color getColor (Member member) {
+    private Color getColor (Member member) {
         if (member.getColor() == null) return Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor();
         else return member.getColor();
     }
 
-    String getColorRoleAsMention (Member member) {
+    private String getColorRoleAsMention (Member member) {
         try {
             return member.getRoles().get(0).getAsMention();
         } catch (IndexOutOfBoundsException e) {
@@ -62,11 +62,11 @@ public class ProfileCommand implements SlashCommandHandler {
         }
     }
 
-    String getColorAsHex (Color color) {
+    private String getColorAsHex (Color color) {
         return "#" + Integer.toHexString(color.getRGB()).toUpperCase();
     }
 
-    Activity getCustomActivity (Member member) {
+    private Activity getCustomActivity (Member member) {
         Activity activity = null;
         for (var act : member.getActivities()) {
             if (act.getType().name().equals("CUSTOM_STATUS")) {
@@ -77,7 +77,7 @@ public class ProfileCommand implements SlashCommandHandler {
         return activity;
     }
 
-    Activity getGameActivity (Member member) {
+    private Activity getGameActivity (Member member) {
         Activity activity = null;
         for (var act : member.getActivities()) {
             if (act.getType().name().equals("CUSTOM_STATUS")) continue;
@@ -86,13 +86,13 @@ public class ProfileCommand implements SlashCommandHandler {
         return activity;
     }
 
-    String getGameActivityType (Activity activity) {
+    private String getGameActivityType (Activity activity) {
         return activity.getType().name().toLowerCase()
                 .replace("listening", "Listening to")
                 .replace("default", "Playing");
     }
 
-    String getGameActivityDetails (Activity activity, Guild guild) {
+    private String getGameActivityDetails (Activity activity, Guild guild) {
         String details;
         if (activity.getName().equals("Spotify")) {
             RichPresence rp = activity.asRichPresence();
@@ -105,19 +105,19 @@ public class ProfileCommand implements SlashCommandHandler {
         return details;
     }
 
-    String getServerJoinedDate (Member member, TimeUtils tu) {
+    private String getServerJoinedDate (Member member, TimeUtils tu) {
         long timeJoined = member.getTimeJoined().toInstant().getEpochSecond();
         String joinDiff = tu.formatDurationToNow(member.getTimeJoined());
         return "<t:" + timeJoined + ":F>" + " (" + joinDiff + " ago)";
     }
 
-    String getAccountCreatedDate (Member member, TimeUtils tu) {
+    private String getAccountCreatedDate (Member member, TimeUtils tu) {
         long timeCreated = member.getTimeCreated().toInstant().getEpochSecond();
         String createDiff = tu.formatDurationToNow(member.getTimeCreated());
         return "<t:" + timeCreated + ":F>" + " (" + createDiff + " ago)";
     }
 
-    String getDescription (Member member) {
+    private String getDescription (Member member) {
         String desc = "";
         if (getCustomActivity(member) != null) {
             desc += "\n\"" + getCustomActivity(member).getName() + "\"";
