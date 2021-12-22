@@ -10,10 +10,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.SlashCommandHandler;
-import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.mongodb.Database;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
-import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.awt.*;
@@ -102,7 +100,7 @@ public class ProfileCommand implements SlashCommandHandler {
 
             details = "[`\"" + rp.getDetails() + "\"";
             if (rp.getState() != null) details +=  " by " + rp.getState();
-            details += "`](" + spotifyURL + ") " + Bot.config.get(guild).getEmote().getSpotifyEmote();
+            details += "`](" + spotifyURL + ") " + Bot.config.get(guild).getEmote().getSpotifyEmote().getAsMention();
         } else details = "`" + activity.getName() + "`";
         return details;
     }

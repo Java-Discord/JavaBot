@@ -7,23 +7,28 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
 public class BanCommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        var userOption = event.getOption("user");
-        if (userOption == null) return Responses.error(event, "User Option may not be null");
-        var user = userOption.getAsUser();
-        var reasonOption = event.getOption("reason");
-        if (reasonOption == null) return Responses.error(event, "Reason may not be null");
-        String reason = reasonOption.getAsString();
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var userOption = event.getOption("user");
+		var reasonOption = event.getOption("reason");
+		if (userOption == null || reasonOption == null) {
+			return Responses.error(event, "Missing required Arguments.");
+		}
+		var member = userOption.getAsMember();
+		var reason = reasonOption.getAsString();
+		var channel = event.getTextChannel();
+		if (channel.getType() != ChannelType.TEXT) {
+			return Responses.error(event, "This command can only be performed in a server text channel.");
+		}
 
-        var channel = event.getTextChannel();
-        if (channel.getType() != ChannelType.TEXT) return Responses.error(event, "This command can only be performed in a server text channel.");
+		var quietOption = event.getOption("quiet");
+		boolean quiet = quietOption != null && quietOption.getAsBoolean();
 
-        var quietOption = event.getOption("quiet");
-        boolean quiet = quietOption != null && quietOption.getAsBoolean();
-
-        var moderationService = new ModerationService(event.getInteraction());
-        moderationService.ban(user, reason, event.getUser(), channel, quiet);
-        return Responses.success(event, "User Banned", String.format("User %s has been banned.", user.getAsTag()));
-    }
+		var moderationService = new ModerationService(event.getInteraction());
+		if (moderationService.ban(member, reason, event.getMember(), channel, quiet)) {
+			return Responses.success(event, "User Banned", String.format("User %s has been banned.", member.getUser().getAsTag()));
+		} else {
+			return Responses.warning(event, "You're not permitted to ban this user.");
+		}
+	}
 }

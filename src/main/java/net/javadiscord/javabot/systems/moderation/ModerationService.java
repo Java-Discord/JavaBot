@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -14,7 +13,7 @@ import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
-import java.awt.Color;
+import java.awt.*;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -55,27 +54,27 @@ public class ModerationService {
 
 	/**
 	 * Issues a warning for the given user.
-	 * @param user The user to warn.
+	 * @param member The member to warn.
 	 * @param severity The severity of the warning.
 	 * @param reason The reason for this warning.
-	 * @param warnedBy The user who issued the warning.
+	 * @param warnedBy The member who issued the warning.
 	 * @param channel The channel in which the warning was issued.
 	 * @param quiet If true, don't send a message in the channel.
 	 */
-	public void warn(User user, WarnSeverity severity, String reason, User warnedBy, TextChannel channel, boolean quiet) {
+	public void warn(Member member, WarnSeverity severity, String reason, Member warnedBy, TextChannel channel, boolean quiet) {
 		DbHelper.doDbAction(con -> {
 			var repo = new WarnRepository(con);
-			var warn = repo.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
+			var warn = repo.insert(new Warn(member.getIdLong(), warnedBy.getIdLong(), severity, reason));
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(config.getWarnTimeoutDays());
-			int totalWeight = repo.getTotalSeverityWeight(user.getIdLong(), cutoff);
-			var warnEmbed = buildWarnEmbed(user, severity, reason, warnedBy, warn.getCreatedAt().toInstant(ZoneOffset.UTC), totalWeight);
-			user.openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(warnEmbed).queue());
+			int totalWeight = repo.getTotalSeverityWeight(member.getIdLong(), cutoff);
+			var warnEmbed = buildWarnEmbed(member, severity, reason, warnedBy, warn.getCreatedAt().toInstant(ZoneOffset.UTC), totalWeight);
+			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(warnEmbed).queue());
 			config.getLogChannel().sendMessageEmbeds(warnEmbed).queue();
 			if (!quiet && channel.getIdLong() != config.getLogChannelId()) {
 				channel.sendMessageEmbeds(warnEmbed).queue();
 			}
 			if (totalWeight > config.getMaxWarnSeverity()) {
-				ban(user, "Too many warnings.", warnedBy, channel, quiet);
+				ban(member, "Too many warnings.", warnedBy, channel, quiet);
 			}
 		});
 	}
@@ -126,44 +125,84 @@ public class ModerationService {
 	}
 
 	/**
-	 * Bans a user.
-	 * @param user The user to ban.
-	 * @param reason The reason for banning the user.
-	 * @param bannedBy The user who is responsible for banning this user.
+	 * Bans a member.
+	 * @param member The member to ban.
+	 * @param reason The reason for banning the member.
+	 * @param bannedBy The member who is responsible for banning this member.
 	 * @param channel The channel in which the ban was issued.
 	 * @param quiet If true, don't send a message in the channel.
 	 */
-	public void ban(User user, String reason, User bannedBy, TextChannel channel, boolean quiet) {
-		var banEmbed = buildBanEmbed(user, reason, bannedBy);
-		if (canBanUser(user, bannedBy)) {
-			channel.getGuild().ban(user, BAN_DELETE_DAYS, reason).queue();
-			user.openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(banEmbed).queue());
+	public boolean ban(Member member, String reason, Member bannedBy, TextChannel channel, boolean quiet) {
+		var banEmbed = buildBanEmbed(member, reason, bannedBy);
+		var guild = channel.getGuild();
+		if (canBanUser(member, bannedBy)) {
+			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(banEmbed).queue());
+			channel.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
-		} else throw new PermissionException("You don't have permission to ban this user.");
+			return true;
+		} else return false;
 	}
 
-	private boolean canBanUser(User user, User bannedBy) {
-		var member = config.getGuild().getMember(bannedBy);
-		if (member == null) throw new IllegalArgumentException("Could not retrieve Guild Member from User object: " + user.toString());
+	private boolean canBanUser(Member member, Member bannedBy) {
 		var perms = member.getPermissions();
 		if (perms.isEmpty()) return false;
-		return perms.contains(Permission.BAN_MEMBERS);
+		return perms.contains(Permission.BAN_MEMBERS) &&
+				!member.getRoles().isEmpty() && !bannedBy.getRoles().isEmpty() &&
+				member.getRoles().get(0).getPosition() > bannedBy.getRoles().get(0).getPosition();
 	}
 
+	private boolean canKickUser(Member member, Member kickedBy) {
+		var perms = member.getPermissions();
+		if (perms.isEmpty()) return false;
+		return perms.contains(Permission.KICK_MEMBERS) &&
+				!member.getRoles().isEmpty() && !kickedBy.getRoles().isEmpty() &&
+				member.getRoles().get(0).getPosition() > kickedBy.getRoles().get(0).getPosition();
+	}
+
+	/**
+	 * Kicks a member.
+	 * @param member The member to kick.
+	 * @param reason The reason for kicking the member.
+	 * @param kickedBy The member who is responsible for kicking this member.
+	 * @param channel The channel in which the kick was issued.
+	 * @param quiet If true, don't send a message in the channel.
+	 */
+	public boolean kick(Member member, String reason, Member kickedBy, TextChannel channel, boolean quiet) {
+		var kickEmbed = buildKickEmbed(member, kickedBy, reason);
+		if (canKickUser(member, kickedBy)) {
+			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(kickEmbed).queue());
+			channel.getGuild().kick(member).queue();
+			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
+			return true;
+		} else return false;
+	}
+
+	@Deprecated(forRemoval = true)
 	public void mute(Member member, Guild guild) {
 		Role muteRole = Bot.config.get(guild).getModeration().getMuteRole();
 		guild.addRoleToMember(member.getId(), muteRole).queue();
 	}
 
-	private MessageEmbed buildWarnEmbed(User user, WarnSeverity severity, String reason, User warnedBy, Instant timestamp, int totalSeverity) {
+	private MessageEmbed buildWarnEmbed(Member member, WarnSeverity severity, String reason, Member warnedBy, Instant timestamp, int totalSeverity) {
 		return new EmbedBuilder()
 				.setColor(Color.ORANGE)
-				.setTitle(String.format("%s | Warn (%d/%d)", user.getAsTag(), totalSeverity, config.getMaxWarnSeverity()))
+				.setTitle(String.format("%s | Warn (%d/%d)", member.getUser().getAsTag(), totalSeverity, config.getMaxWarnSeverity()))
 				.addField("Warned by", warnedBy.getAsMention(), true)
 				.addField("Severity", String.format("`%s (%s)`", severity.name(), severity.getWeight()), true)
 				.addField("Reason", String.format("```%s```", reason), false)
 				.setTimestamp(timestamp)
-				.setFooter(warnedBy.getAsTag(), warnedBy.getEffectiveAvatarUrl())
+				.setFooter(warnedBy.getUser().getAsTag(), warnedBy.getEffectiveAvatarUrl())
+				.build();
+	}
+
+	private MessageEmbed buildKickEmbed(Member member, Member kickedBy, String reason) {
+		return new EmbedBuilder()
+				.setColor(Color.RED)
+				.setTitle(String.format("%s | Kick", member.getUser().getAsTag()))
+				.addField("Kicked by", kickedBy.getAsMention(), true)
+				.addField("Reason", String.format("```%s```", reason), false)
+				.setTimestamp(Instant.now())
+				.setFooter(kickedBy.getUser().getAsTag(), kickedBy.getEffectiveAvatarUrl())
 				.build();
 	}
 
@@ -188,20 +227,21 @@ public class ModerationService {
 								Warned by: <@%s>
 								Severity: `%s (%s)`
 								Reason: %s""",
-								w.getUserId(), w.getId(), w.getCreatedAt().toInstant(ZoneOffset.UTC).getEpochSecond(),
-								w.getWarnedBy(), w.getSeverity(), w.getSeverityWeight(), w.getReason()))
+						w.getUserId(), w.getId(), w.getCreatedAt().toInstant(ZoneOffset.UTC).getEpochSecond(),
+						w.getWarnedBy(), w.getSeverity(), w.getSeverityWeight(), w.getReason()))
 				.setTimestamp(Instant.now())
 				.setFooter(clearedBy.getAsTag(), clearedBy.getEffectiveAvatarUrl())
 				.build();
 	}
 
-	private MessageEmbed buildBanEmbed(User user, String reason, User bannedBy) {
+	private MessageEmbed buildBanEmbed(Member member, String reason, Member bannedBy) {
 		return new EmbedBuilder()
 				.setColor(Color.RED)
-				.setTitle(String.format("%s | Ban", user.getAsTag()))
-				.addField("Reason", reason, false)
+				.addField("Banned by", bannedBy.getAsMention(), true)
+				.setTitle(String.format("%s | Ban", member.getUser().getAsTag()))
+				.addField("Reason", String.format("```%s```", reason), false)
 				.setTimestamp(Instant.now())
-				.setFooter(bannedBy.getAsTag(), bannedBy.getEffectiveAvatarUrl())
+				.setFooter(bannedBy.getUser().getAsTag(), bannedBy.getEffectiveAvatarUrl())
 				.build();
 	}
 }
