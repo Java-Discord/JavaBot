@@ -7,16 +7,15 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.util.Misc;
 
-import javax.annotation.CheckReturnValue;
 import java.time.Instant;
 
+@Deprecated(forRemoval = true)
 public class MuteCommand implements SlashCommandHandler {
 
     @Override
@@ -36,21 +35,13 @@ public class MuteCommand implements SlashCommandHandler {
         }
 
         try {
-            mute(member, event.getGuild()).queue(
-                    success -> event.replyEmbeds(eb).queue(),
-                    e -> Responses.error(event, e.getMessage()).queue()
-            );
+            new ModerationService(event.getInteraction()).mute(member, event.getGuild());
             return event.replyEmbeds(eb);
         } catch (Exception e) {
             return Responses.error(event, e.getMessage());
         }
     }
 
-    @CheckReturnValue
-    public AuditableRestAction<Void> mute (Member member, Guild guild) {
-        Role muteRole = Bot.config.get(guild).getModeration().getMuteRole();
-        return guild.addRoleToMember(member.getId(), muteRole);
-    }
 
     public MessageEmbed muteEmbed(Member member, Member mod, Guild guild, String reason) {
         return new EmbedBuilder()

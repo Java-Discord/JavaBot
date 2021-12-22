@@ -3,6 +3,7 @@ package net.javadiscord.javabot.data.h2db;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
 import org.h2.tools.Server;
 
@@ -10,8 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -26,7 +29,7 @@ public class DbHelper {
 	 * the database.
 	 * @param config The bot's configuration.
 	 * @return The data source.
-	 * @throws IllegalStateException If an error occurs, and we're unable to
+	 * @throws IllegalStateException If an error occurs and we're unable to
 	 * start the database.
 	 */
 	public static HikariDataSource initDataSource(BotConfig config) {
@@ -59,6 +62,39 @@ public class DbHelper {
 			}
 		}
 		return ds;
+	}
+
+	/**
+	 * Does an asynchronous database action using the bot's async pool.
+	 * @param consumer The consumer that will use a connection.
+	 */
+	public static void doDbAction(ConnectionConsumer consumer) {
+		Bot.asyncPool.submit(() -> {
+			try (var c = Bot.dataSource.getConnection()) {
+				consumer.consume(c);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	/**
+	 * Does an asynchronous database action using the bot's async pool, and
+	 * wraps access to the connection behind a data access object that can be
+	 * built using the provided dao constructor.
+	 * @param daoConstructor A function to build a DAO using a connection.
+	 * @param consumer The consumer that does something with the DAO.
+	 * @param <T> The type of data access object. Usually some kind of repository.
+	 */
+	public static <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
+		Bot.asyncPool.submit(() -> {
+			try (var c = Bot.dataSource.getConnection()) {
+				var dao = daoConstructor.apply(c);
+				consumer.consume(dao);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	private static boolean shouldInitSchema(String jdbcUrl) {

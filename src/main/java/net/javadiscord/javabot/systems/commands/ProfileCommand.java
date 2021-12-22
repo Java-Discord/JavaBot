@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.mongodb.Database;
-import net.javadiscord.javabot.systems.moderation.WarnsCommand;
+import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.awt.*;
@@ -100,7 +100,7 @@ public class ProfileCommand implements SlashCommandHandler {
 
             details = "[`\"" + rp.getDetails() + "\"";
             if (rp.getState() != null) details +=  " by " + rp.getState();
-            details += "`](" + spotifyURL + ") " + Bot.config.get(guild).getEmote().getSpotifyEmote();
+            details += "`](" + spotifyURL + ") " + Bot.config.get(guild).getEmote().getSpotifyEmote().getAsMention();
         } else details = "`" + activity.getName() + "`";
         return details;
     }
@@ -119,11 +119,15 @@ public class ProfileCommand implements SlashCommandHandler {
 
     String getDescription (Member member) {
         String desc = "";
-        if (getCustomActivity(member) != null) desc += "\n\"" + getCustomActivity(member).getName() + "\"";
-        if (getGameActivity(member) != null) desc += "\n• " +
-                getGameActivityType(getGameActivity(member)) + " " + getGameActivityDetails(getGameActivity(member), member.getGuild());
+        if (getCustomActivity(member) != null) {
+            desc += "\n\"" + getCustomActivity(member).getName() + "\"";
+        }
+        if (getGameActivity(member) != null) {
+            desc += String.format("\n• %s %s", getGameActivityType(getGameActivity(member)), getGameActivityDetails(getGameActivity(member), member.getGuild()));
+        }
         desc +=
-                "\n\n⌞ Warnings: `" + new WarnsCommand().warnCount(member) + "`" +
+                "\n\n⌞ Warnings: `" + new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
+                        .getWarns(member.getIdLong()).size() + "`" +
                 "\n⌞ QOTW-Points: `" + new Database().getMemberInt(member, "qotwpoints") +
                         " (#" + new LeaderboardCommand().getQOTWRank(member.getGuild(), member.getId()) + ")`";
         return desc;

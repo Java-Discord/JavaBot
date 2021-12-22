@@ -7,6 +7,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.mongodb.Database;
 
+// TODO: Merge with /qotw command
 public class ClearQOTWCommand implements SlashCommandHandler {
 
     @Override

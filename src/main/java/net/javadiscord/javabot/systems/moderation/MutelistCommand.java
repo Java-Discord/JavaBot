@@ -10,6 +10,7 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 public class MutelistCommand implements SlashCommandHandler {
 
     @Override
