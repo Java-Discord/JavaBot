@@ -7,21 +7,19 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.interactions.Interaction;
-import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
-import javax.annotation.CheckReturnValue;
-import java.awt.*;
+import java.awt.Color;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 /**
  * This service provides methods for performing moderation actions, like banning
@@ -116,7 +114,18 @@ public class ModerationService {
 		return true;
 	}
 
-		/**
+	public List<Warn> getWarns(long userId) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new WarnRepository(con);
+			LocalDateTime cutoff = LocalDateTime.now().minusDays(config.getWarnTimeoutDays());
+			return repo.getWarnsByUserId(userId, cutoff);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return List.of();
+		}
+	}
+
+	/**
 	 * Bans a user.
 	 * @param user The user to ban.
 	 * @param reason The reason for banning the user.

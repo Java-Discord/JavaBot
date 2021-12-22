@@ -10,7 +10,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.mongodb.Database;
+import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.awt.*;
@@ -118,11 +121,15 @@ public class ProfileCommand implements SlashCommandHandler {
 
     String getDescription (Member member) {
         String desc = "";
-        if (getCustomActivity(member) != null) desc += "\n\"" + getCustomActivity(member).getName() + "\"";
-        if (getGameActivity(member) != null) desc += "\n• " +
-                getGameActivityType(getGameActivity(member)) + " " + getGameActivityDetails(getGameActivity(member), member.getGuild());
+        if (getCustomActivity(member) != null) {
+            desc += "\n\"" + getCustomActivity(member).getName() + "\"";
+        }
+        if (getGameActivity(member) != null) {
+            desc += String.format("\n• %s %s", getGameActivityType(getGameActivity(member)), getGameActivityDetails(getGameActivity(member), member.getGuild()));
+        }
         desc +=
-                "\n\n⌞ Warnings: `" + 69 + "`" +
+                "\n\n⌞ Warnings: `" + new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
+                        .getWarns(member.getIdLong()).size() + "`" +
                 "\n⌞ QOTW-Points: `" + new Database().getMemberInt(member, "qotwpoints") +
                         " (#" + new LeaderboardCommand().getQOTWRank(member.getGuild(), member.getId()) + ")`";
         return desc;

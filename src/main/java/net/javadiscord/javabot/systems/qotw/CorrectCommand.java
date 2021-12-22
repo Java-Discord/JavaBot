@@ -14,6 +14,7 @@ import net.javadiscord.javabot.util.Misc;
 
 import java.time.Instant;
 
+// TODO: Merge with /qotw command
 public class CorrectCommand implements SlashCommandHandler {
 
     public void correct(Guild guild, Member member) {

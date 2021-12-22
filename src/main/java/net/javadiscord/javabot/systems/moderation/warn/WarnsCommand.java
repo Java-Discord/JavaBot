@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class WarnsCommand implements SlashCommandHandler {
     @Override

@@ -7,14 +7,12 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.util.Misc;
 
-import javax.annotation.CheckReturnValue;
 import java.time.Instant;
 
 @Deprecated(forRemoval = true)
