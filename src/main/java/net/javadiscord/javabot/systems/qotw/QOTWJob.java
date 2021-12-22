@@ -37,9 +37,9 @@ public class QOTWJob extends DiscordApiJob {
 					}
 					var questionChannel = config.getQuestionChannel();
 					if (questionChannel == null) continue;
-					questionChannel.sendMessageEmbeds(buildEmbed(question, jda)).queue(msg -> {
+					questionChannel.sendMessage(config.getQOTWRole().getAsMention())
+							.setEmbeds(buildEmbed(question, jda)).queue(msg -> {
 						questionChannel.crosspostMessageById(msg.getIdLong()).queue();
-						questionChannel.sendMessage(config.getQOTWRole().getAsMention()).queue();
 					});
 					repo.markUsed(question);
 				}
@@ -55,7 +55,7 @@ public class QOTWJob extends DiscordApiJob {
 		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 
 		String description = String.format(
-				"**%s**\n\nDM your answer to <@%d>.\nYour answers will be checked by <t:%d:F>",
+				"%s\n\nDM your answer to <@%d>.\nYour answers will be checked by <t:%d:F>",
 				question.getText(),
 				jda.getSelfUser().getIdLong(),
 				checkTime.toEpochSecond()
