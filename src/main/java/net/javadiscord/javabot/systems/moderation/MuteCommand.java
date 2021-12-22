@@ -17,6 +17,7 @@ import net.javadiscord.javabot.util.Misc;
 import javax.annotation.CheckReturnValue;
 import java.time.Instant;
 
+@Deprecated(forRemoval = true)
 public class MuteCommand implements SlashCommandHandler {
 
     @Override

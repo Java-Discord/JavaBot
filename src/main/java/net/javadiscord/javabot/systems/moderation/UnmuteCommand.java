@@ -13,6 +13,7 @@ import net.javadiscord.javabot.util.Misc;
 
 import java.time.Instant;
 
+@Deprecated(forRemoval = true)
 public class UnmuteCommand implements SlashCommandHandler {
 
     @Override
