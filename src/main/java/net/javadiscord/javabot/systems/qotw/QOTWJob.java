@@ -41,6 +41,10 @@ public class QOTWJob extends DiscordApiJob {
 							.setEmbeds(buildEmbed(question, jda)).queue(msg -> {
 						questionChannel.crosspostMessageById(msg.getIdLong()).queue();
 					});
+					if (config.getSubmissionChannel() != null) {
+						config.getSubmissionChannel().sendMessage(String.format("**Question of the Week #%s**\n> %s",
+								question.getQuestionNumber(), question.getText())).queue();
+					}
 					repo.markUsed(question);
 				}
 			} catch (SQLException e) {
@@ -53,14 +57,12 @@ public class QOTWJob extends DiscordApiJob {
 
 	private MessageEmbed buildEmbed(QOTWQuestion question, JDA jda) {
 		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
-
 		String description = String.format(
 				"%s\n\nDM your answer to <@%d>.\nYour answers will be checked by <t:%d:F>",
 				question.getText(),
 				jda.getSelfUser().getIdLong(),
 				checkTime.toEpochSecond()
 		);
-
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
 				.setDescription(description)
