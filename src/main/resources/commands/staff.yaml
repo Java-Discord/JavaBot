@@ -623,6 +623,10 @@
               value: RESERVED_HELP_CHANNELS
             - name: Warns
               value: WARN
+        - name: include-data
+          description: Should data be included in the export?
+          required: true
+          type: BOOLEAN
 
     # /db-admin migrations-list
     - name: migrations-list
