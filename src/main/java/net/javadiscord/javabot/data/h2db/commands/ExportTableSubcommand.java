@@ -25,7 +25,7 @@ public class ExportTableSubcommand implements SlashCommandHandler {
 		Bot.asyncPool.submit(() -> {
 			try (var con = Bot.dataSource.getConnection();
 					var stmt = con.createStatement()) {
-				boolean success = stmt.execute(String.format("SCRIPT SIMPLE TO '%s' table %s;", TABLE_FILE, choiceOption.getAsString()));
+				boolean success = stmt.execute(String.format("SCRIPT simple TO '%s' TABLE %s;", TABLE_FILE, choiceOption.getAsString()));
 				if (!success) {
 					event.getHook().sendMessage("Exporting the table was not successful.").queue();
 				} else {
