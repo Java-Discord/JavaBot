@@ -586,6 +586,44 @@
           required: true
           type: BOOLEAN
 
+    # /db-admin export-table
+    - name: export-table
+      description: Exports the a single database table to an SQL file.
+      options:
+        - name: table
+          description: The database table you want to export
+          required: true
+          type: STRING
+          choices:
+            - name: Economy Account
+              value: ECONOMY_ACCOUNT
+            - name: Economy Account Preferences
+              value: ECONOMY_ACCOUNT_PREFERENCES
+            - name: Economy Transactions
+              value: ECONOMY_TRANSACTIONS
+            - name: Help Channel Thanks
+              value: HELP_CHANNEL_THANKS
+            - name: Java Jam
+              value: JAM
+            - name: Java Jam Message Id
+              value: JAM_MESSAGE_ID
+            - name: Java Jam Phase
+              value: JAM_PHASE
+            - name: Java Jam Submission
+              value: JAM_SUBMISSION
+            - name: Java Jam Submission Vote
+              value: JAM_SUBMISSION_VOTE
+            - name: Java Jam Theme
+              value: JAM_THEME
+            - name: Java Jam Theme Vote
+              value: JAM_THEME_VOTE
+            - name: Question of the Week Questions
+              value: QOTW_QUESTION
+            - name: Reserved Help Channels
+              value: RESERVED_HELP_CHANNELS
+            - name: Warn
+              value: WARN
+
     # /db-admin migrations-list
     - name: migrations-list
       description: Show a list of all database migrations that can be run.
