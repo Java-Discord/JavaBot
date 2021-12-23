@@ -50,8 +50,8 @@ public class QuestionRepository {
 			UPDATE qotw_question
 			SET used = TRUE, question_number = ?
 			WHERE id = ?""")) {
-			stmt.setLong(1, question.getId());
-			stmt.setInt(2, question.getQuestionNumber());
+			stmt.setInt(1, question.getQuestionNumber());
+			stmt.setLong(2, question.getId());
 			stmt.executeUpdate();
 		}
 	}
