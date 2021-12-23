@@ -603,25 +603,25 @@
               value: ECONOMY_TRANSACTIONS
             - name: Help Channel Thanks
               value: HELP_CHANNEL_THANKS
-            - name: Java Jam
+            - name: Java Jams
               value: JAM
-            - name: Java Jam Message Id
+            - name: Java Jam Messages
               value: JAM_MESSAGE_ID
-            - name: Java Jam Phase
+            - name: Java Jam Phases
               value: JAM_PHASE
-            - name: Java Jam Submission
+            - name: Java Jam Submissions
               value: JAM_SUBMISSION
-            - name: Java Jam Submission Vote
+            - name: Java Jam Submission Votes
               value: JAM_SUBMISSION_VOTE
-            - name: Java Jam Theme
+            - name: Java Jam Themes
               value: JAM_THEME
-            - name: Java Jam Theme Vote
+            - name: Java Jam Theme Votes
               value: JAM_THEME_VOTE
             - name: Question of the Week Questions
               value: QOTW_QUESTION
             - name: Reserved Help Channels
               value: RESERVED_HELP_CHANNELS
-            - name: Warn
+            - name: Warns
               value: WARN
 
     # /db-admin migrations-list
