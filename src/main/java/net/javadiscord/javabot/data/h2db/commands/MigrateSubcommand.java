@@ -52,7 +52,7 @@ public class MigrateSubcommand implements SlashCommandHandler {
 						try (var stmt = con.createStatement()){
 							int rowsUpdated = stmt.executeUpdate(statements[i]);
 							event.getChannel().sendMessageFormat(
-									"Executed statement %d of %d:\n```\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
+									"Executed statement %d of %d:\n```sql\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
 							).queue();
 						} catch (SQLException e) {
 							e.printStackTrace();
