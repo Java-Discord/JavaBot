@@ -13,7 +13,13 @@ import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.util.Misc;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +27,17 @@ import java.util.regex.Pattern;
  * this class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
 public class AutoMod extends ListenerAdapter {
+
+    private List<String> spamUrls;
+
+    public AutoMod() {
+        try {
+            spamUrls = Files.readAllLines(Paths.get(getClass().getResource("/spamLinks.txt").toURI()));
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 
@@ -37,7 +54,7 @@ public class AutoMod extends ListenerAdapter {
         if (canBypassAutomod(member)) return;
         checkContentAutomod(event.getMessage());
     }
-    
+
     /**
      * Checks if a member can bypass the automod system.
      * @param member the {@link Member} to check
@@ -48,7 +65,7 @@ public class AutoMod extends ListenerAdapter {
                 || member.getUser().isBot()
                 || member.hasPermission(Permission.MESSAGE_MANAGE);
     }
-    
+
     /**
      * Runs all automod checks that should be run when a message is sent.
      * @param message the {@link Message} that should be checked
@@ -77,10 +94,10 @@ public class AutoMod extends ListenerAdapter {
                 handleSpam(message, message.getMember());
             }
         });
-        
+
         checkContentAutomod(message);
     }
-    
+
     /**
      * Runs all automod checks only depend on the message content.
      * @param message the {@link Message} that should be checked
@@ -98,6 +115,28 @@ public class AutoMod extends ListenerAdapter {
                             message.getTextChannel(),
                             false
                     );
+        }
+        final String messageRaw = message.getContentRaw();
+        if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
+            // only do it for a links, so it won't iterate for each message
+            for (String spamUrl : spamUrls) {
+                if (messageRaw.contains(spamUrl)){
+                    try {
+                        message.delete().queue();
+                        new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+                                .warn(
+                                        message.getMember(),
+                                        WarnSeverity.HIGH,
+                                        "Automod: Suspicious Link",
+                                        message.getGuild().getMember(message.getJDA().getSelfUser()),
+                                        message.getTextChannel(),
+                                        false
+                                );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     }
 

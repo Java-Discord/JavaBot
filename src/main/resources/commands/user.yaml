@@ -43,15 +43,15 @@
       type: INTEGER
   handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
 
-# /lmgtfy
-- name: lmgtfy
-  description: Turns your text-input into a lmgtfy-link
+# /search
+- name: search
+  description: Turns your text-input into a search query
   options:
-    - name: text
-      description: Text that will be converted into a lmgtfy-link
+    - name: query
+      description: Text that will be converted into a search query
       required: true
       type: STRING
-  handler: net.javadiscord.javabot.systems.commands.LmgtfyCommand
+  handler: net.javadiscord.javabot.systems.commands.SearchCommand
 
 # /ping
 - name: ping
