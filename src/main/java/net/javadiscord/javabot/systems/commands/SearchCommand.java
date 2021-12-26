@@ -16,8 +16,9 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 
+import static net.javadiscord.javabot.Bot.config;
+
 public class SearchCommand implements SlashCommandHandler {
-    private final BotConfig config = new BotConfig(Path.of("config"));
 
     public SearchResults SearchWeb(String searchQuery) throws Exception {
         // Construct the URL.
@@ -59,7 +60,7 @@ public class SearchCommand implements SlashCommandHandler {
         String url;
         String snippet;
         var embed = new EmbedBuilder()
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+                .setColor(config.get(event.getGuild()).getSlashCommand().getDefaultColor())
                 .setTitle("Search Results");
 
         try {
