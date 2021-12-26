@@ -1,0 +1,719 @@
+# /ban
+- name: ban
+  description: Ban a user.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: user
+      description: The user to ban.
+      type: USER
+      required: true
+    - name: reason
+      description: The reason for banning this user.
+      type: STRING
+      required: true
+    - name: quiet
+      description: If true, don't send a message in the server channel where the ban is issued.
+      type: BOOLEAN
+      required: false
+  handler: net.javadiscord.javabot.systems.moderation.BanCommand
+
+# /clearqotw
+- name: clearqotw
+  description: Clears all QOTW-points from the given user.
+  options:
+    - name: user
+      description: The user you want to clear all QOTW-points from
+      required: true
+      type: USER
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  handler: net.javadiscord.javabot.systems.qotw.ClearQOTWCommand
+
+# /editembed
+- name: editembed
+  description: Edits an embed
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /editembed edit
+    - description: Edits an embed
+      name: edit
+      options:
+        - name: link
+          description: Link of the original Message
+          required: true
+          type: STRING
+        - name: description
+          description: Description of the embed
+          required: true
+          type: STRING
+        - name: title
+          description: Title of the embed
+          required: false
+          type: STRING
+
+    # /editembed from-message
+    - description: Edits an Embed from a Message
+      name: from-message
+      options:
+        - name: embed-link
+          description: Link of the original Message
+          required: true
+          type: STRING
+        - name: message-link
+          description: Link of the new Message
+          required: true
+          type: STRING
+        - name: title
+          description: Title of the embed
+          required: false
+          type: STRING
+  handler: net.javadiscord.javabot.systems.commands.staff.EditEmbedCommand
+
+# /embed
+- name: embed
+  description: Sends an embed
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /embed create
+    - description: Creates a new Embed
+      name: create
+      options:
+        - name: title
+          description: Title of the embed
+          required: false
+          type: STRING
+        - name: description
+          description: Description of the embed
+          required: false
+          type: STRING
+        - name: author-name
+          description: Author name of the embed
+          required: false
+          type: STRING
+        - name: author-url
+          description: Author url of the embed
+          required: false
+          type: STRING
+        - name: author-iconurl
+          description: Author iconurl of the embed
+          required: false
+          type: STRING
+        - name: thumbnail-url
+          description: Thumbnail url of the embed
+          required: false
+          type: STRING
+        - name: image-url
+          description: Image url of the embed
+          required: false
+          type: STRING
+        - name: color
+          description: "Color of the embed (e.g. #ff0000)"
+          required: false
+          type: STRING
+
+    # /embed from-message
+    - description: Created a new Embed from a Message
+      name: from-message
+      options:
+        - name: link
+          description: Link of the original Message
+          required: true
+          type: STRING
+        - name: title
+          description: Title of the embed
+          required: false
+          type: STRING
+  handler: net.javadiscord.javabot.systems.commands.staff.EmbedCommand
+
+# /say
+- name: say
+  description: Let the bot say everything you want
+  options:
+    - name: text
+      description: The text the bot should say
+      required: true
+      type: STRING
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  handler: net.javadiscord.javabot.systems.commands.staff.SayCommand
+
+# /kick
+- name: kick
+  description: Kicks a member
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: user
+      description: The user to kick.
+      type: USER
+      required: true
+    - name: reason
+      description: The reason for kicking this user.
+      type: STRING
+      required: true
+    - name: quiet
+      description: If true, don't send a message in the server channel where the kick is issued.
+      type: BOOLEAN
+      required: false
+  handler: net.javadiscord.javabot.systems.moderation.KickCommand
+
+# /mute
+- name: mute
+  description: Mutes a member
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: user
+      description: The user you want to mute
+      required: true
+      type: USER
+    - name: reason
+      description: The reason
+      required: false
+      type: STRING
+  handler: net.javadiscord.javabot.systems.moderation.MuteCommand
+
+# /mutelist
+- name: mutelist
+  description: Lists all muted members
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  handler: net.javadiscord.javabot.systems.moderation.MutelistCommand
+
+# /correct
+- name: correct
+  description: Grants one QOTW-Points to the given member upon use
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: member
+      description: The member you want to grant a point
+      required: true
+      type: USER
+  handler: net.javadiscord.javabot.systems.qotw.CorrectCommand
+
+# /purge
+- name: purge
+  description: Deletes messages from a channel.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: amount
+      description: Number of messages to remove. If left blank, all messages will be removed.
+      type: INTEGER
+      required: false
+    - name: user
+      description: The user whose messages to remove. If left blank, messages from any user are removed.
+      type: USER
+      required: false
+    - name: archive
+      description: If true, save removed messages in an archive.
+      type: BOOLEAN
+      required: false
+  handler: net.javadiscord.javabot.systems.moderation.PurgeCommand
+
+# /prune
+- name: prune
+  description: Removes members from the server.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: pattern
+      description: A regular expression pattern to use, to remove members whose contains a match with the pattern.
+      type: STRING
+      required: false
+    - name: before
+      description: Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.
+      type: STRING
+      required: false
+    - name: after
+      description: Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.
+      type: STRING
+      required: false
+    - name: reason
+      description: The reason for issuing the prune command. This will be provided as the reason for each ban.
+      type: STRING
+      required: false
+    - name: delete-days-of-history
+      description: The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.
+      type: INTEGER
+      required: false
+  handler: net.javadiscord.javabot.systems.moderation.PruneCommand
+
+# /unban
+- name: unban
+  description: Unbans a member
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: id
+      description: The ID of the user you want to unban
+      required: true
+      type: STRING
+  handler: net.javadiscord.javabot.systems.moderation.UnbanCommand
+
+# /unmute
+- name: unmute
+  description: Unmutes a member
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: user
+      description: The user you want to unmute
+      required: true
+      type: USER
+  handler: net.javadiscord.javabot.systems.moderation.UnmuteCommand
+
+# /warn
+- name: warn
+  description: Commands for managing user warns.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /warn add
+    - name: add
+      description: Sends a warning to a user, and increases their warn severity rating.
+      options:
+        - name: user
+          description: The user to warn.
+          type: USER
+          required: true
+        - name: severity
+          description: How severe was the offense?
+          type: STRING
+          required: true
+          choices:
+            - name: Low
+              value: "LOW"
+            - name: Medium
+              value: "MEDIUM"
+            - name: High
+              value: "HIGH"
+        - name: reason
+          description: The reason for this user's warning.
+          type: STRING
+          required: true
+        - name: quiet
+          description: If true, don't send a message in the server channel where the warn is issued.
+          type: BOOLEAN
+          required: false
+
+    # /warn discard-by-id
+    - name: discard-by-id
+      description: Discards a singular Warn by its Id
+      options:
+        - name: id
+          description: The warn's id
+          required: true
+          type: INTEGER
+
+    # /warn discard-all
+    - name: discard-all
+      description: Discards all warns from a user
+      options:
+        - name: user
+          description: The user which warns should be discarded
+          required: true
+          type: USER
+  handler: net.javadiscord.javabot.systems.moderation.warn.WarnCommandHandler
+
+# /config
+- name: config
+  description: Manage configuration for this guild.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /config list
+    - name: list
+      description: Get a list of all configuration properties, and their current values.
+
+    # /config get
+    - name: get
+      description: Get the current value of a configuration property.
+      options:
+        - name: property
+          description: The name of a property.
+          required: true
+          type: STRING
+
+    # /config set
+    - name: set
+      description: Sets the value of a configuration property.
+      options:
+        - name: property
+          description: The name of a property.
+          required: true
+          type: STRING
+        - name: value
+          description: The value to set for the property.
+          required: true
+          type: STRING
+  handler: net.javadiscord.javabot.systems.configuration.ConfigCommandHandler
+
+# /customcommand
+- name: customcommand
+  description: creates, edits or deletes custom slash commands
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /customcommand create
+    - name: create
+      description: Creates a custom slash command
+      options:
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+        - name: text
+          description: Content of the custom slash command
+          required: true
+          type: STRING
+        - name: reply
+          description: If set to True, will reply on use
+          required: false
+          type: BOOLEAN
+        - name: embed
+          description: If set to True, will send the content in an embed
+          required: false
+          type: BOOLEAN
+
+    # /customcommand edit
+    - description: Edits a custom slash command
+      name: edit
+      options:
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+        - name: text
+          description: Content of the custom slash command
+          required: true
+          type: STRING
+        - name: reply
+          description: If set to True, will reply on use
+          required: false
+          type: BOOLEAN
+        - name: embed
+          description: If set to True, will send the content in an embed
+          required: false
+          type: BOOLEAN
+
+    # /customcommand delete
+    - description: Deletes a custom slash command
+      name: delete
+      options:
+        - name: name
+          description: Name of the custom slash command
+          required: true
+          type: STRING
+  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandHandler
+
+# /customcommands
+- name: customcommands
+  description: Lists all custom slash commands
+  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandList
+
+# /reactionrole
+- name: reactionrole
+  description: creates or deletes reaction roles
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /reactionrole create
+    - description: Creates a reaction role
+      name: create
+      options:
+        - name: message-id
+          description: Message, the Reaction Role should be created on
+          required: true
+          type: STRING
+        - name: label
+          description: Label, the Button should use
+          required: true
+          type: STRING
+        - name: role
+          description: Role, the Button should add upon use
+          required: true
+          type: ROLE
+        - name: permanent
+          description: It set to true, doesnt let you remove the Role afterwards
+          required: false
+          type: BOOLEAN
+        - name: emote
+          description: Emote, the Button should use
+          required: false
+          type: STRING
+
+    # /reactionrole delete
+    - description: Deletes a reaction role
+      name: delete
+      options:
+        - name: message-id
+          description: The message
+          required: true
+          type: STRING
+        - name: label
+          description: The button's label
+          required: true
+          type: STRING
+  handler: net.javadiscord.javabot.systems.commands.staff.reaction_roles.ReactionRoleCommandHandler
+
+# /question
+- name: question
+  description: Displays the given amount of questions in a random order
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  options:
+    - name: amount
+      description: Amount of questions
+      required: true
+      type: INTEGER
+  handler: net.javadiscord.javabot.systems.commands.staff.QuestionCommand
+
+# /report
+- name: report
+  description: Reports a member
+  options:
+    - name: user
+      description: The user you want to report
+      required: true
+      type: USER
+    - name: reason
+      description: The reason
+      required: false
+      type: STRING
+  handler: net.javadiscord.javabot.systems.moderation.ReportCommand
+
+# /warns
+- name: warns
+  description: Shows your warn count
+  options:
+    - name: user
+      description: If given, shows the warn count of the given user
+      required: false
+      type: USER
+  handler: net.javadiscord.javabot.systems.moderation.warn.WarnsCommand
+
+# /suggestion
+- name: suggestion
+  description: Accepts, decline or clears a suggestion.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /suggestion accept
+    - name: accept
+      description: Accepts a suggestion
+      options:
+        - name: message-id
+          description: The message id of the suggestion you want to accept.
+          required: true
+          type: STRING
+
+    # /suggestion decline
+    - name: decline
+      description: Declines a suggestion
+      options:
+        - name: message-id
+          description: The message id of the suggestion you want to decline.
+          required: true
+          type: STRING
+
+    # /suggestion clear
+    - name: clear
+      description: Clears a suggestion
+      options:
+        - name: message-id
+          description: The message id of the suggestion you want to clear.
+          required: true
+          type: STRING
+  handler: net.javadiscord.javabot.systems.commands.staff.suggestions.SuggestionCommandHandler
+
+# /db-admin
+- name: db-admin
+  description: Administrative tools for managing the server's database.
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  subCommands:
+    # /db-admin export-schema
+    - name: export-schema
+      description: Exports the current database schema to an SQL file.
+      options:
+        - name: include-data
+          description: Should data be included in the export?
+          required: true
+          type: BOOLEAN
+
+    # /db-admin export-table
+    - name: export-table
+      description: Exports the a single database table to an SQL file.
+      options:
+        - name: table
+          description: The database table you want to export
+          required: true
+          type: STRING
+          choices:
+            - name: Economy Account
+              value: ECONOMY_ACCOUNT
+            - name: Economy Account Preferences
+              value: ECONOMY_ACCOUNT_PREFERENCES
+            - name: Economy Transactions
+              value: ECONOMY_TRANSACTIONS
+            - name: Help Channel Thanks
+              value: HELP_CHANNEL_THANKS
+            - name: Java Jams
+              value: JAM
+            - name: Java Jam Messages
+              value: JAM_MESSAGE_ID
+            - name: Java Jam Phases
+              value: JAM_PHASE
+            - name: Java Jam Submissions
+              value: JAM_SUBMISSION
+            - name: Java Jam Submission Votes
+              value: JAM_SUBMISSION_VOTE
+            - name: Java Jam Themes
+              value: JAM_THEME
+            - name: Java Jam Theme Votes
+              value: JAM_THEME_VOTE
+            - name: Question of the Week Questions
+              value: QOTW_QUESTION
+            - name: Reserved Help Channels
+              value: RESERVED_HELP_CHANNELS
+            - name: Warns
+              value: WARN
+        - name: include-data
+          description: Should data be included in the export?
+          required: true
+          type: BOOLEAN
+
+    # /db-admin migrations-list
+    - name: migrations-list
+      description: Show a list of all database migrations that can be run.
+
+    # /db-admin migrate
+    - name: migrate
+      description: Run a database migration.
+      options:
+        - name: name
+          description: The name of the migration to run.
+          required: true
+          type: STRING
+  handler: net.javadiscord.javabot.data.h2db.commands.DbAdminCommandHandler
+
+# /staff-apply
+#- name: staff-apply
+#  description: Apply to become a member of this server's staff.
+#  handler: net.javadiscord.javabot.commands.moderation.staff_applications.StaffApplyHandler
+#  options:
+#    - name: name
+#      description: Your real name.
+#      required: true
+#      type: STRING
+#    - name: age
+#      description: Your age.
+#      required: true
+#      type: INTEGER
+#    - name: email
+#      description: Your email address.
+#      required: true
+#      type: STRING
+#    - name: timezone
+#      description: The timezone you live in.
+#      required: true
+#      type: STRING
+#    - name: position
+#      description: The position you are applying for.
+#      required: true
+#      type: INTEGER
+#      choices:
+#        - name: Bot Dev
+#          value: 759736213874671636
+#        - name: Website Dev
+#          value: 770315357080125440
+#        - name: Moderator
+#          value: 653644005149638688
+#        - name: Community Manager
+#          value: 749001355288379544
+#        - name: Management
+#          value: 653701560609669160
+#    - name: extra-remarks
+#      description: Anything else you'd like to tell us.
+#      required: false
+#      type: STRING
+
+# /staff-applications
+#- name: staff-applications
+#  description: Manage staff applications.
+#  handler: net.javadiscord.javabot.commands.moderation.staff_applications.StaffApplicationsHandler
+#  enabledByDefault: false
+#  privileges:
+#    - type: ROLE
+#      id: moderation.staffApplicationReviewRoleId
+#  subCommands:
+#    # /staff-applications list
+#    - name: list
+#      description: Show a list of all applications.
+#      options:
+#        - name: page
+#          description: The page of applications to show.
+#          required: false
+#          type: INTEGER
+#        - name: show-all
+#          description: Include all applications, not just those that are pending.
+#          required: false
+#          type: BOOLEAN
+#
+#    # /staff-applications handle
+#    - name: handle
+#      description: Accept or reject an application
+#      options:
+#        - name: application
+#          description: The id of the application to handle.
+#          required: true
+#          type: INTEGER
+#        - name: accept
+#          description: Whether to accept or reject the application.
+#          required: true
+#          type: BOOLEAN

@@ -1,0 +1,144 @@
+# /avatar
+- name: avatar
+  description: Shows your or someone else's profile picture
+  options:
+    - name: user
+      description: If given, shows the profile picture of the given user
+      required: false
+      type: USER
+  handler: net.javadiscord.javabot.systems.commands.AvatarCommand
+
+# /botinfo
+- name: botinfo
+  description: Shows some information about the Bot
+  handler: net.javadiscord.javabot.systems.commands.BotInfoCommand
+
+# /changemymind
+- name: changemymind
+  description: Generates the "change my mind" meme from your given input
+  options:
+    - name: text
+      description: your text-input
+      required: true
+      type: STRING
+  handler: net.javadiscord.javabot.systems.commands.ChangeMyMindCommand
+
+# /idcalc
+- name: idcalc
+  description: Generates a human-readable timestamp out of any discord id
+  options:
+    - name: id
+      description: The id
+      required: true
+      type: STRING
+  handler: net.javadiscord.javabot.systems.commands.IdCalculatorCommand
+
+# /leaderboard
+- name: leaderboard
+  description: Generates the question of the week leaderboard
+  options:
+    - name: amount
+      description: Amount of users to display (2-30)
+      required: false
+      type: INTEGER
+  handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
+
+# /lmgtfy
+- name: lmgtfy
+  description: Turns your text-input into a lmgtfy-link
+  options:
+    - name: text
+      description: Text that will be converted into a lmgtfy-link
+      required: true
+      type: STRING
+  handler: net.javadiscord.javabot.systems.commands.LmgtfyCommand
+
+# /ping
+- name: ping
+  description: Checks the Bot's Gateway Ping
+  handler: net.javadiscord.javabot.systems.commands.PingCommand
+
+# /poll
+- name: poll
+  description: Creates a poll.
+  options:
+    - name: title
+      description: The title of your poll
+      required: true
+      type: STRING
+    - name: option-1
+      description: Adds an option
+      required: true
+      type: STRING
+    - name: option-2
+      description: Adds an option
+      required: true
+      type: STRING
+    - name: option-3
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-4
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-5
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-6
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-7
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-8
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-9
+      description: Adds an option
+      required: false
+      type: STRING
+    - name: option-10
+      description: Adds an option
+      required: false
+      type: STRING
+  handler: net.javadiscord.javabot.systems.commands.PollCommand
+
+# /profile
+- name: profile
+  description: Shows your or someon else's profile
+  options:
+    - name: user
+      description: If given, shows the profile of the user
+      required: false
+      type: USER
+  handler: net.javadiscord.javabot.systems.commands.ProfileCommand
+
+# /regex
+- name: regex
+  description: Checks if the given string matches the regex pattern
+  options:
+    - name: regex
+      description: The regex pattern
+      required: true
+      type: STRING
+    - name: string
+      description: The string
+      required: true
+      type: STRING
+  enabledByDefault: false
+  handler: net.javadiscord.javabot.systems.commands.RegexCommand
+
+# /serverinfo
+- name: serverinfo
+  description: Shows some information about the current guild
+  handler: net.javadiscord.javabot.systems.commands.ServerInfoCommand
+
+# /uptime
+- name: uptime
+  description: Checks the Bot's uptime
+  handler: net.javadiscord.javabot.systems.commands.UptimeCommand
