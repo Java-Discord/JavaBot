@@ -24,7 +24,7 @@ public class SearchCommand implements SlashCommandHandler {
 
     public SearchResults SearchWeb(String searchQuery) throws Exception {
         // Construct the URL.
-        URL url = new URL(host + path + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()));
+        URL url = new URL(host + path + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "?mkt=" + "en-US");
 
         // Open the connection.
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
