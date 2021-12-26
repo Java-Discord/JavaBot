@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.commands;
 
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.io.*;
 import javax.net.ssl.HttpsURLConnection;
@@ -12,9 +13,11 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.data.config.BotConfig;
 
 public class SearchCommand implements SlashCommandHandler {
-    static String subscriptionKey = "6d5a06b2517540daa805852a914b5fc7";
+    static BotConfig config = new BotConfig(Path.of("config"));
+    static String subscriptionKey = config.getSystems().azureSubscriptionKey;
 
     static String host = "https://api.bing.microsoft.com";
     static String path = "/v7.0/search";
