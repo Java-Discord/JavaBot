@@ -17,19 +17,17 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 
 public class SearchCommand implements SlashCommandHandler {
-    static BotConfig config = new BotConfig(Path.of("config"));
-    static String subscriptionKey = config.getSystems().azureSubscriptionKey;
-
-    static String host = "https://api.bing.microsoft.com";
-    static String path = "/v7.0/search";
+    private final BotConfig config = new BotConfig(Path.of("config"));
 
     public SearchResults SearchWeb(String searchQuery) throws Exception {
         // Construct the URL.
-        URL url = new URL(host + path + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=" + "en-US" + "&safeSearch=Strict");
+        String HOST = "https://api.bing.microsoft.com";
+        String PATH = "/v7.0/search";
+        URL url = new URL(HOST + PATH + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=" + "en-US" + "&safeSearch=Strict");
 
         // Open the connection.
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setRequestProperty("Ocp-Apim-Subscription-Key", subscriptionKey);
+        connection.setRequestProperty("Ocp-Apim-Subscription-Key", config.getSystems().azureSubscriptionKey);
 
         // Receive the JSON response body.
         InputStream stream = connection.getInputStream();
@@ -52,7 +50,11 @@ public class SearchCommand implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        String searchTerm = event.getOption("query").getAsString();
+        var query = event.getOption("query");
+        if (query == null) {
+            return Responses.warning(event, "Missing Required Query");
+        }
+        String searchTerm = query.getAsString();
         String name;
         String url;
         String snippet;
@@ -65,7 +67,7 @@ public class SearchCommand implements SlashCommandHandler {
             JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
             JsonArray urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
             StringBuilder resultString = new StringBuilder();
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < Math.min(3, urls.size()); i++) {
                 JsonObject object = urls.get(i).getAsJsonObject();
                 name = object.get("name").getAsString();
                 url = object.get("url").getAsString();
@@ -73,23 +75,16 @@ public class SearchCommand implements SlashCommandHandler {
                 if (object.get("snippet").getAsString().length() > 260) {
                     snippet = object.get("snippet").getAsString().substring(0, 260).concat("...");
                 }
-                resultString.append("**" + (i+1) + ". [" + name  + "](" + url +")** \n" + snippet + "\n\n");
+                resultString.append("**").append(i + 1).append(". [").append(name).append("](").append(url).append(")** \n").append(snippet).append("\n\n");
             }
 
             embed.setDescription(resultString);
-        } catch (Exception e){
+        } catch (Exception e) {
             return Responses.info(event, "Not Found", "There were no results for your search. This might be due to safe-search or because your search was too complex.");
         }
         return event.replyEmbeds(embed.build());
     }
 
-    static class SearchResults {
-        HashMap<String, String> relevantHeaders;
-        String jsonResponse;
-
-        SearchResults(HashMap<String, String> headers, String json) {
-            relevantHeaders = headers;
-            jsonResponse = json;
-        }
+    public record SearchResults(HashMap<String, String> relevantHeaders, String jsonResponse) {
     }
 }

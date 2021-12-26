@@ -28,10 +28,9 @@ import java.util.regex.Pattern;
  */
 public class AutoMod extends ListenerAdapter {
 
-    private static List<String> spamUrls;
+    private List<String> spamUrls;
 
     public AutoMod() {
-        spamUrls = new ArrayList<>();
         try {
             spamUrls = Files.readAllLines(Paths.get(getClass().getResource("/spamLinks.txt").toURI()));
         } catch (IOException | URISyntaxException e) {
@@ -118,7 +117,7 @@ public class AutoMod extends ListenerAdapter {
                     );
         }
         final String messageRaw = message.getContentRaw();
-        if (messageRaw.startsWith("http://") || messageRaw.startsWith("https://")) {
+        if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
             // only do it for a links, so it won't iterate for each message
             for (String spamUrl : spamUrls) {
                 if (messageRaw.contains(spamUrl)){
