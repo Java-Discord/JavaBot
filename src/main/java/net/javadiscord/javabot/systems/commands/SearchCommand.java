@@ -66,7 +66,7 @@ public class SearchCommand implements SlashCommandHandler {
             for (int i = 0; i < urls.size(); i++) {
                 JsonObject object = urls.get(i).getAsJsonObject();
                 name = object.get("name").getAsString();
-                url = object.get("name").getAsString();
+                url = object.get("url").getAsString();
                 snippet = object.get("snippet").getAsString();
                 if (object.get("snippet").getAsString().length() > 45) {
                     snippet = object.get("snippet").getAsString().substring(0, 44).concat("...");
