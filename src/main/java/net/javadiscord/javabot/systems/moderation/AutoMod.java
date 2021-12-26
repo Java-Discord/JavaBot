@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,17 +27,18 @@ import java.util.regex.Pattern;
 /**
  * this class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
+@Slf4j
 public class AutoMod extends ListenerAdapter {
 
     private List<String> spamUrls;
 
     public AutoMod() {
         try {
-            spamUrls = Files.readAllLines(Paths.get(getClass().getResource("/spamLinks.txt").toURI()));
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            spamUrls = Files.readAllLines(Paths.get(getClass().getResource("spamLinks.txt").toURI()));
+        } catch (Exception e) {
+            spamUrls = List.of();
         }
-
+        log.info("Loaded {} spam URLs!", spamUrls.size());
     }
 
     private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
