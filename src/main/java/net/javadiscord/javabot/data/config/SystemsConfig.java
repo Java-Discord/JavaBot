@@ -19,9 +19,15 @@ public class SystemsConfig {
 	private String mongoDatabaseUrl = "";
 
 	/**
+	 * The Key used for bing-search-api
+	 */
+	public String azureSubscriptionKey = "";
+
+	/**
 	 * The number of threads to allocate to the bot's general purpose async
 	 * thread pool.
 	 */
+
 	private int asyncPoolSize = 4;
 
 	/**
