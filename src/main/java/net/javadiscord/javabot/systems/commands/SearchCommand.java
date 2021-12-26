@@ -51,7 +51,7 @@ public class SearchCommand implements SlashCommandHandler {
 
     @Override
     public ReplyAction handle(SlashCommandEvent event) {
-        String searchTerm = String.valueOf(event.getOption("query"));
+        String searchTerm = event.getOption("query").getAsString();
         String name;
         String url;
         String snippet;
