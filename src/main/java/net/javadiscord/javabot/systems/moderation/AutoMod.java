@@ -32,8 +32,8 @@ public class AutoMod extends ListenerAdapter {
 
     public AutoMod() {
         spamUrls = new ArrayList<>();
-        try (var linesStream = Files.lines(Paths.get(getClass().getResource("/spamLinks.txt").toURI()))) {
-            linesStream.forEach(spamUrls::add);
+        try {
+            spamUrls = Files.readAllLines(Paths.get(getClass().getResource("/spamLinks.txt").toURI()));
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
@@ -124,7 +124,15 @@ public class AutoMod extends ListenerAdapter {
                 if (messageRaw.contains(spamUrl)){
                     try {
                         message.delete().queue();
-                        new Warn().warn(message.getMember(), message.getGuild(), "Automod: Suspicious Link");
+                        new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+                                .warn(
+                                        message.getMember(),
+                                        WarnSeverity.HIGH,
+                                        "Automod: Suspicious Link",
+                                        message.getGuild().getMember(message.getJDA().getSelfUser()),
+                                        message.getTextChannel(),
+                                        false
+                                );
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
