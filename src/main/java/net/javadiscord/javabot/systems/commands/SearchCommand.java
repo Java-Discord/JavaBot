@@ -58,33 +58,27 @@ public class SearchCommand implements SlashCommandHandler {
         String snippet;
         var embed = new EmbedBuilder()
                 .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                .setTitle("Search Urls");
+                .setTitle("Search Results");
 
         try {
             SearchResults result = SearchWeb(searchTerm);
             JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
-            JsonArray urls;
-            try {
-                urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
-                for (int i = 0; i < urls.size(); i++) {
-                    JsonObject object = urls.get(i).getAsJsonObject();
-                    name = object.get("name").getAsString();
-                    url = object.get("url").getAsString();
-                    snippet = object.get("snippet").getAsString();
-                    if (object.get("snippet").getAsString().length() > 45) {
-                        snippet = object.get("snippet").getAsString().substring(0, 44).concat("...");
-                    }
-                    embed
-                            .addField("Name", name, true)
-                            .addField("Url", url, true)
-                            .addField("Embed", snippet, true);
+            JsonArray urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
+            StringBuilder resultString = new StringBuilder();
+            for (int i = 0; i < 3; i++) {
+                JsonObject object = urls.get(i).getAsJsonObject();
+                name = object.get("name").getAsString();
+                url = object.get("url").getAsString();
+                snippet = object.get("snippet").getAsString();
+                if (object.get("snippet").getAsString().length() > 260) {
+                    snippet = object.get("snippet").getAsString().substring(0, 260).concat("...");
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                return Responses.info(event, "Not Found", "Unable to fetch results for given query, Please try again");
+                resultString.append("**" + (i+1) + ". [" + name  + "](" + url +")** \n" + snippet + "\n\n");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            embed.setDescription(resultString);
+        } catch (Exception e){
+            return Responses.info(event, "Not Found", "There were no results for your search. This might be due to safe-search or because your search was too complex.");
         }
         return event.replyEmbeds(embed.build());
     }
