@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 
@@ -62,19 +63,25 @@ public class SearchCommand implements SlashCommandHandler {
         try {
             SearchResults result = SearchWeb(searchTerm);
             JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
-            JsonArray urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
-            for (int i = 0; i < urls.size(); i++) {
-                JsonObject object = urls.get(i).getAsJsonObject();
-                name = object.get("name").getAsString();
-                url = object.get("url").getAsString();
-                snippet = object.get("snippet").getAsString();
-                if (object.get("snippet").getAsString().length() > 45) {
-                    snippet = object.get("snippet").getAsString().substring(0, 44).concat("...");
+            JsonArray urls;
+            try {
+                urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
+                for (int i = 0; i < urls.size(); i++) {
+                    JsonObject object = urls.get(i).getAsJsonObject();
+                    name = object.get("name").getAsString();
+                    url = object.get("url").getAsString();
+                    snippet = object.get("snippet").getAsString();
+                    if (object.get("snippet").getAsString().length() > 45) {
+                        snippet = object.get("snippet").getAsString().substring(0, 44).concat("...");
+                    }
+                    embed
+                            .addField("Name", name, true)
+                            .addField("Url", url, true)
+                            .addField("Embed", snippet, true);
                 }
-                embed
-                        .addField("Name", name, true)
-                        .addField("Url", url, true)
-                        .addField("Embed", snippet, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return Responses.info(event, "Not Found", "Unable to fetch results for given query, Please try again");
             }
         } catch (Exception e) {
             e.printStackTrace();
