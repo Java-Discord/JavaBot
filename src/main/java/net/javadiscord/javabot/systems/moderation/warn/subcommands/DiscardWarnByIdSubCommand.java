@@ -7,17 +7,17 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 public class DiscardWarnByIdSubCommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        var idOption = event.getOption("id");
-        if (idOption == null) return Responses.error(event, "Id may not be empty!");
-        var id = idOption.getAsLong();
-        var moderationService = new ModerationService(event.getInteraction());
-        if (moderationService.discardWarnById(id, event.getUser())) {
-            return Responses.success(event, "Warn Discarded", String.format("Successfully discarded Warn with id `%s`", id));
-        } else {
-            return Responses.error(event, String.format("Could not find Warn with id `%s`", id));
-        }
-    }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var idOption = event.getOption("id");
+		if (idOption == null) return Responses.error(event, "Id may not be empty!");
+		var id = idOption.getAsLong();
+		var moderationService = new ModerationService(event.getInteraction());
+		if (moderationService.discardWarnById(id, event.getUser())) {
+			return Responses.success(event, "Warn Discarded", String.format("Successfully discarded Warn with id `%s`", id));
+		} else {
+			return Responses.error(event, String.format("Could not find Warn with id `%s`", id));
+		}
+	}
 }
 

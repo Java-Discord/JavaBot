@@ -16,21 +16,21 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
  */
 public class AvatarCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        OptionMapping option = event.getOption("user");
-        Member member = option == null ? event.getMember() : option.getAsMember();
-        if (member == null) {
-            return Responses.warning(event, "Sorry, this command can only be used in servers.");
-        }
-        return event.replyEmbeds(generateAvatarEmbed(member.getGuild(), member.getEffectiveName(), member.getEffectiveAvatarUrl()));
-    }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		OptionMapping option = event.getOption("user");
+		Member member = option == null ? event.getMember() : option.getAsMember();
+		if (member == null) {
+			return Responses.warning(event, "Sorry, this command can only be used in servers.");
+		}
+		return event.replyEmbeds(generateAvatarEmbed(member.getGuild(), member.getEffectiveName(), member.getEffectiveAvatarUrl()));
+	}
 
-    private MessageEmbed generateAvatarEmbed(Guild guild, String tag, String avatarUrl) {
-        return new EmbedBuilder()
-                .setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
-                .setAuthor(tag + " | Avatar")
-                .setImage(avatarUrl + "?size=4096")
-                .build();
-    }
+	private MessageEmbed generateAvatarEmbed(Guild guild, String tag, String avatarUrl) {
+		return new EmbedBuilder()
+				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
+				.setAuthor(tag + " | Avatar")
+				.setImage(avatarUrl + "?size=4096")
+				.build();
+	}
 }

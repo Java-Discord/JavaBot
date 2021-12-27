@@ -32,201 +32,213 @@ import static com.mongodb.client.model.Projections.excludeId;
 
 public class LeaderboardCommand implements SlashCommandHandler {
 
-    private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
-    private final Color PRIMARY_COLOR = Color.WHITE;
-    private final Color SECONDARY_COLOR = Color.decode("#414A52");
+	private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
+	private final Color PRIMARY_COLOR = Color.WHITE;
+	private final Color SECONDARY_COLOR = Color.decode("#414A52");
 
-    private final int LB_WIDTH = 3000;
-    private final int CARD_HEIGHT = 350;
-    private final int EMPTY_SPACE = 700;
+	private final int LB_WIDTH = 3000;
+	private final int CARD_HEIGHT = 350;
+	private final int EMPTY_SPACE = 700;
 
-    private final float NAME_SIZE = 65;
-    private final float PLACEMENT_SIZE = 72;
+	private final float NAME_SIZE = 65;
+	private final float PLACEMENT_SIZE = 72;
 
-    @Override
-    public ReplyAction handle (SlashCommandEvent event) {
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
 
-        OptionMapping option = event.getOption("amount");
-        long l = option == null ? 10 : option.getAsLong();
+		OptionMapping option = event.getOption("amount");
+		long l = option == null ? 10 : option.getAsLong();
 
-        if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
+		if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
 
-        Bot.asyncPool.submit(() -> {
-            event.getHook().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
-        });
+		Bot.asyncPool.submit(() -> {
+			event.getHook().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
+		});
 
-     return event.deferReply();
-    }
+		return event.deferReply();
+	}
 
-    public int getQOTWRank(Guild guild, String userid) {
+	public int getQOTWRank(Guild guild, String userid) {
 
-        MongoDatabase database = StartupListener.mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
+		MongoDatabase database = StartupListener.mongoClient.getDatabase("userdata");
+		MongoCollection<Document> collection = database.getCollection("users");
 
-        ArrayList<String> users = new ArrayList<>();
-        MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();
+		ArrayList<String> users = new ArrayList<>();
+		MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();
 
-        while (doc.hasNext()) {
+		while (doc.hasNext()) {
 
-            JsonObject Root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
-            String discordID = Root.get("discord_id").getAsString();
-            if (guild.getMemberById(discordID) == null) continue;
+			JsonObject Root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
+			String discordID = Root.get("discord_id").getAsString();
+			if (guild.getMemberById(discordID) == null) continue;
 
-            users.add(discordID);
-        }
+			users.add(discordID);
+		}
 
-        return (users.indexOf(userid)) + 1;
-    }
+		return (users.indexOf(userid)) + 1;
+	}
 
-    ArrayList<Member> getTopUsers (Guild guild, int num) {
+	ArrayList<Member> getTopUsers(Guild guild, int num) {
 
-        ArrayList<Member> topUsers = new ArrayList<>();
+		ArrayList<Member> topUsers = new ArrayList<>();
 
-        MongoDatabase database = StartupListener.mongoClient.getDatabase("userdata");
-        MongoCollection<Document> collection = database.getCollection("users");
+		MongoDatabase database = StartupListener.mongoClient.getDatabase("userdata");
+		MongoCollection<Document> collection = database.getCollection("users");
 
-        MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();
+		MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();
 
-        int placement = 1;
-        while (doc.hasNext() && placement <= num) {
+		int placement = 1;
+		while (doc.hasNext() && placement <= num) {
 
-            JsonObject root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
-            String discordID = root.get("discord_id").getAsString();
+			JsonObject root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
+			String discordID = root.get("discord_id").getAsString();
 
-            if (guild.getMemberById(discordID) == null) continue;
-            if (root.get("qotwpoints").getAsInt() == 0) continue;
+			if (guild.getMemberById(discordID) == null) continue;
+			if (root.get("qotwpoints").getAsInt() == 0) continue;
 
-            try { topUsers.add(guild.getMemberById(discordID));
-            } catch (Exception e) { e.printStackTrace(); }
+			try {
+				topUsers.add(guild.getMemberById(discordID));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-            placement++;
-        }
+			placement++;
+		}
 
-        return topUsers;
-    }
+		return topUsers;
+	}
 
-    BufferedImage getAvatar (String avatarURL)  {
+	BufferedImage getAvatar(String avatarURL) {
 
-        BufferedImage img = null;
-        try { img = ImageIO.read(new URL(avatarURL));
-        } catch (Exception e) { e.printStackTrace(); }
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(new URL(avatarURL));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return img;
-    }
+		return img;
+	}
 
-    BufferedImage getImage (String resourcePath) {
+	BufferedImage getImage(String resourcePath) {
 
-        BufferedImage img = null;
-        try { img = ImageIO.read(Objects.requireNonNull(LeaderboardCommand.class.getClassLoader().getResourceAsStream(resourcePath)));
-        } catch (IOException e) { e.printStackTrace();}
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(Objects.requireNonNull(LeaderboardCommand.class.getClassLoader().getResourceAsStream(resourcePath)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-        return img;
-    }
+		return img;
+	}
 
-    Font getFont (float size) {
+	Font getFont(float size) {
 
-        Font font;
+		Font font;
 
-        try {
-            font = Font.createFont(Font.TRUETYPE_FONT, LeaderboardCommand.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(size);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT, LeaderboardCommand.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(size);
+			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
 
-        } catch (IOException | FontFormatException e) {
-            font = new Font("Arial", Font.PLAIN, (int) size);
-        }
+		} catch (IOException | FontFormatException e) {
+			font = new Font("Arial", Font.PLAIN, (int) size);
+		}
 
-        return font;
-    }
+		return font;
+	}
 
-    void drawUserCard (Graphics2D g2d, Member member, int yOffset, boolean drawLeft, boolean topten) {
+	void drawUserCard(Graphics2D g2d, Member member, int yOffset, boolean drawLeft, boolean topten) {
 
-        // LEFT
-        int xOffset = 200;
+		// LEFT
+		int xOffset = 200;
 
-        // RIGHT
-        if (!drawLeft) xOffset = 1588;
+		// RIGHT
+		if (!drawLeft) xOffset = 1588;
 
-        // CENTER
-        if (topten) xOffset = 894;
+		// CENTER
+		if (topten) xOffset = 894;
 
-        g2d.drawImage(getAvatar(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), xOffset + 185, yOffset + 43, 200, 200, null);
+		g2d.drawImage(getAvatar(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), xOffset + 185, yOffset + 43, 200, 200, null);
 
-        if (topten) g2d.drawImage(getImage("images/leaderboard/LBSelfCard.png"), xOffset, yOffset, null);
-        else g2d.drawImage(getImage("images/leaderboard/LBCard.png"), xOffset, yOffset, null);
+		if (topten) g2d.drawImage(getImage("images/leaderboard/LBSelfCard.png"), xOffset, yOffset, null);
+		else g2d.drawImage(getImage("images/leaderboard/LBCard.png"), xOffset, yOffset, null);
 
-        g2d.setColor(PRIMARY_COLOR);
-        g2d.setFont(getFont(NAME_SIZE));
+		g2d.setColor(PRIMARY_COLOR);
+		g2d.setFont(getFont(NAME_SIZE));
 
-        int stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
+		int stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
 
-        while (stringWidth > 750) {
+		while (stringWidth > 750) {
 
-            Font currentFont = g2d.getFont();
-            Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
-            g2d.setFont(newFont);
-            stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
-        }
+			Font currentFont = g2d.getFont();
+			Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
+			g2d.setFont(newFont);
+			stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
+		}
 
-        g2d.drawString(member.getUser().getName(), xOffset + 430, yOffset + 130);
+		g2d.drawString(member.getUser().getName(), xOffset + 430, yOffset + 130);
 
-        g2d.setColor(SECONDARY_COLOR);
-        g2d.setFont(getFont(PLACEMENT_SIZE));
+		g2d.setColor(SECONDARY_COLOR);
+		g2d.setFont(getFont(PLACEMENT_SIZE));
 
-        String text;
-        int points = new Database().getMemberInt(member, "qotwpoints");
+		String text;
+		int points = new Database().getMemberInt(member, "qotwpoints");
 
-        if (points == 1) text = points + " point";
-        else text = points + " points";
+		if (points == 1) text = points + " point";
+		else text = points + " points";
 
-        String placement = "#" + getQOTWRank(member.getGuild(), member.getId());
-        g2d.drawString(text, xOffset + 430, yOffset + 210);
+		String placement = "#" + getQOTWRank(member.getGuild(), member.getId());
+		g2d.drawString(text, xOffset + 430, yOffset + 210);
 
-        int stringLength = (int) g2d.getFontMetrics().getStringBounds(placement, g2d).getWidth();
-        int start = 185 / 2 - stringLength / 2;
+		int stringLength = (int) g2d.getFontMetrics().getStringBounds(placement, g2d).getWidth();
+		int start = 185 / 2 - stringLength / 2;
 
-        g2d.drawString(placement, xOffset + start, yOffset + 173);
-    }
+		g2d.drawString(placement, xOffset + start, yOffset + 173);
+	}
 
-     ByteArrayOutputStream generateLB (SlashCommandEvent event, long num) {
+	ByteArrayOutputStream generateLB(SlashCommandEvent event, long num) {
 
-        int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE + 20;
-         boolean topTen = getTopUsers(event.getGuild(), (int) num).contains(event.getMember());
+		int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE + 20;
+		boolean topTen = getTopUsers(event.getGuild(), (int) num).contains(event.getMember());
 
-         if (!topTen) LB_HEIGHT += CARD_HEIGHT;
-         BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
+		if (!topTen) LB_HEIGHT += CARD_HEIGHT;
+		BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-         Graphics2D g2d = bufferedImage.createGraphics();
+		Graphics2D g2d = bufferedImage.createGraphics();
 
-         g2d.setRenderingHint(
-                 RenderingHints.KEY_TEXT_ANTIALIASING,
-                 RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+		g2d.setRenderingHint(
+				RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
-         g2d.setRenderingHint(
-                 RenderingHints.KEY_FRACTIONALMETRICS,
-                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		g2d.setRenderingHint(
+				RenderingHints.KEY_FRACTIONALMETRICS,
+				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-         g2d.setPaint(BACKGROUND_COLOR);
-         g2d.fillRect(0, 0, LB_WIDTH, LB_HEIGHT);
+		g2d.setPaint(BACKGROUND_COLOR);
+		g2d.fillRect(0, 0, LB_WIDTH, LB_HEIGHT);
 
-         BufferedImage logo = getImage("images/leaderboard/Logo.png");
-         g2d.drawImage(logo, LB_WIDTH / 2 - logo.getWidth() / 2, 110, null);
+		BufferedImage logo = getImage("images/leaderboard/Logo.png");
+		g2d.drawImage(logo, LB_WIDTH / 2 - logo.getWidth() / 2, 110, null);
 
-         int nameY = EMPTY_SPACE;
-         boolean drawLeft = true;
+		int nameY = EMPTY_SPACE;
+		boolean drawLeft = true;
 
-         for (var member : getTopUsers(event.getGuild(), (int) num)) {
-             drawUserCard(g2d, member, nameY, drawLeft, false);
-             drawLeft = !drawLeft;
-             if (drawLeft) nameY = nameY + CARD_HEIGHT;
-         }
+		for (var member : getTopUsers(event.getGuild(), (int) num)) {
+			drawUserCard(g2d, member, nameY, drawLeft, false);
+			drawLeft = !drawLeft;
+			if (drawLeft) nameY = nameY + CARD_HEIGHT;
+		}
 
-         if (!topTen) drawUserCard(g2d, event.getMember(), nameY, true, true);
-         g2d.dispose();
+		if (!topTen) drawUserCard(g2d, event.getMember(), nameY, true, true);
+		g2d.dispose();
 
-         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-         try { ImageIO.write(bufferedImage, "png", outputStream);
-         } catch (IOException e) { e.printStackTrace(); }
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(bufferedImage, "png", outputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-         return outputStream;
-     }
+		return outputStream;
+	}
 }

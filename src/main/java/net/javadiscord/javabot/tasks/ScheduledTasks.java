@@ -15,11 +15,13 @@ import org.quartz.impl.StdSchedulerFactory;
  */
 public class ScheduledTasks {
 	// Hide the constructor.
-	private ScheduledTasks() {}
+	private ScheduledTasks() {
+	}
 
 	/**
 	 * Initializes all scheduled jobs and starts the scheduler. Also adds a
 	 * shutdown hook that gracefully stops the scheduler when the program ends.
+	 *
 	 * @param jda The Discord API, which may be needed by some jobs.
 	 * @throws SchedulerException If an error occurs while starting the scheduler.
 	 */
@@ -40,8 +42,9 @@ public class ScheduledTasks {
 	/**
 	 * This method is where all tasks are scheduled. <strong>Add scheduled tasks
 	 * to the scheduler using this method!</strong>
+	 *
 	 * @param scheduler The scheduler to use.
-	 * @param jda The Discord API.
+	 * @param jda       The Discord API.
 	 * @throws SchedulerException If an error occurs while adding a task.
 	 */
 	private static void scheduleAllTasks(Scheduler scheduler, JDA jda) throws SchedulerException {
@@ -56,9 +59,10 @@ public class ScheduledTasks {
 	/**
 	 * Convenience method for scheduling an API-dependent job using a single
 	 * trigger that follows a given schedule.
-	 * @param scheduler The scheduler to add the job to.
-	 * @param jda The Discord API.
-	 * @param type The type of job to schedule.
+	 *
+	 * @param scheduler       The scheduler to add the job to.
+	 * @param jda             The Discord API.
+	 * @param type            The type of job to schedule.
 	 * @param scheduleBuilder A schedule builder that the trigger will use.
 	 * @throws SchedulerException If an error occurs while adding the job.
 	 * @see SimpleScheduleBuilder

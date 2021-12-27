@@ -19,7 +19,9 @@ public class JamConfig extends GuildConfigItem {
 
 	private String jamEmbedColorHex = "#fc5a03";
 
-	public Color getJamEmbedColor() { return Color.decode(this.jamEmbedColorHex); }
+	public Color getJamEmbedColor() {
+		return Color.decode(this.jamEmbedColorHex);
+	}
 
 	public TextChannel getAnnouncementChannel() {
 		return this.getGuild().getTextChannelById(this.announcementChannelId);

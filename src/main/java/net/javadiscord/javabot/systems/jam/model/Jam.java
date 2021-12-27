@@ -32,6 +32,7 @@ public class Jam {
 
 	/**
 	 * Gets the name of the jam, or an empty string if the jam doesn't have one.
+	 *
 	 * @return The jam's name, or an empty string.
 	 */
 	public String getNameOrEmpty() {
@@ -44,6 +45,7 @@ public class Jam {
 	/**
 	 * Gets the full name for the jam, so that it can be used in sentences of
 	 * the form "The " + getFullName() + " is starting today!".
+	 *
 	 * @return The full name for the jam, as can be used in a sentence.
 	 */
 	public String getFullName() {

@@ -6,11 +6,11 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 
 public class SayCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        String text = event.getOption("text").getAsString();
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		String text = event.getOption("text").getAsString();
 
-        event.getChannel().sendMessage(text).queue();
-        return event.reply("Done!").setEphemeral(true);
-    }
+		event.getChannel().sendMessage(text).queue();
+		return event.reply("Done!").setEphemeral(true);
+	}
 }

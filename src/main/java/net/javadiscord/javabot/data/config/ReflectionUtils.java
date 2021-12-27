@@ -13,6 +13,21 @@ import java.util.function.Function;
 
 @Slf4j
 public class ReflectionUtils {
+	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
+
+	static {
+		propertyTypeParsers.put(Integer.class, Integer::parseInt);
+		propertyTypeParsers.put(int.class, Integer::parseInt);
+		propertyTypeParsers.put(Long.class, Long::parseLong);
+		propertyTypeParsers.put(long.class, Long::parseLong);
+		propertyTypeParsers.put(Float.class, Float::parseFloat);
+		propertyTypeParsers.put(float.class, Float::parseFloat);
+		propertyTypeParsers.put(Double.class, Double::parseDouble);
+		propertyTypeParsers.put(double.class, Double::parseDouble);
+		propertyTypeParsers.put(Boolean.class, Boolean::parseBoolean);
+		propertyTypeParsers.put(String.class, s -> s);
+	}
+
 	public static Optional<Pair<Field, Object>> resolveField(String propertyName, Object parent) throws UnknownPropertyException {
 		return Optional.ofNullable(resolveField(propertyName.split("\\."), parent));
 	}
@@ -20,9 +35,10 @@ public class ReflectionUtils {
 	/**
 	 * Finds a field and the object whose type contains it, for a given parent
 	 * object.
+	 *
 	 * @param fieldNames An array containing an ordered list of the names of all
 	 *                   fields to traverse.
-	 * @param parent The object whose fields to traverse.
+	 * @param parent     The object whose fields to traverse.
 	 * @return The field and the object upon which it can be applied.
 	 * @throws UnknownPropertyException If no field could be resolved.
 	 */
@@ -31,7 +47,8 @@ public class ReflectionUtils {
 		try {
 			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
 			// Transient fields should not exist in the context of property resolution, treat them as unknown.
-			if (Modifier.isTransient(field.getModifiers())) throw new UnknownPropertyException(fieldNames[0], parent.getClass());
+			if (Modifier.isTransient(field.getModifiers()))
+				throw new UnknownPropertyException(fieldNames[0], parent.getClass());
 			field.setAccessible(true);
 			Object value = field.get(parent);
 			if (fieldNames.length == 1) {
@@ -52,9 +69,10 @@ public class ReflectionUtils {
 	/**
 	 * Gets a mapping of properties and their type, recursively for the given
 	 * type.
+	 *
 	 * @param parentPropertyName The root property name to append child field
 	 *                           names to. This is null for the base case.
-	 * @param parentClass The class to search for properties in.
+	 * @param parentClass        The class to search for properties in.
 	 * @return The map of properties and their types.
 	 * @throws IllegalAccessException If a field cannot have its value obtained.
 	 */
@@ -76,26 +94,13 @@ public class ReflectionUtils {
 		return fieldsMap;
 	}
 
-	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
-	static {
-		propertyTypeParsers.put(Integer.class, Integer::parseInt);
-		propertyTypeParsers.put(int.class, Integer::parseInt);
-		propertyTypeParsers.put(Long.class, Long::parseLong);
-		propertyTypeParsers.put(long.class, Long::parseLong);
-		propertyTypeParsers.put(Float.class, Float::parseFloat);
-		propertyTypeParsers.put(float.class, Float::parseFloat);
-		propertyTypeParsers.put(Double.class, Double::parseDouble);
-		propertyTypeParsers.put(double.class, Double::parseDouble);
-		propertyTypeParsers.put(Boolean.class, Boolean::parseBoolean);
-		propertyTypeParsers.put(String.class, s -> s);
-	}
-
 	/**
 	 * Sets the value of a field to a certain value, using {@link ReflectionUtils#propertyTypeParsers}
 	 * to try and parse the correct value.
-	 * @param field The field to set.
+	 *
+	 * @param field  The field to set.
 	 * @param parent The object whose property value to set.
-	 * @param s The string representation of the value.
+	 * @param s      The string representation of the value.
 	 * @throws IllegalAccessException If the field cannot be set.
 	 */
 	public static void set(Field field, Object parent, String s) throws IllegalAccessException {

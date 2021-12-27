@@ -14,6 +14,14 @@ public class SubCommandGroupConfig {
 	private String description;
 	private SubCommandConfig[] subCommands;
 
+	public static SubCommandGroupConfig fromData(SubcommandGroupData data) {
+		SubCommandGroupConfig c = new SubCommandGroupConfig();
+		c.setName(data.getName());
+		c.setDescription(data.getDescription());
+		c.setSubCommands(data.getSubcommands().stream().map(SubCommandConfig::fromData).toArray(SubCommandConfig[]::new));
+		return c;
+	}
+
 	public SubcommandGroupData toData() {
 		SubcommandGroupData data = new SubcommandGroupData(this.name, this.description);
 		if (this.subCommands != null) {
@@ -27,17 +35,9 @@ public class SubCommandGroupConfig {
 	@Override
 	public String toString() {
 		return "SubCommandGroupConfig{" +
-			"name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", subCommands=" + Arrays.toString(subCommands) +
-			'}';
-	}
-
-	public static SubCommandGroupConfig fromData(SubcommandGroupData data) {
-		SubCommandGroupConfig c = new SubCommandGroupConfig();
-		c.setName(data.getName());
-		c.setDescription(data.getDescription());
-		c.setSubCommands(data.getSubcommands().stream().map(SubCommandConfig::fromData).toArray(SubCommandConfig[]::new));
-		return c;
+				"name='" + name + '\'' +
+				", description='" + description + '\'' +
+				", subCommands=" + Arrays.toString(subCommands) +
+				'}';
 	}
 }

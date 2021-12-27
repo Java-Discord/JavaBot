@@ -16,24 +16,24 @@ import static com.mongodb.client.model.Filters.eq;
  */
 public class CustomCommandList implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        StringBuilder sb = new StringBuilder();
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		StringBuilder sb = new StringBuilder();
 
-        for (Document document : StartupListener.mongoClient
-                .getDatabase("other")
-                .getCollection("customcommands")
-                .find(eq("guildId", event.getGuild().getId()))) {
+		for (Document document : StartupListener.mongoClient
+				.getDatabase("other")
+				.getCollection("customcommands")
+				.find(eq("guildId", event.getGuild().getId()))) {
 
-            JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-            String name = root.get("commandName").getAsString();
+			JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
+			String name = root.get("commandName").getAsString();
 
-            sb.append("/" + name);
-            sb.append("\n");
-        }
-        return Responses.success(event,
-                "Custom Slash Command List", "```" +
-                        (sb.length() > 0 ? sb : "No Custom Commands created yet.") + "```"
-        );
-    }
+			sb.append("/" + name);
+			sb.append("\n");
+		}
+		return Responses.success(event,
+				"Custom Slash Command List", "```" +
+						(sb.length() > 0 ? sb : "No Custom Commands created yet.") + "```"
+		);
+	}
 }

@@ -22,45 +22,47 @@ import java.util.Objects;
 
 public class ChangeMyMindCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        InteractionHook hook = event.getHook();
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		InteractionHook hook = event.getHook();
 
-        String encodedSearchTerm = null;
+		String encodedSearchTerm = null;
 
-        try {
-            encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) { e.printStackTrace(); }
+		try {
+			encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 
-        Unirest.get("https://nekobot.xyz/api/imagegen?type=changemymind&text=" + encodedSearchTerm).asJsonAsync(new Callback<JsonNode>(){
+		Unirest.get("https://nekobot.xyz/api/imagegen?type=changemymind&text=" + encodedSearchTerm).asJsonAsync(new Callback<JsonNode>() {
 
-            @Override
-            public void completed(HttpResponse<JsonNode> hr) {
+			@Override
+			public void completed(HttpResponse<JsonNode> hr) {
 
-                MessageEmbed e = null;
-                try {
-                    e = new EmbedBuilder()
-                            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                            .setImage(hr.getBody().getObject().getString("message"))
-                            .setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
-                            .setTimestamp(Instant.now())
-                            .build();
-                    hook.sendMessageEmbeds(e).queue();
-                } catch (JSONException jsonException) {
-                    jsonException.printStackTrace();
-                }
-            }
+				MessageEmbed e = null;
+				try {
+					e = new EmbedBuilder()
+							.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+							.setImage(hr.getBody().getObject().getString("message"))
+							.setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+							.setTimestamp(Instant.now())
+							.build();
+					hook.sendMessageEmbeds(e).queue();
+				} catch (JSONException jsonException) {
+					jsonException.printStackTrace();
+				}
+			}
 
-            @Override
-            public void failed(UnirestException ue) {
-                // Shouldn't happen
-            }
+			@Override
+			public void failed(UnirestException ue) {
+				// Shouldn't happen
+			}
 
-            @Override
-            public void cancelled() {
-                // Shouldn't happen
-            }
-        });
-        return event.deferReply(false);
-    }
+			@Override
+			public void cancelled() {
+				// Shouldn't happen
+			}
+		});
+		return event.deferReply(false);
+	}
 }

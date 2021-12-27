@@ -21,32 +21,32 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
 		Bot.asyncPool.submit(() -> {
 			var totalHelpers = getCounts("""
-				SELECT COUNT(id), helper_id
-				FROM help_channel_thanks
-				GROUP BY helper_id""", event.getGuild()).stream()
+					SELECT COUNT(id), helper_id
+					FROM help_channel_thanks
+					GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
 					.collect(Collectors.joining("\n"));
 			var helpersThisWeek = getCounts("""
-				SELECT COUNT(id), helper_id
-				FROM help_channel_thanks
-				WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
-				GROUP BY helper_id""", event.getGuild()).stream()
+					SELECT COUNT(id), helper_id
+					FROM help_channel_thanks
+					WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
+					GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
 					.collect(Collectors.joining("\n"));
 			var totalHelped = getCounts("""
-				SELECT COUNT(id) AS count, user_id
-				FROM help_channel_thanks
-				GROUP BY user_id""", event.getGuild()).stream()
+					SELECT COUNT(id) AS count, user_id
+					FROM help_channel_thanks
+					GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
 					.collect(Collectors.joining("\n"));
 			var helpedThisWeek = getCounts("""
-				SELECT COUNT(id) AS count, user_id
-				FROM help_channel_thanks
-				WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
-				GROUP BY user_id""", event.getGuild()).stream()
+					SELECT COUNT(id) AS count, user_id
+					FROM help_channel_thanks
+					WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
+					GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
 					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
 					.collect(Collectors.joining("\n"));
@@ -66,7 +66,8 @@ public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 		try {
 			return DbActions.mapQuery(
 					query,
-					s -> {},
+					s -> {
+					},
 					rs -> {
 						List<Pair<Member, Long>> memberData = new ArrayList<>();
 						while (rs.next()) {

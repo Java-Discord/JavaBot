@@ -13,27 +13,28 @@ import net.javadiscord.javabot.systems.commands.staff.custom_commands.subcommand
  */
 public class CustomCommandHandler extends DelegatingCommandHandler {
 
-    /**
-     * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand(String, SlashCommandHandler)}
-     */
-    public CustomCommandHandler() {
-        addSubcommand("create", new CustomCommandCreate());
-        addSubcommand("delete", new CustomCommandDelete());
-        addSubcommand("edit", new CustomCommandEdit());
-    }
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand(String, SlashCommandHandler)}
+	 */
+	public CustomCommandHandler() {
+		addSubcommand("create", new CustomCommandCreate());
+		addSubcommand("delete", new CustomCommandDelete());
+		addSubcommand("edit", new CustomCommandEdit());
+	}
 
-    /**
-     * Checks if a custom command with the specified name exists.
-     * @param guildId The guild's id
-     * @param commandName The name of the custom slash command
-     */
-    public static boolean commandExists(String guildId, String commandName) {
-        return StartupListener.mongoClient.getDatabase("other")
-                .getCollection("customcommands")
-                .find(
-                new BasicDBObject()
-                        .append("guildId", guildId)
-                        .append("commandName", commandName))
-                .first() != null;
-    }
+	/**
+	 * Checks if a custom command with the specified name exists.
+	 *
+	 * @param guildId     The guild's id
+	 * @param commandName The name of the custom slash command
+	 */
+	public static boolean commandExists(String guildId, String commandName) {
+		return StartupListener.mongoClient.getDatabase("other")
+				.getCollection("customcommands")
+				.find(
+						new BasicDBObject()
+								.append("guildId", guildId)
+								.append("commandName", commandName))
+				.first() != null;
+	}
 }

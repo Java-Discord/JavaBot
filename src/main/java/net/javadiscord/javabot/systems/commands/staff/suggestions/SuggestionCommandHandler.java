@@ -10,9 +10,9 @@ import net.javadiscord.javabot.systems.commands.staff.suggestions.subcommands.De
  */
 public class SuggestionCommandHandler extends DelegatingCommandHandler {
 
-    public SuggestionCommandHandler() {
-        addSubcommand("accept", new AcceptSubcommand());
-        addSubcommand("decline", new DeclineSubcommand());
-        addSubcommand("clear", new ClearSubcommand());
-    }
+	public SuggestionCommandHandler() {
+		addSubcommand("accept", new AcceptSubcommand());
+		addSubcommand("decline", new DeclineSubcommand());
+		addSubcommand("clear", new ClearSubcommand());
+	}
 }

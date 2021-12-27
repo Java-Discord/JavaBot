@@ -10,12 +10,12 @@ import net.javadiscord.javabot.data.mongodb.Database;
 // TODO: Merge with /qotw command
 public class ClearQOTWCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        Member member = event.getOption("user").getAsMember();
-        new Database().setMemberEntry(member.getId(), "qotwpoints", 0);
-        return Responses.success(event, "Cleared QOTW-Points", "Successfully cleared all QOTW-Points from user " + member.getUser().getAsTag());
-    }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		Member member = event.getOption("user").getAsMember();
+		new Database().setMemberEntry(member.getId(), "qotwpoints", 0);
+		return Responses.success(event, "Cleared QOTW-Points", "Successfully cleared all QOTW-Points from user " + member.getUser().getAsTag());
+	}
 }
 
 

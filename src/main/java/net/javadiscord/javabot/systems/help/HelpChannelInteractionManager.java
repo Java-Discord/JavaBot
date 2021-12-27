@@ -15,7 +15,8 @@ import java.sql.SQLException;
 public class HelpChannelInteractionManager {
 	/**
 	 * Handles button interactions for help channel activity checks.
-	 * @param event The button event.
+	 *
+	 * @param event  The button event.
 	 * @param action The data extracted from the button id.
 	 */
 	public void handleHelpChannel(ButtonClickEvent event, String reservationId, String action) {
@@ -85,7 +86,8 @@ public class HelpChannelInteractionManager {
 	 * Handles button interactions pertaining to the interaction provided to
 	 * users when they choose to unreserve their channel, giving them options to
 	 * thank helpers or cancel the unreserving.
-	 * @param event The button event.
+	 *
+	 * @param event  The button event.
 	 * @param action The data extracted from the button's id.
 	 */
 	public void handleHelpThank(ButtonClickEvent event, String reservationId, String action) {

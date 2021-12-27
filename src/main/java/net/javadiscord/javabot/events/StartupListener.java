@@ -24,79 +24,83 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class StartupListener extends ListenerAdapter {
-    public static MongoClient mongoClient;
-    public static Guild preferredGuild;
+	public static MongoClient mongoClient;
+	public static Guild preferredGuild;
 
-    @Override
-    public void onReady(ReadyEvent event) {
-        // Initialize all guild-specific configuration.
-        Bot.config.loadGuilds(event.getJDA().getGuilds());
-        Bot.config.flush();
+	@Override
+	public void onReady(ReadyEvent event) {
+		// Initialize all guild-specific configuration.
+		Bot.config.loadGuilds(event.getJDA().getGuilds());
+		Bot.config.flush();
 
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
-        rootLogger.setLevel(Level.ERROR);
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger rootLogger = loggerContext.getLogger("org.mongodb.driver");
+		rootLogger.setLevel(Level.ERROR);
 
-        try { TimeUnit.MILLISECONDS.sleep(500); }
-        catch (InterruptedException e) { e.printStackTrace(); }
+		try {
+			TimeUnit.MILLISECONDS.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
-        String[] guildOrder = new String[]{"648956210850299986", "675136900478140422", "861254598046777344"};
-        //                                        Java              Mount Everest™    JavaDiscord Emoji Server
+		String[] guildOrder = new String[]{"648956210850299986", "675136900478140422", "861254598046777344"};
+		//                                        Java              Mount Everest™    JavaDiscord Emoji Server
 
-        for (int i = 0; i < event.getJDA().getGuilds().size(); i++) {
+		for (int i = 0; i < event.getJDA().getGuilds().size(); i++) {
 
-            try {
-                preferredGuild = event.getJDA().getGuildById(guildOrder[i]);
-                if (event.getJDA().getGuilds().contains(preferredGuild)) break;
+			try {
+				preferredGuild = event.getJDA().getGuildById(guildOrder[i]);
+				if (event.getJDA().getGuilds().contains(preferredGuild)) break;
 
-            } catch (Exception ignored) {}
-        }
+			} catch (Exception ignored) {
+			}
+		}
 
-        if (preferredGuild == null) preferredGuild = event.getJDA().getGuilds().get(0);
+		if (preferredGuild == null) preferredGuild = event.getJDA().getGuilds().get(0);
 
-        log.info("Logged in as {}{}{}",
-                Constants.TEXT_WHITE, event.getJDA().getSelfUser().getAsTag(), Constants.TEXT_RESET);
-        log.info("Preferred Guild: {}{}{}",
-                Constants.TEXT_WHITE, preferredGuild.getName(), Constants.TEXT_RESET);
-        log.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
+		log.info("Logged in as {}{}{}",
+				Constants.TEXT_WHITE, event.getJDA().getSelfUser().getAsTag(), Constants.TEXT_RESET);
+		log.info("Preferred Guild: {}{}{}",
+				Constants.TEXT_WHITE, preferredGuild.getName(), Constants.TEXT_RESET);
+		log.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
 
-        String[] skipGuilds = new String[]{"861254598046777344", "813817075218776101"};
-        //                               JavaDiscord Emoji Server    Test-Server
+		String[] skipGuilds = new String[]{"861254598046777344", "813817075218776101"};
+		//                               JavaDiscord Emoji Server    Test-Server
 
-        try {
+		try {
 
-        MongoClientURI uri = new MongoClientURI(Bot.config.getSystems().getMongoDatabaseUrl());
-        mongoClient = new MongoClient(uri);
+			MongoClientURI uri = new MongoClientURI(Bot.config.getSystems().getMongoDatabaseUrl());
+			mongoClient = new MongoClient(uri);
 
-        new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());
-        log.info("Successfully connected to MongoDB");
+			new Database().databaseCheck(mongoClient, event.getJDA().getGuilds());
+			log.info("Successfully connected to MongoDB");
 
-        log.info("Starting Guild initialization\n");
-        for (var guild : event.getJDA().getGuilds()) {
-            if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
+			log.info("Starting Guild initialization\n");
+			for (var guild : event.getJDA().getGuilds()) {
+				if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
 
-            new StarboardListener().updateAllSBM(guild);
-            Bot.slashCommands.registerSlashCommands(guild);
+				new StarboardListener().updateAllSBM(guild);
+				Bot.slashCommands.registerSlashCommands(guild);
 
-            // Schedule the help channel updater to run periodically for each guild.
-            var helpConfig = Bot.config.get(guild).getHelp();
-            Bot.asyncPool.scheduleAtFixedRate(
-                    new HelpChannelUpdater(event.getJDA(), helpConfig, List.of(
-                            new SimpleGreetingCheck()
-                    )),
-                    5,
-                    helpConfig.getUpdateIntervalSeconds(),
-                    TimeUnit.SECONDS
-            );
+				// Schedule the help channel updater to run periodically for each guild.
+				var helpConfig = Bot.config.get(guild).getHelp();
+				Bot.asyncPool.scheduleAtFixedRate(
+						new HelpChannelUpdater(event.getJDA(), helpConfig, List.of(
+								new SimpleGreetingCheck()
+						)),
+						5,
+						helpConfig.getUpdateIntervalSeconds(),
+						TimeUnit.SECONDS
+				);
 
-            Bot.config.get(guild).getModeration().getLogChannel().sendMessage("I have just been booted up!").queue();
-        }
+				Bot.config.get(guild).getModeration().getLogChannel().sendMessage("I have just been booted up!").queue();
+			}
 
-        } catch (MongoException e) {
+		} catch (MongoException e) {
 
-            log.error("Couldn't connect to MongoDB ({}) Shutting down...", e.getClass().getSimpleName());
-            e.printStackTrace();
-            System.exit(0);
-        }
-    }
+			log.error("Couldn't connect to MongoDB ({}) Shutting down...", e.getClass().getSimpleName());
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
 }

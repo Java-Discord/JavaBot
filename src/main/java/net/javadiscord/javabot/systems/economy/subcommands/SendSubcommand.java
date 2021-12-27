@@ -72,6 +72,7 @@ public class SendSubcommand implements SlashCommandHandler {
 	 * Checks the validity of a message that will be added to a transaction to
 	 * ensure it is safe and free of formatting characters or other unsightly
 	 * things.
+	 *
 	 * @param message The message to validate.
 	 * @return A list of error messages. If this is empty, validation is successful.
 	 */

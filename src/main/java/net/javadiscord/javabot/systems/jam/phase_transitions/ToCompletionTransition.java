@@ -55,7 +55,7 @@ public class ToCompletionTransition implements JamPhaseTransition {
 	}
 
 	public Map<JamSubmission, Integer> recordAndCountVotes(Map<JamSubmission, List<Long>> submissionVotes, Connection con, JamMessageRepository messageRepository) throws SQLException {
-		try(PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)")){
+		try (PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)")) {
 			Map<JamSubmission, Integer> voteCounts = new HashMap<>();
 			for (var entry : submissionVotes.entrySet()) {
 				submissionVoteStmt.setLong(1, entry.getKey().getId());

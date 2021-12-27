@@ -38,8 +38,8 @@ import static com.mongodb.client.model.Filters.eq;
  * guilds where the bot is active, and responding to them by calling the
  * appropriate {@link SlashCommandHandler}.
  * <p>
- *     The list of valid commands, and their associated handlers, are defined in
- *     their corresponding YAML-file under the resources/commands directory.
+ * The list of valid commands, and their associated handlers, are defined in
+ * their corresponding YAML-file under the resources/commands directory.
  * </p>
  */
 public class SlashCommands extends ListenerAdapter {
@@ -94,10 +94,11 @@ public class SlashCommands extends ListenerAdapter {
 	 * Registers all slash commands defined in the set YAML-files for the given guild
 	 * so that users can see the commands when they type a "/".
 	 * <p>
-	 *     It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
-	 *     whose key is the command name, and whose value is a new instance of
-	 *     the handler class which the command has specified.
+	 * It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
+	 * whose key is the command name, and whose value is a new instance of
+	 * the handler class which the command has specified.
 	 * </p>
+	 *
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerSlashCommands(Guild guild) {
@@ -110,11 +111,11 @@ public class SlashCommands extends ListenerAdapter {
 				"commands/user.yaml"
 		);
 		var commandUpdateAction = this.updateCommands(commandConfigs, guild);
-		var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
+		var customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
 
-		commandUpdateAction.queue(commands ->{
+		commandUpdateAction.queue(commands -> {
 			// Add privileges to the non-custom commands, after the commands have been registered.
-			commands.removeIf(cmd->customCommandNames.contains(cmd.getName()));
+			commands.removeIf(cmd -> customCommandNames.contains(cmd.getName()));
 			this.addCommandPrivileges(commands, commandConfigs, guild);
 		});
 	}
@@ -168,9 +169,9 @@ public class SlashCommands extends ListenerAdapter {
 
 		Map<String, Collection<? extends CommandPrivilege>> map = new HashMap<>();
 
-		for(Command command : commands) {
+		for (Command command : commands) {
 			List<CommandPrivilege> privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
-			if(!privileges.isEmpty()) {
+			if (!privileges.isEmpty()) {
 				map.put(command.getId(), privileges);
 			}
 		}
@@ -181,7 +182,7 @@ public class SlashCommands extends ListenerAdapter {
 
 	@NotNull
 	private List<CommandPrivilege> getCommandPrivileges(Guild guild, CommandConfig config) {
-		if(config == null || config.getPrivileges() == null) return Collections.emptyList();
+		if (config == null || config.getPrivileges() == null) return Collections.emptyList();
 		List<CommandPrivilege> privileges = new ArrayList<>();
 		for (var privilegeConfig : config.getPrivileges()) {
 			try {

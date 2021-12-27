@@ -23,13 +23,13 @@ public class ExportSchemaSubcommand implements SlashCommandHandler {
 		boolean includeData = includeDataOption != null && includeDataOption.getAsBoolean();
 		Bot.asyncPool.submit(() -> {
 			try (var con = Bot.dataSource.getConnection();
-					var stmt = con.createStatement()) {
+				 var stmt = con.createStatement()) {
 				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
 				if (!success) {
 					event.getHook().sendMessage("Exporting the schema was not successful.").queue();
 				} else {
 					event.getHook().sendMessage("The export was successful.").queue();
-					event.getChannel().sendFile(SCHEMA_FILE.toFile(), "schema.sql").queue(msg->{
+					event.getChannel().sendFile(SCHEMA_FILE.toFile(), "schema.sql").queue(msg -> {
 						try {
 							Files.delete(SCHEMA_FILE);
 						} catch (IOException e) {

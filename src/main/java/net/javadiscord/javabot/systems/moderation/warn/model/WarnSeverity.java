@@ -27,6 +27,7 @@ public enum WarnSeverity {
 
 	/**
 	 * Constructs the value.
+	 *
 	 * @param weight The weight to use.
 	 */
 	WarnSeverity(int weight) {
@@ -34,14 +35,8 @@ public enum WarnSeverity {
 	}
 
 	/**
-	 * Gets the weight based on the severity.
-	 */
-	public int getWeight() {
-		return this.weight;
-	}
-
-	/**
 	 * Gets the weight for a given severity name.
+	 *
 	 * @param name The name of the severity level.
 	 * @return The weight for the given severity, or {@link #DEFAULT_WEIGHT} if
 	 * no matching severity could be found.
@@ -53,5 +48,12 @@ public enum WarnSeverity {
 			}
 		}
 		return DEFAULT_WEIGHT;
+	}
+
+	/**
+	 * Gets the weight based on the severity.
+	 */
+	public int getWeight() {
+		return this.weight;
 	}
 }

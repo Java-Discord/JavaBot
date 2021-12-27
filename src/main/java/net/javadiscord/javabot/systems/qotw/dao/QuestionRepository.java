@@ -32,10 +32,10 @@ public class QuestionRepository {
 
 	public int getNextQuestionNumber() throws SQLException {
 		try (var stmt = con.prepareStatement("""
-			SELECT question_number + 1
-			FROM qotw_question
-			WHERE used = TRUE AND question_number IS NOT NULL
-			ORDER BY created_at DESC LIMIT 1""")) {
+				SELECT question_number + 1
+				FROM qotw_question
+				WHERE used = TRUE AND question_number IS NOT NULL
+				ORDER BY created_at DESC LIMIT 1""")) {
 			var rs = stmt.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1);
@@ -45,11 +45,12 @@ public class QuestionRepository {
 	}
 
 	public void markUsed(QOTWQuestion question) throws SQLException {
-		if (question.getQuestionNumber() == null) throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
+		if (question.getQuestionNumber() == null)
+			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
 		try (var stmt = con.prepareStatement("""
-			UPDATE qotw_question
-			SET used = TRUE, question_number = ?
-			WHERE id = ?""")) {
+				UPDATE qotw_question
+				SET used = TRUE, question_number = ?
+				WHERE id = ?""")) {
 			stmt.setInt(1, question.getQuestionNumber());
 			stmt.setLong(2, question.getId());
 			stmt.executeUpdate();
@@ -71,11 +72,11 @@ public class QuestionRepository {
 
 	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws SQLException {
 		try (var stmt = con.prepareStatement("""
-			SELECT *
-			FROM qotw_question
-			WHERE guild_id = ? AND used = FALSE
-			ORDER BY priority DESC, created_at
-			LIMIT 1""")) {
+				SELECT *
+				FROM qotw_question
+				WHERE guild_id = ? AND used = FALSE
+				ORDER BY priority DESC, created_at
+				LIMIT 1""")) {
 			stmt.setLong(1, guildId);
 			ResultSet rs = stmt.executeQuery();
 			Optional<QOTWQuestion> optionalQuestion;

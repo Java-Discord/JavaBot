@@ -25,7 +25,8 @@ public class ToThemeVotingTransition implements JamPhaseTransition {
 	@Override
 	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(jam);
-		if (themes.isEmpty()) throw new IllegalStateException("Cannot start theme voting until at least one theme is available.");
+		if (themes.isEmpty())
+			throw new IllegalStateException("Cannot start theme voting until at least one theme is available.");
 		long votingMessageId = channelManager.sendThemeVotingMessages(jam, themes);
 		new JamMessageRepository(con).saveMessageId(jam, votingMessageId, "theme_voting");
 		new JamRepository(con).updateJamPhase(jam, JamPhase.THEME_VOTING);

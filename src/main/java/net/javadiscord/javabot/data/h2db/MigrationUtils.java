@@ -17,7 +17,7 @@ public class MigrationUtils {
 		var uri = resource.toURI();
 		Path dirPath;
 		try {
-			dirPath =  Paths.get(uri);
+			dirPath = Paths.get(uri);
 		} catch (FileSystemNotFoundException e) {
 			var env = new HashMap<String, String>();
 			dirPath = FileSystems.newFileSystem(uri, env).getPath("/migrations/");

@@ -18,41 +18,41 @@ import java.time.Instant;
 @Deprecated(forRemoval = true)
 public class MuteCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        Member member = event.getOption("user").getAsMember();
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		Member member = event.getOption("user").getAsMember();
 
-        OptionMapping option = event.getOption("reason");
-        String reason = option == null ? "None" : option.getAsString();
+		OptionMapping option = event.getOption("reason");
+		String reason = option == null ? "None" : option.getAsString();
 
-        var eb = muteEmbed(member, event.getMember(), event.getGuild(), reason);
-        Misc.sendToLog(event.getGuild(), eb);
-        member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(eb).queue());
+		var eb = muteEmbed(member, event.getMember(), event.getGuild(), reason);
+		Misc.sendToLog(event.getGuild(), eb);
+		member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(eb).queue());
 
-        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
-        if (member.getRoles().contains(muteRole)) {
-            return Responses.error(event, "```" + member.getUser().getAsTag() + " is already muted```");
-        }
+		Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
+		if (member.getRoles().contains(muteRole)) {
+			return Responses.error(event, "```" + member.getUser().getAsTag() + " is already muted```");
+		}
 
-        try {
-            new ModerationService(event.getInteraction()).mute(member, event.getGuild());
-            return event.replyEmbeds(eb);
-        } catch (Exception e) {
-            return Responses.error(event, e.getMessage());
-        }
-    }
+		try {
+			new ModerationService(event.getInteraction()).mute(member, event.getGuild());
+			return event.replyEmbeds(eb);
+		} catch (Exception e) {
+			return Responses.error(event, e.getMessage());
+		}
+	}
 
 
-    public MessageEmbed muteEmbed(Member member, Member mod, Guild guild, String reason) {
-        return new EmbedBuilder()
-                .setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
-                .setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
-                .addField("Member", member.getAsMention(), true)
-                .addField("Moderator", mod.getAsMention(), true)
-                .addField("ID", "```" + member.getId() + "```", false)
-                .addField("Reason", "```" + reason + "```", false)
-                .setFooter(mod.getUser().getAsTag(), mod.getUser().getEffectiveAvatarUrl())
-                .setTimestamp(Instant.now())
-                .build();
-    }
+	public MessageEmbed muteEmbed(Member member, Member mod, Guild guild, String reason) {
+		return new EmbedBuilder()
+				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
+				.addField("Member", member.getAsMention(), true)
+				.addField("Moderator", mod.getAsMention(), true)
+				.addField("ID", "```" + member.getId() + "```", false)
+				.addField("Reason", "```" + reason + "```", false)
+				.setFooter(mod.getUser().getAsTag(), mod.getUser().getEffectiveAvatarUrl())
+				.setTimestamp(Instant.now())
+				.build();
+	}
 }

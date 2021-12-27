@@ -11,6 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JamThemeRepository {
 	private final Connection con;
+
 	public void addTheme(Jam jam, JamTheme theme) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO jam_theme (jam_id, name, description) VALUES (?, ?, ?)",

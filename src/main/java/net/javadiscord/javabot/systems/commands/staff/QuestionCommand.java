@@ -19,32 +19,32 @@ import java.util.List;
 
 public class QuestionCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        int num = (int) event.getOption("amount").getAsLong();
-        MongoDatabase database = StartupListener.mongoClient.getDatabase("other");
-        MongoCollection<Document> collection = database.getCollection("expert_questions");
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		int num = (int) event.getOption("amount").getAsLong();
+		MongoDatabase database = StartupListener.mongoClient.getDatabase("other");
+		MongoCollection<Document> collection = database.getCollection("expert_questions");
 
-        long l = collection.countDocuments();
-        if (num <= l && num > 0) {
-            int i = num;
-            StringBuilder sb = new StringBuilder();
-            while (i > 0) {
-                String json = collection.aggregate(List.of(Aggregates.sample(1))).first().toJson();
-                JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-                String text = root.get("text").getAsString();
-                if (!(sb.toString().contains(text))) {
+		long l = collection.countDocuments();
+		if (num <= l && num > 0) {
+			int i = num;
+			StringBuilder sb = new StringBuilder();
+			while (i > 0) {
+				String json = collection.aggregate(List.of(Aggregates.sample(1))).first().toJson();
+				JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+				String text = root.get("text").getAsString();
+				if (!(sb.toString().contains(text))) {
 
-                    sb.append("• ").append(text).append("\n");
-                    i--;
-                }
-            }
-            var e = new EmbedBuilder()
-                .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-                .setAuthor("Questions (" + num + ")")
-                .setDescription(sb.toString())
-                .build();
-            return event.replyEmbeds(e);
-        } else return Responses.error(event, "```Please choose a Number between 1 and " + l + "```");
-    }
+					sb.append("• ").append(text).append("\n");
+					i--;
+				}
+			}
+			var e = new EmbedBuilder()
+					.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+					.setAuthor("Questions (" + num + ")")
+					.setDescription(sb.toString())
+					.build();
+			return event.replyEmbeds(e);
+		} else return Responses.error(event, "```Please choose a Number between 1 and " + l + "```");
+	}
 }

@@ -19,32 +19,32 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 public class WarnsCommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        OptionMapping warnsOption = event.getOption("user");
-        Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
-        if (member == null) return Responses.error(event, "Member is missing.");
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
-        try (var con = Bot.dataSource.getConnection()) {
-            return event.replyEmbeds(buildWarnsEmbed(new WarnRepository(con)
-                    .getWarnsByUserId(member.getIdLong(), cutoff), member));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return Responses.error(event, "An Error occurred.");
-        }
-    }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		OptionMapping warnsOption = event.getOption("user");
+		Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
+		if (member == null) return Responses.error(event, "Member is missing.");
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
+		try (var con = Bot.dataSource.getConnection()) {
+			return event.replyEmbeds(buildWarnsEmbed(new WarnRepository(con)
+					.getWarnsByUserId(member.getIdLong(), cutoff), member));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Responses.error(event, "An Error occurred.");
+		}
+	}
 
-    private MessageEmbed buildWarnsEmbed(List<Warn> warns, Member member) {
-        var e = new EmbedBuilder()
-                .setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
-                .setDescription(String.format("%s has `%s` active warns with a total of `%s` severity.\n",
-                        member.getAsMention(), warns.size(), warns.stream().mapToInt(Warn::getSeverityWeight).sum()))
-                .setColor(Bot.config.get(member.getGuild()).getSlashCommand().getWarningColor())
-                .setTimestamp(Instant.now());
-        warns.forEach(w -> e.getDescriptionBuilder().append(
-                String.format("\n`%s` <t:%s>\nWarned by: <@%s>\nSeverity: `%s (%s)`\nReason: %s\n",
-                        w.getId(), w.getCreatedAt().toInstant(ZoneOffset.UTC).getEpochSecond(),
-                        w.getWarnedBy(), w.getSeverity(), w.getSeverityWeight(), w.getReason())));
-        return e.build();
-    }
+	private MessageEmbed buildWarnsEmbed(List<Warn> warns, Member member) {
+		var e = new EmbedBuilder()
+				.setAuthor(member.getUser().getAsTag() + " | Warns", null, member.getUser().getEffectiveAvatarUrl())
+				.setDescription(String.format("%s has `%s` active warns with a total of `%s` severity.\n",
+						member.getAsMention(), warns.size(), warns.stream().mapToInt(Warn::getSeverityWeight).sum()))
+				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getWarningColor())
+				.setTimestamp(Instant.now());
+		warns.forEach(w -> e.getDescriptionBuilder().append(
+				String.format("\n`%s` <t:%s>\nWarned by: <@%s>\nSeverity: `%s (%s)`\nReason: %s\n",
+						w.getId(), w.getCreatedAt().toInstant(ZoneOffset.UTC).getEpochSecond(),
+						w.getWarnedBy(), w.getSeverity(), w.getSeverityWeight(), w.getReason())));
+		return e.build();
+	}
 }

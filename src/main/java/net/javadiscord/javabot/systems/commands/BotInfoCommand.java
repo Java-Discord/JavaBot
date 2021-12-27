@@ -12,26 +12,26 @@ import java.time.Instant;
 
 public class BotInfoCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
 
-        long ping = event.getJDA().getGatewayPing();
-        var bot = event.getJDA().getSelfUser();
+		long ping = event.getJDA().getGatewayPing();
+		var bot = event.getJDA().getSelfUser();
 
-        var e = new EmbedBuilder()
-            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-            .setThumbnail(bot.getEffectiveAvatarUrl())
-            .setAuthor(bot.getName() + " | Info", null, bot.getEffectiveAvatarUrl())
-            .addField("OS", "```" + System.getProperty("os.name") + "```", true)
-            .addField("Library", "```JDA```", true)
-            .addField("JDK", "```" + System.getProperty("java.version") + "```", true)
-            .addField("Ping", "```" + ping + "ms```", true)
-            .addField("Uptime", "```" + new UptimeCommand().getUptime() + "```", true)
-            .setTimestamp(Instant.now())
-            .build();
+		var e = new EmbedBuilder()
+				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+				.setThumbnail(bot.getEffectiveAvatarUrl())
+				.setAuthor(bot.getName() + " | Info", null, bot.getEffectiveAvatarUrl())
+				.addField("OS", "```" + System.getProperty("os.name") + "```", true)
+				.addField("Library", "```JDA```", true)
+				.addField("JDK", "```" + System.getProperty("java.version") + "```", true)
+				.addField("Ping", "```" + ping + "ms```", true)
+				.addField("Uptime", "```" + new UptimeCommand().getUptime() + "```", true)
+				.setTimestamp(Instant.now())
+				.build();
 
-        return event.replyEmbeds(e).addActionRow(
-                Button.link(Constants.GITHUB_LINK, "View on GitHub")
-        );
-    }
+		return event.replyEmbeds(e).addActionRow(
+				Button.link(Constants.GITHUB_LINK, "View on GitHub")
+		);
+	}
 }

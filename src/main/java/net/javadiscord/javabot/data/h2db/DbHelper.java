@@ -22,15 +22,17 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public class DbHelper {
-	private DbHelper() {}
+	private DbHelper() {
+	}
 
 	/**
 	 * Initializes the data source that'll be used throughout the bot to access
 	 * the database.
+	 *
 	 * @param config The bot's configuration.
 	 * @return The data source.
 	 * @throws IllegalStateException If an error occurs and we're unable to
-	 * start the database.
+	 *                               start the database.
 	 */
 	public static HikariDataSource initDataSource(BotConfig config) {
 		// Determine if we need to initialize the schema, before starting up the server.
@@ -66,6 +68,7 @@ public class DbHelper {
 
 	/**
 	 * Does an asynchronous database action using the bot's async pool.
+	 *
 	 * @param consumer The consumer that will use a connection.
 	 */
 	public static void doDbAction(ConnectionConsumer consumer) {
@@ -82,9 +85,10 @@ public class DbHelper {
 	 * Does an asynchronous database action using the bot's async pool, and
 	 * wraps access to the connection behind a data access object that can be
 	 * built using the provided dao constructor.
+	 *
 	 * @param daoConstructor A function to build a DAO using a connection.
-	 * @param consumer The consumer that does something with the DAO.
-	 * @param <T> The type of data access object. Usually some kind of repository.
+	 * @param consumer       The consumer that does something with the DAO.
+	 * @param <T>            The type of data access object. Usually some kind of repository.
 	 */
 	public static <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		Bot.asyncPool.submit(() -> {

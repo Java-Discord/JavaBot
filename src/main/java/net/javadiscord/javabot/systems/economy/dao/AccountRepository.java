@@ -14,20 +14,20 @@ public class AccountRepository {
 	private final Connection con;
 
 	public void saveNewAccount(Account account) throws SQLException {
-		try(PreparedStatement stmt = this.con.prepareStatement("INSERT INTO economy_account (user_id, balance) VALUES (?, ?)")){
+		try (PreparedStatement stmt = this.con.prepareStatement("INSERT INTO economy_account (user_id, balance) VALUES (?, ?)")) {
 			stmt.setLong(1, account.getUserId());
 			stmt.setLong(2, account.getBalance());
 			stmt.executeUpdate();
 		}
-		
-		try(PreparedStatement stmt = this.con.prepareStatement("INSERT INTO economy_account_preferences (user_id) VALUES (?)")){
-		    stmt.setLong(1, account.getUserId());
-		    stmt.executeUpdate();
+
+		try (PreparedStatement stmt = this.con.prepareStatement("INSERT INTO economy_account_preferences (user_id) VALUES (?)")) {
+			stmt.setLong(1, account.getUserId());
+			stmt.executeUpdate();
 		}
 	}
 
 	public void updateAccount(Account account) throws SQLException {
-		try(PreparedStatement stmt = this.con.prepareStatement("UPDATE economy_account SET balance = ? WHERE user_id = ?")){
+		try (PreparedStatement stmt = this.con.prepareStatement("UPDATE economy_account SET balance = ? WHERE user_id = ?")) {
 			stmt.setLong(1, account.getBalance());
 			stmt.setLong(2, account.getUserId());
 			stmt.executeUpdate();

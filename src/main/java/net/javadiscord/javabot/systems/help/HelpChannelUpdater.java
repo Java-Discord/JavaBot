@@ -53,6 +53,7 @@ public class HelpChannelUpdater implements Runnable {
 	/**
 	 * Performs a periodic check on a reserved help channel to see if we need to
 	 * take certain actions.
+	 *
 	 * @param channel The channel to check.
 	 * @return A rest action that completes when the check is done.
 	 */
@@ -79,8 +80,9 @@ public class HelpChannelUpdater implements Runnable {
 	 * if we need to take certain actions, like sending an activity check if the
 	 * channel is inactive, or unreserving the channel if a pending activity
 	 * check has not been responded to in a while.
-	 * @param channel The channel to check.
-	 * @param owner The owner of the channel.
+	 *
+	 * @param channel     The channel to check.
+	 * @param owner       The owner of the channel.
 	 * @param reservation The channel reservation data.
 	 * @return A rest action that completes when this check is done.
 	 */
@@ -117,11 +119,12 @@ public class HelpChannelUpdater implements Runnable {
 			}
 			// No action needed.
 			return new CompletedRestAction<>(this.jda, null);
-		}).flatMap(action->action);
+		}).flatMap(action -> action);
 	}
 
 	/**
 	 * Checks an open help channel to ensure it's in the correct state.
+	 *
 	 * @param channel The channel to check.
 	 * @return A rest action that completes when the check is done.
 	 */
@@ -181,30 +184,33 @@ public class HelpChannelUpdater implements Runnable {
 	 * Determines if a message is an 'activity check', which is a special type
 	 * of message the bot sends to users to check if they're still using a help
 	 * channel.
+	 *
 	 * @param message The message to check.
 	 * @return True if the message is an activity check or false otherwise.
 	 */
 	private boolean isActivityCheck(Message message) {
 		return message.getAuthor().equals(this.jda.getSelfUser()) &&
-			message.getContentRaw().contains("Are you finished with this channel?");
+				message.getContentRaw().contains("Are you finished with this channel?");
 	}
 
 	/**
 	 * Determines if a message is an activity check affirmative response, which
 	 * the bot usually sends when a user indicates they'd like to keep their
 	 * channel reserved.
+	 *
 	 * @param message The message to check.
 	 * @return True if the message is an affirmative response to an activity
 	 * check interaction.
 	 */
 	private boolean isActivityCheckAffirmativeResponse(Message message) {
 		return message.getAuthor().equals(this.jda.getSelfUser()) &&
-			message.getContentRaw().contains("Okay, we'll keep this channel reserved for you");
+				message.getContentRaw().contains("Okay, we'll keep this channel reserved for you");
 	}
 
 	/**
 	 * Determines if a message is a channel reservation message that's sent when
 	 * a user first reserves a channel.
+	 *
 	 * @param message The message to check.
 	 * @return True if the message is a reservation message.
 	 */
@@ -217,6 +223,7 @@ public class HelpChannelUpdater implements Runnable {
 	/**
 	 * Determines if a message is a "thank" message that's sent when a user
 	 * unreserves their channel.
+	 *
 	 * @param message The message to check.
 	 * @return True if the message is a thank message.
 	 */
@@ -228,45 +235,48 @@ public class HelpChannelUpdater implements Runnable {
 	/**
 	 * Sends an activity check to the given channel, to check that the owner is
 	 * still using the channel.
-	 * @param channel The channel to send the check to.
-	 * @param owner The owner of the channel.
+	 *
+	 * @param channel     The channel to send the check to.
+	 * @param owner       The owner of the channel.
 	 * @param reservation The channel reservation data.
 	 * @return A rest action that completes when the check has been sent.
 	 */
 	private RestAction<?> sendActivityCheck(TextChannel channel, User owner, ChannelReservation reservation) {
 		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getName());
 		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()))
-			.setActionRow(
-				new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, Emoji.fromUnicode("✅")),
-				new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
-			);
+				.setActionRow(
+						new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, Emoji.fromUnicode("✅")),
+						new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
+				);
 	}
 
 	/**
 	 * Unreserves an inactive channel, which happens after a user ignores the
 	 * activity check for some amount of time.
-	 * @param channel The channel to unreserve.
-	 * @param owner The owner of the channel.
+	 *
+	 * @param channel           The channel to unreserve.
+	 * @param owner             The owner of the channel.
 	 * @param mostRecentMessage The most recent message that was sent.
-	 * @param messages The list of all recent messages, so that the bot can do
-	 *                 some cleanup if needed.
+	 * @param messages          The list of all recent messages, so that the bot can do
+	 *                          some cleanup if needed.
 	 * @return A rest action that completes once the channel is unreserved.
 	 */
 	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage, List<Message> messages) {
 		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getName(), config.getRemoveTimeoutMinutes());
 		return RestAction.allOf(
-			mostRecentMessage.delete(),
-			deleteThankMessages(messages),
-			channel.sendMessage(String.format(
-				"%s, this channel will be unreserved due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
-				owner.getAsMention()
-			)),
-			this.channelManager.unreserveChannel(channel)
+				mostRecentMessage.delete(),
+				deleteThankMessages(messages),
+				channel.sendMessage(String.format(
+						"%s, this channel will be unreserved due to prolonged inactivity. If your question still isn't answered, please ask again in an open channel.",
+						owner.getAsMention()
+				)),
+				this.channelManager.unreserveChannel(channel)
 		);
 	}
 
 	/**
 	 * Deletes any "thank-you" message that the bot sent previously.
+	 *
 	 * @param messages The list of messages to search through.
 	 * @return A rest action that completes once all thank messages are deleted.
 	 */
@@ -280,13 +290,14 @@ public class HelpChannelUpdater implements Runnable {
 
 	/**
 	 * Removes all old activity check messages from the list of messages.
+	 *
 	 * @param messages The messages to remove activity checks from.
 	 * @return A rest action that completes when all activity checks are removed.
 	 */
 	private RestAction<?> deleteOldBotMessages(List<Message> messages) {
 		var deleteActions = messages.stream()
-			.filter(m -> isActivityCheck(m) || isActivityCheckAffirmativeResponse(m))
-			.map(Message::delete).toList();
+				.filter(m -> isActivityCheck(m) || isActivityCheckAffirmativeResponse(m))
+				.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) {
 			return RestAction.allOf(deleteActions);
 		}
@@ -295,8 +306,9 @@ public class HelpChannelUpdater implements Runnable {
 
 	/**
 	 * Performs checks on the recent message history of a channel.
-	 * @param channel The channel that the messages belong to.
-	 * @param owner The user who's reserved the channel.
+	 *
+	 * @param channel  The channel that the messages belong to.
+	 * @param owner    The user who's reserved the channel.
 	 * @param messages The list of messages to analyze, ordered from newest to
 	 *                 oldest.
 	 * @return A rest action that completes when this check is done.

@@ -17,6 +17,7 @@ public abstract class GuildConfigItem {
 
 	/**
 	 * A shortcut to get the guild in the context of a specific config item.
+	 *
 	 * @return The guild that this item exists under.
 	 */
 	public Guild getGuild() {

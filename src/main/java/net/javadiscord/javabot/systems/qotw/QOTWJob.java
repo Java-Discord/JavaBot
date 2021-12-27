@@ -39,8 +39,8 @@ public class QOTWJob extends DiscordApiJob {
 					if (questionChannel == null) continue;
 					questionChannel.sendMessage(config.getQOTWRole().getAsMention())
 							.setEmbeds(buildEmbed(question, jda)).queue(msg -> {
-						questionChannel.crosspostMessageById(msg.getIdLong()).queue();
-					});
+								questionChannel.crosspostMessageById(msg.getIdLong()).queue();
+							});
 					if (config.getSubmissionChannel() != null) {
 						config.getSubmissionChannel().sendMessage(String.format("**Question of the Week #%s**\n> %s",
 								question.getQuestionNumber(), question.getText())).queue();

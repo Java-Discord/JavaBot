@@ -60,10 +60,11 @@ public final class Responses {
 
 	/**
 	 * Sends a reply to a slash command event.
-	 * @param event The event to reply to.
-	 * @param title The title of the reply message.
-	 * @param message The message to send.
-	 * @param color The color of the embed.
+	 *
+	 * @param event     The event to reply to.
+	 * @param title     The title of the reply message.
+	 * @param message   The message to send.
+	 * @param color     The color of the embed.
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The reply action.
 	 */
@@ -73,10 +74,11 @@ public final class Responses {
 
 	/**
 	 * Sends a reply to an interaction hook.
-	 * @param hook The interaction hook to send a message to.
-	 * @param title The title of the message.
-	 * @param message The message to send.
-	 * @param color The color of the embed.
+	 *
+	 * @param hook      The interaction hook to send a message to.
+	 * @param title     The title of the message.
+	 * @param message   The message to send.
+	 * @param color     The color of the embed.
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The webhook message action.
 	 */

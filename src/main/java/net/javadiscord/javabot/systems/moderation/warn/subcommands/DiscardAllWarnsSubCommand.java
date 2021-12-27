@@ -7,14 +7,14 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 public class DiscardAllWarnsSubCommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        var userOption = event.getOption("user");
-        if (userOption == null) return Responses.error(event, "User cannot be empty!");
-        var user = userOption.getAsUser();
-        var moderationService = new ModerationService(event.getInteraction());
-        moderationService.discardAllWarns(user, event.getUser());
-        return Responses.success(event, "Warns Discarded", String.format("Discarded all warns from %s.", user.getAsTag()));
-    }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var userOption = event.getOption("user");
+		if (userOption == null) return Responses.error(event, "User cannot be empty!");
+		var user = userOption.getAsUser();
+		var moderationService = new ModerationService(event.getInteraction());
+		moderationService.discardAllWarns(user, event.getUser());
+		return Responses.success(event, "Warns Discarded", String.format("Discarded all warns from %s.", user.getAsTag()));
+	}
 }
 

@@ -79,7 +79,7 @@ public class InteractionListener extends ListenerAdapter {
 		String roleID = id[1];
 		boolean permanent = Boolean.parseBoolean(id[2]);
 
-		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member->{
+		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member -> {
 			Role role = event.getGuild().getRoleById(roleID);
 
 			if (member.getRoles().contains(role)) {

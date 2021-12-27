@@ -33,7 +33,8 @@ public class ModerationService {
 
 	/**
 	 * Constructs the service.
-	 * @param jda The API to use to interact with various discord entities.
+	 *
+	 * @param jda    The API to use to interact with various discord entities.
 	 * @param config The moderation config to use.
 	 */
 	public ModerationService(JDA jda, ModerationConfig config) {
@@ -43,6 +44,7 @@ public class ModerationService {
 
 	/**
 	 * Constructs the service using information obtained from an interaction.
+	 *
 	 * @param interaction The interaction to use.
 	 */
 	public ModerationService(Interaction interaction) {
@@ -54,12 +56,13 @@ public class ModerationService {
 
 	/**
 	 * Issues a warning for the given user.
-	 * @param member The member to warn.
+	 *
+	 * @param member   The member to warn.
 	 * @param severity The severity of the warning.
-	 * @param reason The reason for this warning.
+	 * @param reason   The reason for this warning.
 	 * @param warnedBy The member who issued the warning.
-	 * @param channel The channel in which the warning was issued.
-	 * @param quiet If true, don't send a message in the channel.
+	 * @param channel  The channel in which the warning was issued.
+	 * @param quiet    If true, don't send a message in the channel.
 	 */
 	public void warn(Member member, WarnSeverity severity, String reason, Member warnedBy, TextChannel channel, boolean quiet) {
 		DbHelper.doDbAction(con -> {
@@ -81,7 +84,8 @@ public class ModerationService {
 
 	/**
 	 * Clears warns from the given user by discarding all warns.
-	 * @param user The user to clear warns from.
+	 *
+	 * @param user      The user to clear warns from.
 	 * @param clearedBy The user who cleared the warns.
 	 */
 	public void discardAllWarns(User user, User clearedBy) {
@@ -95,7 +99,8 @@ public class ModerationService {
 
 	/**
 	 * Clears a warn by discarding the Warn with the corresponding id.
-	 * @param id The id of the warn to discard.
+	 *
+	 * @param id        The id of the warn to discard.
 	 * @param clearedBy The user who cleared the warn.
 	 */
 	public boolean discardWarnById(long id, User clearedBy) {
@@ -126,11 +131,12 @@ public class ModerationService {
 
 	/**
 	 * Bans a member.
-	 * @param member The member to ban.
-	 * @param reason The reason for banning the member.
+	 *
+	 * @param member   The member to ban.
+	 * @param reason   The reason for banning the member.
 	 * @param bannedBy The member who is responsible for banning this member.
-	 * @param channel The channel in which the ban was issued.
-	 * @param quiet If true, don't send a message in the channel.
+	 * @param channel  The channel in which the ban was issued.
+	 * @param quiet    If true, don't send a message in the channel.
 	 */
 	public boolean ban(Member member, String reason, Member bannedBy, TextChannel channel, boolean quiet) {
 		var banEmbed = buildBanEmbed(member, reason, bannedBy);
@@ -146,10 +152,11 @@ public class ModerationService {
 
 	/**
 	 * Unbans a member.
-	 * @param userId The user's id.
+	 *
+	 * @param userId   The user's id.
 	 * @param bannedBy The member who is responsible for unbanning this member.
-	 * @param channel The channel in which the unban was issued.
-	 * @param quiet If true, don't send a message in the channel.
+	 * @param channel  The channel in which the unban was issued.
+	 * @param quiet    If true, don't send a message in the channel.
 	 */
 	public boolean unban(long userId, Member bannedBy, TextChannel channel, boolean quiet) {
 		var unbanEmbed = buildUnbanEmbed(userId, bannedBy);
@@ -184,11 +191,12 @@ public class ModerationService {
 
 	/**
 	 * Kicks a member.
-	 * @param member The member to kick.
-	 * @param reason The reason for kicking the member.
+	 *
+	 * @param member   The member to kick.
+	 * @param reason   The reason for kicking the member.
 	 * @param kickedBy The member who is responsible for kicking this member.
-	 * @param channel The channel in which the kick was issued.
-	 * @param quiet If true, don't send a message in the channel.
+	 * @param channel  The channel in which the kick was issued.
+	 * @param quiet    If true, don't send a message in the channel.
 	 */
 	public boolean kick(Member member, String reason, Member kickedBy, TextChannel channel, boolean quiet) {
 		var kickEmbed = buildKickEmbed(member, kickedBy, reason);

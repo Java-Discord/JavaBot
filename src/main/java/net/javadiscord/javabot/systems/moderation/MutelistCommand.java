@@ -13,25 +13,25 @@ import java.util.List;
 @Deprecated(forRemoval = true)
 public class MutelistCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
 
-        String res = "";
-        int memberSize;
-        Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
+		String res = "";
+		int memberSize;
+		Role muteRole = Bot.config.get(event.getGuild()).getModeration().getMuteRole();
 
-        try {
-            List<Member> members = event.getGuild().getMembersWithRoles(muteRole);
-            StringBuilder sb = new StringBuilder();
-            memberSize = members.size();
-            for (Member member : members) {
-                sb.append(member.getAsMention());
-                sb.append("\n");
-            }
-            res = sb.toString();
-        } catch (IllegalArgumentException e) {
-            memberSize = 0;
-        }
-        return Responses.success(event, "Mutelist (" + memberSize + ")", res);
-    }
+		try {
+			List<Member> members = event.getGuild().getMembersWithRoles(muteRole);
+			StringBuilder sb = new StringBuilder();
+			memberSize = members.size();
+			for (Member member : members) {
+				sb.append(member.getAsMention());
+				sb.append("\n");
+			}
+			res = sb.toString();
+		} catch (IllegalArgumentException e) {
+			memberSize = 0;
+		}
+		return Responses.success(event, "Mutelist (" + memberSize + ")", res);
+	}
 }

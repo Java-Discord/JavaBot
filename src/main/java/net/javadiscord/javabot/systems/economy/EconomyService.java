@@ -43,7 +43,8 @@ public class EconomyService {
 
 	public Transaction performTransaction(Long fromUserId, Long toUserId, long value, String message) throws SQLException {
 		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
-		if (Objects.equals(fromUserId, toUserId)) throw new IllegalArgumentException("Sender and recipient cannot be the same.");
+		if (Objects.equals(fromUserId, toUserId))
+			throw new IllegalArgumentException("Sender and recipient cannot be the same.");
 
 		Transaction t = new Transaction();
 		t.setFromUserId(fromUserId);
@@ -51,7 +52,7 @@ public class EconomyService {
 		t.setValue(value);
 		t.setMessage(message);
 
-		try(Connection con = this.dataSource.getConnection()){
+		try (Connection con = this.dataSource.getConnection()) {
 			con.setAutoCommit(false);
 			TransactionRepository transactionRepository = new TransactionRepository(con);
 			AccountRepository accountRepository = new AccountRepository(con);
@@ -64,7 +65,8 @@ public class EconomyService {
 					account.setBalance(0);
 					accountRepository.saveNewAccount(account);
 				}
-				if (account.getBalance() < value) throw new IllegalStateException("Sender account does not have the required funds.");
+				if (account.getBalance() < value)
+					throw new IllegalStateException("Sender account does not have the required funds.");
 				account.updateBalance(-value);
 				accountRepository.updateAccount(account);
 			}

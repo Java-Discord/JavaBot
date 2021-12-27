@@ -25,6 +25,7 @@ public class JamChannelManager {
 
 	/**
 	 * Constructs the channel manager.
+	 *
 	 * @param jamConfig The config for the jam.
 	 */
 	public JamChannelManager(JamConfig jamConfig) {
@@ -34,7 +35,8 @@ public class JamChannelManager {
 	/**
 	 * Convenience method to send an error message as a response to a deferred
 	 * slash command.
-	 * @param event The slash command event.
+	 *
+	 * @param event   The slash command event.
 	 * @param message The message to send.
 	 */
 	public void sendErrorMessageAsync(SlashCommandEvent event, String message) {
@@ -43,9 +45,10 @@ public class JamChannelManager {
 
 	/**
 	 * Gets the number of votes each theme received.
+	 *
 	 * @param messageId The id of the message to which users have reacted to
 	 *                  cast their votes.
-	 * @param themes The list of themes that can be voted on.
+	 * @param themes    The list of themes that can be voted on.
 	 * @return A map containing for each theme, a list of all user ids who have
 	 * voted on that theme.
 	 */
@@ -67,7 +70,8 @@ public class JamChannelManager {
 
 	/**
 	 * Sends a message containing the themes to be voted on, in the voting channel.
-	 * @param jam The jam for which the themes are prepared.
+	 *
+	 * @param jam    The jam for which the themes are prepared.
 	 * @param themes The list of themes that will be put to a vote.
 	 * @return The id of the message which was generated.
 	 */
@@ -97,7 +101,8 @@ public class JamChannelManager {
 	/**
 	 * Sends a message in the announcement channel which shows the theme which
 	 * was chosen.
-	 * @param votes A map containing for each theme, the number of votes it got.
+	 *
+	 * @param votes  A map containing for each theme, the number of votes it got.
 	 * @param winner The theme which was most voted-for.
 	 */
 	public void sendChosenThemeMessage(Map<JamTheme, Integer> votes, JamTheme winner) {
@@ -128,9 +133,10 @@ public class JamChannelManager {
 	/**
 	 * Sends a message in the Jam voting channel for each submission, so that
 	 * users can begin voting on submissions.
-	 * @param jam The jam that the submissions are for.
+	 *
+	 * @param jam         The jam that the submissions are for.
 	 * @param submissions The submissions to make a message for.
-	 * @param jda The JDA instance.
+	 * @param jda         The JDA instance.
 	 * @return A map containing for every submission, the id of the message that
 	 * users will react with votes on.
 	 */
@@ -162,6 +168,7 @@ public class JamChannelManager {
 	/**
 	 * Gets a list of user ids for each Jam submission, indicating the list of
 	 * users that voted for the submission.
+	 *
 	 * @param submissionMessageMap A map containing for each submission, the id
 	 *                             of the message on which users will react with
 	 *                             the vote emoji.
@@ -188,8 +195,9 @@ public class JamChannelManager {
 	/**
 	 * Determines if a user's vote should be counted, based on how long the user
 	 * has been a member of the guild, and how active they are.
-	 * @param guild The guild in which to check.
-	 * @param user The user to check.
+	 *
+	 * @param guild  The guild in which to check.
+	 * @param user   The user to check.
 	 * @param cutoff The date at which the vote is being performed.
 	 * @return True if the user's vote should count, or false if not.
 	 */
@@ -208,10 +216,11 @@ public class JamChannelManager {
 	/**
 	 * Determines if the given member has sent at least a single message in the
 	 * given channel.
-	 * @param member The member to check.
+	 *
+	 * @param member  The member to check.
 	 * @param channel The channel to check in.
-	 * @param cutoff The time at which messages are considered. Any message
-	 *               before this time is ignored.
+	 * @param cutoff  The time at which messages are considered. Any message
+	 *                before this time is ignored.
 	 * @return True if the user has sent a message, or false otherwise.
 	 */
 	public boolean hasMemberSentMessage(Member member, TextChannel channel, OffsetDateTime cutoff) {
@@ -242,10 +251,11 @@ public class JamChannelManager {
 	/**
 	 * Sends a message in the announcement channel when a single winner is
 	 * chosen for a jam.
+	 *
 	 * @param submission The winning submission.
 	 * @param voteCounts A map containing for each submission, the number of
 	 *                   votes it received.
-	 * @param event The event which triggered this method.
+	 * @param event      The event which triggered this method.
 	 */
 	public void sendSingleWinnerMessage(JamSubmission submission, Map<JamSubmission, Integer> voteCounts, SlashCommandEvent event) {
 		String username = this.getSubmissionUserName(submission, event);
@@ -263,10 +273,11 @@ public class JamChannelManager {
 	/**
 	 * Sends a message in the announcement channel when multiple winners are
 	 * chosen for a jam.
+	 *
 	 * @param submissions The list of winning submissions.
-	 * @param voteCounts A map containing for each submission, the number of
-	 *                   votes it received.
-	 * @param event The event which triggered this method.
+	 * @param voteCounts  A map containing for each submission, the number of
+	 *                    votes it received.
+	 * @param event       The event which triggered this method.
 	 */
 	public void sendMultipleWinnersMessage(List<JamSubmission> submissions, Map<JamSubmission, Integer> voteCounts, SlashCommandEvent event) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
@@ -290,11 +301,12 @@ public class JamChannelManager {
 	/**
 	 * Adds fields to an embed for displaying information about the runners-up
 	 * for a jam.
+	 *
 	 * @param embedBuilder The embed builder.
-	 * @param voteCounts A map containing each submission and the number of
-	 *                   votes it received.
-	 * @param winners The list of winning submissions.
-	 * @param event The event which triggered this method.
+	 * @param voteCounts   A map containing each submission and the number of
+	 *                     votes it received.
+	 * @param winners      The list of winning submissions.
+	 * @param event        The event which triggered this method.
 	 */
 	private void addRunnerUpSubmissionFields(EmbedBuilder embedBuilder, Map<JamSubmission, Integer> voteCounts, List<JamSubmission> winners, SlashCommandEvent event) {
 		var otherSubmissions = new HashMap<>(voteCounts);
@@ -316,8 +328,9 @@ public class JamChannelManager {
 	 * Gets the name which should be displayed for a user's submission. This
 	 * defaults to the user's guild-specific nickname, or "Unknown User" if no
 	 * name could be resolved.
+	 *
 	 * @param submission The submission to get a username for.
-	 * @param event The event which triggered this method.
+	 * @param event      The event which triggered this method.
 	 * @return The name to display alongside the submission.
 	 */
 	private String getSubmissionUserName(JamSubmission submission, SlashCommandEvent event) {
@@ -329,6 +342,7 @@ public class JamChannelManager {
 
 	/**
 	 * Utility method to remove all messages from a channel.
+	 *
 	 * @param channel The channel to remove messages from.
 	 */
 	private void removeAllMessages(TextChannel channel) {

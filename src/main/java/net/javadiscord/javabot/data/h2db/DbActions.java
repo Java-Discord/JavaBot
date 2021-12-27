@@ -14,7 +14,8 @@ import java.util.function.Function;
  */
 public class DbActions {
 	// Hide the constructor.
-	private DbActions () {}
+	private DbActions() {
+	}
 
 	public static void doAction(ConnectionConsumer consumer) throws SQLException {
 		try (var c = Bot.dataSource.getConnection()) {
@@ -72,6 +73,7 @@ public class DbActions {
 
 	/**
 	 * Does an asynchronous database action using the bot's async pool.
+	 *
 	 * @param consumer The consumer that will use a connection.
 	 * @return A future that completes when the action is complete.
 	 */
@@ -92,9 +94,10 @@ public class DbActions {
 	 * Does an asynchronous database action using the bot's async pool, and
 	 * wraps access to the connection behind a data access object that can be
 	 * built using the provided dao constructor.
+	 *
 	 * @param daoConstructor A function to build a DAO using a connection.
-	 * @param consumer The consumer that does something with the DAO.
-	 * @param <T> The type of data access object. Usually some kind of repository.
+	 * @param consumer       The consumer that does something with the DAO.
+	 * @param <T>            The type of data access object. Usually some kind of repository.
 	 * @return A future that completes when the action is complete.
 	 */
 	public static <T> CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
@@ -125,11 +128,12 @@ public class DbActions {
 
 	/**
 	 * Fetches a single result from the database.
-	 * @param query The query to use.
+	 *
+	 * @param query    The query to use.
 	 * @param modifier The query modifier for setting parameters.
-	 * @param mapper The result set mapper. It is assumed to already have its
-	 *               cursor on the first row. Do not call next() on it.
-	 * @param <T> The result type.
+	 * @param mapper   The result set mapper. It is assumed to already have its
+	 *                 cursor on the first row. Do not call next() on it.
+	 * @param <T>      The result type.
 	 * @return An optional that may contain the result, if one was found.
 	 */
 	public static <T> Optional<T> fetchSingleEntity(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {

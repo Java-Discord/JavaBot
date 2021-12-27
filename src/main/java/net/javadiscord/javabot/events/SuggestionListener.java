@@ -14,7 +14,8 @@ public class SuggestionListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED) return;
+		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED)
+			return;
 		if (!event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel())) return;
 
 		var config = Bot.config.get(event.getGuild());
@@ -33,7 +34,9 @@ public class SuggestionListener extends ListenerAdapter {
 					message.addReaction(config.getEmote().getUpvoteEmote()).queue();
 					message.addReaction(config.getEmote().getDownvoteEmote()).queue();
 				});
-			} catch (Exception e) { event.getChannel().sendMessage(e.getMessage()).queue(); }
+			} catch (Exception e) {
+				event.getChannel().sendMessage(e.getMessage()).queue();
+			}
 		} else {
 			event.getChannel().sendMessageEmbeds(eb).queue(message -> {
 				message.addReaction(config.getEmote().getUpvoteEmote()).queue();

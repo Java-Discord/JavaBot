@@ -23,11 +23,8 @@ import java.util.Map;
  * eligible property.
  */
 public class EditJamSubcommand extends ActiveJamSubcommand {
-	private interface PropertyHandler {
-		ReplyAction updateProperty(SlashCommandEvent event, Connection con, Jam jam, String value) throws SQLException;
-	}
-
 	private static final Map<String, PropertyHandler> propertyHandlers = new HashMap<>();
+
 	static {
 		propertyHandlers.put("ends_at", (event, con, jam, value) -> {
 			if (value == null) {
@@ -65,5 +62,9 @@ public class EditJamSubcommand extends ActiveJamSubcommand {
 			return Responses.warning(event, "Unsupported Property", "Only the following properties may be updated: " + String.join(", ", propertyHandlers.keySet()));
 		}
 		return propertyHandler.updateProperty(event, con, activeJam, value);
+	}
+
+	private interface PropertyHandler {
+		ReplyAction updateProperty(SlashCommandEvent event, Connection con, Jam jam, String value) throws SQLException;
 	}
 }

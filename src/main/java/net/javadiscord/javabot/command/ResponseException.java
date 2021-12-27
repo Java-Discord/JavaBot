@@ -6,8 +6,6 @@ import lombok.Getter;
  * An exception that can be thrown while responding to a user.
  */
 public class ResponseException extends Exception {
-	public enum Type {WARNING, ERROR}
-
 	@Getter
 	private final Type type;
 
@@ -23,4 +21,6 @@ public class ResponseException extends Exception {
 	public static ResponseException error(String message, Throwable cause) {
 		return new ResponseException(Type.ERROR, message, cause);
 	}
+
+	public enum Type {WARNING, ERROR}
 }

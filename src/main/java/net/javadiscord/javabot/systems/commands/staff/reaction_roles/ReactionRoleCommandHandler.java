@@ -9,16 +9,19 @@ import net.javadiscord.javabot.systems.commands.staff.reaction_roles.subcommands
 
 public class ReactionRoleCommandHandler extends DelegatingCommandHandler {
 
-    public ReactionRoleCommandHandler() {
-        addSubcommand("create", new CreateReactionRole());
-        addSubcommand("delete", new DeleteReactionRole());
-    }
+	public ReactionRoleCommandHandler() {
+		addSubcommand("create", new CreateReactionRole());
+		addSubcommand("delete", new DeleteReactionRole());
+	}
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
 
-        try { return super.handle(event);
-        } catch (Exception e) { return Responses.error(event, "```" + e.getMessage() + "```"); }
-    }
+		try {
+			return super.handle(event);
+		} catch (Exception e) {
+			return Responses.error(event, "```" + e.getMessage() + "```");
+		}
+	}
 }
 

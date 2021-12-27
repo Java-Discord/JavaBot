@@ -14,6 +14,7 @@ public class TimeUtils {
 	 * The standard formatter for date time objects.
 	 */
 	public static final DateTimeFormatter STANDARD_FORMATTER;
+
 	static {
 		STANDARD_FORMATTER = DateTimeFormatter.ofPattern("EEE',' dd/MM/yyyy',' HH:mm", Locale.ENGLISH);
 	}
@@ -29,27 +30,8 @@ public class TimeUtils {
 	}
 
 	/**
-	 * Returns the duration between the given time and now, respecting time zone
-	 * information.
-	 * @param time The time to get the duration to.
-	 * @return A duration between the given time and now.
-	 */
-	public Duration durationToNow(OffsetDateTime time) {
-		return Duration.between(time, this.clock.instant().atOffset(time.getOffset()));
-	}
-
-	/**
-	 * Shortcut to get a formatted duration string representing the duration
-	 * from the given time to now.
-	 * @param time The time to use.
-	 * @return A string representing the duration.
-	 */
-	public String formatDurationToNow(OffsetDateTime time) {
-		return formatDuration(durationToNow(time));
-	}
-
-	/**
 	 * Formats a duration as roughly-accurate string that is human-friendly.
+	 *
 	 * @param duration The duration to format.
 	 * @return A string representing a human-readable duration.
 	 */
@@ -64,7 +46,7 @@ public class TimeUtils {
 			return pluralize("day", "days", duration.toDays());
 		} else if (duration.toHours() > 0) {
 			return pluralize("hour", "hours", duration.toHours());
-		} else if (duration.toMinutes() > 0){
+		} else if (duration.toMinutes() > 0) {
 			return pluralize("minute", "minutes", duration.toMinutes());
 		} else if (duration.toSeconds() > 0) {
 			return pluralize("second", "seconds", duration.toSeconds());
@@ -76,12 +58,35 @@ public class TimeUtils {
 	/**
 	 * Formats an integer number with a suffix that agrees with the plurality of
 	 * the number. For example, this can produce "1 day" and "2 days".
+	 *
 	 * @param single The singular form of the suffix.
 	 * @param plural The plural form of the suffix.
-	 * @param count The value to show.
+	 * @param count  The value to show.
 	 * @return A string representation that respects plurality.
 	 */
 	private static String pluralize(String single, String plural, long count) {
 		return count + " " + (count == 1 ? single : plural);
+	}
+
+	/**
+	 * Returns the duration between the given time and now, respecting time zone
+	 * information.
+	 *
+	 * @param time The time to get the duration to.
+	 * @return A duration between the given time and now.
+	 */
+	public Duration durationToNow(OffsetDateTime time) {
+		return Duration.between(time, this.clock.instant().atOffset(time.getOffset()));
+	}
+
+	/**
+	 * Shortcut to get a formatted duration string representing the duration
+	 * from the given time to now.
+	 *
+	 * @param time The time to use.
+	 * @return A string representing the duration.
+	 */
+	public String formatDurationToNow(OffsetDateTime time) {
+		return formatDuration(durationToNow(time));
 	}
 }

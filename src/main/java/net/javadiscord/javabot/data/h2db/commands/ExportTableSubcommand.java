@@ -26,13 +26,13 @@ public class ExportTableSubcommand implements SlashCommandHandler {
 		if (tableNameOption == null) return Responses.error(event, "Missing required Choice Option");
 		Bot.asyncPool.submit(() -> {
 			try (var con = Bot.dataSource.getConnection();
-					var stmt = con.createStatement()) {
+				 var stmt = con.createStatement()) {
 				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s' TABLE %s;", includeData ? "COLUMNS" : "NODATA", TABLE_FILE, tableNameOption.getAsString()));
 				if (!success) {
 					event.getHook().sendMessage("Exporting the table was not successful.").queue();
 				} else {
 					event.getHook().sendMessage("The export was successful.").queue();
-					event.getChannel().sendFile(TABLE_FILE.toFile(), "table.sql").queue(msg->{
+					event.getChannel().sendFile(TABLE_FILE.toFile(), "table.sql").queue(msg -> {
 						try {
 							Files.delete(TABLE_FILE);
 						} catch (IOException e) {

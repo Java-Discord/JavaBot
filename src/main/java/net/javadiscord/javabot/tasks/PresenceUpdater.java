@@ -21,87 +21,85 @@ import java.util.function.Function;
  * activities. Also sets the bot to {@link OnlineStatus#DO_NOT_DISTURB} if it's
  * not set like that already.
  * <p>
- *     This updater should be added as an event listener to the bot, so that it
- *     will automatically begin operation when the bot gives the ready event.
+ * This updater should be added as an event listener to the bot, so that it
+ * will automatically begin operation when the bot gives the ready event.
  * </p>
  */
 public class PresenceUpdater extends ListenerAdapter {
-    /**
-     * The executor that is responsible for the scheduled updates of the bot's
-     * presence data.
-     */
-    private final ScheduledExecutorService threadPool = Executors.newSingleThreadScheduledExecutor();
+	/**
+	 * The executor that is responsible for the scheduled updates of the bot's
+	 * presence data.
+	 */
+	private final ScheduledExecutorService threadPool = Executors.newSingleThreadScheduledExecutor();
 
-    /**
-     * A list of functions that take a reference to the bot's JDA client, and
-     * produce an {@link Activity} that should be displayed.
-     */
-    private final List<Function<JDA, Activity>> activities;
+	/**
+	 * A list of functions that take a reference to the bot's JDA client, and
+	 * produce an {@link Activity} that should be displayed.
+	 */
+	private final List<Function<JDA, Activity>> activities;
+	/**
+	 * The amount of time the updater should wait before updating the activity.
+	 */
+	private final long delay;
+	/**
+	 * The unit of time that {@link PresenceUpdater#delay} is counted in.
+	 */
+	private final TimeUnit delayUnit;
+	/**
+	 * The index of the currently active activity.
+	 */
+	private int currentActivityIndex = 0;
+	/**
+	 * A reference to the bot's JDA client object. This is set as soon as the
+	 * bot is ready, and so it will never be null when passed to a function.
+	 */
+	private JDA jda;
 
-    /**
-     * The index of the currently active activity.
-     */
-    private int currentActivityIndex = 0;
+	/**
+	 * Constructs an updater using a list of activities, and a delay and time
+	 * unit to describe how frequently to cycle through them.
+	 *
+	 * @param activities The list of activity-producing functions.
+	 * @param delay      The amount of time the updater should wait before updating the activity.
+	 * @param delayUnit  The unit of time that {@link PresenceUpdater#delay} is counted in.
+	 */
+	public PresenceUpdater(List<Function<JDA, Activity>> activities, long delay, TimeUnit delayUnit) {
+		this.activities = new CopyOnWriteArrayList<>(activities);
+		this.delay = delay;
+		this.delayUnit = delayUnit;
+	}
 
-    /**
-     * The amount of time the updater should wait before updating the activity.
-     */
-    private final long delay;
+	/**
+	 * @return A pre-built implementation of the {@link PresenceUpdater} that
+	 * has all the necessary properties defined to reasonable defaults.
+	 */
+	public static PresenceUpdater standardActivities() {
+		return new PresenceUpdater(List.of(
+				jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + StartupListener.preferredGuild.getMemberCount() + " members"),
+				jda -> Activity.watching(Constants.JAM_LINK + " | " + StartupListener.preferredGuild.getMemberCount() + " members"),
+				jda -> Activity.watching(Constants.QOTW_LINK + " | " + StartupListener.preferredGuild.getMemberCount() + " members"),
+				jda -> Activity.watching(Constants.GITHUB_LINK + " | " + StartupListener.preferredGuild.getMemberCount() + " members")
+		), 35, TimeUnit.SECONDS);
+	}
 
-    /**
-     * The unit of time that {@link PresenceUpdater#delay} is counted in.
-     */
-    private final TimeUnit delayUnit;
-
-    /**
-     * A reference to the bot's JDA client object. This is set as soon as the
-     * bot is ready, and so it will never be null when passed to a function.
-     */
-    private JDA jda;
-
-    /**
-     * Constructs an updater using a list of activities, and a delay and time
-     * unit to describe how frequently to cycle through them.
-     * @param activities The list of activity-producing functions.
-     * @param delay The amount of time the updater should wait before updating the activity.
-     * @param delayUnit The unit of time that {@link PresenceUpdater#delay} is counted in.
-     */
-    public PresenceUpdater(List<Function<JDA, Activity>> activities, long delay, TimeUnit delayUnit) {
-        this.activities = new CopyOnWriteArrayList<>(activities);
-        this.delay = delay;
-        this.delayUnit = delayUnit;
-    }
-
-    /**
-     * Called when the Discord bot is ready. This triggers the start of the
-     * scheduled updating of the bot's activities.
-     * @param event The ready event that's sent. Notably, contains a reference
-     *              to the bot's {@link JDA} client.
-     */
-    @Override
-    public void onReady(@Nonnull ReadyEvent event) {
-        this.jda = event.getJDA();
-        threadPool.scheduleWithFixedDelay(() -> {
-            if (this.jda.getPresence().getStatus() != OnlineStatus.DO_NOT_DISTURB) {
-                this.jda.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
-            }
-            if (currentActivityIndex >= this.activities.size()) currentActivityIndex = 0;
-            if (!this.activities.isEmpty()) {
-                this.jda.getPresence().setActivity(this.activities.get(currentActivityIndex++).apply(this.jda));
-            }
-        }, 0, this.delay, this.delayUnit);
-    }
-
-    /**
-     * @return A pre-built implementation of the {@link PresenceUpdater} that
-     * has all the necessary properties defined to reasonable defaults.
-     */
-    public static PresenceUpdater standardActivities() {
-        return new PresenceUpdater(List.of(
-            jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching(Constants.JAM_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching(Constants.QOTW_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching(Constants.GITHUB_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members")
-        ), 35, TimeUnit.SECONDS);
-    }
+	/**
+	 * Called when the Discord bot is ready. This triggers the start of the
+	 * scheduled updating of the bot's activities.
+	 *
+	 * @param event The ready event that's sent. Notably, contains a reference
+	 *              to the bot's {@link JDA} client.
+	 */
+	@Override
+	public void onReady(@Nonnull ReadyEvent event) {
+		this.jda = event.getJDA();
+		threadPool.scheduleWithFixedDelay(() -> {
+			if (this.jda.getPresence().getStatus() != OnlineStatus.DO_NOT_DISTURB) {
+				this.jda.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
+			}
+			if (currentActivityIndex >= this.activities.size()) currentActivityIndex = 0;
+			if (!this.activities.isEmpty()) {
+				this.jda.getPresence().setActivity(this.activities.get(currentActivityIndex++).apply(this.jda));
+			}
+		}, 0, this.delay, this.delayUnit);
+	}
 }

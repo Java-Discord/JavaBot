@@ -24,11 +24,8 @@ import java.util.stream.Stream;
  */
 public class PreferencesSubcommand implements SlashCommandHandler {
 
-	private interface PreferenceUpdater {
-		ReplyAction update(SlashCommandEvent event, AccountPreferences prefs, String value);
-	}
-
 	private static final Map<String, PreferenceUpdater> preferenceUpdaters = new HashMap<>();
+
 	static {
 		preferenceUpdaters.put("receive_transaction_dms", (event, prefs, value) -> {
 			boolean b;
@@ -81,5 +78,9 @@ public class PreferencesSubcommand implements SlashCommandHandler {
 			e.printStackTrace();
 			return Responses.error(event, "An SQL error occurred: " + e.getMessage());
 		}
+	}
+
+	private interface PreferenceUpdater {
+		ReplyAction update(SlashCommandEvent event, AccountPreferences prefs, String value);
 	}
 }
