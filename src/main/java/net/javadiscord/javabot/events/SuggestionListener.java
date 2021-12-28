@@ -22,7 +22,7 @@ public class SuggestionListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (!canCreateSubmission(event)) return;
+		if (!canCreateSuggestion(event)) return;
 		var config = Bot.config.get(event.getGuild());
 		var embed = buildSuggestionEmbed(event.getAuthor(), event.getMessage(), config.getSlashCommand());
 		MessageAction action = event.getChannel().sendMessageEmbeds(embed);
@@ -40,7 +40,7 @@ public class SuggestionListener extends ListenerAdapter {
 		);
 	}
 
-	private boolean canCreateSubmission(MessageReceivedEvent event) {
+	private boolean canCreateSuggestion(MessageReceivedEvent event) {
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && event.getMessage().getType() != MessageType.THREAD_CREATED
 				&& event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
 	}
