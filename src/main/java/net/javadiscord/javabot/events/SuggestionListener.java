@@ -1,45 +1,66 @@
 package net.javadiscord.javabot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageType;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.concurrent.ExecutionException;
 
+@Slf4j
 public class SuggestionListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED) return;
-		if (!event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel())) return;
-
+		if (!canCreateSubmission(event)) return;
 		var config = Bot.config.get(event.getGuild());
-		var eb = new EmbedBuilder()
-				.setColor(config.getSlashCommand().getDefaultColor())
-				.setImage(null)
-				.setAuthor(event.getAuthor().getAsTag() + " · Suggestion", null, event.getAuthor().getEffectiveAvatarUrl())
-				.setTimestamp(Instant.now())
-				.setDescription(event.getMessage().getContentRaw())
-				.build();
-
-		if (!event.getMessage().getAttachments().isEmpty()) {
-			Message.Attachment attachment = event.getMessage().getAttachments().get(0);
+		var embed = buildSuggestionEmbed(event.getAuthor(), event.getMessage(), config.getSlashCommand());
+		MessageAction action = event.getChannel().sendMessageEmbeds(embed);
+		for (var a : event.getMessage().getAttachments()) {
 			try {
-				event.getChannel().sendFile(attachment.retrieveInputStream().get(), "attachment." + attachment.getFileExtension()).setEmbeds(eb).queue(message -> {
-					message.addReaction(config.getEmote().getUpvoteEmote()).queue();
-					message.addReaction(config.getEmote().getDownvoteEmote()).queue();
-				});
-			} catch (Exception e) { event.getChannel().sendMessage(e.getMessage()).queue(); }
-		} else {
-			event.getChannel().sendMessageEmbeds(eb).queue(message -> {
-				message.addReaction(config.getEmote().getUpvoteEmote()).queue();
-				message.addReaction(config.getEmote().getDownvoteEmote()).queue();
-			});
+				action.addFile(a.retrieveInputStream().get(), a.getFileName());
+			} catch (InterruptedException | ExecutionException e) {
+				action.append("Could not add Attachment: " + a.getFileName());
+			}
 		}
-		event.getMessage().delete().queue();
+		action.queue(success -> {
+					addReactions(success).queue();
+					event.getMessage().delete().queue();
+				}, e -> log.error("Could not send Submission Embed", e)
+		);
+	}
+
+	private boolean canCreateSubmission(MessageReceivedEvent event) {
+		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && event.getMessage().getType() != MessageType.THREAD_CREATED
+				&& event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
+	}
+
+	private MessageEmbed buildSuggestionEmbed(User user, Message message, SlashCommandConfig config) {
+		return new EmbedBuilder()
+				.setTitle("Suggestion")
+				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
+				.setImage(null)
+				.setColor(config.getDefaultColor())
+				.setTimestamp(Instant.now())
+				.setDescription(message.getContentRaw())
+				.build();
+	}
+
+	private RestAction<?> addReactions(Message m) {
+		var config = Bot.config.get(m.getGuild()).getEmote();
+		return RestAction.allOf(
+				m.addReaction(config.getUpvoteEmote()),
+				m.addReaction(config.getDownvoteEmote())
+		);
 	}
 }
