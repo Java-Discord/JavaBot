@@ -26,7 +26,7 @@ public class SearchCommand implements SlashCommandHandler {
     private static final String HOST = "https://api.bing.microsoft.com";
     private static final String PATH = "/v7.0/search";
 
-    public SearchResults SearchWeb(String searchQuery) throws Exception {
+    private SearchResults searchWeb(String searchQuery) throws Exception {
         // Construct the URL.
         URL url = new URL(HOST + PATH + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=" + "en-US" + "&safeSearch=Strict");
 
@@ -68,7 +68,7 @@ public class SearchCommand implements SlashCommandHandler {
                 .setTitle("Search Results");
 
         try {
-            SearchResults result = SearchWeb(searchTerm);
+            SearchResults result = searchWeb(searchTerm);
             JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
             JsonArray urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
             StringBuilder resultString = new StringBuilder();
