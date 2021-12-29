@@ -124,7 +124,6 @@ public class AutoMod extends ListenerAdapter {
             for (String spamUrl : spamUrls) {
                 if (messageRaw.contains(spamUrl)){
                     try {
-                        message.delete().queue();
                         new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
                                 .warn(
                                         message.getMember(),
@@ -140,6 +139,7 @@ public class AutoMod extends ListenerAdapter {
                 }
             }
         }
+        message.delete().queue();
     }
 
     /**
