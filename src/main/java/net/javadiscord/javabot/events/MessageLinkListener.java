@@ -27,7 +27,7 @@ public class MessageLinkListener extends ListenerAdapter {
 		Matcher matcher = MESSAGE_URL_PATTERN.matcher(event.getMessage().getContentRaw());
 		if (matcher.find()) {
 			var optional = parseMessageUrl(matcher.group(), event.getJDA());
-			optional.ifPresent(action -> action.queue(m -> event.getMessage().replyEmbeds(buildUrlEmbed(m)).queue()));
+			optional.ifPresent(action -> action.queue(m -> event.getMessage().replyEmbeds(buildUrlEmbed(m)).queue(), e -> {}));
 		}
 	}
 
