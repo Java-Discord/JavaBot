@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class MessageLinkListener extends ListenerAdapter {
 
-	private final Pattern MESSAGE_URL_PATTERN = Pattern.compile("https://((?:canary|ptb)\\.)discord.com/channels/[0-9]+/[0-9]+/[0-9]+");
+	private final Pattern MESSAGE_URL_PATTERN = Pattern.compile("https://((?:canary|ptb)\\.)?discord.com/channels/[0-9]+/[0-9]+/[0-9]+");
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
