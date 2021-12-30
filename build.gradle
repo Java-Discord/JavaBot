@@ -29,7 +29,7 @@ dependencies {
     implementation group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
 
     // H2 Database
-    implementation group: 'com.h2database', name: 'h2', version: '2.0.204'
+    implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
     implementation 'com.zaxxer:HikariCP:5.0.0'
 
     // Quartz scheduler
