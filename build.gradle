@@ -4,8 +4,8 @@ plugins {
     id 'checkstyle'
 }
 
-sourceCompatibility = 16
-targetCompatibility = 16
+sourceCompatibility = 17
+targetCompatibility = 17
 
 group 'net.javadiscord'
 version '1.0.0-SNAPSHOT'
@@ -47,6 +47,13 @@ dependencies {
 
 jar{
     manifest{ attributes("Manifest-Version": "1.0", "Main-Class": "net.javadiscord.javabot.Bot") }
+}
+
+java{
+    toolchain{
+        sourceCompatibility(sourceCompatibility as JavaVersion)
+        targetCompatibility(targetCompatibility as JavaVersion)
+    }
 }
 
 tasks.withType(JavaCompile){ options.encoding = 'UTF-8'}
