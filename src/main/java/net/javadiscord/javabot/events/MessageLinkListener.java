@@ -46,9 +46,9 @@ public class MessageLinkListener extends ListenerAdapter {
 		try {
 			var arr = url.split("/");
 			String[] segments = Arrays.copyOfRange(arr, 4, arr.length);
-			if (jda.getGuilds().stream().map(Guild::getId).toList().contains(segments[0])) {
+			if (jda.getGuilds().stream().map(Guild::getId).anyMatch(s -> s.contains(segments[0]))) {
 				var guild = jda.getGuildById(segments[0]);
-				if (guild != null && guild.getChannels().stream().map(GuildChannel::getId).toList().contains(segments[1])) {
+				if (guild != null && guild.getChannels().stream().map(GuildChannel::getId).anyMatch(s -> s.contains(segments[1]))) {
 					var channel = guild.getTextChannelById(segments[1]);
 					if (channel != null) {
 						optional = channel.retrieveMessageById(segments[2]);
