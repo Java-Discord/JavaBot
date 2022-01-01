@@ -37,7 +37,7 @@ public class MessageLinkListener extends ListenerAdapter {
 				.setColor(Bot.config.get(m.getGuild()).getSlashCommand().getDefaultColor())
 				.setDescription(m.getContentRaw())
 				.setTimestamp(m.getTimeCreated())
-				.setFooter(m.getAuthor().getAsTag(), m.getAuthor().getEffectiveAvatarUrl())
+				.setFooter(String.format("%s in #%s", m.getAuthor().getAsTag(), m.getChannel().getName()), m.getAuthor().getEffectiveAvatarUrl())
 				.build();
 	}
 
