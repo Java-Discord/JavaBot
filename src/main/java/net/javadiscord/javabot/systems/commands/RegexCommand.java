@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.commands;
 
+import com.google.re2j.Pattern;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -8,8 +9,6 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
-
-import java.util.regex.Pattern;
 
 public class RegexCommand implements SlashCommandHandler {
 
@@ -24,6 +23,8 @@ public class RegexCommand implements SlashCommandHandler {
 
         Pattern pattern = Pattern.compile(patternOption.getAsString());
         String string = stringOption.getAsString();
+
+        if (patternOption.getAsString().length() > 1018 || string.length() > 1018) return Responses.warning(event, "Pattern and String cannot be longer than 1018 Characters each.");
 
         return event.replyEmbeds(buildRegexEmbed(pattern.matcher(string).matches(), pattern, string, event.getGuild()).build());
     }
