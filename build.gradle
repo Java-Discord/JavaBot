@@ -17,15 +17,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    implementation 'net.dv8tion:JDA:5.0.0-alpha.1'
+    implementation 'net.dv8tion:JDA:5.0.0-alpha.3'
     implementation 'org.mongodb:mongodb-driver:3.12.10'
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'org.yaml:snakeyaml:1.29'
 
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.5'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
     implementation group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
 
     // H2 Database
@@ -41,8 +41,8 @@ dependencies {
     // Lombok Annotations
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testCompileOnly 'org.projectlombok:lombok:1.18.20'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 jar{

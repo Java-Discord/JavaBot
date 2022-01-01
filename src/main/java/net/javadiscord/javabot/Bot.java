@@ -24,12 +24,9 @@ import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Collectors;
 
 /**
  * The main class where the bot is initialized.
@@ -75,7 +72,6 @@ public class Bot {
      * @throws Exception If any exception occurs during bot creation.
      */
     public static void main(String[] args) throws Exception {
-
 
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
         config = new BotConfig(Path.of("config"));
