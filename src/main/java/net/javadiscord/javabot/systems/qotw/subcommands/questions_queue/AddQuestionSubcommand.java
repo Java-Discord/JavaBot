@@ -1,11 +1,12 @@
-package net.javadiscord.javabot.systems.qotw.subcommands;
+package net.javadiscord.javabot.systems.qotw.subcommands.questions_queue;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionRepository;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
+import net.javadiscord.javabot.systems.qotw.subcommands.QOTWSubcommand;
 
 import java.sql.Connection;
 
@@ -33,7 +34,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand {
 			question.setPriority((int) priorityOption.getAsLong());
 		}
 
-		new QuestionRepository(con).save(question);
+		new QuestionQueueRepository(con).save(question);
 		return Responses.success(event, "Question Added", "Your question has been added to the queue. Its id is `" + question.getId() + "`.");
 	}
 }
