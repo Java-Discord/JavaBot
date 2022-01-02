@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.commands.staff.reaction_roles.subcommands;
+package net.javadiscord.javabot.systems.staff.reaction_roles.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;

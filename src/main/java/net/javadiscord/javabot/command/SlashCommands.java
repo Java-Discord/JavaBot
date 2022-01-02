@@ -1,18 +1,13 @@
 package net.javadiscord.javabot.command;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
@@ -20,26 +15,24 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.data.CommandConfig;
 import net.javadiscord.javabot.command.data.CommandDataLoader;
-import net.javadiscord.javabot.events.StartupListener;
+import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.util.Misc;
-import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
 import java.util.*;
-
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * This listener is responsible for handling slash commands sent by users in
  * guilds where the bot is active, and responding to them by calling the
  * appropriate {@link SlashCommandHandler}.
  * <p>
- *     The list of valid commands, and their associated handlers, are defined in
- *     their corresponding YAML-file under the resources/commands directory.
+ * The list of valid commands, and their associated handlers, are defined in
+ * their corresponding YAML-file under the resources/commands directory.
  * </p>
  */
 public class SlashCommands extends ListenerAdapter {
@@ -94,10 +87,11 @@ public class SlashCommands extends ListenerAdapter {
 	 * Registers all slash commands defined in the set YAML-files for the given guild
 	 * so that users can see the commands when they type a "/".
 	 * <p>
-	 *     It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
-	 *     whose key is the command name, and whose value is a new instance of
-	 *     the handler class which the command has specified.
+	 * It does this by attempting to add an entry to {@link SlashCommands#commandsIndex}
+	 * whose key is the command name, and whose value is a new instance of
+	 * the handler class which the command has specified.
 	 * </p>
+	 *
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerSlashCommands(Guild guild) {
@@ -110,11 +104,11 @@ public class SlashCommands extends ListenerAdapter {
 				"commands/user.yaml"
 		);
 		var commandUpdateAction = this.updateCommands(commandConfigs, guild);
-		var customCommandNames=this.updateCustomCommands(commandUpdateAction, guild);
+		var customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
 
-		commandUpdateAction.queue(commands ->{
+		commandUpdateAction.queue(commands -> {
 			// Add privileges to the non-custom commands, after the commands have been registered.
-			commands.removeIf(cmd->customCommandNames.contains(cmd.getName()));
+			commands.removeIf(cmd -> customCommandNames.contains(cmd.getName()));
 			this.addCommandPrivileges(commands, commandConfigs, guild);
 		});
 	}
@@ -141,25 +135,33 @@ public class SlashCommands extends ListenerAdapter {
 		return commandUpdateAction;
 	}
 
+	/**
+	 * Attempts to update and register all Custom Commands.
+	 *
+	 * @param commandUpdateAction The {@link CommandListUpdateAction}.
+	 * @param guild               The current guild.
+	 * @return A {@link Set} with all Custom Command names.
+	 */
 	private Set<String> updateCustomCommands(CommandListUpdateAction commandUpdateAction, Guild guild) {
-		log.info("{}[{}]{} Registering custom commands",
-				Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
-		MongoDatabase database = StartupListener.mongoClient.getDatabase("other");
-		MongoCollection<Document> collection = database.getCollection("customcommands");
-
-		Set<String> customCommandNames = new HashSet<>();
-		for (Document document : collection.find(eq("guildId", guild.getId()))) {
-			JsonObject root = JsonParser.parseString(document.toJson()).getAsJsonObject();
-			String commandName = root.get("commandName").getAsString();
-			String value = root.get("value").getAsString();
-			if (value.length() > 100) value = value.substring(0, 97) + "...";
-			commandUpdateAction.addCommands(
-					new CommandData(commandName, value)
-							.addOption(OptionType.BOOLEAN, "reply", "If set to True, will reply on use", false)
-							.addOption(OptionType.BOOLEAN, "embed", "If set to True, will send the content in an embed", false));
-			customCommandNames.add(commandName);
+		log.info("{}[{}]{} Registering custom commands", Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new CustomCommandRepository(con);
+			var commands = repo.getCustomCommandsByGuildId(guild.getIdLong());
+			Set<String> commandNames = new HashSet<>();
+			for (var c : commands) {
+				var response = c.getResponse();
+				if (response.length() > 100) response = response.substring(0, 97).concat("...");
+				commandUpdateAction.addCommands(
+						new CommandData(c.getName(), response).addOptions(
+								new OptionData(OptionType.BOOLEAN, "reply", "Should the custom commands reply?"),
+								new OptionData(OptionType.BOOLEAN, "embed", "Should the response be embedded?")));
+				commandNames.add(c.getName());
+			}
+			return commandNames;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Set.of();
 		}
-		return customCommandNames;
 	}
 
 	private void addCommandPrivileges(List<Command> commands, CommandConfig[] commandConfigs, Guild guild) {
@@ -167,10 +169,9 @@ public class SlashCommands extends ListenerAdapter {
 				Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
 
 		Map<String, Collection<? extends CommandPrivilege>> map = new HashMap<>();
-
-		for(Command command : commands) {
+		for (Command command : commands) {
 			List<CommandPrivilege> privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
-			if(!privileges.isEmpty()) {
+			if (!privileges.isEmpty()) {
 				map.put(command.getId(), privileges);
 			}
 		}
@@ -181,13 +182,13 @@ public class SlashCommands extends ListenerAdapter {
 
 	@NotNull
 	private List<CommandPrivilege> getCommandPrivileges(Guild guild, CommandConfig config) {
-		if(config == null || config.getPrivileges() == null) return Collections.emptyList();
+		if (config == null || config.getPrivileges() == null) return Collections.emptyList();
 		List<CommandPrivilege> privileges = new ArrayList<>();
 		for (var privilegeConfig : config.getPrivileges()) {
 			try {
 				privileges.add(privilegeConfig.toData(guild, Bot.config));
 				log.info("\t{}[{}]{} Registering privilege: {}",
-						Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, Objects.toString(privilegeConfig));
+						Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, privilegeConfig);
 			} catch (Exception e) {
 				log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
 			}
@@ -205,45 +206,42 @@ public class SlashCommands extends ListenerAdapter {
 		return null;
 	}
 
+	/**
+	 * Handles a Custom Slash Command.
+	 *
+	 * @param event The {@link SlashCommandEvent} that is fired.
+	 * @return The {@link RestAction}.
+	 */
 	private RestAction<?> handleCustomCommand(SlashCommandEvent event) {
-		String json = StartupListener.mongoClient
-				.getDatabase("other")
-				.getCollection("customcommands")
-				.find(
-						new BasicDBObject()
-								.append("guildId", event.getGuild().getId())
-								.append("commandName", event.getName()))
-				.first()
-				.toJson();
-
-		JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-		String value = Misc.replaceTextVariables(event.getGuild(), root.get("value").getAsString());
-		boolean embed = root.get("embed").getAsBoolean();
-		boolean reply = root.get("reply").getAsBoolean();
-
-		OptionMapping replyOption = event.getOption("reply");
-		if (replyOption != null) reply = replyOption.getAsBoolean();
-
-		OptionMapping embedOption = event.getOption("embed");
-		if (embedOption != null) embed = embedOption.getAsBoolean();
-
-		if (embed) {
-			var e = new EmbedBuilder()
-					.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-					.setDescription(value)
-					.build();
-
-			if (reply) return event.replyEmbeds(e);
-			else {
-				event.reply("Done!").setEphemeral(true).queue();
-				return event.getChannel().sendMessageEmbeds(e);
+		var name = event.getName();
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new CustomCommandRepository(con);
+			var optional = repo.findByName(event.getGuild().getIdLong(), name);
+			if (optional.isEmpty()) return null;
+			var command = optional.get();
+			var responseText = Misc.replaceTextVariables(event.getGuild(), command.getResponse());
+			var replyOption = event.getOption("reply");
+			boolean reply = replyOption == null ? command.isReply() : replyOption.getAsBoolean();
+			var embedOption = event.getOption("embed");
+			boolean embed = embedOption == null ? command.isEmbed() : embedOption.getAsBoolean();
+			if (embed) {
+				var e = new EmbedBuilder()
+						.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+						.setDescription(responseText)
+						.build();
+				if (reply) return event.replyEmbeds(e);
+				else {
+					return RestAction.allOf(event.getChannel().sendMessageEmbeds(e), event.reply("Done!").setEphemeral(true));
+				}
+			} else {
+				if (reply) return event.reply(responseText);
+				else {
+					return RestAction.allOf(event.getChannel().sendMessage(responseText), event.reply("Done!").setEphemeral(true));
+				}
 			}
-		} else {
-			if (reply) return event.reply(value);
-			else {
-				event.reply("Done!").setEphemeral(true).queue();
-				return event.getChannel().sendMessage(value);
-			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Responses.error(event, "Unknown Command.");
 		}
 	}
 }

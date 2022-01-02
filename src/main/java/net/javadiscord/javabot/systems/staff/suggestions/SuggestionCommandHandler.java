@@ -1,9 +1,9 @@
-package net.javadiscord.javabot.systems.commands.staff.suggestions;
+package net.javadiscord.javabot.systems.staff.suggestions;
 
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.systems.commands.staff.suggestions.subcommands.AcceptSubcommand;
-import net.javadiscord.javabot.systems.commands.staff.suggestions.subcommands.ClearSubcommand;
-import net.javadiscord.javabot.systems.commands.staff.suggestions.subcommands.DeclineSubcommand;
+import net.javadiscord.javabot.systems.staff.suggestions.subcommands.AcceptSubcommand;
+import net.javadiscord.javabot.systems.staff.suggestions.subcommands.ClearSubcommand;
+import net.javadiscord.javabot.systems.staff.suggestions.subcommands.DeclineSubcommand;
 
 /**
  * Command to modify the state of suggestions.

@@ -30,6 +30,7 @@ public class AutoMod extends ListenerAdapter {
 	private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 	private List<String> spamUrls;
 
+	// FIXME: 02.01.2022 Fix URL loading
 	public AutoMod() {
 		try {
 			spamUrls = Files.readAllLines(Paths.get(getClass().getResource("spamLinks.txt").toURI()));
