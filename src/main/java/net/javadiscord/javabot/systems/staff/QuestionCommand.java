@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.commands.staff;
+package net.javadiscord.javabot.systems.staff;
 
 
 import com.google.gson.JsonObject;

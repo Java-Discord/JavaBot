@@ -1,0 +1,9 @@
+CREATE TABLE custom_commands (
+     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+     guild_id BIGINT NOT NULL,
+     created_by BIGINT NOT NULL,
+     name VARCHAR(64) NOT NULL,
+     response VARCHAR(2048) NOT NULL,
+     reply BOOL NOT NULL DEFAULT TRUE,
+     embed BOOL NOT NULL DEFAULT TRUE
+)
