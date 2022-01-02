@@ -213,11 +213,6 @@ public class SlashCommands extends ListenerAdapter {
 	 * @return The {@link RestAction}.
 	 */
 	private RestAction<?> handleCustomCommand(SlashCommandEvent event) {
-		var replyOption = event.getOption("reply");
-		boolean reply = replyOption == null || replyOption.getAsBoolean();
-		var embedOption = event.getOption("embed");
-		boolean embed = embedOption == null || embedOption.getAsBoolean();
-
 		var name = event.getName();
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new CustomCommandRepository(con);
@@ -225,6 +220,10 @@ public class SlashCommands extends ListenerAdapter {
 			if (optional.isEmpty()) return null;
 			var command = optional.get();
 			var responseText = Misc.replaceTextVariables(event.getGuild(), command.getResponse());
+			var replyOption = event.getOption("reply");
+			boolean reply = replyOption == null ? command.isReply() : replyOption.getAsBoolean();
+			var embedOption = event.getOption("embed");
+			boolean embed = embedOption == null ? command.isEmbed() : embedOption.getAsBoolean();
 			if (embed) {
 				var e = new EmbedBuilder()
 						.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
@@ -239,7 +238,6 @@ public class SlashCommands extends ListenerAdapter {
 				else {
 					return RestAction.allOf(event.getChannel().sendMessage(responseText), event.reply("Done!").setEphemeral(true));
 				}
-
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

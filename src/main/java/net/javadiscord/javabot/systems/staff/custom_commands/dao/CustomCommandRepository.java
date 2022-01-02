@@ -26,13 +26,15 @@ public class CustomCommandRepository {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s already exists.", command.getGuildId(), command.getName()));
 		}
 		try (var s = con.prepareStatement(
-				"INSERT INTO custom_commands (guild_id, created_by, name, response) VALUES (?, ?, ?, ?)",
+				"INSERT INTO custom_commands (guild_id, created_by, name, response, reply, embed) VALUES (?, ?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
 			s.setLong(1, command.getGuildId());
 			s.setLong(2, command.getCreatedBy());
 			s.setString(3, command.getName());
 			s.setString(4, command.getResponse());
+			s.setBoolean(5, command.isReply());
+			s.setBoolean(6, command.isEmbed());
 			s.executeUpdate();
 			var rs = s.getGeneratedKeys();
 			if (!rs.next()) throw new SQLException("No generated keys returned.");
