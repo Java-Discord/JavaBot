@@ -241,7 +241,7 @@ public class SlashCommands extends ListenerAdapter {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			return Responses.error(event, "Unknown Command.");
 		}
 	}
 }

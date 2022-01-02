@@ -31,8 +31,6 @@ public class CreateSubCommand implements SlashCommandHandler {
 
 		var embedOption = event.getOption("embed");
 		boolean embed = embedOption == null || embedOption.getAsBoolean();
-		System.out.println(reply);
-		System.out.println(embed);
 
 		String name = CustomCommandHandler.cleanString(nameOption.getAsString());
 		String response = responseOption.getAsString();

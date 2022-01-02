@@ -49,7 +49,7 @@ public class CustomCommandRepository {
 	 * @param update The new custom command.
 	 * @throws SQLException If an error occurs.
 	 */
-	public CustomCommand edit(CustomCommand old, CustomCommand update) throws SQLException{
+	public CustomCommand edit(CustomCommand old, CustomCommand update) throws SQLException {
 		if (findByName(old.getGuildId(), old.getName()).isEmpty()) {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s does not exist.", old.getGuildId(), old.getName()));
 		}
@@ -88,7 +88,7 @@ public class CustomCommandRepository {
 	 * @return The custom command, if it was found.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<CustomCommand> findByName(long guildId, String name) throws SQLException{
+	public Optional<CustomCommand> findByName(long guildId, String name) throws SQLException {
 		CustomCommand command = null;
 		try (var s = con.prepareStatement("SELECT * FROM custom_commands WHERE guild_id = ? AND name = ?")) {
 			s.setLong(1, guildId);
@@ -108,7 +108,7 @@ public class CustomCommandRepository {
 	 * @return The custom command, if it was found.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<CustomCommand> findById(long id) throws SQLException{
+	public Optional<CustomCommand> findById(long id) throws SQLException {
 		CustomCommand command = null;
 		try (var s = con.prepareStatement("SELECT * FROM custom_commands WHERE id = ?")) {
 			s.setLong(1, id);
@@ -125,7 +125,6 @@ public class CustomCommandRepository {
 	 * Gets all custom commands for the given guild
 	 * @param guildId The id of the guild.
 	 * @return A List with all custom commands.
-	 * @throws SQLException If an error occurs.
 	 */
 	public List<CustomCommand> getCustomCommandsByGuildId(long guildId) {
 		List<CustomCommand> commands = new ArrayList<>();
