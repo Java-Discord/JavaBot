@@ -1,6 +1,9 @@
 package net.javadiscord.javabot.systems.commands;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
@@ -34,7 +37,8 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	public ReplyAction handle(SlashCommandEvent event) {
 		Bot.asyncPool.submit(() -> {
 			try {
-				event.getHook().sendFile(new ByteArrayInputStream(generateLeaderboard(event.getGuild()).toByteArray()),
+				event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()))
+						.addFile(new ByteArrayInputStream(generateLeaderboard(event.getGuild()).toByteArray()),
 						Instant.now().getEpochSecond() + ".png").queue();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -47,6 +51,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * Gets the given user's QOTW-Rank.
 	 *
 	 * @param userId The id of the user.
+	 * @return The QOTW-Rank as an integer.
 	 */
 	public int getQOTWRank(long userId) {
 		try (var con = Bot.dataSource.getConnection()) {
@@ -63,6 +68,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * Gets the top N members.
 	 *
 	 * @param n The amount of members to get.
+	 * @return A {@link List} with the top member ids.
 	 */
 	private List<Long> getTopNMembers(int n) {
 		try (var con = Bot.dataSource.getConnection()) {
@@ -81,6 +87,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * Gets the given user's QOTW-Points.
 	 *
 	 * @param userId The id of the user.
+	 * @return The user's total QOTW-Points
 	 */
 	private long getPoints(long userId) {
 		try (var con = Bot.dataSource.getConnection()) {
@@ -90,6 +97,30 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 			e.printStackTrace();
 			return 0;
 		}
+	}
+
+	/**
+	 * Builds the Leaderboard Rank {@link MessageEmbed}.
+	 * @param member The member which executed the command.
+	 * @return A {@link MessageEmbed} object.
+	 */
+	private MessageEmbed buildLeaderboardRankEmbed(Member member) {
+		var rank = getQOTWRank(member.getIdLong());
+		var rankSuffix = switch (rank % 10) {
+			case 1 -> "st";
+			case 2 -> "nd";
+			case 3 -> "rd";
+			default -> "th";
+		};
+		var points = getPoints(member.getIdLong());
+		var pointsText = points == 1 ? "point" : "points";
+		return new EmbedBuilder()
+				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
+				.setTitle("Question of the Week Leaderboard")
+				.setDescription(String.format("You're currently in `%s` place with `%s` %s.",
+						rank + rankSuffix, points, pointsText))
+				.setTimestamp(Instant.now())
+				.build();
 	}
 
 	/**
@@ -141,6 +172,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * Draws and constructs the leaderboard image.
 	 *
 	 * @param guild The current guild.
+	 * @return The finished image as a {@link ByteArrayInputStream}.
 	 * @throws IOException If an error occurs.
 	 */
 	private ByteArrayOutputStream generateLeaderboard(Guild guild) throws IOException {
