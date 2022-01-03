@@ -37,9 +37,14 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	public ReplyAction handle(SlashCommandEvent event) {
 		Bot.asyncPool.submit(() -> {
 			try {
-				event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()))
-						.addFile(new ByteArrayInputStream(generateLeaderboard(event.getGuild()).toByteArray()),
-						Instant.now().getEpochSecond() + ".png").queue();
+				var action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
+				byte[] array;
+				if (isCached(getQOTWPointsSum() + ".png")) {
+					array = getOutputStreamFromImage(getCachedImage(getQOTWPointsSum() + ".png")).toByteArray();
+				} else {
+					array = generateLeaderboard(event.getGuild()).toByteArray();
+				}
+				action.addFile(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png").queue();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -80,6 +85,22 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return List.of();
+		}
+	}
+
+	/**
+	 * Gets the sum of all QOTW-Points
+	 *
+	 * @return A {@link List} with the top member ids.
+	 */
+	private long getQOTWPointsSum() {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			var accounts = repo.getAllAccountsSortedByPoints();
+			return accounts.stream().mapToLong(QOTWAccount::getPoints).sum();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
 		}
 	}
 
@@ -199,6 +220,11 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 			if (left) y = y + card.getHeight() + MARGIN;
 		}
 		g2d.dispose();
+		cacheImage(image, getQOTWPointsSum() + ".png", "png");
+		return getOutputStreamFromImage(image);
+	}
+
+	private ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
 		var outputStream = new ByteArrayOutputStream();
 		ImageIO.write(image, "png", outputStream);
 		return outputStream;
