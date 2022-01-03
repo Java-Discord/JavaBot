@@ -65,7 +65,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	}
 
 	/**
-	 * Gets the top N members.
+	 * Gets the top N members based on their QOTW-Points.
 	 *
 	 * @param n The amount of members to get.
 	 * @return A {@link List} with the top member ids.
