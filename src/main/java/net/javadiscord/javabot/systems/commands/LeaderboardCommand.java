@@ -59,16 +59,16 @@ public class LeaderboardCommand implements SlashCommandHandler {
 	}
 
 	private List<Member> getTopUsers(Guild guild, int num) {
-        try (var con = Bot.dataSource.getConnection()) {
-            var repo = new QuestionPointsRepository(con);
-            var accounts = repo.getAllAccountsSortedByPoints();
-            return accounts.stream()
-                    .map(QOTWAccount::getUserId).limit(num)
-                    .map(guild::getMemberById).toList();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return List.of();
-        }
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			var accounts = repo.getAllAccountsSortedByPoints();
+			return accounts.stream()
+					.map(QOTWAccount::getUserId).limit(num)
+					.map(guild::getMemberById).toList();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return List.of();
+		}
 	}
 
 	private BufferedImage getAvatar(String avatarURL) {
@@ -126,18 +126,18 @@ public class LeaderboardCommand implements SlashCommandHandler {
 		g2d.setColor(SECONDARY_COLOR);
 		g2d.setFont(getFont(PLACEMENT_SIZE));
 
-        try (var con = Bot.dataSource.getConnection()) {
-            var repo = new QuestionPointsRepository(con);
-            long points = repo.getAccountByUserId(member.getIdLong()).getPoints();
-            String text = points > 1 ? "points" : "point";
-            String rank = "#" + getQOTWRank(member.getIdLong());
-            g2d.drawString(text, xOffset + 430, yOffset + 210);
-            int stringLength = (int) g2d.getFontMetrics().getStringBounds(rank, g2d).getWidth();
-            int start = 185 / 2 - stringLength / 2;
-            g2d.drawString(rank, xOffset + start, yOffset + 173);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			long points = repo.getAccountByUserId(member.getIdLong()).getPoints();
+			String text = points > 1 ? "points" : "point";
+			String rank = "#" + getQOTWRank(member.getIdLong());
+			g2d.drawString(text, xOffset + 430, yOffset + 210);
+			int stringLength = (int) g2d.getFontMetrics().getStringBounds(rank, g2d).getWidth();
+			int start = 185 / 2 - stringLength / 2;
+			g2d.drawString(rank, xOffset + start, yOffset + 173);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private ByteArrayOutputStream generateLeaderboard(Member member, long num) {
