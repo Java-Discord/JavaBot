@@ -18,10 +18,11 @@ public class QuestionPointsRepository {
 	 */
 	public void insert(QOTWAccount account) throws SQLException {
 		if (getAccountByUserId(account.getUserId()) == null) {
-			PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id) VALUES (?)",
+			PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS
 			);
 			stmt.setLong(1, account.getUserId());
+			stmt.setLong(2, account.getPoints());
 			int rows = stmt.executeUpdate();
 			if (rows == 0) throw new SQLException("User was not inserted.");
 			stmt.close();
