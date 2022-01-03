@@ -164,4 +164,10 @@ CREATE TABLE custom_commands (
 	response VARCHAR(2048) NOT NULL,
 	reply BOOL NOT NULL DEFAULT TRUE,
 	embed BOOL NOT NULL DEFAULT TRUE
-)
+);
+
+// QOTW Points
+CREATE TABLE qotw_points (
+	 user_id BIGINT PRIMARY KEY,
+	 points BIGINT NOT NULL DEFAULT 0
+);

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.events;
 
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
@@ -44,6 +45,7 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
 		if (genericEvent instanceof MessageReactionAddEvent raEvent && raEvent.getUser() != null && (raEvent.getUser().isBot() || raEvent.getUser().isSystem())) {
 			return true;
 		}
+		if (genericEvent.getChannelType() == ChannelType.PRIVATE) return true;
 		return !genericEvent.getChannel().equals(Bot.config.get(genericEvent.getGuild()).getModeration().getShareKnowledgeChannel());
 	}
 

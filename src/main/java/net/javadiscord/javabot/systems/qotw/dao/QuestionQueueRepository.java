@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class QuestionRepository {
+public class QuestionQueueRepository {
 	private final Connection con;
 
 	public void save(QOTWQuestion question) throws SQLException {

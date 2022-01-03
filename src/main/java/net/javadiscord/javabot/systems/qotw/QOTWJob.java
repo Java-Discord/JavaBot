@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionRepository;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.util.Misc;
@@ -25,7 +25,7 @@ public class QOTWJob extends DiscordApiJob {
 		for (var guild : jda.getGuilds()) {
 			if (Bot.config.get(guild).getModeration().getLogChannel() == null) continue;
 			try (var c = Bot.dataSource.getConnection()) {
-				var repo = new QuestionRepository(c);
+				var repo = new QuestionQueueRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
 					Misc.sendToLog(guild, "Warning! @here No available next question for QOTW!");
