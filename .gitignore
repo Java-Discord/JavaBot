@@ -5,7 +5,6 @@ build/
 /config.json
 /config
 /purgeArchives
-/imageCache
 
 # Eclipse settings
 .classpath
