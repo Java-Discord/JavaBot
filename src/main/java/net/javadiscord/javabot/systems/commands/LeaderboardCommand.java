@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 
+import static net.javadiscord.javabot.Bot.imageCache;
+
 public class LeaderboardCommand extends ImageGenerationUtils implements SlashCommandHandler {
 
 	private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
@@ -39,8 +41,8 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 			try {
 				var action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
 				byte[] array;
-				if (isCached(getQOTWPointsSum() + ".png")) {
-					array = getOutputStreamFromImage(getCachedImage(getQOTWPointsSum() + ".png")).toByteArray();
+				if (imageCache.isCached(getCacheName())) {
+					array = getOutputStreamFromImage(imageCache.getCachedImage(getCacheName())).toByteArray();
 				} else {
 					array = generateLeaderboard(event.getGuild()).toByteArray();
 				}
@@ -89,22 +91,6 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	}
 
 	/**
-	 * Gets the sum of all QOTW-Points
-	 *
-	 * @return A {@link List} with the top member ids.
-	 */
-	private long getQOTWPointsSum() {
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new QuestionPointsRepository(con);
-			var accounts = repo.getAllAccountsSortedByPoints();
-			return accounts.stream().mapToLong(QOTWAccount::getPoints).sum();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return 0;
-		}
-	}
-
-	/**
 	 * Gets the given user's QOTW-Points.
 	 *
 	 * @param userId The id of the user.
@@ -122,6 +108,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 
 	/**
 	 * Builds the Leaderboard Rank {@link MessageEmbed}.
+	 *
 	 * @param member The member which executed the command.
 	 * @return A {@link MessageEmbed} object.
 	 */
@@ -220,10 +207,37 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 			if (left) y = y + card.getHeight() + MARGIN;
 		}
 		g2d.dispose();
-		cacheImage(image, getQOTWPointsSum() + ".png", "png");
+		imageCache.removeCachedImagesByKeyword("qotw_leaderboard");
+		imageCache.cacheImage(getCacheName(), image);
 		return getOutputStreamFromImage(image);
 	}
 
+	/**
+	 * Builds the cached image's name.
+	 */
+	private String getCacheName() {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			var accounts = repo.getAllAccountsSortedByPoints().stream().limit(DISPLAY_COUNT).toList();
+			StringBuilder sb = new StringBuilder("qotw_leaderboard_");
+			for (var a : accounts) {
+				sb.append(":").append(a.getUserId())
+						.append(":").append(a.getPoints());
+			}
+			return sb.toString();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "";
+		}
+	}
+
+	/**
+	 * Retrieves the image's {@link ByteArrayOutputStream}.
+	 *
+	 * @param image The image.
+	 * @return The image's {@link ByteArrayOutputStream}.
+	 * @throws IOException If an error occurs.
+	 */
 	private ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
 		var outputStream = new ByteArrayOutputStream();
 		ImageIO.write(image, "png", outputStream);
