@@ -60,6 +60,9 @@ public class Bot {
      */
     public static ScheduledExecutorService asyncPool;
 
+    /**
+     * A reference to the Bot's {@link ImageCacheUtils}.
+     */
     public static ImageCacheUtils imageCache;
 
     /**
