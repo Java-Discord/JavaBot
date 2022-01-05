@@ -12,11 +12,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.StringResourceCache;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,11 +32,11 @@ public class AutoMod extends ListenerAdapter {
 	private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 	private List<String> spamUrls;
 
-	// FIXME: 02.01.2022 Fix URL loading
 	public AutoMod() {
 		try {
-			spamUrls = Files.readAllLines(Paths.get(getClass().getResource("spamLinks.txt").toURI()));
+			spamUrls = Arrays.stream(StringResourceCache.load("/spamLinks.txt").split(System.lineSeparator())).toList();
 		} catch (Exception e) {
+			e.printStackTrace();
 			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());
