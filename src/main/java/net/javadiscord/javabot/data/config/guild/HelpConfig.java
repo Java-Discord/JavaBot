@@ -32,9 +32,14 @@ public class HelpConfig extends GuildConfigItem {
 	private long dormantCategoryId;
 
 	/**
-	 * The id of the helper role
+	 * The id of the helper role.
 	 */
 	private long helperRoleId;
+
+	/**
+	 * The id of the help-ping role.
+	 */
+	private long helpPingRoleId;
 
 	/**
 	 * The strategy to use when naming help channels. This is only used when
