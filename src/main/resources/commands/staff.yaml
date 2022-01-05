@@ -20,20 +20,6 @@
       required: false
   handler: net.javadiscord.javabot.systems.moderation.BanCommand
 
-# /clearqotw
-- name: clearqotw
-  description: Clears all QOTW-points from the given user.
-  options:
-    - name: user
-      description: The user you want to clear all QOTW-points from
-      required: true
-      type: USER
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.qotw.ClearQOTWCommand
-
 # /editembed
 - name: editembed
   description: Edits an embed
@@ -75,7 +61,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.EditEmbedCommand
+  handler: net.javadiscord.javabot.systems.staff.EditEmbedCommand
 
 # /embed
 - name: embed
@@ -134,7 +120,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.EmbedCommand
+  handler: net.javadiscord.javabot.systems.staff.EmbedCommand
 
 # /say
 - name: say
@@ -148,7 +134,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.commands.staff.SayCommand
+  handler: net.javadiscord.javabot.systems.staff.SayCommand
 
 # /kick
 - name: kick
@@ -198,20 +184,6 @@
     - type: ROLE
       id: moderation.staffRoleId
   handler: net.javadiscord.javabot.systems.moderation.MutelistCommand
-
-# /correct
-- name: correct
-  description: Grants one QOTW-Points to the given member upon use
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  options:
-    - name: member
-      description: The member you want to grant a point
-      required: true
-      type: USER
-  handler: net.javadiscord.javabot.systems.qotw.CorrectCommand
 
 # /purge
 - name: purge
@@ -441,12 +413,12 @@
           description: Name of the custom slash command
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler
 
 # /customcommands
 - name: customcommands
   description: Lists all custom slash commands
-  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandList
+  handler: net.javadiscord.javabot.systems.staff.custom_commands.ListCommand
 
 # /reactionrole
 - name: reactionrole
@@ -493,7 +465,7 @@
           description: The button's label
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.reaction_roles.ReactionRoleCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.reaction_roles.ReactionRoleCommandHandler
 
 # /question
 - name: question
@@ -507,7 +479,7 @@
       description: Amount of questions
       required: true
       type: INTEGER
-  handler: net.javadiscord.javabot.systems.commands.staff.QuestionCommand
+  handler: net.javadiscord.javabot.systems.staff.QuestionCommand
 
 # /report
 - name: report
@@ -567,7 +539,7 @@
           description: The message id of the suggestion you want to clear.
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.suggestions.SuggestionCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.suggestions.SuggestionCommandHandler
 
 # /db-admin
 - name: db-admin
@@ -595,6 +567,8 @@
           required: true
           type: STRING
           choices:
+            - name: Custom Commands
+              value: CUSTOM_COMMANDS
             - name: Economy Account
               value: ECONOMY_ACCOUNT
             - name: Economy Account Preferences
@@ -617,6 +591,8 @@
               value: JAM_THEME
             - name: Java Jam Theme Votes
               value: JAM_THEME_VOTE
+            - name: Question of the Week Accounts
+              value: QOTW_POINTS
             - name: Question of the Week Questions
               value: QOTW_QUESTION
             - name: Reserved Help Channels

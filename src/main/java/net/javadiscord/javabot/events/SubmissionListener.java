@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
-import net.javadiscord.javabot.systems.qotw.CorrectCommand;
+import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubCommand;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -88,7 +88,7 @@ public class SubmissionListener extends ListenerAdapter {
 		var userId = event.getMessage().getEmbeds().get(0)
 				.getFooter().getText().replace("ID: ", "");
 		event.getGuild().retrieveMemberById(userId).queue(member -> {
-			new CorrectCommand().correct(event.getGuild(), member);
+			new IncrementSubCommand().correct(member);
 			log.info("{}[{}]{} Submission by User {} was approved by {}",
 					Constants.TEXT_WHITE, event.getGuild().getName(), Constants.TEXT_RESET,
 					member.getUser().getAsTag(), event.getUser().getAsTag());

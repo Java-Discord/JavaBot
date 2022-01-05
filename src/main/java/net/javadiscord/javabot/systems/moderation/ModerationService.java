@@ -13,7 +13,7 @@ import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
-import java.awt.Color;
+import java.awt.*;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;

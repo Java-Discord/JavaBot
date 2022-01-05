@@ -1,7 +1,6 @@
 # /qotw
 - name: qotw
   description: Administrative tools for managing the Question of the Week.
-  handler: net.javadiscord.javabot.systems.qotw.QOTWCommandHandler
   enabledByDefault: false
   privileges:
     - type: ROLE
@@ -41,3 +40,39 @@
               description: The id of the question to remove.
               required: true
               type: INTEGER
+
+      # /qotw qotw-points
+    - name: qotw-points
+      description: Commands for interaction with Users Question of the Week points.
+      subCommands:
+        # /qotw qotw-points increment
+        - name: increment
+          description: Adds one point to the users QOTW-Account
+          options:
+            - name: user
+              description: The user whose points should be incremented.
+              required: true
+              type: USER
+
+        # /qotw qotw-points clear
+        - name: clear
+          description: Clears all QOTW-Points of one user.
+          options:
+            - name: user
+              description: The user whose points should be cleared.
+              required: true
+              type: USER
+
+        # /qotw qotw-points set
+        - name: set
+          description: Changes the QOTW-Points of one user.
+          options:
+            - name: user
+              description: The user whose points should be changes.
+              required: true
+              type: USER
+            - name: points
+              description: The amount of points.
+              required: true
+              type: INTEGER
+  handler: net.javadiscord.javabot.systems.qotw.subcommands.QOTWCommandHandler

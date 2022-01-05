@@ -130,7 +130,7 @@
       description: The string
       required: true
       type: STRING
-  enabledByDefault: false
+  enabledByDefault: true
   handler: net.javadiscord.javabot.systems.commands.RegexCommand
 
 # /serverinfo

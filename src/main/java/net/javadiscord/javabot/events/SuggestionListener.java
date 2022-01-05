@@ -2,10 +2,7 @@ package net.javadiscord.javabot.events;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageType;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -41,6 +38,7 @@ public class SuggestionListener extends ListenerAdapter {
 	}
 
 	private boolean canCreateSuggestion(MessageReceivedEvent event) {
+		if (event.getChannelType() == ChannelType.PRIVATE) return false;
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && event.getMessage().getType() != MessageType.THREAD_CREATED
 				&& event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
 	}
