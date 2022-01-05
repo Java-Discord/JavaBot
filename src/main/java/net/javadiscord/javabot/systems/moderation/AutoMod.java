@@ -14,6 +14,8 @@ import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.util.Misc;
 
 import javax.annotation.Nonnull;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -28,6 +30,11 @@ import java.util.regex.Pattern;
 public class AutoMod extends ListenerAdapter {
 
 	private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	Pattern urlPattern = Pattern.compile(
+			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
+					+ "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+/?)*"
+					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
+			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	private List<String> spamUrls;
 
 	public AutoMod() {
@@ -118,23 +125,28 @@ public class AutoMod extends ListenerAdapter {
 					);
 			message.delete().queue();
 		}
+
 		final String messageRaw = message.getContentRaw();
+		Matcher urlMatcher = urlPattern.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
 			for (String spamUrl : spamUrls) {
-				if (messageRaw.contains(spamUrl)) {
+				while (urlMatcher.find()) {
 					try {
-						new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
-								.warn(
-										message.getMember(),
-										WarnSeverity.HIGH,
-										"Automod: Suspicious Link",
-										message.getGuild().getMember(message.getJDA().getSelfUser()),
-										message.getTextChannel(),
-										false
-								);
-						message.delete().queue();
-					} catch (Exception e) {
+						URI uri = new URI(messageRaw.substring(urlMatcher.start(1), urlMatcher.end()));
+						if (uri.getHost().matches(spamUrl)) {
+							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+									.warn(
+											message.getMember(),
+											WarnSeverity.HIGH,
+											"Automod: Suspicious Link",
+											message.getGuild().getMember(message.getJDA().getSelfUser()),
+											message.getTextChannel(),
+											false
+									);
+							message.delete().queue();
+						}
+					} catch (URISyntaxException e) {
 						e.printStackTrace();
 					}
 				}
