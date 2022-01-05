@@ -17,8 +17,6 @@ import net.javadiscord.javabot.util.StringResourceCache;
 import javax.annotation.Nonnull;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -135,8 +133,9 @@ public class AutoMod extends ListenerAdapter {
 			// only do it for a links, so it won't iterate for each message
 			for (String spamUrl : spamUrls) {
 				while (urlMatcher.find()) {
+					String url = messageRaw.substring(urlMatcher.start(1), urlMatcher.end());
 					try {
-						URI uri = new URI(messageRaw.substring(urlMatcher.start(1), urlMatcher.end()));
+						URI uri = new URI(url);
 						if (uri.getHost().matches(spamUrl)) {
 							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 									.warn(
