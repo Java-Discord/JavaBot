@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class AutoMod extends ListenerAdapter {
 
-	private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 	Pattern urlPattern = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+/?)*"
