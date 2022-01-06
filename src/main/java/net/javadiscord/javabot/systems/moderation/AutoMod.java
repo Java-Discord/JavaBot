@@ -149,7 +149,6 @@ public class AutoMod extends ListenerAdapter {
 				String url = messageRaw.substring(urlMatcher.start(1), urlMatcher.end());
 				try {
 					URI uri = new URI(url);
-					Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage(uri.getHost()).queue();
 					if (spamUrls.contains(uri.getHost())) {
 						if (message.getMember() != null){
 							Misc.sendToLog(message.getGuild(), "Suspicious link by: ".concat("@" + message.getMember().getEffectiveName()).concat(" (" + message.getMember().getId() + ") "));
