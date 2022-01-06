@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 public class AutoMod extends ListenerAdapter {
 
 	final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
-	Pattern urlPattern = Pattern.compile(
+	private final Pattern urlPattern = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
 					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
@@ -152,7 +152,7 @@ public class AutoMod extends ListenerAdapter {
 					Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage(uri.getHost()).queue();
 					if (spamUrls.contains(uri.getHost())) {
 						if (message.getMember() != null){
-							Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage("Suspicious link by: ".concat("@" + message.getMember().getEffectiveName()).concat(" (" + message.getMember().getId() + ") ").concat(url)).queue();
+							Misc.sendToLog(message.getGuild(), "Suspicious link by: ".concat("@" + message.getMember().getEffectiveName()).concat(" (" + message.getMember().getId() + ") "));
 							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 									.warn(
 											message.getMember(),
