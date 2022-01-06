@@ -48,7 +48,8 @@ public class HelpPingCommandHandler implements SlashCommandHandler {
 				return Responses.warning(event, "Sorry, but you can only use this command occasionally. Please try again later.");
 			}
 			lastPingTimes.put(event.getMember(), System.currentTimeMillis());
-			return event.reply("<@&765578700724371486>").setEphemeral(false);
+			event.getChannel().sendMessage(String.format("<@&%s>", Bot.config.get(event.getGuild()).getHelp().getHelpPingRoleId())).queue();
+			return event.reply("Done!").setEphemeral(true);
 		} else {
 			return Responses.warning(event, WRONG_CHANNEL_MSG);
 		}
