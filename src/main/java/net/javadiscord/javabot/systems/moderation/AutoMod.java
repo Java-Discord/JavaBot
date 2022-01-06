@@ -15,16 +15,11 @@ import net.javadiscord.javabot.util.Misc;
 import net.javadiscord.javabot.util.StringResourceCache;
 
 import javax.annotation.Nonnull;
-import javax.net.ssl.HttpsURLConnection;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,19 +39,10 @@ public class AutoMod extends ListenerAdapter {
 
 	public AutoMod() {
 		try {
-			URL url = new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt");
-			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-			InputStream stream = connection.getInputStream();
-			String response = new Scanner(stream).useDelimiter("\\A").next();
-			spamUrls = List.of(response.split("\n"));
-		} catch (IOException e) {
+			spamUrls = Arrays.stream(StringResourceCache.load("/spamLinks.txt").split(System.lineSeparator())).toList();
+		} catch (Exception e) {
 			e.printStackTrace();
-			try {
-				spamUrls = Arrays.stream(StringResourceCache.load("/spamLinks.txt").split(System.lineSeparator())).toList();
-			} catch (Exception exception) {
-				exception.printStackTrace();
-				spamUrls = List.of();
-			}
+			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());
 	}
