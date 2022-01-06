@@ -20,6 +20,7 @@ import net.javadiscord.javabot.systems.serverlock.ServerLock;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
 import net.javadiscord.javabot.tasks.StatsUpdater;
+import net.javadiscord.javabot.util.ImageCacheUtils;
 import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
@@ -60,6 +61,11 @@ public class Bot {
     public static ScheduledExecutorService asyncPool;
 
     /**
+     * A reference to the Bot's {@link ImageCacheUtils}.
+     */
+    public static ImageCacheUtils imageCache;
+
+    /**
      * The main method that starts the bot. This involves a few steps:
      * <ol>
      *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
@@ -77,6 +83,7 @@ public class Bot {
         config = new BotConfig(Path.of("config"));
         dataSource = DbHelper.initDataSource(config);
         slashCommands = new SlashCommands();
+        imageCache = new ImageCacheUtils();
         asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
         var jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
