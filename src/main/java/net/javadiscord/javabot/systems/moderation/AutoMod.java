@@ -145,14 +145,14 @@ public class AutoMod extends ListenerAdapter {
 		Matcher urlMatcher = urlPattern.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
-			for (String spamUrl : spamUrls) {
-				while (urlMatcher.find()) {
-					String url = messageRaw.substring(urlMatcher.start(1), urlMatcher.end());
-					try {
-						URI uri = new URI(url);
-						Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage(uri.getHost()).queue();
-						if (spamUrls.contains(uri.getHost())) {
-							Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage("Suspicious link by: ".concat(message.getMember().getId()).concat(" " + url)).queue();
+			while (urlMatcher.find()) {
+				String url = messageRaw.substring(urlMatcher.start(1), urlMatcher.end());
+				try {
+					URI uri = new URI(url);
+					Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage(uri.getHost()).queue();
+					if (spamUrls.contains(uri.getHost())) {
+						if (message.getMember() != null){
+							Bot.config.get(message.getGuild()).getModeration().getLogChannel().sendMessage("Suspicious link by: ".concat("@" + message.getMember().getEffectiveName()).concat(" (" + message.getMember().getId() + ") ").concat(url)).queue();
 							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 									.warn(
 											message.getMember(),
@@ -164,9 +164,9 @@ public class AutoMod extends ListenerAdapter {
 									);
 							message.delete().queue();
 						}
-					} catch (URISyntaxException e) {
-						e.printStackTrace();
 					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
 				}
 			}
 		}
