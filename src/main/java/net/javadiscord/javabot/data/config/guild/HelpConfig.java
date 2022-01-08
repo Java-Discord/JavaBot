@@ -140,6 +140,8 @@ public class HelpConfig extends GuildConfigItem {
 		return this.getGuild().getRoleById(this.helperRoleId);
 	}
 
+	public Role getHelpPingRole() { return this.getGuild().getRoleById(this.helpPingRoleId); }
+
 	public ChannelNamingStrategy getChannelNamingStrategy() {
 		return switch (this.channelNamingStrategy) {
 			case "alphabet" -> new AlphabetNamingStrategy();
