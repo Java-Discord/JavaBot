@@ -146,11 +146,11 @@ public class AutoMod extends ListenerAdapter {
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
 			while (urlMatcher.find()) {
-				String url = messageRaw.substring(urlMatcher.start(1), urlMatcher.end());
+				String url = urlMatcher.group(0).trim();
 				try {
 					URI uri = new URI(url);
 					if (spamUrls.contains(uri.getHost())) {
-						if (message.getMember() != null){
+						if (message.getMember() != null) {
 							Misc.sendToLog(message.getGuild(), "Suspicious link by: ".concat("@" + message.getMember().getEffectiveName()).concat(" (" + message.getMember().getId() + ") "));
 							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 									.warn(
