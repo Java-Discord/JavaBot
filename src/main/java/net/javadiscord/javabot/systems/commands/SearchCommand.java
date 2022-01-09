@@ -77,8 +77,11 @@ public class SearchCommand implements SlashCommandHandler {
                 name = object.get("name").getAsString();
                 url = object.get("url").getAsString();
                 snippet = object.get("snippet").getAsString();
-                if (object.get("snippet").getAsString().length() > 260) {
-                    snippet = object.get("snippet").getAsString().substring(0, 260).concat("...");
+                if (object.get("snippet").getAsString().length() > 320) {
+                    snippet = snippet.substring(0, 320);
+                    int snippetLastPeriod = snippet.lastIndexOf('.');
+                    if (snippetLastPeriod != -1) snippet = snippet.substring(0, snippetLastPeriod + 1);
+                    else snippet = snippet.concat("...");
                 }
                 resultString.append("**").append(i + 1).append(". [").append(name).append("](")
                         .append(url).append(")** \n").append(snippet).append("\n\n");
