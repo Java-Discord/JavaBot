@@ -42,7 +42,7 @@
               type: INTEGER
 
       # /qotw account
-    - name: qotw-points
+    - name: account
       description: Commands for interaction with Users Question of the Week points.
       subCommands:
         # /qotw account increment
