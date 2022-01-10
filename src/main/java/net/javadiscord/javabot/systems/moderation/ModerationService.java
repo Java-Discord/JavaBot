@@ -141,7 +141,9 @@ public class ModerationService {
 	public boolean timeout(Member member, String reason, Member timedOutBy, Duration duration, TextChannel channel, boolean quiet) {
 		var timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
 		if (canTimeoutUser(member, timedOutBy)) {
-			member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(timeoutEmbed).queue());
+			member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(timeoutEmbed).queue(),
+					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
+			);
 			channel.getGuild().timeoutFor(member, duration).queue();
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 			return true;
@@ -161,7 +163,9 @@ public class ModerationService {
 	public boolean removeTimeout(Member member, String reason, Member removedBy, TextChannel channel, boolean quiet) {
 		var removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
 		if (canTimeoutUser(member, removedBy)) {
-			member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(removeTimeoutEmbed).queue());
+			member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(removeTimeoutEmbed).queue(),
+					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
+			);
 			channel.getGuild().removeTimeout(member).queue();
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 			return true;
