@@ -174,27 +174,25 @@
           description: The user that should be timed out.
           required: true
           type: USER
-        - name: duration
+        - name: duration-amount
           description: How long the Timeout should last.
+          required: true
+          type: INTEGER
+        - name: duration-timeunit
+          description: What Timeunit your Duration should have
           required: true
           type: STRING
           choices:
-            - name: 60 Seconds
-              value: 60:SECONDS
-            - name: 5 Minutes
-              value: 5:MINUTES
-            - name: 10 Minutes
-              value: 10:MINUTES
-            - name: 1 Hour
-              value: 1:HOURS
-            - name: 12 Hours
-              value: 12:HOURS
-            - name: 1 Day
-              value: 1:DAYS
-            - name: 1 Week
-              value: 7:DAYS
-            - name: 4 Weeks
-              value: 28:DAYS
+            - name: Seconds
+              value: SECONDS
+            - name: Minutes
+              value: MINUTES
+            - name: Hours
+              value: HOURS
+            - name: Days
+              value: DAYS
+            - name: Weeks
+              value: WEEKS
         - name: reason
           description: The reason for adding this Timeout.
           required: true
