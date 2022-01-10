@@ -158,32 +158,69 @@
       required: false
   handler: net.javadiscord.javabot.systems.moderation.KickCommand
 
-# /mute
-- name: mute
-  description: Mutes a member
+# /timeout
+- name: timeout
+  description: Commands for managing User Timeouts.
   enabledByDefault: false
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  options:
-    - name: user
-      description: The user you want to mute
-      required: true
-      type: USER
-    - name: reason
-      description: The reason
-      required: false
-      type: STRING
-  handler: net.javadiscord.javabot.systems.moderation.MuteCommand
+  subCommands:
+    # /timeout add
+    - name: add
+      description: Adds a Timeout to the given User.
+      options:
+        - name: user
+          description: The user that should be timed out.
+          required: true
+          type: USER
+        - name: duration
+          description: How long the Timeout should last.
+          required: true
+          type: STRING
+          choices:
+            - name: 60 Seconds
+              value: 60:SECONDS
+            - name: 5 Minutes
+              value: 5:MINUTES
+            - name: 10 Minutes
+              value: 10:MINUTES
+            - name: 1 Hour
+              value: 1:HOURS
+            - name: 12 Hours
+              value: 12:HOURS
+            - name: 1 Day
+              value: 1:DAYS
+            - name: 1 Week
+              value: 7:DAYS
+            - name: 4 Weeks
+              value: 28:DAYS
+        - name: reason
+          description: The reason for adding this Timeout.
+          required: true
+          type: STRING
+        - name: quiet
+          description: If true, don't send a message in the server channel where the Timeout is issued.
+          type: BOOLEAN
+          required: false
 
-# /mutelist
-- name: mutelist
-  description: Lists all muted members
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.moderation.MutelistCommand
+    # /timeout remove
+    - name: remove
+      description: Removes a Timeout from the given User.
+      options:
+        - name: user
+          description: The user whose Timeout should be removed.
+          required: true
+          type: USER
+        - name: reason
+          description: The reason for removing this Timeout.
+          required: true
+          type: STRING
+        - name: quiet
+          description: If true, don't send a message in the server channel where the Timeout is issued.
+          type: BOOLEAN
+          required: false
+  handler: net.javadiscord.javabot.systems.moderation.timeout.TimeoutCommandHandler
 
 # /purge
 - name: purge
@@ -250,20 +287,6 @@
       required: true
       type: STRING
   handler: net.javadiscord.javabot.systems.moderation.UnbanCommand
-
-# /unmute
-- name: unmute
-  description: Unmutes a member
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  options:
-    - name: user
-      description: The user you want to unmute
-      required: true
-      type: USER
-  handler: net.javadiscord.javabot.systems.moderation.UnmuteCommand
 
 # /warn
 - name: warn
