@@ -19,7 +19,7 @@ public class QOTWCommandHandler extends DelegatingCommandHandler {
 				"remove", new RemoveQuestionSubcommand()
 		)));
 		this.addSubcommandGroup(
-				"qotw-points", new DelegatingCommandHandler(Map.of(
+				"account", new DelegatingCommandHandler(Map.of(
 				"increment", new IncrementSubCommand(),
 				"clear", new ClearSubCommand(),
 				"set", new SetSubCommand()
