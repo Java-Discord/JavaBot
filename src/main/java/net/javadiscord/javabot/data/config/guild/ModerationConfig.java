@@ -12,7 +12,6 @@ public class ModerationConfig extends GuildConfigItem {
 	private long reportChannelId;
 	private long logChannelId;
 	private long suggestionChannelId;
-	private long muteRoleId;
 	private long staffRoleId;
 
 	/**
@@ -56,10 +55,6 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public TextChannel getShareKnowledgeChannel() {
 		return this.getGuild().getTextChannelById(this.shareKnowledgeChannelId);
-	}
-
-	public Role getMuteRole() {
-		return this.getGuild().getRoleById(this.muteRoleId);
 	}
 
 	public Role getStaffRole() {

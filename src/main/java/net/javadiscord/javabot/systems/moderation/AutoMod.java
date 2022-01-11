@@ -1,23 +1,19 @@
 package net.javadiscord.javabot.systems.moderation;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.javadiscord.javabot.util.Misc;
 import net.javadiscord.javabot.util.StringResourceCache;
 
 import javax.annotation.Nonnull;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Instant;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -156,26 +152,15 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty()
 				&& "java".equals(msg.getAttachments().get(0).getFileExtension())) return;
 
-		Role muteRole = Bot.config.get(msg.getGuild()).getModeration().getMuteRole();
-		if (member.getRoles().contains(muteRole)) return;
-
-		var eb = new EmbedBuilder()
-				.setColor(Bot.config.get(msg.getGuild()).getSlashCommand().getErrorColor())
-				.setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
-				.addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-				.addField("Moderator", "```" + msg.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
-				.addField("ID", "```" + member.getId() + "```", false)
-				.addField("Reason", "```" + "Automod: Spam" + "```", false)
-				.setFooter("ID: " + member.getId())
-				.setTimestamp(Instant.now())
-				.build();
-
-		msg.getChannel().sendMessageEmbeds(eb).queue();
-		Misc.sendToLog(msg.getGuild(), eb);
-		member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
-
-		// TODO: Replace with Timeout (https://support.discord.com/hc/de/articles/4413305239191-Time-Out-FAQ) once there is a proper JDA Implementation
-		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration()).mute(member, member.getGuild());
+		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
+				.timeout(
+						member,
+						"Automod: Spam",
+						msg.getGuild().getSelfMember(),
+						Duration.of(6, ChronoUnit.HOURS),
+						msg.getTextChannel(),
+						false
+				);
 	}
 
 	/**
