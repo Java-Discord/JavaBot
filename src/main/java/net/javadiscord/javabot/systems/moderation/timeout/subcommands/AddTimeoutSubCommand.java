@@ -11,7 +11,6 @@ import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 public class AddTimeoutSubCommand implements SlashCommandHandler {
 
@@ -25,6 +24,9 @@ public class AddTimeoutSubCommand implements SlashCommandHandler {
             return Responses.error(event, "Missing required Arguments.");
         }
         var member = userOption.getAsMember();
+        if (member == null) {
+            return Responses.error(event, "Cannot timeout a user who is not a member of this server");
+        }
         var reason = reasonOption.getAsString();
         var duration = Duration.of(durationAmountOption.getAsLong(), ChronoUnit.valueOf(durationTimeUnitOption.getAsString()));
         if (duration.toSeconds() > (Member.MAX_TIME_OUT_LENGTH * 24 * 60 * 60)) {
@@ -37,6 +39,9 @@ public class AddTimeoutSubCommand implements SlashCommandHandler {
         var quietOption = event.getOption("quiet");
         boolean quiet = quietOption != null && quietOption.getAsBoolean();
 
+        if (member.isTimedOut()) {
+            return Responses.error(event, String.format("Could not timeout %s; they are already timed out.", member.getAsMention()));
+        }
         var moderationService = new ModerationService(event.getInteraction());
         if (moderationService.timeout(member, reason, event.getMember(), duration, channel, quiet)) {
             return Responses.success(event, "User Timed Out", String.format("%s has been timed out.", member.getAsMention()));

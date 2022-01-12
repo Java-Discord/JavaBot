@@ -145,6 +145,7 @@ public class ModerationService {
 					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
 			);
 			channel.getGuild().timeoutFor(member, duration).queue();
+			config.getLogChannel().sendMessageEmbeds(timeoutEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 			return true;
 		}
@@ -167,6 +168,7 @@ public class ModerationService {
 					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
 			);
 			channel.getGuild().removeTimeout(member).queue();
+			config.getLogChannel().sendMessageEmbeds(removeTimeoutEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 			return true;
 		}
@@ -190,6 +192,7 @@ public class ModerationService {
 					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
 			);
 			channel.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
+			config.getLogChannel().sendMessageEmbeds(banEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 			return true;
 		}
@@ -208,6 +211,7 @@ public class ModerationService {
 		var unbanEmbed = buildUnbanEmbed(userId, bannedBy);
 		if (isBanned(channel.getGuild(), userId)) {
 			channel.getGuild().unban(User.fromId(userId)).queue();
+			config.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
 			return true;
 		} else return false;
@@ -259,6 +263,7 @@ public class ModerationService {
 					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
 			);
 			channel.getGuild().kick(member).queue();
+			config.getLogChannel().sendMessageEmbeds(kickEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 			return true;
 		} else return false;

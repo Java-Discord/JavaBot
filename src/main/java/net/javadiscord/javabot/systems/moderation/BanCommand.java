@@ -16,7 +16,7 @@ public class BanCommand implements SlashCommandHandler {
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {
-			return Responses.error(event, "Could not find Member");
+			return Responses.error(event, "Cannot ban a user who is not a member of this server");
 		}
 		var reason = reasonOption.getAsString();
 		var channel = event.getTextChannel();
