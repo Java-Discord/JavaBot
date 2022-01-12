@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
+import net.javadiscord.javabot.util.Misc;
 import net.javadiscord.javabot.util.StringResourceCache;
 
 import javax.annotation.Nonnull;
@@ -18,7 +19,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.Instant;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
 @Slf4j
 public class AutoMod extends ListenerAdapter {
 
-	final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
-	private final Pattern urlPattern = Pattern.compile(
+	private final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
 					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
@@ -48,14 +48,9 @@ public class AutoMod extends ListenerAdapter {
 			InputStream stream = connection.getInputStream();
 			String response = new Scanner(stream).useDelimiter("\\A").next();
 			spamUrls = List.of(response.split("\n"));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			try {
-				spamUrls = Arrays.stream(StringResourceCache.load("/spamLinks.txt").split(System.lineSeparator())).toList();
-			} catch (Exception exception) {
-				exception.printStackTrace();
-				spamUrls = List.of();
-			}
+			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());
 	}
@@ -126,7 +121,7 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void checkContentAutomod(@Nonnull Message message) {
 		// Advertising
-		Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
+		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 					.warn(
@@ -141,7 +136,7 @@ public class AutoMod extends ListenerAdapter {
 		}
 
 		final String messageRaw = message.getContentRaw();
-		Matcher urlMatcher = urlPattern.matcher(messageRaw);
+		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
 			while (urlMatcher.find()) {
