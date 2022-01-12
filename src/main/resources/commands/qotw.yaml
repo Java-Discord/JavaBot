@@ -41,20 +41,20 @@
               required: true
               type: INTEGER
 
-      # /qotw qotw-points
-    - name: qotw-points
+      # /qotw account
+    - name: account
       description: Commands for interaction with Users Question of the Week points.
       subCommands:
-        # /qotw qotw-points increment
+        # /qotw account increment
         - name: increment
-          description: Adds one point to the users QOTW-Account
+          description: Adds one point to the user's QOTW-Account
           options:
             - name: user
               description: The user whose points should be incremented.
               required: true
               type: USER
 
-        # /qotw qotw-points clear
+        # /qotw account clear
         - name: clear
           description: Clears all QOTW-Points of one user.
           options:
@@ -63,7 +63,7 @@
               required: true
               type: USER
 
-        # /qotw qotw-points set
+        # /qotw account set
         - name: set
           description: Changes the QOTW-Points of one user.
           options:

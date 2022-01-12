@@ -62,7 +62,7 @@ public class HelpChannelManager {
 		// Only allow guild members.
 		if (member == null) return false;
 		// Don't allow muted users.
-		if (member.getRoles().contains(Bot.config.get(this.config.getGuild()).getModeration().getMuteRole())) return false;
+		if (member.isTimedOut()) return false;
 		try (var con = Bot.dataSource.getConnection();
 				var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
