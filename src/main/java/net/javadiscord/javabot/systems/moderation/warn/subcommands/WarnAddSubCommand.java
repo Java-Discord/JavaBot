@@ -18,6 +18,9 @@ public class WarnAddSubCommand implements SlashCommandHandler {
 			return Responses.error(event, "Missing required Arguments.");
 		}
 		var member = userOption.getAsMember();
+		if (member == null) {
+			return Responses.error(event, "Cannot warn a user who is not a member of this server");
+		}
 		var severity = WarnSeverity.valueOf(severityOption.getAsString().trim().toUpperCase());
 		if (member.getUser().isBot()) return Responses.warning(event, "Cannot warn Bots.");
 
@@ -29,7 +32,7 @@ public class WarnAddSubCommand implements SlashCommandHandler {
 
 		var moderationService = new ModerationService(event.getInteraction());
 		moderationService.warn(member, severity, reasonOption.getAsString(), event.getMember(), event.getTextChannel(), quiet);
-		return Responses.success(event, "User Warned", String.format("User %s has been warned.", member.getUser().getAsTag()));
+		return Responses.success(event, "User Warned", String.format("%s has been warned.", member.getAsMention()));
 	}
 }
 

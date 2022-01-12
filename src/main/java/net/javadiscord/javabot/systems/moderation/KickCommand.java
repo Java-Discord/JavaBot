@@ -17,7 +17,7 @@ public class KickCommand implements SlashCommandHandler {
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {
-			return Responses.error(event, "Could not find Member");
+			return Responses.error(event, "Cannot kick a user who is not a member of this server");
 		}
 		var reason = reasonOption.getAsString();
 		var channel = event.getTextChannel();
