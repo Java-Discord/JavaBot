@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
@@ -18,6 +19,10 @@ import net.javadiscord.javabot.data.config.guild.StarBoardConfig;
 import net.javadiscord.javabot.data.mongodb.Database;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -53,18 +58,31 @@ public class StarboardListener extends ListenerAdapter {
 				e.printStackTrace();
 			}
 		}
-		msgAction.queue(sbMsg -> db.createStarboardDoc(guildId, channelId, messageId, sbMsg.getId()));
+		msgAction.queue(sbMsg -> {
+			db.createStarboardDoc(guildId, channelId, messageId, sbMsg.getId());
+			sbMsg.addReaction(config.getEmotes().get(0)).queue();
+		});
 	}
 
-	void updateSB(Guild guild, String channelId, String messageId, int reactionCount) {
+	void updateSB(Guild guild, String channelId, String messageId, int reactionCount, Message message) {
 		Database db = new Database();
 		String guildId = guild.getId();
 		String sbcEmbedId = db.getStarboardChannelString(guildId, channelId, messageId, "starboard_embed");
+		var config = Bot.config.get(guild).getStarBoard();
 		if (sbcEmbedId == null) return;
 
 		Bot.config.get(guild).getStarBoard().getChannel()
-				.retrieveMessageById(sbcEmbedId).queue((sbMsg) -> handleMessage(guild, channelId, messageId, reactionCount, sbMsg),
-						failure -> this.removeMessageFromStarboard(guild, messageId));
+				.retrieveMessageById(sbcEmbedId).queue((sbMsg) -> {
+					try {
+						var list = sbMsg.retrieveReactionUsers("⭐").takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), sbMsg)).get();
+						var list2 = message.retrieveReactionUsers("⭐").takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), message)).get();
+						var stream = Stream.concat(list.stream(), list2.stream()).distinct();
+						this.handleMessage(guild, channelId, messageId, (int)stream.count()-1, sbMsg);
+					} catch (Exception e) {
+						log.warn("Starboard Message Not Found");
+					}
+
+				}, failure -> this.removeMessageFromStarboard(guild, messageId));
 	}
 
 	private void handleMessage(Guild guild, String channelId, String messageId, int reactionCount, Message sbMsg) {
@@ -133,7 +151,7 @@ public class StarboardListener extends ListenerAdapter {
 			if (!db.isMessageOnStarboard(guildId, channelId, messageId) && reactionCount >= config.getReactionThreshold()) {
 				addToSB(guild, channel, msg, reactionCount);
 			} else if (db.getStarboardChannelString(guildId, channelId, messageId, "starboard_embed") != null) {
-				updateSB(guild, channelId, messageId, reactionCount);
+				updateSB(guild, channelId, messageId, reactionCount, msg);
 			}
 		}, failure -> collection.deleteOne(doc));
 	}
@@ -147,7 +165,7 @@ public class StarboardListener extends ListenerAdapter {
 	}
 
 	private void updateIfEmpty(Guild guild, String channelId, String messageId, Message msg) {
-		if (msg.getReactions().isEmpty()) updateSB(guild, channelId, messageId, 0);
+		if (msg.getReactions().isEmpty()) updateSB(guild, channelId, messageId, 0, msg);
 	}
 
 	@Override
@@ -166,15 +184,22 @@ public class StarboardListener extends ListenerAdapter {
 		String channelId = event.getChannel().getId();
 		String messageId = event.getMessageId();
 
-		event.getChannel().retrieveMessageById(messageId).queue(message -> {
-			int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
+		if (channelId.equals(config.getChannel().getId())) {
+			this.updateSbReactionCounts(event, config, messageId, channelId);
+		}
 
-			if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
-				updateSB(event.getGuild(), channelId, messageId, reactionCount);
-			} else if (reactionCount >= config.getReactionThreshold()) {
-				addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
-			}
-		});
+		if (!channelId.equals(config.getChannel().getId())) {
+			event.getChannel().retrieveMessageById(messageId).queue(message -> {
+
+
+				int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
+				if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
+					updateSB(event.getGuild(), channelId, messageId, reactionCount, message);
+				} else if (reactionCount >= config.getReactionThreshold()) {
+					addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -190,21 +215,51 @@ public class StarboardListener extends ListenerAdapter {
 		String channelId = event.getChannel().getId();
 		String messageId = event.getMessageId();
 
-		event.getChannel().retrieveMessageById(messageId).queue(message -> {
-			int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
+		if (channelId.equals(config.getChannel().getId())) {
+			this.updateSbReactionCounts(event, config, messageId, channelId);
+		}
 
-			if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
-				updateSB(event.getGuild(), channelId, messageId, reactionCount);
-			} else if (reactionCount >= config.getReactionThreshold()) {
-				addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
-			} else {
-				removeMessageFromStarboard(event.getGuild(), messageId);
-			}
-		});
+		if (!channelId.equals(config.getChannel().getId())) {
+
+			event.getChannel().retrieveMessageById(messageId).queue(message -> {
+				int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
+				if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
+					updateSB(event.getGuild(), channelId, messageId, reactionCount, message);
+				} else if (reactionCount >= config.getReactionThreshold()) {
+					addToSB(event.getGuild(), event.getChannel(), message, reactionCount);
+				} else {
+					removeMessageFromStarboard(event.getGuild(), messageId);
+				}
+			});
+		}
 	}
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
 		removeMessageFromStarboard(event.getGuild(), event.getMessageId());
+	}
+
+	private void updateSbReactionCounts(GenericMessageReactionEvent event, StarBoardConfig config, String messageId, String remoteTextChannelId) {
+		Objects.requireNonNull(event.getGuild().getTextChannelById(remoteTextChannelId)).retrieveMessageById(messageId).queue(message -> {
+			MessageEmbed me = message.getEmbeds().get(0);
+			String prevChannelId = Objects.requireNonNull(me.getAuthor().getUrl()).split("/")[5];
+			String originalMessageId = me.getAuthor().getUrl().split("/")[6];
+
+
+			Objects.requireNonNull(event.getGuild().getTextChannelById(prevChannelId)).retrieveMessageById(originalMessageId).queue(msg -> {
+				int count = this.getReactionCountForEmote(config.getEmotes().get(0), msg) + this.getReactionCountForEmote(config.getEmotes().get(0), message);
+				try {
+					var list = msg.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), msg)).get();
+					var list2 = message.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), message)).get();
+
+					Stream<User> stream = Stream.concat(list.stream(), list2.stream()).distinct();
+					this.updateMessage(event.getGuild(), prevChannelId, (int) stream.count()-1, message, config);
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			});
+		});
+
+
 	}
 }
