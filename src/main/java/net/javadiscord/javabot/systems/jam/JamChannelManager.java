@@ -83,7 +83,7 @@ public class JamChannelManager {
 		}
 		Message themeVoteMessage = this.config.getVotingChannel().sendMessageEmbeds(voteEmbedBuilder.build()).complete();
 		for (int i = 0; i < themes.size(); i++) {
-			themeVoteMessage.addReaction(JamPhaseManager.REACTION_NUMBERS[i]).complete();
+			themeVoteMessage.addReaction(JamPhaseManager.REACTION_NUMBERS[i]).queue();
 		}
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s Theme Voting Has Started!", jam.getFullName()))
