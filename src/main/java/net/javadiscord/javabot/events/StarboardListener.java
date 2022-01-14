@@ -73,15 +73,7 @@ public class StarboardListener extends ListenerAdapter {
 
 		Bot.config.get(guild).getStarBoard().getChannel()
 				.retrieveMessageById(sbcEmbedId).queue((sbMsg) -> {
-					try {
-						var list = sbMsg.retrieveReactionUsers("⭐").takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), sbMsg)).get();
-						var list2 = message.retrieveReactionUsers("⭐").takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), message)).get();
-						var stream = Stream.concat(list.stream(), list2.stream()).distinct();
-						this.handleMessage(guild, channelId, messageId, (int)stream.count()-1, sbMsg);
-					} catch (Exception e) {
-						log.warn("Starboard Message Not Found");
-					}
-
+						this.handleMessage(guild, channelId, messageId, this.getUniqueStarCounts(sbMsg, message, config)-1, sbMsg);
 				}, failure -> this.removeMessageFromStarboard(guild, messageId));
 	}
 
@@ -245,21 +237,24 @@ public class StarboardListener extends ListenerAdapter {
 			String prevChannelId = Objects.requireNonNull(me.getAuthor().getUrl()).split("/")[5];
 			String originalMessageId = me.getAuthor().getUrl().split("/")[6];
 
-
 			Objects.requireNonNull(event.getGuild().getTextChannelById(prevChannelId)).retrieveMessageById(originalMessageId).queue(msg -> {
-				int count = this.getReactionCountForEmote(config.getEmotes().get(0), msg) + this.getReactionCountForEmote(config.getEmotes().get(0), message);
-				try {
-					var list = msg.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), msg)).get();
-					var list2 = message.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), message)).get();
-
-					Stream<User> stream = Stream.concat(list.stream(), list2.stream()).distinct();
-					this.updateMessage(event.getGuild(), prevChannelId, (int) stream.count()-1, message, config);
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				}
+					this.updateMessage(
+							event.getGuild(),
+							prevChannelId,
+							this.getUniqueStarCounts(message, msg, config)-1,
+							message, config);
 			});
 		});
+	}
 
+	private int getUniqueStarCounts(Message sbMsg, Message orgMsg, StarBoardConfig config){
+		try {
+			var list = orgMsg.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), orgMsg)).get();
+			var list2 = sbMsg.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), sbMsg)).get();
 
+			Stream<User> stream = Stream.concat(list.stream(), list2.stream()).distinct();
+
+			return (int)stream.count();
+		}catch(InterruptedException | ExecutionException e){ return 0; }
 	}
 }
