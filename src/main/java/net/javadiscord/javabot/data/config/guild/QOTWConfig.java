@@ -27,5 +27,7 @@ public class QOTWConfig extends GuildConfigItem {
 		return this.getGuild().getRoleById(this.questionRoleId);
 	}
 
-	public Role getQOTWReviewRole() { return this.getGuild().getRoleById(this.qotwReviewRoleId); }
+	public Role getQOTWReviewRole() {
+		return this.getGuild().getRoleById(this.qotwReviewRoleId);
+	}
 }
