@@ -198,11 +198,12 @@ public class JamChannelManager {
 		Member member = guild.getMember(user);
 		if (member == null || member.isPending()) return false;
 		boolean memberForSufficientTime = (!member.hasTimeJoined() || member.getTimeJoined().plusHours(1).isBefore(cutoff));
-		boolean sentMessage = false;
-		for (var channel : guild.getTextChannels()) {
-			sentMessage = sentMessage || hasMemberSentMessage(member, channel, cutoff.minusMonths(1));
-		}
-		return memberForSufficientTime && sentMessage;
+//      boolean sentMessage = false;
+//      for (var channel : guild.getTextChannels()) {
+//      	sentMessage = sentMessage || hasMemberSentMessage(member, channel, cutoff.minusMonths(1));
+//      }
+//      return memberForSufficientTime && sentMessage;
+		return memberForSufficientTime;
 	}
 
 	/**
