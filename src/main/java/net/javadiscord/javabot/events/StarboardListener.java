@@ -232,20 +232,25 @@ public class StarboardListener extends ListenerAdapter {
 	}
 
 	private void updateSbReactionCounts(GenericMessageReactionEvent event, StarBoardConfig config, String messageId, String remoteTextChannelId) {
-		Objects.requireNonNull(event.getGuild().getTextChannelById(remoteTextChannelId)).retrieveMessageById(messageId).queue(message -> {
-			MessageEmbed me = message.getEmbeds().get(0);
-			String prevChannelId = Objects.requireNonNull(me.getAuthor().getUrl()).split("/")[5];
-			String originalMessageId = Objects.requireNonNull(me.getAuthor().getUrl()).split("/")[6];
-
-			Objects.requireNonNull(event.getGuild().getTextChannelById(prevChannelId)).retrieveMessageById(originalMessageId).queue(msg -> {
-				// Adding -1 to the UniqueStarCount since it should not count for the ⭐ of JavaBot.
-					this.updateMessage(
-							event.getGuild(),
-							prevChannelId,
-							this.getUniqueStarCounts(message, msg, config)-1,
-							message, config);
+		var starboardChannel = event.getGuild().getTextChannelById(remoteTextChannelId);
+		if(starboardChannel!=null){
+			starboardChannel.retrieveMessageById(messageId).queue(message -> {
+				MessageEmbed me;
+				if(message.getEmbeds().get(0)!=null){
+					me = message.getEmbeds().get(0);
+					String prevChannelId = me.getAuthor().getUrl().split("/")[5];
+					String originalMessageId = me.getAuthor().getUrl().split("/")[6];
+					event.getGuild().getTextChannelById(prevChannelId).retrieveMessageById(originalMessageId).queue(msg -> {
+						// Adding -1 to the UniqueStarCount since it should not count for the ⭐ of JavaBot.
+						this.updateMessage(
+								event.getGuild(),
+								prevChannelId,
+								this.getUniqueStarCounts(message, msg, config)-1,
+								message, config);
+					});
+				}
 			});
-		});
+		}
 	}
 
 	private int getUniqueStarCounts(Message starboardMessage, Message originalMessage, StarBoardConfig config){
