@@ -20,7 +20,7 @@ public class SubmissionManager {
 
 	public WebhookMessageAction<?> handleSubmission(ButtonClickEvent event, long questionNumber) {
 		if (!isLatestQOTWMessage(event.getMessage())) {
-			return Responses.error(event.getHook(), "You may only answer to the newest QOTW.");
+			return Responses.error(event.getHook(), "You may only answer the newest QOTW.");
 		}
 		var member = event.getMember();
 		if (hasActiveSubmissionThread(member, questionNumber)) {
