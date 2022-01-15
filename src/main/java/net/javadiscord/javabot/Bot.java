@@ -78,7 +78,6 @@ public class Bot {
      * @throws Exception If any exception occurs during bot creation.
      */
     public static void main(String[] args) throws Exception {
-
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
         config = new BotConfig(Path.of("config"));
         dataSource = DbHelper.initDataSource(config);
