@@ -10,20 +10,22 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class QOTWConfig extends GuildConfigItem {
-	private boolean dmEnabled;
-	private long submissionChannelId;
 	private long questionChannelId;
+	private long submissionChannelId;
 	private long questionRoleId;
-
-	public TextChannel getSubmissionChannel() {
-		return this.getGuild().getTextChannelById(this.submissionChannelId);
-	}
+	private long qotwReviewRoleId;
 
 	public NewsChannel getQuestionChannel() {
 		return this.getGuild().getNewsChannelById(this.questionChannelId);
 	}
 
+	public TextChannel getSubmissionChannel() {
+		return this.getGuild().getTextChannelById(this.submissionChannelId);
+	}
+
 	public Role getQOTWRole() {
 		return this.getGuild().getRoleById(this.questionRoleId);
 	}
+
+	public Role getQOTWReviewRole() { return this.getGuild().getRoleById(this.qotwReviewRoleId); }
 }

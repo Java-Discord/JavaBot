@@ -17,14 +17,15 @@ import java.time.Instant;
 
 public class IncrementSubCommand implements SlashCommandHandler {
 
-    public long correct(Member member) {
+    public long correct(Member member, boolean quiet) {
         try (var con = Bot.dataSource.getConnection()) {
             var repo = new QuestionPointsRepository(con);
             var memberId = member.getIdLong();
             repo.increment(memberId);
             var points = repo.getAccountByUserId(memberId).getPoints();
             var dmEmbed = buildIncrementDmEmbed(member, points);
-            Misc.sendToLog(member.getGuild(), dmEmbed);
+            var embed = buildIncrementEmbed(member, points);
+            if (!quiet) Misc.sendToLog(member.getGuild(), embed);
             member.getUser().openPrivateChannel().queue(
                     c -> c.sendMessageEmbeds(dmEmbed).queue(),
                     e -> Misc.sendToLog(member.getGuild(), "> Could not send direct message to member " + member.getAsMention()));
@@ -42,7 +43,7 @@ public class IncrementSubCommand implements SlashCommandHandler {
             return Responses.error(event, "Missing required arguments.");
         }
         var member = memberOption.getAsMember();
-        var points = correct(member);
+        var points = correct(member, false);
         var embed = buildIncrementEmbed(member, points);
         return event.replyEmbeds(embed);
     }

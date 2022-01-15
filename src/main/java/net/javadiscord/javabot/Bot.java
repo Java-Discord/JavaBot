@@ -119,7 +119,6 @@ public class Bot {
                 new StatsUpdater(),
                 new SuggestionListener(),
                 new AutoMod(),
-                new SubmissionListener(),
                 new StarboardListener(),
                 new InteractionListener(),
                 new HelpChannelListener(),

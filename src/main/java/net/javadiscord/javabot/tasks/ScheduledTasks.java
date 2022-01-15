@@ -46,7 +46,7 @@ public class ScheduledTasks {
 	 */
 	private static void scheduleAllTasks(Scheduler scheduler, JDA jda) throws SchedulerException {
 		// Schedule posting a new QOTW every Monday at 9am.
-		scheduleApiJob(scheduler, jda, QOTWJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.MONDAY, 9, 0));
+		scheduleApiJob(scheduler, jda, QOTWJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.SATURDAY, 14, 29));
 
 		// Schedule checking to make sure there's a new QOTW question in the queue.
 		// We schedule this to run daily at 9am, just so we're always aware when the QOTW queue goes empty.
