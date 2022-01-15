@@ -69,7 +69,7 @@ public class ModerationService {
 			var warn = repo.insert(new Warn(member.getIdLong(), warnedBy.getIdLong(), severity, reason));
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(config.getWarnTimeoutDays());
 			int totalWeight = repo.getTotalSeverityWeight(member.getIdLong(), cutoff);
-			var warnEmbed = buildWarnEmbed(member, severity, reason, warnedBy, warn.getCreatedAt().toInstant(ZoneOffset.UTC), totalWeight);
+			var warnEmbed = buildWarnEmbed(member, severity, warn.getId(), reason, warnedBy, warn.getCreatedAt().toInstant(ZoneOffset.UTC), totalWeight);
 			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(warnEmbed).queue(),
 					e -> log.info("Could not send Direct Message to User {}", member.getUser().getAsTag())
 			);
@@ -269,10 +269,10 @@ public class ModerationService {
 		} else return false;
 	}
 
-	private MessageEmbed buildWarnEmbed(Member member, WarnSeverity severity, String reason, Member warnedBy, Instant timestamp, int totalSeverity) {
+	private MessageEmbed buildWarnEmbed(Member member, WarnSeverity severity, long warnId, String reason, Member warnedBy, Instant timestamp, int totalSeverity) {
 		return new EmbedBuilder()
 				.setColor(Color.ORANGE)
-				.setTitle(String.format("%s | Warn (%d/%d)", member.getUser().getAsTag(), totalSeverity, config.getMaxWarnSeverity()))
+				.setTitle(String.format("`%d` %s | Warn (%d/%d)", warnId, member.getUser().getAsTag(), totalSeverity, config.getMaxWarnSeverity()))
 				.addField("User", member.getAsMention(), true)
 				.addField("Warned by", warnedBy.getAsMention(), true)
 				.addField("Severity", String.format("`%s (%s)`", severity.name(), severity.getWeight()), true)
