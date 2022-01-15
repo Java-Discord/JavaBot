@@ -2,7 +2,10 @@ package net.javadiscord.javabot.systems.qotw;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.ThreadChannel;
+import net.dv8tion.jda.api.entities.ThreadMember;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.command.Responses;
@@ -27,22 +30,20 @@ public class SubmissionManager {
 		if (!canCreateSubmissions(event.getMember(), questionNumber)) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
-		config.getSubmissionChannel()
-				.createThreadChannel(
-						String.format("Submission by %s | %s (%s)", member.getEffectiveName(), member.getId(), questionNumber),
-						true).queue(
-						thread -> {
-							var manager = thread.getManager();
-							manager.setInvitable(false).queue();
-							manager.setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-							thread.sendMessageFormat("**Question of the Week #%s**\n" +
+		config.getSubmissionChannel().createThreadChannel(
+				String.format("Submission by %s | %s (%s)", member.getEffectiveName(), member.getId(), questionNumber), true).queue(
+				thread -> {
+					var manager = thread.getManager();
+					manager.setInvitable(false).queue();
+					manager.setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
+					thread.sendMessageFormat("**Question of the Week #%s**\n" +
 											"\nHey, %s! Please submit your answer into this thread." +
 											"\nYou can even send multiple messages, if you want to. This whole thread counts as your submission." +
 											"\nThe %s will review your submission once a new question appears.",
 									questionNumber, member.getAsMention(), config.getQOTWReviewRole().getAsMention())
-									.queue();
-						}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
-				);
+							.queue();
+				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
+		);
 		log.info("Opened new Submission Thread for User {}", member.getUser().getAsTag());
 		return Responses.success(event.getHook(), "Submission Thread created",
 				"Successfully created a new private Thread for your submission.");
