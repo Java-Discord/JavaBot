@@ -2,12 +2,10 @@ package net.javadiscord.javabot.systems.expert_questions.dao;
 
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.expert_questions.model.ExpertQuestion;
-import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class ExpertQuestionRepository {
