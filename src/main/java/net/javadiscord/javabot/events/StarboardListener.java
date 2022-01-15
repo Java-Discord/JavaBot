@@ -184,8 +184,6 @@ public class StarboardListener extends ListenerAdapter {
 
 		if (!channelId.equals(config.getChannel().getId())) {
 			event.getChannel().retrieveMessageById(messageId).queue(message -> {
-
-
 				int reactionCount = getReactionCountForEmote(config.getEmotes().get(0), message);
 				if (db.isMessageOnStarboard(guildId, channelId, messageId)) {
 					updateSB(event.getGuild(), channelId, messageId, reactionCount, message);
@@ -237,7 +235,7 @@ public class StarboardListener extends ListenerAdapter {
 		Objects.requireNonNull(event.getGuild().getTextChannelById(remoteTextChannelId)).retrieveMessageById(messageId).queue(message -> {
 			MessageEmbed me = message.getEmbeds().get(0);
 			String prevChannelId = Objects.requireNonNull(me.getAuthor().getUrl()).split("/")[5];
-			String originalMessageId = me.getAuthor().getUrl().split("/")[6];
+			String originalMessageId = Objects.requireNonNull(me.getAuthor().getUrl()).split("/")[6];
 
 			Objects.requireNonNull(event.getGuild().getTextChannelById(prevChannelId)).retrieveMessageById(originalMessageId).queue(msg -> {
 				// Adding -1 to the UniqueStarCount since it should not count for the ⭐ of JavaBot.
@@ -252,10 +250,10 @@ public class StarboardListener extends ListenerAdapter {
 
 	private int getUniqueStarCounts(Message starboardMessage, Message originalMessage, StarBoardConfig config){
 		try {
-			List<User> list = originalMessage.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), originalMessage)).get();
-			List<User> list2 = starboardMessage.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), starboardMessage)).get();
+			List<User> originalMessageUsers = originalMessage.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), originalMessage)).get();
+			List<User> starboardMessageUsers = starboardMessage.retrieveReactionUsers(config.getEmotes().get(0)).takeAsync(this.getReactionCountForEmote(config.getEmotes().get(0), starboardMessage)).get();
 
-			Stream<User> stream = Stream.concat(list.stream(), list2.stream()).distinct();
+			Stream<User> stream = Stream.concat(originalMessageUsers.stream(), starboardMessageUsers.stream()).distinct();
 
 			return (int)stream.count();
 		}catch(InterruptedException | ExecutionException e){ return 0; }
