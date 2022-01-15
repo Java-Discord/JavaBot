@@ -58,7 +58,6 @@ public class QOTWJob extends DiscordApiJob {
 		String description = String.format(
 				"%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",
 				question.getText(),
-				jda.getSelfUser().getIdLong(),
 				checkTime.toEpochSecond()
 		);
 		return new EmbedBuilder()
