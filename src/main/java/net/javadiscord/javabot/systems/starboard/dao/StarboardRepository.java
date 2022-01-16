@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.starboard.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 
 import java.sql.*;
