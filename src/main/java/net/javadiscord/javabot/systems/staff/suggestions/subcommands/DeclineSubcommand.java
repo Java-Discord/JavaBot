@@ -27,8 +27,8 @@ public class DeclineSubcommand implements SlashCommandHandler {
         config.getModeration().getSuggestionChannel().retrieveMessageById(messageId).queue(m -> {
             var embed = m.getEmbeds().get(0);
             m.clearReactions().queue();
-            var clearEmbed = buildSuggestionClearEmbed(event.getUser(), embed, config);
-            m.editMessageEmbeds(clearEmbed).queue(
+            var declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, config);
+            m.editMessageEmbeds(declineEmbed).queue(
                     message -> message.addReaction(config.getEmote().getFailureEmote()).queue(),
                     error -> Responses.error(event, error.getMessage()).queue());
         }, e -> log.error("Could not find suggestion message with id {}", messageId));
@@ -36,7 +36,7 @@ public class DeclineSubcommand implements SlashCommandHandler {
                 String.format("Successfully declined suggestion with id `%s`", messageId));
     }
 
-    private MessageEmbed buildSuggestionClearEmbed(User user, MessageEmbed embed, GuildConfig config) {
+    private MessageEmbed buildSuggestionDeclineEmbed(User user, MessageEmbed embed, GuildConfig config) {
         return new EmbedBuilder()
                 .setColor(config.getSlashCommand().getDefaultColor())
                 .setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
