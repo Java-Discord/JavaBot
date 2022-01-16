@@ -15,6 +15,7 @@ import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.data.mongodb.Database;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
+import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.util.Misc;
 import org.slf4j.LoggerFactory;
 
@@ -74,10 +75,8 @@ public class StartupListener extends ListenerAdapter {
         log.info("Starting Guild initialization\n");
         for (var guild : event.getJDA().getGuilds()) {
             if (Arrays.asList(skipGuilds).contains(guild.getId())) continue;
-
-            new StarboardListener().updateAllSBM(guild);
             Bot.slashCommands.registerSlashCommands(guild);
-
+            new StarboardManager().updateAllStarboardEntries(guild);
             // Schedule the help channel updater to run periodically for each guild.
             var helpConfig = Bot.config.get(guild).getHelp();
             Bot.asyncPool.scheduleAtFixedRate(

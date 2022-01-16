@@ -29,7 +29,7 @@ public class GuildConfig {
 	private ModerationConfig moderation;
 	private QOTWConfig qotw;
 	private StatsConfig stats;
-	private StarBoardConfig starBoard;
+	private StarboardConfig starBoard;
 	private JamConfig jam;
 	private EmoteConfig emote;
 	private ServerLockConfig serverLock;
@@ -42,7 +42,7 @@ public class GuildConfig {
 		this.moderation = new ModerationConfig();
 		this.qotw = new QOTWConfig();
 		this.stats = new StatsConfig();
-		this.starBoard = new StarBoardConfig();
+		this.starBoard = new StarboardConfig();
 		this.jam = new JamConfig();
 		this.emote = new EmoteConfig();
 		this.serverLock = new ServerLockConfig();
@@ -61,7 +61,7 @@ public class GuildConfig {
 		this.qotw.setGuildConfig(this);
 		if (this.stats == null) this.stats = new StatsConfig();
 		this.stats.setGuildConfig(this);
-		if (this.starBoard == null) this.starBoard = new StarBoardConfig();
+		if (this.starBoard == null) this.starBoard = new StarboardConfig();
 		this.starBoard.setGuildConfig(this);
 		if (this.jam == null) this.jam = new JamConfig();
 		this.jam.setGuildConfig(this);
