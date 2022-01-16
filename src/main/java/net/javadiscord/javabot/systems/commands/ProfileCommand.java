@@ -35,6 +35,7 @@ public class ProfileCommand implements SlashCommandHandler {
 		var warns = new ModerationService(member.getJDA(), config).getWarns(member.getIdLong());
 		var points = new QuestionPointsRepository(con).getAccountByUserId(member.getIdLong()).getPoints();
 		var roles = member.getRoles();
+		var status = member.getOnlineStatus().name();
 		var embed = new EmbedBuilder()
 				.setTitle("Profile")
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
@@ -42,8 +43,14 @@ public class ProfileCommand implements SlashCommandHandler {
 				.setColor(member.getColor())
 				.setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
 				.setTimestamp(Instant.now())
-				.addField("User", member.getAsMention(), false);
-		if (!roles.isEmpty()) embed.addField("Highest Role", roles.get(0).getAsMention(), true);
+				.addField("User", member.getAsMention(), true)
+				.addField("Status",
+						status.substring(0, 1).toUpperCase() +
+								status.substring(1).toLowerCase().replace("_", " "), true)
+				.addField("ID", member.getId(), true);
+		if (!roles.isEmpty()) {
+			embed.addField(String.format("Roles (+%s other)", roles.size() - 1), roles.get(0).getAsMention(), true);
+		}
 		embed.addField("Warns", String.format("`%s (%s/%s)`",
 						warns.size(),
 						warns.stream().mapToLong(Warn::getSeverityWeight).count(),
@@ -52,9 +59,10 @@ public class ProfileCommand implements SlashCommandHandler {
 						points,
 						points == 1 ? "" : "s",
 						new LeaderboardCommand().getQOTWRank(member.getIdLong())), true)
-				.addField("Discord-ID", String.format("```\n%s\n```", member.getId()), false)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);
+		if (member.getTimeBoosted() != null)
+			embed.addField("Boosted since", String.format("<t:%s:R>", member.getTimeBoosted().toEpochSecond()), true);
 		return embed.build();
 	}
 
