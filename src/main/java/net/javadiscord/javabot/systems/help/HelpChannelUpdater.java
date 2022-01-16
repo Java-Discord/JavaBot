@@ -103,6 +103,9 @@ public class HelpChannelUpdater implements Runnable {
 					if (mostRecentMessage.getTimeCreated().plusMinutes(timeout).isBefore(OffsetDateTime.now())) {
 						if (isThankMessage(mostRecentMessage)) {// If the thank message times out, just unreserve already.
 							return channelManager.unreserveChannel(channel);
+						} else if (isActivityCheckAffirmativeResponse(mostRecentMessage)) { //If the last message was an activity check affirmative response, delete that and send a new check
+							mostRecentMessage.delete().queue();
+							return sendActivityCheck(channel, owner, reservation);
 						} else {
 							return sendActivityCheck(channel, owner, reservation);
 						}
@@ -285,7 +288,7 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private RestAction<?> deleteOldBotMessages(List<Message> messages) {
 		var deleteActions = messages.stream()
-			.filter(m -> isActivityCheck(m) || isActivityCheckAffirmativeResponse(m))
+			.filter(m -> isActivityCheck(m))
 			.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) {
 			return RestAction.allOf(deleteActions);
@@ -318,8 +321,8 @@ public class HelpChannelUpdater implements Runnable {
 			messages.removeIf(m -> m.getTimeCreated().isBefore(fm.getTimeCreated()));
 			botMessages.removeIf(m -> m.getTimeCreated().isBefore(fm.getTimeCreated()));
 		}
-		// Trim away bot messages from the main list of messages.
-		messages.removeIf(m -> m.getAuthor().isBot() || m.getAuthor().isSystem());
+		// Trim away system messages from the main list of messages.
+		messages.removeIf(m -> m.getAuthor().isSystem());
 		List<User> nonOwnerParticipants = messages.stream().map(Message::getAuthor).filter(u -> !u.isBot() && !u.isSystem()).toList();
 		Duration timeSinceFirstMessage = null;
 		if (firstMessage != null) {
