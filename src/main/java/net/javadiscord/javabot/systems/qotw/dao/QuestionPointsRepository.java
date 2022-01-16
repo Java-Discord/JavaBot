@@ -1,12 +1,14 @@
 package net.javadiscord.javabot.systems.qotw.dao;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class QuestionPointsRepository {
 	private final Connection con;
@@ -25,6 +27,7 @@ public class QuestionPointsRepository {
 			int rows = stmt.executeUpdate();
 			if (rows == 0) throw new SQLException("User was not inserted.");
 			stmt.close();
+			log.info("Inserted new QOTW-Account: {}", account);
 	}
 
 	/**
