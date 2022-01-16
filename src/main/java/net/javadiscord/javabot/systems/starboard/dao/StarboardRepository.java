@@ -45,6 +45,16 @@ public class StarboardRepository {
 		return null;
 	}
 
+	public StarboardEntry getEntryByStarboardMessageId(long starboardMessageId) throws SQLException {
+		PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE starboard_message_id = ?");
+		s.setLong(1, starboardMessageId);
+		var rs = s.executeQuery();
+		if (rs.next()) {
+			return read(rs);
+		}
+		return null;
+	}
+
 	private StarboardEntry read(ResultSet rs) throws SQLException {
 		StarboardEntry entry = new StarboardEntry();
 		entry.setOriginalMessageId(rs.getLong("original_message_id"));

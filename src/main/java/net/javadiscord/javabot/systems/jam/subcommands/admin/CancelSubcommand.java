@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
 import net.dv8tion.jda.api.entities.NewsChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;

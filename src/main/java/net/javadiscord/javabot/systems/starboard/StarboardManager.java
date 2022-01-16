@@ -47,7 +47,7 @@ public class StarboardManager extends ListenerAdapter {
 							} else if (stars >= config.getReactionThreshold()) {
 								addMessageToStarboard(message, stars, config);
 							} else if (stars < 1) {
-								if (!removeMessageFromStarboard(message.getIdLong(), config)) {
+								if (!removeMessageFromStarboard(message.getIdLong(), channel, config)) {
 									log.error("Could not remove Message from Starboard");
 								}
 							}
@@ -64,10 +64,12 @@ public class StarboardManager extends ListenerAdapter {
 		if (!event.isFromGuild() || !event.isFromType(ChannelType.TEXT)) return;
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new StarboardRepository(con);
-			var entry = repo.getEntryByMessageId(event.getMessageIdLong());
 			var config = Bot.config.get(event.getGuild()).getStarBoard();
+			StarboardEntry entry;
+			if (event.getChannel().equals(config.getStarboardChannel())) entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
+			else entry = repo.getEntryByMessageId(event.getMessageIdLong());
 			if (entry != null) {
-				if (!removeMessageFromStarboard(event.getMessageIdLong(), config)) {
+				if (!removeMessageFromStarboard(entry.getOriginalMessageId(), event.getTextChannel(), config)) {
 					log.error("Could not remove Message from Starboard");
 				}
 			}
@@ -133,7 +135,7 @@ public class StarboardManager extends ListenerAdapter {
 				starboardMessage -> {
 					if (stars < 1) {
 						try {
-							if (!removeMessageFromStarboard(message.getIdLong(), config)) {
+							if (!removeMessageFromStarboard(message.getIdLong(), message.getTextChannel(), config)) {
 								log.error("Could not remove Message from Starboard");
 							}
 						} catch (SQLException e) {
@@ -151,20 +153,17 @@ public class StarboardManager extends ListenerAdapter {
 		);
 	}
 
-	private boolean removeMessageFromStarboard(long messageId, StarboardConfig config) throws SQLException {
+	private boolean removeMessageFromStarboard(long messageId, TextChannel channel, StarboardConfig config) throws SQLException {
 		var repo = new StarboardRepository(Bot.dataSource.getConnection());
 		var entry = repo.getEntryByMessageId(messageId);
 		if (entry == null) return false;
-		config.getStarboardChannel().retrieveMessageById(entry.getStarboardMessageId()).queue(
-				starboardMessage -> {
-					starboardMessage.delete().queue();
-					try {
-						repo.delete(messageId);
-					} catch (SQLException e) {
-						log.error("Could not mark Starboard Entry as removed", e);
-					}
-				}, e -> log.error("Could not remove Message from Starboard", e)
-		);
+		if (!channel.equals(config.getStarboardChannel())) {
+			config.getStarboardChannel().retrieveMessageById(entry.getStarboardMessageId()).queue(
+					starboardMessage -> starboardMessage.delete().queue(),
+					e -> log.error("Could not remove Message from Starboard", e)
+			);
+		}
+		repo.delete(messageId);
 		log.info("Removed Starboard Entry with message Id {}", messageId);
 		return true;
 	}
