@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 import static net.javadiscord.javabot.Bot.imageCache;
 
@@ -77,12 +78,14 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * @param n The amount of members to get.
 	 * @return A {@link List} with the top member ids.
 	 */
-	private List<Long> getTopNMembers(int n) {
+	private List<Member> getTopNMembers(int n, Guild guild) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QuestionPointsRepository(con);
 			var accounts = repo.getAllAccountsSortedByPoints();
 			return accounts.stream()
-					.map(QOTWAccount::getUserId).limit(n)
+					.map(QOTWAccount::getUserId).map(guild::getMemberById)
+					.filter(Objects::nonNull)
+					.limit(n)
 					.toList();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -187,7 +190,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 		var logo = getResourceImage("images/leaderboard/Logo.png");
 		var card = getResourceImage("images/leaderboard/LBCard.png");
 
-		var topMembers = getTopNMembers(DISPLAY_COUNT);
+		var topMembers = getTopNMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
 				(getResourceImage("images/leaderboard/LBCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		var image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
@@ -201,8 +204,8 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 
 		boolean left = true;
 		int y = logo.getHeight() + 3 * MARGIN;
-		for (var id : topMembers) {
-			drawUserCard(g2d, guild, id, y, left);
+		for (var m : topMembers) {
+			drawUserCard(g2d, guild, m.getIdLong(), y, left);
 			left = !left;
 			if (left) y = y + card.getHeight() + MARGIN;
 		}

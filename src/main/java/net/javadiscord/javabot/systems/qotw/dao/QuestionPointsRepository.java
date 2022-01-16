@@ -17,7 +17,6 @@ public class QuestionPointsRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void insert(QOTWAccount account) throws SQLException {
-		if (getAccountByUserId(account.getUserId()) == null) {
 			PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS
 			);
@@ -26,7 +25,6 @@ public class QuestionPointsRepository {
 			int rows = stmt.executeUpdate();
 			if (rows == 0) throw new SQLException("User was not inserted.");
 			stmt.close();
-		}
 	}
 
 	/**
@@ -40,8 +38,13 @@ public class QuestionPointsRepository {
 		var rs = s.executeQuery();
 		if (rs.next()) {
 			return read(rs);
+		} else {
+			QOTWAccount account = new QOTWAccount();
+			account.setUserId(userId);
+			account.setPoints(0);
+			insert(account);
+			return account;
 		}
-		return null;
 	}
 
 	/**
@@ -77,7 +80,7 @@ public class QuestionPointsRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWAccount> getAllAccountsSortedByPoints() throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points ORDER BY points desc");
+		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points ORDER BY points DESC");
 		var rs = s.executeQuery();
 		List<QOTWAccount> accounts = new ArrayList<>();
 		while (rs.next()) {
