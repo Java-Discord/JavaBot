@@ -137,3 +137,13 @@
 - name: uptime
   description: Checks the Bot's uptime
   handler: net.javadiscord.javabot.systems.commands.UptimeCommand
+
+# /format-code
+- name: format-code
+  description: Format unformatted code from a mesage
+  options:
+    - name: message-id
+      description: Message to be formatted, last message used if left blank
+      required: false
+      type: STRING
+  handler: net.javadiscord.javabot.systems.commands.FormatCodeCommand
