@@ -66,7 +66,8 @@ public class StarboardManager extends ListenerAdapter {
 			var repo = new StarboardRepository(con);
 			var config = Bot.config.get(event.getGuild()).getStarBoard();
 			StarboardEntry entry;
-			if (event.getChannel().equals(config.getStarboardChannel())) entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
+			if (event.getChannel().equals(config.getStarboardChannel()))
+				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
 			else entry = repo.getEntryByMessageId(event.getMessageIdLong());
 			if (entry != null) {
 				if (!removeMessageFromStarboard(entry.getOriginalMessageId(), event.getTextChannel(), config)) {
@@ -149,6 +150,13 @@ public class StarboardManager extends ListenerAdapter {
 										String.format("%s %s | %s", starEmote, stars, message.getChannel().getAsMention()))
 								.queue();
 					}
+				}, e -> {
+					log.error("Could not retrieve original Message. Deleting corresponding Starboard Entry...");
+					try {
+						removeMessageFromStarboard(message.getIdLong(), message.getTextChannel(), config);
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+					}
 				}
 		);
 	}
@@ -166,6 +174,41 @@ public class StarboardManager extends ListenerAdapter {
 		repo.delete(messageId);
 		log.info("Removed Starboard Entry with message Id {}", messageId);
 		return true;
+	}
+
+	public void updateAllStarboardEntries(Guild guild) {
+		log.info("Updating all Starboard Entries");
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new StarboardRepository(con);
+			var entries = repo.getAllStarboardEntries(guild.getIdLong());
+			var config = Bot.config.get(guild).getStarBoard();
+			var starEmote = config.getEmotes().get(0);
+			for (var entry : entries) {
+				var channel = guild.getTextChannelById(entry.getChannelId());
+				if (channel == null) {
+					removeMessageFromStarboard(entry.getOriginalMessageId(), channel, config);
+					return;
+				}
+				channel.retrieveMessageById(entry.getOriginalMessageId()).queue(
+						message -> {
+							try {
+								updateStarboardMessage(message, getReactionCountForEmote(starEmote, message), config);
+							} catch (SQLException ex) {
+								ex.printStackTrace();
+							}
+						},
+						e -> {
+							try {
+								removeMessageFromStarboard(entry.getOriginalMessageId(), channel, config);
+							} catch (SQLException ex) {
+								ex.printStackTrace();
+							}
+						}
+				);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private MessageEmbed buildStarboardEmbed(Message message) {

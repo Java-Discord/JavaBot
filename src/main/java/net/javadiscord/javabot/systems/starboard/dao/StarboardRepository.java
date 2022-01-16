@@ -2,9 +2,12 @@ package net.javadiscord.javabot.systems.starboard.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,6 +56,17 @@ public class StarboardRepository {
 			return read(rs);
 		}
 		return null;
+	}
+
+	public List<StarboardEntry> getAllStarboardEntries(long guildId) throws SQLException {
+		PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE guild_id = ?");
+		s.setLong(1, guildId);
+		var rs = s.executeQuery();
+		List<StarboardEntry> entries = new ArrayList<>();
+		while (rs.next()) {
+			entries.add(read(rs));
+		}
+		return entries;
 	}
 
 	private StarboardEntry read(ResultSet rs) throws SQLException {
