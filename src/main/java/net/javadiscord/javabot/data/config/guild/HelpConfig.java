@@ -104,7 +104,7 @@ public class HelpConfig extends GuildConfigItem {
 	private int removeInactiveTimeoutMinutes = 60;
 
 	/**
-	 * The number of minuted to wait before closing a channel waiting for a response
+	 * The number of minutes to wait before closing a channel waiting for a response
 	 * to a thanks question.
 	 */
 	private int removeThanksTimeoutMinutes = 15;
