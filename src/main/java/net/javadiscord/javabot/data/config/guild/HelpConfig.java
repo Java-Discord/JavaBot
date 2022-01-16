@@ -101,7 +101,13 @@ public class HelpConfig extends GuildConfigItem {
 	 * inactive channel is one in which the most recent message is an unanswered
 	 * activity check that was sent by this bot.
 	 */
-	private int removeTimeoutMinutes = 60;
+	private int removeInactiveTimeoutMinutes = 60;
+
+	/**
+	 * The number of minuted to wait before closing a channel waiting for a response
+	 * to a thanks question.
+	 */
+	private int removeThanksTimeoutMinutes = 15;
 
 	/**
 	 * The number of seconds to wait between each help channel update check.
