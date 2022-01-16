@@ -98,10 +98,10 @@ public class PresenceUpdater extends ListenerAdapter {
      */
     public static PresenceUpdater standardActivities() {
         return new PresenceUpdater(List.of(
-            jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching(Constants.JAM_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching(Constants.QOTW_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members"),
-            jda -> Activity.watching(Constants.GITHUB_LINK + " | " + StartupListener.preferredGuild.getMemberCount()  + " members")
+            jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + StartupListener.defaultGuild.getMemberCount()  + " members"),
+            jda -> Activity.watching(Constants.JAM_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members"),
+            jda -> Activity.watching(Constants.QOTW_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members"),
+            jda -> Activity.watching(Constants.GITHUB_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members")
         ), 35, TimeUnit.SECONDS);
     }
 }
