@@ -253,7 +253,7 @@ public class HelpChannelManager {
 				new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("✅")),
 				new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
 		);
-		interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel, this will also be done automatically in 15 Minutes.")
+		interaction.getHook().sendMessage(String.format("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel, this will also be done automatically in %d Minutes.", config.getRemoveThanksTimeoutMinutes()))
 				.setEphemeral(true).queue();
 		List<ActionRow> rows = new ArrayList<>(5);
 		rows.add(controlsRow);
