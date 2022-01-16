@@ -17,6 +17,7 @@ import net.javadiscord.javabot.events.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.serverlock.ServerLock;
+import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
 import net.javadiscord.javabot.tasks.StatsUpdater;
@@ -118,7 +119,7 @@ public class Bot {
                 new StatsUpdater(),
                 new SuggestionListener(),
                 new AutoMod(),
-                new StarboardListener(),
+                new StarboardManager(),
                 new InteractionListener(),
                 new HelpChannelListener(),
                 new ShareKnowledgeVoteListener()

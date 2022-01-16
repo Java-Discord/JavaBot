@@ -14,11 +14,6 @@ public class SystemsConfig {
 	private String jdaBotToken = "";
 
 	/**
-	 * The URL used to log in to the MongoDB instance which this bot uses.
-	 */
-	private String mongoDatabaseUrl = "";
-
-	/**
 	 * The Key used for bing-search-api
 	 */
 	public String azureSubscriptionKey = "";
