@@ -66,9 +66,11 @@ public class StarboardManager extends ListenerAdapter {
 			var repo = new StarboardRepository(con);
 			var config = Bot.config.get(event.getGuild()).getStarBoard();
 			StarboardEntry entry;
-			if (event.getChannel().equals(config.getStarboardChannel()))
+			if (event.getChannel().equals(config.getStarboardChannel())) {
 				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
-			else entry = repo.getEntryByMessageId(event.getMessageIdLong());
+			} else {
+				entry = repo.getEntryByMessageId(event.getMessageIdLong());
+			}
 			if (entry != null) {
 				if (!removeMessageFromStarboard(entry.getOriginalMessageId(), event.getTextChannel(), config)) {
 					log.error("Could not remove Message from Starboard");
