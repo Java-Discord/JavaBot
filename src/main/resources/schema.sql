@@ -171,3 +171,17 @@ CREATE TABLE qotw_points (
 	 user_id BIGINT PRIMARY KEY,
 	 points BIGINT NOT NULL DEFAULT 0
 );
+
+CREATE TABLE expert_questions (
+	  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+	  guild_id BIGINT NOT NULL,
+	  text VARCHAR(2048) NOT NULL
+);
+
+CREATE TABLE starboard (
+	   original_message_id BIGINT PRIMARY KEY,
+	   guild_id BIGINT NOT NULL,
+	   channel_id BIGINT NOT NULL,
+	   author_id BIGINT NOT NULL,
+	   starboard_message_id BIGINT NOT NULL
+);
