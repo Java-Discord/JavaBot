@@ -75,6 +75,7 @@ public class SubmissionManager {
 	}
 
 	public Member getSubmissionThreadOwner(ThreadChannel channel) {
+		if (channel == null) return null;
 		var message = channel.getHistoryFromBeginning(50)
 				.complete().retrieveFuture(50).complete()
 				.stream().filter(m -> m.getAuthor().equals(channel.getJDA().getSelfUser()))
@@ -83,6 +84,7 @@ public class SubmissionManager {
 	}
 
 	public List<ThreadChannel> getSubmissionThreads(Member member) {
+		if (member == null) return List.of();
 		return config.getSubmissionChannel().getThreadChannels()
 				.stream()
 				.filter(c -> getSubmissionThreadOwner(c).equals(member) && !c.isArchived())
