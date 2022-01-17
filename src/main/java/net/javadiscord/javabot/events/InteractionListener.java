@@ -13,7 +13,7 @@ import net.javadiscord.javabot.systems.qotw.SubmissionManager;
 public class InteractionListener extends ListenerAdapter {
 
 	// TODO: add Context-Menu Commands (once they're available in JDA)
-
+	// TODO: Clean up button ids. "qotw-submission" & "qotw-submission-delete" is just a temporary solution.
 	@Override
 	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
@@ -22,6 +22,7 @@ public class InteractionListener extends ListenerAdapter {
 		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
 			case "qotw-submission" -> new SubmissionManager(config.getQotw()).handleSubmission(event, Long.parseLong(id[1])).queue();
+			case "qotw-submission-delete" -> new SubmissionManager(config.getQotw()).handleThreadDeletion(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);

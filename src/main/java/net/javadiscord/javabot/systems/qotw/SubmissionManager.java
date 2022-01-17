@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.entities.ThreadMember;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
@@ -41,12 +43,21 @@ public class SubmissionManager {
 											"\nYou can even send multiple messages, if you want to. This whole thread counts as your submission." +
 											"\nThe %s will review your submission once a new question appears.",
 									questionNumber, member.getAsMention(), config.getQOTWReviewRole().getAsMention())
+							.setActionRows(ActionRow.of(Button.danger("qotw-submission-delete", "Delete your Submission")))
 							.queue();
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
 		log.info("Opened new Submission Thread for User {}", member.getUser().getAsTag());
 		return Responses.success(event.getHook(), "Submission Thread created",
 				"Successfully created a new private Thread for your submission.");
+	}
+
+	public void handleThreadDeletion(ButtonClickEvent event) {
+		var thread = (ThreadChannel) event.getGuildChannel();
+		if (thread.getName().contains(event.getUser().getId())) {
+			thread.delete().queue();
+			log.info("Deleted {}'s Submission Thread", event.getUser().getAsTag());
+		}
 	}
 
 	private boolean isLatestQOTWMessage(Message message) {
