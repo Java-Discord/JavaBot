@@ -94,21 +94,22 @@ public class HelpChannelUpdater implements Runnable {
 			try {
 				// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
 				if (isActivityCheck(mostRecentMessage)) {
-					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveInactiveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
 						log.info("Unreserving channel {} because of no response to activity check.", channel.getName());
 						return unreserveInactiveChannel(channel, owner, mostRecentMessage, messages);
+					}
+				} else if(isThankMessage(mostRecentMessage)) {
+					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveThanksTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+						log.info("Unreserving channel {} because no response to thanks question was received.", channel.getName());
+						return  unreserveInactiveChannel(channel, owner, mostRecentMessage, messages);
 					}
 				} else {// The most recent message is not an activity check, so check if it's old enough to warrant sending an activity check.
 					int timeout = channelManager.getTimeout(channel);
 					if (mostRecentMessage.getTimeCreated().plusMinutes(timeout).isBefore(OffsetDateTime.now())) {
-						if (isThankMessage(mostRecentMessage)) {// If the thank message times out, just unreserve already.
-							return channelManager.unreserveChannel(channel);
-						} else if (isActivityCheckAffirmativeResponse(mostRecentMessage)) { //If the last message was an activity check affirmative response, delete that and send a new check
+						 if (isActivityCheckAffirmativeResponse(mostRecentMessage)) { //If the last message was an activity check affirmative response, delete that and send a new check
 							mostRecentMessage.delete().queue();
-							return sendActivityCheck(channel, owner, reservation);
-						} else {
-							return sendActivityCheck(channel, owner, reservation);
-						}
+						 }
+						return sendActivityCheck(channel, owner, reservation);
 					} else {// The channel is still active, so take this opportunity to clean up the channel.
 						// Also use it to do some introspection on the type of messages sent recently, to see if the bot can provide automated guidance.
 						return RestAction.allOf(deleteOldBotMessages(messages), semanticMessageCheck(channel, owner, messages));
@@ -238,7 +239,7 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private RestAction<?> sendActivityCheck(TextChannel channel, User owner, ChannelReservation reservation) {
 		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getName());
-		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveTimeoutMinutes()))
+		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveInactiveTimeoutMinutes()))
 			.setActionRow(
 				new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, Emoji.fromUnicode("✅")),
 				new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
@@ -256,7 +257,7 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes once the channel is unreserved.
 	 */
 	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage, List<Message> messages) {
-		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getName(), config.getRemoveTimeoutMinutes());
+		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getName(), config.getRemoveInactiveTimeoutMinutes());
 		return RestAction.allOf(
 			mostRecentMessage.delete(),
 			deleteThankMessages(messages),
