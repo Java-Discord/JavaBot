@@ -16,6 +16,7 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.events.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
+import net.javadiscord.javabot.systems.qotw.SubmissionEventListener;
 import net.javadiscord.javabot.systems.serverlock.ServerLock;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
@@ -122,6 +123,7 @@ public class Bot {
                 new StarboardManager(),
                 new InteractionListener(),
                 new HelpChannelListener(),
+                new SubmissionEventListener(),
                 new ShareKnowledgeVoteListener()
         );
     }

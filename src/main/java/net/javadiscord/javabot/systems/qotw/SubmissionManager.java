@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.ThreadChannel;
-import net.dv8tion.jda.api.entities.ThreadMember;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,11 +22,11 @@ public class SubmissionManager {
 			return Responses.error(event.getHook(), "You may only answer the newest QOTW.");
 		}
 		var member = event.getMember();
-		if (hasActiveSubmissionThread(member, questionNumber)) {
-			var thread = getSubmissionThread(member, questionNumber);
-			return Responses.error(event.getHook(), "You already have a submission thread: " + thread.get().getAsMention());
+		if (hasActiveSubmissionThreads(member)) {
+			var thread = getSubmissionThreads(member);
+			return Responses.error(event.getHook(), "You already have a submission thread: " + thread.get(0).getAsMention());
 		}
-		if (!canCreateSubmissions(event.getMember(), questionNumber)) {
+		if (!canCreateSubmissions(event.getMember())) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
 		config.getSubmissionChannel().createThreadChannel(
@@ -64,27 +63,30 @@ public class SubmissionManager {
 		return message.equals(latestMessage);
 	}
 
-	private boolean canCreateSubmissions(Member member, long questionNumber) {
+	private boolean canCreateSubmissions(Member member) {
 		if (member == null) return false;
 		if (member.getUser().isBot() || member.getUser().isSystem()) return false;
 		if (member.isTimedOut() || member.isPending()) return false;
-		return !hasActiveSubmissionThread(member, questionNumber);
+		return !hasActiveSubmissionThreads(member);
 	}
 
-	public boolean hasActiveSubmissionThread(Member member, long questionNumber) {
-		var optional = getSubmissionThread(member, questionNumber);
-		return optional.isPresent() && !optional.get().isArchived();
+	public boolean hasActiveSubmissionThreads(Member member) {
+		return getSubmissionThreads(member).size() > 0;
 	}
 
-	public Optional<ThreadMember> getSubmissionThreadOwner(ThreadChannel channel) {
-		return channel.getThreadMembers().stream().filter(m -> channel.getName().contains(m.getId())).findFirst();
+	public Member getSubmissionThreadOwner(ThreadChannel channel) {
+		var message = channel.getHistoryFromBeginning(50)
+				.complete().retrieveFuture(50).complete()
+				.stream().filter(m -> m.getAuthor().equals(channel.getJDA().getSelfUser()))
+				.limit(1).findFirst();
+		return message.map(value -> value.getMentionedMembers().get(0)).orElse(null);
 	}
 
-	public Optional<ThreadChannel> getSubmissionThread(Member member, long questionNumber) {
+	public List<ThreadChannel> getSubmissionThreads(Member member) {
 		return config.getSubmissionChannel().getThreadChannels()
 				.stream()
-				.filter(s -> s.getName().contains(String.format("| %s (%s)", member.getId(), questionNumber)) && !s.isArchived())
-				.findFirst();
+				.filter(c -> getSubmissionThreadOwner(c).equals(member) && !c.isArchived())
+				.toList();
 	}
 
 	public String archiveThreadContents(ThreadChannel channel) {
