@@ -120,6 +120,7 @@ public class AutoMod extends ListenerAdapter {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
+			Misc.sendToLog(message.getGuild(), "Message: `" + message.getContentRaw() + "`");
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 					.warn(
 							message.getMember(),
