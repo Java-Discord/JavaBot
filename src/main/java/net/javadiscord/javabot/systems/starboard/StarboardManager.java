@@ -21,14 +21,14 @@ public class StarboardManager extends ListenerAdapter {
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
 		if (!validUser(event.getUser())) return;
-		if (event.getChannelType() != ChannelType.TEXT || !event.getChannelType().isThread()) return;
+		if (event.getChannelType() != ChannelType.TEXT) return;
 		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getTextChannel(), event.getMessageIdLong());
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
 		if (!validUser(event.getUser())) return;
-		if (event.getChannelType() != ChannelType.TEXT || !event.getChannelType().isThread()) return;
+		if (event.getChannelType() != ChannelType.TEXT) return;
 		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getTextChannel(), event.getMessageIdLong());
 	}
 
