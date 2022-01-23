@@ -9,6 +9,9 @@ import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
 
+/**
+ * Simple DTO representing slash command privileges.
+ */
 @Data
 @Slf4j
 public class CommandPrivilegeConfig {
@@ -16,6 +19,13 @@ public class CommandPrivilegeConfig {
 	private boolean enabled = true;
 	private String id;
 
+	/**
+	 * Converts the current {@link CommandPrivilegeConfig} into a {@link CommandPrivilege} object.
+	 *
+	 * @param guild     The current guild.
+	 * @param botConfig The bot's config.
+	 * @return The {@link CommandPrivilege} object.
+	 */
 	public CommandPrivilege toData(Guild guild, BotConfig botConfig) {
 		if (this.type.equalsIgnoreCase(CommandPrivilege.Type.USER.name())) {
 			Member member = guild.getMemberById(id);

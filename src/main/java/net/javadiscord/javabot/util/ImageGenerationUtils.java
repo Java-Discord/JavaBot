@@ -39,6 +39,7 @@ public abstract class ImageGenerationUtils {
 	 * Gets a Font from the specified Resource Path.
 	 *
 	 * @param path The path of the font.
+	 * @param size The font's size.
 	 * @return The font as an {@link Optional}
 	 */
 	protected Optional<Font> getResourceFont(String path, float size) {
@@ -46,7 +47,7 @@ public abstract class ImageGenerationUtils {
 		try {
 			font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path))).deriveFont(size);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-		} catch (Exception e) {
+		} catch (IOException | FontFormatException e) {
 			log.warn("Could not load Font from path " + path);
 		}
 		return Optional.ofNullable(font);

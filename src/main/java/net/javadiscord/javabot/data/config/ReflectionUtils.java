@@ -47,8 +47,9 @@ public class ReflectionUtils {
 		try {
 			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
 			// Transient fields should not exist in the context of property resolution, treat them as unknown.
-			if (Modifier.isTransient(field.getModifiers()))
+			if (Modifier.isTransient(field.getModifiers())) {
 				throw new UnknownPropertyException(fieldNames[0], parent.getClass());
+			}
 			field.setAccessible(true);
 			Object value = field.get(parent);
 			if (fieldNames.length == 1) {

@@ -185,13 +185,9 @@ public class SlashCommands extends ListenerAdapter {
 		if (config == null || config.getPrivileges() == null) return Collections.emptyList();
 		List<CommandPrivilege> privileges = new ArrayList<>();
 		for (var privilegeConfig : config.getPrivileges()) {
-			try {
-				privileges.add(privilegeConfig.toData(guild, Bot.config));
-				log.info("\t{}[{}]{} Registering privilege: {}",
-						Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, privilegeConfig);
-			} catch (Exception e) {
-				log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
-			}
+			privileges.add(privilegeConfig.toData(guild, Bot.config));
+			log.info("\t{}[{}]{} Registering privilege: {}",
+					Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, privilegeConfig);
 		}
 		return privileges;
 	}

@@ -10,26 +10,26 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import java.sql.SQLException;
 
 public class ClearSubCommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        var memberOption = event.getOption("user");
-        if (memberOption == null) {
-            return Responses.error(event, "Missing required arguments.");
-        }
-        var member = memberOption.getAsMember();
-        var memberId = member.getIdLong();
-        try (var con = Bot.dataSource.getConnection()) {
-            var repo = new QuestionPointsRepository(con);
-            repo.update(memberId, 0);
-            return Responses.success(event,
-                    "Cleared QOTW-Points",
-                    "Successfully cleared all QOTW-Points from user " + member.getUser().getAsMention());
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return Responses.error(event, "An Error occurred.");
-        }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var memberOption = event.getOption("user");
+		if (memberOption == null) {
+			return Responses.error(event, "Missing required arguments.");
+		}
+		var member = memberOption.getAsMember();
+		var memberId = member.getIdLong();
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			repo.update(memberId, 0);
+			return Responses.success(event,
+					"Cleared QOTW-Points",
+					"Successfully cleared all QOTW-Points from user " + member.getUser().getAsMention());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Responses.error(event, "An Error occurred.");
+		}
 
-    }
+	}
 }
 
 

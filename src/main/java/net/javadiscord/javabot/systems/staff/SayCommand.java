@@ -8,12 +8,12 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 @Slf4j
 public class SayCommand implements SlashCommandHandler {
 
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        String text = event.getOption("text").getAsString();
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		String text = event.getOption("text").getAsString();
 
-        log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), event.getUser().getAsTag());
-        event.getChannel().sendMessage(text).queue();
-        return event.reply("Done!").setEphemeral(true);
-    }
+		log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), event.getUser().getAsTag());
+		event.getChannel().sendMessage(text).queue();
+		return event.reply("Done!").setEphemeral(true);
+	}
 }

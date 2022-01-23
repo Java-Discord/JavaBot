@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 /**
  * Parent class for any guild-specific collection of configuration settings,
  * which exposes a link to the parent guild config, and thus, the guild, which
- * may be needed to obtain text channels,
+ * may be needed to obtain text channels.
  */
 public abstract class GuildConfigItem {
 	/**

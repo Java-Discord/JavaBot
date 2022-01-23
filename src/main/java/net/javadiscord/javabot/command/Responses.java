@@ -18,6 +18,9 @@ import java.time.Instant;
  * sends as replies to slash command events.
  */
 public final class Responses {
+
+	private Responses() {}
+
 	public static ReplyAction success(SlashCommandEvent event, String title, String message) {
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}

@@ -11,6 +11,12 @@ public class OptionChoiceConfig {
 	private String name;
 	private String value;
 
+	/**
+	 * Converts the given {@link Choice} into a {@link OptionChoiceConfig} object.
+	 *
+	 * @param choice The {@link Choice}.
+	 * @return The {@link OptionChoiceConfig} object.
+	 */
 	public static OptionChoiceConfig fromData(Choice choice) {
 		var c = new OptionChoiceConfig();
 		c.setName(choice.getName());

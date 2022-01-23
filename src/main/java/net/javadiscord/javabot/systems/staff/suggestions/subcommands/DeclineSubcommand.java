@@ -16,34 +16,34 @@ import net.javadiscord.javabot.data.config.GuildConfig;
  */
 @Slf4j
 public class DeclineSubcommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        var messageIdOption = event.getOption("message-id");
-        if (messageIdOption == null) {
-            return Responses.error(event, "Missing required arguments.");
-        }
-        var messageId = messageIdOption.getAsString();
-        var config = Bot.config.get(event.getGuild());
-        config.getModeration().getSuggestionChannel().retrieveMessageById(messageId).queue(m -> {
-            var embed = m.getEmbeds().get(0);
-            m.clearReactions().queue();
-            var declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, config);
-            m.editMessageEmbeds(declineEmbed).queue(
-                    message -> message.addReaction(config.getEmote().getFailureEmote()).queue(),
-                    error -> Responses.error(event, error.getMessage()).queue());
-        }, e -> log.error("Could not find suggestion message with id {}", messageId));
-        return Responses.success(event, "Suggestion declined",
-                String.format("Successfully declined suggestion with id `%s`", messageId));
-    }
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var messageIdOption = event.getOption("message-id");
+		if (messageIdOption == null) {
+			return Responses.error(event, "Missing required arguments.");
+		}
+		var messageId = messageIdOption.getAsString();
+		var config = Bot.config.get(event.getGuild());
+		config.getModeration().getSuggestionChannel().retrieveMessageById(messageId).queue(m -> {
+			var embed = m.getEmbeds().get(0);
+			m.clearReactions().queue();
+			var declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, config);
+			m.editMessageEmbeds(declineEmbed).queue(
+					message -> message.addReaction(config.getEmote().getFailureEmote()).queue(),
+					error -> Responses.error(event, error.getMessage()).queue());
+		}, e -> log.error("Could not find suggestion message with id {}", messageId));
+		return Responses.success(event, "Suggestion declined",
+				String.format("Successfully declined suggestion with id `%s`", messageId));
+	}
 
-    private MessageEmbed buildSuggestionDeclineEmbed(User user, MessageEmbed embed, GuildConfig config) {
-        return new EmbedBuilder()
-                .setColor(config.getSlashCommand().getDefaultColor())
-                .setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
-                .setTitle("Suggestion Declined")
-                .setDescription(embed.getDescription())
-                .setTimestamp(embed.getTimestamp())
-                .setFooter("Declined by " + user.getAsTag())
-                .build();
-    }
+	private MessageEmbed buildSuggestionDeclineEmbed(User user, MessageEmbed embed, GuildConfig config) {
+		return new EmbedBuilder()
+				.setColor(config.getSlashCommand().getDefaultColor())
+				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
+				.setTitle("Suggestion Declined")
+				.setDescription(embed.getDescription())
+				.setTimestamp(embed.getTimestamp())
+				.setFooter("Declined by " + user.getAsTag())
+				.build();
+	}
 }

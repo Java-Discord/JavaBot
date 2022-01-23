@@ -24,7 +24,9 @@ public class JamConfig extends GuildConfigItem {
 		return Color.decode(this.jamEmbedColorHex);
 	}
 
-	public NewsChannel getAnnouncementChannel() { return this.getGuild().getNewsChannelById(this.announcementChannelId); }
+	public NewsChannel getAnnouncementChannel() {
+		return this.getGuild().getNewsChannelById(this.announcementChannelId);
+	}
 
 	public TextChannel getVotingChannel() {
 		return this.getGuild().getTextChannelById(this.votingChannelId);

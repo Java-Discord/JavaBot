@@ -11,23 +11,24 @@ import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.EditSub
  */
 public class CustomCommandHandler extends DelegatingCommandHandler {
 
-    /**
-     * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand(String, SlashCommandHandler)}
-     */
-    public CustomCommandHandler() {
-        addSubcommand("create", new CreateSubCommand());
-        addSubcommand("delete", new DeleteSubCommand());
-        addSubcommand("edit", new EditSubCommand());
-    }
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand(String, SlashCommandHandler)}
+	 */
+	public CustomCommandHandler() {
+		addSubcommand("create", new CreateSubCommand());
+		addSubcommand("delete", new DeleteSubCommand());
+		addSubcommand("edit", new EditSubCommand());
+	}
 
-    /**
-     * Cleans the given String by removing all whitespaces and slashes, so it can be used for custom commands.
-     * @param s The string that should be cleaned.
-     * @return The cleaned string.
-     */
-    public static String cleanString(String s) {
-        return s.trim()
-                .replaceAll("\\s+", "")
-                .replace("/", "");
-    }
+	/**
+	 * Cleans the given String by removing all whitespaces and slashes, so it can be used for custom commands.
+	 *
+	 * @param s The string that should be cleaned.
+	 * @return The cleaned string.
+	 */
+	public static String cleanString(String s) {
+		return s.trim()
+				.replaceAll("\\s+", "")
+				.replace("/", "");
+	}
 }

@@ -20,6 +20,12 @@ public class CommandConfig {
 	private SubCommandGroupConfig[] subCommandGroups;
 	private String handler;
 
+	/**
+	 * Creates a {@link CommandConfig} object from the given {@link CommandData}.
+	 *
+	 * @param data The original {@link CommandData}.
+	 * @return A new {@link CommandConfig} object.
+	 */
 	public static CommandConfig fromData(CommandData data) {
 		CommandConfig c = new CommandConfig();
 		c.setName(data.getName());
@@ -31,6 +37,11 @@ public class CommandConfig {
 		return c;
 	}
 
+	/**
+	 * Converts the current {@link CommandConfig} into a {@link CommandData} object.
+	 *
+	 * @return The {@link CommandData} object.
+	 */
 	public CommandData toData() {
 		CommandData data = new CommandData(this.name, this.description);
 		data.setDefaultEnabled(this.enabledByDefault);

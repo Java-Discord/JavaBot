@@ -8,8 +8,9 @@ import java.util.List;
 
 public class MessageActionUtils {
 	public static List<ActionRow> toActionRows(List<? extends Component> components) {
-		if (components.size() > 25)
+		if (components.size() > 25) {
 			throw new IllegalArgumentException("Cannot add more than 25 components to a message action.");
+		}
 		List<ActionRow> rows = new ArrayList<>(5);
 		List<Component> rowComponents = new ArrayList<>(5);
 		while (!components.isEmpty()) {

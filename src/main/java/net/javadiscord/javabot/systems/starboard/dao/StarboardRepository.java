@@ -30,8 +30,8 @@ public class StarboardRepository {
 
 	public void delete(long messageId) throws SQLException {
 		try (var stmt = con.prepareStatement("""
-			DELETE FROM starboard
-			WHERE original_message_id = ?""")) {
+				DELETE FROM starboard
+				WHERE original_message_id = ?""")) {
 			stmt.setLong(1, messageId);
 			stmt.executeUpdate();
 		}

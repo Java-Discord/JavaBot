@@ -7,6 +7,7 @@ import net.javadiscord.javabot.Bot;
 
 import java.util.List;
 
+@Deprecated
 public class Misc {
 
 	public static void sendToLog(Guild guild, MessageEmbed embed) {
@@ -30,20 +31,21 @@ public class Misc {
 
 			sb.append(", ").append(guildList.get(guildAmount - 1).getName());
 
-			if (showID && showMemCount)
+			if (showID && showMemCount) {
 				sb.append(" (").append(guildList.get(guildAmount - 1).getId()).append(", ").append(guildList.get(guildAmount - 1).getMemberCount()).append(" members)");
-			else if (showID && !showMemCount)
+			} else if (showID && !showMemCount) {
 				sb.append(" (").append(guildList.get(guildAmount - 1).getId()).append(")");
-			else if (!showID && showMemCount)
+			} else if (!showID && showMemCount) {
 				sb.append(" (").append(guildList.get(guildAmount - 1).getMemberCount()).append(" members)");
+			}
 		}
 		return sb.substring(2);
 	}
 
 	/**
-	 * Utility method that replaces text variables
+	 * Utility method that replaces text variables.
 	 *
-	 * @param string The string that should be replaced
+	 * @param string The string that should be replaced.
 	 */
 	public static String replaceTextVariables(Guild guild, String string) {
 		return string
@@ -52,16 +54,18 @@ public class Misc {
 				.replace("{!serverid}", guild.getId());
 	}
 
-    /**
-     * Utility method that replaces text variables
-     * @param string The string that should be replaced
-     */
-    public static String replaceTextVariables(Member member, String string) {
-        return string
-                .replace("{!membercount}", String.valueOf(member.getGuild().getMemberCount()))
-                .replace("{!servername}", member.getGuild().getName())
-                .replace("{!serverid}", member.getGuild().getId())
-                .replace("{!member}", member.getAsMention())
-                .replace("{!membertag}", member.getUser().getAsTag());
-    }
+	/**
+	 * Utility method that replaces text variables.
+	 *
+	 * @param member The member object.
+	 * @param string The string that should be replaced.
+	 */
+	public static String replaceTextVariables(Member member, String string) {
+		return string
+				.replace("{!membercount}", String.valueOf(member.getGuild().getMemberCount()))
+				.replace("{!servername}", member.getGuild().getName())
+				.replace("{!serverid}", member.getGuild().getId())
+				.replace("{!member}", member.getAsMention())
+				.replace("{!membertag}", member.getUser().getAsTag());
+	}
 }

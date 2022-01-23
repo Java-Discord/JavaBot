@@ -22,5 +22,8 @@ public class ResponseException extends Exception {
 		return new ResponseException(Type.ERROR, message, cause);
 	}
 
+	/**
+	 * Enum class representing all Response Exception types.
+	 */
 	public enum Type {WARNING, ERROR}
 }

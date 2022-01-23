@@ -31,7 +31,7 @@ public class RemoveTimeoutSubCommand implements SlashCommandHandler {
 		if (!member.isTimedOut()) {
 			return Responses.error(event, String.format("Could not remove Timeout from member %s; they are not timed out.", member.getAsMention()));
 		}
-        var moderationService = new ModerationService(event.getInteraction());
+		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.removeTimeout(member, reason, event.getMember(), channel, quiet)) {
 			return Responses.success(event, "Timeout Removed", String.format("%s's Timeout has been removed.", member.getAsMention()));
 		} else {

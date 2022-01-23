@@ -11,6 +11,11 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class MigrationUtils {
+
+	private MigrationUtils() {
+
+	}
+
 	public static Path getMigrationsDirectory() throws URISyntaxException, IOException {
 		var resource = MigrationsListSubcommand.class.getResource("/migrations/");
 		if (resource == null) throw new IOException("Missing resource /migrations/");
