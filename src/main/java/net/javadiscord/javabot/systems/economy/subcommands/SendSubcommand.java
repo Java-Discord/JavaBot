@@ -17,6 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Subcommand that allows members to send money to another member.
+ */
 public class SendSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
@@ -72,6 +75,7 @@ public class SendSubcommand implements SlashCommandHandler {
 	 * Checks the validity of a message that will be added to a transaction to
 	 * ensure it is safe and free of formatting characters or other unsightly
 	 * things.
+	 *
 	 * @param message The message to validate.
 	 * @return A list of error messages. If this is empty, validation is successful.
 	 */

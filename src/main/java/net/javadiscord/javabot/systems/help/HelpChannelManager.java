@@ -29,6 +29,9 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 public class HelpChannelManager {
+	/**
+	 * Static String that contains the Thank Message Text.
+	 */
 	public static final String THANK_MESSAGE_TEXT = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you? When you're done, click **Unreserve**.";
 
 	@Getter
@@ -54,6 +57,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Determines if the given user is allowed to reserve a help channel.
+	 *
 	 * @param user The user who is trying to reserve a channel.
 	 * @return True if the user can reserve it, or false if not.
 	 */
@@ -63,8 +67,8 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
-		try (var con = Bot.dataSource.getConnection();
-				var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?");
 			stmt.setLong(1, user.getIdLong());
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -80,7 +84,9 @@ public class HelpChannelManager {
 	 */
 	public void openNew() {
 		var category = config.getOpenChannelCategory();
-		if (category == null) throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
+		if (category == null) {
+			throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
+		}
 		String name = this.config.getChannelNamingStrategy().getName(category.getTextChannels(), config);
 		category.createTextChannel(name).queue(channel -> {
 			channel.getManager().setPosition(0).setTopic(this.config.getOpenChannelTopic()).queue();
@@ -90,9 +96,10 @@ public class HelpChannelManager {
 
 	/**
 	 * Reserves a text channel for a user.
-	 * @param channel The channel to reserve.
+	 *
+	 * @param channel       The channel to reserve.
 	 * @param reservingUser The user who is reserving the channel.
-	 * @param message The message the user sent in the channel.
+	 * @param message       The message the user sent in the channel.
 	 */
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
 		if (!isOpen(channel)) throw new IllegalArgumentException("Can only reserve open channels!");
@@ -143,6 +150,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Gets the owner of a reserved channel.
+	 *
 	 * @param channel The channel to get the owner of.
 	 * @return The user who reserved the channel, or null.
 	 */
@@ -165,6 +173,7 @@ public class HelpChannelManager {
 	/**
 	 * Gets a list of all users that have participated in a reserved help
 	 * channel since it was reserved.
+	 *
 	 * @param channel The channel to get participants for.
 	 * @return The list of users.
 	 */
@@ -198,9 +207,10 @@ public class HelpChannelManager {
 	/**
 	 * Unreserves a channel from the case that a user has done so via a discord
 	 * interaction.
-	 * @param channel The channel to unreserve.
-	 * @param owner The owner of the reserved channel.
-	 * @param reason The user-supplied reason for unreserving the channel.
+	 *
+	 * @param channel     The channel to unreserve.
+	 * @param owner       The owner of the reserved channel.
+	 * @param reason      The user-supplied reason for unreserving the channel.
 	 * @param interaction The interaction the user did to unreserve the channel.
 	 */
 	public void unreserveChannelByUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
@@ -283,13 +293,14 @@ public class HelpChannelManager {
 
 	/**
 	 * Unreserves a channel after it no longer needs to be reserved.
+	 *
 	 * @param channel The channel to unreserve.
 	 * @return A rest action that completes when everything is done.
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			try (var con = Bot.dataSource.getConnection();
-					var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
+			try (var con = Bot.dataSource.getConnection()) {
+				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
 				var dormantCategory = config.getDormantChannelCategory();
@@ -316,6 +327,12 @@ public class HelpChannelManager {
 		}
 	}
 
+	/**
+	 * Unreserves all help channels the given user owns.
+	 *
+	 * @param user The user whose help channels should be unreserved.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void unreserveAllOwnedChannels(User user) throws SQLException {
 		var channels = DbActions.mapQuery(
 				"SELECT channel_id FROM reserved_help_channels WHERE user_id = ?",
@@ -333,6 +350,12 @@ public class HelpChannelManager {
 		}
 	}
 
+	/**
+	 * Tries to retrieve the current {@link ChannelReservation} by the channel id.
+	 *
+	 * @param channelId The channel's id.
+	 * @return The {@link ChannelReservation} object as an {@link Optional}.
+	 */
 	public Optional<ChannelReservation> getReservationForChannel(long channelId) {
 		return DbActions.fetchSingleEntity(
 				"SELECT * FROM reserved_help_channels WHERE channel_id = ?",
@@ -347,6 +370,12 @@ public class HelpChannelManager {
 		);
 	}
 
+	/**
+	 * Tries to retrieve the current {@link ChannelReservation} by its id.
+	 *
+	 * @param id The reservation's id.
+	 * @return The {@link ChannelReservation} object as an {@link Optional}.
+	 */
 	public Optional<ChannelReservation> getReservation(long id) {
 		return DbActions.fetchSingleEntity(
 				"SELECT * FROM reserved_help_channels WHERE id = ?",
@@ -361,20 +390,32 @@ public class HelpChannelManager {
 		);
 	}
 
+	/**
+	 * Sets the timeout for the given channel.
+	 *
+	 * @param channel The channel.
+	 * @param timeout The timeout.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void setTimeout(TextChannel channel, int timeout) throws SQLException {
-		try (var con = Bot.dataSource.getConnection();
-			 var stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")
-		) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?");
 			stmt.setInt(1, timeout);
 			stmt.setLong(2, channel.getIdLong());
 			stmt.executeUpdate();
 		}
 	}
 
+	/**
+	 * Gets the given channel's timeout.
+	 *
+	 * @param channel The channel.
+	 * @return The timout as an integer.
+	 * @throws SQLException If an error occurs.
+	 */
 	public int getTimeout(TextChannel channel) throws SQLException {
-		try (var con = Bot.dataSource.getConnection();
-			var stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")
-		) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?");
 			stmt.setLong(1, channel.getIdLong());
 			var rs = stmt.executeQuery();
 			if (rs.next()) {
@@ -385,6 +426,13 @@ public class HelpChannelManager {
 		}
 	}
 
+	/**
+	 * Retrieves the time the given channel was reserved.
+	 *
+	 * @param channel The help channel.
+	 * @return The time the given channel was reserved as a {@link LocalDateTime} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public LocalDateTime getReservedAt(TextChannel channel) throws SQLException {
 		return DbActions.mapQuery(
 				"SELECT reserved_at FROM reserved_help_channels WHERE channel_id = ?",
@@ -396,6 +444,13 @@ public class HelpChannelManager {
 		);
 	}
 
+	/**
+	 * Calculates the next timeout for the given help channel.
+	 *
+	 * @param channel The help channel whose next timeout should be calculated.
+	 * @return The next timeout as an integer.
+	 * @throws SQLException If an error occurs.
+	 */
 	public int getNextTimeout(TextChannel channel) throws SQLException {
 		if (config.getInactivityTimeouts().isEmpty()) {
 			log.warn("No help channel inactivity timeouts have been configured!");
@@ -412,6 +467,12 @@ public class HelpChannelManager {
 		return maxTimeout;
 	}
 
+	/**
+	 * Gets the given help channel's reservation id.
+	 *
+	 * @param channel The channel whose id should be returned.
+	 * @return The reservation id as an {@link Optional}.
+	 */
 	public Optional<Long> getReservationId(TextChannel channel) {
 		try {
 			return DbActions.mapQuery(

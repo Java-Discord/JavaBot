@@ -23,6 +23,9 @@ public class HelpPingCommandHandler implements SlashCommandHandler {
 
 	private final Map<Member, Long> lastPingTimes;
 
+	/**
+	 * Constructor that initializes and handles the cooldown map.
+	 */
 	public HelpPingCommandHandler() {
 		lastPingTimes = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {

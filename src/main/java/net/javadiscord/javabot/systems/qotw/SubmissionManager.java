@@ -15,11 +15,21 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 
 import java.util.Optional;
 
+/**
+ * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class SubmissionManager {
 	private final QOTWConfig config;
 
+	/**
+	 * Handles the "Submit your Answer" Button interaction.
+	 *
+	 * @param event          The {@link ButtonClickEvent} that is fired upon use.
+	 * @param questionNumber The current qotw-week number.
+	 * @return A {@link WebhookMessageAction}.
+	 */
 	public WebhookMessageAction<?> handleSubmission(ButtonClickEvent event, long questionNumber) {
 		if (!isLatestQOTWMessage(event.getMessage())) {
 			return Responses.error(event.getHook(), "You may only answer the newest QOTW.");
@@ -52,6 +62,11 @@ public class SubmissionManager {
 				"Successfully created a new private Thread for your submission.");
 	}
 
+	/**
+	 * Handles the "Delete Submission" Button.
+	 *
+	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 */
 	public void handleThreadDeletion(ButtonClickEvent event) {
 		var thread = (ThreadChannel) event.getGuildChannel();
 		if (thread.getName().contains(event.getUser().getId())) {
@@ -91,6 +106,13 @@ public class SubmissionManager {
 		return channel.getThreadMembers().stream().filter(m -> channel.getName().contains(m.getId())).findFirst();
 	}
 
+	/**
+	 * Gets the given member's submission thread.
+	 *
+	 * @param member         The member whose thread should be retrieved.
+	 * @param questionNumber The current qotw-week number.
+	 * @return The {@link ThreadChannel} as an {@link Optional}.
+	 */
 	public Optional<ThreadChannel> getSubmissionThread(Member member, long questionNumber) {
 		return config.getSubmissionChannel().getThreadChannels()
 				.stream()
@@ -98,6 +120,12 @@ public class SubmissionManager {
 				.findFirst();
 	}
 
+	/**
+	 * Archives a submissions thread's messages into a single string.
+	 *
+	 * @param channel The submission's thread channel.
+	 * @return The String containing all messages.
+	 */
 	public String archiveThreadContents(ThreadChannel channel) {
 		var history = channel.getHistory();
 		var messageCount = channel.getMessageCount();

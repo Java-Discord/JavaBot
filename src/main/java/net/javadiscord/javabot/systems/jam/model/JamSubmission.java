@@ -5,6 +5,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Simple data class that represents a single Jam Submission.
+ */
 @Data
 public class JamSubmission {
 	private long id;

@@ -14,6 +14,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StringResourceCache {
 	private static final Map<String, String> CACHE = new ConcurrentHashMap<>();
 
+	private StringResourceCache() {
+	}
+
+	/**
+	 * Loads a String from the resources folder.
+	 *
+	 * @param resourceName The resources' name & path.
+	 * @return The resources' content as a String.
+	 */
 	public static String load(String resourceName) {
 		String sql = CACHE.get(resourceName);
 		if (sql == null) {

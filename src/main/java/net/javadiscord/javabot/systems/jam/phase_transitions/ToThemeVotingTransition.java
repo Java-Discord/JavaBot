@@ -10,6 +10,7 @@ import net.javadiscord.javabot.systems.jam.model.JamPhase;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -23,9 +24,11 @@ import java.util.List;
  */
 public class ToThemeVotingTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(jam);
-		if (themes.isEmpty()) throw new IllegalStateException("Cannot start theme voting until at least one theme is available.");
+		if (themes.isEmpty()) {
+			throw new IllegalStateException("Cannot start theme voting until at least one theme is available.");
+		}
 		long votingMessageId = channelManager.sendThemeVotingMessages(jam, themes);
 		new JamMessageRepository(con).saveMessageId(jam, votingMessageId, "theme_voting");
 		new JamRepository(con).updateJamPhase(jam, JamPhase.THEME_VOTING);

@@ -10,11 +10,15 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.subcommands.QOTWSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Subcommand that allows staff-members to list QOTW Questions.
+ */
 public class ListQuestionsSubcommand extends QOTWSubcommand {
 	@Override
-	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con, long guildId) throws Exception {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con, long guildId) throws SQLException {
 		var repository = new QuestionQueueRepository(con);
 		OptionMapping pageOption = event.getOption("page");
 		int page = 0;

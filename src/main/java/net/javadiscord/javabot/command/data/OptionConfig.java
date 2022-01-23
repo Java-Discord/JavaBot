@@ -18,14 +18,12 @@ public class OptionConfig {
 	private boolean required;
 	private OptionChoiceConfig[] choices;
 
-	public OptionData toData() {
-		var d = new OptionData(OptionType.valueOf(this.type.toUpperCase()), this.name, this.description, this.required);
-		if (this.choices != null && this.choices.length > 0) {
-			d.addChoices(Arrays.stream(this.choices).map(OptionChoiceConfig::toData).toList());
-		}
-		return d;
-	}
-
+	/**
+	 * Converts the given {@link OptionData} into a {@link OptionConfig} object.
+	 *
+	 * @param data The {@link OptionData}.
+	 * @return The {@link OptionConfig} object.
+	 */
 	public static OptionConfig fromData(OptionData data) {
 		OptionConfig c = new OptionConfig();
 		c.setName(data.getName());
@@ -34,6 +32,19 @@ public class OptionConfig {
 		c.setRequired(data.isRequired());
 		c.setChoices(data.getChoices().stream().map(OptionChoiceConfig::fromData).toArray(OptionChoiceConfig[]::new));
 		return c;
+	}
+
+	/**
+	 * Converts the current {@link OptionConfig} to a {@link OptionData} object.
+	 *
+	 * @return The {@link OptionData} object.
+	 */
+	public OptionData toData() {
+		var d = new OptionData(OptionType.valueOf(this.type.toUpperCase()), this.name, this.description, this.required);
+		if (this.choices != null && this.choices.length > 0) {
+			d.addChoices(Arrays.stream(this.choices).map(OptionChoiceConfig::toData).toList());
+		}
+		return d;
 	}
 
 	@Override

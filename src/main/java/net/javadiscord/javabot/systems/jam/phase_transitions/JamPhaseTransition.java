@@ -5,6 +5,7 @@ import net.javadiscord.javabot.systems.jam.JamChannelManager;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Represents an atomic transition from one Jam state to another. For example,
@@ -13,5 +14,5 @@ import java.sql.Connection;
  * transition.
  */
 public interface JamPhaseTransition {
-	void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception;
+	void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException;
 }

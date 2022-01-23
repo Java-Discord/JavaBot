@@ -16,7 +16,9 @@ import java.sql.SQLException;
 public class HelpChannelListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
-		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) return;
+		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) {
+			return;
+		}
 
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		TextChannel channel = event.getTextChannel();

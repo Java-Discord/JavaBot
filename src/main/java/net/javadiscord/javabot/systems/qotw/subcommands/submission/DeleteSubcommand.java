@@ -14,6 +14,9 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.qotw.SubmissionManager;
 
+/**
+ * Subcommand that allows staff-members to delete QOTW-Submissions.
+ */
 @Slf4j
 public class DeleteSubcommand implements SlashCommandHandler {
 	@Override

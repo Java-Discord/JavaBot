@@ -11,6 +11,9 @@ import net.javadiscord.javabot.systems.economy.EconomyService;
 
 import java.sql.SQLException;
 
+/**
+ * Subcommand that allows users to send money to other users.
+ */
 public class GiveSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {

@@ -12,6 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests the functionality of the {@link TimeUtils} class.
  */
 public class TimeUtilsTest {
+
+	/**
+	 * Tests durations.
+	 */
 	@Test
 	public void testDurationToNow() {
 		OffsetDateTime now = OffsetDateTime.of(2020, 6, 1, 10, 16, 45, 0, ZoneOffset.UTC);
@@ -20,6 +24,9 @@ public class TimeUtilsTest {
 		assertEquals(2, tu.durationToNow(now.minusHours(2).atZoneSameInstant(ZoneId.of("EST", ZoneId.SHORT_IDS)).toOffsetDateTime()).toHours());
 	}
 
+	/**
+	 * Tests the duration formatting.
+	 */
 	@Test
 	public void testFormatDuration() {
 		Map<Duration, String> cases = new HashMap<>();

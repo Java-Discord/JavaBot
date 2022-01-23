@@ -9,15 +9,19 @@ import net.javadiscord.javabot.systems.expert_questions.ExpertSubcommand;
 import net.javadiscord.javabot.systems.expert_questions.dao.ExpertQuestionRepository;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-public class ListSubCommand extends ExpertSubcommand {
+/**
+ * Subcommand that allows staff-members to list expert questions in a random order.
+ */
+public class ListSubcommand extends ExpertSubcommand {
 	@Override
-	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws Exception {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException {
 		var numberOption = event.getOption("amount");
 		if (numberOption == null) {
-			return Responses.error(event, "Missing required Arguments");
+			return Responses.error(event, "Missing required arguments");
 		}
 		var number = numberOption.getAsLong();
 		var repo = new ExpertQuestionRepository(con);

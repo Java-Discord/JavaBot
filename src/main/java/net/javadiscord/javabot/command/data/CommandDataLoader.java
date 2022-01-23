@@ -13,11 +13,13 @@ import java.util.Set;
  */
 @Slf4j
 public final class CommandDataLoader {
-	private CommandDataLoader() {}
+	private CommandDataLoader() {
+	}
 
 	/**
 	 * Loads an array of {@link CommandConfig} from the given set of classpath
 	 * resources.
+	 *
 	 * @param resources The list of resources to read from.
 	 * @return An array of slash command data objects.
 	 */

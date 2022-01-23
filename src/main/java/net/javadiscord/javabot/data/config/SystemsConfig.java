@@ -9,15 +9,13 @@ import lombok.Data;
 @Data
 public class SystemsConfig {
 	/**
+	 * The Key used for the bing-search-api.
+	 */
+	public String azureSubscriptionKey = "";
+	/**
 	 * The token used to create the JDA Discord bot instance.
 	 */
 	private String jdaBotToken = "";
-
-	/**
-	 * The Key used for bing-search-api
-	 */
-	public String azureSubscriptionKey = "";
-
 	/**
 	 * The number of threads to allocate to the bot's general purpose async
 	 * thread pool.

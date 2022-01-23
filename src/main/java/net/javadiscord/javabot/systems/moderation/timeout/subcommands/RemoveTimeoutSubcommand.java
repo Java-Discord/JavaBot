@@ -7,14 +7,16 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
-public class RemoveTimeoutSubCommand implements SlashCommandHandler {
-
+/**
+ * Subcommand that allows staff-members to manually remove a timeout.
+ */
+public class RemoveTimeoutSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {
@@ -31,7 +33,7 @@ public class RemoveTimeoutSubCommand implements SlashCommandHandler {
 		if (!member.isTimedOut()) {
 			return Responses.error(event, String.format("Could not remove Timeout from member %s; they are not timed out.", member.getAsMention()));
 		}
-        var moderationService = new ModerationService(event.getInteraction());
+		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.removeTimeout(member, reason, event.getMember(), channel, quiet)) {
 			return Responses.success(event, "Timeout Removed", String.format("%s's Timeout has been removed.", member.getAsMention()));
 		} else {

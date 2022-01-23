@@ -40,6 +40,7 @@ public class BotConfig {
 
 	/**
 	 * Constructs a new empty configuration.
+	 *
 	 * @param dir The path to the directory containing the guild configuration
 	 *            files.
 	 */
@@ -78,6 +79,7 @@ public class BotConfig {
 
 	/**
 	 * Loads a set of guilds into the configuration at runtime.
+	 *
 	 * @param guilds The list of guilds to load config for.
 	 */
 	public void loadGuilds(List<Guild> guilds) {
@@ -93,6 +95,7 @@ public class BotConfig {
 	 * Adds a guild to the bot's configuration at runtime. A new, default
 	 * configuration object is created, so be aware of the presence of null
 	 * values.
+	 *
 	 * @param guild The guild to add configuration for.
 	 */
 	public void addGuild(Guild guild) {
@@ -103,6 +106,7 @@ public class BotConfig {
 
 	/**
 	 * Gets the configuration for a particular guild.
+	 *
 	 * @param guild The guild to get config for.
 	 * @return The config for the given guild.
 	 */

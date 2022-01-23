@@ -18,6 +18,7 @@ public class WarnRepository {
 
 	/**
 	 * Inserts a new warn into the database.
+	 *
 	 * @param warn The warn to save.
 	 * @return The warn that was saved.
 	 * @throws SQLException If an error occurs.
@@ -42,6 +43,7 @@ public class WarnRepository {
 
 	/**
 	 * Finds a warn by its id.
+	 *
 	 * @param id The id of the warn.
 	 * @return The warn, if it was found.
 	 * @throws SQLException If an error occurs.
@@ -62,6 +64,7 @@ public class WarnRepository {
 	/**
 	 * Gets the total severity weight of all warns for the given user, which
 	 * were created after the given cutoff, and haven't been discarded.
+	 *
 	 * @param userId The id of the user.
 	 * @param cutoff The time after which to look for warns.
 	 * @return The total weight of all warn severities.
@@ -83,13 +86,14 @@ public class WarnRepository {
 
 	/**
 	 * Discards all warnings that have been issued to a given user.
+	 *
 	 * @param userId The id of the user to discard warnings for.
 	 * @throws SQLException If an error occurs.
 	 */
 	public void discardAll(long userId) throws SQLException {
 		try (var s = con.prepareStatement("""
-			UPDATE warn SET discarded = TRUE
-			WHERE user_id = ?""")) {
+				UPDATE warn SET discarded = TRUE
+				WHERE user_id = ?""")) {
 			s.setLong(1, userId);
 			s.executeUpdate();
 		}
@@ -97,13 +101,14 @@ public class WarnRepository {
 
 	/**
 	 * Discards the warning with the corresponding id.
+	 *
 	 * @param id The id of the Warn to discard.
 	 * @throws SQLException If an error occurs.
 	 */
 	public void discardById(long id) throws SQLException {
 		try (var s = con.prepareStatement("""
-			UPDATE warn SET discarded = TRUE
-			WHERE id = ?""")) {
+				UPDATE warn SET discarded = TRUE
+				WHERE id = ?""")) {
 			s.setLong(1, id);
 			s.executeUpdate();
 		}
@@ -111,7 +116,9 @@ public class WarnRepository {
 
 	/**
 	 * Reads the given {@link ResultSet} and constructs a new {@link Warn} object.
+	 *
 	 * @param rs The ResultSet
+	 * @return The {@link Warn} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	private Warn read(ResultSet rs) throws SQLException {
@@ -130,6 +137,7 @@ public class WarnRepository {
 	/**
 	 * Gets all warns for the given user, which
 	 * were created after the given cutoff, and haven't been discarded.
+	 *
 	 * @param userId The id of the user.
 	 * @param cutoff The time after which to look for warns.
 	 * @return A List with all Warns.

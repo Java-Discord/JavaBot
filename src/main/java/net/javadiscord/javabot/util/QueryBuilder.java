@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+/**
+ * Builds SQL Queries.
+ */
 public class QueryBuilder {
 	private final PreparedStatement stmt;
 	private int parameterIndex = 1;

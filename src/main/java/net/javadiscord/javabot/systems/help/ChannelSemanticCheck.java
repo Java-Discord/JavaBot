@@ -15,10 +15,11 @@ import java.util.List;
 public interface ChannelSemanticCheck {
 	/**
 	 * Performs a check on the given data.
-	 * @param channel The reserved help channel.
-	 * @param owner The user who reserved the help channel.
-	 * @param messages The list of messages sent in the channel since the user
-	 *                 reserved it, ordered from newest to oldest.
+	 *
+	 * @param channel      The reserved help channel.
+	 * @param owner        The user who reserved the help channel.
+	 * @param messages     The list of messages sent in the channel since the user
+	 *                     reserved it, ordered from newest to oldest.
 	 * @param semanticData Extra semantic data that may be useful in determining
 	 *                     when to do things.
 	 * @return A rest action that completes when this check is done.

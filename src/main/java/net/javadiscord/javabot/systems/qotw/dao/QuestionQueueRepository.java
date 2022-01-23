@@ -8,10 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Dao class that represents the QOTW_QUESTION SQL Table.
+ */
 @RequiredArgsConstructor
 public class QuestionQueueRepository {
 	private final Connection con;
 
+	/**
+	 * Inserts a single {@link QOTWQuestion}.
+	 *
+	 * @param question The {@link QOTWQuestion} to insert.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void save(QOTWQuestion question) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO qotw_question (guild_id, created_by, text, priority) VALUES (?, ?, ?, ?)",
@@ -30,12 +39,18 @@ public class QuestionQueueRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Gets the next Question's week number.
+	 *
+	 * @return The next Question's week number as an integer.
+	 * @throws SQLException If an error occurs.
+	 */
 	public int getNextQuestionNumber() throws SQLException {
 		try (var stmt = con.prepareStatement("""
-			SELECT question_number + 1
-			FROM qotw_question
-			WHERE used = TRUE AND question_number IS NOT NULL
-			ORDER BY created_at DESC LIMIT 1""")) {
+				SELECT question_number + 1
+				FROM qotw_question
+				WHERE used = TRUE AND question_number IS NOT NULL
+				ORDER BY created_at DESC LIMIT 1""")) {
 			var rs = stmt.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1);
@@ -44,18 +59,35 @@ public class QuestionQueueRepository {
 		}
 	}
 
+	/**
+	 * Marks a single {@link QOTWQuestion} as used.
+	 *
+	 * @param question The {@link QOTWQuestion} that should be marked as used.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void markUsed(QOTWQuestion question) throws SQLException {
-		if (question.getQuestionNumber() == null) throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
+		if (question.getQuestionNumber() == null) {
+			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
+		}
 		try (var stmt = con.prepareStatement("""
-			UPDATE qotw_question
-			SET used = TRUE, question_number = ?
-			WHERE id = ?""")) {
+				UPDATE qotw_question
+				SET used = TRUE, question_number = ?
+				WHERE id = ?""")) {
 			stmt.setInt(1, question.getQuestionNumber());
 			stmt.setLong(2, question.getId());
 			stmt.executeUpdate();
 		}
 	}
 
+	/**
+	 * Gets as many Questions as specified.
+	 *
+	 * @param guildId The current guild's id.
+	 * @param page    The page.
+	 * @param size    The amount of questions to return.
+	 * @return A {@link List} containing the specified amount of {@link QOTWQuestion}.
+	 * @throws SQLException If an error occurs.
+	 */
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws SQLException {
 		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT %d OFFSET %d";
 		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, page));
@@ -69,13 +101,20 @@ public class QuestionQueueRepository {
 		return questions;
 	}
 
+	/**
+	 * Retrieves the next question.
+	 *
+	 * @param guildId The current guild's id.
+	 * @return The next {@link QOTWQuestion} as an {@link Optional}
+	 * @throws SQLException If an error occurs.
+	 */
 	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws SQLException {
 		try (var stmt = con.prepareStatement("""
-			SELECT *
-			FROM qotw_question
-			WHERE guild_id = ? AND used = FALSE
-			ORDER BY priority DESC, created_at
-			LIMIT 1""")) {
+				SELECT *
+				FROM qotw_question
+				WHERE guild_id = ? AND used = FALSE
+				ORDER BY priority DESC, created_at
+				LIMIT 1""")) {
 			stmt.setLong(1, guildId);
 			ResultSet rs = stmt.executeQuery();
 			Optional<QOTWQuestion> optionalQuestion;
@@ -88,6 +127,14 @@ public class QuestionQueueRepository {
 		}
 	}
 
+	/**
+	 * Removes a single {@link QOTWQuestion}.
+	 *
+	 * @param guildId The current guild's id.
+	 * @param id      The question's id.
+	 * @return Whether the {@link QOTWQuestion} was actually removed.
+	 * @throws SQLException If an error occurs.
+	 */
 	public boolean removeQuestion(long guildId, long id) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_question WHERE guild_id = ? AND id = ?");
 		stmt.setLong(1, guildId);

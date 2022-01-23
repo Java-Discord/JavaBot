@@ -12,12 +12,16 @@ import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Subcommand that allows jam-admin to list all jam submissions.
+ */
 public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping pageOption = event.getOption("page");
 		OptionMapping userOption = event.getOption("user");
 		int page = 1;

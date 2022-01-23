@@ -8,10 +8,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Dao class that represents the JAM_MESSAGE_ID SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamMessageRepository {
 	private final Connection con;
 
+	/**
+	 * Inserts a new message id into the database table.
+	 *
+	 * @param jam         The current {@link Jam}.
+	 * @param messageId   The message's id.
+	 * @param messageType The message's type.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void saveMessageId(Jam jam, long messageId, String messageType) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("INSERT INTO jam_message_id (jam_id, message_id, message_type) VALUES (?, ?, ?)");
 		stmt.setLong(1, jam.getId());
@@ -21,6 +32,14 @@ public class JamMessageRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Gets a message based on the current {@link Jam} and the message's type.
+	 *
+	 * @param jam         The current {@link Jam}.
+	 * @param messageType The message's type.
+	 * @return The message's id as a Long.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Long getMessageId(Jam jam, String messageType) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("SELECT message_id FROM jam_message_id WHERE jam_id = ? AND message_type = ?");
 		stmt.setLong(1, jam.getId());
@@ -32,6 +51,13 @@ public class JamMessageRepository {
 		return messageId;
 	}
 
+	/**
+	 * Removes a message based on the current {@link Jam} and the message's type.
+	 *
+	 * @param jam         The current {@link Jam}.
+	 * @param messageType The message's type.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void removeMessageId(Jam jam, String messageType) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ? AND message_type = ?");
 		stmt.setLong(1, jam.getId());

@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Simple Data class that represents a single help channel reservation.
+ */
 @Data
 @AllArgsConstructor
 public class ChannelReservation {

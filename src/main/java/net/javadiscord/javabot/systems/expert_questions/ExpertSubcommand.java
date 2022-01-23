@@ -7,7 +7,11 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
+/**
+ * Interface class that handles all Expert Question Commands.
+ */
 public abstract class ExpertSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
@@ -19,11 +23,11 @@ public abstract class ExpertSubcommand implements SlashCommandHandler {
 			var reply = this.handleCommand(event, con);
 			con.commit();
 			return reply;
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return Responses.error(event, "An error occurred: " + e.getMessage());
 		}
 	}
 
-	protected abstract ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws Exception;
+	protected abstract ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException;
 }

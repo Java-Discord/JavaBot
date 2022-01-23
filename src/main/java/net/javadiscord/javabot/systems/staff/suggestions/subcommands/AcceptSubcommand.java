@@ -23,7 +23,7 @@ public class AcceptSubcommand implements SlashCommandHandler {
 			return Responses.error(event, "Missing required arguments.");
 		}
 		var messageId = messageIdOption.getAsString();
-        var config = Bot.config.get(event.getGuild());
+		var config = Bot.config.get(event.getGuild());
 		config.getModeration().getSuggestionChannel().retrieveMessageById(messageId).queue(m -> {
 			var embed = m.getEmbeds().get(0);
 			m.clearReactions().queue();

@@ -6,9 +6,24 @@ import net.dv8tion.jda.api.interactions.components.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class for message actions.
+ */
 public class MessageActionUtils {
+
+	private MessageActionUtils() {
+	}
+
+	/**
+	 * Converts a {@link List} of Message {@link Component}s into a List of actions rows.
+	 *
+	 * @param components The {@link List} of {@link Component}s.
+	 * @return A {@link List} of {@link ActionRow}s.
+	 */
 	public static List<ActionRow> toActionRows(List<? extends Component> components) {
-		if (components.size() > 25) throw new IllegalArgumentException("Cannot add more than 25 components to a message action.");
+		if (components.size() > 25) {
+			throw new IllegalArgumentException("Cannot add more than 25 components to a message action.");
+		}
 		List<ActionRow> rows = new ArrayList<>(5);
 		List<Component> rowComponents = new ArrayList<>(5);
 		while (!components.isEmpty()) {

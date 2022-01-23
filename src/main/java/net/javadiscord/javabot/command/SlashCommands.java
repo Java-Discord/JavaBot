@@ -185,13 +185,9 @@ public class SlashCommands extends ListenerAdapter {
 		if (config == null || config.getPrivileges() == null) return Collections.emptyList();
 		List<CommandPrivilege> privileges = new ArrayList<>();
 		for (var privilegeConfig : config.getPrivileges()) {
-			try {
-				privileges.add(privilegeConfig.toData(guild, Bot.config));
-				log.info("\t{}[{}]{} Registering privilege: {}",
-						Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, privilegeConfig);
-			} catch (Exception e) {
-				log.warn("Could not register privileges for command {}: {}", config.getName(), e.getMessage());
-			}
+			privileges.add(privilegeConfig.toData(guild, Bot.config));
+			log.info("\t{}[{}]{} Registering privilege: {}",
+					Constants.TEXT_WHITE, config.getName(), Constants.TEXT_RESET, privilegeConfig);
 		}
 		return privileges;
 	}
@@ -229,13 +225,15 @@ public class SlashCommands extends ListenerAdapter {
 						.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
 						.setDescription(responseText)
 						.build();
-				if (reply) return event.replyEmbeds(e);
-				else {
+				if (reply) {
+					return event.replyEmbeds(e);
+				} else {
 					return RestAction.allOf(event.getChannel().sendMessageEmbeds(e), event.reply("Done!").setEphemeral(true));
 				}
 			} else {
-				if (reply) return event.reply(responseText);
-				else {
+				if (reply) {
+					return event.reply(responseText);
+				} else {
 					return RestAction.allOf(event.getChannel().sendMessage(responseText), event.reply("Done!").setEphemeral(true));
 				}
 			}

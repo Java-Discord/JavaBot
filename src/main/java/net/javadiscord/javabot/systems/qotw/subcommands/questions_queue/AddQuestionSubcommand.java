@@ -9,10 +9,14 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.systems.qotw.subcommands.QOTWSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
+/**
+ * Subcommand that allows staff-members to add question to the QOTW-Queue.
+ */
 public class AddQuestionSubcommand extends QOTWSubcommand {
 	@Override
-	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con, long guildId) throws Exception {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con, long guildId) throws SQLException {
 		QOTWQuestion question = new QOTWQuestion();
 		question.setGuildId(guildId);
 		question.setCreatedBy(event.getUser().getIdLong());

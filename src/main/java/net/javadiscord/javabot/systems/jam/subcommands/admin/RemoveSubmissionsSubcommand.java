@@ -10,10 +10,14 @@ import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
+/**
+ * Subcommand that allows jam-admins to manually remove submissions.
+ */
 public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping idOption = event.getOption("id");
 		OptionMapping userOption = event.getOption("user");
 		if (idOption == null && userOption == null) {

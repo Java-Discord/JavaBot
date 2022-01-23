@@ -41,6 +41,11 @@ public class ServerLock extends ListenerAdapter {
 
 	private final Map<Long, Deque<Member>> guildMemberQueues;
 
+	/**
+	 * Contructor that initializes and handles the serverlock.
+	 *
+	 * @param jda The {@link JDA} instance.
+	 */
 	public ServerLock(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
@@ -59,6 +64,22 @@ public class ServerLock extends ListenerAdapter {
 				}
 			}
 		}, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, GUILD_MEMBER_QUEUE_CLEAN_INTERVAL, TimeUnit.SECONDS);
+	}
+
+	/**
+	 * The embed that is sent when a user tries to join while the server is locked.
+	 *
+	 * @param guild The current guild.
+	 * @return The {@link MessageEmbed} object.
+	 */
+	public static MessageEmbed buildServerLockEmbed(Guild guild) {
+		return new EmbedBuilder()
+				.setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
+				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
+				.setDescription(String.format("""
+						Unfortunately, this server is currently locked. Please try to join again later.
+						Contact the server owner, %s, for more info.""", guild.getOwner().getAsMention())
+				).build();
 	}
 
 	@Override
@@ -89,6 +110,7 @@ public class ServerLock extends ListenerAdapter {
 	 *     <li>More than a threshold number of users have joined within a small
 	 *     window of time.</li>
 	 * </ul>
+	 *
 	 * @param guild The guild to check.
 	 * @return The collection of members who we think could be raiding the server.
 	 */
@@ -129,6 +151,7 @@ public class ServerLock extends ListenerAdapter {
 	/**
 	 * Checks to see if we should lock the guild by analyzing the pattern of
 	 * users who recently joined the guild.
+	 *
 	 * @param guild The guild to check.
 	 */
 	private void checkForRaid(Guild guild) {
@@ -141,6 +164,7 @@ public class ServerLock extends ListenerAdapter {
 
 	/**
 	 * Checks to see if we should unlock the guild.
+	 *
 	 * @param guild The guild to check.
 	 */
 	private void checkForEndOfRaid(Guild guild) {
@@ -156,11 +180,12 @@ public class ServerLock extends ListenerAdapter {
 	/**
 	 * Rejects a user's joining of the server during a raid attempt by sending
 	 * them a message about it and kicking them immediately.
+	 *
 	 * @param event The user who joined.
 	 */
 	private void rejectUserDuringRaid(GuildMemberJoinEvent event) {
 		event.getUser().openPrivateChannel().queue(c -> {
-			c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(event.getGuild())).queue(msg -> {
+			c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg -> {
 				event.getMember().kick().queue();
 			});
 		});
@@ -171,19 +196,19 @@ public class ServerLock extends ListenerAdapter {
 
 	/**
 	 * Locks a server when a raid has been detected.
-	 * @param guild The guild to lock.
+	 *
+	 * @param guild            The guild to lock.
 	 * @param potentialRaiders The list of members that we think are starting
 	 *                         the raid.
 	 */
 	private void lockServer(Guild guild, Collection<Member> potentialRaiders) {
 		for (var member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
-				c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(guild)).queue(msg -> {
-					try {
-						member.kick().queue();
-					} catch (Exception e) {
-						Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), e.getMessage()));
-					}
+				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
+					member.kick().queue(
+							success -> {
+							},
+							error -> Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage())));
 				});
 			});
 		}
@@ -202,10 +227,10 @@ public class ServerLock extends ListenerAdapter {
 		config.setLocked("true");
 		Bot.config.get(guild).flush();
 		Misc.sendToLogFormat(guild, """
-				**Server Locked** @here
-				The automated locking system has detected that the following %d users may be part of a raid:
-				%s
-				""",
+						**Server Locked** @here
+						The automated locking system has detected that the following %d users may be part of a raid:
+						%s
+						""",
 				potentialRaiders.size(),
 				membersString
 		);
@@ -213,6 +238,7 @@ public class ServerLock extends ListenerAdapter {
 
 	/**
 	 * Unlocks the server after it has been deemed that we're no longer in a raid.
+	 *
 	 * @param guild The guild to unlock.
 	 */
 	private void unlockServer(Guild guild) {
@@ -220,19 +246,5 @@ public class ServerLock extends ListenerAdapter {
 		config.setLocked("false");
 		Bot.config.get(guild).flush();
 		Misc.sendToLog(guild, "Server unlocked automatically.");
-	}
-
-	/**
-	 * The embed that is sent when a user tries to join while the server is locked.
-	 * @param guild The current guild.
-	 */
-	public static MessageEmbed lockEmbed(Guild guild) {
-		return new EmbedBuilder()
-				.setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
-				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
-				.setDescription(String.format("""
-        Unfortunately, this server is currently locked. Please try to join again later.
-        Contact the server owner, %s, for more info.""", guild.getOwner().getAsMention())
-				).build();
 	}
 }

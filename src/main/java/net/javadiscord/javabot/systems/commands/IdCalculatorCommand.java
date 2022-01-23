@@ -1,38 +1,44 @@
 package net.javadiscord.javabot.systems.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
-import net.javadiscord.javabot.util.TimeUtils;
+import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Objects;
 
+/**
+ * Command that allows users to convert discord ids into a human-readable timestamp.
+ */
 public class IdCalculatorCommand implements SlashCommandHandler {
-    @Override
-    public ReplyAction handle(SlashCommandEvent event) {
-        long id;
-        try {
-            id = Objects.requireNonNull(event.getOption("id")).getAsLong();
-        } catch (Exception e) {
-            id = event.getUser().getIdLong();
-        }
-        long unixTimeStampMilliseconds = id / 4194304 + 1420070400000L;
-        long unixTimeStamp = unixTimeStampMilliseconds / 1000;
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var idOption = event.getOption("id");
+		if (idOption == null) {
+			return Responses.error(event, "Missing required arguments");
+		}
+		long id = idOption.getAsLong();
+		long unixTimestampMilliseconds = id / 4194304 + 1420070400000L;
+		long unixTimestamp = unixTimestampMilliseconds / 1000;
+		var config = Bot.config.get(event.getGuild()).getSlashCommand();
+		return event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, unixTimestamp, unixTimestampMilliseconds, config));
+	}
 
-        String date = Instant.ofEpochMilli(unixTimeStampMilliseconds).atZone(ZoneId.of("GMT")).format(TimeUtils.STANDARD_FORMATTER);
-
-        EmbedBuilder eb = new EmbedBuilder()
-            .setAuthor("ID-Calculator")
-            .setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-            .addField("ID", "```" + id + "```", false)
-            .addField("Unix-Timestamp (+ milliseconds)", "```" + unixTimeStampMilliseconds + "```", false)
-            .addField("Unix-Timestamp", "```" + unixTimeStamp + "```", false)
-            .addField("date", "```" + date + "```", false);
-
-        return event.replyEmbeds(eb.build());
-    }
+	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp, long unixTimestampMillis, SlashCommandConfig config) {
+		var instant = Instant.ofEpochMilli(unixTimestampMillis);
+		return new EmbedBuilder()
+				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+				.setTitle("ID-Calculator")
+				.setColor(config.getDefaultColor())
+				.addField("Input", String.format("`%s`", id), false)
+				.addField("Unix-Timestamp (+ milliseconds)", String.format("<t:%s>", unixTimestampMillis), true)
+				.addField("Unix-Timestamp", String.format("<t:%s>", unixTimestamp), true)
+				.addField("Date", String.format("<t:%s:F>", instant), false)
+				.build();
+	}
 }

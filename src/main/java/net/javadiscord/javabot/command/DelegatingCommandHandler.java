@@ -19,6 +19,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 
 	/**
 	 * Constructs the handler with an already-initialized map of subcommands.
+	 *
 	 * @param subcommandHandlers The map of subcommands to use.
 	 */
 	public DelegatingCommandHandler(Map<String, SlashCommandHandler> subcommandHandlers) {
@@ -38,6 +39,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	/**
 	 * Gets an unmodifiable map of the subcommand handlers this delegating
 	 * handler has registered.
+	 *
 	 * @return An unmodifiable map containing all registered subcommands.
 	 */
 	public Map<String, SlashCommandHandler> getSubcommandHandlers() {
@@ -47,6 +49,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	/**
 	 * Gets an unmodifiable map of the subcommand group handlers that this
 	 * handler has registered.
+	 *
 	 * @return An unmodifiable map containing all registered group handlers.
 	 */
 	public Map<String, SlashCommandHandler> getSubcommandGroupHandlers() {
@@ -55,11 +58,12 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 
 	/**
 	 * Adds a subcommand to this handler.
-	 * @param name The name of the subcommand. <em>This is case-sensitive.</em>
+	 *
+	 * @param name    The name of the subcommand. <em>This is case-sensitive.</em>
 	 * @param handler The handler that will be called to handle subcommands with
 	 *                the given name.
 	 * @throws UnsupportedOperationException If this handler was initialized
-	 * with an unmodifiable map of subcommand handlers.
+	 *                                       with an unmodifiable map of subcommand handlers.
 	 */
 	protected void addSubcommand(String name, SlashCommandHandler handler) {
 		this.subcommandHandlers.put(name, handler);
@@ -67,11 +71,12 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 
 	/**
 	 * Adds a subcommand group handler to this handler.
-	 * @param name The name of the subcommand group. <em>This is case-sensitive.</em>
+	 *
+	 * @param name    The name of the subcommand group. <em>This is case-sensitive.</em>
 	 * @param handler The handler that will be called to handle commands within
 	 *                the given subcommand's name.
 	 * @throws UnsupportedOperationException If this handler was initialized
-	 * with an unmodifiable map of subcommand group handlers.
+	 *                                       with an unmodifiable map of subcommand group handlers.
 	 */
 	protected void addSubcommandGroup(String name, SlashCommandHandler handler) {
 		this.subcommandGroupHandlers.put(name, handler);
@@ -80,6 +85,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 	/**
 	 * Handles slash command events by checking if a subcommand name was given,
 	 * and if so, delegating the handling of the event to that subcommand.
+	 *
 	 * @param event The event.
 	 * @return The reply action that is sent to the user.
 	 */
@@ -107,6 +113,7 @@ public class DelegatingCommandHandler implements SlashCommandHandler {
 
 	/**
 	 * Handles the case where the main command is called without any subcommand.
+	 *
 	 * @param event The event.
 	 * @return The reply action that is sent to the user.
 	 */

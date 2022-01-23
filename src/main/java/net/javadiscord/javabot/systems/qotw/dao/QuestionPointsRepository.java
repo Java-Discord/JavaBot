@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the QOTW_POINTS SQL Table.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class QuestionPointsRepository {
@@ -15,24 +18,27 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Inserts a new {@link QOTWAccount} if none exists.
+	 *
 	 * @param account The account to insert.
 	 * @throws SQLException If an error occurs.
 	 */
 	public void insert(QOTWAccount account) throws SQLException {
-			PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
-					Statement.RETURN_GENERATED_KEYS
-			);
-			stmt.setLong(1, account.getUserId());
-			stmt.setLong(2, account.getPoints());
-			int rows = stmt.executeUpdate();
-			if (rows == 0) throw new SQLException("User was not inserted.");
-			stmt.close();
-			log.info("Inserted new QOTW-Account: {}", account);
+		PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
+				Statement.RETURN_GENERATED_KEYS
+		);
+		stmt.setLong(1, account.getUserId());
+		stmt.setLong(2, account.getPoints());
+		int rows = stmt.executeUpdate();
+		if (rows == 0) throw new SQLException("User was not inserted.");
+		stmt.close();
+		log.info("Inserted new QOTW-Account: {}", account);
 	}
 
 	/**
 	 * Returns a {@link QOTWAccount} based on the given user Id.
+	 *
 	 * @param userId The discord Id of the user.
+	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	public QOTWAccount getAccountByUserId(long userId) throws SQLException {
@@ -52,8 +58,10 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Updates a single user's QOTW-Points.
+	 *
 	 * @param userId The discord Id of the user.
 	 * @param points The points that should be set.
+	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	public QOTWAccount update(long userId, long points) throws SQLException {
@@ -67,9 +75,10 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Increments a single user's QOTW-Points.
+	 *
 	 * @param userId The discord Id of the user.
-	 * @throws SQLException If an error occurs.
 	 * @return The total points after the update.
+	 * @throws SQLException If an error occurs.
 	 */
 	public long increment(long userId) throws SQLException {
 		createAccountIfUserHasNone(userId);
@@ -80,6 +89,8 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Gets all {@link QOTWAccount} and sorts them by their points.
+	 *
+	 * @return A {@link List} that contains all {@link QOTWAccount}s sorted by their points.
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWAccount> getAllAccountsSortedByPoints() throws SQLException {
@@ -94,6 +105,7 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Creates a new {@link QOTWAccount} for the given user if they have none.
+	 *
 	 * @param userId The discord Id of the user.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -108,7 +120,9 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Reads a {@link ResultSet} and returns a new {@link QOTWAccount} object.
+	 *
 	 * @param rs The query's ResultSet.
+	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	private QOTWAccount read(ResultSet rs) throws SQLException {

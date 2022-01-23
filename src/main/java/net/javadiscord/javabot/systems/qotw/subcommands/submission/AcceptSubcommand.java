@@ -13,11 +13,14 @@ import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.qotw.SubmissionManager;
-import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubCommand;
+import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Subcommand that allows staff members to accept QOTW-Submissions.
+ */
 @Slf4j
 public class AcceptSubcommand implements SlashCommandHandler {
 	@Override
@@ -42,7 +45,7 @@ public class AcceptSubcommand implements SlashCommandHandler {
 			return Responses.error(event, "Cannot accept a submission of a user who is not a member of this server");
 		}
 		var member = memberOptional.get().getMember();
-		new IncrementSubCommand().correct(member, true);
+		new IncrementSubcommand().correct(member, true);
 		var embed = buildAcceptSubmissionEmbed(member, event.getMember(), thread);
 		thread.sendMessageEmbeds(embed).queue();
 		config.getModeration().getLogChannel()

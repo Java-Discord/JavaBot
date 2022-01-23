@@ -8,10 +8,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the ECONOMY_TRANSACTION SQL Table.
+ */
 @RequiredArgsConstructor
 public class TransactionRepository {
 	private final Connection con;
 
+	/**
+	 * Inserts a new {@link Transaction} object.
+	 *
+	 * @param t The {@link Transaction} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void saveNewTransaction(Transaction t) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO economy_transaction (from_user_id, to_user_id, value, message) VALUES (?, ?, ?, ?)",
@@ -42,6 +51,13 @@ public class TransactionRepository {
 		}
 	}
 
+	/**
+	 * Retrieves a transaction based on the id.
+	 *
+	 * @param id The transaction's id.
+	 * @return A {@link Transaction} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Transaction getTransaction(long id) throws SQLException {
 		try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM economy_transaction WHERE id = ?")) {
 			stmt.setLong(1, id);
@@ -53,6 +69,14 @@ public class TransactionRepository {
 		}
 	}
 
+	/**
+	 * Retrieves the latest transactions of a user.
+	 *
+	 * @param userId The user's id.
+	 * @param count  The count of transactions that should be retrieved.
+	 * @return A List with all {@link Transaction}s.
+	 * @throws SQLException If an error occurs.
+	 */
 	public List<Transaction> getLatestTransactions(long userId, int count) throws SQLException {
 		String sql = StringResourceCache.load("/economy/sql/find_latest_transactions.sql").replace("/* LIMIT */", "LIMIT " + count);
 		try (var stmt = con.prepareStatement(sql)) {

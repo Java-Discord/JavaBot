@@ -11,6 +11,7 @@ import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -56,7 +57,6 @@ public class PlanNewJamSubcommand implements SlashCommandHandler {
 				Responses.warning(hook, "There is already an active Jam (id = `" + activeJam.getId() + "`). Complete that Jam before planning a new one.").queue();
 				return;
 			}
-
 			Jam jam = new Jam();
 			jam.setGuildId(guildId);
 			jam.setName(name);
@@ -65,7 +65,7 @@ public class PlanNewJamSubcommand implements SlashCommandHandler {
 			jam.setCompleted(false);
 			jamRepository.saveNewJam(jam);
 			Responses.success(hook, "Jam Created", "Jam has been created! *Jam ID = `" + jam.getId() + "`*. Use `/jam info` for more info.").queue();
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			Responses.error(hook, "Error occurred while creating the Jam: " + e.getMessage()).queue();
 		}
 	}

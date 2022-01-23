@@ -14,6 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Listens for {@link MessageReceivedEvent}s in the
+ * {@link net.javadiscord.javabot.data.config.guild.ModerationConfig#getSuggestionChannel()} channel.
+ */
 @Slf4j
 public class SuggestionListener extends ListenerAdapter {
 

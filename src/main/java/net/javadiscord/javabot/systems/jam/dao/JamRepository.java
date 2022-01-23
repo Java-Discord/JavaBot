@@ -5,10 +5,19 @@ import net.javadiscord.javabot.systems.jam.model.Jam;
 
 import java.sql.*;
 
+/**
+ * Dao class that represents the JAM SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamRepository {
 	private final Connection con;
 
+	/**
+	 * Insertes a new {@link Jam}.
+	 *
+	 * @param jam The {@link Jam} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void saveNewJam(Jam jam) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO jam (guild_id, name, started_by, starts_at, ends_at) VALUES (?, ?, ?, ?, ?)",
@@ -37,6 +46,12 @@ public class JamRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Updates a single {@link Jam}.
+	 *
+	 * @param jam The updated {@link Jam} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void updateJam(Jam jam) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET name = ?, starts_at = ?, ends_at = ? WHERE id = ?");
 		stmt.setString(1, jam.getName());
@@ -51,6 +66,12 @@ public class JamRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Gets a single {@link Jam} based on the given id.
+	 *
+	 * @param id The jam's id.
+	 * @return The {@link Jam} object.
+	 */
 	public Jam getJam(long id) {
 		try {
 			PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE id = ?");
@@ -68,6 +89,12 @@ public class JamRepository {
 		}
 	}
 
+	/**
+	 * Gets the active {@link Jam}.
+	 *
+	 * @param guildId The current guild's id.
+	 * @return The {@link Jam} object.
+	 */
 	public Jam getActiveJam(long guildId) {
 		try {
 			PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE guild_id = ? AND completed = FALSE");
@@ -100,6 +127,12 @@ public class JamRepository {
 		return jam;
 	}
 
+	/**
+	 * Completes a single {@link Jam}.
+	 *
+	 * @param jam The {@link Jam} object to update.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void completeJam(Jam jam) throws SQLException {
 		jam.setCompleted(true);
 		jam.setCurrentPhase(null);
@@ -109,6 +142,13 @@ public class JamRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Updates a single {@link Jam}'s phase.
+	 *
+	 * @param jam           The {@link Jam} object to update.
+	 * @param nextPhaseName The next phase's name.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void updateJamPhase(Jam jam, String nextPhaseName) throws SQLException {
 		jam.setCurrentPhase(nextPhaseName);
 		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET current_phase = ? WHERE id = ?");
@@ -118,6 +158,12 @@ public class JamRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Cancels a single {@link Jam}.
+	 *
+	 * @param jam The {@link Jam} object to cancel.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void cancelJam(Jam jam) throws SQLException {
 		this.completeJam(jam);
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?");

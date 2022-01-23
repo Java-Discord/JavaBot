@@ -5,6 +5,7 @@ import java.sql.SQLException;
 /**
  * Functional interface for defining operations that consume a specified data-
  * access object.
+ *
  * @param <T> The type of the data access object.
  */
 @FunctionalInterface

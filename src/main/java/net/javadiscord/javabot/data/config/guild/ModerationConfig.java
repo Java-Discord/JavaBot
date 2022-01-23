@@ -6,6 +6,9 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
+/**
+ * Configuration for the guild's moderation system.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ModerationConfig extends GuildConfigItem {
@@ -15,12 +18,12 @@ public class ModerationConfig extends GuildConfigItem {
 	private long staffRoleId;
 
 	/**
-	 * ID of the share-knowledge channel
+	 * ID of the share-knowledge channel.
 	 */
 	private long shareKnowledgeChannelId;
 
 	/**
-	 * The threshold for deleting a message in #share-knowledge. Note that this should be strictly < 0
+	 * The threshold for deleting a message in #share-knowledge. Note that this should be strictly < 0.
 	 */
 	private int shareKnowledgeMessageDeleteThreshold;
 

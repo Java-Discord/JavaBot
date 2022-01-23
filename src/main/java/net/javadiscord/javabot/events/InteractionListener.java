@@ -9,6 +9,9 @@ import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.qotw.SubmissionManager;
 
+/**
+ * Listens for Interaction Events and handles them.
+ */
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
 
@@ -31,8 +34,10 @@ public class InteractionListener extends ListenerAdapter {
 	}
 
 	/**
-	 * Some utility methods for interactions
-	 * + May be useful for Context Menu Interactions
+	 * Some utility methods for interactions.
+	 * + May be useful for Context Menu Interactions.
+	 *
+	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
 	private void handleUtils(ButtonClickEvent event) {
 		var service = new ModerationService(event.getInteraction());
@@ -64,7 +69,7 @@ public class InteractionListener extends ListenerAdapter {
 		String roleID = id[1];
 		boolean permanent = Boolean.parseBoolean(id[2]);
 
-		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member->{
+		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member -> {
 			Role role = event.getGuild().getRoleById(roleID);
 
 			if (member.getRoles().contains(role)) {

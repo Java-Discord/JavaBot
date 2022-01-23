@@ -9,6 +9,9 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 
 import java.awt.*;
 
+/**
+ * Configuration for the guild's java jam.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class JamConfig extends GuildConfigItem {
@@ -20,9 +23,13 @@ public class JamConfig extends GuildConfigItem {
 
 	private String jamEmbedColorHex = "#FC5A03";
 
-	public Color getJamEmbedColor() { return Color.decode(this.jamEmbedColorHex); }
+	public Color getJamEmbedColor() {
+		return Color.decode(this.jamEmbedColorHex);
+	}
 
-	public NewsChannel getAnnouncementChannel() { return this.getGuild().getNewsChannelById(this.announcementChannelId); }
+	public NewsChannel getAnnouncementChannel() {
+		return this.getGuild().getNewsChannelById(this.announcementChannelId);
+	}
 
 	public TextChannel getVotingChannel() {
 		return this.getGuild().getTextChannelById(this.votingChannelId);

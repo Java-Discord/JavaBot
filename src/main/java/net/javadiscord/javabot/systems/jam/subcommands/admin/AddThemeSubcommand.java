@@ -11,11 +11,15 @@ import net.javadiscord.javabot.systems.jam.model.JamTheme;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Subcommand that allows jam-admins to add themes to vote on for the current JavaJam.
+ */
 public class AddThemeSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping nameOption = event.getOption("name");
 		OptionMapping descriptionOption = event.getOption("description");
 		if (nameOption == null || descriptionOption == null) {

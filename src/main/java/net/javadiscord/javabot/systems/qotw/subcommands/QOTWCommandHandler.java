@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.qotw.subcommands;
 
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.ClearSubCommand;
-import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubCommand;
+import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.ClearSubcommand;
+import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.SetSubCommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.ListQuestionsSubcommand;
@@ -13,7 +13,15 @@ import net.javadiscord.javabot.systems.qotw.subcommands.submission.DeleteSubcomm
 
 import java.util.Map;
 
+/**
+ * Handler class for all QOTW Commands.
+ */
 public class QOTWCommandHandler extends DelegatingCommandHandler {
+	/**
+	 * Adds all subcommands and subcommand groups
+	 * {@link DelegatingCommandHandler#addSubcommand}
+	 * {@link DelegatingCommandHandler#addSubcommandGroup}.
+	 */
 	public QOTWCommandHandler() {
 		this.addSubcommandGroup(
 				"questions-queue", new DelegatingCommandHandler(Map.of(
@@ -23,8 +31,8 @@ public class QOTWCommandHandler extends DelegatingCommandHandler {
 				)));
 		this.addSubcommandGroup(
 				"account", new DelegatingCommandHandler(Map.of(
-						"increment", new IncrementSubCommand(),
-						"clear", new ClearSubCommand(),
+						"increment", new IncrementSubcommand(),
+						"clear", new ClearSubcommand(),
 						"set", new SetSubCommand()
 				)));
 		this.addSubcommandGroup(

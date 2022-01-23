@@ -11,6 +11,9 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 
+/**
+ * Class that handles economy notifications.
+ */
 @Slf4j
 public class EconomyNotificationService {
 
@@ -18,8 +21,9 @@ public class EconomyNotificationService {
 	 * Sends notifications to the recipient of a transaction. The sender should
 	 * already be aware of the transaction, so there's no need to send them a
 	 * message as well.
+	 *
 	 * @param transaction The transaction to send messages about.
-	 * @param event The event which triggered the transaction.
+	 * @param event       The event which triggered the transaction.
 	 */
 	public void sendTransactionNotification(Transaction transaction, SlashCommandEvent event) {
 		if (transaction.getToUserId() != null) {

@@ -8,6 +8,9 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Configuration for the guild's starboard system.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class StarboardConfig extends GuildConfigItem {

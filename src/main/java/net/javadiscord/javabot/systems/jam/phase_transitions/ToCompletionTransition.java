@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Transitions the jam to completion, that is, it does the following things:
+ * Transitions the jam to completion, that is, it does the following things.
  * <ol>
  *     <li>Counts the number of votes each submission received.</li>
  *     <li>Determine the winner(s) of the jam.</li>
@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class ToCompletionTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		JamMessageRepository messageRepository = new JamMessageRepository(con);
 		List<JamSubmission> submissions = new JamSubmissionRepository(con).getSubmissions(jam);
 
@@ -46,6 +46,12 @@ public class ToCompletionTransition implements JamPhaseTransition {
 		new JamRepository(con).completeJam(jam);
 	}
 
+	/**
+	 * Determines the JavaJam Winner by their votecount.
+	 *
+	 * @param voteCounts A Map containing the {@link JamSubmission} and an Integer that represents the vote counts.
+	 * @return The JavaJam winners.
+	 */
 	public List<JamSubmission> determineWinners(Map<JamSubmission, Integer> voteCounts) {
 		int highestVoteCount = voteCounts.values().stream().max(Comparator.naturalOrder()).orElse(-1);
 		return voteCounts.entrySet().stream()
@@ -54,8 +60,17 @@ public class ToCompletionTransition implements JamPhaseTransition {
 				.toList();
 	}
 
+	/**
+	 * Counts JavaJam submission votes.
+	 *
+	 * @param submissionVotes   A Map containing the {@link JamSubmission} and a {@link List} that contains all message id's.
+	 * @param con               The datasource's connection.
+	 * @param messageRepository The {@link JamMessageRepository}.
+	 * @return A Map containing the {@link JamSubmission} and the vote count as an Integer.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Map<JamSubmission, Integer> recordAndCountVotes(Map<JamSubmission, List<Long>> submissionVotes, Connection con, JamMessageRepository messageRepository) throws SQLException {
-		try(PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)")){
+		try (PreparedStatement submissionVoteStmt = con.prepareStatement("INSERT INTO jam_submission_vote (submission_id, user_id) VALUES (?, ?)")) {
 			Map<JamSubmission, Integer> voteCounts = new HashMap<>();
 			for (var entry : submissionVotes.entrySet()) {
 				submissionVoteStmt.setLong(1, entry.getKey().getId());
@@ -70,6 +85,14 @@ public class ToCompletionTransition implements JamPhaseTransition {
 		}
 	}
 
+	/**
+	 * Retrieves the submission's message ids.
+	 *
+	 * @param submissions       A {@link List} with all Submissions.
+	 * @param messageRepository The {@link JamMessageRepository}.
+	 * @return A Map contains the {@link JamSubmission} and its message id.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Map<JamSubmission, Long> getSubmissionMessageIds(List<JamSubmission> submissions, JamMessageRepository messageRepository) throws SQLException {
 		Map<JamSubmission, Long> submissionMessages = new HashMap<>();
 		for (JamSubmission submission : submissions) {

@@ -3,7 +3,7 @@ package net.javadiscord.javabot.systems.staff.custom_commands.model;
 import lombok.Data;
 
 /**
- * A data class that represents a single Custom Command
+ * A data class that represents a single Custom Command.
  */
 @Data
 public class CustomCommand {

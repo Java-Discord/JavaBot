@@ -8,14 +8,17 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
-public class WarnAddSubCommand implements SlashCommandHandler {
+/**
+ * Subcommand that allows staff-members to add a single warn to any user.
+ */
+public class WarnAddSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		var severityOption = event.getOption("severity");
 		if (userOption == null || reasonOption == null || severityOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {

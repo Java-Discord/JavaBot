@@ -20,6 +20,28 @@ public class CommandConfig {
 	private SubCommandGroupConfig[] subCommandGroups;
 	private String handler;
 
+	/**
+	 * Creates a {@link CommandConfig} object from the given {@link CommandData}.
+	 *
+	 * @param data The original {@link CommandData}.
+	 * @return A new {@link CommandConfig} object.
+	 */
+	public static CommandConfig fromData(CommandData data) {
+		CommandConfig c = new CommandConfig();
+		c.setName(data.getName());
+		c.setDescription(data.getDescription());
+		c.setOptions(data.getOptions().stream().map(OptionConfig::fromData).toArray(OptionConfig[]::new));
+		c.setSubCommands(data.getSubcommands().stream().map(SubCommandConfig::fromData).toArray(SubCommandConfig[]::new));
+		c.setSubCommandGroups(data.getSubcommandGroups().stream().map(SubCommandGroupConfig::fromData).toArray(SubCommandGroupConfig[]::new));
+		c.setHandler(null);
+		return c;
+	}
+
+	/**
+	 * Converts the current {@link CommandConfig} into a {@link CommandData} object.
+	 *
+	 * @return The {@link CommandData} object.
+	 */
 	public CommandData toData() {
 		CommandData data = new CommandData(this.name, this.description);
 		data.setDefaultEnabled(this.enabledByDefault);
@@ -56,23 +78,12 @@ public class CommandConfig {
 	@Override
 	public String toString() {
 		return "CommandConfig{" +
-			"name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", options=" + Arrays.toString(options) +
-			", subCommands=" + Arrays.toString(subCommands) +
-			", subCommandGroups=" + Arrays.toString(subCommandGroups) +
-			", handler=" + handler +
-			'}';
-	}
-
-	public static CommandConfig fromData(CommandData data) {
-		CommandConfig c = new CommandConfig();
-		c.setName(data.getName());
-		c.setDescription(data.getDescription());
-		c.setOptions(data.getOptions().stream().map(OptionConfig::fromData).toArray(OptionConfig[]::new));
-		c.setSubCommands(data.getSubcommands().stream().map(SubCommandConfig::fromData).toArray(SubCommandConfig[]::new));
-		c.setSubCommandGroups(data.getSubcommandGroups().stream().map(SubCommandGroupConfig::fromData).toArray(SubCommandGroupConfig[]::new));
-		c.setHandler(null);
-		return c;
+				"name='" + name + '\'' +
+				", description='" + description + '\'' +
+				", options=" + Arrays.toString(options) +
+				", subCommands=" + Arrays.toString(subCommands) +
+				", subCommandGroups=" + Arrays.toString(subCommandGroups) +
+				", handler=" + handler +
+				'}';
 	}
 }

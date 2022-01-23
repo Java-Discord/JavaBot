@@ -12,10 +12,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the JAM_SUBMISSION SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamSubmissionRepository {
 	private final Connection con;
 
+	/**
+	 * Gets all submission based on the given {@link Jam}.
+	 *
+	 * @param jam The {@link Jam}.
+	 * @return A {@link List} with all {@link JamSubmission}s.
+	 * @throws SQLException If an error occurs.
+	 */
 	public List<JamSubmission> getSubmissions(Jam jam) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement(StringResourceCache.load("/jam/sql/find_latest_submissions.sql"));
 		stmt.setLong(1, jam.getId());
@@ -28,6 +38,15 @@ public class JamSubmissionRepository {
 		return submissions;
 	}
 
+	/**
+	 * Gets all submission based on the given {@link Jam} and user id.
+	 *
+	 * @param jam    The {@link Jam}.
+	 * @param page   The page.
+	 * @param userId The user's id.
+	 * @return A {@link List} with all {@link JamSubmission}s.
+	 * @throws SQLException If an error occurs.
+	 */
 	public List<JamSubmission> getSubmissions(Jam jam, int page, Long userId) throws SQLException {
 		int pageSize = 10;
 		String sql = "SELECT js.* FROM jam_submission js WHERE js.jam_id = ? /* CONDITIONS */ ORDER BY js.created_at LIMIT 10 /* OFFSET */"
@@ -49,6 +68,14 @@ public class JamSubmissionRepository {
 		return submissions;
 	}
 
+	/**
+	 * Gets a single submission based on the given submission id.
+	 *
+	 * @param jam          The {@link Jam}.
+	 * @param submissionId The submission's id.
+	 * @return The {@link JamSubmission}.
+	 * @throws SQLException If an error occurs.
+	 */
 	public JamSubmission getSubmission(Jam jam, long submissionId) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam_submission WHERE jam_id = ? AND id = ?");
 		stmt.setLong(1, jam.getId());
@@ -62,6 +89,12 @@ public class JamSubmissionRepository {
 		return submission;
 	}
 
+	/**
+	 * Inserts a single {@link JamSubmission}.
+	 *
+	 * @param submission The {@link JamSubmission} object to insert.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void saveSubmission(JamSubmission submission) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("INSERT INTO jam_submission (jam_id, theme_name, user_id, source_link, description) VALUES (?, ?, ?, ?, ?)");
 		stmt.setLong(1, submission.getJam().getId());
@@ -73,6 +106,14 @@ public class JamSubmissionRepository {
 		stmt.close();
 	}
 
+	/**
+	 * Removes a single {@link JamSubmission}.
+	 *
+	 * @param jam          The current {@link Jam}.
+	 * @param submissionId The submission's id.
+	 * @return the amount of rows that got updated during this process.
+	 * @throws SQLException If an error occurred.
+	 */
 	public int removeSubmission(Jam jam, long submissionId) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_submission WHERE jam_id = ? AND id = ?");
 		stmt.setLong(1, jam.getId());
@@ -82,6 +123,14 @@ public class JamSubmissionRepository {
 		return rows;
 	}
 
+	/**
+	 * Removes all {@link JamSubmission}s of the given user.
+	 *
+	 * @param jam    The current {@link Jam}.
+	 * @param userId The user's id.
+	 * @return the amount of rows that got updated during this process.
+	 * @throws SQLException If an error occurred.
+	 */
 	public int removeSubmissions(Jam jam, long userId) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_submission WHERE jam_id = ? AND user_id = ?");
 		stmt.setLong(1, jam.getId());

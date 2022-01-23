@@ -11,12 +11,16 @@ import net.javadiscord.javabot.systems.jam.model.JamTheme;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Subcommand that allows jam-admins to manually remove themes.
+ */
 public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		if (activeJam.getCurrentPhase() == null || !activeJam.getCurrentPhase().equals(JamPhase.THEME_PLANNING)) {
 			return Responses.warning(event, "Themes can only be removed during theme planning.");
 		}

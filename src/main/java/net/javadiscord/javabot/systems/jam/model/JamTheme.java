@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Simple data class that represents a single Jam Theme.
+ */
 @Data
 @NoArgsConstructor
 public class JamTheme {
