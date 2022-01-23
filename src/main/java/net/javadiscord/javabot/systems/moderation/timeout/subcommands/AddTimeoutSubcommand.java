@@ -12,8 +12,10 @@ import net.javadiscord.javabot.systems.moderation.ModerationService;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-public class AddTimeoutSubCommand implements SlashCommandHandler {
-
+/**
+ * Subcommand that allows staff-members to add timeouts to a single users.
+ */
+public class AddTimeoutSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");
@@ -21,7 +23,7 @@ public class AddTimeoutSubCommand implements SlashCommandHandler {
 		var durationAmountOption = event.getOption("duration-amount");
 		var durationTimeUnitOption = event.getOption("duration-timeunit");
 		if (userOption == null || reasonOption == null || durationAmountOption == null || durationTimeUnitOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {

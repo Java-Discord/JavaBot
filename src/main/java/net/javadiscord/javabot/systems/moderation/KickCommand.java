@@ -7,13 +7,12 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
 public class KickCommand implements SlashCommandHandler {
-
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {

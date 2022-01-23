@@ -17,6 +17,9 @@ import net.javadiscord.javabot.systems.qotw.SubmissionManager;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Subcommand that allows staff-members to decline QOTW-Submissions.
+ */
 @Slf4j
 public class DeclineSubcommand implements SlashCommandHandler {
 	@Override

@@ -13,6 +13,7 @@ import net.javadiscord.javabot.util.Misc;
 
 import javax.annotation.Nonnull;
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * this class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
+ * This class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
 @Slf4j
 public class AutoMod extends ListenerAdapter {
@@ -38,6 +39,9 @@ public class AutoMod extends ListenerAdapter {
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	private List<String> spamUrls;
 
+	/**
+	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
+	 */
 	public AutoMod() {
 		try {
 			URL url = new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt");
@@ -45,7 +49,7 @@ public class AutoMod extends ListenerAdapter {
 			InputStream stream = connection.getInputStream();
 			String response = new Scanner(stream).useDelimiter("\\A").next();
 			spamUrls = List.of(response.split("\n"));
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			spamUrls = List.of();
 		}
@@ -164,7 +168,7 @@ public class AutoMod extends ListenerAdapter {
 	}
 
 	/**
-	 * Handles potential spam messages
+	 * Handles potential spam messages.
 	 *
 	 * @param msg    the message
 	 * @param member the member to be potentially warned
@@ -172,7 +176,9 @@ public class AutoMod extends ListenerAdapter {
 	private void handleSpam(@Nonnull Message msg, Member member) {
 		// java files -> not spam
 		if (!msg.getAttachments().isEmpty()
-				&& "java".equals(msg.getAttachments().get(0).getFileExtension())) return;
+				&& "java".equals(msg.getAttachments().get(0).getFileExtension())) {
+			return;
+		}
 
 		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
 				.timeout(
@@ -186,10 +192,10 @@ public class AutoMod extends ListenerAdapter {
 	}
 
 	/**
-	 * returns the original String cleaned up of unused code points and spaces
+	 * returns the original String cleaned up of unused code points and spaces.
 	 *
-	 * @param input the input String
-	 * @return the cleaned-up String
+	 * @param input the input String.
+	 * @return the cleaned-up String.
 	 */
 	private String cleanString(String input) {
 		input = input.replaceAll("\\p{C}", "");

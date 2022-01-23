@@ -11,6 +11,9 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 
+/**
+ * Class that handles economy notifications.
+ */
 @Slf4j
 public class EconomyNotificationService {
 

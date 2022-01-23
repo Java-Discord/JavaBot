@@ -8,13 +8,17 @@ import net.javadiscord.javabot.systems.expert_questions.dao.ExpertQuestionReposi
 import net.javadiscord.javabot.systems.expert_questions.model.ExpertQuestion;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
-public class AddSubCommand extends ExpertSubcommand {
+/**
+ * Subcommand that allows staff-members to add expert questions to the database.
+ */
+public class AddSubcommand extends ExpertSubcommand {
 	@Override
-	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws Exception {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException {
 		var textOption = event.getOption("text");
 		if (textOption == null) {
-			return Responses.error(event, "Missing required Arguments");
+			return Responses.error(event, "Missing required arguments");
 		}
 		var text = textOption.getAsString();
 		ExpertQuestion question = new ExpertQuestion();

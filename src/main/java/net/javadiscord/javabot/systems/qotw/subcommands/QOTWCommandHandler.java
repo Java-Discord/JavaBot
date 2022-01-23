@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.subcommands;
 
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.ClearSubCommand;
+import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.ClearSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubCommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.SetSubCommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuestionSubcommand;
@@ -24,7 +24,7 @@ public class QOTWCommandHandler extends DelegatingCommandHandler {
 		this.addSubcommandGroup(
 				"account", new DelegatingCommandHandler(Map.of(
 						"increment", new IncrementSubCommand(),
-						"clear", new ClearSubCommand(),
+						"clear", new ClearSubcommand(),
 						"set", new SetSubCommand()
 				)));
 		this.addSubcommandGroup(

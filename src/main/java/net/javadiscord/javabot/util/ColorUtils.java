@@ -4,8 +4,17 @@ import java.awt.*;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Colors {
+/**
+ * Utility class for generating colors.
+ */
+public class ColorUtils {
 
+	private ColorUtils() {}
+
+	/**
+	 * Generates a random pastel color.
+	 * @return A random pastel color.
+	 */
 	public static Color randomPastel() {
 		Random rand = ThreadLocalRandom.current();
 		float hue = rand.nextFloat();

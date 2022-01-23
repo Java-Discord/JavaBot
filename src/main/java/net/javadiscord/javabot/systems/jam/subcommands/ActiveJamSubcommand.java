@@ -39,7 +39,7 @@ public abstract class ActiveJamSubcommand implements SlashCommandHandler {
 				var reply = this.handleJamCommand(event, activeJam, con, Bot.config.get(event.getGuild()).getJam());
 				con.commit();
 				return reply;
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				con.rollback();
 				log.warn("Exception thrown while handling Jam command: {}", e.getMessage());
 				return Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```");

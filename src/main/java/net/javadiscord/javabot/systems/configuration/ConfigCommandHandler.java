@@ -10,6 +10,9 @@ import net.javadiscord.javabot.systems.configuration.subcommands.SetSubcommand;
  * slash commands.
  */
 public class ConfigCommandHandler extends DelegatingCommandHandler {
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
+	 */
 	public ConfigCommandHandler() {
 		addSubcommand("list", new ListSubcommand());
 		addSubcommand("get", new GetSubcommand());

@@ -6,11 +6,16 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
+/**
+ * Subcommand that allows staff-members to discard any warn by their id.
+ */
 public class DiscardWarnByIdSubCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var idOption = event.getOption("id");
-		if (idOption == null) return Responses.error(event, "Id may not be empty!");
+		if (idOption == null) {
+			return Responses.error(event, "Id may not be empty!");
+		}
 		var id = idOption.getAsLong();
 		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.discardWarnById(id, event.getUser())) {

@@ -61,8 +61,9 @@ public class ProfileCommand implements SlashCommandHandler {
 						new LeaderboardCommand().getQOTWRank(member.getIdLong())), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);
-		if (member.getTimeBoosted() != null)
+		if (member.getTimeBoosted() != null) {
 			embed.addField("Boosted since", String.format("<t:%s:R>", member.getTimeBoosted().toEpochSecond()), true);
+		}
 		return embed.build();
 	}
 
@@ -93,8 +94,11 @@ public class ProfileCommand implements SlashCommandHandler {
 	private Activity getGameActivity(Member member) {
 		Activity activity = null;
 		for (var act : member.getActivities()) {
-			if (act.getType().name().equals("CUSTOM_STATUS")) continue;
-			else activity = act;
+			if (act.getType().name().equals("CUSTOM_STATUS")) {
+				continue;
+			} else {
+				activity = act;
+			}
 			break;
 		}
 		return activity;

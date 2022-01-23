@@ -8,7 +8,7 @@ import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
-import net.javadiscord.javabot.util.Colors;
+import net.javadiscord.javabot.util.ColorUtils;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -148,7 +148,7 @@ public class JamChannelManager {
 			String userName = user == null ? "Unknown user" : user.getAsTag();
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("Submission by " + userName, submission.getSourceLink())
-					.setColor(Colors.randomPastel())
+					.setColor(ColorUtils.randomPastel())
 					.setTimestamp(submission.getCreatedAt())
 					.addField("Description", submission.getDescription(), false);
 			Message message = this.config.getVotingChannel().sendMessageEmbeds(embedBuilder.build()).complete();

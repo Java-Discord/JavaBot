@@ -11,7 +11,7 @@ public class UnbanCommand implements SlashCommandHandler {
 	public ReplyAction handle(SlashCommandEvent event) {
 		var idOption = event.getOption("id");
 		if (idOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var id = idOption.getAsLong();
 		var channel = event.getTextChannel();

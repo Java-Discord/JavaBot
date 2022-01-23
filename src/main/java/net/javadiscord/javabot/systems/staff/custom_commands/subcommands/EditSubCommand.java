@@ -46,8 +46,9 @@ public class EditSubCommand implements SlashCommandHandler {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new CustomCommandRepository(con);
 			var c = repo.findByName(event.getGuild().getIdLong(), name);
-			if (c.isEmpty())
+			if (c.isEmpty()) {
 				return Responses.error(event, String.format("A Custom Command called `/%s` does not exist.", name));
+			}
 			var newCommand = repo.edit(c.get(), command);
 			var e = buildEditCommandEmbed(event.getMember(), newCommand);
 			Bot.slashCommands.registerSlashCommands(event.getGuild());

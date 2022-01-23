@@ -6,13 +6,16 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
+/**
+ * Command that allows staff-members to ban guild members.
+ */
 public class BanCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {

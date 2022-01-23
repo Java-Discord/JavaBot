@@ -30,8 +30,9 @@ public class DeleteSubCommand implements SlashCommandHandler {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new CustomCommandRepository(con);
 			var command = repo.findByName(event.getGuild().getIdLong(), name);
-			if (command.isEmpty())
+			if (command.isEmpty()) {
 				return Responses.error(event, String.format("Could not find Custom Command with name `/%s`.", name));
+			}
 			repo.delete(command.get());
 			var e = buildDeleteCommandEmbed(event.getMember(), command.get());
 			Bot.slashCommands.registerSlashCommands(event.getGuild());

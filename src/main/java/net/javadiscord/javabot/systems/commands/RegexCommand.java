@@ -31,8 +31,9 @@ public class RegexCommand implements SlashCommandHandler {
 
 		String string = stringOption.getAsString();
 
-		if (patternOption.getAsString().length() > 1018 || string.length() > 1018)
+		if (patternOption.getAsString().length() > 1018 || string.length() > 1018) {
 			return Responses.warning(event, "Pattern and String cannot be longer than 1018 Characters each.");
+		}
 
 		return event.replyEmbeds(buildRegexEmbed(pattern.matcher(string).matches(), pattern, string, event.getGuild()).build());
 	}

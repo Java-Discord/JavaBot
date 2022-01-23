@@ -34,6 +34,11 @@ public class GuildConfig {
 	private EmoteConfig emote;
 	private ServerLockConfig serverLock;
 
+	/**
+	 * Constructor that initializes all Config classes.
+	 * @param guild The current guild.
+	 * @param file The config file.
+	 */
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;
 		// Initialize all config items.

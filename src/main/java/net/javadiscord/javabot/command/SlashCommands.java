@@ -225,13 +225,15 @@ public class SlashCommands extends ListenerAdapter {
 						.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
 						.setDescription(responseText)
 						.build();
-				if (reply) return event.replyEmbeds(e);
-				else {
+				if (reply) {
+					return event.replyEmbeds(e);
+				} else {
 					return RestAction.allOf(event.getChannel().sendMessageEmbeds(e), event.reply("Done!").setEphemeral(true));
 				}
 			} else {
-				if (reply) return event.reply(responseText);
-				else {
+				if (reply) {
+					return event.reply(responseText);
+				} else {
 					return RestAction.allOf(event.getChannel().sendMessage(responseText), event.reply("Done!").setEphemeral(true));
 				}
 			}

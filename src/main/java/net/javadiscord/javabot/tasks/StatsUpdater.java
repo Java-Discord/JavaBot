@@ -24,7 +24,9 @@ public class StatsUpdater extends ListenerAdapter {
 				if (
 						config.getCategoryId() == 0 ||
 								config.getMemberCountMessageTemplate() == null
-				) continue;
+				) {
+					continue;
+				}
 				String text = config.getMemberCountMessageTemplate()
 						.replace("{!membercount}", String.valueOf(guild.getMemberCount()))
 						.replace("{!server}", guild.getName());

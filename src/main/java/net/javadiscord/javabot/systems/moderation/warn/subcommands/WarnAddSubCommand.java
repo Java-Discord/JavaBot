@@ -15,7 +15,7 @@ public class WarnAddSubCommand implements SlashCommandHandler {
 		var reasonOption = event.getOption("reason");
 		var severityOption = event.getOption("severity");
 		if (userOption == null || reasonOption == null || severityOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+			return Responses.error(event, "Missing required arguments.");
 		}
 		var member = userOption.getAsMember();
 		if (member == null) {

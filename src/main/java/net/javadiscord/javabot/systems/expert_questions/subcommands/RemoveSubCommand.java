@@ -7,19 +7,22 @@ import net.javadiscord.javabot.systems.expert_questions.ExpertSubcommand;
 import net.javadiscord.javabot.systems.expert_questions.dao.ExpertQuestionRepository;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class RemoveSubCommand extends ExpertSubcommand {
 	@Override
-	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws Exception {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException {
 		var idOption = event.getOption("id");
 		if (idOption == null) {
-			return Responses.error(event, "Missing required Arguments");
+			return Responses.error(event, "Missing required arguments");
 		}
 		var id = idOption.getAsLong();
 		var repo = new ExpertQuestionRepository(con);
 		if (repo.remove(event.getGuild().getIdLong(), id)) {
 			return Responses.success(event, "Removed Expert Question",
 					String.format("Successfully removed Expert Question with id `%s`", id));
-		} else return Responses.error(event, "Could not remove Expert Question");
+		} else {
+			return Responses.error(event, "Could not remove Expert Question");
+		}
 	}
 }

@@ -9,10 +9,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Dao class that represents the ECONOMY_ACCOUNT & ECONOMY_ACCOUNT_PREFERENCES SQL Table.
+ */
 @RequiredArgsConstructor
 public class AccountRepository {
 	private final Connection con;
 
+	/**
+	 * Inserts a new economy account.
+	 * @param account The account that should be inserted.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void saveNewAccount(Account account) throws SQLException {
 		try (PreparedStatement stmt = this.con.prepareStatement("INSERT INTO economy_account (user_id, balance) VALUES (?, ?)")) {
 			stmt.setLong(1, account.getUserId());
@@ -26,6 +34,11 @@ public class AccountRepository {
 		}
 	}
 
+	/**
+	 * Updates a single economy account.
+	 * @param account The account that should be updated.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void updateAccount(Account account) throws SQLException {
 		try (PreparedStatement stmt = this.con.prepareStatement("UPDATE economy_account SET balance = ? WHERE user_id = ?")) {
 			stmt.setLong(1, account.getBalance());
@@ -34,6 +47,12 @@ public class AccountRepository {
 		}
 	}
 
+	/**
+	 * Gets an economy account by a discord user id.
+	 * @param userId The user's id.
+	 * @return An {@link Account} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Account getAccount(long userId) throws SQLException {
 		try (var stmt = this.con.prepareStatement("SELECT * FROM economy_account WHERE user_id = ?")) {
 			stmt.setLong(1, userId);
@@ -52,6 +71,12 @@ public class AccountRepository {
 		return account;
 	}
 
+	/**
+	 * Gets a user's account preferences by their user id.
+	 * @param userId The user's id.
+	 * @return An {@link AccountPreferences} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public AccountPreferences getPreferences(long userId) throws SQLException {
 		try (var stmt = this.con.prepareStatement("SELECT * FROM economy_account_preferences WHERE user_id = ?")) {
 			stmt.setLong(1, userId);
@@ -66,6 +91,11 @@ public class AccountRepository {
 		}
 	}
 
+	/**
+	 * Inserts a new {@link AccountPreferences} object.
+	 * @param prefs The {@link AccountPreferences} to insert.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void savePreferences(AccountPreferences prefs) throws SQLException {
 		try (var stmt = this.con.prepareStatement("UPDATE economy_account_preferences SET receive_transaction_dms = ? WHERE user_id = ?")) {
 			stmt.setBoolean(1, prefs.isReceiveTransactionDms());

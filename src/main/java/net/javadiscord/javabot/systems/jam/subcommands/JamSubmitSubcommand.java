@@ -87,8 +87,9 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 		String themeName = null;
 		if (possibleThemes.size() > 1) {
 			OptionMapping themeOption = event.getOption("theme");
-			if (themeOption == null)
+			if (themeOption == null) {
 				throw new IllegalArgumentException("This Jam has multiple themes. You must specify the theme you're submitting for.");
+			}
 			boolean validThemeFound = false;
 			for (JamTheme theme : possibleThemes) {
 				if (themeOption.getAsString().equals(theme.getName())) {

@@ -36,6 +36,7 @@ public class OptionConfig {
 
 	/**
 	 * Converts the current {@link OptionConfig} to a {@link OptionData} object.
+	 *
 	 * @return The {@link OptionData} object.
 	 */
 	public OptionData toData() {

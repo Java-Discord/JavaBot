@@ -12,10 +12,19 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Class that handles Economy actions.
+ */
 @RequiredArgsConstructor
 public class EconomyService {
 	private final HikariDataSource dataSource;
 
+	/**
+	 * Creates a new Economy Account if none exists.
+	 * @param userId The user's id.
+	 * @return An {@link Account} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Account getOrCreateAccount(long userId) throws SQLException {
 		try (Connection con = this.dataSource.getConnection()) {
 			con.setAutoCommit(false);
@@ -32,6 +41,13 @@ public class EconomyService {
 		}
 	}
 
+	/**
+	 * Gets all recent transactions from a user.
+	 * @param userId The user's id.
+	 * @param count The count of transactions to retrieve.
+	 * @return A {@link List} with all transactions.
+	 * @throws SQLException If an error occurs.
+	 */
 	public List<Transaction> getRecentTransactions(long userId, int count) throws SQLException {
 		try (Connection con = this.dataSource.getConnection()) {
 			con.setReadOnly(true);
@@ -41,10 +57,20 @@ public class EconomyService {
 		}
 	}
 
+	/**
+	 * Performs a single transaction.
+	 * @param fromUserId The sender's user id.
+	 * @param toUserId The recipient's user id.
+	 * @param value The transaction's value.
+	 * @param message The transaction's message.
+	 * @return A {@link Transaction} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public Transaction performTransaction(Long fromUserId, Long toUserId, long value, String message) throws SQLException {
 		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
-		if (Objects.equals(fromUserId, toUserId))
+		if (Objects.equals(fromUserId, toUserId)) {
 			throw new IllegalArgumentException("Sender and recipient cannot be the same.");
+		}
 
 		Transaction t = new Transaction();
 		t.setFromUserId(fromUserId);
@@ -65,8 +91,9 @@ public class EconomyService {
 					account.setBalance(0);
 					accountRepository.saveNewAccount(account);
 				}
-				if (account.getBalance() < value)
+				if (account.getBalance() < value) {
 					throw new IllegalStateException("Sender account does not have the required funds.");
+				}
 				account.updateBalance(-value);
 				accountRepository.updateAccount(account);
 			}

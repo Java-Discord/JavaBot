@@ -223,7 +223,9 @@ public class ModerationService {
 			config.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
 			return true;
-		} else return false;
+		} else {
+			return false;
+		}
 	}
 
 	private boolean isBanned(Guild guild, long userId) {
@@ -276,7 +278,9 @@ public class ModerationService {
 			config.getLogChannel().sendMessageEmbeds(kickEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 			return true;
-		} else return false;
+		} else {
+			return false;
+		}
 	}
 
 	private MessageEmbed buildWarnEmbed(Member member, WarnSeverity severity, long warnId, String reason, Member warnedBy, Instant timestamp, int totalSeverity) {

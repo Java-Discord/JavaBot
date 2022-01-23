@@ -6,7 +6,10 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
-public class DiscardAllWarnsSubCommand implements SlashCommandHandler {
+/**
+ * Subcommand that allows staff-members to discard all warns from a user.
+ */
+public class DiscardAllWarnsSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");

@@ -5,6 +5,9 @@ import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Emote;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
+/**
+ * Configuration for the guild's emotes.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EmoteConfig extends GuildConfigItem {

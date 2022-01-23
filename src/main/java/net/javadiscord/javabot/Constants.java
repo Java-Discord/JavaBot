@@ -35,5 +35,6 @@ public class Constants {
 	 */
 	public static final String TEXT_WHITE = "\u001B[37m";
 
-	private Constants() {}
+	private Constants() {
+	}
 }

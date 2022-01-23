@@ -10,6 +10,9 @@ import net.javadiscord.javabot.systems.qotw.subcommands.QOTWSubcommand;
 
 import java.sql.Connection;
 
+/**
+ * Subcommand that allows staff-members to add question to the QOTW-Queue.
+ */
 public class AddQuestionSubcommand extends QOTWSubcommand {
 	@Override
 	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con, long guildId) throws Exception {

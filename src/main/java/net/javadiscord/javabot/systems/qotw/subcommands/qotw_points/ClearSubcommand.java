@@ -9,7 +9,10 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 
 import java.sql.SQLException;
 
-public class ClearSubCommand implements SlashCommandHandler {
+/**
+ * Subcommand that allows staff-members to clear a user's QOTW-Account.
+ */
+public class ClearSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var memberOption = event.getOption("user");

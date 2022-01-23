@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the QOTW_POINTS SQL Table.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class QuestionPointsRepository {
@@ -35,6 +38,7 @@ public class QuestionPointsRepository {
 	 * Returns a {@link QOTWAccount} based on the given user Id.
 	 *
 	 * @param userId The discord Id of the user.
+	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	public QOTWAccount getAccountByUserId(long userId) throws SQLException {
@@ -57,6 +61,7 @@ public class QuestionPointsRepository {
 	 *
 	 * @param userId The discord Id of the user.
 	 * @param points The points that should be set.
+	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	public QOTWAccount update(long userId, long points) throws SQLException {
@@ -84,7 +89,7 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Gets all {@link QOTWAccount} and sorts them by their points.
-	 *
+	 * @return A {@link List} that contains all {@link QOTWAccount}s sorted by their points.
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWAccount> getAllAccountsSortedByPoints() throws SQLException {
@@ -116,6 +121,7 @@ public class QuestionPointsRepository {
 	 * Reads a {@link ResultSet} and returns a new {@link QOTWAccount} object.
 	 *
 	 * @param rs The query's ResultSet.
+	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	private QOTWAccount read(ResultSet rs) throws SQLException {

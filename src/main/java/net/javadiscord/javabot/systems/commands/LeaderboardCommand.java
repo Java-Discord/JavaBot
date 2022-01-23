@@ -147,8 +147,11 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	private void drawUserCard(Graphics2D g2d, Guild guild, long userId, int y, boolean left) throws IOException {
 		var card = getResourceImage("images/leaderboard/LBCard.png");
 		int x;
-		if (left) x = MARGIN * 5;
-		else x = WIDTH - (MARGIN * 5) - card.getWidth();
+		if (left) {
+			x = MARGIN * 5;
+		} else {
+			x = WIDTH - (MARGIN * 5) - card.getWidth();
+		}
 
 		var member = guild.getMemberById(userId);
 		if (member != null) {

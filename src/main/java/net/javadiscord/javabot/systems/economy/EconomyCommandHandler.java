@@ -7,7 +7,13 @@ import net.javadiscord.javabot.systems.economy.subcommands.SendSubcommand;
 
 import java.util.Map;
 
+/**
+ * Handler class for all economy commands.
+ */
 public class EconomyCommandHandler extends DelegatingCommandHandler {
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
+	 */
 	public EconomyCommandHandler() {
 		super(Map.of(
 				"account", new AccountSubcommand(),

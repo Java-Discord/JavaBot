@@ -18,6 +18,9 @@ import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSub
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Subcommand that allows staff members to accept QOTW-Submissions.
+ */
 @Slf4j
 public class AcceptSubcommand implements SlashCommandHandler {
 	@Override

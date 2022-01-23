@@ -1,18 +1,16 @@
 package net.javadiscord.javabot.systems.staff.custom_commands;
 
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CreateSubCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.DeleteSubCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.EditSubCommand;
 
 /**
- * Handler class for the "/customcommand"-slash commands
+ * Handler class for the "/customcommand"-slash commands.
  */
 public class CustomCommandHandler extends DelegatingCommandHandler {
-
 	/**
-	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand(String, SlashCommandHandler)}
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
 	 */
 	public CustomCommandHandler() {
 		addSubcommand("create", new CreateSubCommand());

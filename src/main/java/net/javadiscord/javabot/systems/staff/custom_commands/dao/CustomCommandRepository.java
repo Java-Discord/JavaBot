@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Dao class that represents the CUSTOM_COMMANDS SQL Table.
+ */
 @RequiredArgsConstructor
 public class CustomCommandRepository {
 	private final Connection con;
@@ -49,6 +52,7 @@ public class CustomCommandRepository {
 	 *
 	 * @param old    The old custom command.
 	 * @param update The new custom command.
+	 * @return The updated {@link CustomCommand} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	public CustomCommand edit(CustomCommand old, CustomCommand update) throws SQLException {
@@ -127,7 +131,7 @@ public class CustomCommandRepository {
 	}
 
 	/**
-	 * Gets all custom commands for the given guild
+	 * Gets all custom commands for the given guild.
 	 *
 	 * @param guildId The id of the guild.
 	 * @return A List with all custom commands.
@@ -149,7 +153,8 @@ public class CustomCommandRepository {
 	/**
 	 * Reads the given {@link ResultSet} and constructs a new {@link CustomCommand} object.
 	 *
-	 * @param rs The ResultSet
+	 * @param rs The ResultSet.
+	 * @return The {@link CustomCommand} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	private CustomCommand read(ResultSet rs) throws SQLException {

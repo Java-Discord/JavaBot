@@ -1,37 +1,42 @@
 package net.javadiscord.javabot.systems.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
 
+/**
+ * Command that provides some basic info about the bot.
+ */
 public class BotInfoCommand implements SlashCommandHandler {
-
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
+		var embed = buildBotInfoEmbed(event.getJDA(), Bot.config.get(event.getGuild()).getSlashCommand());
+		return event.replyEmbeds(embed).addActionRow(Button.link(Constants.GITHUB_LINK, "View on GitHub")
+		);
+	}
 
-		long ping = event.getJDA().getGatewayPing();
-		var bot = event.getJDA().getSelfUser();
-
-		var e = new EmbedBuilder()
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+	private MessageEmbed buildBotInfoEmbed(JDA jda, SlashCommandConfig config) {
+		var bot = jda.getSelfUser();
+		return new EmbedBuilder()
+				.setColor(config.getDefaultColor())
 				.setThumbnail(bot.getEffectiveAvatarUrl())
-				.setAuthor(bot.getName() + " | Info", null, bot.getEffectiveAvatarUrl())
-				.addField("OS", "```" + System.getProperty("os.name") + "```", true)
+				.setAuthor(bot.getAsTag(), null, bot.getEffectiveAvatarUrl())
+				.setTitle("Info")
+				.addField("OS", String.format("```%s```", System.getProperty("os.name")), true)
 				.addField("Library", "```JDA```", true)
-				.addField("JDK", "```" + System.getProperty("java.version") + "```", true)
-				.addField("Ping", "```" + ping + "ms```", true)
-				.addField("Uptime", "```" + new UptimeCommand().getUptime() + "```", true)
+				.addField("JDK", String.format("```%s```", System.getProperty("java.version")), true)
+				.addField("Gateway Ping", String.format("```%sms```", jda.getGatewayPing()), true)
+				.addField("Uptime", String.format("```%s```", new UptimeCommand().getUptime()), true)
 				.setTimestamp(Instant.now())
 				.build();
-
-		return event.replyEmbeds(e).addActionRow(
-				Button.link(Constants.GITHUB_LINK, "View on GitHub")
-		);
 	}
 }

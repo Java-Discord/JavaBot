@@ -14,6 +14,9 @@ import java.awt.*;
 import java.util.function.UnaryOperator;
 
 // TODO: Refactor embed interface completely.
+/**
+ * Command that allows staff-members to create embed messages.
+ */
 @Deprecated(forRemoval = true)
 public class EmbedCommand implements SlashCommandHandler {
 
@@ -33,12 +36,8 @@ public class EmbedCommand implements SlashCommandHandler {
 
 		Message message;
 
-		try {
-			TextChannel channel = event.getGuild().getTextChannelById(value[5]);
-			message = channel.retrieveMessageById(value[6]).complete();
-		} catch (Exception e) {
-			return Responses.error(event, e.getMessage());
-		}
+		TextChannel channel = event.getGuild().getTextChannelById(value[5]);
+		message = channel.retrieveMessageById(value[6]).complete();
 
 		OptionMapping embedOption = event.getOption("title");
 		String title = embedOption == null ? null : embedOption.getAsString();
@@ -66,20 +65,16 @@ public class EmbedCommand implements SlashCommandHandler {
 		String thumb = getOpt.apply("thumbnail-url");
 		String img = getOpt.apply("image-url");
 		String color = getOpt.apply("color");
-		try {
-			var eb = new EmbedBuilder();
-			eb.setTitle(title);
-			eb.setDescription(description);
-			eb.setAuthor(authorname, url, iconurl);
-			eb.setImage(img);
-			eb.setThumbnail(thumb);
-			eb.setColor(Color.decode(color));
 
-			event.getChannel().sendMessageEmbeds(eb.build()).queue();
-			return event.reply("Done!").setEphemeral(true);
+		var eb = new EmbedBuilder();
+		eb.setTitle(title);
+		eb.setDescription(description);
+		eb.setAuthor(authorname, url, iconurl);
+		eb.setImage(img);
+		eb.setThumbnail(thumb);
+		eb.setColor(Color.decode(color));
 
-		} catch (Exception e) {
-			return Responses.error(event, e.getMessage());
-		}
+		event.getChannel().sendMessageEmbeds(eb.build()).queue();
+		return event.reply("Done!").setEphemeral(true);
 	}
 }

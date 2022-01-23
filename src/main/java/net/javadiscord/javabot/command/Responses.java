@@ -19,7 +19,8 @@ import java.time.Instant;
  */
 public final class Responses {
 
-	private Responses() {}
+	private Responses() {
+	}
 
 	public static ReplyAction success(SlashCommandEvent event, String title, String message) {
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);

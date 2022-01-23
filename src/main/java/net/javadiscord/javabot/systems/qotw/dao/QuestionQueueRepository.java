@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Dao class that represents the QOTW_QUESTION SQL Table.
+ */
 @RequiredArgsConstructor
 public class QuestionQueueRepository {
 	private final Connection con;
@@ -45,8 +48,9 @@ public class QuestionQueueRepository {
 	}
 
 	public void markUsed(QOTWQuestion question) throws SQLException {
-		if (question.getQuestionNumber() == null)
+		if (question.getQuestionNumber() == null) {
 			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
+		}
 		try (var stmt = con.prepareStatement("""
 				UPDATE qotw_question
 				SET used = TRUE, question_number = ?

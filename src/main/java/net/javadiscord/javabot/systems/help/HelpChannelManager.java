@@ -81,8 +81,9 @@ public class HelpChannelManager {
 	 */
 	public void openNew() {
 		var category = config.getOpenChannelCategory();
-		if (category == null)
+		if (category == null) {
 			throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
+		}
 		String name = this.config.getChannelNamingStrategy().getName(category.getTextChannels(), config);
 		category.createTextChannel(name).queue(channel -> {
 			channel.getManager().setPosition(0).setTopic(this.config.getOpenChannelTopic()).queue();
