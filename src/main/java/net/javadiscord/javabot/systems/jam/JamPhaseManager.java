@@ -18,7 +18,13 @@ import java.sql.SQLException;
  */
 @RequiredArgsConstructor
 public class JamPhaseManager {
+	/**
+	 * A static String array containing all reaction emotes as unicode strings.
+	 */
 	public static final String[] REACTION_NUMBERS = {"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"};
+	/**
+	 * A static String that contains the vote reaction unicode character.
+	 */
 	public static final String SUBMISSION_VOTE_UNICODE = "⬆";
 	private static final Logger log = LoggerFactory.getLogger(JamPhaseManager.class);
 	private final Jam jam;
@@ -50,7 +56,7 @@ public class JamPhaseManager {
 				bkpCon = c;
 				transition.transition(jam, event, channelManager, c);
 				c.commit();
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				log.error("An error occurred while transitioning the Jam phase.", e);
 				channelManager.sendErrorMessageAsync(event, "An error occurred: " + e.getMessage());
 				try {

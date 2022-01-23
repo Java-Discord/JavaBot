@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class ToSubmissionTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		JamMessageRepository messageRepository = new JamMessageRepository(con);
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(jam);
 		long themeVotingMessageId = messageRepository.getMessageId(jam, "theme_voting");

@@ -10,11 +10,15 @@ import net.javadiscord.javabot.systems.jam.model.JamTheme;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Subcommand that allows jam-admins to list all added themes.
+ */
 public class ListThemesSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(activeJam);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("Themes for Jam " + activeJam.getId())

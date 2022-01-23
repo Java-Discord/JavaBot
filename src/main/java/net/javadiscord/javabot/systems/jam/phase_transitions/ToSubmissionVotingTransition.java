@@ -10,6 +10,7 @@ import net.javadiscord.javabot.systems.jam.model.JamPhase;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ import java.util.List;
  */
 public class ToSubmissionVotingTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		List<JamSubmission> submissions = new JamSubmissionRepository(con).getSubmissions(jam);
 		if (submissions.isEmpty()) {
 			throw new IllegalStateException("Cannot start submission voting because there aren't any submissions.");

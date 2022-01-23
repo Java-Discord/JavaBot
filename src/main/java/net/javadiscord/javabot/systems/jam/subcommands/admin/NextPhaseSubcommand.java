@@ -11,6 +11,9 @@ import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
 
+/**
+ * Subcommand that allows jam-admin to manually forward to the next jam phase.
+ */
 public class NextPhaseSubcommand extends ActiveJamSubcommand {
 	@Override
 	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) {

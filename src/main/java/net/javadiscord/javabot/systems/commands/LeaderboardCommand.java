@@ -25,6 +25,9 @@ import java.util.Objects;
 
 import static net.javadiscord.javabot.Bot.imageCache;
 
+/**
+ * Command that generates a leaderboard based on QOTW-Points.
+ */
 public class LeaderboardCommand extends ImageGenerationUtils implements SlashCommandHandler {
 
 	private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
@@ -76,6 +79,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * Gets the top N members based on their QOTW-Points.
 	 *
 	 * @param n The amount of members to get.
+	 * @param guild The current guild.
 	 * @return A {@link List} with the top member ids.
 	 */
 	private List<Member> getTopNMembers(int n, Guild guild) {
@@ -220,6 +224,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 
 	/**
 	 * Builds the cached image's name.
+	 * @return The image's cache name.
 	 */
 	private String getCacheName() {
 		try (var con = Bot.dataSource.getConnection()) {

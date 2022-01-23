@@ -46,7 +46,7 @@ public class EditJamSubcommand extends ActiveJamSubcommand {
 	}
 
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping propertyNameOption = event.getOption("property");
 		OptionMapping propertyValueOption = event.getOption("value");
 		if (propertyNameOption == null || propertyValueOption == null) {

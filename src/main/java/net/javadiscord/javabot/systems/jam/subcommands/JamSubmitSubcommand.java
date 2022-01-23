@@ -11,6 +11,7 @@ import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
 
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
@@ -25,7 +26,7 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		if (!activeJam.submissionsAllowed()) {
 			return Responses.warning(event, "Submissions Not Permitted", "The Jam is not currently accepting submissions.");
 		}
@@ -66,7 +67,7 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 			URLConnection connection = url.openConnection();
 			connection.connect();
 			return true;
-		} catch (Exception e) {
+		} catch (IOException e) {
 			return false;
 		}
 	}

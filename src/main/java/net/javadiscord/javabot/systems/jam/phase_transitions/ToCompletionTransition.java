@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class ToCompletionTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws Exception {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		JamMessageRepository messageRepository = new JamMessageRepository(con);
 		List<JamSubmission> submissions = new JamSubmissionRepository(con).getSubmissions(jam);
 

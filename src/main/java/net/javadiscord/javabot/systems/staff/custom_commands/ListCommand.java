@@ -22,7 +22,7 @@ public class ListCommand implements SlashCommandHandler {
 			for (var c : commands) sb.append("/").append(c.getName()).append("\n");
 			return Responses.success(event,
 					"Custom Slash Command List",
-					String.format("```\n%s\n```", (sb.length() > 0 ? sb : "No Custom Commands created yet."))
+					String.format("```\n%s\n```", sb.length() > 0 ? sb : "No Custom Commands created yet.")
 			);
 		} catch (SQLException e) {
 			e.printStackTrace();
