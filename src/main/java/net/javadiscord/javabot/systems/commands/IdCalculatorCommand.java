@@ -36,9 +36,9 @@ public class IdCalculatorCommand implements SlashCommandHandler {
 				.setTitle("ID-Calculator")
 				.setColor(config.getDefaultColor())
 				.addField("Input", String.format("`%s`", id), false)
-				.addField("Unix-Timestamp (+ milliseconds)", String.format("<t:%s>", unixTimestampMillis), true)
-				.addField("Unix-Timestamp", String.format("<t:%s>", unixTimestamp), true)
-				.addField("Date", String.format("<t:%s:F>", instant), false)
+				.addField("Unix-Timestamp", String.format("`%s`", unixTimestamp), true)
+				.addField("Unix-Timestamp (+ milliseconds)", String.format("`%s`", unixTimestampMillis), true)
+				.addField("Date", String.format("<t:%s:F>", instant.getEpochSecond()), false)
 				.build();
 	}
 }

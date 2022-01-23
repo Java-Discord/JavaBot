@@ -35,17 +35,16 @@ public class ServerInfoCommand implements SlashCommandHandler {
 				.setThumbnail(guild.getIconUrl())
 				.setAuthor(guild.getName(), null, guild.getIconUrl())
 				.setTitle("Server Information")
-				.addField("Name", String.format("```%s```", guild.getName()), true)
 				.addField("Owner", guild.getOwner().getAsMention(), true)
-				.addField("ID", String.format("```%s```", guild.getIdLong()), false)
+				.addField("Member Count", guild.getMemberCount() + " members", true)
 				.addField("Roles", String.format("%s Roles", guild.getRoles().size() - 1L), true)
+				.addField("ID", String.format("```%s```", guild.getIdLong()), false)
 				.addField("Channel Count",
 						String.format(
 								"```%s Channels, %s Categories" +
 										"\n→ Text: %s" +
 										"\n→ Voice: %s```", channels, categories, textChannels, voiceChannels), false)
-				.addField("Member Count", "```" + guild.getMemberCount() + " members```", false)
-				.addField("Server created on", String.format("<t:%s:f>", guild.getTimeCreated().toInstant()), false)
+				.addField("Server created on", String.format("<t:%s:f>", guild.getTimeCreated().toInstant().getEpochSecond()), false)
 				.setTimestamp(Instant.now())
 				.build();
 	}
