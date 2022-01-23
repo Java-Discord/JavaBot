@@ -11,12 +11,17 @@ import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 
 import java.sql.SQLException;
 
+/**
+ * Handles various interactions regarding the help channel system.
+ */
 @Slf4j
 public class HelpChannelInteractionManager {
+
 	/**
 	 * Handles button interactions for help channel activity checks.
 	 *
 	 * @param event  The button event.
+	 * @param reservationId The help channel's reservation id.
 	 * @param action The data extracted from the button id.
 	 */
 	public void handleHelpChannel(ButtonClickEvent event, String reservationId, String action) {
@@ -24,7 +29,8 @@ public class HelpChannelInteractionManager {
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
-			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?").setEphemeral(true).queue();
+			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
+					.setEphemeral(true).queue();
 			event.getMessage().delete().queue();
 			return;
 		}
@@ -53,7 +59,7 @@ public class HelpChannelInteractionManager {
 		// Check that the user is allowed to do the interaction.
 		if (
 				event.getUser().equals(owner) ||
-						(event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole()))
+						event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole())
 		) {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();
@@ -88,6 +94,7 @@ public class HelpChannelInteractionManager {
 	 * thank helpers or cancel the unreserving.
 	 *
 	 * @param event  The button event.
+	 * @param reservationId The help channel's reservation id.
 	 * @param action The data extracted from the button's id.
 	 */
 	public void handleHelpThank(ButtonClickEvent event, String reservationId, String action) {

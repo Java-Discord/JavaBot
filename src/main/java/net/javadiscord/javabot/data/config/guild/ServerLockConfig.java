@@ -4,6 +4,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
+/**
+ * Configuration for the guild's serverlock system.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ServerLockConfig extends GuildConfigItem {

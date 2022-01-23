@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Utility class for caching images.
+ */
 @Slf4j
 public class ImageCacheUtils {
 

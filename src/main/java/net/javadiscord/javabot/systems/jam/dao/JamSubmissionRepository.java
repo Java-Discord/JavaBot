@@ -12,6 +12,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the JAM_SUBMISSION SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamSubmissionRepository {
 	private final Connection con;

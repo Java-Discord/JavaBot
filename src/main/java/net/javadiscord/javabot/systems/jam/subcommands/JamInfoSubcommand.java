@@ -22,12 +22,7 @@ import java.time.format.DateTimeFormatter;
 public class JamInfoSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
-		Jam jam;
-		try {
-			jam = this.fetchJam(event);
-		} catch (RuntimeException t) {
-			return Responses.error(event, t.getMessage());
-		}
+		Jam jam = this.fetchJam(event);
 		if (jam == null) {
 			return Responses.warning(event, "No Jam was found.");
 		}

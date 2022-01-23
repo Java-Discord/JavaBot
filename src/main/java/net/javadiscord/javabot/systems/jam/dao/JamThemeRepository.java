@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the JAM_THEME SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamThemeRepository {
 	private final Connection con;

@@ -82,7 +82,7 @@ See https://checkstyle.org/ for more information.
             <property name="ignoreComments" value="true"/>
         </module>
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="75"/>
         </module>
         <module name="MissingOverride"/>
         <module name="EmptyForInitializerPad"/>

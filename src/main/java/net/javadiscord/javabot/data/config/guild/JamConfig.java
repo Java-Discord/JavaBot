@@ -9,6 +9,9 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 
 import java.awt.*;
 
+/**
+ * Configuration for the guild's java jam.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class JamConfig extends GuildConfigItem {

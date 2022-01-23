@@ -15,8 +15,17 @@ import net.javadiscord.javabot.util.Misc;
 import java.sql.SQLException;
 import java.time.Instant;
 
-public class IncrementSubCommand implements SlashCommandHandler {
+/**
+ * Subcommand that allows staff-members to increment the QOTW-Account of any user.
+ */
+public class IncrementSubcommand implements SlashCommandHandler {
 
+	/**
+	 * Increments the QOTW-Points of the given member by 1.
+	 * @param member The member whose points should be incremented.
+	 * @param quiet If true, don't send a message in the channel.
+	 * @return The new amount of QOTW-Points.
+	 */
 	public long correct(Member member, boolean quiet) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QuestionPointsRepository(con);

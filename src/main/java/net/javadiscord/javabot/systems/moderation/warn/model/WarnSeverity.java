@@ -1,5 +1,8 @@
 package net.javadiscord.javabot.systems.moderation.warn.model;
 
+/**
+ * Enum class that represents the different Warn Severity's.
+ */
 public enum WarnSeverity {
 	/**
 	 * Low severity is intended for small violations.
@@ -52,6 +55,7 @@ public enum WarnSeverity {
 
 	/**
 	 * Gets the weight based on the severity.
+	 * @return The severity's weight.
 	 */
 	public int getWeight() {
 		return this.weight;

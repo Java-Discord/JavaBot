@@ -5,6 +5,9 @@ import net.javadiscord.javabot.systems.jam.model.Jam;
 
 import java.sql.*;
 
+/**
+ * Dao class that represents the JAM SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamRepository {
 	private final Connection con;

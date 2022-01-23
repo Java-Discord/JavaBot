@@ -6,6 +6,9 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
+/**
+ * Command that allows staff-members to unban users from the current guild by their id.
+ */
 public class UnbanCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {

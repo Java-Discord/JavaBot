@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Simple data class that represents a single JavaJam.
+ */
 @Data
 @NoArgsConstructor
 public class Jam {
@@ -23,6 +26,7 @@ public class Jam {
 	private String currentPhase;
 
 	/**
+	 * Checks if submissions for this JavaJam are allowed.
 	 * @return True if the jam currently allows submissions. This is only the
 	 * case during the {@link JamPhase#SUBMISSION} phase.
 	 */

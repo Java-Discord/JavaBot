@@ -6,6 +6,9 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 
 import java.awt.*;
 
+/**
+ * Configuration for the bot's slash commands.
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class SlashCommandConfig extends GuildConfigItem {

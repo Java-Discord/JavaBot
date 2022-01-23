@@ -9,6 +9,9 @@ import net.javadiscord.javabot.systems.help.HelpChannelManager;
 
 import java.sql.SQLException;
 
+/**
+ * Listens for the {@link GuildMemberRemoveEvent}.
+ */
 public class UserLeaveListener extends ListenerAdapter {
 
 	@Override

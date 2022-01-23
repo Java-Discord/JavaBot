@@ -7,9 +7,12 @@ import net.javadiscord.javabot.systems.jam.subcommands.JamSubmitSubcommand;
 import java.util.Map;
 
 /**
- * Main command handler for Jam commands.
+ * Handler class for all Jam commands.
  */
 public class JamCommandHandler extends DelegatingCommandHandler {
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
+	 */
 	public JamCommandHandler() {
 		super(Map.of(
 				"info", new JamInfoSubcommand(),

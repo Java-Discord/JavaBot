@@ -32,6 +32,12 @@ public class HelpChannelUpdater implements Runnable {
 	private final HelpChannelManager channelManager;
 	private final List<ChannelSemanticCheck> semanticChecks;
 
+	/**
+	 * The Constructor of the class.
+	 * @param jda The {@link JDA} instance.
+	 * @param config The bot's {@link HelpConfig}.
+	 * @param semanticChecks A list with all {@link ChannelSemanticCheck}s.
+	 */
 	public HelpChannelUpdater(JDA jda, HelpConfig config, List<ChannelSemanticCheck> semanticChecks) {
 		this.jda = jda;
 		this.config = config;

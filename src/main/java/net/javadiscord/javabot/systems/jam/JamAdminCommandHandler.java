@@ -5,7 +5,13 @@ import net.javadiscord.javabot.systems.jam.subcommands.admin.*;
 
 import java.util.Map;
 
+/**
+ * Handler class for all jam-admin commands.
+ */
 public class JamAdminCommandHandler extends DelegatingCommandHandler {
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
+	 */
 	public JamAdminCommandHandler() {
 		super(Map.of(
 				"plan-new-jam", new PlanNewJamSubcommand(),

@@ -10,6 +10,9 @@ import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Utility class for generating images.
+ */
 @Slf4j
 public abstract class ImageGenerationUtils {
 

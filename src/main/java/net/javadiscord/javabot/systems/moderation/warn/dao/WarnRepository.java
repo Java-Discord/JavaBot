@@ -118,6 +118,7 @@ public class WarnRepository {
 	 * Reads the given {@link ResultSet} and constructs a new {@link Warn} object.
 	 *
 	 * @param rs The ResultSet
+	 * @return The {@link Warn} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	private Warn read(ResultSet rs) throws SQLException {

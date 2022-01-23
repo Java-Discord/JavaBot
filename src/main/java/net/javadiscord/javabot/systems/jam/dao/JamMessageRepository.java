@@ -8,6 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Dao class that represents the JAM_MESSAGE_ID SQL Table.
+ */
 @RequiredArgsConstructor
 public class JamMessageRepository {
 	private final Connection con;

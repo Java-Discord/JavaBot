@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+/**
+ * Command that allows users to see all their active warns.
+ */
 public class WarnsCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
