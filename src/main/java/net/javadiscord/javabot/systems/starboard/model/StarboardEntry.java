@@ -2,6 +2,9 @@ package net.javadiscord.javabot.systems.starboard.model;
 
 import lombok.Data;
 
+/**
+ * Simple data class that represents a single Starboard Entry.
+ */
 @Data
 public class StarboardEntry {
 	private long originalMessageId;

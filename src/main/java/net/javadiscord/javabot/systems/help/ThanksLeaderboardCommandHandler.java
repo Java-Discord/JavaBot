@@ -16,43 +16,48 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Command that generates a leaderboard based on the help channel thanks count.
+ */
 public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
+		var collector = Collectors.joining("\n");
+		var format = "**%d** %s";
 		Bot.asyncPool.submit(() -> {
 			var totalHelpers = getCounts("""
 					SELECT COUNT(id), helper_id
 					FROM help_channel_thanks
 					GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
-					.collect(Collectors.joining("\n"));
+					.map(p -> String.format(format, p.second(), p.first().getUser().getAsMention()))
+					.collect(collector);
 			var helpersThisWeek = getCounts("""
 					SELECT COUNT(id), helper_id
 					FROM help_channel_thanks
 					WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
 					GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
-					.collect(Collectors.joining("\n"));
+					.map(p -> String.format(format, p.second(), p.first().getUser().getAsMention()))
+					.collect(collector);
 			var totalHelped = getCounts("""
 					SELECT COUNT(id) AS count, user_id
 					FROM help_channel_thanks
 					GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
-					.collect(Collectors.joining("\n"));
+					.map(p -> String.format(format, p.second(), p.first().getUser().getAsMention()))
+					.collect(collector);
 			var helpedThisWeek = getCounts("""
 					SELECT COUNT(id) AS count, user_id
 					FROM help_channel_thanks
 					WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
 					GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
-					.map(p -> String.format("**%d** %s", p.second(), p.first().getUser().getAsMention()))
-					.collect(Collectors.joining("\n"));
+					.map(p -> String.format(format, p.second(), p.first().getUser().getAsMention()))
+					.collect(collector);
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle("Thanks Leaderboard")
-					.setColor(0x2F3136)
+					.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
 					.addField("Most Thanked This Week", helpersThisWeek, false)
 					.addField("Most Thanked All Time", totalHelpers, false)
 					.addField("Most Thankful This Week", helpedThisWeek, false)

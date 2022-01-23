@@ -9,6 +9,9 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 
 import java.sql.SQLException;
 
+/**
+ * Subcommand that allows staff-members to edit the QOTW-Point amount of any user.
+ */
 public class SetSubCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {

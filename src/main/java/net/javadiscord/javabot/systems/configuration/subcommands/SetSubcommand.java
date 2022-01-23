@@ -7,6 +7,9 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
 
+/**
+ * Subcommand that allows staff-members to edit the bot's configuration.
+ */
 public class SetSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {

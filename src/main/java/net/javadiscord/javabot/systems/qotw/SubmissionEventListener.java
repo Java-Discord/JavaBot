@@ -5,6 +5,9 @@ import net.dv8tion.jda.api.events.thread.member.ThreadMemberLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Listens for various events that may affect QOTW Submission threads.
+ */
 @Slf4j
 public class SubmissionEventListener extends ListenerAdapter {
 	@Override

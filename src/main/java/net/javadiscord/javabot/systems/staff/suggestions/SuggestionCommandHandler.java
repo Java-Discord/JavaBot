@@ -6,10 +6,12 @@ import net.javadiscord.javabot.systems.staff.suggestions.subcommands.ClearSubcom
 import net.javadiscord.javabot.systems.staff.suggestions.subcommands.DeclineSubcommand;
 
 /**
- * Command to modify the state of suggestions.
+ * Handler class for all suggestion related commands.
  */
 public class SuggestionCommandHandler extends DelegatingCommandHandler {
-
+	/**
+	 * Adds all subcommands {@link DelegatingCommandHandler}.
+	 */
 	public SuggestionCommandHandler() {
 		addSubcommand("accept", new AcceptSubcommand());
 		addSubcommand("decline", new DeclineSubcommand());

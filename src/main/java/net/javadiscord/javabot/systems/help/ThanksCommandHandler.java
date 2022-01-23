@@ -29,8 +29,8 @@ public class ThanksCommandHandler implements SlashCommandHandler {
 				.setTitle("Thank you, " + user.getAsTag())
 				.setThumbnail(user.getAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
-				.addField("Total Times Thanked", "**" + totalThanks + "**", false)
-				.addField("Times Thanked This Week", "**" + weekThanks + "**", false);
+				.addField("Total Times Thanked", String.format("**%s**", totalThanks), false)
+				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), false);
 		return event.replyEmbeds(embed.build());
 	}
 }

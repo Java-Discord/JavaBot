@@ -7,7 +7,10 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
-public class RemoveTimeoutSubCommand implements SlashCommandHandler {
+/**
+ * Subcommand that allows staff-members to manually remove a timeout.
+ */
+public class RemoveTimeoutSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var userOption = event.getOption("user");

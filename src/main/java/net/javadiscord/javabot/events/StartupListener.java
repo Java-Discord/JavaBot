@@ -16,9 +16,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Listens for the {@link ReadyEvent}.
+ */
 @Slf4j
 public class StartupListener extends ListenerAdapter {
 
+	/**
+	 * The default guild, that is chosen upon startup based on the member count.
+	 */
 	public static Guild defaultGuild;
 
 	@Override

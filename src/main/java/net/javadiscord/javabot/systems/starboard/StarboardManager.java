@@ -16,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Handles & manages all starboard interactions.
+ */
 @Slf4j
 public class StarboardManager extends ListenerAdapter {
 	@Override
@@ -149,7 +152,7 @@ public class StarboardManager extends ListenerAdapter {
 								log.error("Could not remove Message from Starboard");
 							}
 						} catch (SQLException e) {
-							log.error("Could not remove Message from Starboard", e);
+							e.printStackTrace();
 						}
 					} else {
 						var starEmote = config.getEmotes().get(0);
@@ -177,7 +180,7 @@ public class StarboardManager extends ListenerAdapter {
 		if (!channel.equals(config.getStarboardChannel())) {
 			config.getStarboardChannel().retrieveMessageById(entry.getStarboardMessageId()).queue(
 					starboardMessage -> starboardMessage.delete().queue(),
-					e -> log.error("Could not remove Message from Starboard", e)
+					Throwable::printStackTrace
 			);
 		}
 		repo.delete(messageId);
@@ -185,6 +188,10 @@ public class StarboardManager extends ListenerAdapter {
 		return true;
 	}
 
+	/**
+	 * Updates all Starboard Entries in the current guild.
+	 * @param guild The current guild.
+	 */
 	public void updateAllStarboardEntries(Guild guild) {
 		log.info("Updating all Starboard Entries");
 		try (var con = Bot.dataSource.getConnection()) {

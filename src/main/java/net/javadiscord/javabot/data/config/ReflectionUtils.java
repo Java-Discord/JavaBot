@@ -11,9 +11,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Utility class for resolving JSON files.
+ */
 @Slf4j
 public class ReflectionUtils {
 	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
+
+	private ReflectionUtils() {}
 
 	static {
 		propertyTypeParsers.put(Integer.class, Integer::parseInt);

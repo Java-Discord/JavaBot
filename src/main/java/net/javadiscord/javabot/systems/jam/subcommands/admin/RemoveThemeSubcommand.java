@@ -14,6 +14,9 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Subcommand that allows jam-admins to manually remove themes.
+ */
 public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 	@Override
 	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {

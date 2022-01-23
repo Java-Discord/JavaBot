@@ -13,7 +13,15 @@ import net.javadiscord.javabot.systems.qotw.subcommands.submission.DeleteSubcomm
 
 import java.util.Map;
 
+/**
+ * Handler class for all QOTW Commands.
+ */
 public class QOTWCommandHandler extends DelegatingCommandHandler {
+	/**
+	 * Adds all subcommands and subcommand groups
+	 * {@link DelegatingCommandHandler#addSubcommand}
+	 * {@link DelegatingCommandHandler#addSubcommandGroup}.
+	 */
 	public QOTWCommandHandler() {
 		this.addSubcommandGroup(
 				"questions-queue", new DelegatingCommandHandler(Map.of(

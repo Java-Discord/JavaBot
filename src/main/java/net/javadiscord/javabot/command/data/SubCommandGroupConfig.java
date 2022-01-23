@@ -14,6 +14,11 @@ public class SubCommandGroupConfig {
 	private String description;
 	private SubCommandConfig[] subCommands;
 
+	/**
+	 * Converts the given {@link SubcommandGroupData} into a {@link SubCommandGroupConfig} object.
+	 * @param data The {@link SubcommandGroupData}.
+	 * @return The {@link SubCommandGroupConfig} object.
+	 */
 	public static SubCommandGroupConfig fromData(SubcommandGroupData data) {
 		SubCommandGroupConfig c = new SubCommandGroupConfig();
 		c.setName(data.getName());
@@ -22,6 +27,10 @@ public class SubCommandGroupConfig {
 		return c;
 	}
 
+	/**
+	 * Converts the current {@link SubCommandGroupConfig} into a {@link SubcommandGroupData} object.
+	 * @return The {@link SubcommandGroupData} object.
+	 */
 	public SubcommandGroupData toData() {
 		SubcommandGroupData data = new SubcommandGroupData(this.name, this.description);
 		if (this.subCommands != null) {

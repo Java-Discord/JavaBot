@@ -5,6 +5,9 @@ import lombok.Data;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 
+/**
+ * Simple data class that represents a single Transaction.
+ */
 @Data
 public class Transaction {
 	private long id;

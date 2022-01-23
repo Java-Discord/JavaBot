@@ -9,7 +9,10 @@ import net.javadiscord.javabot.systems.expert_questions.dao.ExpertQuestionReposi
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class RemoveSubCommand extends ExpertSubcommand {
+/**
+ * Subcommand that allows staff-members to remove expert questions.
+ */
+public class RemoveSubcommand extends ExpertSubcommand {
 	@Override
 	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException {
 		var idOption = event.getOption("id");

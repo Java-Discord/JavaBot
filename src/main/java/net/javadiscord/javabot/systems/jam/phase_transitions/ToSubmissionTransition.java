@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Moves the jam from the theme voting phase to the submission phase, by doing
- * the following:
+ * the following.
  * <ol>
  *     <li>Counts the number of votes for each theme.</li>
  *     <li>Determine the winning theme(s).</li>

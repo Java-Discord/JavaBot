@@ -8,11 +8,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dao class that represents the STARBOARD SQL Table.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class StarboardRepository {
 	private final Connection con;
 
+	/**
+	 * Insertes a single {@link StarboardEntry}.
+	 * @param entry The {@link StarboardEntry}.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void insert(StarboardEntry entry) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("INSERT INTO starboard (original_message_id, guild_id, channel_id, author_id, starboard_message_id) VALUES (?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
@@ -28,6 +36,11 @@ public class StarboardRepository {
 		log.info("Inserted new Starboard-Entry: {}", entry);
 	}
 
+	/**
+	 * Deletes a single {@link StarboardEntry} based on the message id.
+	 * @param messageId The entries' message id.
+	 * @throws SQLException If an error occurs.
+	 */
 	public void delete(long messageId) throws SQLException {
 		try (var stmt = con.prepareStatement("""
 				DELETE FROM starboard
@@ -37,6 +50,12 @@ public class StarboardRepository {
 		}
 	}
 
+	/**
+	 * Gets a {@link StarboardEntry} by its message id.
+	 * @param messageId The entries' message id.
+	 * @return The {@link StarboardEntry} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public StarboardEntry getEntryByMessageId(long messageId) throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE original_message_id = ?");
 		s.setLong(1, messageId);
@@ -47,6 +66,12 @@ public class StarboardRepository {
 		return null;
 	}
 
+	/**
+	 * Gets a {@link StarboardEntry} by its starboard message id.
+	 * @param starboardMessageId The entries' starboard message id.
+	 * @return The {@link StarboardEntry} object.
+	 * @throws SQLException If an error occurs.
+	 */
 	public StarboardEntry getEntryByStarboardMessageId(long starboardMessageId) throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE starboard_message_id = ?");
 		s.setLong(1, starboardMessageId);
@@ -57,6 +82,12 @@ public class StarboardRepository {
 		return null;
 	}
 
+	/**
+	 * Retrieves all {@link StarboardEntry}s by the given guild.
+	 * @param guildId The current guild's id.
+	 * @return A {@link List} containing all {@link StarboardEntry}s.
+	 * @throws SQLException If an error occurs.
+	 */
 	public List<StarboardEntry> getAllStarboardEntries(long guildId) throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE guild_id = ?");
 		s.setLong(1, guildId);

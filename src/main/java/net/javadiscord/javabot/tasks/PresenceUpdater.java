@@ -70,15 +70,17 @@ public class PresenceUpdater extends ListenerAdapter {
 	}
 
 	/**
+	 * A list of standard Activities.
 	 * @return A pre-built implementation of the {@link PresenceUpdater} that
 	 * has all the necessary properties defined to reasonable defaults.
 	 */
 	public static PresenceUpdater standardActivities() {
+		var format = "%s | %s members";
 		return new PresenceUpdater(List.of(
-				jda -> Activity.watching(Constants.WEBSITE_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members"),
-				jda -> Activity.watching(Constants.JAM_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members"),
-				jda -> Activity.watching(Constants.QOTW_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members"),
-				jda -> Activity.watching(Constants.GITHUB_LINK + " | " + StartupListener.defaultGuild.getMemberCount() + " members")
+				jda -> Activity.watching(String.format(format, Constants.WEBSITE_LINK, StartupListener.defaultGuild.getMemberCount())),
+				jda -> Activity.watching(String.format(format, Constants.JAM_LINK, StartupListener.defaultGuild.getMemberCount())),
+				jda -> Activity.watching(String.format(format, Constants.QOTW_LINK, StartupListener.defaultGuild.getMemberCount())),
+				jda -> Activity.watching(String.format(format, Constants.GITHUB_LINK, StartupListener.defaultGuild.getMemberCount()))
 		), 35, TimeUnit.SECONDS);
 	}
 

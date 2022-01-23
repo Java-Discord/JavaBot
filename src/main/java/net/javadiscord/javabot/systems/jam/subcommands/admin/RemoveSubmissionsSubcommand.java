@@ -11,6 +11,9 @@ import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
 
 import java.sql.Connection;
 
+/**
+ * Subcommand that allows jam-admins to manually remove submissions.
+ */
 public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand {
 	@Override
 	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws Exception {

@@ -11,6 +11,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -20,13 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-
+/**
+ * Command that allows members to search the internet using the bing api.
+ */
 public class SearchCommand implements SlashCommandHandler {
 
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
 
-	private SearchResults searchWeb(String searchQuery) throws Exception {
+	private SearchResults searchWeb(String searchQuery) throws IOException {
 		// Construct the URL.
 		URL url = new URL(HOST + PATH + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=" + "en-US" + "&safeSearch=Strict");
 
@@ -91,12 +94,17 @@ public class SearchCommand implements SlashCommandHandler {
 			}
 
 			embed.setDescription(resultString);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			return Responses.info(event, "Not Found", "There were no results for your search. This might be due to safe-search or because your search was too complex. Please try again.");
 		}
 		return event.replyEmbeds(embed.build());
 	}
 
-	public record SearchResults(HashMap<String, String> relevantHeaders, String jsonResponse) {
+	/**
+	 * Simple record class, that represents the search results.
+	 * @param relevantHeaders The most relevant headers.
+	 * @param jsonResponse The HTTP Response, formatted as a JSON.
+	 */
+	public record SearchResults(Map<String, String> relevantHeaders, String jsonResponse) {
 	}
 }

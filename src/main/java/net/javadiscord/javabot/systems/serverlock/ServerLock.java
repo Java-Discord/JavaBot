@@ -41,6 +41,10 @@ public class ServerLock extends ListenerAdapter {
 
 	private final Map<Long, Deque<Member>> guildMemberQueues;
 
+	/**
+	 * Contructor that initializes and handles the serverlock.
+	 * @param jda The {@link JDA} instance.
+	 */
 	public ServerLock(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
@@ -65,8 +69,9 @@ public class ServerLock extends ListenerAdapter {
 	 * The embed that is sent when a user tries to join while the server is locked.
 	 *
 	 * @param guild The current guild.
+	 * @return The {@link MessageEmbed} object.
 	 */
-	public static MessageEmbed lockEmbed(Guild guild) {
+	public static MessageEmbed buildServerLockEmbed(Guild guild) {
 		return new EmbedBuilder()
 				.setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
 				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
@@ -179,7 +184,7 @@ public class ServerLock extends ListenerAdapter {
 	 */
 	private void rejectUserDuringRaid(GuildMemberJoinEvent event) {
 		event.getUser().openPrivateChannel().queue(c -> {
-			c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(event.getGuild())).queue(msg -> {
+			c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg -> {
 				event.getMember().kick().queue();
 			});
 		});
@@ -198,12 +203,10 @@ public class ServerLock extends ListenerAdapter {
 	private void lockServer(Guild guild, Collection<Member> potentialRaiders) {
 		for (var member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
-				c.sendMessage("https://discord.gg/java").setEmbeds(lockEmbed(guild)).queue(msg -> {
-					try {
-						member.kick().queue();
-					} catch (Exception e) {
-						Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), e.getMessage()));
-					}
+				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
+					member.kick().queue(
+							success -> {},
+							error -> Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage())));
 				});
 			});
 		}

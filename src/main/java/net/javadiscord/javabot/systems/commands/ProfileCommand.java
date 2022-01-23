@@ -17,6 +17,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 
+/**
+ * Command that allows members to display info about themselves or other users.
+ */
 public class ProfileCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
