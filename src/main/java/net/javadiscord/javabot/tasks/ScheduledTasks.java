@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.tasks;
 
 import net.dv8tion.jda.api.JDA;
+import net.javadiscord.javabot.systems.qotw.QOTWCloseSubmissionsJob;
 import net.javadiscord.javabot.systems.qotw.QOTWJob;
 import net.javadiscord.javabot.systems.qotw.QOTWReminderJob;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
@@ -50,6 +51,9 @@ public class ScheduledTasks {
 	private static void scheduleAllTasks(Scheduler scheduler, JDA jda) throws SchedulerException {
 		// Schedule posting a new QOTW every Monday at 9am.
 		scheduleApiJob(scheduler, jda, QOTWJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.MONDAY, 9, 0));
+
+		// Schedule closing submissions every Sunday at 9pm.
+		scheduleApiJob(scheduler, jda, QOTWCloseSubmissionsJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.SUNDAY, 23, 0));
 
 		// Schedule checking to make sure there's a new QOTW question in the queue.
 		// We schedule this to run daily at 9am, just so we're always aware when the QOTW queue goes empty.
