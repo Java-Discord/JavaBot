@@ -53,7 +53,7 @@ public class ScheduledTasks {
 		scheduleApiJob(scheduler, jda, QOTWJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.MONDAY, 9, 0));
 
 		// Schedule closing submissions every Sunday at 9pm.
-		scheduleApiJob(scheduler, jda, QOTWCloseSubmissionsJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.SUNDAY, 23, 0));
+		scheduleApiJob(scheduler, jda, QOTWCloseSubmissionsJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.SUNDAY, 21, 0));
 
 		// Schedule checking to make sure there's a new QOTW question in the queue.
 		// We schedule this to run daily at 9am, just so we're always aware when the QOTW queue goes empty.
