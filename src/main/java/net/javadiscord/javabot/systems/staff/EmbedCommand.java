@@ -14,6 +14,7 @@ import java.awt.*;
 import java.util.function.UnaryOperator;
 
 // TODO: Refactor embed interface completely.
+
 /**
  * Command that allows staff-members to create embed messages.
  */

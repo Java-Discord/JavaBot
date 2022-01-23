@@ -48,6 +48,7 @@ public class ToCompletionTransition implements JamPhaseTransition {
 
 	/**
 	 * Determines the JavaJam Winner by their votecount.
+	 *
 	 * @param voteCounts A Map containing the {@link JamSubmission} and an Integer that represents the vote counts.
 	 * @return The JavaJam winners.
 	 */
@@ -61,8 +62,9 @@ public class ToCompletionTransition implements JamPhaseTransition {
 
 	/**
 	 * Counts JavaJam submission votes.
-	 * @param submissionVotes A Map containing the {@link JamSubmission} and a {@link List} that contains all message id's.
-	 * @param con The datasource's connection.
+	 *
+	 * @param submissionVotes   A Map containing the {@link JamSubmission} and a {@link List} that contains all message id's.
+	 * @param con               The datasource's connection.
 	 * @param messageRepository The {@link JamMessageRepository}.
 	 * @return A Map containing the {@link JamSubmission} and the vote count as an Integer.
 	 * @throws SQLException If an error occurs.
@@ -85,7 +87,8 @@ public class ToCompletionTransition implements JamPhaseTransition {
 
 	/**
 	 * Retrieves the submission's message ids.
-	 * @param submissions A {@link List} with all Submissions.
+	 *
+	 * @param submissions       A {@link List} with all Submissions.
 	 * @param messageRepository The {@link JamMessageRepository}.
 	 * @return A Map contains the {@link JamSubmission} and its message id.
 	 * @throws SQLException If an error occurs.

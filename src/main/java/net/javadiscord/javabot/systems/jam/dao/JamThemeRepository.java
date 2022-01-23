@@ -17,7 +17,8 @@ public class JamThemeRepository {
 
 	/**
 	 * Inserts a single {@link JamTheme} for the current {@link Jam}.
-	 * @param jam The current {@link Jam}.
+	 *
+	 * @param jam   The current {@link Jam}.
 	 * @param theme The {@link JamTheme}.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -71,6 +72,7 @@ public class JamThemeRepository {
 
 	/**
 	 * Removes a single {@link JamTheme} from the current {@link Jam}.
+	 *
 	 * @param theme The {@link JamTheme}.
 	 * @throws SQLException If an error occurs.
 	 */

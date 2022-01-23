@@ -89,6 +89,7 @@ public class QuestionPointsRepository {
 
 	/**
 	 * Gets all {@link QOTWAccount} and sorts them by their points.
+	 *
 	 * @return A {@link List} that contains all {@link QOTWAccount}s sorted by their points.
 	 * @throws SQLException If an error occurs.
 	 */

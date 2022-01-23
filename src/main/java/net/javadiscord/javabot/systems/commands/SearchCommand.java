@@ -102,8 +102,9 @@ public class SearchCommand implements SlashCommandHandler {
 
 	/**
 	 * Simple record class, that represents the search results.
+	 *
 	 * @param relevantHeaders The most relevant headers.
-	 * @param jsonResponse The HTTP Response, formatted as a JSON.
+	 * @param jsonResponse    The HTTP Response, formatted as a JSON.
 	 */
 	public record SearchResults(Map<String, String> relevantHeaders, String jsonResponse) {
 	}

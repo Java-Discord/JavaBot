@@ -9,10 +9,12 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class ColorUtils {
 
-	private ColorUtils() {}
+	private ColorUtils() {
+	}
 
 	/**
 	 * Generates a random pastel color.
+	 *
 	 * @return A random pastel color.
 	 */
 	public static Color randomPastel() {

@@ -20,9 +20,9 @@ public class HelpChannelInteractionManager {
 	/**
 	 * Handles button interactions for help channel activity checks.
 	 *
-	 * @param event  The button event.
+	 * @param event         The button event.
 	 * @param reservationId The help channel's reservation id.
-	 * @param action The data extracted from the button id.
+	 * @param action        The data extracted from the button id.
 	 */
 	public void handleHelpChannel(ButtonClickEvent event, String reservationId, String action) {
 		var config = Bot.config.get(event.getGuild()).getHelp();
@@ -93,9 +93,9 @@ public class HelpChannelInteractionManager {
 	 * users when they choose to unreserve their channel, giving them options to
 	 * thank helpers or cancel the unreserving.
 	 *
-	 * @param event  The button event.
+	 * @param event         The button event.
 	 * @param reservationId The help channel's reservation id.
-	 * @param action The data extracted from the button's id.
+	 * @param action        The data extracted from the button's id.
 	 */
 	public void handleHelpThank(ButtonClickEvent event, String reservationId, String action) {
 		var config = Bot.config.get(event.getGuild()).getHelp();

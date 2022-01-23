@@ -27,6 +27,7 @@ public class Jam {
 
 	/**
 	 * Checks if submissions for this JavaJam are allowed.
+	 *
 	 * @return True if the jam currently allows submissions. This is only the
 	 * case during the {@link JamPhase#SUBMISSION} phase.
 	 */

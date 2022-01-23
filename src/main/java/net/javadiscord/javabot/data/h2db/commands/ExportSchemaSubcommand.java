@@ -22,8 +22,8 @@ public class ExportSchemaSubcommand implements SlashCommandHandler {
 		var includeDataOption = event.getOption("include-data");
 		boolean includeData = includeDataOption != null && includeDataOption.getAsBoolean();
 		Bot.asyncPool.submit(() -> {
-			try (var con = Bot.dataSource.getConnection();
-				var stmt = con.createStatement()) {
+			try (var con = Bot.dataSource.getConnection()) {
+				var stmt = con.createStatement();
 				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
 				if (!success) {
 					event.getHook().sendMessage("Exporting the schema was not successful.").queue();

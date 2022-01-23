@@ -36,6 +36,7 @@ public class InteractionListener extends ListenerAdapter {
 	/**
 	 * Some utility methods for interactions.
 	 * + May be useful for Context Menu Interactions.
+	 *
 	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
 	private void handleUtils(ButtonClickEvent event) {

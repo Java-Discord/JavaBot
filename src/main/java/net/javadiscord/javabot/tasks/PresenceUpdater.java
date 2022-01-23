@@ -71,6 +71,7 @@ public class PresenceUpdater extends ListenerAdapter {
 
 	/**
 	 * A list of standard Activities.
+	 *
 	 * @return A pre-built implementation of the {@link PresenceUpdater} that
 	 * has all the necessary properties defined to reasonable defaults.
 	 */

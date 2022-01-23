@@ -55,6 +55,7 @@ public enum WarnSeverity {
 
 	/**
 	 * Gets the weight based on the severity.
+	 *
 	 * @return The severity's weight.
 	 */
 	public int getWeight() {

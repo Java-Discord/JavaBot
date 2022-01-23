@@ -17,6 +17,7 @@ public class TransactionRepository {
 
 	/**
 	 * Inserts a new {@link Transaction} object.
+	 *
 	 * @param t The {@link Transaction} object.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -52,6 +53,7 @@ public class TransactionRepository {
 
 	/**
 	 * Retrieves a transaction based on the id.
+	 *
 	 * @param id The transaction's id.
 	 * @return A {@link Transaction} object.
 	 * @throws SQLException If an error occurs.
@@ -69,8 +71,9 @@ public class TransactionRepository {
 
 	/**
 	 * Retrieves the latest transactions of a user.
+	 *
 	 * @param userId The user's id.
-	 * @param count The count of transactions that should be retrieved.
+	 * @param count  The count of transactions that should be retrieved.
 	 * @return A List with all {@link Transaction}s.
 	 * @throws SQLException If an error occurs.
 	 */

@@ -17,6 +17,7 @@ public class UptimeCommand implements SlashCommandHandler {
 
 	/**
 	 * Calculates the Uptimes and returns a formatted String.
+	 *
 	 * @return The current Uptime as a String.
 	 */
 	public String getUptime() {

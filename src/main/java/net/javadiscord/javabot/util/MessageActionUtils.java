@@ -11,10 +11,12 @@ import java.util.List;
  */
 public class MessageActionUtils {
 
-	private MessageActionUtils() {}
+	private MessageActionUtils() {
+	}
 
 	/**
 	 * Converts a {@link List} of Message {@link Component}s into a List of actions rows.
+	 *
 	 * @param components The {@link List} of {@link Component}s.
 	 * @return A {@link List} of {@link ActionRow}s.
 	 */

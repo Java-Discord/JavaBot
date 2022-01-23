@@ -10,6 +10,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
 // TODO: Refactor embed editing interface completely.
+
 /**
  * Command that allows staff-members to edit embed messages.
  */

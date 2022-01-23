@@ -15,13 +15,15 @@ import java.util.HashMap;
  */
 public class MigrationUtils {
 
-	private MigrationUtils() {}
+	private MigrationUtils() {
+	}
 
 	/**
 	 * Tries to get the Migrations Directories' Path.
+	 *
 	 * @return The Migrations Directories' Path.
 	 * @throws URISyntaxException If an error occurs.
-	 * @throws IOException If an error occurs.
+	 * @throws IOException        If an error occurs.
 	 */
 	public static Path getMigrationsDirectory() throws URISyntaxException, IOException {
 		var resource = MigrationsListSubcommand.class.getResource("/migrations/");

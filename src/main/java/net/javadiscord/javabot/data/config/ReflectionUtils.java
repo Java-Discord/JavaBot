@@ -18,8 +18,6 @@ import java.util.function.Function;
 public class ReflectionUtils {
 	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
 
-	private ReflectionUtils() {}
-
 	static {
 		propertyTypeParsers.put(Integer.class, Integer::parseInt);
 		propertyTypeParsers.put(int.class, Integer::parseInt);
@@ -31,6 +29,9 @@ public class ReflectionUtils {
 		propertyTypeParsers.put(double.class, Double::parseDouble);
 		propertyTypeParsers.put(Boolean.class, Boolean::parseBoolean);
 		propertyTypeParsers.put(String.class, s -> s);
+	}
+
+	private ReflectionUtils() {
 	}
 
 	public static Optional<Pair<Field, Object>> resolveField(String propertyName, Object parent) throws UnknownPropertyException {

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 /**
  * Interface for mapping {@link ResultSet}s.
+ *
  * @param <T> The generic type.
  */
 @FunctionalInterface

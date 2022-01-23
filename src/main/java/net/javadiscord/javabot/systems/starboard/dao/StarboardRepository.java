@@ -18,6 +18,7 @@ public class StarboardRepository {
 
 	/**
 	 * Insertes a single {@link StarboardEntry}.
+	 *
 	 * @param entry The {@link StarboardEntry}.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -38,6 +39,7 @@ public class StarboardRepository {
 
 	/**
 	 * Deletes a single {@link StarboardEntry} based on the message id.
+	 *
 	 * @param messageId The entries' message id.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -52,6 +54,7 @@ public class StarboardRepository {
 
 	/**
 	 * Gets a {@link StarboardEntry} by its message id.
+	 *
 	 * @param messageId The entries' message id.
 	 * @return The {@link StarboardEntry} object.
 	 * @throws SQLException If an error occurs.
@@ -68,6 +71,7 @@ public class StarboardRepository {
 
 	/**
 	 * Gets a {@link StarboardEntry} by its starboard message id.
+	 *
 	 * @param starboardMessageId The entries' starboard message id.
 	 * @return The {@link StarboardEntry} object.
 	 * @throws SQLException If an error occurs.
@@ -84,6 +88,7 @@ public class StarboardRepository {
 
 	/**
 	 * Retrieves all {@link StarboardEntry}s by the given guild.
+	 *
 	 * @param guildId The current guild's id.
 	 * @return A {@link List} containing all {@link StarboardEntry}s.
 	 * @throws SQLException If an error occurs.

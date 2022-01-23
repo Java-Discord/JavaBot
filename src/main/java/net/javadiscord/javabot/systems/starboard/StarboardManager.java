@@ -190,6 +190,7 @@ public class StarboardManager extends ListenerAdapter {
 
 	/**
 	 * Updates all Starboard Entries in the current guild.
+	 *
 	 * @param guild The current guild.
 	 */
 	public void updateAllStarboardEntries(Guild guild) {

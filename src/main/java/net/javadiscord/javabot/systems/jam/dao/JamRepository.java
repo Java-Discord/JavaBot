@@ -14,6 +14,7 @@ public class JamRepository {
 
 	/**
 	 * Insertes a new {@link Jam}.
+	 *
 	 * @param jam The {@link Jam} object.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -47,6 +48,7 @@ public class JamRepository {
 
 	/**
 	 * Updates a single {@link Jam}.
+	 *
 	 * @param jam The updated {@link Jam} object.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -66,6 +68,7 @@ public class JamRepository {
 
 	/**
 	 * Gets a single {@link Jam} based on the given id.
+	 *
 	 * @param id The jam's id.
 	 * @return The {@link Jam} object.
 	 */
@@ -88,6 +91,7 @@ public class JamRepository {
 
 	/**
 	 * Gets the active {@link Jam}.
+	 *
 	 * @param guildId The current guild's id.
 	 * @return The {@link Jam} object.
 	 */
@@ -125,6 +129,7 @@ public class JamRepository {
 
 	/**
 	 * Completes a single {@link Jam}.
+	 *
 	 * @param jam The {@link Jam} object to update.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -139,7 +144,8 @@ public class JamRepository {
 
 	/**
 	 * Updates a single {@link Jam}'s phase.
-	 * @param jam The {@link Jam} object to update.
+	 *
+	 * @param jam           The {@link Jam} object to update.
 	 * @param nextPhaseName The next phase's name.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -154,6 +160,7 @@ public class JamRepository {
 
 	/**
 	 * Cancels a single {@link Jam}.
+	 *
 	 * @param jam The {@link Jam} object to cancel.
 	 * @throws SQLException If an error occurs.
 	 */

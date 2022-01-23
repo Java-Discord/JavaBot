@@ -18,6 +18,7 @@ public class AccountRepository {
 
 	/**
 	 * Inserts a new economy account.
+	 *
 	 * @param account The account that should be inserted.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -36,6 +37,7 @@ public class AccountRepository {
 
 	/**
 	 * Updates a single economy account.
+	 *
 	 * @param account The account that should be updated.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -49,6 +51,7 @@ public class AccountRepository {
 
 	/**
 	 * Gets an economy account by a discord user id.
+	 *
 	 * @param userId The user's id.
 	 * @return An {@link Account} object.
 	 * @throws SQLException If an error occurs.
@@ -73,6 +76,7 @@ public class AccountRepository {
 
 	/**
 	 * Gets a user's account preferences by their user id.
+	 *
 	 * @param userId The user's id.
 	 * @return An {@link AccountPreferences} object.
 	 * @throws SQLException If an error occurs.
@@ -93,6 +97,7 @@ public class AccountRepository {
 
 	/**
 	 * Inserts a new {@link AccountPreferences} object.
+	 *
 	 * @param prefs The {@link AccountPreferences} to insert.
 	 * @throws SQLException If an error occurs.
 	 */

@@ -16,6 +16,7 @@ public class ExpertQuestionRepository {
 
 	/**
 	 * Inserts a single {@link ExpertQuestion}.
+	 *
 	 * @param question The {@link ExpertQuestion} object to insert.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -37,8 +38,9 @@ public class ExpertQuestionRepository {
 
 	/**
 	 * Removes a single {@link ExpertQuestion}.
+	 *
 	 * @param guildId The current guild's id.
-	 * @param id The question's id.
+	 * @param id      The question's id.
 	 * @return Whether the question was removed or not.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -53,6 +55,7 @@ public class ExpertQuestionRepository {
 
 	/**
 	 * Gets all expert questions for the given guild.
+	 *
 	 * @param guildId The guild's id.
 	 * @return A {@link List} with all Expert Questions.
 	 * @throws SQLException If an error occurs.

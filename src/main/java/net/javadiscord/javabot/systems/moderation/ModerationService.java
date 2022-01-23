@@ -126,6 +126,7 @@ public class ModerationService {
 
 	/**
 	 * Gets all warns based on the user id.
+	 *
 	 * @param userId The user's id.
 	 * @return A {@link List} with all warns.
 	 */

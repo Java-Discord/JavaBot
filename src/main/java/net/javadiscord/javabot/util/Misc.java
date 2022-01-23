@@ -13,7 +13,8 @@ import java.util.List;
 @Deprecated
 public class Misc {
 
-	private Misc() {}
+	private Misc() {
+	}
 
 	public static void sendToLog(Guild guild, MessageEmbed embed) {
 		Bot.config.get(guild).getModeration().getLogChannel().sendMessageEmbeds(embed).queue();
@@ -25,9 +26,10 @@ public class Misc {
 
 	/**
 	 * Sends a message to the guild's log channel.
-	 * @param guild The current guild.
+	 *
+	 * @param guild      The current guild.
 	 * @param formatText The unformatted text.
-	 * @param args The arguments.
+	 * @param args       The arguments.
 	 */
 	public static void sendToLogFormat(Guild guild, String formatText, Object... args) {
 		Bot.config.get(guild).getModeration().getLogChannel().sendMessage(String.format(
@@ -38,8 +40,9 @@ public class Misc {
 
 	/**
 	 * Gets all guilds and formats them nicely.
-	 * @param guildList A {@link List} with all guilds.
-	 * @param showID Whether the guild's id should be appended every time.
+	 *
+	 * @param guildList    A {@link List} with all guilds.
+	 * @param showID       Whether the guild's id should be appended every time.
 	 * @param showMemCount Whether the guild's membercount should be appended every time.
 	 * @return The formatted String.
 	 */
@@ -63,7 +66,7 @@ public class Misc {
 	/**
 	 * Utility method that replaces text variables.
 	 *
-	 * @param guild The current guild.
+	 * @param guild  The current guild.
 	 * @param string The string that should be replaced.
 	 * @return The formatted String.
 	 */

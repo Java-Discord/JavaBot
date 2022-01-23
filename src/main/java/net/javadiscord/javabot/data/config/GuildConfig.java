@@ -36,8 +36,9 @@ public class GuildConfig {
 
 	/**
 	 * Constructor that initializes all Config classes.
+	 *
 	 * @param guild The current guild.
-	 * @param file The config file.
+	 * @param file  The config file.
 	 */
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;

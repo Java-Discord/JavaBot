@@ -21,6 +21,7 @@ public class JamSubmissionRepository {
 
 	/**
 	 * Gets all submission based on the given {@link Jam}.
+	 *
 	 * @param jam The {@link Jam}.
 	 * @return A {@link List} with all {@link JamSubmission}s.
 	 * @throws SQLException If an error occurs.
@@ -39,8 +40,9 @@ public class JamSubmissionRepository {
 
 	/**
 	 * Gets all submission based on the given {@link Jam} and user id.
-	 * @param jam The {@link Jam}.
-	 * @param page The page.
+	 *
+	 * @param jam    The {@link Jam}.
+	 * @param page   The page.
 	 * @param userId The user's id.
 	 * @return A {@link List} with all {@link JamSubmission}s.
 	 * @throws SQLException If an error occurs.
@@ -68,7 +70,8 @@ public class JamSubmissionRepository {
 
 	/**
 	 * Gets a single submission based on the given submission id.
-	 * @param jam The {@link Jam}.
+	 *
+	 * @param jam          The {@link Jam}.
 	 * @param submissionId The submission's id.
 	 * @return The {@link JamSubmission}.
 	 * @throws SQLException If an error occurs.
@@ -88,6 +91,7 @@ public class JamSubmissionRepository {
 
 	/**
 	 * Inserts a single {@link JamSubmission}.
+	 *
 	 * @param submission The {@link JamSubmission} object to insert.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -104,7 +108,8 @@ public class JamSubmissionRepository {
 
 	/**
 	 * Removes a single {@link JamSubmission}.
-	 * @param jam The current {@link Jam}.
+	 *
+	 * @param jam          The current {@link Jam}.
 	 * @param submissionId The submission's id.
 	 * @return the amount of rows that got updated during this process.
 	 * @throws SQLException If an error occurred.
@@ -120,7 +125,8 @@ public class JamSubmissionRepository {
 
 	/**
 	 * Removes all {@link JamSubmission}s of the given user.
-	 * @param jam The current {@link Jam}.
+	 *
+	 * @param jam    The current {@link Jam}.
 	 * @param userId The user's id.
 	 * @return the amount of rows that got updated during this process.
 	 * @throws SQLException If an error occurred.

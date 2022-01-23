@@ -22,8 +22,9 @@ public class IncrementSubcommand implements SlashCommandHandler {
 
 	/**
 	 * Increments the QOTW-Points of the given member by 1.
+	 *
 	 * @param member The member whose points should be incremented.
-	 * @param quiet If true, don't send a message in the channel.
+	 * @param quiet  If true, don't send a message in the channel.
 	 * @return The new amount of QOTW-Points.
 	 */
 	public long correct(Member member, boolean quiet) {

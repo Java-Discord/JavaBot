@@ -17,8 +17,9 @@ public class JamMessageRepository {
 
 	/**
 	 * Inserts a new message id into the database table.
-	 * @param jam The current {@link Jam}.
-	 * @param messageId The message's id.
+	 *
+	 * @param jam         The current {@link Jam}.
+	 * @param messageId   The message's id.
 	 * @param messageType The message's type.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -33,7 +34,8 @@ public class JamMessageRepository {
 
 	/**
 	 * Gets a message based on the current {@link Jam} and the message's type.
-	 * @param jam The current {@link Jam}.
+	 *
+	 * @param jam         The current {@link Jam}.
 	 * @param messageType The message's type.
 	 * @return The message's id as a Long.
 	 * @throws SQLException If an error occurs.
@@ -51,7 +53,8 @@ public class JamMessageRepository {
 
 	/**
 	 * Removes a message based on the current {@link Jam} and the message's type.
-	 * @param jam The current {@link Jam}.
+	 *
+	 * @param jam         The current {@link Jam}.
 	 * @param messageType The message's type.
 	 * @throws SQLException If an error occurs.
 	 */

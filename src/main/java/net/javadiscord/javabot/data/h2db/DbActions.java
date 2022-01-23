@@ -19,6 +19,7 @@ public class DbActions {
 
 	/**
 	 * Consumes an action based on the given {@link ConnectionConsumer}.
+	 *
 	 * @param consumer The {@link ConnectionConsumer}.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -30,8 +31,9 @@ public class DbActions {
 
 	/**
 	 * Maps an action based on the given {@link ConnectionFunction}.
+	 *
 	 * @param function The {@link ConnectionFunction}.
-	 * @param <T> The generic type.
+	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -43,10 +45,11 @@ public class DbActions {
 
 	/**
 	 * Maps a query.
-	 * @param query The query.
+	 *
+	 * @param query    The query.
 	 * @param modifier The {@link StatementModifier}.
-	 * @param mapper The {@link ResultSetMapper}.
-	 * @param <T> The generic type.
+	 * @param mapper   The {@link ResultSetMapper}.
+	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -60,10 +63,11 @@ public class DbActions {
 
 	/**
 	 * Maps a query asynchronous.
-	 * @param query The query.
+	 *
+	 * @param query    The query.
 	 * @param modifier The {@link StatementModifier}.
-	 * @param mapper The {@link ResultSetMapper}.
-	 * @param <T> The generic type.
+	 * @param mapper   The {@link ResultSetMapper}.
+	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 */
 	public static <T> CompletableFuture<T> mapQueryAsync(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {
@@ -80,7 +84,8 @@ public class DbActions {
 
 	/**
 	 * Counts the amount of rows that fit the given query.
-	 * @param query The query.
+	 *
+	 * @param query    The query.
 	 * @param modifier The {@link StatementModifier}.
 	 * @return The column value.
 	 */
@@ -98,7 +103,8 @@ public class DbActions {
 
 	/**
 	 * Updates a database table.
-	 * @param query The query.
+	 *
+	 * @param query  The query.
 	 * @param params The queries' parameters.
 	 * @return The rows that got updates during this process.
 	 * @throws SQLException If an error occurs.
@@ -158,8 +164,9 @@ public class DbActions {
 
 	/**
 	 * Maps a {@link ConnectionFunction} asynchronous.
+	 *
 	 * @param function The {@link ConnectionFunction}.
-	 * @param <T> The generic type.
+	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 */
 	public static <T> CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {

@@ -67,8 +67,8 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
-		try (var con = Bot.dataSource.getConnection();
-			var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?");
 			stmt.setLong(1, user.getIdLong());
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -299,8 +299,8 @@ public class HelpChannelManager {
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			try (var con = Bot.dataSource.getConnection();
-				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
+			try (var con = Bot.dataSource.getConnection()) {
+				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
 				var dormantCategory = config.getDormantChannelCategory();
@@ -329,6 +329,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Unreserves all help channels the given user owns.
+	 *
 	 * @param user The user whose help channels should be unreserved.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -351,6 +352,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Tries to retrieve the current {@link ChannelReservation} by the channel id.
+	 *
 	 * @param channelId The channel's id.
 	 * @return The {@link ChannelReservation} object as an {@link Optional}.
 	 */
@@ -370,6 +372,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Tries to retrieve the current {@link ChannelReservation} by its id.
+	 *
 	 * @param id The reservation's id.
 	 * @return The {@link ChannelReservation} object as an {@link Optional}.
 	 */
@@ -389,6 +392,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Sets the timeout for the given channel.
+	 *
 	 * @param channel The channel.
 	 * @param timeout The timeout.
 	 * @throws SQLException If an error occurs.
@@ -404,6 +408,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Gets the given channel's timeout.
+	 *
 	 * @param channel The channel.
 	 * @return The timout as an integer.
 	 * @throws SQLException If an error occurs.
@@ -423,6 +428,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Retrieves the time the given channel was reserved.
+	 *
 	 * @param channel The help channel.
 	 * @return The time the given channel was reserved as a {@link LocalDateTime} object.
 	 * @throws SQLException If an error occurs.
@@ -440,6 +446,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Calculates the next timeout for the given help channel.
+	 *
 	 * @param channel The help channel whose next timeout should be calculated.
 	 * @return The next timeout as an integer.
 	 * @throws SQLException If an error occurs.
@@ -462,6 +469,7 @@ public class HelpChannelManager {
 
 	/**
 	 * Gets the given help channel's reservation id.
+	 *
 	 * @param channel The channel whose id should be returned.
 	 * @return The reservation id as an {@link Optional}.
 	 */

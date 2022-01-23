@@ -17,6 +17,7 @@ public class QuestionQueueRepository {
 
 	/**
 	 * Inserts a single {@link QOTWQuestion}.
+	 *
 	 * @param question The {@link QOTWQuestion} to insert.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -40,6 +41,7 @@ public class QuestionQueueRepository {
 
 	/**
 	 * Gets the next Question's week number.
+	 *
 	 * @return The next Question's week number as an integer.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -59,6 +61,7 @@ public class QuestionQueueRepository {
 
 	/**
 	 * Marks a single {@link QOTWQuestion} as used.
+	 *
 	 * @param question The {@link QOTWQuestion} that should be marked as used.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -78,9 +81,10 @@ public class QuestionQueueRepository {
 
 	/**
 	 * Gets as many Questions as specified.
+	 *
 	 * @param guildId The current guild's id.
-	 * @param page The page.
-	 * @param size The amount of questions to return.
+	 * @param page    The page.
+	 * @param size    The amount of questions to return.
 	 * @return A {@link List} containing the specified amount of {@link QOTWQuestion}.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -99,6 +103,7 @@ public class QuestionQueueRepository {
 
 	/**
 	 * Retrieves the next question.
+	 *
 	 * @param guildId The current guild's id.
 	 * @return The next {@link QOTWQuestion} as an {@link Optional}
 	 * @throws SQLException If an error occurs.
@@ -124,8 +129,9 @@ public class QuestionQueueRepository {
 
 	/**
 	 * Removes a single {@link QOTWQuestion}.
+	 *
 	 * @param guildId The current guild's id.
-	 * @param id The question's id.
+	 * @param id      The question's id.
 	 * @return Whether the {@link QOTWQuestion} was actually removed.
 	 * @throws SQLException If an error occurs.
 	 */

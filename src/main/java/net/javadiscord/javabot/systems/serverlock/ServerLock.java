@@ -43,6 +43,7 @@ public class ServerLock extends ListenerAdapter {
 
 	/**
 	 * Contructor that initializes and handles the serverlock.
+	 *
 	 * @param jda The {@link JDA} instance.
 	 */
 	public ServerLock(JDA jda) {
@@ -205,7 +206,8 @@ public class ServerLock extends ListenerAdapter {
 			member.getUser().openPrivateChannel().queue(c -> {
 				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
-							success -> {},
+							success -> {
+							},
 							error -> Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage())));
 				});
 			});

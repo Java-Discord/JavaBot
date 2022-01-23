@@ -21,6 +21,7 @@ public class EconomyService {
 
 	/**
 	 * Creates a new Economy Account if none exists.
+	 *
 	 * @param userId The user's id.
 	 * @return An {@link Account} object.
 	 * @throws SQLException If an error occurs.
@@ -43,8 +44,9 @@ public class EconomyService {
 
 	/**
 	 * Gets all recent transactions from a user.
+	 *
 	 * @param userId The user's id.
-	 * @param count The count of transactions to retrieve.
+	 * @param count  The count of transactions to retrieve.
 	 * @return A {@link List} with all transactions.
 	 * @throws SQLException If an error occurs.
 	 */
@@ -59,10 +61,11 @@ public class EconomyService {
 
 	/**
 	 * Performs a single transaction.
+	 *
 	 * @param fromUserId The sender's user id.
-	 * @param toUserId The recipient's user id.
-	 * @param value The transaction's value.
-	 * @param message The transaction's message.
+	 * @param toUserId   The recipient's user id.
+	 * @param value      The transaction's value.
+	 * @param message    The transaction's message.
 	 * @return A {@link Transaction} object.
 	 * @throws SQLException If an error occurs.
 	 */

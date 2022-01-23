@@ -16,6 +16,7 @@ public class SubCommandGroupConfig {
 
 	/**
 	 * Converts the given {@link SubcommandGroupData} into a {@link SubCommandGroupConfig} object.
+	 *
 	 * @param data The {@link SubcommandGroupData}.
 	 * @return The {@link SubCommandGroupConfig} object.
 	 */
@@ -29,6 +30,7 @@ public class SubCommandGroupConfig {
 
 	/**
 	 * Converts the current {@link SubCommandGroupConfig} into a {@link SubcommandGroupData} object.
+	 *
 	 * @return The {@link SubcommandGroupData} object.
 	 */
 	public SubcommandGroupData toData() {

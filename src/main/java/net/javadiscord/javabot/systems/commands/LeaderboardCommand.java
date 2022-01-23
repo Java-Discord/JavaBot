@@ -78,7 +78,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	/**
 	 * Gets the top N members based on their QOTW-Points.
 	 *
-	 * @param n The amount of members to get.
+	 * @param n     The amount of members to get.
 	 * @param guild The current guild.
 	 * @return A {@link List} with the top member ids.
 	 */
@@ -224,6 +224,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 
 	/**
 	 * Builds the cached image's name.
+	 *
 	 * @return The image's cache name.
 	 */
 	private String getCacheName() {

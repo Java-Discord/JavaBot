@@ -25,7 +25,8 @@ public class SubmissionManager {
 
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
-	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 *
+	 * @param event          The {@link ButtonClickEvent} that is fired upon use.
 	 * @param questionNumber The current qotw-week number.
 	 * @return A {@link WebhookMessageAction}.
 	 */
@@ -63,6 +64,7 @@ public class SubmissionManager {
 
 	/**
 	 * Handles the "Delete Submission" Button.
+	 *
 	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
 	public void handleThreadDeletion(ButtonClickEvent event) {
@@ -106,7 +108,8 @@ public class SubmissionManager {
 
 	/**
 	 * Gets the given member's submission thread.
-	 * @param member The member whose thread should be retrieved.
+	 *
+	 * @param member         The member whose thread should be retrieved.
 	 * @param questionNumber The current qotw-week number.
 	 * @return The {@link ThreadChannel} as an {@link Optional}.
 	 */
@@ -119,6 +122,7 @@ public class SubmissionManager {
 
 	/**
 	 * Archives a submissions thread's messages into a single string.
+	 *
 	 * @param channel The submission's thread channel.
 	 * @return The String containing all messages.
 	 */
