@@ -21,18 +21,18 @@ public class StarboardManager extends ListenerAdapter {
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
 		if (!validUser(event.getUser())) return;
-		if (event.getChannelType() != ChannelType.TEXT) return;
-		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getTextChannel(), event.getMessageIdLong());
+		if (!isValidChannel(event.getChannel())) return;
+		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getChannel(), event.getMessageIdLong());
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
 		if (!validUser(event.getUser())) return;
-		if (event.getChannelType() != ChannelType.TEXT) return;
-		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getTextChannel(), event.getMessageIdLong());
+		if (!isValidChannel(event.getGuildChannel())) return;
+		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getChannel(), event.getMessageIdLong());
 	}
 
-	private void handleReactionEvent(Guild guild, MessageReaction.ReactionEmote reactionEmote, TextChannel channel, long messageId) {
+	private void handleReactionEvent(Guild guild, MessageReaction.ReactionEmote reactionEmote, MessageChannel channel, long messageId) {
 		Bot.asyncPool.submit(() -> {
 			var config = Bot.config.get(guild).getStarBoard();
 			if (config.getStarboardChannel().equals(channel)) return;
@@ -61,9 +61,14 @@ public class StarboardManager extends ListenerAdapter {
 		});
 	}
 
+	private boolean isValidChannel(MessageChannel channel) {
+		var type = channel.getType();
+		return type == ChannelType.TEXT || type == ChannelType.GUILD_PUBLIC_THREAD;
+	}
+
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		if (!event.isFromGuild() || !event.isFromType(ChannelType.TEXT)) return;
+		if (!isValidChannel(event.getChannel())) return;
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new StarboardRepository(con);
 			var config = Bot.config.get(event.getGuild()).getStarBoard();
@@ -74,7 +79,7 @@ public class StarboardManager extends ListenerAdapter {
 				entry = repo.getEntryByMessageId(event.getMessageIdLong());
 			}
 			if (entry != null) {
-				if (!removeMessageFromStarboard(entry.getOriginalMessageId(), event.getTextChannel(), config)) {
+				if (!removeMessageFromStarboard(entry.getOriginalMessageId(), event.getChannel(), config)) {
 					log.error("Could not remove Message from Starboard");
 				}
 			}
@@ -140,7 +145,7 @@ public class StarboardManager extends ListenerAdapter {
 				starboardMessage -> {
 					if (stars < 1) {
 						try {
-							if (!removeMessageFromStarboard(message.getIdLong(), message.getTextChannel(), config)) {
+							if (!removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config)) {
 								log.error("Could not remove Message from Starboard");
 							}
 						} catch (SQLException e) {
@@ -157,7 +162,7 @@ public class StarboardManager extends ListenerAdapter {
 				}, e -> {
 					log.error("Could not retrieve original Message. Deleting corresponding Starboard Entry...");
 					try {
-						removeMessageFromStarboard(message.getIdLong(), message.getTextChannel(), config);
+						removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config);
 					} catch (SQLException ex) {
 						ex.printStackTrace();
 					}
@@ -165,7 +170,7 @@ public class StarboardManager extends ListenerAdapter {
 		);
 	}
 
-	private boolean removeMessageFromStarboard(long messageId, TextChannel channel, StarboardConfig config) throws SQLException {
+	private boolean removeMessageFromStarboard(long messageId, MessageChannel channel, StarboardConfig config) throws SQLException {
 		var repo = new StarboardRepository(Bot.dataSource.getConnection());
 		var entry = repo.getEntryByMessageId(messageId);
 		if (entry == null) return false;
