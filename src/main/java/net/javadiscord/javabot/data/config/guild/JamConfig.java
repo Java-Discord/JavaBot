@@ -2,6 +2,7 @@ package net.javadiscord.javabot.data.config.guild;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
@@ -17,15 +18,13 @@ public class JamConfig extends GuildConfigItem {
 	private long pingRoleId;
 	private long adminRoleId;
 
-	private String jamEmbedColorHex = "#fc5a03";
+	private String jamEmbedColorHex = "#FC5A03";
 
 	public Color getJamEmbedColor() {
 		return Color.decode(this.jamEmbedColorHex);
 	}
 
-	public TextChannel getAnnouncementChannel() {
-		return this.getGuild().getTextChannelById(this.announcementChannelId);
-	}
+	public NewsChannel getAnnouncementChannel() { return this.getGuild().getNewsChannelById(this.announcementChannelId); }
 
 	public TextChannel getVotingChannel() {
 		return this.getGuild().getTextChannelById(this.votingChannelId);

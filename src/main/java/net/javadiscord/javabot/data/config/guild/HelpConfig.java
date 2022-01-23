@@ -32,9 +32,14 @@ public class HelpConfig extends GuildConfigItem {
 	private long dormantCategoryId;
 
 	/**
-	 * The id of the helper role
+	 * The id of the helper role.
 	 */
 	private long helperRoleId;
+
+	/**
+	 * The id of the help-ping role.
+	 */
+	private long helpPingRoleId;
 
 	/**
 	 * The strategy to use when naming help channels. This is only used when
@@ -96,7 +101,13 @@ public class HelpConfig extends GuildConfigItem {
 	 * inactive channel is one in which the most recent message is an unanswered
 	 * activity check that was sent by this bot.
 	 */
-	private int removeTimeoutMinutes = 60;
+	private int removeInactiveTimeoutMinutes = 60;
+
+	/**
+	 * The number of minutes to wait before closing a channel waiting for a response
+	 * to a thanks question.
+	 */
+	private int removeThanksTimeoutMinutes = 15;
 
 	/**
 	 * The number of seconds to wait between each help channel update check.
@@ -134,6 +145,8 @@ public class HelpConfig extends GuildConfigItem {
 	public Role getHelperRole() {
 		return this.getGuild().getRoleById(this.helperRoleId);
 	}
+
+	public Role getHelpPingRole() { return this.getGuild().getRoleById(this.helpPingRoleId); }
 
 	public ChannelNamingStrategy getChannelNamingStrategy() {
 		return switch (this.channelNamingStrategy) {

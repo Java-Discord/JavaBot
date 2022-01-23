@@ -118,7 +118,7 @@ public class DbHelper {
 	}
 
 	private static void initializeSchema(HikariDataSource dataSource) throws IOException, SQLException {
-		InputStream is = DbHelper.class.getResourceAsStream("/db/schema.sql");
+		InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("schema.sql");
 		if (is == null) throw new IOException("Could not load schema.sql.");
 		var queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
 				.filter(s -> !s.isBlank()).toList();

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
@@ -22,7 +22,7 @@ public class CancelSubcommand extends ActiveJamSubcommand {
 		if (confirmOption == null || !confirmOption.getAsString().equals("yes")) {
 			return Responses.warning(event, "Invalid confirmation. Type `yes` to confirm cancellation.");
 		}
-		TextChannel announcementChannel = config.getAnnouncementChannel();
+		NewsChannel announcementChannel = config.getAnnouncementChannel();
 		if (announcementChannel == null) throw new IllegalArgumentException("Invalid jam announcement channel id.");
 
 		new JamRepository(con).cancelJam(activeJam);

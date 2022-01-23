@@ -1,21 +1,16 @@
 package net.javadiscord.javabot.systems.commands;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
-import net.javadiscord.javabot.data.mongodb.Database;
-import net.javadiscord.javabot.events.StartupListener;
-import org.bson.Document;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
+import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
+import net.javadiscord.javabot.util.ImageGenerationUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -23,222 +18,232 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
-import static com.mongodb.client.model.Indexes.descending;
-import static com.mongodb.client.model.Projections.excludeId;
+import static net.javadiscord.javabot.Bot.imageCache;
 
-public class LeaderboardCommand implements SlashCommandHandler {
+public class LeaderboardCommand extends ImageGenerationUtils implements SlashCommandHandler {
 
 	private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
 	private final Color PRIMARY_COLOR = Color.WHITE;
 	private final Color SECONDARY_COLOR = Color.decode("#414A52");
 
-	private final int LB_WIDTH = 3000;
-	private final int CARD_HEIGHT = 350;
-	private final int EMPTY_SPACE = 700;
+	private final int DISPLAY_COUNT = 10;
 
-	private final float NAME_SIZE = 65;
-	private final float PLACEMENT_SIZE = 72;
+	private final int MARGIN = 40;
+	private final int WIDTH = 3000;
 
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
-
-		OptionMapping option = event.getOption("amount");
-		long l = option == null ? 10 : option.getAsLong();
-
-		if (l > 30 || l < 2) return Responses.error(event, "```Please choose an amount between 2-30```");
-
 		Bot.asyncPool.submit(() -> {
-			event.getHook().sendFile(new ByteArrayInputStream(generateLB(event, l).toByteArray()), "leaderboard" + ".png").queue();
+			try {
+				var action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
+				byte[] array;
+				if (imageCache.isCached(getCacheName())) {
+					array = getOutputStreamFromImage(imageCache.getCachedImage(getCacheName())).toByteArray();
+				} else {
+					array = generateLeaderboard(event.getGuild()).toByteArray();
+				}
+				action.addFile(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png").queue();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		});
-
 		return event.deferReply();
 	}
 
-	public int getQOTWRank(Guild guild, String userid) {
-
-		MongoDatabase database = StartupListener.mongoClient.getDatabase("userdata");
-		MongoCollection<Document> collection = database.getCollection("users");
-
-		ArrayList<String> users = new ArrayList<>();
-		MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();
-
-		while (doc.hasNext()) {
-
-			JsonObject Root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
-			String discordID = Root.get("discord_id").getAsString();
-			if (guild.getMemberById(discordID) == null) continue;
-
-			users.add(discordID);
-		}
-
-		return (users.indexOf(userid)) + 1;
-	}
-
-	ArrayList<Member> getTopUsers(Guild guild, int num) {
-
-		ArrayList<Member> topUsers = new ArrayList<>();
-
-		MongoDatabase database = StartupListener.mongoClient.getDatabase("userdata");
-		MongoCollection<Document> collection = database.getCollection("users");
-
-		MongoCursor<Document> doc = collection.find().projection(excludeId()).sort(descending("qotwpoints")).iterator();
-
-		int placement = 1;
-		while (doc.hasNext() && placement <= num) {
-
-			JsonObject root = JsonParser.parseString(doc.next().toJson()).getAsJsonObject();
-			String discordID = root.get("discord_id").getAsString();
-
-			if (guild.getMemberById(discordID) == null) continue;
-			if (root.get("qotwpoints").getAsInt() == 0) continue;
-
-			try {
-				topUsers.add(guild.getMemberById(discordID));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			placement++;
-		}
-
-		return topUsers;
-	}
-
-	BufferedImage getAvatar(String avatarURL) {
-
-		BufferedImage img = null;
-		try {
-			img = ImageIO.read(new URL(avatarURL));
-		} catch (Exception e) {
+	/**
+	 * Gets the given user's QOTW-Rank.
+	 *
+	 * @param userId The id of the user.
+	 * @return The QOTW-Rank as an integer.
+	 */
+	public int getQOTWRank(long userId) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			var accounts = repo.getAllAccountsSortedByPoints();
+			return accounts.stream().map(QOTWAccount::getUserId).toList().indexOf(userId) + 1;
+		} catch (SQLException e) {
 			e.printStackTrace();
+			return 0;
 		}
-
-		return img;
 	}
 
-	BufferedImage getImage(String resourcePath) {
-
-		BufferedImage img = null;
-		try {
-			img = ImageIO.read(Objects.requireNonNull(LeaderboardCommand.class.getClassLoader().getResourceAsStream(resourcePath)));
-		} catch (IOException e) {
+	/**
+	 * Gets the top N members based on their QOTW-Points.
+	 *
+	 * @param n The amount of members to get.
+	 * @return A {@link List} with the top member ids.
+	 */
+	private List<Member> getTopNMembers(int n, Guild guild) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			var accounts = repo.getAllAccountsSortedByPoints();
+			return accounts.stream()
+					.map(QOTWAccount::getUserId).map(guild::getMemberById)
+					.filter(Objects::nonNull)
+					.limit(n)
+					.toList();
+		} catch (SQLException e) {
 			e.printStackTrace();
+			return List.of();
 		}
-
-		return img;
 	}
 
-	Font getFont(float size) {
-
-		Font font;
-
-		try {
-			font = Font.createFont(Font.TRUETYPE_FONT, LeaderboardCommand.class.getClassLoader().getResourceAsStream("fonts/Uni-Sans-Heavy.ttf")).deriveFont(size);
-			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-
-		} catch (IOException | FontFormatException e) {
-			font = new Font("Arial", Font.PLAIN, (int) size);
+	/**
+	 * Gets the given user's QOTW-Points.
+	 *
+	 * @param userId The id of the user.
+	 * @return The user's total QOTW-Points
+	 */
+	private long getPoints(long userId) {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			return repo.getAccountByUserId(userId).getPoints();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
 		}
-
-		return font;
 	}
 
-	void drawUserCard(Graphics2D g2d, Member member, int yOffset, boolean drawLeft, boolean topten) {
+	/**
+	 * Builds the Leaderboard Rank {@link MessageEmbed}.
+	 *
+	 * @param member The member which executed the command.
+	 * @return A {@link MessageEmbed} object.
+	 */
+	private MessageEmbed buildLeaderboardRankEmbed(Member member) {
+		var rank = getQOTWRank(member.getIdLong());
+		var rankSuffix = switch (rank % 10) {
+			case 1 -> "st";
+			case 2 -> "nd";
+			case 3 -> "rd";
+			default -> "th";
+		};
+		var points = getPoints(member.getIdLong());
+		var pointsText = points == 1 ? "point" : "points";
+		return new EmbedBuilder()
+				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
+				.setTitle("Question of the Week Leaderboard")
+				.setDescription(String.format("You're currently in `%s` place with `%s` %s.",
+						rank + rankSuffix, points, pointsText))
+				.setTimestamp(Instant.now())
+				.build();
+	}
 
-		// LEFT
-		int xOffset = 200;
+	/**
+	 * Draws a single "user card" at the given coordinates.
+	 *
+	 * @param g2d    Graphics object.
+	 * @param guild  The current Guild.
+	 * @param userId The current User's Discord Id.
+	 * @param y      The y-position.
+	 * @param left   Whether the card should be drawn left or right.
+	 * @throws IOException If an error occurs.
+	 */
+	private void drawUserCard(Graphics2D g2d, Guild guild, long userId, int y, boolean left) throws IOException {
+		var card = getResourceImage("images/leaderboard/LBCard.png");
+		int x;
+		if (left) x = MARGIN * 5;
+		else x = WIDTH - (MARGIN * 5) - card.getWidth();
 
-		// RIGHT
-		if (!drawLeft) xOffset = 1588;
-
-		// CENTER
-		if (topten) xOffset = 894;
-
-		g2d.drawImage(getAvatar(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), xOffset + 185, yOffset + 43, 200, 200, null);
-
-		if (topten) g2d.drawImage(getImage("images/leaderboard/LBSelfCard.png"), xOffset, yOffset, null);
-		else g2d.drawImage(getImage("images/leaderboard/LBCard.png"), xOffset, yOffset, null);
-
+		var member = guild.getMemberById(userId);
+		if (member != null) {
+			g2d.drawImage(getImageFromUrl(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
+		}
+		var displayName = member != null ? member.getEffectiveName() : String.valueOf(userId);
+		g2d.drawImage(card, x, y, null);
 		g2d.setColor(PRIMARY_COLOR);
-		g2d.setFont(getFont(NAME_SIZE));
+		g2d.setFont(getResourceFont("fonts/Uni-Sans-Heavy.ttf", 65).orElseThrow());
 
-		int stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
-
+		int stringWidth = g2d.getFontMetrics().stringWidth(displayName);
 		while (stringWidth > 750) {
-
-			Font currentFont = g2d.getFont();
-			Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
+			var currentFont = g2d.getFont();
+			var newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
 			g2d.setFont(newFont);
-			stringWidth = g2d.getFontMetrics().stringWidth(member.getUser().getName());
+			stringWidth = g2d.getFontMetrics().stringWidth(displayName);
 		}
-
-		g2d.drawString(member.getUser().getName(), xOffset + 430, yOffset + 130);
-
+		g2d.drawString(displayName, x + 430, y + 130);
 		g2d.setColor(SECONDARY_COLOR);
-		g2d.setFont(getFont(PLACEMENT_SIZE));
+		g2d.setFont(getResourceFont("fonts/Uni-Sans-Heavy.ttf", 72).orElseThrow());
 
-		String text;
-		int points = new Database().getMemberInt(member, "qotwpoints");
-
-		if (points == 1) text = points + " point";
-		else text = points + " points";
-
-		String placement = "#" + getQOTWRank(member.getGuild(), member.getId());
-		g2d.drawString(text, xOffset + 430, yOffset + 210);
-
-		int stringLength = (int) g2d.getFontMetrics().getStringBounds(placement, g2d).getWidth();
+		var points = getPoints(userId);
+		String text = points + (points > 1 ? " points" : " point");
+		String rank = "#" + getQOTWRank(userId);
+		g2d.drawString(text, x + 430, y + 210);
+		int stringLength = (int) g2d.getFontMetrics().getStringBounds(rank, g2d).getWidth();
 		int start = 185 / 2 - stringLength / 2;
-
-		g2d.drawString(placement, xOffset + start, yOffset + 173);
+		g2d.drawString(rank, x + start, y + 173);
 	}
 
-	ByteArrayOutputStream generateLB(SlashCommandEvent event, long num) {
+	/**
+	 * Draws and constructs the leaderboard image.
+	 *
+	 * @param guild The current guild.
+	 * @return The finished image as a {@link ByteArrayInputStream}.
+	 * @throws IOException If an error occurs.
+	 */
+	private ByteArrayOutputStream generateLeaderboard(Guild guild) throws IOException {
+		var logo = getResourceImage("images/leaderboard/Logo.png");
+		var card = getResourceImage("images/leaderboard/LBCard.png");
 
-		int LB_HEIGHT = (getTopUsers(event.getGuild(), (int) num).size() / 2) * CARD_HEIGHT + EMPTY_SPACE + 20;
-		boolean topTen = getTopUsers(event.getGuild(), (int) num).contains(event.getMember());
+		var topMembers = getTopNMembers(DISPLAY_COUNT, guild);
+		int height = (logo.getHeight() + MARGIN * 3) +
+				(getResourceImage("images/leaderboard/LBCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
+		var image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d = image.createGraphics();
 
-		if (!topTen) LB_HEIGHT += CARD_HEIGHT;
-		BufferedImage bufferedImage = new BufferedImage(LB_WIDTH, LB_HEIGHT, BufferedImage.TYPE_INT_RGB);
-
-		Graphics2D g2d = bufferedImage.createGraphics();
-
-		g2d.setRenderingHint(
-				RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-
-		g2d.setRenderingHint(
-				RenderingHints.KEY_FRACTIONALMETRICS,
-				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-
+		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+		g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		g2d.setPaint(BACKGROUND_COLOR);
-		g2d.fillRect(0, 0, LB_WIDTH, LB_HEIGHT);
+		g2d.fillRect(0, 0, WIDTH, height);
+		g2d.drawImage(logo, WIDTH / 2 - logo.getWidth() / 2, MARGIN, null);
 
-		BufferedImage logo = getImage("images/leaderboard/Logo.png");
-		g2d.drawImage(logo, LB_WIDTH / 2 - logo.getWidth() / 2, 110, null);
-
-		int nameY = EMPTY_SPACE;
-		boolean drawLeft = true;
-
-		for (var member : getTopUsers(event.getGuild(), (int) num)) {
-			drawUserCard(g2d, member, nameY, drawLeft, false);
-			drawLeft = !drawLeft;
-			if (drawLeft) nameY = nameY + CARD_HEIGHT;
+		boolean left = true;
+		int y = logo.getHeight() + 3 * MARGIN;
+		for (var m : topMembers) {
+			drawUserCard(g2d, guild, m.getIdLong(), y, left);
+			left = !left;
+			if (left) y = y + card.getHeight() + MARGIN;
 		}
-
-		if (!topTen) drawUserCard(g2d, event.getMember(), nameY, true, true);
 		g2d.dispose();
+		imageCache.removeCachedImagesByKeyword("qotw_leaderboard");
+		imageCache.cacheImage(getCacheName(), image);
+		return getOutputStreamFromImage(image);
+	}
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(bufferedImage, "png", outputStream);
-		} catch (IOException e) {
+	/**
+	 * Builds the cached image's name.
+	 */
+	private String getCacheName() {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new QuestionPointsRepository(con);
+			var accounts = repo.getAllAccountsSortedByPoints().stream().limit(DISPLAY_COUNT).toList();
+			StringBuilder sb = new StringBuilder("qotw_leaderboard_");
+			for (var a : accounts) {
+				sb.append(":").append(a.getUserId())
+						.append(":").append(a.getPoints());
+			}
+			return sb.toString();
+		} catch (SQLException e) {
 			e.printStackTrace();
+			return "";
 		}
+	}
 
+	/**
+	 * Retrieves the image's {@link ByteArrayOutputStream}.
+	 *
+	 * @param image The image.
+	 * @return The image's {@link ByteArrayOutputStream}.
+	 * @throws IOException If an error occurs.
+	 */
+	private ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
+		var outputStream = new ByteArrayOutputStream();
+		ImageIO.write(image, "png", outputStream);
 		return outputStream;
 	}
 }

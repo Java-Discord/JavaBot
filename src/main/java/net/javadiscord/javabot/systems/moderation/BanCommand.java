@@ -15,6 +15,9 @@ public class BanCommand implements SlashCommandHandler {
 			return Responses.error(event, "Missing required Arguments.");
 		}
 		var member = userOption.getAsMember();
+		if (member == null) {
+			return Responses.error(event, "Cannot ban a user who is not a member of this server");
+		}
 		var reason = reasonOption.getAsString();
 		var channel = event.getTextChannel();
 		if (channel.getType() != ChannelType.TEXT) {
@@ -25,7 +28,7 @@ public class BanCommand implements SlashCommandHandler {
 
 		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.ban(member, reason, event.getMember(), channel, quiet)) {
-			return Responses.success(event, "User Banned", String.format("User %s has been banned.", member.getUser().getAsTag()));
+			return Responses.success(event, "User Banned", String.format("%s has been banned.", member.getAsMention()));
 		} else {
 			return Responses.warning(event, "You're not permitted to ban this user.");
 		}

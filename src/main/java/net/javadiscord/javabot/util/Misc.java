@@ -52,17 +52,16 @@ public class Misc {
 				.replace("{!serverid}", guild.getId());
 	}
 
-	/**
-	 * Utility method that replaces text variables
-	 *
-	 * @param string The string that should be replaced
-	 */
-	public static String replaceTextVariables(Member member, String string) {
-		return string
-				.replace("{!membercount}", String.valueOf(member.getGuild().getMemberCount()))
-				.replace("{!servername}", member.getGuild().getName())
-				.replace("{!serverid}", member.getGuild().getId())
-				.replace("{!member}", member.getAsMention())
-				.replace("{!membertag}", member.getUser().getAsTag());
-	}
+    /**
+     * Utility method that replaces text variables
+     * @param string The string that should be replaced
+     */
+    public static String replaceTextVariables(Member member, String string) {
+        return string
+                .replace("{!membercount}", String.valueOf(member.getGuild().getMemberCount()))
+                .replace("{!servername}", member.getGuild().getName())
+                .replace("{!serverid}", member.getGuild().getId())
+                .replace("{!member}", member.getAsMention())
+                .replace("{!membertag}", member.getUser().getAsTag());
+    }
 }

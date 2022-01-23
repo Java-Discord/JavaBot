@@ -1,11 +1,9 @@
 package net.javadiscord.javabot.systems.moderation;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -14,13 +12,15 @@ import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.util.Misc;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.ArrayList;
+import java.net.URL;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,13 +30,23 @@ import java.util.regex.Pattern;
 @Slf4j
 public class AutoMod extends ListenerAdapter {
 
-	private static final Pattern inviteURL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private final Pattern URL_PATTERN = Pattern.compile(
+			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
+					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
+					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
+			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	private List<String> spamUrls;
 
 	public AutoMod() {
 		try {
-			spamUrls = Files.readAllLines(Paths.get(getClass().getResource("spamLinks.txt").toURI()));
+			URL url = new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt");
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			InputStream stream = connection.getInputStream();
+			String response = new Scanner(stream).useDelimiter("\\A").next();
+			spamUrls = List.of(response.split("\n"));
 		} catch (Exception e) {
+			e.printStackTrace();
 			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());
@@ -108,8 +118,9 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void checkContentAutomod(@Nonnull Message message) {
 		// Advertising
-		Matcher matcher = inviteURL.matcher(cleanString(message.getContentRaw()));
+		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
+			Misc.sendToLog(message.getGuild(), "Message: `" + message.getContentRaw() + "`");
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 					.warn(
 							message.getMember(),
@@ -119,26 +130,34 @@ public class AutoMod extends ListenerAdapter {
 							message.getTextChannel(),
 							false
 					);
+			message.delete().queue();
 		}
+
 		final String messageRaw = message.getContentRaw();
+		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
-			for (String spamUrl : spamUrls) {
-				if (messageRaw.contains(spamUrl)) {
-					try {
-						message.delete().queue();
-						new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
-								.warn(
-										message.getMember(),
-										WarnSeverity.HIGH,
-										"Automod: Suspicious Link",
-										message.getGuild().getMember(message.getJDA().getSelfUser()),
-										message.getTextChannel(),
-										false
-								);
-					} catch (Exception e) {
-						e.printStackTrace();
+			while (urlMatcher.find()) {
+				String url = urlMatcher.group(0).trim();
+				try {
+					URI uri = new URI(url);
+					if (spamUrls.contains(uri.getHost())) {
+						if (message.getMember() != null) {
+							Misc.sendToLog(message.getGuild(), String.format("Suspicious Link sent by: %s (%s)", message.getMember().getAsMention(), url));
+							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+									.warn(
+											message.getMember(),
+											WarnSeverity.HIGH,
+											"Automod: Suspicious Link",
+											message.getGuild().getMember(message.getJDA().getSelfUser()),
+											message.getTextChannel(),
+											false
+									);
+							message.delete().queue();
+						}
 					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -155,26 +174,15 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty()
 				&& "java".equals(msg.getAttachments().get(0).getFileExtension())) return;
 
-		Role muteRole = Bot.config.get(msg.getGuild()).getModeration().getMuteRole();
-		if (member.getRoles().contains(muteRole)) return;
-
-		var eb = new EmbedBuilder()
-				.setColor(Bot.config.get(msg.getGuild()).getSlashCommand().getErrorColor())
-				.setAuthor(member.getUser().getAsTag() + " | Mute", null, member.getUser().getEffectiveAvatarUrl())
-				.addField("Name", "```" + member.getUser().getAsTag() + "```", true)
-				.addField("Moderator", "```" + msg.getGuild().getSelfMember().getUser().getAsTag() + "```", true)
-				.addField("ID", "```" + member.getId() + "```", false)
-				.addField("Reason", "```" + "Automod: Spam" + "```", false)
-				.setFooter("ID: " + member.getId())
-				.setTimestamp(Instant.now())
-				.build();
-
-		msg.getChannel().sendMessageEmbeds(eb).queue();
-		Misc.sendToLog(msg.getGuild(), eb);
-		member.getUser().openPrivateChannel().queue(channel -> channel.sendMessageEmbeds(eb).queue());
-
-		// TODO: Replace with Timeout (https://support.discord.com/hc/de/articles/4413305239191-Time-Out-FAQ) once there is a proper JDA Implementation
-		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration()).mute(member, member.getGuild());
+		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
+				.timeout(
+						member,
+						"Automod: Spam",
+						msg.getGuild().getSelfMember(),
+						Duration.of(6, ChronoUnit.HOURS),
+						msg.getTextChannel(),
+						false
+				);
 	}
 
 	/**

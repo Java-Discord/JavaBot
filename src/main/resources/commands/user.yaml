@@ -36,11 +36,6 @@
 # /leaderboard
 - name: leaderboard
   description: Generates the question of the week leaderboard
-  options:
-    - name: amount
-      description: Amount of users to display (2-30)
-      required: false
-      type: INTEGER
   handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
 
 # /search
@@ -130,7 +125,7 @@
       description: The string
       required: true
       type: STRING
-  enabledByDefault: false
+  enabledByDefault: true
   handler: net.javadiscord.javabot.systems.commands.RegexCommand
 
 # /serverinfo

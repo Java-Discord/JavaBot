@@ -2,68 +2,81 @@ package net.javadiscord.javabot.systems.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.RichPresence;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
-import net.javadiscord.javabot.data.mongodb.Database;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
-import net.javadiscord.javabot.util.TimeUtils;
+import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 
-import java.awt.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.Instant;
 
 public class ProfileCommand implements SlashCommandHandler {
-
-	private String getBadges(Member member) {
-		String badges = "";
-		var config = Bot.config.get(member.getGuild()).getEmote();
-		if (member.getUser().isBot()) badges += config.getBotEmote().getAsMention();
-		if (member.getTimeBoosted() != null) badges += config.getServerBoostEmote().getAsMention();
-
-		badges += member.getUser().getFlags().toString()
-				.substring(1, member.getUser().getFlags().toString().length() - 1)
-				.replace(",", "")
-				.replace("PARTNER", config.getPartnerEmote().getAsMention())
-				.replace("HYPESQUAD_BRAVERY", config.getBraveryEmote().getAsMention())
-				.replace("HYPESQUAD_BRILLIANCE", config.getBrillianceEmote().getAsMention())
-				.replace("HYPESQUAD_BALANCE", config.getBalanceEmote().getAsMention())
-				.replace("VERIFIED_DEVELOPER", config.getDevEmote().getAsMention())
-				.replace("EARLY_SUPPORTER", config.getEarlySupporterEmote().getAsMention())
-				.replace("SYSTEM", config.getStaffEmote().getAsMention())
-				.replace("BUG_HUNTER_LEVEL_1", config.getBugHunterEmote().getAsMention())
-				.replace("BUG_HUNTER_LEVEL_2", config.getBugHunterEmote().getAsMention())
-				.replace("VERIFIED_BOT", "");
-		return badges;
-	}
-
-	private String getOnlineStatus(Member member) {
-		var config = Bot.config.get(member.getGuild()).getEmote();
-		return member.getOnlineStatus().toString()
-				.replace("ONLINE", config.getOnlineEmote().getAsMention())
-				.replace("IDLE", config.getIdleEmote().getAsMention())
-				.replace("DO_NOT_DISTURB", config.getDndEmote().getAsMention())
-				.replace("OFFLINE", config.getOfflineEmote().getAsMention());
-	}
-
-	private Color getColor(Member member) {
-		if (member.getColor() == null) return Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor();
-		else return member.getColor();
-	}
-
-	private String getColorRoleAsMention(Member member) {
+	@Override
+	public ReplyAction handle(SlashCommandEvent event) {
+		var profileOption = event.getOption("user");
+		var member = profileOption == null ? event.getMember() : profileOption.getAsMember();
 		try {
-			return member.getRoles().get(0).getAsMention();
-		} catch (IndexOutOfBoundsException e) {
-			return "None";
+			return event.replyEmbeds(buildProfileEmbed(member, Bot.dataSource.getConnection()));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Responses.error(event, "Could not load profile.");
 		}
 	}
 
-	private String getColorAsHex(Color color) {
-		return "#" + Integer.toHexString(color.getRGB()).toUpperCase();
+	private MessageEmbed buildProfileEmbed(Member member, Connection con) throws SQLException {
+		var config = Bot.config.get(member.getGuild()).getModeration();
+		var warns = new ModerationService(member.getJDA(), config).getWarns(member.getIdLong());
+		var points = new QuestionPointsRepository(con).getAccountByUserId(member.getIdLong()).getPoints();
+		var roles = member.getRoles();
+		var status = member.getOnlineStatus().name();
+		var embed = new EmbedBuilder()
+				.setTitle("Profile")
+				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
+				.setDescription(getDescription(member))
+				.setColor(member.getColor())
+				.setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
+				.setTimestamp(Instant.now())
+				.addField("User", member.getAsMention(), true)
+				.addField("Status",
+						status.substring(0, 1).toUpperCase() +
+								status.substring(1).toLowerCase().replace("_", " "), true)
+				.addField("ID", member.getId(), true);
+		if (!roles.isEmpty()) {
+			embed.addField(String.format("Roles (+%s other)", roles.size() - 1), roles.get(0).getAsMention(), true);
+		}
+		embed.addField("Warns", String.format("`%s (%s/%s)`",
+						warns.size(),
+						warns.stream().mapToLong(Warn::getSeverityWeight).count(),
+						config.getMaxWarnSeverity()), true)
+				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
+						points,
+						points == 1 ? "" : "s",
+						new LeaderboardCommand().getQOTWRank(member.getIdLong())), true)
+				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
+				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);
+		if (member.getTimeBoosted() != null)
+			embed.addField("Boosted since", String.format("<t:%s:R>", member.getTimeBoosted().toEpochSecond()), true);
+		return embed.build();
+	}
+
+	private String getDescription(Member member) {
+		StringBuilder sb = new StringBuilder();
+		if (getCustomActivity(member) != null) {
+			sb.append("\n`").append(getCustomActivity(member).getName()).append("`");
+		}
+		if (getGameActivity(member) != null) {
+			sb.append(String.format("\n%s %s",
+					getGameActivityType(getGameActivity(member)),
+					getGameActivityDetails(getGameActivity(member))));
+		}
+		return sb.toString();
 	}
 
 	private Activity getCustomActivity(Member member) {
@@ -93,67 +106,18 @@ public class ProfileCommand implements SlashCommandHandler {
 				.replace("default", "Playing");
 	}
 
-	private String getGameActivityDetails(Activity activity, Guild guild) {
-		String details;
+	private String getGameActivityDetails(Activity activity) {
+		StringBuilder sb = new StringBuilder();
 		if (activity.getName().equals("Spotify")) {
-			RichPresence rp = activity.asRichPresence();
+			var rp = activity.asRichPresence();
 			String spotifyURL = "https://open.spotify.com/track/" + rp.getSyncId();
-
-			details = "[`\"" + rp.getDetails() + "\"";
-			if (rp.getState() != null) details += " by " + rp.getState();
-			details += "`](" + spotifyURL + ") " + Bot.config.get(guild).getEmote().getSpotifyEmote().getAsMention();
-		} else details = "`" + activity.getName() + "`";
-		return details;
-	}
-
-	private String getServerJoinedDate(Member member, TimeUtils tu) {
-		long timeJoined = member.getTimeJoined().toInstant().getEpochSecond();
-		String joinDiff = tu.formatDurationToNow(member.getTimeJoined());
-		return "<t:" + timeJoined + ":F>" + " (" + joinDiff + " ago)";
-	}
-
-	private String getAccountCreatedDate(Member member, TimeUtils tu) {
-		long timeCreated = member.getTimeCreated().toInstant().getEpochSecond();
-		String createDiff = tu.formatDurationToNow(member.getTimeCreated());
-		return "<t:" + timeCreated + ":F>" + " (" + createDiff + " ago)";
-	}
-
-	private String getDescription(Member member) {
-		String desc = "";
-		if (getCustomActivity(member) != null) {
-			desc += "\n\"" + getCustomActivity(member).getName() + "\"";
+			sb.append(String.format("[`\"%s\"", rp.getDetails()));
+			if (rp.getState() != null) sb.append(" by " + rp.getState());
+			sb.append(String.format("`](%s)", spotifyURL));
+		} else {
+			sb.append(String.format("`%s`", activity.getName()));
 		}
-		if (getGameActivity(member) != null) {
-			desc += String.format("\n• %s %s", getGameActivityType(getGameActivity(member)), getGameActivityDetails(getGameActivity(member), member.getGuild()));
-		}
-		desc +=
-				"\n\n⌞ Warnings: `" + new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
-						.getWarns(member.getIdLong()).size() + "`" +
-						"\n⌞ QOTW-Points: `" + new Database().getMemberInt(member, "qotwpoints") +
-						" (#" + new LeaderboardCommand().getQOTWRank(member.getGuild(), member.getId()) + ")`";
-		return desc;
+		return sb.toString();
 	}
 
-	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
-		OptionMapping profileOption = event.getOption("user");
-		Member member = profileOption == null || profileOption.getAsMember() == null ? event.getMember() : profileOption.getAsMember();
-		TimeUtils tu = new TimeUtils();
-
-		var e = new EmbedBuilder()
-				.setTitle(getOnlineStatus(member) + " " + member.getUser().getAsTag() + " " + getBadges(member))
-				.setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
-				.setColor(getColor(member))
-				.setDescription(getDescription(member))
-				.setFooter("ID: " + member.getId());
-
-		if (member.getRoles().size() > 1)
-			e.addField("Roles", getColorRoleAsMention(member) + " (+" + (member.getRoles().size() - 1) + " other)", true);
-		else if (!member.getRoles().isEmpty()) e.addField("Roles", getColorRoleAsMention(member), true);
-
-		if (!member.getRoles().isEmpty()) e.addField("Color", "`" + getColorAsHex(getColor(member)) + "`", true);
-		e.addField("Server joined on", getServerJoinedDate(member, tu), false)
-				.addField("Account created on", getAccountCreatedDate(member, tu), true);
-		return event.replyEmbeds(e.build());
-	}
 }

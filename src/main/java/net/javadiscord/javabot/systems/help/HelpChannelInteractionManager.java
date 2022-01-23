@@ -77,7 +77,7 @@ public class HelpChannelInteractionManager {
 				}
 			}
 		} else {
-			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel, or moderators, are allowed to use these buttons.")
+			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel or moderators are allowed to use these buttons.")
 					.setEphemeral(true).queue();
 		}
 	}

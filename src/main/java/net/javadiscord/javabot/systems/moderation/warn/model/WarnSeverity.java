@@ -4,17 +4,17 @@ public enum WarnSeverity {
 	/**
 	 * Low severity is intended for small violations.
 	 */
-	LOW(10),
+	LOW(20),
 
 	/**
 	 * Medium severity is for more egregious, but still mostly harmless violations.
 	 */
-	MEDIUM(20),
+	MEDIUM(40),
 
 	/**
 	 * High severity indicates the user did something intentionally malicious.
 	 */
-	HIGH(40);
+	HIGH(80);
 
 	/**
 	 * A default weight that is used as a fallback in any case where it is

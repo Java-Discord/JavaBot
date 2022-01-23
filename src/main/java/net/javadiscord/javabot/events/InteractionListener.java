@@ -4,23 +4,25 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.qotw.SubmissionManager;
 
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
 
 	// TODO: add Context-Menu Commands (once they're available in JDA)
-
+	// TODO: Clean up button ids. "qotw-submission" & "qotw-submission-delete" is just a temporary solution.
 	@Override
 	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
 		event.deferEdit().queue();
-
 		String[] id = event.getComponentId().split(":");
+		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
-			case "dm-submission" -> this.handleDmSubmission(event);
-			case "submission" -> this.handleSubmission(event);
+			case "qotw-submission" -> new SubmissionManager(config.getQotw()).handleSubmission(event, Long.parseLong(id[1])).queue();
+			case "qotw-submission-delete" -> new SubmissionManager(config.getQotw()).handleThreadDeletion(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
@@ -54,23 +56,6 @@ public class InteractionListener extends ListenerAdapter {
 					event.getMember(),
 					event.getTextChannel(),
 					false);
-		}
-	}
-
-	private void handleDmSubmission(ButtonClickEvent event) {
-		String[] id = event.getComponentId().split(":");
-		switch (id[1]) {
-			case "send" -> new SubmissionListener().dmSubmissionSend(event);
-			case "cancel" -> new SubmissionListener().dmSubmissionCancel(event);
-		}
-	}
-
-	private void handleSubmission(ButtonClickEvent event) {
-		String[] id = event.getComponentId().split(":");
-		switch (id[1]) {
-			case "approve" -> new SubmissionListener().submissionApprove(event);
-			case "decline" -> new SubmissionListener().submissionDecline(event);
-			case "getraw" -> new SubmissionListener().submissionGetRaw(event);
 		}
 	}
 

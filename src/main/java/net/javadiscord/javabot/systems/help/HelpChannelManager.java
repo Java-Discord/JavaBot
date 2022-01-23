@@ -54,7 +54,6 @@ public class HelpChannelManager {
 
 	/**
 	 * Determines if the given user is allowed to reserve a help channel.
-	 *
 	 * @param user The user who is trying to reserve a channel.
 	 * @return True if the user can reserve it, or false if not.
 	 */
@@ -63,10 +62,9 @@ public class HelpChannelManager {
 		// Only allow guild members.
 		if (member == null) return false;
 		// Don't allow muted users.
-		if (member.getRoles().contains(Bot.config.get(this.config.getGuild()).getModeration().getMuteRole()))
-			return false;
+		if (member.isTimedOut()) return false;
 		try (var con = Bot.dataSource.getConnection();
-			 var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
+				var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -82,8 +80,7 @@ public class HelpChannelManager {
 	 */
 	public void openNew() {
 		var category = config.getOpenChannelCategory();
-		if (category == null)
-			throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
+		if (category == null) throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
 		String name = this.config.getChannelNamingStrategy().getName(category.getTextChannels(), config);
 		category.createTextChannel(name).queue(channel -> {
 			channel.getManager().setPosition(0).setTopic(this.config.getOpenChannelTopic()).queue();
@@ -93,10 +90,9 @@ public class HelpChannelManager {
 
 	/**
 	 * Reserves a text channel for a user.
-	 *
-	 * @param channel       The channel to reserve.
+	 * @param channel The channel to reserve.
 	 * @param reservingUser The user who is reserving the channel.
-	 * @param message       The message the user sent in the channel.
+	 * @param message The message the user sent in the channel.
 	 */
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
 		if (!isOpen(channel)) throw new IllegalArgumentException("Can only reserve open channels!");
@@ -147,7 +143,6 @@ public class HelpChannelManager {
 
 	/**
 	 * Gets the owner of a reserved channel.
-	 *
 	 * @param channel The channel to get the owner of.
 	 * @return The user who reserved the channel, or null.
 	 */
@@ -170,7 +165,6 @@ public class HelpChannelManager {
 	/**
 	 * Gets a list of all users that have participated in a reserved help
 	 * channel since it was reserved.
-	 *
 	 * @param channel The channel to get participants for.
 	 * @return The list of users.
 	 */
@@ -204,10 +198,9 @@ public class HelpChannelManager {
 	/**
 	 * Unreserves a channel from the case that a user has done so via a discord
 	 * interaction.
-	 *
-	 * @param channel     The channel to unreserve.
-	 * @param owner       The owner of the reserved channel.
-	 * @param reason      The user-supplied reason for unreserving the channel.
+	 * @param channel The channel to unreserve.
+	 * @param owner The owner of the reserved channel.
+	 * @param reason The user-supplied reason for unreserving the channel.
 	 * @param interaction The interaction the user did to unreserve the channel.
 	 */
 	public void unreserveChannelByUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
@@ -260,7 +253,7 @@ public class HelpChannelManager {
 				new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("✅")),
 				new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
 		);
-		interaction.getHook().sendMessage("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel.")
+		interaction.getHook().sendMessage(String.format("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel, this will also be done automatically in %d Minutes.", config.getRemoveThanksTimeoutMinutes()))
 				.setEphemeral(true).queue();
 		List<ActionRow> rows = new ArrayList<>(5);
 		rows.add(controlsRow);
@@ -290,14 +283,13 @@ public class HelpChannelManager {
 
 	/**
 	 * Unreserves a channel after it no longer needs to be reserved.
-	 *
 	 * @param channel The channel to unreserve.
 	 * @return A rest action that completes when everything is done.
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
 			try (var con = Bot.dataSource.getConnection();
-				 var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
+					var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
 				var dormantCategory = config.getDormantChannelCategory();
@@ -381,7 +373,7 @@ public class HelpChannelManager {
 
 	public int getTimeout(TextChannel channel) throws SQLException {
 		try (var con = Bot.dataSource.getConnection();
-			 var stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")
+			var stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")
 		) {
 			stmt.setLong(1, channel.getIdLong());
 			var rs = stmt.executeQuery();

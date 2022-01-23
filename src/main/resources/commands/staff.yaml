@@ -20,20 +20,6 @@
       required: false
   handler: net.javadiscord.javabot.systems.moderation.BanCommand
 
-# /clearqotw
-- name: clearqotw
-  description: Clears all QOTW-points from the given user.
-  options:
-    - name: user
-      description: The user you want to clear all QOTW-points from
-      required: true
-      type: USER
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.qotw.ClearQOTWCommand
-
 # /editembed
 - name: editembed
   description: Edits an embed
@@ -75,7 +61,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.EditEmbedCommand
+  handler: net.javadiscord.javabot.systems.staff.EditEmbedCommand
 
 # /embed
 - name: embed
@@ -134,7 +120,7 @@
           description: Title of the embed
           required: false
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.EmbedCommand
+  handler: net.javadiscord.javabot.systems.staff.EmbedCommand
 
 # /say
 - name: say
@@ -148,7 +134,7 @@
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.commands.staff.SayCommand
+  handler: net.javadiscord.javabot.systems.staff.SayCommand
 
 # /kick
 - name: kick
@@ -172,46 +158,67 @@
       required: false
   handler: net.javadiscord.javabot.systems.moderation.KickCommand
 
-# /mute
-- name: mute
-  description: Mutes a member
+# /timeout
+- name: timeout
+  description: Commands for managing User Timeouts.
   enabledByDefault: false
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  options:
-    - name: user
-      description: The user you want to mute
-      required: true
-      type: USER
-    - name: reason
-      description: The reason
-      required: false
-      type: STRING
-  handler: net.javadiscord.javabot.systems.moderation.MuteCommand
+  subCommands:
+    # /timeout add
+    - name: add
+      description: Adds a Timeout to the given User.
+      options:
+        - name: user
+          description: The user that should be timed out.
+          required: true
+          type: USER
+        - name: duration-amount
+          description: How long the Timeout should last.
+          required: true
+          type: INTEGER
+        - name: duration-timeunit
+          description: What Timeunit your Duration should have
+          required: true
+          type: STRING
+          choices:
+            - name: Seconds
+              value: SECONDS
+            - name: Minutes
+              value: MINUTES
+            - name: Hours
+              value: HOURS
+            - name: Days
+              value: DAYS
+            - name: Weeks
+              value: WEEKS
+        - name: reason
+          description: The reason for adding this Timeout.
+          required: true
+          type: STRING
+        - name: quiet
+          description: If true, don't send a message in the server channel where the Timeout is issued.
+          type: BOOLEAN
+          required: false
 
-# /mutelist
-- name: mutelist
-  description: Lists all muted members
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  handler: net.javadiscord.javabot.systems.moderation.MutelistCommand
-
-# /correct
-- name: correct
-  description: Grants one QOTW-Points to the given member upon use
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  options:
-    - name: member
-      description: The member you want to grant a point
-      required: true
-      type: USER
-  handler: net.javadiscord.javabot.systems.qotw.CorrectCommand
+    # /timeout remove
+    - name: remove
+      description: Removes a Timeout from the given User.
+      options:
+        - name: user
+          description: The user whose Timeout should be removed.
+          required: true
+          type: USER
+        - name: reason
+          description: The reason for removing this Timeout.
+          required: true
+          type: STRING
+        - name: quiet
+          description: If true, don't send a message in the server channel where the Timeout is issued.
+          type: BOOLEAN
+          required: false
+  handler: net.javadiscord.javabot.systems.moderation.timeout.TimeoutCommandHandler
 
 # /purge
 - name: purge
@@ -278,20 +285,6 @@
       required: true
       type: STRING
   handler: net.javadiscord.javabot.systems.moderation.UnbanCommand
-
-# /unmute
-- name: unmute
-  description: Unmutes a member
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  options:
-    - name: user
-      description: The user you want to unmute
-      required: true
-      type: USER
-  handler: net.javadiscord.javabot.systems.moderation.UnmuteCommand
 
 # /warn
 - name: warn
@@ -441,12 +434,12 @@
           description: Name of the custom slash command
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler
 
 # /customcommands
 - name: customcommands
   description: Lists all custom slash commands
-  handler: net.javadiscord.javabot.systems.commands.staff.custom_commands.CustomCommandList
+  handler: net.javadiscord.javabot.systems.staff.custom_commands.ListCommand
 
 # /reactionrole
 - name: reactionrole
@@ -493,21 +486,38 @@
           description: The button's label
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.reaction_roles.ReactionRoleCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.reaction_roles.ReactionRoleCommandHandler
 
-# /question
-- name: question
-  description: Displays the given amount of questions in a random order
+# /expert-question
+- name: expert-question
+  description: Commands for managing the Set of Expert Questions.
   enabledByDefault: false
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
-  options:
-    - name: amount
-      description: Amount of questions
-      required: true
-      type: INTEGER
-  handler: net.javadiscord.javabot.systems.commands.staff.QuestionCommand
+  subCommands:
+    - name: add
+      description: Adds an Expert Question to the Set.
+      options:
+        - name: text
+          description: The question's text.
+          type: STRING
+          required: true
+    - name: remove
+      description: Removes an Expert Question from the Set.
+      options:
+        - name: id
+          description: The question's id.
+          type: INTEGER
+          required: true
+    - name: list
+      description: Displays a random amount of Expert Questions.
+      options:
+        - name: amount
+          description: The amount of questions to display.
+          type: INTEGER
+          required: true
+  handler: net.javadiscord.javabot.systems.expert_questions.ExpertQuestionCommandHandler
 
 # /report
 - name: report
@@ -567,7 +577,7 @@
           description: The message id of the suggestion you want to clear.
           required: true
           type: STRING
-  handler: net.javadiscord.javabot.systems.commands.staff.suggestions.SuggestionCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.suggestions.SuggestionCommandHandler
 
 # /db-admin
 - name: db-admin
@@ -595,12 +605,16 @@
           required: true
           type: STRING
           choices:
+            - name: Custom Commands
+              value: CUSTOM_COMMANDS
             - name: Economy Account
               value: ECONOMY_ACCOUNT
             - name: Economy Account Preferences
               value: ECONOMY_ACCOUNT_PREFERENCES
             - name: Economy Transactions
               value: ECONOMY_TRANSACTIONS
+            - name: Expert Questions
+              value: EXPERT_QUESTIONS
             - name: Help Channel Thanks
               value: HELP_CHANNEL_THANKS
             - name: Java Jams
@@ -617,10 +631,14 @@
               value: JAM_THEME
             - name: Java Jam Theme Votes
               value: JAM_THEME_VOTE
+            - name: Question of the Week Accounts
+              value: QOTW_POINTS
             - name: Question of the Week Questions
               value: QOTW_QUESTION
             - name: Reserved Help Channels
               value: RESERVED_HELP_CHANNELS
+            - name: Starboard
+              value: STARBOARD
             - name: Warns
               value: WARN
         - name: include-data

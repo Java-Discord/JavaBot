@@ -16,6 +16,9 @@ public class KickCommand implements SlashCommandHandler {
 			return Responses.error(event, "Missing required Arguments.");
 		}
 		var member = userOption.getAsMember();
+		if (member == null) {
+			return Responses.error(event, "Cannot kick a user who is not a member of this server");
+		}
 		var reason = reasonOption.getAsString();
 		var channel = event.getTextChannel();
 		if (channel.getType() != ChannelType.TEXT) {
@@ -26,7 +29,7 @@ public class KickCommand implements SlashCommandHandler {
 
 		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.kick(member, reason, event.getMember(), channel, quiet)) {
-			return Responses.success(event, "User Kicked", String.format("User %s has been kicked.", member.getUser().getAsTag()));
+			return Responses.success(event, "User Kicked", String.format("%s has been kicked.", member.getAsMention()));
 		} else {
 			return Responses.warning(event, "You're not permitted to kick this user.");
 		}
