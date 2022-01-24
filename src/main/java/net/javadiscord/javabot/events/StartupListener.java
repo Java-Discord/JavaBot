@@ -9,6 +9,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
+import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.util.Misc;
 
 import java.util.Comparator;

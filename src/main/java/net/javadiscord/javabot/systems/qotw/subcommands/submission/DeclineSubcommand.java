@@ -39,10 +39,11 @@ public class DeclineSubcommand implements SlashCommandHandler {
 			return Responses.error(event, "Thread must be part of " + submissionChannel.getAsMention());
 		}
 		var manager = new SubmissionManager(config.getQotw());
-		var member = manager.getSubmissionThreadOwner(thread);
-		if (member == null) {
+		var memberOptional = manager.getSubmissionThreadOwner(thread);
+		if (memberOptional.isEmpty()) {
 			return Responses.error(event, "Cannot decline a submission of a user who is not a member of this server");
 		}
+		var member = memberOptional.get().getMember();
 		var embed = buildDeclineSubmissionEmbed(member, event.getMember(), thread);
 		thread.sendMessageEmbeds(embed).queue();
 		config.getModeration().getLogChannel()

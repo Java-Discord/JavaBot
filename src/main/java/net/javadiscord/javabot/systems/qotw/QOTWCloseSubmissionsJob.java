@@ -30,10 +30,8 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 					ActionRow.of(message.getButtons()
 							.stream()
 							.map(Button::asDisabled)
-							.collect(Collectors.toList()))).queue();
-			for (var thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				thread.getManager().setInvitable(false).setLocked(true).setArchived(true).queue();
-			}
+							.collect(Collectors.toList()))
+					).queue();
 		}
 	}
 
