@@ -52,8 +52,7 @@ public class SubmissionManager {
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName(), member.getId()), true).queue(
 				thread -> {
 					var manager = thread.getManager();
-					manager.setInvitable(false).queue();
-					manager.setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
+					manager.setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
 					thread.sendMessage(config.getQOTWReviewRole().getAsMention())
 							.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
 							.setActionRows(ActionRow.of(Button.danger("qotw-submission-delete", "Delete Submission")))
