@@ -36,11 +36,10 @@ public class DeleteSubcommand implements SlashCommandHandler {
 			return Responses.error(event, "Thread must be part of " + submissionChannel.getAsMention());
 		}
 		var manager = new SubmissionManager(config.getQotw());
-		var memberOptional = manager.getSubmissionThreadOwner(thread);
-		if (memberOptional.isEmpty()) {
-			return Responses.error(event, "Cannot decline a submission of a user who is not a member of this server");
+		var member = manager.getSubmissionThreadOwner(thread);
+		if (member == null) {
+			return Responses.error(event, "Cannot delete a submission of a user who is not a member of this server");
 		}
-		var member = memberOptional.get().getMember();
 		var embed = buildDeleteSubmissionEmbed(member, event.getMember(), thread);
 		thread.delete().queue();
 		config.getModeration().getLogChannel().sendMessageEmbeds(embed).queue();

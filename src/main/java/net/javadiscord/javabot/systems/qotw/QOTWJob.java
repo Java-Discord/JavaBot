@@ -40,7 +40,7 @@ public class QOTWJob extends DiscordApiJob {
 					var questionChannel = config.getQuestionChannel();
 					if (questionChannel == null) continue;
 					questionChannel.sendMessage(config.getQOTWRole().getAsMention())
-							.setEmbeds(buildEmbed(question, jda))
+							.setEmbeds(buildEmbed(question))
 							.setActionRows(ActionRow.of(Button.success("qotw-submission:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
 					repo.markUsed(question);
@@ -53,16 +53,12 @@ public class QOTWJob extends DiscordApiJob {
 		}
 	}
 
-	private MessageEmbed buildEmbed(QOTWQuestion question, JDA jda) {
-		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
-		String description = String.format(
-				"%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",
-				question.getText(),
-				checkTime.toEpochSecond()
-		);
+	private MessageEmbed buildEmbed(QOTWQuestion question) {
+		var checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
-				.setDescription(description)
+				.setDescription(String.format("%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",
+								question.getText(), checkTime.toEpochSecond()))
 				.build();
 	}
 }

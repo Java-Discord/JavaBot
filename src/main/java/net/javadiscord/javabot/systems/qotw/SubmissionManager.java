@@ -2,17 +2,18 @@ package net.javadiscord.javabot.systems.qotw;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.ThreadChannel;
-import net.dv8tion.jda.api.entities.ThreadMember;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.util.Pair;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -21,6 +22,11 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class SubmissionManager {
+	/**
+	 * The submission thread's name.
+	 */
+	public static final String THREAD_NAME = "[#%s] %s | %s";
+
 	private final QOTWConfig config;
 
 	/**
@@ -43,17 +49,14 @@ public class SubmissionManager {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
 		config.getSubmissionChannel().createThreadChannel(
-				String.format("Submission by %s | %s (%s)", member.getEffectiveName(), member.getId(), questionNumber), true).queue(
+				String.format(THREAD_NAME, questionNumber, member.getEffectiveName(), member.getId()), true).queue(
 				thread -> {
 					var manager = thread.getManager();
 					manager.setInvitable(false).queue();
 					manager.setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					thread.sendMessageFormat("**Question of the Week #%s**\n" +
-											"\nHey, %s! Please submit your answer into this thread." +
-											"\nYou can even send multiple messages, if you want to. This whole thread counts as your submission." +
-											"\nThe %s will review your submission once a new question appears.",
-									questionNumber, member.getAsMention(), config.getQOTWReviewRole().getAsMention())
-							.setActionRows(ActionRow.of(Button.danger("qotw-submission-delete", "Delete your Submission")))
+					thread.sendMessage(config.getQOTWReviewRole().getAsMention())
+							.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
+							.setActionRows(ActionRow.of(Button.danger("qotw-submission-delete", "Delete Submission")))
 							.queue();
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
@@ -102,8 +105,9 @@ public class SubmissionManager {
 		return optional.isPresent() && !optional.get().isArchived();
 	}
 
-	public Optional<ThreadMember> getSubmissionThreadOwner(ThreadChannel channel) {
-		return channel.getThreadMembers().stream().filter(m -> channel.getName().contains(m.getId())).findFirst();
+	public Member getSubmissionThreadOwner(ThreadChannel channel) {
+		var userId = channel.getName().split("\\|")[1].substring(1);
+		return channel.getGuild().getMemberById(userId);
 	}
 
 	/**
@@ -116,7 +120,7 @@ public class SubmissionManager {
 	public Optional<ThreadChannel> getSubmissionThread(Member member, long questionNumber) {
 		return config.getSubmissionChannel().getThreadChannels()
 				.stream()
-				.filter(s -> s.getName().contains(String.format("| %s (%s)", member.getId(), questionNumber)) && !s.isArchived())
+				.filter(s -> s.getName().contains(String.format(THREAD_NAME, questionNumber, member.getEffectiveName(), member.getId())) && !s.isArchived())
 				.findFirst();
 	}
 
@@ -139,5 +143,28 @@ public class SubmissionManager {
 			messageCount -= 100;
 		}
 		return sb.toString();
+	}
+
+	private String getSubmissionId(long questionNumber, long userId) {
+		return String.format("id:%s:%s", questionNumber, userId);
+	}
+
+	private Pair<Long, Long> parseSubmissionId(String submissionId) {
+		var split = submissionId.split(":");
+		return new Pair<>(Long.parseLong(split[1]), Long.parseLong(split[2]));
+	}
+
+	private MessageEmbed buildSubmissionThreadEmbed(User createdBy, long questionNumber, QOTWConfig config) {
+		return new EmbedBuilder()
+				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getDefaultColor())
+				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setTitle(String.format("Question of the Week #%s", questionNumber))
+				.setDescription(String.format("Hey, %s! Please submit your answer into this thread." +
+								"\nYou can even send multiple messages, if you want to. This whole thread counts as your submission." +
+								"\nThe %s will review your submission once a new question appears.",
+						createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
+				.setFooter(getSubmissionId(questionNumber, createdBy.getIdLong()))
+				.setTimestamp(Instant.now())
+				.build();
 	}
 }
