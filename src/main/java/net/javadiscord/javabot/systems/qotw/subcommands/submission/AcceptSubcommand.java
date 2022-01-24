@@ -40,10 +40,11 @@ public class AcceptSubcommand implements SlashCommandHandler {
 			return Responses.error(event, "Thread must be part of " + submissionChannel.getAsMention());
 		}
 		var manager = new SubmissionManager(config.getQotw());
-		var member = manager.getSubmissionThreadOwner(thread);
-		if (member == null) {
+		var memberOptional = manager.getSubmissionThreadOwner(thread);
+		if (memberOptional.isEmpty()) {
 			return Responses.error(event, "Cannot accept a submission of a user who is not a member of this server");
 		}
+		var member = memberOptional.get().getMember();
 		new IncrementSubcommand().correct(member, true);
 		var embed = buildAcceptSubmissionEmbed(member, event.getMember(), thread);
 		thread.sendMessageEmbeds(embed).queue();
