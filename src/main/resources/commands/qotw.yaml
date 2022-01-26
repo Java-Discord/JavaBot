@@ -75,28 +75,4 @@
               description: The amount of points.
               required: true
               type: INTEGER
-    - name: submission
-      description: Commands for managing user submissions.
-      subCommands:
-        - name: accept
-          description: Grants the user one QOTW-Point and accept their submission.
-          options:
-            - name: thread
-              description: The submission thread.
-              type: CHANNEL
-              required: true
-        - name: decline
-          description: Declines a submission.
-          options:
-            - name: thread
-              description: The submission thread.
-              type: CHANNEL
-              required: true
-        - name: delete
-          description: Deletes a submission.
-          options:
-            - name: thread
-              description: The submission thread.
-              type: CHANNEL
-              required: true
   handler: net.javadiscord.javabot.systems.qotw.subcommands.QOTWCommandHandler
