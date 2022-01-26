@@ -133,6 +133,7 @@ public class SubmissionManager {
 	 *
 	 * @param id The button's id, split by ":".
 	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 * @return The {@link ReplyAction}.
 	 */
 	public ReplyAction handleSubmissionControlInteraction(String[] id, ButtonClickEvent event) {
 		if (!event.getMember().getRoles().isEmpty() || !event.getMember().getRoles().contains(config.getQOTWReviewRole())) {
