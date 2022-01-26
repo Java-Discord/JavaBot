@@ -8,13 +8,15 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.util.Pair;
+import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -26,6 +28,8 @@ public class SubmissionManager {
 	 * The submission thread's name.
 	 */
 	public static final String THREAD_NAME = "[#%s] %s | %s";
+	private final String SUBMISSION_ACCEPTED = "✔️";
+	private final String SUBMISSION_DECLINED = "❌";
 
 	private final QOTWConfig config;
 
@@ -55,7 +59,7 @@ public class SubmissionManager {
 					manager.setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
 					thread.sendMessage(String.format("%s, %s", event.getUser().getAsMention(), config.getQOTWReviewRole().getAsMention()))
 							.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
-							.setActionRows(ActionRow.of(Button.danger("qotw-submission-delete", "Delete Submission")))
+							.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
 							.queue();
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
@@ -104,8 +108,14 @@ public class SubmissionManager {
 		return optional.isPresent() && !optional.get().isArchived();
 	}
 
+	/**
+	 * Tries to retrieve the owner of this submission by using the id that is embedded into the channel name.
+	 * @param channel The {@link ThreadChannel}.
+	 * @return The submission's owner.
+	 */
 	public Member getSubmissionThreadOwner(ThreadChannel channel) {
-		var userId = channel.getName().split("\\|")[1].substring(1);
+		var split = channel.getName().split("\\s+");
+		var userId = split[split.length - 1];
 		return channel.getGuild().getMemberById(userId);
 	}
 
@@ -124,33 +134,46 @@ public class SubmissionManager {
 	}
 
 	/**
-	 * Archives a submissions thread's messages into a single string.
+	 * Handles Interaction regarding the Submission Controls System.
 	 *
-	 * @param channel The submission's thread channel.
-	 * @return The String containing all messages.
+	 * @param id The button's id, split by ":".
+	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 * @return The {@link ReplyAction}.
 	 */
-	public String archiveThreadContents(ThreadChannel channel) {
-		var history = channel.getHistory();
-		var messageCount = channel.getMessageCount();
-		StringBuilder sb = new StringBuilder();
-		while (messageCount > 0) {
-			var messages = history.retrievePast(100).complete();
-			for (var message : messages) {
-				if (message.getAuthor() == message.getJDA().getSelfUser()) continue;
-				sb.insert(0, message.getContentRaw() + "\n\n");
-			}
-			messageCount -= 100;
+	public ReplyAction handleSubmissionControlInteraction(String[] id, ButtonClickEvent event) {
+		if (!event.getMember().getRoles().isEmpty() || !event.getMember().getRoles().contains(config.getQOTWReviewRole())) {
+			return event.reply("Insufficient Permissions.");
 		}
-		return sb.toString();
+		if (!event.getChannelType().isThread()) {
+			return event.reply("This interaction may only be used in thread channels.");
+		}
+		var thread = (ThreadChannel) event.getGuildChannel();
+		return switch (id[1]) {
+			case "accept" -> acceptSubmission(event, thread);
+			case "decline" -> declineSubmission(event, thread);
+			case "delete" -> deleteSubmission(event, thread);
+			default -> event.reply("Invalid Interaction").setEphemeral(true);
+		};
 	}
 
-	private String getSubmissionId(long questionNumber, long userId) {
-		return String.format("id:%s:%s", questionNumber, userId);
+	private ReplyAction acceptSubmission(ButtonClickEvent event, ThreadChannel thread) {
+		var member = getSubmissionThreadOwner(thread);
+		if (member == null) return event.reply("Cannot accept a submission of a user who is not a member of this server");
+		new IncrementSubcommand().correct(member, false);
+		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
+		return event.reply("Successfully accepted submission by " + member.getAsMention()).setEphemeral(true);
 	}
 
-	private Pair<Long, Long> parseSubmissionId(String submissionId) {
-		var split = submissionId.split(":");
-		return new Pair<>(Long.parseLong(split[1]), Long.parseLong(split[2]));
+	private ReplyAction declineSubmission(ButtonClickEvent event, ThreadChannel thread) {
+		var member = getSubmissionThreadOwner(thread);
+		if (member == null) return event.reply("Cannot decline a submission of a user who is not a member of this server");
+		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
+		return event.reply("Successfully declined submission by " + member.getAsMention()).setEphemeral(true);
+	}
+
+	private ReplyAction deleteSubmission(ButtonClickEvent event, ThreadChannel thread) {
+		thread.delete().queueAfter(10, TimeUnit.SECONDS);
+		return event.reply("Submission will be deleted in 10 seconds...").setEphemeral(true);
 	}
 
 	private MessageEmbed buildSubmissionThreadEmbed(User createdBy, long questionNumber, QOTWConfig config) {
@@ -162,7 +185,6 @@ public class SubmissionManager {
 								"\nYou can even send multiple messages, if you want to. This whole thread counts as your submission." +
 								"\nThe %s will review your submission once a new question appears.",
 						createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
-				.setFooter(getSubmissionId(questionNumber, createdBy.getIdLong()))
 				.setTimestamp(Instant.now())
 				.build();
 	}

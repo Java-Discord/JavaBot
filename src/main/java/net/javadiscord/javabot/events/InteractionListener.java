@@ -24,7 +24,13 @@ public class InteractionListener extends ListenerAdapter {
 		String[] id = event.getComponentId().split(":");
 		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
-			case "qotw-submission" -> new SubmissionManager(config.getQotw()).handleSubmission(event, Long.parseLong(id[1])).queue();
+			case "qotw-submission" -> {
+				var manager = new SubmissionManager(config.getQotw());
+				if (!id[1].isEmpty() && id[1].equals("delete")) manager.handleThreadDeletion(event);
+				else manager.handleSubmission(event, Long.parseLong(id[1])).queue();
+			}
+			case "submission-controls" -> new SubmissionManager(config.getQotw()).handleSubmissionControlInteraction(id, event).queue();
+			// Deprecated: Remove this next week
 			case "qotw-submission-delete" -> new SubmissionManager(config.getQotw()).handleThreadDeletion(event);
 			case "reaction-role" -> this.handleReactionRoles(event);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
