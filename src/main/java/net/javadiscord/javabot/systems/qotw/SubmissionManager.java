@@ -109,8 +109,14 @@ public class SubmissionManager {
 		return optional.isPresent() && !optional.get().isArchived();
 	}
 
+	/**
+	 * Tries to retrieve the owner of this submission by using the id that is embedded into the channel name.
+	 * @param channel The {@link ThreadChannel}.
+	 * @return The submission's owner.
+	 */
 	public Member getSubmissionThreadOwner(ThreadChannel channel) {
-		var userId = channel.getName().substring(channel.getName().length() - DISCORD_ID_LENGTH);
+		var split = channel.getName().split("\\s+");
+		var userId = split[split.length - 1];
 		return channel.getGuild().getMemberById(userId);
 	}
 
