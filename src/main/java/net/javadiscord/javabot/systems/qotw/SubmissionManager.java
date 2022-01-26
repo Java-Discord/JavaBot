@@ -161,6 +161,7 @@ public class SubmissionManager {
 		if (member == null) return event.reply("Cannot accept a submission of a user who is not a member of this server");
 		new IncrementSubcommand().correct(member, false);
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
+		log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
 		return event.reply("Successfully accepted submission by " + member.getAsMention()).setEphemeral(true);
 	}
 
@@ -168,11 +169,13 @@ public class SubmissionManager {
 		var member = getSubmissionThreadOwner(thread);
 		if (member == null) return event.reply("Cannot decline a submission of a user who is not a member of this server");
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
+		log.info("{} declined {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
 		return event.reply("Successfully declined submission by " + member.getAsMention()).setEphemeral(true);
 	}
 
 	private ReplyAction deleteSubmission(ButtonClickEvent event, ThreadChannel thread) {
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
+		log.info("{} deleted submission {}", event.getUser().getAsTag(), thread.getName());
 		return event.reply("Submission will be deleted in 10 seconds...").setEphemeral(true);
 	}
 
