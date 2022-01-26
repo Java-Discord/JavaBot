@@ -28,7 +28,6 @@ public class SubmissionManager {
 	 * The submission thread's name.
 	 */
 	public static final String THREAD_NAME = "[#%s] %s | %s";
-	private final int DISCORD_ID_LENGTH = 18;
 	private final String SUBMISSION_ACCEPTED = "✔️";
 	private final String SUBMISSION_DECLINED = "❌";
 
