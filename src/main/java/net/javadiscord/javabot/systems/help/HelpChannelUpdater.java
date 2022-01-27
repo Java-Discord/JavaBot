@@ -1,21 +1,22 @@
 package net.javadiscord.javabot.systems.help;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +56,9 @@ public class HelpChannelUpdater implements Runnable {
 			this.checkOpenChannel(channel).queue();
 		}
 		this.balanceChannels();
+		if (config.getHelpOverviewChannel() != null) {
+			this.updateHelpOverview();
+		}
 	}
 
 	/**
@@ -354,5 +358,51 @@ public class HelpChannelUpdater implements Runnable {
 				.collect(Collectors.toList());
 		if (checkActions.isEmpty()) return new CompletedRestAction<>(jda, null);
 		return RestAction.allOf(checkActions);
+	}
+
+	private void updateHelpOverview() {
+		var channel = config.getHelpOverviewChannel();
+		var history = channel.getHistory();
+		history.retrievePast(100).queue(
+				messages -> {
+					var latestMessage = messages.stream().filter(m -> m.getAuthor().equals(jda.getSelfUser())).findFirst();
+					if (latestMessage.isPresent()) {
+						latestMessage.get().editMessageEmbeds(buildHelpOverviewEmbed()).queue();
+					} else {
+						channel.sendMessageEmbeds(buildHelpOverviewEmbed()).queue();
+					}
+				}
+		);
+	}
+
+	private MessageEmbed buildHelpOverviewEmbed() {
+		String availableHelpChannels = config.getOpenChannelCategory().getTextChannels()
+				.stream()
+				.map(TextChannel::getAsMention)
+				.collect(Collectors.joining("\n"));
+		StringBuilder reservedHelpChannels = new StringBuilder();
+		for (var channel : config.getReservedChannelCategory().getTextChannels()) {
+			var optional = channelManager.getReservationForChannel(channel.getIdLong());
+			if (optional.isEmpty()) continue;
+			var reservation = optional.get();
+			jda.retrieveUserById(reservation.getUserId()).queue(
+					u -> reservedHelpChannels.append(String.format("""
+							%s
+							Reserved by %s <t:%s:R>
+							
+							""", channel.getAsMention(), u.getAsMention(),
+							reservation.getReservedAt().toEpochSecond(ZoneOffset.UTC))),
+					e -> {}
+			);
+		}
+		return new EmbedBuilder()
+				.setTitle("Help Overview")
+				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getDefaultColor())
+				.addField("Available Help Channels", availableHelpChannels, false)
+				.addField("Reserved Help Channels", reservedHelpChannels.toString(), false)
+				.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false)
+				.setFooter(String.format("Refreshing every %s seconds", config.getUpdateIntervalSeconds()))
+				.setTimestamp(Instant.now())
+				.build();
 	}
 }
