@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.serverlock;
+package net.javadiscord.javabot.systems.moderation;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;

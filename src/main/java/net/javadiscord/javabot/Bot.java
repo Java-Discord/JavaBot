@@ -16,7 +16,7 @@ import net.javadiscord.javabot.events.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.qotw.SubmissionEventListener;
-import net.javadiscord.javabot.systems.serverlock.ServerLock;
+import net.javadiscord.javabot.systems.moderation.ServerLock;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
