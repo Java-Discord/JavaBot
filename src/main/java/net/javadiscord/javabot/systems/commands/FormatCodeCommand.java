@@ -23,15 +23,15 @@ public class FormatCodeCommand implements SlashCommandHandler {
 		var formatOption = event.getOption("format");
 		String format = formatOption == null ? "java" : formatOption.getAsString();
 		long id;
-        if (idOption == null) {
-            if (event.getChannel().hasLatestMessage()) {
-                id = event.getChannel().getLatestMessageIdLong();
-            } else {
-                return Responses.error(event, "Missing required arguments.");
-            }
-        } else {
-            id = idOption.getAsLong();
-        }
+		if (idOption == null) {
+			if (event.getChannel().hasLatestMessage()) {
+				id = event.getChannel().getLatestMessageIdLong();
+			} else {
+				return Responses.error(event, "Missing required arguments.");
+			}
+		} else {
+			id = idOption.getAsLong();
+		}
 		var slashConfig = Bot.config.get(event.getGuild()).getSlashCommand();
 		event.getTextChannel().retrieveMessageById(id).queue(
 				m -> event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(m, m.getAuthor(), format, slashConfig)).queue(),
