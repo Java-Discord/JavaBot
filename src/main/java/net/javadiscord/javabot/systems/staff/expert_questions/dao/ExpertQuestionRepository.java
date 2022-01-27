@@ -1,7 +1,7 @@
-package net.javadiscord.javabot.systems.expert_questions.dao;
+package net.javadiscord.javabot.systems.staff.expert_questions.dao;
 
 import lombok.RequiredArgsConstructor;
-import net.javadiscord.javabot.systems.expert_questions.model.ExpertQuestion;
+import net.javadiscord.javabot.systems.staff.expert_questions.model.ExpertQuestion;
 
 import java.sql.*;
 import java.util.ArrayList;

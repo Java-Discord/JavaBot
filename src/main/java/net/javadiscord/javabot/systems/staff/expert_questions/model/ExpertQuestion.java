@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.expert_questions.model;
+package net.javadiscord.javabot.systems.staff.expert_questions.model;
 
 import lombok.Data;
 

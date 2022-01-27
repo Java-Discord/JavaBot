@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.expert_questions;
+package net.javadiscord.javabot.systems.staff.expert_questions;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;

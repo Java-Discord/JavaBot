@@ -517,7 +517,7 @@
           description: The amount of questions to display.
           type: INTEGER
           required: true
-  handler: net.javadiscord.javabot.systems.expert_questions.ExpertQuestionCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.expert_questions.ExpertQuestionCommandHandler
 
 # /report
 - name: report
