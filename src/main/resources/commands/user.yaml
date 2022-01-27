@@ -143,7 +143,44 @@
   description: Format unformatted code from a mesage
   options:
     - name: message-id
-      description: Message to be formatted, last message used if left blank
+      description: Message to be formatted, last message used if left blank.
       required: false
       type: STRING
+    - name: format
+      description: The language used to format the code, defaults to Java if left blank.
+      required: false
+      type: STRING
+      choices:
+        - name: C
+          value: c
+        - name: C#
+          value: csharp
+        - name: C++
+          value: cpp
+        - name: CSS
+          value: css
+        - name: D
+          value: d
+        - name: Go
+          value: go
+        - name: HTML
+          value: html
+        - name: Java
+          value: java
+        - name: JavaScript
+          value: js
+        - name: Kotlin
+          value: kotlin
+        - name: PHP
+          value: php
+        - name: Python
+          value: python
+        - name: Ruby
+          value: Ruby
+        - name: Rust
+          value: rust
+        - name: Swift
+          value: swift
+        - name: TypeScript
+          value: typescript
   handler: net.javadiscord.javabot.systems.commands.FormatCodeCommand
