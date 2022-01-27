@@ -15,7 +15,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
  * Subcommand that lets staff members decline suggestions.
  */
 @Slf4j
-public class DeclineSubcommand implements SlashCommandHandler {
+public class DeclineSuggestionSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var messageIdOption = event.getOption("message-id");
@@ -38,7 +38,7 @@ public class DeclineSubcommand implements SlashCommandHandler {
 
 	private MessageEmbed buildSuggestionDeclineEmbed(User user, MessageEmbed embed, GuildConfig config) {
 		return new EmbedBuilder()
-				.setColor(config.getSlashCommand().getDefaultColor())
+				.setColor(config.getSlashCommand().getErrorColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion Declined")
 				.setDescription(embed.getDescription())

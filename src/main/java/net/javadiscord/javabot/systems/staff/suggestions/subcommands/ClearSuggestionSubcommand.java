@@ -14,7 +14,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
  * Subcommand that lets staff members clear suggestions.
  */
 @Slf4j
-public class ClearSubcommand implements SlashCommandHandler {
+public class ClearSuggestionSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var messageIdOption = event.getOption("message-id");

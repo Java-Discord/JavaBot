@@ -15,7 +15,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
  * Subcommand that lets staff members accept suggestions.
  */
 @Slf4j
-public class AcceptSubcommand implements SlashCommandHandler {
+public class AcceptSuggestionSubcommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		var messageIdOption = event.getOption("message-id");
