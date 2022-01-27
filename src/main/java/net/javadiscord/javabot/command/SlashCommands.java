@@ -96,7 +96,6 @@ public class SlashCommands extends ListenerAdapter {
 	 */
 	public void registerSlashCommands(Guild guild) {
 		CommandConfig[] commandConfigs = CommandDataLoader.load(
-				"commands/economy.yaml",
 				"commands/help.yaml",
 				"commands/jam.yaml",
 				"commands/qotw.yaml",
