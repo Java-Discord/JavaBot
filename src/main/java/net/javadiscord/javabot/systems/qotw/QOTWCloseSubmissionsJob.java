@@ -2,9 +2,12 @@ package net.javadiscord.javabot.systems.qotw;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
@@ -30,7 +33,7 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 			var message = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
 			if (message == null) continue;
 			message.editMessageComponents(
-					ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled()))
+							ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled()))
 					.queue();
 			var manager = new SubmissionManager(qotwConfig);
 			// Remove Thread Owners and send Submission Controls
@@ -38,16 +41,24 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 				var ownerId = manager.getSubmissionThreadOwner(thread).getId();
 				thread.getThreadMembers()
 						.stream()
-						.filter(m -> !m.getMember().getRoles().contains(qotwConfig.getQOTWReviewRole()))
+						.filter(m -> !m.getMember().getRoles().contains(qotwConfig.getQOTWReviewRole()) && !m.getMember().getUser().isBot())
 						.forEach(m -> thread.removeThreadMember(m.getUser()).queue());
 				thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
+				// Build Submission Controls Embed
+				var declineMenu = SelectionMenu.create("submission-controls:decline")
+						.setPlaceholder("Select a reason for declining this submission.")
+						.setMinValues(1)
+						.setMaxValues(3)
+						.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")
+						.addOption("Incomplete Answer", "Incomplete Answer", "The submission was missing some important things and was overall incomplete.")
+						.addOption("Too short", "Too short", "The submission was way too short in comparison to other submissions.")
+						.build();
 				thread.sendMessage(qotwConfig.getQOTWReviewRole().getAsMention())
 						.setEmbeds(buildSubmissionControlEmbed(qotwConfig))
 						.setActionRows(ActionRow.of(
 								Button.success("submission-controls:accept:" + ownerId, "Accept"),
-								Button.danger("submission-controls:decline:" + ownerId, "Decline"),
 								Button.danger("submission-controls:delete", "Delete")
-						)).queue();
+						), ActionRow.of(declineMenu)).queue();
 			}
 		}
 	}

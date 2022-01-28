@@ -3,6 +3,7 @@ package net.javadiscord.javabot.events;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
@@ -14,6 +15,16 @@ import net.javadiscord.javabot.systems.qotw.SubmissionManager;
  */
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
+
+	@Override
+	public void onSelectionMenu(SelectionMenuEvent event) {
+		if (event.getUser().isBot()) return;
+		event.deferEdit().queue();
+		var config = Bot.config.get(event.getGuild());
+		if (event.getComponentId().equals("submission-controls:decline")) {
+			new SubmissionManager(config.getQotw()).handleSubmissionControlSelectInteraction(event.getComponentId(), event);
+		}
+	}
 
 	// TODO: add Context-Menu Commands (once they're available in JDA)
 	// TODO: Clean up button ids. "qotw-submission" & "qotw-submission-delete" is just a temporary solution.
@@ -29,7 +40,7 @@ public class InteractionListener extends ListenerAdapter {
 				if (!id[1].isEmpty() && id[1].equals("delete")) manager.handleThreadDeletion(event);
 				else manager.handleSubmission(event, Long.parseLong(id[1])).queue();
 			}
-			case "submission-controls" -> new SubmissionManager(config.getQotw()).handleSubmissionControlInteraction(id, event).queue();
+			case "submission-controls" -> new SubmissionManager(config.getQotw()).handleSubmissionControlButtonInteractions(id, event).queue();
 			// Deprecated: Remove this next week
 			case "qotw-submission-delete" -> new SubmissionManager(config.getQotw()).handleThreadDeletion(event);
 			case "reaction-role" -> this.handleReactionRoles(event);

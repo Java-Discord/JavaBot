@@ -1,5 +1,9 @@
 # /jam
 - name: jam
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
   description: Interact with Java Jam functionality.
   subCommands:
     # /jam info

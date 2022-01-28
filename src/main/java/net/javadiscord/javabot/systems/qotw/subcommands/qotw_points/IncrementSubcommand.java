@@ -61,11 +61,12 @@ public class IncrementSubcommand implements SlashCommandHandler {
 	private MessageEmbed buildIncrementDmEmbed(Member member, long points) {
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
-				.setTitle("Question of the Week")
+				.setTitle("QOTW Notification")
 				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
 				.setDescription(String.format(
-						"Your answer was correct! %s\nYou've been granted **`1 QOTW-Point`**! (total: %s)",
-						Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
+						"Hey %s," +
+						"\nYour submission was accepted! %s\nYou've been granted **`1 QOTW-Point`**! (total: %s)",
+						member.getAsMention(), Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
 				.setTimestamp(Instant.now())
 				.build();
 	}
