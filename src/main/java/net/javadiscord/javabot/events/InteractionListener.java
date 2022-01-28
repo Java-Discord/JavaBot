@@ -22,7 +22,7 @@ public class InteractionListener extends ListenerAdapter {
 		event.deferEdit().queue();
 		var config = Bot.config.get(event.getGuild());
 		if (event.getComponentId().equals("submission-controls:decline")) {
-			new SubmissionManager(config.getQotw()).handleSubmissionControlSelectInteraction(event.getComponentId(), event);
+			new SubmissionManager(config.getQotw()).handleSubmissionControlSelectInteraction(event.getComponentId(), event).queue();
 		}
 	}
 

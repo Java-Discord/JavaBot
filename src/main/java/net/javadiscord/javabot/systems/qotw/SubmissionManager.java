@@ -56,8 +56,7 @@ public class SubmissionManager {
 		config.getSubmissionChannel().createThreadChannel(
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName(), member.getId()), true).queue(
 				thread -> {
-					var manager = thread.getManager();
-					manager.setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
+					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
 					thread.sendMessage(String.format("%s, %s", event.getUser().getAsMention(), config.getQOTWReviewRole().getAsMention()))
 							.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
 							.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
@@ -231,7 +230,7 @@ public class SubmissionManager {
 				.setDescription(String.format(
 						"Hey %s," +
 						"\nYour QOTW-Submission was **declined** for the following reasons:" +
-						"\n> **`%s`**" +
+						"\n**`%s`**" +
 						"\n\nHowever, you can try your luck again next week!", createdBy.getAsMention(), reasons))
 				.setTimestamp(Instant.now())
 				.build();

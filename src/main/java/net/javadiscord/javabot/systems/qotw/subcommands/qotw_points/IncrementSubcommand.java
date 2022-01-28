@@ -37,7 +37,7 @@ public class IncrementSubcommand implements SlashCommandHandler {
 			var embed = buildIncrementEmbed(member, points);
 			if (!quiet) Misc.sendToLog(member.getGuild(), embed);
 			member.getUser().openPrivateChannel().queue(
-					c -> c.sendMessageEmbeds(dmEmbed).queue(),
+					c -> c.sendMessageEmbeds(dmEmbed).queue(s -> {}, e -> {}),
 					e -> Misc.sendToLog(member.getGuild(), "> Could not send direct message to member " + member.getAsMention()));
 			return repo.getAccountByUserId(memberId).getPoints();
 		} catch (SQLException e) {
@@ -66,7 +66,7 @@ public class IncrementSubcommand implements SlashCommandHandler {
 				.setDescription(String.format(
 						"Hey %s," +
 						"\nYour submission was accepted! %s\nYou've been granted **`1 QOTW-Point`**! (total: %s)",
-						member.getAsMention(), Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
+						member.getAsMention(), "Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention()", points))
 				.setTimestamp(Instant.now())
 				.build();
 	}

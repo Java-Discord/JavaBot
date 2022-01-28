@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -19,6 +20,7 @@ import java.time.Instant;
 /**
  * Job which disables the Submission button.
  */
+@Slf4j
 public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 	private final String SUBMISSION_PENDING = "\uD83D\uDD52";
 
@@ -59,6 +61,7 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 								Button.success("submission-controls:accept:" + ownerId, "Accept"),
 								Button.danger("submission-controls:delete", "Delete")
 						), ActionRow.of(declineMenu)).queue();
+				log.info("Sent Submission Controls to thread {}", thread.getName());
 			}
 		}
 	}
