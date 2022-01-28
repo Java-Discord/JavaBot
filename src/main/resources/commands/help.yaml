@@ -1,9 +1,5 @@
 # /unreserve
 - name: unreserve
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Unreserves this help channel so that others can use it.
   handler: net.javadiscord.javabot.systems.help.UnreserveCommandHandler
   options:
@@ -14,10 +10,6 @@
 
 # /thanks
 - name: thanks
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Show an overview of how a user has been thanked for their help.
   handler: net.javadiscord.javabot.systems.help.ThanksCommandHandler
   options:
@@ -28,27 +20,15 @@
 
 # /thanks-leaderboard
 - name: thanks-leaderboard
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Show a leaderboard of the most thanked users.
   handler: net.javadiscord.javabot.systems.help.ThanksLeaderboardCommandHandler
 
 # /help-guidelines
 - name: help-guidelines
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Show the server's help guidelines in a simple format.
   handler: net.javadiscord.javabot.systems.help.HelpGuidelinesCommandHandler
 
 # /help-ping
 - name: help-ping
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Notify those with the help-ping role that your question is urgent.
   handler: net.javadiscord.javabot.systems.help.HelpPingCommandHandler

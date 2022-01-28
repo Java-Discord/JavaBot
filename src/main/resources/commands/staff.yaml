@@ -438,10 +438,6 @@
 
 # /customcommands
 - name: customcommands
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Lists all custom slash commands
   handler: net.javadiscord.javabot.systems.staff.custom_commands.ListCommand
 
@@ -525,10 +521,6 @@
 
 # /report
 - name: report
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Reports a member
   options:
     - name: user
@@ -543,10 +535,6 @@
 
 # /warns
 - name: warns
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
   description: Shows your warn count
   options:
     - name: user
