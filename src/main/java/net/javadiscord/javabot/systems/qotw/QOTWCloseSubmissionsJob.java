@@ -47,23 +47,26 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 						.forEach(m -> thread.removeThreadMember(m.getUser()).queue());
 				thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 				// Build Submission Controls Embed
-				var declineMenu = SelectionMenu.create("submission-controls:decline")
-						.setPlaceholder("Select a reason for declining this submission.")
-						.setMinValues(1)
-						.setMaxValues(3)
-						.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")
-						.addOption("Incomplete Answer", "Incomplete Answer", "The submission was missing some important things and was overall incomplete.")
-						.addOption("Too short", "Too short", "The submission was way too short in comparison to other submissions.")
-						.build();
 				thread.sendMessage(qotwConfig.getQOTWReviewRole().getAsMention())
 						.setEmbeds(buildSubmissionControlEmbed(qotwConfig))
 						.setActionRows(ActionRow.of(
 								Button.success("submission-controls:accept:" + ownerId, "Accept"),
-								Button.danger("submission-controls:delete", "Delete")
-						), ActionRow.of(declineMenu)).queue();
+								Button.secondary("submission-controls:delete","🗑️")
+						), ActionRow.of(buildDeclineMenu())).queue();
 				log.info("Sent Submission Controls to thread {}", thread.getName());
 			}
 		}
+	}
+
+	private SelectionMenu buildDeclineMenu() {
+		return SelectionMenu.create("submission-controls:decline")
+				.setPlaceholder("Select a reason for declining this submission.")
+				.setMinValues(1)
+				.setMaxValues(3)
+				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")
+				.addOption("Incomplete Answer", "Incomplete Answer", "The submission was missing some important things and was overall incomplete.")
+				.addOption("Too short", "Too short", "The submission was way too short in comparison to other submissions.")
+				.build();
 	}
 
 	private Message getLatestQOTWMessage(MessageChannel channel, QOTWConfig config, JDA jda) {

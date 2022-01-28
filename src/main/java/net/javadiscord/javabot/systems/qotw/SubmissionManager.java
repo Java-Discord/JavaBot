@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
-
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
@@ -110,6 +109,7 @@ public class SubmissionManager {
 
 	/**
 	 * Tries to retrieve the owner of this submission by using the id that is embedded into the channel name.
+	 *
 	 * @param channel The {@link ThreadChannel}.
 	 * @return The submission's owner.
 	 */
@@ -136,7 +136,7 @@ public class SubmissionManager {
 	/**
 	 * Handles Button interactions regarding the Submission Controls System.
 	 *
-	 * @param id The button's id, split by ":".
+	 * @param id    The button's id, split by ":".
 	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 * @return The {@link WebhookMessageAction}.
 	 */
@@ -158,7 +158,7 @@ public class SubmissionManager {
 	/**
 	 * Handles Select Menu interactions regarding the Submission Controls System.
 	 *
-	 * @param id The SelectionMenu's id.
+	 * @param id    The SelectionMenu's id.
 	 * @param event The {@link SelectionMenuEvent} that is fired upon use.
 	 * @return The {@link WebhookMessageAction}.
 	 */
@@ -179,7 +179,9 @@ public class SubmissionManager {
 
 	private WebhookMessageAction<?> acceptSubmission(ButtonClickEvent event, ThreadChannel thread) {
 		var member = getSubmissionThreadOwner(thread);
-		if (member == null) return event.getHook().sendMessage("Cannot accept a submission of a user who is not a member of this server");
+		if (member == null) {
+			return event.getHook().sendMessage("Cannot accept a submission of a user who is not a member of this server");
+		}
 		new IncrementSubcommand().correct(member, true);
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 		log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
@@ -190,9 +192,12 @@ public class SubmissionManager {
 	private WebhookMessageAction<?> declineSubmission(SelectionMenuEvent event, ThreadChannel thread) {
 		var member = getSubmissionThreadOwner(thread);
 		var reasons = String.join(", ", event.getValues());
-		if (member == null) return event.getHook().sendMessage("Cannot decline a submission of a user who is not a member of this server");
+		if (member == null) {
+			return event.getHook().sendMessage("Cannot decline a submission of a user who is not a member of this server");
+		}
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
-		member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(), e -> {});
+		member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(), e -> {
+		});
 		log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
 		this.disableControls(String.format("Declined by %s for: %s", event.getUser().getAsTag(), reasons), event.getMessage());
 		return event.getHook().sendMessage("Successfully declined submission by " + member.getAsMention()).setEphemeral(true);
@@ -229,9 +234,9 @@ public class SubmissionManager {
 				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getErrorColor())
 				.setDescription(String.format(
 						"Hey %s," +
-						"\nYour QOTW-Submission was **declined** for the following reasons:" +
-						"\n**`%s`**" +
-						"\n\nHowever, you can try your luck again next week!", createdBy.getAsMention(), reasons))
+								"\nYour QOTW-Submission was **declined** for the following reasons:" +
+								"\n**`%s`**" +
+								"\n\nHowever, you can try your luck again next week!", createdBy.getAsMention(), reasons))
 				.setTimestamp(Instant.now())
 				.build();
 	}
