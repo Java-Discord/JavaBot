@@ -119,8 +119,10 @@ public class AutoMod extends ListenerAdapter {
 	 * Runs all automod checks only depend on the message content.
 	 *
 	 * @param message the {@link Message} that should be checked
+	 *
+	 * Returns true for safe content
 	 */
-	private void checkContentAutomod(@Nonnull Message message) {
+	public boolean checkContentAutomod(@Nonnull Message message) {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
@@ -135,6 +137,7 @@ public class AutoMod extends ListenerAdapter {
 							false
 					);
 			message.delete().queue();
+			return false;
 		}
 
 		final String messageRaw = message.getContentRaw();
@@ -158,6 +161,7 @@ public class AutoMod extends ListenerAdapter {
 											false
 									);
 							message.delete().queue();
+							return false;
 						}
 					}
 				} catch (URISyntaxException e) {
@@ -165,6 +169,7 @@ public class AutoMod extends ListenerAdapter {
 				}
 			}
 		}
+		return true;
 	}
 
 	/**
