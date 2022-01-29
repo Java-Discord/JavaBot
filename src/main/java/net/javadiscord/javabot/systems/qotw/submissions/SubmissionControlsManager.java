@@ -15,7 +15,7 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -127,7 +127,7 @@ public class SubmissionControlsManager {
 						new IncrementSubcommand().correct(member, true);
 						thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
-						Misc.sendToLogFormat(event.getGuild(), "{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
+						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s accepted %s's submission", event.getUser().getAsTag(), member.getUser().getAsTag()).queue();
 						this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
 						Responses.success(event.getHook(), "Submission Accepted", "Successfully accepted submission by " + member.getAsMention()).queue();
 					}
@@ -161,7 +161,7 @@ public class SubmissionControlsManager {
 								});
 						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
-						Misc.sendToLogFormat(event.getGuild(), "%s declined %s's submission for: %s", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
+						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s declined %s's submission for: `%s`", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
 						this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
 						Responses.success(event.getHook(), "Submission Declined",
 								String.format("Successfully declined submission by %s for the following reasons:\n`%s`" + member.getAsMention(), reasons)).queue();
@@ -175,7 +175,7 @@ public class SubmissionControlsManager {
 	private void deleteSubmission(ButtonClickEvent event, ThreadChannel thread) {
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 		log.info("{} deleted submission thread {}", event.getUser().getAsTag(), thread.getName());
-		Misc.sendToLogFormat(event.getGuild(), "%s deleted submission thread `%s`", event.getUser().getAsTag(), thread.getName());
+		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s deleted submission thread `%s`", event.getUser().getAsTag(), thread.getName()).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
 		event.getHook().sendMessage("Submission will be deleted in 10 seconds...").setEphemeral(true);
 	}
