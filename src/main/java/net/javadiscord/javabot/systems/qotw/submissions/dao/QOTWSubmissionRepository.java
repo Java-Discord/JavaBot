@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

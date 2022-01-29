@@ -38,6 +38,7 @@ public class SubmissionControlsManager {
 
 	/**
 	 * Sends an embed in the submission's guild channel that allows QOTW-Review Team members to accept, decline or delete submissions.
+	 *
 	 * @return Whether the message was successfully delivered.
 	 */
 	public boolean sendSubmissionControls() {
@@ -156,7 +157,8 @@ public class SubmissionControlsManager {
 						}
 						member.getUser().openPrivateChannel().queue(
 								c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(),
-								e -> {});
+								e -> {
+								});
 						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
 						Misc.sendToLogFormat(event.getGuild(), "%s declined %s's submission for: %s", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);

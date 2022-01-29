@@ -3,7 +3,10 @@ package net.javadiscord.javabot.systems.qotw.submissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.ThreadChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
@@ -99,6 +102,7 @@ public class SubmissionManager {
 
 	/**
 	 * Checks if the given user has unreviewed submissions.
+	 *
 	 * @param authorId The user's id.
 	 * @return Whether the user hat unreviewed submissions or not.
 	 */
