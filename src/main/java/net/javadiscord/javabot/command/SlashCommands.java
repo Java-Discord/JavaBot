@@ -168,7 +168,7 @@ public class SlashCommands extends ListenerAdapter {
 
 		Map<String, List<CommandPrivilege>> map = new HashMap<>();
 		for (Command command : commands) {
-			List<CommandPrivilege>privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
+			List<CommandPrivilege> privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
 			if (!privileges.isEmpty()) {
 				map.put(command.getId(), privileges);
 			}

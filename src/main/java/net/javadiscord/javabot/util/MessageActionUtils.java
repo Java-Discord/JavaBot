@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 
 import java.util.ArrayList;
@@ -16,9 +15,9 @@ public class MessageActionUtils {
 	}
 
 	/**
-	 * Converts a {@link List} of Message {@link Component}s into a List of actions rows.
+	 * Converts a {@link List} of Message {@link ItemComponent}s into a List of actions rows.
 	 *
-	 * @param components The {@link List} of {@link Component}s.
+	 * @param components The {@link List} of {@link ItemComponent}s.
 	 * @return A {@link List} of {@link ActionRow}s.
 	 */
 	public static List<ActionRow> toActionRows(List<? extends ItemComponent> components) {
