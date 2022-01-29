@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 public class MigrateSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		String migrationName = Objects.requireNonNull(event.getOption("name")).getAsString();
 		if (!migrationName.endsWith(".sql")) {
 			migrationName = migrationName + ".sql";

@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
@@ -58,7 +58,7 @@ public class QOTWJob extends DiscordApiJob {
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
 				.setDescription(String.format("%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",
-								question.getText(), checkTime.toEpochSecond()))
+						question.getText(), checkTime.toEpochSecond()))
 				.build();
 	}
 }

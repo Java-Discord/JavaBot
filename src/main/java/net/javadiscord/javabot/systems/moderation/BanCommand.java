@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
@@ -11,7 +11,7 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
  */
 public class BanCommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {

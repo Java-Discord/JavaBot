@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.configuration.subcommands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.io.File;
@@ -12,7 +12,7 @@ import java.io.File;
  */
 public class ListSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		return event.deferReply()
 				.addFile(new File("config/" + event.getGuild().getId() + ".json"));
 	}

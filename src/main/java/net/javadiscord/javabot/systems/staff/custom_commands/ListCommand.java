@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.staff.custom_commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
@@ -15,7 +15,7 @@ import java.sql.SQLException;
 public class ListCommand implements SlashCommandHandler {
 
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var commands = new CustomCommandRepository(con).getCustomCommandsByGuildId(event.getGuild().getIdLong());
 			StringBuilder sb = new StringBuilder();

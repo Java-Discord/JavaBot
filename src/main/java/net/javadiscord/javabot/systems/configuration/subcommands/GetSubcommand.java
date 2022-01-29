@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.configuration.subcommands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
@@ -12,7 +12,7 @@ import net.javadiscord.javabot.data.config.UnknownPropertyException;
  */
 public class GetSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		var propertyOption = event.getOption("property");
 		if (propertyOption == null) {
 			return Responses.warning(event, "Missing required property argument.");

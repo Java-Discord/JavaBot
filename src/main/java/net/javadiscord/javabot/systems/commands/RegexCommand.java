@@ -4,8 +4,8 @@ import com.google.re2j.Pattern;
 import com.google.re2j.PatternSyntaxException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
@@ -16,7 +16,7 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
  */
 public class RegexCommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) throws ResponseException {
 		var patternOption = event.getOption("regex");
 		var stringOption = event.getOption("string");
 		if (patternOption == null) return Responses.warning(event, "Missing required regex pattern.");

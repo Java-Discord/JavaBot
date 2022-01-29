@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
@@ -51,15 +51,15 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 						.setEmbeds(buildSubmissionControlEmbed(qotwConfig))
 						.setActionRows(ActionRow.of(
 								Button.success("submission-controls:accept:" + ownerId, "Accept"),
-								Button.secondary("submission-controls:delete","🗑️")
+								Button.secondary("submission-controls:delete", "🗑️")
 						), ActionRow.of(buildDeclineMenu())).queue();
 				log.info("Sent Submission Controls to thread {}", thread.getName());
 			}
 		}
 	}
 
-	private SelectionMenu buildDeclineMenu() {
-		return SelectionMenu.create("submission-controls:decline")
+	private SelectMenu buildDeclineMenu() {
+		return SelectMenu.create("submission-controls:decline")
 				.setPlaceholder("Select a reason for declining this submission.")
 				.setMinValues(1)
 				.setMaxValues(3)

@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
-import net.javadiscord.javabot.systems.moderation.AutoMod;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -25,7 +24,7 @@ public class SuggestionListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
-		if (Bot.autoMod.hasSuspiciousLink(event.getMessage()) || Bot.autoMod.hasAdvertisingLink(event.getMessage())){
+		if (Bot.autoMod.hasSuspiciousLink(event.getMessage()) || Bot.autoMod.hasAdvertisingLink(event.getMessage())) {
 			event.getMessage().delete().queue();
 			return;
 		}

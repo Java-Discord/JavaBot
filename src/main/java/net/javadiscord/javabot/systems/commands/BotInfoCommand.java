@@ -3,9 +3,9 @@ package net.javadiscord.javabot.systems.commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.SlashCommandHandler;
@@ -18,7 +18,7 @@ import java.time.Instant;
  */
 public class BotInfoCommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		var embed = buildBotInfoEmbed(event.getJDA(), Bot.config.get(event.getGuild()).getSlashCommand());
 		return event.replyEmbeds(embed).addActionRow(Button.link(Constants.GITHUB_LINK, "View on GitHub")
 		);

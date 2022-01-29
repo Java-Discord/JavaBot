@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -36,11 +36,11 @@ public class SubmissionManager {
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
 	 *
-	 * @param event          The {@link ButtonClickEvent} that is fired upon use.
+	 * @param event          The {@link ButtonInteractionEvent} that is fired upon use.
 	 * @param questionNumber The current qotw-week number.
 	 * @return A {@link WebhookMessageAction}.
 	 */
-	public WebhookMessageAction<?> handleSubmission(ButtonClickEvent event, long questionNumber) {
+	public WebhookMessageAction<?> handleSubmission(ButtonInteractionEvent event, long questionNumber) {
 		if (!isLatestQOTWMessage(event.getMessage())) {
 			return Responses.error(event.getHook(), "You may only answer the newest QOTW.");
 		}
@@ -70,9 +70,9 @@ public class SubmissionManager {
 	/**
 	 * Handles the "Delete Submission" Button.
 	 *
-	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
-	public void handleThreadDeletion(ButtonClickEvent event) {
+	public void handleThreadDeletion(ButtonInteractionEvent event) {
 		var thread = (ThreadChannel) event.getGuildChannel();
 		if (thread.getName().contains(event.getUser().getId())) {
 			thread.delete().queue();
@@ -137,10 +137,10 @@ public class SubmissionManager {
 	 * Handles Button interactions regarding the Submission Controls System.
 	 *
 	 * @param id    The button's id, split by ":".
-	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 * @return The {@link WebhookMessageAction}.
 	 */
-	public WebhookMessageAction<?> handleSubmissionControlButtonInteractions(String[] id, ButtonClickEvent event) {
+	public WebhookMessageAction<?> handleSubmissionControlButtonInteractions(String[] id, ButtonInteractionEvent event) {
 		if (!event.getMember().getRoles().isEmpty() && !event.getMember().getRoles().contains(config.getQOTWReviewRole())) {
 			return event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true);
 		}
@@ -159,10 +159,10 @@ public class SubmissionManager {
 	 * Handles Select Menu interactions regarding the Submission Controls System.
 	 *
 	 * @param id    The SelectionMenu's id.
-	 * @param event The {@link SelectionMenuEvent} that is fired upon use.
+	 * @param event The {@link SelectMenuInteractionEvent} that is fired upon use.
 	 * @return The {@link WebhookMessageAction}.
 	 */
-	public WebhookMessageAction<?> handleSubmissionControlSelectInteraction(String id, SelectionMenuEvent event) {
+	public WebhookMessageAction<?> handleSubmissionControlSelectInteraction(String id, SelectMenuInteractionEvent event) {
 		if (!event.getMember().getRoles().isEmpty() && !event.getMember().getRoles().contains(config.getQOTWReviewRole())) {
 			return event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true);
 		}
@@ -177,7 +177,7 @@ public class SubmissionManager {
 		}
 	}
 
-	private WebhookMessageAction<?> acceptSubmission(ButtonClickEvent event, ThreadChannel thread) {
+	private WebhookMessageAction<?> acceptSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
 		var member = getSubmissionThreadOwner(thread);
 		if (member == null) {
 			return event.getHook().sendMessage("Cannot accept a submission of a user who is not a member of this server");
@@ -189,7 +189,7 @@ public class SubmissionManager {
 		return event.getHook().sendMessage("Successfully accepted submission by " + member.getAsMention()).setEphemeral(true);
 	}
 
-	private WebhookMessageAction<?> declineSubmission(SelectionMenuEvent event, ThreadChannel thread) {
+	private WebhookMessageAction<?> declineSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
 		var member = getSubmissionThreadOwner(thread);
 		var reasons = String.join(", ", event.getValues());
 		if (member == null) {
@@ -203,7 +203,7 @@ public class SubmissionManager {
 		return event.getHook().sendMessage("Successfully declined submission by " + member.getAsMention()).setEphemeral(true);
 	}
 
-	private WebhookMessageAction<?> deleteSubmission(ButtonClickEvent event, ThreadChannel thread) {
+	private WebhookMessageAction<?> deleteSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 		log.info("{} deleted submission {}", event.getUser().getAsTag(), thread.getName());
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());

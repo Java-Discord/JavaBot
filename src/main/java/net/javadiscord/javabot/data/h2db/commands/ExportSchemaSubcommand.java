@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
@@ -18,7 +18,7 @@ public class ExportSchemaSubcommand implements SlashCommandHandler {
 	private static final Path SCHEMA_FILE = Path.of("___schema.sql");
 
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		var includeDataOption = event.getOption("include-data");
 		boolean includeData = includeDataOption != null && includeDataOption.getAsBoolean();
 		Bot.asyncPool.submit(() -> {

@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.jam.subcommands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamSubmissionRepository;
@@ -26,7 +26,7 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
+	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		if (!activeJam.submissionsAllowed()) {
 			return Responses.warning(event, "Submissions Not Permitted", "The Jam is not currently accepting submissions.");
 		}
@@ -83,7 +83,7 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	 * @return The name of the theme.
 	 * @throws SQLException If a database error occurs.
 	 */
-	private String getThemeName(Connection con, Jam activeJam, SlashCommandEvent event) throws SQLException {
+	private String getThemeName(Connection con, Jam activeJam, SlashCommandInteractionEvent event) throws SQLException {
 		List<JamTheme> possibleThemes = new JamThemeRepository(con).getAcceptedThemes(activeJam);
 		String themeName = null;
 		if (possibleThemes.size() > 1) {

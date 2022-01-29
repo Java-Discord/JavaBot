@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.command.data;
 
 import lombok.Data;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -21,12 +22,12 @@ public class CommandConfig {
 	private String handler;
 
 	/**
-	 * Creates a {@link CommandConfig} object from the given {@link CommandData}.
+	 * Creates a {@link CommandConfig} object from the given {@link SlashCommandData}.
 	 *
-	 * @param data The original {@link CommandData}.
+	 * @param data The original {@link SlashCommandData}.
 	 * @return A new {@link CommandConfig} object.
 	 */
-	public static CommandConfig fromData(CommandData data) {
+	public static CommandConfig fromData(SlashCommandData data) {
 		CommandConfig c = new CommandConfig();
 		c.setName(data.getName());
 		c.setDescription(data.getDescription());
@@ -38,12 +39,12 @@ public class CommandConfig {
 	}
 
 	/**
-	 * Converts the current {@link CommandConfig} into a {@link CommandData} object.
+	 * Converts the current {@link CommandConfig} into a {@link SlashCommandData} object.
 	 *
-	 * @return The {@link CommandData} object.
+	 * @return The {@link SlashCommandData} object.
 	 */
-	public CommandData toData() {
-		CommandData data = new CommandData(this.name, this.description);
+	public SlashCommandData toData() {
+		SlashCommandData data = Commands.slash(this.name, this.description);
 		data.setDefaultEnabled(this.enabledByDefault);
 		if (this.options != null) {
 			for (OptionConfig option : this.options) {

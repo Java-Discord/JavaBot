@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 
@@ -37,7 +37,7 @@ public class UptimeCommand implements SlashCommandHandler {
 	}
 
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 		var e = new EmbedBuilder()
 				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())

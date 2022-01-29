@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.internal.interactions.ButtonImpl;
+import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
@@ -387,12 +387,13 @@ public class HelpChannelUpdater implements Runnable {
 			var reservation = optional.get();
 			jda.retrieveUserById(reservation.getUserId()).queue(
 					u -> reservedHelpChannels.append(String.format("""
-							%s
-							Reserved by %s <t:%s:R>
-							
-							""", channel.getAsMention(), u.getAsMention(),
+									%s
+									Reserved by %s <t:%s:R>
+																
+									""", channel.getAsMention(), u.getAsMention(),
 							reservation.getReservedAt().toEpochSecond(ZoneOffset.UTC))),
-					e -> {}
+					e -> {
+					}
 			);
 		}
 		return new EmbedBuilder()

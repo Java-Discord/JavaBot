@@ -2,8 +2,8 @@ package net.javadiscord.javabot.systems.help;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.h2db.DbActions;
@@ -14,7 +14,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
  */
 public class ThanksCommandHandler implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) throws ResponseException {
 		var userOption = event.getOption("user");
 		User user = userOption == null ? event.getUser() : userOption.getAsUser();
 		long totalThanks = DbActions.count(

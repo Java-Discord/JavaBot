@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
@@ -17,7 +17,7 @@ import java.nio.file.Files;
  */
 public class MigrationsListSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
 		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("List of Runnable Migrations");

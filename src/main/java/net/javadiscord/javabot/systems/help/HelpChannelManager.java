@@ -3,12 +3,17 @@ package net.javadiscord.javabot.systems.help;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.InteractionType;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.internal.interactions.ButtonImpl;
+import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -217,7 +222,7 @@ public class HelpChannelManager {
 		if (owner.equals(interaction.getUser())) {// The user is unreserving their own channel.
 			unreserveChannelByOwner(channel, owner, interaction);
 		} else {// The channel was unreserved by someone other than the owner.
-			unreserveChannelByOtherUser(channel, owner, reason, interaction);
+			unreserveChannelByOtherUser(channel, owner, reason, (SlashCommandInteractionEvent) interaction);
 		}
 	}
 
@@ -236,7 +241,7 @@ public class HelpChannelManager {
 				if (!entry.getKey().getUser().equals(owner)) potentialHelpers.add(entry.getKey());
 			}
 			if (potentialHelpers.isEmpty()) {
-				Responses.info(interaction.getHook(), "Channel Unreserved", "Your channel has been unreserved.").queue();
+				Responses.info((SlashCommandInteractionEvent) interaction, "Channel Unreserved", "Your channel has been unreserved.").queue();
 				unreserveChannel(channel).queue();
 				return;
 			}
@@ -245,7 +250,9 @@ public class HelpChannelManager {
 				if (c == 0) return o1.getEffectiveName().compareTo(o2.getEffectiveName());
 				return c;
 			});
+			System.out.println("sending thanks");
 			sendThanksButtonsMessage(potentialHelpers, reservation, interaction, channel);
+			System.out.println("sent thanks");
 			try {
 				setTimeout(channel, 5);
 			} catch (SQLException e) {
@@ -255,23 +262,30 @@ public class HelpChannelManager {
 	}
 
 	private void sendThanksButtonsMessage(List<Member> potentialHelpers, ChannelReservation reservation, Interaction interaction, TextChannel channel) {
-		List<Component> thanksButtons = new ArrayList<>(25);
+		System.out.println("creating thanks");
+		List<ItemComponent> thanksButtons = new ArrayList<>(25);
 		for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 20))) {
 			thanksButtons.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
+			System.out.println("adding helpers...");
 		}
 		ActionRow controlsRow = ActionRow.of(
 				new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("✅")),
 				new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
 		);
-		interaction.getHook().sendMessage(String.format("Before your channel is unreserved, we would appreciate if you could take a moment to acknowledge those who helped you. This helps us to reward users who contribute to helping others, and gives us better insight into how to help users more effectively. Otherwise, click the **Unreserve** button simply unreserve your channel, this will also be done automatically in %d Minutes.", config.getRemoveThanksTimeoutMinutes()))
-				.setEphemeral(true).queue();
+		if (interaction.getType() == InteractionType.COMPONENT) ((ButtonInteractionEvent) interaction).getHook().sendMessage(THANK_MESSAGE_TEXT).setEphemeral(true).queue();
+		if (interaction.getType() == InteractionType.COMMAND) ((SlashCommandInteractionEvent) interaction).getHook().sendMessage(THANK_MESSAGE_TEXT).setEphemeral(true).queue();
+		System.out.println("created buttons");
+
+		System.out.println("sent message");
 		List<ActionRow> rows = new ArrayList<>(5);
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
+		System.out.println("added buttons");
 		channel.sendMessage(THANK_MESSAGE_TEXT).setActionRows(rows).queue();
+		System.out.println("sent message");
 	}
 
-	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
+	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, SlashCommandInteractionEvent interaction) {
 		if (reason != null) {// The user provided a reason, so check that it's legit, then send a DM to the owner.
 			if (reason.isBlank() || reason.length() < 5) {
 				Responses.warning(interaction.getHook(), "The reason you provided is not descriptive enough.").queue();

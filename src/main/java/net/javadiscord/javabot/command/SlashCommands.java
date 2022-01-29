@@ -2,12 +2,11 @@ package net.javadiscord.javabot.command;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
@@ -49,7 +48,7 @@ public class SlashCommands extends ListenerAdapter {
 	}
 
 	@Override
-	public void onSlashCommand(SlashCommandEvent event) {
+	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) return;
 
 		var command = this.commandsIndex.get(event.getName());
@@ -64,7 +63,7 @@ public class SlashCommands extends ListenerAdapter {
 		}
 	}
 
-	private void handleResponseException(ResponseException e, SlashCommandEvent event) {
+	private void handleResponseException(ResponseException e, SlashCommandInteractionEvent event) {
 		switch (e.getType()) {
 			case WARNING -> Responses.warning(event, e.getMessage()).queue();
 			case ERROR -> Responses.error(event, e.getMessage()).queue();
@@ -151,9 +150,9 @@ public class SlashCommands extends ListenerAdapter {
 				var response = c.getResponse();
 				if (response.length() > 100) response = response.substring(0, 97).concat("...");
 				commandUpdateAction.addCommands(
-						new CommandData(c.getName(), response).addOptions(
-								new OptionData(OptionType.BOOLEAN, "reply", "Should the custom commands reply?"),
-								new OptionData(OptionType.BOOLEAN, "embed", "Should the response be embedded?")));
+						Commands.slash(c.getName(), response)
+								.addOption(OptionType.BOOLEAN, "reply", "Should the custom commands reply?")
+								.addOption(OptionType.BOOLEAN, "embed", "Should the response be embedded?"));
 				commandNames.add(c.getName());
 			}
 			return commandNames;
@@ -167,9 +166,9 @@ public class SlashCommands extends ListenerAdapter {
 		log.info("{}[{}]{} Adding command privileges",
 				Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
 
-		Map<String, Collection<? extends CommandPrivilege>> map = new HashMap<>();
+		Map<String, List<CommandPrivilege>> map = new HashMap<>();
 		for (Command command : commands) {
-			List<CommandPrivilege> privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
+			List<CommandPrivilege>privileges = getCommandPrivileges(guild, findCommandConfig(command.getName(), commandConfigs));
 			if (!privileges.isEmpty()) {
 				map.put(command.getId(), privileges);
 			}
@@ -204,10 +203,10 @@ public class SlashCommands extends ListenerAdapter {
 	/**
 	 * Handles a Custom Slash Command.
 	 *
-	 * @param event The {@link SlashCommandEvent} that is fired.
+	 * @param event The {@link SlashCommandInteractionEvent} that is fired.
 	 * @return The {@link RestAction}.
 	 */
-	private RestAction<?> handleCustomCommand(SlashCommandEvent event) {
+	private RestAction<?> handleCustomCommand(SlashCommandInteractionEvent event) {
 		var name = event.getName();
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new CustomCommandRepository(con);
