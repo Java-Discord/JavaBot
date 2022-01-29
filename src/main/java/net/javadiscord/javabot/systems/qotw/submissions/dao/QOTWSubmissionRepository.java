@@ -63,7 +63,7 @@ public class QOTWSubmissionRepository {
 				UPDATE qotw_submissions
 				SET reviewed = TRUE
 				WHERE thread_id = ?""")) {
-			stmt.setLong(2, submission.getThreadId());
+			stmt.setLong(1, submission.getThreadId());
 			stmt.executeUpdate();
 		}
 	}
@@ -79,7 +79,7 @@ public class QOTWSubmissionRepository {
 				UPDATE qotw_submissions
 				SET accepted = TRUE
 				WHERE thread_id = ?""")) {
-			stmt.setLong(2, submission.getThreadId());
+			stmt.setLong(1, submission.getThreadId());
 			stmt.executeUpdate();
 		}
 	}

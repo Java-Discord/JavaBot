@@ -29,7 +29,7 @@ public class SubmissionManager {
 	/**
 	 * The submission thread's name.
 	 */
-	public static final String THREAD_NAME = "#%s | %s";
+	public static final String THREAD_NAME = "%s — %s";
 	private final QOTWConfig config;
 
 	/**
@@ -45,7 +45,7 @@ public class SubmissionManager {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
 		config.getSubmissionChannel().createThreadChannel(
-				String.format(THREAD_NAME, questionNumber, member.getUser().getName()), true).queue(
+				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
 					try (var con = Bot.dataSource.getConnection()) {
 						var repo = new QOTWSubmissionRepository(con);
@@ -57,9 +57,8 @@ public class SubmissionManager {
 						repo.insert(submission);
 
 						thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-						thread.addThreadMember(member).queue();
-						event.getGuild().getMembersWithRoles(config.getQOTWReviewRole()).forEach(m -> thread.addThreadMember(m).queue());
-						thread.sendMessageEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
+						thread.sendMessage(String.format("%s %s", config.getQOTWReviewRole(), member.getAsMention()))
+								.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
 								.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
 								.queue();
 					} catch (SQLException e) {

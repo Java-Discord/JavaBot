@@ -127,7 +127,7 @@ public class SubmissionControlsManager {
 						new IncrementSubcommand().correct(member, true);
 						thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
-						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s accepted %s's submission", event.getUser().getAsTag(), member.getUser().getAsTag()).queue();
+						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s accepted %s's submission", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag()).queue();
 						this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
 						Responses.success(event.getHook(), "Submission Accepted", "Successfully accepted submission by " + member.getAsMention()).queue();
 					}
@@ -156,15 +156,16 @@ public class SubmissionControlsManager {
 							return;
 						}
 						member.getUser().openPrivateChannel().queue(
-								c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(),
-								e -> {
-								});
+								c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(
+										s -> { },
+										e -> log.info("Could not send submission notification to user {}", event.getUser().getAsTag())),
+								e -> { });
 						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
-						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s declined %s's submission for: `%s`", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
+						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s declined %s's submission for: `%s`", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
 						this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
 						Responses.success(event.getHook(), "Submission Declined",
-								String.format("Successfully declined submission by %s for the following reasons:\n`%s`" + member.getAsMention(), reasons)).queue();
+								String.format("Successfully declined submission by %s for the following reasons:\n`%s`", member.getAsMention(), reasons)).queue();
 					}
 			);
 		} catch (SQLException e) {
@@ -208,7 +209,7 @@ public class SubmissionControlsManager {
 	}
 
 	private SelectionMenu buildDeclineMenu() {
-		return SelectionMenu.create("submission-controls:decline")
+		return SelectionMenu.create("submission-controls-select:decline")
 				.setPlaceholder("Select a reason for declining this submission.")
 				.setRequiredRange(1, 3)
 				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")
