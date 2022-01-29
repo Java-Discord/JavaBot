@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -121,49 +122,36 @@ public class AutoMod extends ListenerAdapter {
 	 * @param message the {@link Message} that should be checked
 	 */
 	private void checkContentAutomod(@Nonnull Message message) {
-		// Advertising
-		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
-		if (matcher.find()) {
+		//Check for Advertising Links
+		if (hasAdvertisingLink(message)) {
 			GuildUtils.getLogChannel(message.getGuild()).sendMessage("Message: `" + message.getContentRaw() + "`").queue();
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 					.warn(
 							message.getMember(),
-							WarnSeverity.LOW,
+							WarnSeverity.MEDIUM,
 							"Automod: Advertising",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
 							message.getTextChannel(),
-							false
+							isSuggestionsChannel(message.getTextChannel())
 					);
 			message.delete().queue();
+
+
 		}
 
-		final String messageRaw = message.getContentRaw();
-		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
-		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
-			// only do it for a links, so it won't iterate for each message
-			while (urlMatcher.find()) {
-				String url = urlMatcher.group(0).trim();
-				try {
-					URI uri = new URI(url);
-					if (spamUrls.contains(uri.getHost())) {
-						if (message.getMember() != null) {
-							GuildUtils.getLogChannel(message.getGuild()).sendMessage(String.format("Suspicious Link sent by: %s (%s)", message.getMember().getAsMention(), url)).queue();
-							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
-									.warn(
-											message.getMember(),
-											WarnSeverity.HIGH,
-											"Automod: Suspicious Link",
-											message.getGuild().getMember(message.getJDA().getSelfUser()),
-											message.getTextChannel(),
-											false
-									);
-							message.delete().queue();
-						}
-					}
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
+		//Check for suspicious Links
+		if (hasSuspiciousLink(message)) {
+			GuildUtils.getLogChannel(message.getGuild()).sendMessage(String.format("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message)).queue();
+			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+					.warn(
+							message.getMember(),
+							WarnSeverity.MEDIUM,
+							"Automod: Suspicious Link",
+							message.getGuild().getMember(message.getJDA().getSelfUser()),
+							message.getTextChannel(),
+							isSuggestionsChannel(message.getTextChannel())
+					);
+			message.delete().queue();
 		}
 	}
 
@@ -202,5 +190,50 @@ public class AutoMod extends ListenerAdapter {
 		input = input.replace(" ", "");
 		return input;
 	}
-}
 
+	/**
+	 * Checks whether the given message contains a link that might be used to scam people.
+	 *
+	 * @param message The message to check.
+	 * @return True if a link is found and False if not.
+	 */
+	public boolean hasSuspiciousLink(Message message) {
+		final String messageRaw = message.getContentRaw();
+		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
+		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
+			// only do it for a links, so it won't iterate for each message
+			while (urlMatcher.find()) {
+				String url = urlMatcher.group(0).trim();
+				try {
+					URI uri = new URI(url);
+					if (spamUrls.contains(uri.getHost())) {
+						return true;
+					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks whether the given message contains a discord invite link.
+	 *
+	 * @param message The Message to check.
+	 * @return True if an invite is found and False if not.
+	 */
+	public boolean hasAdvertisingLink(Message message) {
+		// Advertising
+		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
+		if (matcher.find()) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isSuggestionsChannel(TextChannel channel) {
+		return channel.equals(Bot.config.get(channel.getGuild()).getModeration().getSuggestionChannel());
+	}
+
+}
