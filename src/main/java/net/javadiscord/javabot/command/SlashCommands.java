@@ -16,7 +16,7 @@ import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.data.CommandConfig;
 import net.javadiscord.javabot.command.data.CommandDataLoader;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,7 +214,7 @@ public class SlashCommands extends ListenerAdapter {
 			var optional = repo.findByName(event.getGuild().getIdLong(), name);
 			if (optional.isEmpty()) return null;
 			var command = optional.get();
-			var responseText = Misc.replaceTextVariables(event.getGuild(), command.getResponse());
+			var responseText = GuildUtils.replaceTextVariables(event.getGuild(), command.getResponse());
 			var replyOption = event.getOption("reply");
 			boolean reply = replyOption == null ? command.isReply() : replyOption.getAsBoolean();
 			var embedOption = event.getOption("embed");

@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -190,8 +190,7 @@ public class ServerLock extends ListenerAdapter {
 			});
 		});
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
-		Misc.sendToLog(event.getGuild(), String.format("**%s** (%s old) tried to join this server.",
-				event.getMember().getUser().getAsTag(), diff));
+		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff).queue();
 	}
 
 	/**
@@ -208,7 +207,7 @@ public class ServerLock extends ListenerAdapter {
 					member.kick().queue(
 							success -> {
 							},
-							error -> Misc.sendToLog(guild, String.format("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage())));
+							error -> GuildUtils.getLogChannel(guild).sendMessageFormat("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()).queue());
 				});
 			});
 		}
@@ -226,14 +225,14 @@ public class ServerLock extends ListenerAdapter {
 		var config = Bot.config.get(guild).getServerLock();
 		config.setLocked("true");
 		Bot.config.get(guild).flush();
-		Misc.sendToLogFormat(guild, """
+		GuildUtils.getLogChannel(guild).sendMessageFormat("""
 						**Server Locked** @here
 						The automated locking system has detected that the following %d users may be part of a raid:
 						%s
 						""",
 				potentialRaiders.size(),
 				membersString
-		);
+		).queue();
 	}
 
 	/**
@@ -245,6 +244,6 @@ public class ServerLock extends ListenerAdapter {
 		var config = Bot.config.get(guild).getServerLock();
 		config.setLocked("false");
 		Bot.config.get(guild).flush();
-		Misc.sendToLog(guild, "Server unlocked automatically.");
+		GuildUtils.getLogChannel(guild).sendMessage("Server unlocked automatically.").queue();
 	}
 }

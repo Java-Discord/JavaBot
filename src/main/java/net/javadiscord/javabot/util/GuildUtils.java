@@ -2,7 +2,7 @@ package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.javadiscord.javabot.Bot;
 
 import java.util.List;
@@ -10,32 +10,13 @@ import java.util.List;
 /**
  * Utility class for various things.
  */
-@Deprecated
-public class Misc {
+public class GuildUtils {
 
-	private Misc() {
+	private GuildUtils() {
 	}
 
-	public static void sendToLog(Guild guild, MessageEmbed embed) {
-		Bot.config.get(guild).getModeration().getLogChannel().sendMessageEmbeds(embed).queue();
-	}
-
-	public static void sendToLog(Guild guild, String text) {
-		Bot.config.get(guild).getModeration().getLogChannel().sendMessage(text).queue();
-	}
-
-	/**
-	 * Sends a message to the guild's log channel.
-	 *
-	 * @param guild      The current guild.
-	 * @param formatText The unformatted text.
-	 * @param args       The arguments.
-	 */
-	public static void sendToLogFormat(Guild guild, String formatText, Object... args) {
-		Bot.config.get(guild).getModeration().getLogChannel().sendMessage(String.format(
-				formatText,
-				args
-		)).queue();
+	public static MessageChannel getLogChannel(Guild guild) {
+		return Bot.config.get(guild).getModeration().getLogChannel();
 	}
 
 	/**
@@ -46,6 +27,7 @@ public class Misc {
 	 * @param showMemCount Whether the guild's membercount should be appended every time.
 	 * @return The formatted String.
 	 */
+	@Deprecated
 	public static String getGuildList(List<Guild> guildList, boolean showID, boolean showMemCount) {
 		StringBuilder sb = new StringBuilder();
 		for (int guildAmount = guildList.size(); guildAmount > 0; guildAmount--) {
@@ -70,6 +52,7 @@ public class Misc {
 	 * @param string The string that should be replaced.
 	 * @return The formatted String.
 	 */
+	@Deprecated
 	public static String replaceTextVariables(Guild guild, String string) {
 		return string
 				.replace("{!membercount}", String.valueOf(guild.getMemberCount()))
@@ -84,6 +67,7 @@ public class Misc {
 	 * @param string The string that should be replaced.
 	 * @return The formatted String.
 	 */
+	@Deprecated
 	public static String replaceTextVariables(Member member, String string) {
 		return string
 				.replace("{!membercount}", String.valueOf(member.getGuild().getMemberCount()))
