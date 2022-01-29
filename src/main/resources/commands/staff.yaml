@@ -635,6 +635,8 @@
               value: QOTW_POINTS
             - name: Question of the Week Questions
               value: QOTW_QUESTION
+            - name: Question of the Week Submissions
+              value: QOTW_SUBMISSIONS
             - name: Reserved Help Channels
               value: RESERVED_HELP_CHANNELS
             - name: Starboard
