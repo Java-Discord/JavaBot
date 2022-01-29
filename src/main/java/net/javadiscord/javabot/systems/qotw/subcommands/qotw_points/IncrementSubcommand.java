@@ -10,7 +10,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.commands.LeaderboardCommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -35,10 +35,12 @@ public class IncrementSubcommand implements SlashCommandHandler {
 			var points = repo.getAccountByUserId(memberId).getPoints();
 			var dmEmbed = buildIncrementDmEmbed(member, points);
 			var embed = buildIncrementEmbed(member, points);
-			if (!quiet) Misc.sendToLog(member.getGuild(), embed);
+			if (!quiet) GuildUtils.getLogChannel(member.getGuild()).sendMessageEmbeds(embed).queue();
 			member.getUser().openPrivateChannel().queue(
-					c -> c.sendMessageEmbeds(dmEmbed).queue(),
-					e -> Misc.sendToLog(member.getGuild(), "> Could not send direct message to member " + member.getAsMention()));
+					c -> c.sendMessageEmbeds(dmEmbed).queue(s -> {
+					}, e -> {
+					}),
+					e -> GuildUtils.getLogChannel(member.getGuild()).sendMessage("> Could not send direct message to member " + member.getAsMention()).queue());
 			return repo.getAccountByUserId(memberId).getPoints();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -61,11 +63,12 @@ public class IncrementSubcommand implements SlashCommandHandler {
 	private MessageEmbed buildIncrementDmEmbed(Member member, long points) {
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
-				.setTitle("Question of the Week")
+				.setTitle("QOTW Notification")
 				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
 				.setDescription(String.format(
-						"Your answer was correct! %s\nYou've been granted **`1 QOTW-Point`**! (total: %s)",
-						Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
+						"Hey %s," +
+								"\nYour submission was accepted! %s\nYou've been granted **`1 QOTW-Point`**! (total: %s)",
+						member.getAsMention(), Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
 				.setTimestamp(Instant.now())
 				.build();
 	}

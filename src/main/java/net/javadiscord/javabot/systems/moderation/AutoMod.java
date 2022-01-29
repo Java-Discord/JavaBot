@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import javax.annotation.Nonnull;
 import javax.net.ssl.HttpsURLConnection;
@@ -126,7 +126,7 @@ public class AutoMod extends ListenerAdapter {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
-			Misc.sendToLog(message.getGuild(), "Message: `" + message.getContentRaw() + "`");
+			GuildUtils.getLogChannel(message.getGuild()).sendMessage("Message: `" + message.getContentRaw() + "`").queue();
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 					.warn(
 							message.getMember(),
@@ -150,7 +150,7 @@ public class AutoMod extends ListenerAdapter {
 					URI uri = new URI(url);
 					if (spamUrls.contains(uri.getHost())) {
 						if (message.getMember() != null) {
-							Misc.sendToLog(message.getGuild(), String.format("Suspicious Link sent by: %s (%s)", message.getMember().getAsMention(), url));
+							GuildUtils.getLogChannel(message.getGuild()).sendMessage(String.format("Suspicious Link sent by: %s (%s)", message.getMember().getAsMention(), url)).queue();
 							new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
 									.warn(
 											message.getMember(),

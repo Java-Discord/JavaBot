@@ -9,7 +9,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -32,7 +32,7 @@ public class StartupListener extends ListenerAdapter {
 		Bot.config.loadGuilds(event.getJDA().getGuilds());
 		Bot.config.flush();
 		log.info("Logged in as {}{}{}", Constants.TEXT_WHITE, event.getJDA().getSelfUser().getAsTag(), Constants.TEXT_RESET);
-		log.info("Guilds: " + Misc.getGuildList(event.getJDA().getGuilds(), true, true));
+		log.info("Guilds: " + GuildUtils.getGuildList(event.getJDA().getGuilds(), true, true));
 		var optionalGuild = event.getJDA().getGuilds().stream().max(Comparator.comparing(Guild::getMemberCount));
 		optionalGuild.ifPresent(guild -> defaultGuild = guild);
 
@@ -51,7 +51,7 @@ public class StartupListener extends ListenerAdapter {
 					helpConfig.getUpdateIntervalSeconds(),
 					TimeUnit.SECONDS
 			);
-			Misc.sendToLog(guild, "I have just been booted up!");
+			GuildUtils.getLogChannel(guild).sendMessage("I have just been booted up!").queue();
 		}
 	}
 }

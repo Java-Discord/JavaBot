@@ -401,7 +401,7 @@ public class HelpChannelUpdater implements Runnable {
 				.addField("Available Help Channels", availableHelpChannels, false)
 				.addField("Reserved Help Channels", reservedHelpChannels.toString(), false)
 				.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false)
-				.setFooter(String.format("Refreshes every %s seconds", config.getUpdateIntervalSeconds()))
+				.setFooter(String.format("Last refreshed: %s", Instant.now()))
 				.setTimestamp(Instant.now())
 				.build();
 	}

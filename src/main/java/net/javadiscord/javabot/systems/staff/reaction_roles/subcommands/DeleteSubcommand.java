@@ -11,7 +11,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class DeleteSubcommand implements SlashCommandHandler {
 			}
 			var config = Bot.config.get(event.getGuild()).getSlashCommand();
 			var embed = buildReactionRoleDeleteEmbed(event.getUser(), messageId, buttonLabel, config);
-			Misc.sendToLog(event.getGuild(), embed);
+			GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(embed).queue();
 			event.replyEmbeds(embed).queue();
 		});
 		return event.deferReply(true);
