@@ -21,12 +21,11 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class SuggestionListener extends ListenerAdapter {
-	private final AutoMod AUTOMOD = new AutoMod();
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
-		if (AUTOMOD.hasSuspiciousLink(event.getMessage()) || AUTOMOD.hasAdvertisingLink(event.getMessage())){
+		if (Bot.autoMod.hasSuspiciousLink(event.getMessage()) || Bot.autoMod.hasAdvertisingLink(event.getMessage())){
 			event.getMessage().delete().queue();
 			return;
 		}

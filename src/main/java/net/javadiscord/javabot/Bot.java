@@ -47,6 +47,10 @@ public class Bot {
 	 */
 	public static SlashCommands slashCommands;
 	/**
+	 * An instance of our AutoMod feature.
+	 */
+	public static AutoMod autoMod;
+	/**
 	 * A reference to the data source that provides access to the relational
 	 * database that this bot users for certain parts of the application. Use
 	 * this to obtain a connection and perform transactions.
@@ -83,6 +87,7 @@ public class Bot {
 		config = new BotConfig(Path.of("config"));
 		dataSource = DbHelper.initDataSource(config);
 		slashCommands = new SlashCommands();
+		autoMod = new AutoMod();
 		imageCache = new ImageCacheUtils();
 		asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
 		var jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
@@ -119,7 +124,6 @@ public class Bot {
 				PresenceUpdater.standardActivities(),
 				new StatsUpdater(),
 				new SuggestionListener(),
-				new AutoMod(),
 				new StarboardManager(),
 				new InteractionListener(),
 				new HelpChannelListener(),
