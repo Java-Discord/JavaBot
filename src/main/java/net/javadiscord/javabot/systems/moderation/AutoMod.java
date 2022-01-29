@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.events.SuggestionListener;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.util.GuildUtils;
 
@@ -38,6 +39,7 @@ public class AutoMod extends ListenerAdapter {
 					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	private List<String> spamUrls;
+	private final SuggestionListener suggestionListener = new SuggestionListener();
 
 	/**
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
@@ -58,15 +60,14 @@ public class AutoMod extends ListenerAdapter {
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
-		Member member = event.getMember();
-		if (canBypassAutomod(member)) return;
-		checkNewMessageAutomod(event.getMessage());
+		checkSpamAutomod(event.getMessage());
+		if (event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel()) && !checkContentAutomod(event.getMessage())){
+			suggestionListener.createSuggestion(event);
+		}
 	}
 
 	@Override
 	public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
-		Member member = event.getMember();
-		if (canBypassAutomod(member)) return;
 		checkContentAutomod(event.getMessage());
 	}
 
@@ -87,7 +88,9 @@ public class AutoMod extends ListenerAdapter {
 	 *
 	 * @param message the {@link Message} that should be checked
 	 */
-	private void checkNewMessageAutomod(@Nonnull Message message) {
+	private void checkSpamAutomod(@Nonnull Message message) {
+		Member member = message.getMember();
+		if (canBypassAutomod(member)) return;
 		// mention spam
 		if (message.getMentionedMembers().size() >= 5) {
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
@@ -112,15 +115,17 @@ public class AutoMod extends ListenerAdapter {
 			}
 		});
 
-		checkContentAutomod(message);
 	}
 
 	/**
 	 * Runs all automod checks only depend on the message content.
 	 *
 	 * @param message the {@link Message} that should be checked
+	 *
+	 * @return <code>true</code> if the message is suspicious, else <code>false</code>
 	 */
-	private void checkContentAutomod(@Nonnull Message message) {
+	private boolean checkContentAutomod(@Nonnull Message message) {
+		if (canBypassAutomod(message.getMember())) return true;
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
@@ -135,6 +140,7 @@ public class AutoMod extends ListenerAdapter {
 							false
 					);
 			message.delete().queue();
+			return true;
 		}
 
 		final String messageRaw = message.getContentRaw();
@@ -158,6 +164,7 @@ public class AutoMod extends ListenerAdapter {
 											false
 									);
 							message.delete().queue();
+							return true;
 						}
 					}
 				} catch (URISyntaxException e) {
@@ -165,6 +172,7 @@ public class AutoMod extends ListenerAdapter {
 				}
 			}
 		}
+		return false;
 	}
 
 	/**

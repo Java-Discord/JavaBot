@@ -19,10 +19,9 @@ import java.util.concurrent.ExecutionException;
  * {@link net.javadiscord.javabot.data.config.guild.ModerationConfig#getSuggestionChannel()} channel.
  */
 @Slf4j
-public class SuggestionListener extends ListenerAdapter {
+public class SuggestionListener {
 
-	@Override
-	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+	public void createSuggestion(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
 		var config = Bot.config.get(event.getGuild());
 		var embed = buildSuggestionEmbed(event.getAuthor(), event.getMessage(), config.getSlashCommand());

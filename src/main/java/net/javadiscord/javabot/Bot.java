@@ -118,7 +118,6 @@ public class Bot {
 				new StartupListener(),
 				PresenceUpdater.standardActivities(),
 				new StatsUpdater(),
-				new SuggestionListener(),
 				new AutoMod(),
 				new StarboardManager(),
 				new InteractionListener(),
