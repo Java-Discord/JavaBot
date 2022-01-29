@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
+import net.javadiscord.javabot.systems.moderation.AutoMod;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -20,10 +21,15 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class SuggestionListener extends ListenerAdapter {
+	private final AutoMod AUTOMOD = new AutoMod();
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
+		if (AUTOMOD.hasSuspiciousLink(event.getMessage()) || AUTOMOD.hasAdvertisingLink(event.getMessage())){
+			event.getMessage().delete().queue();
+			return;
+		}
 		var config = Bot.config.get(event.getGuild());
 		var embed = buildSuggestionEmbed(event.getAuthor(), event.getMessage(), config.getSlashCommand());
 		MessageAction action = event.getChannel().sendMessageEmbeds(embed);
