@@ -12,7 +12,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class CreateSubcommand implements SlashCommandHandler {
 			m.editMessageComponents(ActionRow.of(buttons)).queue();
 			var config = Bot.config.get(event.getGuild()).getSlashCommand();
 			var embed = buildReactionRoleCreateEmbed(emote, event.getUser(), role, event.getChannel(), 0, buttonLabel, config);
-			Misc.sendToLog(event.getGuild(), embed);
+			GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(embed).queue();
 			event.replyEmbeds(embed).queue();
 		}, e -> log.error("Could not create Reaction Role.", e));
 		return event.deferReply(true);

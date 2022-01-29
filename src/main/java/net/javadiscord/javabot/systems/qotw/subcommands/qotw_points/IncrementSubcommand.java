@@ -10,7 +10,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.commands.LeaderboardCommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -35,12 +35,12 @@ public class IncrementSubcommand implements SlashCommandHandler {
 			var points = repo.getAccountByUserId(memberId).getPoints();
 			var dmEmbed = buildIncrementDmEmbed(member, points);
 			var embed = buildIncrementEmbed(member, points);
-			if (!quiet) Misc.sendToLog(member.getGuild(), embed);
+			if (!quiet) GuildUtils.getLogChannel(member.getGuild()).sendMessageEmbeds(embed).queue();
 			member.getUser().openPrivateChannel().queue(
 					c -> c.sendMessageEmbeds(dmEmbed).queue(s -> {
 					}, e -> {
 					}),
-					e -> Misc.sendToLog(member.getGuild(), "> Could not send direct message to member " + member.getAsMention()));
+					e -> GuildUtils.getLogChannel(member.getGuild()).sendMessage("> Could not send direct message to member " + member.getAsMention()).queue());
 			return repo.getAccountByUserId(memberId).getPoints();
 		} catch (SQLException e) {
 			e.printStackTrace();

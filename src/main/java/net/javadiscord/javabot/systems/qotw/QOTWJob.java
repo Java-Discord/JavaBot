@@ -10,7 +10,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
-import net.javadiscord.javabot.util.Misc;
+import net.javadiscord.javabot.util.GuildUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -30,7 +30,7 @@ public class QOTWJob extends DiscordApiJob {
 				var repo = new QuestionQueueRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
-					Misc.sendToLog(guild, "Warning! @here No available next question for QOTW!");
+					GuildUtils.getLogChannel(guild).sendMessage("Warning! @here No available next question for QOTW!").queue();
 				} else {
 					var question = nextQuestion.get();
 					var config = Bot.config.get(guild).getQotw();
@@ -47,7 +47,7 @@ public class QOTWJob extends DiscordApiJob {
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
-				Misc.sendToLogFormat(guild, "Warning! @here Could not send next QOTW question:\n```\n%s\n```\n", e.getMessage());
+				GuildUtils.getLogChannel(guild).sendMessageFormat("Warning! @here Could not send next QOTW question:\n```\n%s\n```\n", e.getMessage()).queue();
 				throw new JobExecutionException(e);
 			}
 		}
