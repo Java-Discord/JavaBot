@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,9 +14,9 @@ import java.sql.SQLException;
  * behavior of preparing a connection and obtaining the guild id; these two
  * things are required for all QOTW subcommands.
  */
-public abstract class QOTWSubcommand implements SlashCommandHandler {
+public abstract class QOTWSubcommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
 			return Responses.warning(event, "This command can only be used in the context of a guild.");
 		}

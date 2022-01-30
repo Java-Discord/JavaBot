@@ -4,16 +4,16 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
 /**
  * Subcommand that allows staff-members to add a single warn to any user.
  */
-public class WarnAddSubcommand implements SlashCommandHandler {
+public class WarnAddSubcommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		var severityOption = event.getOption("severity");

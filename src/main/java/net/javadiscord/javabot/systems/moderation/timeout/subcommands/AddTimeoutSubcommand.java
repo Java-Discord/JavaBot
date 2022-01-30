@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 import java.time.Duration;
@@ -15,9 +15,9 @@ import java.time.temporal.ChronoUnit;
 /**
  * Subcommand that allows staff-members to add timeouts to a single users.
  */
-public class AddTimeoutSubcommand implements SlashCommandHandler {
+public class AddTimeoutSubcommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");
 		var reasonOption = event.getOption("reason");
 		var durationAmountOption = event.getOption("duration-amount");

@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
@@ -19,9 +19,9 @@ import java.time.Instant;
 /**
  * Command that allows members to report other members.
  */
-public class ReportCommand implements SlashCommandHandler {
+public class ReportCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		OptionMapping option = event.getOption("reason");
 		String reason = option == null ? "None" : option.getAsString();
 		Member member = event.getOption("user").getAsMember();

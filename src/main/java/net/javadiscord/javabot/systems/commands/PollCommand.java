@@ -7,20 +7,20 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 import java.time.Instant;
 
 /**
  * Command that allows user to create polls with up to 10 options.
  */
-public class PollCommand implements SlashCommandHandler {
+public class PollCommand implements ISlashCommand {
 
 	private final String[] EMOTES = new String[]{"0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"};
 	private final int MAX_OPTIONS = 10;
 
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
 		OptionMapping titleOption = event.getOption("title");
 		if (titleOption == null) {

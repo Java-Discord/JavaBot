@@ -4,14 +4,14 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 /**
  * Command that displays the current Gateway ping.
  */
-public class PingCommand implements SlashCommandHandler {
+public class PingCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		long gatewayPing = event.getJDA().getGatewayPing();
 		String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 		var e = new EmbedBuilder()

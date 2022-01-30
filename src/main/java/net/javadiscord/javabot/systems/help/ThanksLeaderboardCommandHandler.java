@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.util.Pair;
 
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 /**
  * Command that generates a leaderboard based on the help channel thanks count.
  */
-public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
+public class ThanksLeaderboardCommandHandler implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) throws ResponseException {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		var collector = Collectors.joining("\n");
 		var format = "**%d** %s";
 		Bot.asyncPool.submit(() -> {

@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.GuildUtils;
 
@@ -20,9 +20,9 @@ import java.util.List;
 /**
  * Subcommand that deletes any Reaction Role/Button.
  */
-public class DeleteSubcommand implements SlashCommandHandler {
+public class DeleteSubcommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var labelOption = event.getOption("label");
 		var idOption = event.getOption("message-id");
 		if (labelOption == null || idOption == null) {

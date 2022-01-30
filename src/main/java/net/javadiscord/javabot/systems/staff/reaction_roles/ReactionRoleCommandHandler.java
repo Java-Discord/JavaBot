@@ -21,9 +21,9 @@ public class ReactionRoleCommandHandler extends DelegatingCommandHandler {
 	}
 
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		try {
-			return super.handle(event);
+			return super.handleSlashCommandInteraction(event);
 		} catch (ResponseException e) {
 			return Responses.error(event, String.format("```%s```", e.getMessage()));
 		}

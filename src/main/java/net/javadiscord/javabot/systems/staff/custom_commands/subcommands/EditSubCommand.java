@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
@@ -18,9 +18,9 @@ import java.time.Instant;
 /**
  * Subcommand that allows to edit Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
  */
-public class EditSubCommand implements SlashCommandHandler {
+public class EditSubCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var nameOption = event.getOption("name");
 		var responseOption = event.getOption("text");
 		if (nameOption == null || responseOption == null) {
@@ -51,7 +51,7 @@ public class EditSubCommand implements SlashCommandHandler {
 			}
 			var newCommand = repo.edit(c.get(), command);
 			var e = buildEditCommandEmbed(event.getMember(), newCommand);
-			Bot.slashCommands.registerSlashCommands(event.getGuild());
+			Bot.interactionHandler.registerCommands(event.getGuild());
 			return event.replyEmbeds(e);
 		} catch (SQLException e) {
 			e.printStackTrace();

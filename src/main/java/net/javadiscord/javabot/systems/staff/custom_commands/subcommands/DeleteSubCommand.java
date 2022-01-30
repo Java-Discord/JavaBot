@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
@@ -18,9 +18,9 @@ import java.time.Instant;
 /**
  * Subcommand that allows to delete Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
  */
-public class DeleteSubCommand implements SlashCommandHandler {
+public class DeleteSubCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var nameOption = event.getOption("name");
 		if (nameOption == null) {
 			return Responses.error(event, "Missing required arguments.");
@@ -35,7 +35,7 @@ public class DeleteSubCommand implements SlashCommandHandler {
 			}
 			repo.delete(command.get());
 			var e = buildDeleteCommandEmbed(event.getMember(), command.get());
-			Bot.slashCommands.registerSlashCommands(event.getGuild());
+			Bot.interactionHandler.registerCommands(event.getGuild());
 			return event.replyEmbeds(e);
 		} catch (SQLException e) {
 			e.printStackTrace();

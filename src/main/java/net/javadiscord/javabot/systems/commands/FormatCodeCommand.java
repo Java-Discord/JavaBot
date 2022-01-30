@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
@@ -16,9 +16,9 @@ import java.time.Instant;
 /**
  * Command that allows members to format messages.
  */
-public class FormatCodeCommand implements SlashCommandHandler {
+public class FormatCodeCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var idOption = event.getOption("message-id");
 		var formatOption = event.getOption("format");
 		String format = formatOption == null ? "java" : formatOption.getAsString();

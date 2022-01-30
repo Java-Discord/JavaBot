@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
 import java.io.IOException;
@@ -15,9 +15,9 @@ import java.nio.file.Files;
  * This subcommand shows a list of all available migrations, and a short preview
  * of their source code.
  */
-public class MigrationsListSubcommand implements SlashCommandHandler {
+public class MigrationsListSubcommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("List of Runnable Migrations");

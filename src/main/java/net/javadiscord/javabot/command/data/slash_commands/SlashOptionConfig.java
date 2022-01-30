@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command.data;
+package net.javadiscord.javabot.command.data.slash_commands;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -11,38 +11,38 @@ import java.util.Arrays;
  * command or subcommand.
  */
 @Data
-public class OptionConfig {
+public class SlashOptionConfig {
 	private String name;
 	private String description;
 	private String type;
 	private boolean required;
-	private OptionChoiceConfig[] choices;
+	private SlashOptionChoiceConfig[] choices;
 
 	/**
-	 * Converts the given {@link OptionData} into a {@link OptionConfig} object.
+	 * Converts the given {@link OptionData} into a {@link SlashOptionConfig} object.
 	 *
 	 * @param data The {@link OptionData}.
-	 * @return The {@link OptionConfig} object.
+	 * @return The {@link SlashOptionConfig} object.
 	 */
-	public static OptionConfig fromData(OptionData data) {
-		OptionConfig c = new OptionConfig();
+	public static SlashOptionConfig fromData(OptionData data) {
+		SlashOptionConfig c = new SlashOptionConfig();
 		c.setName(data.getName());
 		c.setDescription(data.getDescription());
 		c.setType(data.getType().name());
 		c.setRequired(data.isRequired());
-		c.setChoices(data.getChoices().stream().map(OptionChoiceConfig::fromData).toArray(OptionChoiceConfig[]::new));
+		c.setChoices(data.getChoices().stream().map(SlashOptionChoiceConfig::fromData).toArray(SlashOptionChoiceConfig[]::new));
 		return c;
 	}
 
 	/**
-	 * Converts the current {@link OptionConfig} to a {@link OptionData} object.
+	 * Converts the current {@link SlashOptionConfig} to a {@link OptionData} object.
 	 *
 	 * @return The {@link OptionData} object.
 	 */
 	public OptionData toData() {
 		var d = new OptionData(OptionType.valueOf(this.type.toUpperCase()), this.name, this.description, this.required);
 		if (this.choices != null && this.choices.length > 0) {
-			d.addChoices(Arrays.stream(this.choices).map(OptionChoiceConfig::toData).toList());
+			d.addChoices(Arrays.stream(this.choices).map(SlashOptionChoiceConfig::toData).toList());
 		}
 		return d;
 	}

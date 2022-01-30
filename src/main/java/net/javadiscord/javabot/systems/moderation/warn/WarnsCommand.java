@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 
@@ -21,9 +21,9 @@ import java.util.List;
 /**
  * Command that allows users to see all their active warns.
  */
-public class WarnsCommand implements SlashCommandHandler {
+public class WarnsCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		OptionMapping warnsOption = event.getOption("user");
 		Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
 		if (member == null) return Responses.error(event, "Member is missing.");

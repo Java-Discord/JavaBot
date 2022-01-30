@@ -9,14 +9,14 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 /**
  * Command that allows members to test regex patterns.
  */
-public class RegexCommand implements SlashCommandHandler {
+public class RegexCommand implements ISlashCommand {
 	@Override
-	public ReplyCallbackAction handle(SlashCommandInteractionEvent event) throws ResponseException {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		var patternOption = event.getOption("regex");
 		var stringOption = event.getOption("string");
 		if (patternOption == null) return Responses.warning(event, "Missing required regex pattern.");
