@@ -47,8 +47,8 @@ public class Bot {
 	 */
 	public static SlashCommands slashCommands;
 	/**
-	 * An instance of our AutoMod feature.
-	 */
+	 * An instance of {@link AutoMod}.
+	 * */
 	public static AutoMod autoMod;
 	/**
 	 * A reference to the data source that provides access to the relational
