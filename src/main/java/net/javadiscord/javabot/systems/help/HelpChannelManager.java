@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.InteractionType;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
@@ -248,9 +249,7 @@ public class HelpChannelManager {
 				if (c == 0) return o1.getEffectiveName().compareTo(o2.getEffectiveName());
 				return c;
 			});
-			System.out.println("sending thanks");
 			sendThanksButtonsMessage(potentialHelpers, reservation, interaction, channel);
-			System.out.println("sent thanks");
 			try {
 				setTimeout(channel, 5);
 			} catch (SQLException e) {
@@ -260,27 +259,27 @@ public class HelpChannelManager {
 	}
 
 	private void sendThanksButtonsMessage(List<Member> potentialHelpers, ChannelReservation reservation, Interaction interaction, TextChannel channel) {
-		System.out.println("creating thanks");
 		List<ItemComponent> thanksButtons = new ArrayList<>(25);
 		for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 20))) {
 			thanksButtons.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
-			System.out.println("adding helpers...");
 		}
 		ActionRow controlsRow = ActionRow.of(
 				new ButtonImpl("help-thank:" + reservation.getId() + ":done", "Unreserve", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("✅")),
 				new ButtonImpl("help-thank:" + reservation.getId() + ":cancel", "Cancel", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("❌"))
 		);
-		if (interaction.getType() == InteractionType.COMPONENT) ((ButtonInteractionEvent) interaction).getHook().sendMessage(THANK_MESSAGE_TEXT).setEphemeral(true).queue();
-		if (interaction.getType() == InteractionType.COMMAND) ((SlashCommandInteractionEvent) interaction).getHook().sendMessage(THANK_MESSAGE_TEXT).setEphemeral(true).queue();
-		System.out.println("created buttons");
-
-		System.out.println("sent message");
+		InteractionHook hook;
+		if (interaction.getType() == InteractionType.COMPONENT) {
+			hook = ((ButtonInteractionEvent) interaction).getHook();
+		} else if (interaction.getType() == InteractionType.COMMAND) {
+			hook = ((SlashCommandInteractionEvent) interaction).getHook();
+		} else {
+			throw new IllegalStateException("Unable to obtain Interaction Hook!");
+		}
+		hook.sendMessage(THANK_MESSAGE_TEXT).setEphemeral(true).queue();
 		List<ActionRow> rows = new ArrayList<>(5);
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
-		System.out.println("added buttons");
 		channel.sendMessage(THANK_MESSAGE_TEXT).setActionRows(rows).queue();
-		System.out.println("sent message");
 	}
 
 	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, SlashCommandInteractionEvent interaction) {
