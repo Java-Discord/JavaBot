@@ -110,7 +110,7 @@ public class Bot {
 
 	/**
 	 * Adds all the bot's event listeners to the JDA instance, except for the
-	 * main {@link SlashCommands} listener.
+	 * main {@link SlashCommands} listener and {@link AutoMod}.
 	 *
 	 * @param jda The JDA bot instance to add listeners to.
 	 */
