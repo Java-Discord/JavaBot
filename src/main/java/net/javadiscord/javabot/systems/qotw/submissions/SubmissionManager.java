@@ -7,9 +7,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -35,11 +35,11 @@ public class SubmissionManager {
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
 	 *
-	 * @param event          The {@link ButtonClickEvent} that is fired upon use.
+	 * @param event          The {@link ButtonInteractionEvent} that is fired upon use.
 	 * @param questionNumber The current qotw-week number.
 	 * @return A {@link WebhookMessageAction}.
 	 */
-	public WebhookMessageAction<?> handleSubmission(ButtonClickEvent event, int questionNumber) {
+	public WebhookMessageAction<?> handleSubmission(ButtonInteractionEvent event, int questionNumber) {
 		var member = event.getMember();
 		if (!canCreateSubmissions(member)) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
@@ -75,9 +75,9 @@ public class SubmissionManager {
 	/**
 	 * Handles the "Delete Submission" Button.
 	 *
-	 * @param event The {@link ButtonClickEvent} that is fired upon use.
+	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
-	public void handleThreadDeletion(ButtonClickEvent event) {
+	public void handleThreadDeletion(ButtonInteractionEvent event) {
 		var thread = (ThreadChannel) event.getGuildChannel();
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QOTWSubmissionRepository(con);
