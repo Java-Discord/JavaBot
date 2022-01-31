@@ -10,6 +10,8 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
  *
  * This only works if the way the bot is hosted is set up correctly, for example with a bash script that handles
  * compilation and a service set up with that bash script running before the bot gets started.
+ *
+ * I have explained how we do it in https://github.com/Java-Discord/JavaBot/pull/195
  */
 @Slf4j
 public class redeployCommand implements SlashCommandHandler {
