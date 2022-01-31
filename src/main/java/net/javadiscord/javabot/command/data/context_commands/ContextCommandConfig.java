@@ -14,11 +14,11 @@ public class ContextCommandConfig {
 	private String type;
 	private String handler;
 
-	public Command.Type getType() {
+	public Command.Type getEnumType() {
 		return Command.Type.valueOf(this.type);
 	}
 
 	public CommandData toData() {
-		return Commands.context(getType(), this.name);
+		return Commands.context(getEnumType(), this.name);
 	}
 }

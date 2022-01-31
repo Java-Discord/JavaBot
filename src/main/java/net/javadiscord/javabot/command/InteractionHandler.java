@@ -141,7 +141,10 @@ public class InteractionHandler extends ListenerAdapter {
 				"commands/slash/staff.yaml",
 				"commands/slash/user.yaml"
 		);
-		var contextConfigs = CommandDataLoader.loadContextCommandConfig("commands/context/message.yaml", "commands/context/user.yaml");
+		var contextConfigs = CommandDataLoader.loadContextCommandConfig(
+				"commands/context/message.yaml",
+				"commands/context/user.yaml"
+		);
 		var commandUpdateAction = this.updateCommands(slashCommandConfigs, contextConfigs, guild);
 		var customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
 
@@ -158,10 +161,10 @@ public class InteractionHandler extends ListenerAdapter {
 		if (slashCommandConfigs.length > Commands.MAX_SLASH_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s commands.", Commands.MAX_SLASH_COMMANDS));
 		}
-		if (Arrays.stream(contextConfigs).filter(p -> p.getType() == Command.Type.USER).count() > Commands.MAX_USER_COMMANDS) {
+		if (Arrays.stream(contextConfigs).filter(p -> p.getEnumType() == Command.Type.USER).count() > Commands.MAX_USER_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s User Context Commands", Commands.MAX_USER_COMMANDS));
 		}
-		if (Arrays.stream(contextConfigs).filter(p -> p.getType() == Command.Type.MESSAGE).count() > Commands.MAX_MESSAGE_COMMANDS) {
+		if (Arrays.stream(contextConfigs).filter(p -> p.getEnumType() == Command.Type.MESSAGE).count() > Commands.MAX_MESSAGE_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s Message Context Commands", Commands.MAX_MESSAGE_COMMANDS));
 		}
 		CommandListUpdateAction commandUpdateAction = guild.updateCommands();
@@ -182,9 +185,9 @@ public class InteractionHandler extends ListenerAdapter {
 			if (config.getHandler() != null && !config.getHandler().isEmpty()) {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
-					if (config.getType() == Command.Type.USER) {
+					if (config.getEnumType() == Command.Type.USER) {
 						this.userContextCommandIndex.put(config.getName(), (IUserContextCommand) handlerClass.getConstructor().newInstance());
-					} else if (config.getType() == Command.Type.MESSAGE) {
+					} else if (config.getEnumType() == Command.Type.MESSAGE) {
 						this.messageContextCommandIndex.put(config.getName(), (IMessageContextCommand) handlerClass.getConstructor().newInstance());
 					} else {
 						log.warn("Unknown Context Command Type.");
@@ -193,7 +196,7 @@ public class InteractionHandler extends ListenerAdapter {
 					e.printStackTrace();
 				}
 			} else {
-				log.warn("Context Command ({}) \"{}\" does not have an associated handler class. It will be ignored.", config.getType(), config.getName());
+				log.warn("Context Command ({}) \"{}\" does not have an associated handler class. It will be ignored.", config.getEnumType(), config.getName());
 			}
 			commandUpdateAction.addCommands(config.toData());
 		}
