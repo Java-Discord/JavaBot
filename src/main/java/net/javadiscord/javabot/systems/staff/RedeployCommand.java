@@ -14,7 +14,7 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
  * I have explained how we do it in https://github.com/Java-Discord/JavaBot/pull/195
  */
 @Slf4j
-public class redeployCommand implements SlashCommandHandler {
+public class RedeployCommand implements SlashCommandHandler {
 	@Override
 	public ReplyAction handle(SlashCommandEvent event) {
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
