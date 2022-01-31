@@ -2,34 +2,50 @@ package net.javadiscord.javabot.events;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.entities.ThreadChannel;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
-import net.javadiscord.javabot.systems.qotw.SubmissionManager;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
+
+import java.sql.SQLException;
 
 /**
  * Listens for Interaction Events and handles them.
  */
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
+	// TODO: add Context-Menu Commands (once they're available in JDA)
 
 	@Override
-	public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
+	public void onSelectionMenu(SelectionMenuEvent event) {
 		if (event.getUser().isBot()) return;
 		event.deferEdit().queue();
+		String[] id = event.getComponentId().split(":");
 		var config = Bot.config.get(event.getGuild());
-		if (event.getComponentId().equals("submission-controls:decline")) {
-			new SubmissionManager(config.getQotw()).handleSubmissionControlSelectInteraction(event.getComponentId(), event).queue();
+		switch (id[0]) {
+			case "submission-controls-select" -> {
+				var thread = (ThreadChannel) event.getGuildChannel();
+				try (var con = Bot.dataSource.getConnection()) {
+					var repo = new QOTWSubmissionRepository(con);
+					var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
+					submissionOptional.ifPresent(qotwSubmission -> new SubmissionControlsManager(event.getGuild(), config.getQotw(), qotwSubmission).handleSelectMenus(id, event));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
 
-	// TODO: add Context-Menu Commands (once they're available in JDA)
-	// TODO: Clean up button ids. "qotw-submission" & "qotw-submission-delete" is just a temporary solution.
 	@Override
-	public void onButtonInteraction(ButtonInteractionEvent event) {
+	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
 		event.deferEdit().queue();
 		String[] id = event.getComponentId().split(":");
@@ -38,15 +54,23 @@ public class InteractionListener extends ListenerAdapter {
 			case "qotw-submission" -> {
 				var manager = new SubmissionManager(config.getQotw());
 				if (!id[1].isEmpty() && id[1].equals("delete")) manager.handleThreadDeletion(event);
-				else manager.handleSubmission(event, Long.parseLong(id[1])).queue();
+				else manager.handleSubmission(event, Integer.parseInt(id[1])).queue();
 			}
-			case "submission-controls" -> new SubmissionManager(config.getQotw()).handleSubmissionControlButtonInteractions(id, event).queue();
-			// Deprecated: Remove this next week
-			case "qotw-submission-delete" -> new SubmissionManager(config.getQotw()).handleThreadDeletion(event);
-			case "reaction-role" -> this.handleReactionRoles(event);
+			case "submission-controls" -> {
+				var thread = (ThreadChannel) event.getGuildChannel();
+				try (var con = Bot.dataSource.getConnection()) {
+					var repo = new QOTWSubmissionRepository(con);
+					var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
+					submissionOptional.ifPresent(qotwSubmission -> new SubmissionControlsManager(event.getGuild(), config.getQotw(), qotwSubmission).handleButtons(id, event));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			case "reaction-role" -> this.handleReactionRoles(id, event);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
-			case "utils" -> this.handleUtils(event);
+			case "utils" -> this.handleUtils(id, event);
+			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
 
@@ -54,11 +78,11 @@ public class InteractionListener extends ListenerAdapter {
 	 * Some utility methods for interactions.
 	 * + May be useful for Context Menu Interactions.
 	 *
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
+	 * @param id The button's id, split by ":".
+	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
-	private void handleUtils(ButtonInteractionEvent event) {
+	private void handleUtils(String[] id, ButtonClickEvent event) {
 		var service = new ModerationService(event.getInteraction());
-		String[] id = event.getComponentId().split(":");
 		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
 			case "kick" -> service.kick(
@@ -81,8 +105,7 @@ public class InteractionListener extends ListenerAdapter {
 		}
 	}
 
-	private void handleReactionRoles(ButtonInteractionEvent event) {
-		String[] id = event.getComponentId().split(":");
+	private void handleReactionRoles(String[] id, ButtonClickEvent event) {
 		String roleID = id[1];
 		boolean permanent = Boolean.parseBoolean(id[2]);
 
