@@ -6,18 +6,15 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
 
 /**
  * Command for displaying a full-size version of a user's avatar.
  */
-public class AvatarCommand implements ISlashCommand, IUserContextCommand {
+public class AvatarCommand implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");
@@ -26,11 +23,6 @@ public class AvatarCommand implements ISlashCommand, IUserContextCommand {
 			return Responses.warning(event, "Sorry, this command can only be used in servers.");
 		}
 		return event.replyEmbeds(buildAvatarEmbed(member.getGuild(), member.getUser()));
-	}
-
-	@Override
-	public ReplyCallbackAction handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
-		return event.replyEmbeds(buildAvatarEmbed(event.getGuild(), event.getTarget()));
 	}
 
 	private MessageEmbed buildAvatarEmbed(Guild guild, User createdBy) {

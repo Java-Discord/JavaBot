@@ -1,0 +1,3 @@
+- name: Report Message
+  type: MESSAGE
+  handler: net.javadiscord.javabot.systems.moderation.ReportCommand
