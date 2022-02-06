@@ -3,7 +3,6 @@ package net.javadiscord.javabot.systems.commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -21,31 +20,27 @@ public class PollCommand implements ISlashCommand {
 
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-
-		OptionMapping titleOption = event.getOption("title");
+		var titleOption = event.getOption("title");
 		if (titleOption == null) {
 			return Responses.error(event, "Missing required arguments");
 		}
-
-		var e = new EmbedBuilder()
-				.setAuthor(titleOption.getAsString(), null, event.getUser().getEffectiveAvatarUrl())
+		var embed = new EmbedBuilder()
+				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
+				.setTitle(titleOption.getAsString())
 				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
-				.setDescription("")
 				.setTimestamp(Instant.now());
-
-		event.getChannel().sendMessageEmbeds(e.build()).queue(m -> {
+		event.getHook().sendMessageEmbeds(embed.build()).queue(m -> {
 			for (int i = 1; i < MAX_OPTIONS + 1; i++) {
-				OptionMapping optionMap = event.getOption("option-" + i);
+				var optionMap = event.getOption("option-" + i);
 				if (optionMap != null) {
-					e.getDescriptionBuilder()
-							.append(EMOTES[i - 1] + " " + optionMap.getAsString())
-							.append("\n");
+					embed.getDescriptionBuilder()
+							.append(String.format("%s %s\n", EMOTES[i - 1], optionMap.getAsString()));
 					m.addReaction(Emoji.fromMarkdown(EMOTES[i - 1]).getAsMention()).queue();
 				}
 			}
-			m.editMessageEmbeds(e.build()).queue();
+			m.editMessageEmbeds(embed.build()).queue();
 		});
 
-		return event.reply("Done!").setEphemeral(true);
+		return event.deferReply();
 	}
 }
