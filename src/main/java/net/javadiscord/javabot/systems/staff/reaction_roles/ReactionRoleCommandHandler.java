@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.staff.reaction_roles;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
@@ -21,9 +21,9 @@ public class ReactionRoleCommandHandler extends DelegatingCommandHandler {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		try {
-			return super.handleSlashCommandInteraction(event);
+			return super.handle(event);
 		} catch (ResponseException e) {
 			return Responses.error(event, String.format("```%s```", e.getMessage()));
 		}

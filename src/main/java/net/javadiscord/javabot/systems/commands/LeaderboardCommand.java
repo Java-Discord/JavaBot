@@ -4,10 +4,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
@@ -28,7 +28,7 @@ import static net.javadiscord.javabot.Bot.imageCache;
 /**
  * Command that generates a leaderboard based on QOTW-Points.
  */
-public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCommand {
+public class LeaderboardCommand extends ImageGenerationUtils implements SlashCommandHandler {
 
 	private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
 	private final Color PRIMARY_COLOR = Color.WHITE;
@@ -40,7 +40,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 	private final int WIDTH = 3000;
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		Bot.asyncPool.submit(() -> {
 			try {
 				var action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));

@@ -2,12 +2,12 @@ package net.javadiscord.javabot.systems.help;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * Handler for the /help-ping command that allows users to occasionally ping
  * helpers.
  */
-public class HelpPingCommandHandler implements ISlashCommand {
+public class HelpPingCommandHandler implements SlashCommandHandler {
 	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **reserved help channels**.";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
@@ -41,7 +41,7 @@ public class HelpPingCommandHandler implements ISlashCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
 		Guild guild = event.getGuild();
 		if (guild == null) return Responses.warning(event, WRONG_CHANNEL_MSG);
 		var channelManager = new HelpChannelManager(Bot.config.get(guild).getHelp());

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.jam.phase_transitions;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.javadiscord.javabot.systems.jam.JamChannelManager;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
@@ -14,5 +14,5 @@ import java.sql.SQLException;
  * transition.
  */
 public interface JamPhaseTransition {
-	void transition(Jam jam, SlashCommandInteractionEvent event, JamChannelManager channelManager, Connection con) throws SQLException;
+	void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException;
 }

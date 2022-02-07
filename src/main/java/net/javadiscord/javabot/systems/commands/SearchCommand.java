@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.Scanner;
 /**
  * Command that allows members to search the internet using the bing api.
  */
-public class SearchCommand implements ISlashCommand {
+public class SearchCommand implements SlashCommandHandler {
 
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
@@ -57,7 +57,7 @@ public class SearchCommand implements ISlashCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		var query = event.getOption("query");
 		if (query == null) {
 			return Responses.warning(event, "Missing Required Query");

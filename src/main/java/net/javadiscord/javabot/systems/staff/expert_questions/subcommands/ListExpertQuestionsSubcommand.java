@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.staff.expert_questions.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.staff.expert_questions.ExpertSubcommand;
@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
  */
 public class ListExpertQuestionsSubcommand extends ExpertSubcommand {
 	@Override
-	protected ReplyCallbackAction handleCommand(SlashCommandInteractionEvent event, Connection con) throws SQLException {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException {
 		var numberOption = event.getOption("amount");
 		if (numberOption == null) {
 			return Responses.error(event, "Missing required arguments");

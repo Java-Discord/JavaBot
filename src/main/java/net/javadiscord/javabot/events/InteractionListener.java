@@ -3,8 +3,8 @@ package net.javadiscord.javabot.events;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.ThreadChannel;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -24,7 +24,7 @@ public class InteractionListener extends ListenerAdapter {
 	// TODO: add Context-Menu Commands (once they're available in JDA)
 
 	@Override
-	public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
+	public void onSelectionMenu(SelectionMenuEvent event) {
 		if (event.getUser().isBot()) return;
 		event.deferEdit().queue();
 		String[] id = event.getComponentId().split(":");
@@ -45,7 +45,7 @@ public class InteractionListener extends ListenerAdapter {
 	}
 
 	@Override
-	public void onButtonInteraction(ButtonInteractionEvent event) {
+	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
 		event.deferEdit().queue();
 		String[] id = event.getComponentId().split(":");
@@ -79,9 +79,9 @@ public class InteractionListener extends ListenerAdapter {
 	 * + May be useful for Context Menu Interactions.
 	 *
 	 * @param id The button's id, split by ":".
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
+	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
-	private void handleUtils(String[] id, ButtonInteractionEvent event) {
+	private void handleUtils(String[] id, ButtonClickEvent event) {
 		var service = new ModerationService(event.getInteraction());
 		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
@@ -105,7 +105,7 @@ public class InteractionListener extends ListenerAdapter {
 		}
 	}
 
-	private void handleReactionRoles(String[] id, ButtonInteractionEvent event) {
+	private void handleReactionRoles(String[] id, ButtonClickEvent event) {
 		String roleID = id[1];
 		boolean permanent = Boolean.parseBoolean(id[2]);
 

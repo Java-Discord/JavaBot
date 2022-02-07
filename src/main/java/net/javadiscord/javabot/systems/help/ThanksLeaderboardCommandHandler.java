@@ -3,11 +3,11 @@ package net.javadiscord.javabot.systems.help;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.util.Pair;
 
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 /**
  * Command that generates a leaderboard based on the help channel thanks count.
  */
-public class ThanksLeaderboardCommandHandler implements ISlashCommand {
+public class ThanksLeaderboardCommandHandler implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
 		var collector = Collectors.joining("\n");
 		var format = "**%d** %s";
 		Bot.asyncPool.submit(() -> {

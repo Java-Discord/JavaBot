@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.jam.phase_transitions;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.javadiscord.javabot.systems.jam.JamChannelManager;
 import net.javadiscord.javabot.systems.jam.dao.JamMessageRepository;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class ToSubmissionVotingTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandInteractionEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		List<JamSubmission> submissions = new JamSubmissionRepository(con).getSubmissions(jam);
 		if (submissions.isEmpty()) {
 			throw new IllegalStateException("Cannot start submission voting because there aren't any submissions.");

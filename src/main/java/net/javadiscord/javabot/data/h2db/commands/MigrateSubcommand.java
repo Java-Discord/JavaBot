@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
 import java.io.IOException;
@@ -24,9 +24,9 @@ import java.util.Objects;
  * character, and then proceed to execute each statement.
  * </p>
  */
-public class MigrateSubcommand implements ISlashCommand {
+public class MigrateSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		String migrationName = Objects.requireNonNull(event.getOption("name")).getAsString();
 		if (!migrationName.endsWith(".sql")) {
 			migrationName = migrationName + ".sql";

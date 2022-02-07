@@ -1,18 +1,18 @@
 package net.javadiscord.javabot.systems.configuration.subcommands;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
 
 /**
  * Subcommand that allows staff-members to get a single property variable from the guild config.
  */
-public class GetSubcommand implements ISlashCommand {
+public class GetSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		var propertyOption = event.getOption("property");
 		if (propertyOption == null) {
 			return Responses.warning(event, "Missing required property argument.");

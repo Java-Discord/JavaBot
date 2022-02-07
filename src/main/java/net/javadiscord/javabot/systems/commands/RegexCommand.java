@@ -4,19 +4,19 @@ import com.google.re2j.Pattern;
 import com.google.re2j.PatternSyntaxException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 
 /**
  * Command that allows members to test regex patterns.
  */
-public class RegexCommand implements ISlashCommand {
+public class RegexCommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public ReplyAction handle(SlashCommandEvent event) throws ResponseException {
 		var patternOption = event.getOption("regex");
 		var stringOption = event.getOption("string");
 		if (patternOption == null) return Responses.warning(event, "Missing required regex pattern.");

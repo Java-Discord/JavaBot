@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.systems.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Command that displays the bot's uptime.
  */
-public class UptimeCommand implements ISlashCommand {
+public class UptimeCommand implements SlashCommandHandler {
 
 	/**
 	 * Calculates the Uptimes and returns a formatted String.
@@ -37,7 +37,7 @@ public class UptimeCommand implements ISlashCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		String botImage = event.getJDA().getSelfUser().getAvatarUrl();
 		var e = new EmbedBuilder()
 				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())

@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.qotw.subcommands.questions_queue;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
  */
 public class AddQuestionSubcommand extends QOTWSubcommand {
 	@Override
-	protected ReplyCallbackAction handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
+	protected ReplyAction handleCommand(SlashCommandEvent event, Connection con, long guildId) throws SQLException {
 		QOTWQuestion question = new QOTWQuestion();
 		question.setGuildId(guildId);
 		question.setCreatedBy(event.getUser().getIdLong());

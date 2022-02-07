@@ -134,8 +134,7 @@ public class AutoMod extends ListenerAdapter {
 							message.getTextChannel(),
 							isSuggestionsChannel(message.getTextChannel())
 					);
-			message.delete().queue(success -> {
-			}, error -> log.info("Message was deleted before Automod was able to handle it."));
+			message.delete().queue(success -> {}, error -> log.info("Message was deleted before Automod was able to handle it."));
 
 
 		}
@@ -152,8 +151,7 @@ public class AutoMod extends ListenerAdapter {
 							message.getTextChannel(),
 							isSuggestionsChannel(message.getTextChannel())
 					);
-			message.delete().queue(success -> {
-			}, error -> log.info("Message was deleted before Automod was able to handle it."));
+			message.delete().queue(success -> {}, error -> log.info("Message was deleted before Automod was able to handle it."));
 		}
 	}
 

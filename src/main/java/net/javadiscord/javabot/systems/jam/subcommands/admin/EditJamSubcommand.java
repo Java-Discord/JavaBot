@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
@@ -46,7 +46,7 @@ public class EditJamSubcommand extends ActiveJamSubcommand {
 	}
 
 	@Override
-	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
+	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping propertyNameOption = event.getOption("property");
 		OptionMapping propertyValueOption = event.getOption("value");
 		if (propertyNameOption == null || propertyValueOption == null) {
@@ -65,6 +65,6 @@ public class EditJamSubcommand extends ActiveJamSubcommand {
 	}
 
 	private interface PropertyHandler {
-		ReplyCallbackAction updateProperty(SlashCommandInteractionEvent event, Connection con, Jam jam, String value) throws SQLException;
+		ReplyAction updateProperty(SlashCommandEvent event, Connection con, Jam jam, String value) throws SQLException;
 	}
 }

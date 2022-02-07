@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.systems.qotw.subcommands.qotw_points;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 
 import java.sql.SQLException;
@@ -12,9 +12,9 @@ import java.sql.SQLException;
 /**
  * Subcommand that allows staff-members to clear a user's QOTW-Account.
  */
-public class ClearSubcommand implements ISlashCommand {
+public class ClearSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		var memberOption = event.getOption("user");
 		if (memberOption == null) {
 			return Responses.error(event, "Missing required arguments.");

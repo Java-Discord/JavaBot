@@ -12,7 +12,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	public void onGuildJoin(GuildJoinEvent event) {
 		Bot.config.addGuild(event.getGuild());
 		for (var guild : event.getJDA().getGuilds()) {
-			Bot.interactionHandler.registerCommands(guild);
+			Bot.slashCommands.registerSlashCommands(guild);
 		}
 	}
 }

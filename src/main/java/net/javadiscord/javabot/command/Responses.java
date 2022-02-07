@@ -3,10 +3,10 @@ package net.javadiscord.javabot.command;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ public final class Responses {
 	private Responses() {
 	}
 
-	public static ReplyCallbackAction success(CommandInteraction event, String title, String message) {
+	public static ReplyAction success(SlashCommandEvent event, String title, String message) {
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
@@ -30,7 +30,7 @@ public final class Responses {
 		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getSuccessColor(), true);
 	}
 
-	public static ReplyCallbackAction info(CommandInteraction event, String title, String message) {
+	public static ReplyAction info(SlashCommandEvent event, String title, String message) {
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
@@ -38,7 +38,7 @@ public final class Responses {
 		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getInfoColor(), true);
 	}
 
-	public static ReplyCallbackAction error(CommandInteraction event, String message) {
+	public static ReplyAction error(SlashCommandEvent event, String message) {
 		return reply(event, "An Error Occurred", message, Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor(), true);
 	}
 
@@ -46,7 +46,7 @@ public final class Responses {
 		return reply(hook, "An Error Occurred", message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getErrorColor(), true);
 	}
 
-	public static ReplyCallbackAction warning(CommandInteraction event, String message) {
+	public static ReplyAction warning(SlashCommandEvent event, String message) {
 		return warning(event, null, message);
 	}
 
@@ -54,7 +54,7 @@ public final class Responses {
 		return warning(hook, null, message);
 	}
 
-	public static ReplyCallbackAction warning(CommandInteraction event, String title, String message) {
+	public static ReplyAction warning(SlashCommandEvent event, String title, String message) {
 		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor(), true);
 	}
 
@@ -72,7 +72,7 @@ public final class Responses {
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The reply action.
 	 */
-	private static ReplyCallbackAction reply(CommandInteraction event, @Nullable String title, String message, Color color, boolean ephemeral) {
+	private static ReplyAction reply(SlashCommandEvent event, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return event.replyEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 

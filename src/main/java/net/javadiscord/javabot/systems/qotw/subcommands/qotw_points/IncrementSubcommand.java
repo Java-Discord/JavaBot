@@ -3,11 +3,11 @@ package net.javadiscord.javabot.systems.qotw.subcommands.qotw_points;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.commands.LeaderboardCommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.util.GuildUtils;
@@ -18,7 +18,7 @@ import java.time.Instant;
 /**
  * Subcommand that allows staff-members to increment the QOTW-Account of any user.
  */
-public class IncrementSubcommand implements ISlashCommand {
+public class IncrementSubcommand implements SlashCommandHandler {
 
 	/**
 	 * Increments the QOTW-Points of the given member by 1.
@@ -49,7 +49,7 @@ public class IncrementSubcommand implements ISlashCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		var memberOption = event.getOption("user");
 		if (memberOption == null) {
 			return Responses.error(event, "Missing required arguments.");

@@ -3,13 +3,13 @@ package net.javadiscord.javabot.systems.commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
@@ -17,9 +17,9 @@ import java.time.Instant;
 /**
  * Command that displays some server information.
  */
-public class ServerInfoCommand implements ISlashCommand {
+public class ServerInfoCommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		if (event.getGuild() == null) return Responses.warning(event, "This can only be used in a guild.");
 		var embed = buildServerInfoEmbed(event.getGuild(), Bot.config.get(event.getGuild()).getSlashCommand());
 		return event.replyEmbeds(embed).addActionRow(Button.link(Constants.WEBSITE_LINK, "Website"));

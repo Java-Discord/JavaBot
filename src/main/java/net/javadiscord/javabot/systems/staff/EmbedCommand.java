@@ -3,12 +3,12 @@ package net.javadiscord.javabot.systems.staff;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.awt.*;
 import java.util.function.UnaryOperator;
@@ -19,10 +19,10 @@ import java.util.function.UnaryOperator;
  * Command that allows staff-members to create embed messages.
  */
 @Deprecated(forRemoval = true)
-public class EmbedCommand implements ISlashCommand {
+public class EmbedCommand implements SlashCommandHandler {
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 
 		return switch (event.getSubcommandName()) {
 			case "create" -> createEmbed(event);
@@ -31,7 +31,7 @@ public class EmbedCommand implements ISlashCommand {
 		};
 	}
 
-	private ReplyCallbackAction createEmbedFromLink(SlashCommandInteractionEvent event) {
+	private ReplyAction createEmbedFromLink(SlashCommandEvent event) {
 		String link = event.getOption("link").getAsString();
 		String[] value = link.split("/");
 
@@ -53,7 +53,7 @@ public class EmbedCommand implements ISlashCommand {
 		return event.reply("Done!").setEphemeral(true);
 	}
 
-	private ReplyCallbackAction createEmbed(SlashCommandInteractionEvent event) {
+	private ReplyAction createEmbed(SlashCommandEvent event) {
 		UnaryOperator<String> getOpt = s -> {
 			var mapping = event.getOption(s);
 			return mapping == null ? null : mapping.getAsString();

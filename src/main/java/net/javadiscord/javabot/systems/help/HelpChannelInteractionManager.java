@@ -3,7 +3,7 @@ package net.javadiscord.javabot.systems.help;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.h2db.DbActions;
@@ -24,7 +24,7 @@ public class HelpChannelInteractionManager {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button id.
 	 */
-	public void handleHelpChannel(ButtonInteractionEvent event, String reservationId, String action) {
+	public void handleHelpChannel(ButtonClickEvent event, String reservationId, String action) {
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
@@ -97,7 +97,7 @@ public class HelpChannelInteractionManager {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button's id.
 	 */
-	public void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
+	public void handleHelpThank(ButtonClickEvent event, String reservationId, String action) {
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
@@ -147,7 +147,7 @@ public class HelpChannelInteractionManager {
 		}
 	}
 
-	private void thankHelper(ButtonInteractionEvent event, TextChannel channel, User owner, long helperId, ChannelReservation reservation, HelpChannelManager channelManager) {
+	private void thankHelper(ButtonClickEvent event, TextChannel channel, User owner, long helperId, ChannelReservation reservation, HelpChannelManager channelManager) {
 		var btn = event.getButton();
 		long thankCount = DbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE reservation_id = ? AND helper_id = ?",

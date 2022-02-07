@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.jam.phase_transitions;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.javadiscord.javabot.systems.jam.JamChannelManager;
 import net.javadiscord.javabot.systems.jam.dao.JamMessageRepository;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class ToSubmissionTransition implements JamPhaseTransition {
 	@Override
-	public void transition(Jam jam, SlashCommandInteractionEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
+	public void transition(Jam jam, SlashCommandEvent event, JamChannelManager channelManager, Connection con) throws SQLException {
 		JamMessageRepository messageRepository = new JamMessageRepository(con);
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(jam);
 		long themeVotingMessageId = messageRepository.getMessageId(jam, "theme_voting");

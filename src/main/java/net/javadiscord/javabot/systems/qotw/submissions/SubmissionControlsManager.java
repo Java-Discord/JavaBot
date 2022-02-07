@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
@@ -68,9 +68,9 @@ public class SubmissionControlsManager {
 	 * Handles Button interactions regarding the Submission Controls System.
 	 *
 	 * @param id    The button's id, split by ":".
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
+	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
-	public void handleButtons(String[] id, ButtonInteractionEvent event) {
+	public void handleButtons(String[] id, ButtonClickEvent event) {
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
@@ -92,9 +92,9 @@ public class SubmissionControlsManager {
 	 * Handles Select Menu interactions regarding the Submission Controls System.
 	 *
 	 * @param id    The SelectionMenu's id.
-	 * @param event The {@link SelectMenuInteractionEvent} that is fired upon use.
+	 * @param event The {@link SelectionMenuEvent} that is fired upon use.
 	 */
-	public void handleSelectMenus(String[] id, SelectMenuInteractionEvent event) {
+	public void handleSelectMenus(String[] id, SelectionMenuEvent event) {
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
@@ -110,7 +110,7 @@ public class SubmissionControlsManager {
 		}
 	}
 
-	private void acceptSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
+	private void acceptSubmission(ButtonClickEvent event, ThreadChannel thread) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QOTWSubmissionRepository(con);
 			var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
@@ -137,11 +137,11 @@ public class SubmissionControlsManager {
 		}
 	}
 
-	private void declineButtonSubmission(ButtonInteractionEvent event) {
+	private void declineButtonSubmission(ButtonClickEvent event) {
 		event.getMessage().editMessageComponents(ActionRow.of(this.buildDeclineMenu())).queue();
 	}
 
-	private void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
+	private void declineSelectSubmission(SelectionMenuEvent event, ThreadChannel thread) {
 		var reasons = String.join(", ", event.getValues());
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QOTWSubmissionRepository(con);
@@ -173,7 +173,7 @@ public class SubmissionControlsManager {
 		}
 	}
 
-	private void deleteSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
+	private void deleteSubmission(ButtonClickEvent event, ThreadChannel thread) {
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 		log.info("{} deleted submission thread {}", event.getUser().getAsTag(), thread.getName());
 		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s deleted submission thread `%s`", event.getUser().getAsTag(), thread.getName()).queue();
@@ -208,8 +208,8 @@ public class SubmissionControlsManager {
 				Button.secondary("submission-controls:delete", "🗑️")));
 	}
 
-	private SelectMenu buildDeclineMenu() {
-		return SelectMenu.create("submission-controls-select:decline")
+	private SelectionMenu buildDeclineMenu() {
+		return SelectionMenu.create("submission-controls-select:decline")
 				.setPlaceholder("Select a reason for declining this submission.")
 				.setRequiredRange(1, 3)
 				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")

@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.javadiscord.javabot.command.InteractionHandler;
+import net.javadiscord.javabot.command.SlashCommands;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.events.*;
@@ -42,13 +42,13 @@ public class Bot {
 	/**
 	 * A reference to the slash command listener that's the main point of
 	 * interaction for users with this bot. It's marked as a publicly accessible
-	 * reference so that {@link InteractionHandler#registerCommands} can
+	 * reference so that {@link SlashCommands#registerSlashCommands} can
 	 * be called wherever it's needed.
 	 */
-	public static InteractionHandler interactionHandler;
+	public static SlashCommands slashCommands;
 	/**
-	 * An instance of {@link AutoMod}.
-	 * */
+	 * An instance of our AutoMod feature.
+	 */
 	public static AutoMod autoMod;
 	/**
 	 * A reference to the data source that provides access to the relational
@@ -74,7 +74,7 @@ public class Bot {
 	 * <ol>
 	 *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
 	 *     <li>Loading the configuration JSON file.</li>
-	 *     <li>Initializing the {@link InteractionHandler} listener (which reads command data from a YAML file).</li>
+	 *     <li>Initializing the {@link SlashCommands} listener (which reads command data from a YAML file).</li>
 	 *     <li>Creating and configuring the {@link JDA} instance that enables the bot's Discord connectivity.</li>
 	 *     <li>Adding event listeners to the bot.</li>
 	 * </ol>
@@ -86,7 +86,7 @@ public class Bot {
 		TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 		config = new BotConfig(Path.of("config"));
 		dataSource = DbHelper.initDataSource(config);
-		interactionHandler = new InteractionHandler();
+		slashCommands = new SlashCommands();
 		autoMod = new AutoMod();
 		imageCache = new ImageCacheUtils();
 		asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
@@ -96,7 +96,7 @@ public class Bot {
 				.setMemberCachePolicy(MemberCachePolicy.ALL)
 				.enableCache(CacheFlag.ACTIVITY)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-				.addEventListeners(interactionHandler)
+				.addEventListeners(slashCommands)
 				.build();
 		addEventListeners(jda);
 		try {
@@ -110,7 +110,7 @@ public class Bot {
 
 	/**
 	 * Adds all the bot's event listeners to the JDA instance, except for the
-	 * main {@link InteractionHandler} listener and {@link AutoMod}.
+	 * main {@link SlashCommands} listener.
 	 *
 	 * @param jda The JDA bot instance to add listeners to.
 	 */

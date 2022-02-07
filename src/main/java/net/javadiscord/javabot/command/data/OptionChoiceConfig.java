@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command.data.slash_commands;
+package net.javadiscord.javabot.command.data;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
@@ -7,18 +7,18 @@ import net.dv8tion.jda.api.interactions.commands.Command.Choice;
  * DTO for a choice that a slash command option can have.
  */
 @Data
-public class SlashOptionChoiceConfig {
+public class OptionChoiceConfig {
 	private String name;
 	private String value;
 
 	/**
-	 * Converts the given {@link Choice} into a {@link SlashOptionChoiceConfig} object.
+	 * Converts the given {@link Choice} into a {@link OptionChoiceConfig} object.
 	 *
 	 * @param choice The {@link Choice}.
-	 * @return The {@link SlashOptionChoiceConfig} object.
+	 * @return The {@link OptionChoiceConfig} object.
 	 */
-	public static SlashOptionChoiceConfig fromData(Choice choice) {
-		var c = new SlashOptionChoiceConfig();
+	public static OptionChoiceConfig fromData(Choice choice) {
+		var c = new OptionChoiceConfig();
 		c.setName(choice.getName());
 		c.setValue(choice.getAsString());
 		return c;

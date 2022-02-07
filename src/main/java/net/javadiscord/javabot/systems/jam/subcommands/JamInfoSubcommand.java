@@ -2,12 +2,12 @@ package net.javadiscord.javabot.systems.jam.subcommands;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
@@ -19,9 +19,9 @@ import java.time.format.DateTimeFormatter;
  * Shows some basic information about the current Java Jam.
  */
 @RequiredArgsConstructor
-public class JamInfoSubcommand implements ISlashCommand {
+public class JamInfoSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		Jam jam = this.fetchJam(event);
 		if (jam == null) {
 			return Responses.warning(event, "No Jam was found.");
@@ -46,7 +46,7 @@ public class JamInfoSubcommand implements ISlashCommand {
 		return event.deferReply();
 	}
 
-	private Jam fetchJam(SlashCommandInteractionEvent event) {
+	private Jam fetchJam(SlashCommandEvent event) {
 		Jam jam;
 		try (Connection con = Bot.dataSource.getConnection()) {
 			JamRepository jamRepository = new JamRepository(con);

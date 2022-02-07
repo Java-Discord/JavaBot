@@ -5,19 +5,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
@@ -25,9 +19,9 @@ import java.time.Instant;
 /**
  * Command that allows members to report other members.
  */
-public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessageContextCommand {
+public class ReportCommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		OptionMapping option = event.getOption("reason");
 		String reason = option == null ? "None" : option.getAsString();
 		Member member = event.getOption("user").getAsMember();
@@ -36,50 +30,19 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 		}
 		var config = Bot.config.get(event.getGuild());
 		MessageChannel reportChannel = config.getModeration().getReportChannel();
-		var embed = buildReportEmbed(member.getUser(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
-		embed.addField("Reason", String.format("```%s```", reason), false);
+		var embed = buildReportEmbed(member.getUser(), event.getUser(), reason, event.getTextChannel(), config.getSlashCommand());
 		reportChannel.sendMessage("@here").setEmbeds(embed.build())
-				.setActionRows(setComponents(member.getIdLong()))
+				.setActionRow(
+						Button.danger("utils:ban:" + member.getId(), "Ban"),
+						Button.danger("utils:kick:" + member.getId(), "Kick"),
+						Button.secondary("utils:delete", "🗑️")
+				)
 				.queue();
 		embed.setDescription("Successfully reported " + "`" + member.getUser().getAsTag() + "`!\nYour report has been send to our Moderators");
 		return event.replyEmbeds(embed.build()).setEphemeral(true);
 	}
 
-
-	@Override
-	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) throws ResponseException {
-		var config = Bot.config.get(event.getGuild());
-		var embed = buildReportEmbed(event.getTarget().getAuthor(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
-		embed.addField("Message", String.format("[Jump to Message](%s)", event.getTarget().getJumpUrl()), false);
-		MessageChannel reportChannel = config.getModeration().getReportChannel();
-		reportChannel.sendMessage("@here").setEmbeds(embed.build())
-				.setActionRows(setComponents(event.getTarget().getAuthor().getIdLong()))
-				.queue();
-		embed.setDescription("Successfully reported " + "`" + event.getTarget().getAuthor().getAsTag() + "`!\nYour report has been send to our Moderators");
-		return event.replyEmbeds(embed.build()).setEphemeral(true);
-	}
-
-	@Override
-	public ReplyCallbackAction handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
-		var config = Bot.config.get(event.getGuild());
-		var embed = buildReportEmbed(event.getTarget(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
-		MessageChannel reportChannel = config.getModeration().getReportChannel();
-		reportChannel.sendMessage("@here").setEmbeds(embed.build())
-				.setActionRows(setComponents(event.getTarget().getIdLong()))
-				.queue();
-		embed.setDescription("Successfully reported " + "`" + event.getTarget().getAsTag() + "`!\nYour report has been send to our Moderators");
-		return event.replyEmbeds(embed.build()).setEphemeral(true);
-	}
-
-	private ActionRow setComponents(long userId) {
-		return ActionRow.of(
-				Button.danger("utils:ban:" + userId, "Ban"),
-				Button.danger("utils:kick:" + userId, "Kick"),
-				Button.secondary("utils:delete", "🗑️")
-		);
-	}
-
-	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, TextChannel channel, SlashCommandConfig config) {
+	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, String reason, TextChannel channel, SlashCommandConfig config) {
 		return new EmbedBuilder()
 				.setAuthor(reported.getAsTag(), null, reported.getEffectiveAvatarUrl())
 				.setTitle("Report")
@@ -89,6 +52,7 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Reported on", String.format("<t:%s:F>", Instant.now().getEpochSecond()), false)
 				.addField("ID", String.format("```%s```", reported.getId()), true)
+				.addField("Reason", String.format("```%s```", reason), false)
 				.setFooter(reportedBy.getAsTag(), reportedBy.getEffectiveAvatarUrl())
 				.setTimestamp(Instant.now());
 	}

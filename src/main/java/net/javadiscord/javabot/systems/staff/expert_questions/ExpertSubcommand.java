@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.systems.staff.expert_questions;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.SlashCommandHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,9 +12,9 @@ import java.sql.SQLException;
 /**
  * Interface class that handles all Expert Question Commands.
  */
-public abstract class ExpertSubcommand implements ISlashCommand {
+public abstract class ExpertSubcommand implements SlashCommandHandler {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public ReplyAction handle(SlashCommandEvent event) {
 		if (event.getGuild() == null) {
 			return Responses.warning(event, "This command can only be used in the context of a guild.");
 		}
@@ -29,5 +29,5 @@ public abstract class ExpertSubcommand implements ISlashCommand {
 		}
 	}
 
-	protected abstract ReplyCallbackAction handleCommand(SlashCommandInteractionEvent event, Connection con) throws SQLException;
+	protected abstract ReplyAction handleCommand(SlashCommandEvent event, Connection con) throws SQLException;
 }
