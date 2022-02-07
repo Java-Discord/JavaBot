@@ -15,7 +15,7 @@ public class EmoteConfig extends GuildConfigItem {
 	private String successId;
 	private String upvoteId;
 	private String downvoteId;
-	private String trashBin;
+	private String jobChannelVoteEmoji;
 
 	public Emote getFailureEmote() {
 		return getGuild().getJDA().getEmoteById(this.failureId);
