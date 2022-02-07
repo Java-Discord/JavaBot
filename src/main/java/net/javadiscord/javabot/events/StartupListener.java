@@ -38,7 +38,7 @@ public class StartupListener extends ListenerAdapter {
 
 		log.info("Starting Guild initialization\n");
 		for (var guild : event.getJDA().getGuilds()) {
-			Bot.slashCommands.registerSlashCommands(guild);
+			Bot.interactionHandler.registerCommands(guild);
 			// TODO: Reimplement this.
 			//new StarboardManager().updateAllStarboardEntries(guild);
 			// Schedule the help channel updater to run periodically for each guild.

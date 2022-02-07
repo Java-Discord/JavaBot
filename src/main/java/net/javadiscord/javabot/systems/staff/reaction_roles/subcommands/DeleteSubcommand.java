@@ -3,13 +3,13 @@ package net.javadiscord.javabot.systems.staff.reaction_roles.subcommands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.GuildUtils;
 
@@ -20,9 +20,9 @@ import java.util.List;
 /**
  * Subcommand that deletes any Reaction Role/Button.
  */
-public class DeleteSubcommand implements SlashCommandHandler {
+public class DeleteSubcommand implements ISlashCommand {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var labelOption = event.getOption("label");
 		var idOption = event.getOption("message-id");
 		if (labelOption == null || idOption == null) {

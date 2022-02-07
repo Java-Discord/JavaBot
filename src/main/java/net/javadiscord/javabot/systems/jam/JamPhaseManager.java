@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.jam;
 
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamPhase;
@@ -28,7 +28,7 @@ public class JamPhaseManager {
 	public static final String SUBMISSION_VOTE_UNICODE = "⬆";
 	private static final Logger log = LoggerFactory.getLogger(JamPhaseManager.class);
 	private final Jam jam;
-	private final SlashCommandEvent event;
+	private final SlashCommandInteractionEvent event;
 	private final JamChannelManager channelManager;
 
 	/**

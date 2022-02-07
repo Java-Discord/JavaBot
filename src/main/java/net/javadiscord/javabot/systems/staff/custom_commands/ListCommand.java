@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.systems.staff.custom_commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 
 import java.sql.SQLException;
@@ -12,10 +12,10 @@ import java.sql.SQLException;
 /**
  * Command that lists Custom Slash Commands.
  */
-public class ListCommand implements SlashCommandHandler {
+public class ListCommand implements ISlashCommand {
 
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var commands = new CustomCommandRepository(con).getCustomCommandsByGuildId(event.getGuild().getIdLong());
 			StringBuilder sb = new StringBuilder();

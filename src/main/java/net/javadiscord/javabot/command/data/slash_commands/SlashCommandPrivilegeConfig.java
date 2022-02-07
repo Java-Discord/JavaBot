@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command.data;
+package net.javadiscord.javabot.command.data.slash_commands;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +14,13 @@ import net.javadiscord.javabot.data.config.UnknownPropertyException;
  */
 @Data
 @Slf4j
-public class CommandPrivilegeConfig {
+public class SlashCommandPrivilegeConfig {
 	private String type;
 	private boolean enabled = true;
 	private String id;
 
 	/**
-	 * Converts the current {@link CommandPrivilegeConfig} into a {@link CommandPrivilege} object.
+	 * Converts the current {@link SlashCommandPrivilegeConfig} into a {@link CommandPrivilege} object.
 	 *
 	 * @param guild     The current guild.
 	 * @param botConfig The bot's config.
