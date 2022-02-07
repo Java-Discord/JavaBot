@@ -48,6 +48,7 @@ public class InteractionListener extends ListenerAdapter {
 	public void onButtonClick(ButtonClickEvent event) {
 		if (event.getUser().isBot()) return;
 		event.deferEdit().queue();
+		System.out.println(event.getComponentId());
 		String[] id = event.getComponentId().split(":");
 		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
