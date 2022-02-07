@@ -78,6 +78,7 @@ public class SubmissionManager {
 	 * @param event The {@link ButtonClickEvent} that is fired upon use.
 	 */
 	public void handleThreadDeletion(ButtonClickEvent event) {
+		System.out.println("SubmissionManager#handleThreadDeletion"):
 		var thread = (ThreadChannel) event.getGuildChannel();
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QOTWSubmissionRepository(con);
