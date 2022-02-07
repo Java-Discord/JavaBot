@@ -135,6 +135,15 @@
     - type: ROLE
       id: moderation.staffRoleId
   handler: net.javadiscord.javabot.systems.staff.SayCommand
+  
+# /redeploy
+- name: redeploy
+  description: Makes the bot redeploy
+  enabledByDefault: false
+  privileges:
+    - type: ROLE
+      id: moderation.staffRoleId
+  handler: net.javadiscord.javabot.systems.staff.RedeployCommand
 
 # /kick
 - name: kick
