@@ -3,7 +3,7 @@ package net.javadiscord.javabot.systems.jam;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
@@ -39,7 +39,7 @@ public class JamChannelManager {
 	 * @param event   The slash command event.
 	 * @param message The message to send.
 	 */
-	public void sendErrorMessageAsync(SlashCommandEvent event, String message) {
+	public void sendErrorMessageAsync(SlashCommandInteractionEvent event, String message) {
 		event.getHook().sendMessage(message).queue();
 	}
 
@@ -258,7 +258,7 @@ public class JamChannelManager {
 	 *                   votes it received.
 	 * @param event      The event which triggered this method.
 	 */
-	public void sendSingleWinnerMessage(JamSubmission submission, Map<JamSubmission, Integer> voteCounts, SlashCommandEvent event) {
+	public void sendSingleWinnerMessage(JamSubmission submission, Map<JamSubmission, Integer> voteCounts, SlashCommandInteractionEvent event) {
 		String username = this.getSubmissionUserName(submission, event);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s has won the %s!", username, submission.getJam().getFullName()), submission.getSourceLink())
@@ -280,7 +280,7 @@ public class JamChannelManager {
 	 *                    votes it received.
 	 * @param event       The event which triggered this method.
 	 */
-	public void sendMultipleWinnersMessage(List<JamSubmission> submissions, Map<JamSubmission, Integer> voteCounts, SlashCommandEvent event) {
+	public void sendMultipleWinnersMessage(List<JamSubmission> submissions, Map<JamSubmission, Integer> voteCounts, SlashCommandInteractionEvent event) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("There Are Multiple Winners of the %s!", submissions.get(0).getJam()))
 				.setColor(this.config.getJamEmbedColor());
@@ -309,7 +309,7 @@ public class JamChannelManager {
 	 * @param winners      The list of winning submissions.
 	 * @param event        The event which triggered this method.
 	 */
-	private void addRunnerUpSubmissionFields(EmbedBuilder embedBuilder, Map<JamSubmission, Integer> voteCounts, List<JamSubmission> winners, SlashCommandEvent event) {
+	private void addRunnerUpSubmissionFields(EmbedBuilder embedBuilder, Map<JamSubmission, Integer> voteCounts, List<JamSubmission> winners, SlashCommandInteractionEvent event) {
 		var otherSubmissions = new HashMap<>(voteCounts);
 		winners.forEach(otherSubmissions::remove);
 		if (!otherSubmissions.isEmpty()) {
@@ -334,7 +334,7 @@ public class JamChannelManager {
 	 * @param event      The event which triggered this method.
 	 * @return The name to display alongside the submission.
 	 */
-	private String getSubmissionUserName(JamSubmission submission, SlashCommandEvent event) {
+	private String getSubmissionUserName(JamSubmission submission, SlashCommandInteractionEvent event) {
 		User winner = event.getJDA().getUserById(submission.getUserId());
 		Guild guild = event.getGuild();
 		Member member = guild == null || winner == null ? null : guild.getMember(winner);

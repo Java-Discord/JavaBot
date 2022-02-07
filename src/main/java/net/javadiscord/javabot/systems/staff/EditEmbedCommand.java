@@ -3,11 +3,11 @@ package net.javadiscord.javabot.systems.staff;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 // TODO: Refactor embed editing interface completely.
 
@@ -15,10 +15,10 @@ import net.javadiscord.javabot.command.SlashCommandHandler;
  * Command that allows staff-members to edit embed messages.
  */
 @Deprecated(forRemoval = true)
-public class EditEmbedCommand implements SlashCommandHandler {
+public class EditEmbedCommand implements ISlashCommand {
 
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
 		return switch (event.getSubcommandName()) {
 			case "edit" -> editEmbed(event);
@@ -27,7 +27,7 @@ public class EditEmbedCommand implements SlashCommandHandler {
 		};
 	}
 
-	private ReplyAction editEmbedFromLink(SlashCommandEvent event) {
+	private ReplyCallbackAction editEmbedFromLink(SlashCommandInteractionEvent event) {
 		String emLink = event.getOption("embed-link").getAsString();
 		String msgLink = event.getOption("message-link").getAsString();
 
@@ -55,7 +55,7 @@ public class EditEmbedCommand implements SlashCommandHandler {
 		return event.reply("Done!").setEphemeral(true);
 	}
 
-	private ReplyAction editEmbed(SlashCommandEvent event) {
+	private ReplyCallbackAction editEmbed(SlashCommandInteractionEvent event) {
 
 		String link = event.getOption("link").getAsString();
 		String[] value = link.split("/");

@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class AddThemeSubcommand extends ActiveJamSubcommand {
 	@Override
-	protected ReplyAction handleJamCommand(SlashCommandEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
+	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping nameOption = event.getOption("name");
 		OptionMapping descriptionOption = event.getOption("description");
 		if (nameOption == null || descriptionOption == null) {

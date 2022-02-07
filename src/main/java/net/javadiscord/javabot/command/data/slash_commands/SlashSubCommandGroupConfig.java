@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command.data;
+package net.javadiscord.javabot.command.data.slash_commands;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
@@ -9,34 +9,34 @@ import java.util.Arrays;
  * Simple DTO for a group of Discord subcommands.
  */
 @Data
-public class SubCommandGroupConfig {
+public class SlashSubCommandGroupConfig {
 	private String name;
 	private String description;
-	private SubCommandConfig[] subCommands;
+	private SlashSubCommandConfig[] subCommands;
 
 	/**
-	 * Converts the given {@link SubcommandGroupData} into a {@link SubCommandGroupConfig} object.
+	 * Converts the given {@link SubcommandGroupData} into a {@link SlashSubCommandGroupConfig} object.
 	 *
 	 * @param data The {@link SubcommandGroupData}.
-	 * @return The {@link SubCommandGroupConfig} object.
+	 * @return The {@link SlashSubCommandGroupConfig} object.
 	 */
-	public static SubCommandGroupConfig fromData(SubcommandGroupData data) {
-		SubCommandGroupConfig c = new SubCommandGroupConfig();
+	public static SlashSubCommandGroupConfig fromData(SubcommandGroupData data) {
+		SlashSubCommandGroupConfig c = new SlashSubCommandGroupConfig();
 		c.setName(data.getName());
 		c.setDescription(data.getDescription());
-		c.setSubCommands(data.getSubcommands().stream().map(SubCommandConfig::fromData).toArray(SubCommandConfig[]::new));
+		c.setSubCommands(data.getSubcommands().stream().map(SlashSubCommandConfig::fromData).toArray(SlashSubCommandConfig[]::new));
 		return c;
 	}
 
 	/**
-	 * Converts the current {@link SubCommandGroupConfig} into a {@link SubcommandGroupData} object.
+	 * Converts the current {@link SlashSubCommandGroupConfig} into a {@link SubcommandGroupData} object.
 	 *
 	 * @return The {@link SubcommandGroupData} object.
 	 */
 	public SubcommandGroupData toData() {
 		SubcommandGroupData data = new SubcommandGroupData(this.name, this.description);
 		if (this.subCommands != null) {
-			for (SubCommandConfig scc : this.subCommands) {
+			for (SlashSubCommandConfig scc : this.subCommands) {
 				data.addSubcommands(scc.toData());
 			}
 		}

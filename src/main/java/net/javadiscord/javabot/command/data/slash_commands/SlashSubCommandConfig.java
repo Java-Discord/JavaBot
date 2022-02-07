@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command.data;
+package net.javadiscord.javabot.command.data.slash_commands;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -9,34 +9,34 @@ import java.util.Arrays;
  * Simple DTO for a Discord subcommand.
  */
 @Data
-public class SubCommandConfig {
+public class SlashSubCommandConfig {
 	private String name;
 	private String description;
-	private OptionConfig[] options;
+	private SlashOptionConfig[] options;
 
 	/**
-	 * Converts the given {@link SubcommandData} into a {@link SubCommandConfig} object.
+	 * Converts the given {@link SubcommandData} into a {@link SlashSubCommandConfig} object.
 	 *
 	 * @param data The {@link SubcommandData}.
-	 * @return The {@link SubCommandConfig} object.
+	 * @return The {@link SlashSubCommandConfig} object.
 	 */
-	public static SubCommandConfig fromData(SubcommandData data) {
-		SubCommandConfig c = new SubCommandConfig();
+	public static SlashSubCommandConfig fromData(SubcommandData data) {
+		SlashSubCommandConfig c = new SlashSubCommandConfig();
 		c.setName(data.getName());
 		c.setDescription(data.getDescription());
-		c.setOptions(data.getOptions().stream().map(OptionConfig::fromData).toArray(OptionConfig[]::new));
+		c.setOptions(data.getOptions().stream().map(SlashOptionConfig::fromData).toArray(SlashOptionConfig[]::new));
 		return c;
 	}
 
 	/**
-	 * Converts the current {@link SubCommandConfig} into a {@link SubcommandData} object.
+	 * Converts the current {@link SlashSubCommandConfig} into a {@link SubcommandData} object.
 	 *
 	 * @return The {@link SubcommandData} object.
 	 */
 	public SubcommandData toData() {
 		SubcommandData data = new SubcommandData(this.name, this.description);
 		if (this.options != null) {
-			for (OptionConfig oc : this.options) {
+			for (SlashOptionConfig oc : this.options) {
 				data.addOptions(oc.toData());
 			}
 		}

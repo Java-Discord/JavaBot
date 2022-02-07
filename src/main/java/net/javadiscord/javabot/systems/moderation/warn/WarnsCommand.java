@@ -3,12 +3,15 @@ package net.javadiscord.javabot.systems.moderation.warn;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 
@@ -21,9 +24,9 @@ import java.util.List;
 /**
  * Command that allows users to see all their active warns.
  */
-public class WarnsCommand implements SlashCommandHandler {
+public class WarnsCommand implements ISlashCommand, IUserContextCommand {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		OptionMapping warnsOption = event.getOption("user");
 		Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
 		if (member == null) return Responses.error(event, "Member is missing.");
@@ -32,8 +35,19 @@ public class WarnsCommand implements SlashCommandHandler {
 			return event.replyEmbeds(buildWarnsEmbed(new WarnRepository(con)
 					.getWarnsByUserId(member.getIdLong(), cutoff), member));
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return Responses.error(event, "An Error occurred.");
+			throw ResponseException.error("Could not get warns from user: " + member.getUser().getAsTag(), e);
+		}
+	}
+
+	@Override
+	public ReplyCallbackAction handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
+		Member member = event.getTargetMember();
+		try (var con = Bot.dataSource.getConnection()) {
+			return event.replyEmbeds(buildWarnsEmbed(new WarnRepository(con)
+					.getWarnsByUserId(member.getIdLong(), cutoff), member));
+		} catch (SQLException e) {
+			throw ResponseException.error("Could not get warns from user: " + member.getUser().getAsTag(), e);
 		}
 	}
 

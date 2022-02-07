@@ -1,18 +1,18 @@
 package net.javadiscord.javabot.systems.staff;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.SlashCommandHandler;
+import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 /**
  * Command that lets staff-members let the bot say whatever they want.
  */
 @Slf4j
-public class SayCommand implements SlashCommandHandler {
+public class SayCommand implements ISlashCommand {
 	@Override
-	public ReplyAction handle(SlashCommandEvent event) {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var textOption = event.getOption("text");
 		if (textOption == null) {
 			return Responses.error(event, "Missing required arguments.");
