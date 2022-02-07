@@ -88,7 +88,7 @@ public class SubmissionManager {
 					return;
 				}
 				repo.removeSubmission(thread.getIdLong());
-				thread.delete.queue();
+				thread.delete().queue();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
