@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageType;
@@ -13,19 +14,11 @@ import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Listens for messages and reactions in #share-knowledge.
+ * Listens for reactions in #looking-for-programmer.
  * Automatically deletes messages below a certain score.
  */
-public class ShareKnowledgeVoteListener extends ListenerAdapter {
-	@Override
-	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (isInvalidEvent(event)) return;
-		var config = Bot.config.get(event.getGuild());
-
-		// add upvote and downvote option
-		event.getMessage().addReaction(config.getEmote().getUpvoteEmote()).queue();
-		event.getMessage().addReaction(config.getEmote().getDownvoteEmote()).queue();
-	}
+@Slf4j
+public class JobChannelVoteListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
@@ -53,34 +46,21 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
 		if (event.getUser() == null || event.getUser().isBot() || event.getUser().isSystem()) return;
 		if (isInvalidEvent(event)) return;
 		var config = Bot.config.get(event.getGuild());
-
-		String reactionId = event.getReaction().getReactionEmote().getId();
-		String upvoteId = config.getEmote().getUpvoteEmote().getId();
-		String downvoteId = config.getEmote().getDownvoteEmote().getId();
-
-		if (!(reactionId.equals(upvoteId) || reactionId.equals(downvoteId))) return;
-		String messageId = event.getMessageId();
-		event.getChannel().retrieveMessageById(messageId).queue(message -> {
-			int upvotes = message
-					.getReactions()
-					.stream()
-					.filter(reaction -> reaction.getReactionEmote().getId().equals(upvoteId))
-					.findFirst()
-					.map(MessageReaction::getCount)
-					.orElse(0);
+		if (!event.getTextChannel().equals(config.getModeration().getJobChannel())) return;
+		if (!event.getReactionEmote().isEmoji() || !event.getReactionEmote().getName().equals(config.getEmote().getTrashBin())) return;
+		event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> {
 			int downvotes = message
 					.getReactions()
 					.stream()
-					.filter(reaction -> reaction.getReactionEmote().getId().equals(downvoteId))
+					.filter(reaction -> reaction.getReactionEmote().getName().equals(config.getEmote().getTrashBin()))
 					.findFirst()
 					.map(MessageReaction::getCount)
 					.orElse(0);
-			int eval = downvotes - upvotes;
-			if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
+			if (downvotes >= config.getModeration().getJobChannelMessageDeleteThreshold()) {
 				message.delete().queue();
 				message.getAuthor().openPrivateChannel()
 						.queue(
-								s -> s.sendMessage(String.format("Your message in %s has been removed due to community feedback.", config.getModeration().getShareKnowledgeChannel().getAsMention())).queue(),
+								s -> s.sendMessage(String.format("Your message in %s has been removed due to community feedback.", config.getModeration().getJobChannel().getAsMention())).queue(),
 								e -> {}
 						);
 			}

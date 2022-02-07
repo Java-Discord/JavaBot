@@ -127,7 +127,8 @@ public class Bot {
 				new StarboardManager(),
 				new InteractionListener(),
 				new HelpChannelListener(),
-				new ShareKnowledgeVoteListener()
+				new ShareKnowledgeVoteListener(),
+				new JobChannelVoteListener()
 		);
 	}
 }
