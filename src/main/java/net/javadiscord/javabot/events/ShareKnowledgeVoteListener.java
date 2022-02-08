@@ -79,9 +79,10 @@ public class ShareKnowledgeVoteListener extends ListenerAdapter {
 			if (eval >= config.getModeration().getShareKnowledgeMessageDeleteThreshold()) {
 				message.delete().queue();
 				message.getAuthor().openPrivateChannel()
-						.queue(channel -> channel.sendMessage("Your Message in " +
-								config.getModeration().getShareKnowledgeChannel().getAsMention() +
-								" has been removed due to community feedback").queue());
+						.queue(
+								s -> s.sendMessage(String.format("Your message in %s has been removed due to community feedback.", config.getModeration().getShareKnowledgeChannel().getAsMention())).queue(),
+								e -> {}
+						);
 			}
 		});
 	}
