@@ -4,10 +4,12 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
@@ -16,7 +18,7 @@ import java.time.Instant;
 /**
  * Command that allows members to format messages.
  */
-public class FormatCodeCommand implements ISlashCommand {
+public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var idOption = event.getOption("message-id");
@@ -37,6 +39,12 @@ public class FormatCodeCommand implements ISlashCommand {
 				m -> event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(m, m.getAuthor(), format, slashConfig)).queue(),
 				e -> Responses.error(event.getHook(), "Could not retrieve message.").queue());
 		return event.deferReply();
+	}
+
+	@Override
+	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
+		Message message = event.getTarget();
+		return event.replyEmbeds(buildFormatCodeEmbed(message, message.getAuthor(), "java", Bot.config.get(event.getGuild()).getSlashCommand()));
 	}
 
 	private MessageEmbed buildFormatCodeEmbed(Message message, User author, String format, SlashCommandConfig config) {
