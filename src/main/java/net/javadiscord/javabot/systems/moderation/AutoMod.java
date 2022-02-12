@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -60,7 +61,7 @@ public class AutoMod extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		Member member = event.getMember();
-		if (canBypassAutomod(member)) return;
+		//if (canBypassAutomod(member)) return;
 		checkNewMessageAutomod(event.getMessage());
 	}
 
@@ -229,6 +230,7 @@ public class AutoMod extends ListenerAdapter {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
+			if (Arrays.stream(Bot.config.get(message.getGuild()).getModeration().getAutomodInviteExcludes()).anyMatch(message.getContentRaw()::contains)) return false;
 			return true;
 		}
 		return false;
