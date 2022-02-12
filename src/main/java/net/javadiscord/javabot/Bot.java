@@ -96,7 +96,7 @@ public class Bot {
 				.setMemberCachePolicy(MemberCachePolicy.ALL)
 				.enableCache(CacheFlag.ACTIVITY)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-				.addEventListeners(interactionHandler)
+				.addEventListeners(interactionHandler, autoMod)
 				.build();
 		addEventListeners(jda);
 		try {
