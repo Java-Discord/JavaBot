@@ -61,7 +61,7 @@ public class AutoMod extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		Member member = event.getMember();
-		//if (canBypassAutomod(member)) return;
+		if (canBypassAutomod(member)) return;
 		checkNewMessageAutomod(event.getMessage());
 	}
 
