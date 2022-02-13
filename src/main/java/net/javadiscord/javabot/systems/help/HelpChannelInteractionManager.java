@@ -66,7 +66,7 @@ public class HelpChannelInteractionManager {
 				if (event.getUser().equals(owner)) {// If the owner is unreserving their own channel, handle it separately.
 					channelManager.unreserveChannelByUser(channel, owner, null, event);
 				} else {
-					channelManager.unreserveChannel(channel);
+					channelManager.unreserveChannel(channel).queue();
 				}
 			} else if (action.equals("not-done")) {
 				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
