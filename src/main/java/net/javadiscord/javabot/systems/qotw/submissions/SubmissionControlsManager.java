@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
@@ -178,6 +179,7 @@ public class SubmissionControlsManager {
 		log.info("{} deleted submission thread {}", event.getUser().getAsTag(), thread.getName());
 		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s deleted submission thread `%s`", event.getUser().getAsTag(), thread.getName()).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.removeSubmission(thread.getIdLong()));
 		event.getHook().sendMessage("Submission will be deleted in 10 seconds...").setEphemeral(true);
 	}
 

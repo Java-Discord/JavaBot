@@ -40,6 +40,24 @@ public class QuestionQueueRepository {
 	}
 
 	/**
+	 * Gets a {@link QOTWQuestion} by its Question Number.
+	 *
+	 * @param questionNumber The question's number.
+	 * @return The question as an {@link Optional}
+	 * @throws SQLException If an error occurs.
+	 */
+	public Optional<QOTWQuestion> findByQuestionNumber(int questionNumber) throws SQLException {
+		QOTWQuestion question = null;
+		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_question WHERE question_number = ?");
+		s.setInt(1, questionNumber);
+		var rs = s.executeQuery();
+		if (rs.next()) {
+			question = read(rs);
+		}
+		return Optional.ofNullable(question);
+	}
+
+	/**
 	 * Gets the next Question's week number.
 	 *
 	 * @return The next Question's week number as an integer.
