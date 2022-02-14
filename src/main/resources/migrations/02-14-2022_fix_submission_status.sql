@@ -1,0 +1,1 @@
+UPDATE qotw_submissions SET reviewed = TRUE WHERE question_number < 61 
