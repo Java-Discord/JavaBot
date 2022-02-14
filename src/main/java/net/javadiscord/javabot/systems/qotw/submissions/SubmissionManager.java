@@ -141,11 +141,11 @@ public class SubmissionManager {
 						question.getText(), createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
 				.addField("Note",
 						"""
-								To maximize your chances of getting this weeks QOTW Point make sure to:
+								To maximize your chances of getting this week's QOTW Point make sure to:
 								— Provide a **Code example** (if possible)
 								— Try to answer the question as detailed as possible.
 								
-								Staff usually wont reply in here.""", false)
+								Staff usually won't reply in here.""", false)
 				.setTimestamp(Instant.now())
 				.build();
 	}
