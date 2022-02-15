@@ -48,6 +48,14 @@ public class ModerationConfig extends GuildConfigItem {
 	 */
 	private int maxWarnSeverity = 100;
 
+	/**
+	 * Invite liks AutoMod should exclude.
+	 */
+	private String[] automodInviteExcludes;
+
+	/**
+	 * Text that is sent to users when they're banned.
+	 */
 	private String banMessageText = "Looks like you've been banned from the Java Discord. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
 
 	public TextChannel getReportChannel() {

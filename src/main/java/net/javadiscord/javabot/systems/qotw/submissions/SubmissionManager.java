@@ -14,6 +14,9 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 
@@ -47,6 +50,7 @@ public class SubmissionManager {
 		config.getSubmissionChannel().createThreadChannel(
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
+					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
 					try (var con = Bot.dataSource.getConnection()) {
 						var repo = new QOTWSubmissionRepository(con);
 						QOTWSubmission submission = new QOTWSubmission();
@@ -55,12 +59,18 @@ public class SubmissionManager {
 						submission.setGuildId(thread.getGuild().getIdLong());
 						submission.setAuthorId(member.getIdLong());
 						repo.insert(submission);
-
-						thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-						thread.sendMessage(String.format("%s %s", config.getQOTWReviewRole(), member.getAsMention()))
-								.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionNumber, config))
-								.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
-								.queue();
+						DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> {
+							var questionOptional = dao.findByQuestionNumber(questionNumber);
+							if (questionOptional.isPresent()) {
+								thread.sendMessage(String.format("%s %s", config.getQOTWReviewRole(), member.getAsMention()))
+										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
+										.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
+										.queue();
+							} else {
+								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
+										.queue();
+							}
+						});
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
@@ -118,15 +128,24 @@ public class SubmissionManager {
 		}
 	}
 
-	private MessageEmbed buildSubmissionThreadEmbed(User createdBy, long questionNumber, QOTWConfig config) {
+	private MessageEmbed buildSubmissionThreadEmbed(User createdBy, QOTWQuestion question, QOTWConfig config) {
 		return new EmbedBuilder()
 				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getDefaultColor())
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
-				.setTitle(String.format("Question of the Week #%s", questionNumber))
-				.setDescription(String.format("Hey, %s! Please submit your answer into this thread." +
-								"\nYou can even send multiple messages, if you want to. This whole thread counts as your submission." +
-								"\nThe %s will review your submission once a new question appears.",
-						createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
+				.setTitle(String.format("Question of the Week #%s", question.getQuestionNumber()))
+				.setDescription(String.format("""
+								%s
+								                        
+								Hey, %s! Please submit your answer into this private thread.
+								The %s will review your submission once a new question appears.""",
+						question.getText(), createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
+				.addField("Note",
+						"""
+								To maximize your chances of getting this week's QOTW Point make sure to:
+								— Provide a **Code example** (if possible)
+								— Try to answer the question as detailed as possible.
+								
+								Staff usually won't reply in here.""", false)
 				.setTimestamp(Instant.now())
 				.build();
 	}

@@ -240,7 +240,15 @@ public class HelpChannelManager {
 				if (!entry.getKey().getUser().equals(owner)) potentialHelpers.add(entry.getKey());
 			}
 			if (potentialHelpers.isEmpty()) {
-				Responses.info((SlashCommandInteractionEvent) interaction, "Channel Unreserved", "Your channel has been unreserved.").queue();
+				InteractionHook hook;
+				if (interaction.getType() == InteractionType.COMPONENT) {
+					hook = ((ButtonInteractionEvent) interaction).getHook();
+				} else if (interaction.getType() == InteractionType.COMMAND) {
+					hook = ((SlashCommandInteractionEvent) interaction).getHook();
+				} else {
+					throw new IllegalStateException("Unable to obtain Interaction Hook!");
+				}
+				Responses.info(hook, "Channel Unreserved", "Your channel has been unreserved.").queue();
 				unreserveChannel(channel).queue();
 				return;
 			}
