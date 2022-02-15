@@ -56,7 +56,7 @@ public class ProfileCommand implements ISlashCommand {
 		}
 		embed.addField("Warns", String.format("`%s (%s/%s)`",
 						warns.size(),
-						warns.stream().mapToLong(Warn::getSeverityWeight).count(),
+						warns.stream().mapToLong(Warn::getSeverityWeight).sum(),
 						config.getMaxWarnSeverity()), true)
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points,
