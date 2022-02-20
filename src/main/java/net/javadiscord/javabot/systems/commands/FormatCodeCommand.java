@@ -14,33 +14,44 @@ import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
+import java.util.Collections;
 
 /**
  * Command that allows members to format messages.
  */
 public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand {
+	long id;
+
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var idOption = event.getOption("message-id");
 		var formatOption = event.getOption("format");
+		var slashConfig = Bot.config.get(event.getGuild()).getSlashCommand();
 		String format = formatOption == null ? "java" : formatOption.getAsString();
-		long id;
 		if (idOption == null) {
 			if (event.getChannel().hasLatestMessage()) {
-				id = event.getChannel().getLatestMessageIdLong();
-				if (event.getChannel().retrieveMessageById(id).complete().getAuthor().isBot()){
-					return Responses.error(event, "Missing required arguments.");
-				}
+				event.getChannel().getHistory().retrievePast(100) // max limit
+						.map(messages -> messages)
+						.queue(messages -> {
+							for (Message message : messages) {
+								if (!message.getAuthor().isBot()){
+									id = message.getIdLong();
+									break;
+								}
+							}
+							event.getTextChannel().retrieveMessageById(id).queue(
+									m -> event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(m, m.getAuthor(), format, slashConfig)).queue(),
+									e -> Responses.error(event.getHook(), "Could not retrieve message.").queue());
+						});
 			} else {
 				return Responses.error(event, "Missing required arguments.");
 			}
 		} else {
 			id = idOption.getAsLong();
+			event.getTextChannel().retrieveMessageById(id).queue(
+					m -> event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(m, m.getAuthor(), format, slashConfig)).queue(),
+					e -> Responses.error(event.getHook(), "Could not retrieve message.").queue());
 		}
-		var slashConfig = Bot.config.get(event.getGuild()).getSlashCommand();
-		event.getTextChannel().retrieveMessageById(id).queue(
-				m -> event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(m, m.getAuthor(), format, slashConfig)).queue(),
-				e -> Responses.error(event.getHook(), "Could not retrieve message.").queue());
 		return event.deferReply();
 	}
 
