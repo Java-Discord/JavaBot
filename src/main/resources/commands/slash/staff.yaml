@@ -133,7 +133,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: moderation.staffRoleId
+      id: moderation.adminRoleId
   handler: net.javadiscord.javabot.systems.staff.SayCommand
 
 # /redeploy
@@ -257,7 +257,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: moderation.staffRoleId
+      id: moderation.adminRoleId
   options:
     - name: pattern
       description: A regular expression pattern to use, to remove members whose contains a match with the pattern.
@@ -594,7 +594,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: moderation.staffRoleId
+      id: moderation.adminRoleId
   subCommands:
     # /db-admin export-schema
     - name: export-schema
