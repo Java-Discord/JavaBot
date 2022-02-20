@@ -14,7 +14,6 @@ import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
-import java.util.Collections;
 
 /**
  * Command that allows members to format messages.
