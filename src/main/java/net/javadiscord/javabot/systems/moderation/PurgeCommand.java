@@ -5,8 +5,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.moderation.ModerationCommand;
+import net.javadiscord.javabot.command.moderation.UserModerationAction;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import javax.annotation.Nullable;
@@ -22,10 +25,10 @@ import java.util.List;
 /**
  * This command deletes messages from a channel.
  */
-public class PurgeCommand implements ISlashCommand {
+public class PurgeCommand extends UserModerationAction {
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
 		Member member = event.getMember();
 		if (member == null) {
 			return Responses.warning(event, "This command can only be used in a guild.");

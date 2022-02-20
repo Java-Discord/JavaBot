@@ -18,6 +18,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.moderation.UserModerationAction;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
@@ -25,27 +26,7 @@ import java.time.Instant;
 /**
  * Command that allows members to report other members.
  */
-public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessageContextCommand {
-	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		OptionMapping option = event.getOption("reason");
-		String reason = option == null ? "None" : option.getAsString();
-		Member member = event.getOption("user").getAsMember();
-		if (member == null) {
-			return Responses.error(event, "Cannot report a user who is not a member of this server");
-		}
-		var config = Bot.config.get(event.getGuild());
-		MessageChannel reportChannel = config.getModeration().getReportChannel();
-		var embed = buildReportEmbed(member.getUser(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
-		embed.addField("Reason", String.format("```%s```", reason), false);
-		reportChannel.sendMessage("@here").setEmbeds(embed.build())
-				.setActionRows(setComponents(member.getIdLong()))
-				.queue();
-		embed.setDescription("Successfully reported " + "`" + member.getUser().getAsTag() + "`!\nYour report has been send to our Moderators");
-		return event.replyEmbeds(embed.build()).setEphemeral(true);
-	}
-
-
+public class ReportCommand extends UserModerationAction implements IUserContextCommand, IMessageContextCommand {
 	@Override
 	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) throws ResponseException {
 		var config = Bot.config.get(event.getGuild());
@@ -91,6 +72,22 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 				.addField("ID", String.format("```%s```", reported.getId()), true)
 				.setFooter(reportedBy.getAsTag(), reportedBy.getEffectiveAvatarUrl())
 				.setTimestamp(Instant.now());
+	}
+
+	@Override
+	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
+		OptionMapping option = event.getOption("reason");
+		String reason = option == null ? "None" : option.getAsString();
+
+		var config = Bot.config.get(event.getGuild());
+		MessageChannel reportChannel = config.getModeration().getReportChannel();
+		var embed = buildReportEmbed(target.getUser(),commandUser.getUser(), event.getTextChannel(), config.getSlashCommand());
+		embed.addField("Reason", String.format("```%s```", reason), false);
+		reportChannel.sendMessage("@here").setEmbeds(embed.build())
+				.setActionRows(setComponents(target.getIdLong()))
+				.queue();
+		embed.setDescription("Successfully reported " + "`" + target.getUser().getAsTag() + "`!\nYour report has been send to our Moderators");
+		return event.replyEmbeds(embed.build()).setEphemeral(true);
 	}
 }
 
