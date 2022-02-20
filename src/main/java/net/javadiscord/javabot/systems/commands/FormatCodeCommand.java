@@ -28,6 +28,9 @@ public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand 
 		if (idOption == null) {
 			if (event.getChannel().hasLatestMessage()) {
 				id = event.getChannel().getLatestMessageIdLong();
+				if (event.getChannel().retrieveMessageById(id).complete().getAuthor().isBot()){
+					return Responses.error(event, "Missing required arguments.");
+				}
 			} else {
 				return Responses.error(event, "Missing required arguments.");
 			}
