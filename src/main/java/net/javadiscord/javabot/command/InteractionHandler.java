@@ -79,6 +79,12 @@ public class InteractionHandler extends ListenerAdapter {
 		}
 	}
 
+	/**
+	 * Checks whether a slash command exists
+	 * @param name the name of the command
+	 * @param guild the {@link Guild} the command may exist in
+	 * @return <code>true</code> if the command exists, else <code>false</code>
+	 */
 	public boolean doesSlashCommandExist(String name, Guild guild){
 		try {
 			return this.slashCommandIndex.containsKey(name) || getCustomCommand(name, guild).isPresent();
