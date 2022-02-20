@@ -80,7 +80,7 @@ public class InteractionHandler extends ListenerAdapter {
 	}
 
 	/**
-	 * Checks whether a slash command exists
+	 * Checks whether a slash command exists.
 	 * @param name the name of the command
 	 * @param guild the {@link Guild} the command may exist in
 	 * @return <code>true</code> if the command exists, else <code>false</code>
