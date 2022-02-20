@@ -17,6 +17,7 @@ public class ModerationConfig extends GuildConfigItem {
 	private long suggestionChannelId;
 	private long jobChannelId;
 	private long staffRoleId;
+	private long adminRoleId;
 
 	/**
 	 * ID of the share-knowledge channel.
@@ -80,5 +81,9 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public Role getStaffRole() {
 		return this.getGuild().getRoleById(this.staffRoleId);
+	}
+
+	public Role getAdminRole() {
+		return this.getGuild().getRoleById(this.adminRoleId);
 	}
 }
