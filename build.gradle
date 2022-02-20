@@ -21,7 +21,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     implementation 'net.dv8tion:JDA:5.0.0-alpha.5'
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'org.yaml:snakeyaml:1.29'
     implementation 'com.google.re2j:re2j:1.6'
 
@@ -30,13 +30,10 @@ dependencies {
 
     // H2 Database
     implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
-    implementation 'com.zaxxer:HikariCP:5.0.0'
+    implementation 'com.zaxxer:HikariCP:5.0.1'
 
     // Quartz scheduler
     implementation 'org.quartz-scheduler:quartz:2.3.2'
-
-    // NLP
-    implementation 'org.apache.opennlp:opennlp-tools:1.9.4'
 
     // Lombok Annotations
     compileOnly 'org.projectlombok:lombok:1.18.22'
