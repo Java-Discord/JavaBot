@@ -22,6 +22,7 @@ import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
+import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
 import net.javadiscord.javabot.util.GuildUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -66,14 +67,23 @@ public class InteractionHandler extends ListenerAdapter {
 	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) return;
 		var command = this.slashCommandIndex.get(event.getName());
-		if (command != null) {
-			try {
+
+		try {
+			if (command != null) {
 				command.handleSlashCommandInteraction(event).queue();
-			} catch (ResponseException e) {
-				handleResponseException(e, event);
+			} else {
+				handleCustomCommand(event).queue();
 			}
-		} else {
-			handleCustomCommand(event).queue();
+		} catch (ResponseException e) {
+			handleResponseException(e, event);
+		}
+	}
+
+	public boolean doesSlashCommandExist(String name, Guild guild){
+		try {
+			return this.slashCommandIndex.containsKey(name) || getCustomCommand(name, guild).isPresent();
+		} catch(SQLException e) {
+			return false;
 		}
 	}
 
@@ -278,10 +288,9 @@ public class InteractionHandler extends ListenerAdapter {
 	 */
 	private RestAction<?> handleCustomCommand(SlashCommandInteractionEvent event) {
 		var name = event.getName();
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new CustomCommandRepository(con);
-			var optional = repo.findByName(event.getGuild().getIdLong(), name);
-			if (optional.isEmpty()) return null;
+		try {
+			var optional = getCustomCommand(name, event.getGuild());
+			if (optional.isEmpty()) return Responses.error(event,"Unknown Command.");
 			var command = optional.get();
 			var responseText = GuildUtils.replaceTextVariables(event.getGuild(), command.getResponse());
 			var replyOption = event.getOption("reply");
@@ -308,6 +317,13 @@ public class InteractionHandler extends ListenerAdapter {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return Responses.error(event, "Unknown Command.");
+		}
+	}
+
+	private Optional<CustomCommand> getCustomCommand(String name, Guild guild) throws SQLException {
+		try (var con = Bot.dataSource.getConnection()) {
+			var repo = new CustomCommandRepository(con);
+			return repo.findByName(guild.getIdLong(), name);
 		}
 	}
 }

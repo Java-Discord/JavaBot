@@ -43,6 +43,10 @@ public class CreateSubCommand implements ISlashCommand {
 		command.setReply(reply);
 		command.setEmbed(embed);
 
+		if(Bot.interactionHandler.doesSlashCommandExist(name, event.getGuild())){
+			return Responses.error(event, "This command already exists.");
+		}
+
 		try (var con = Bot.dataSource.getConnection()) {
 			var c = new CustomCommandRepository(con).insert(command);
 			var e = buildCreateCommandEmbed(event.getMember(), c);
