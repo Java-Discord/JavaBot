@@ -29,8 +29,7 @@ public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand 
 		String format = formatOption == null ? "java" : formatOption.getAsString();
 		if (idOption == null) {
 			if (event.getChannel().hasLatestMessage()) {
-				event.getChannel().getHistory().retrievePast(100) // max limit
-						.map(messages -> messages)
+				event.getChannel().getHistory().retrievePast(10)
 						.queue(messages -> {
 							for (Message message : messages) {
 								if (!message.getAuthor().isBot()){
