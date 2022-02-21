@@ -4,7 +4,7 @@ General utility bot for the [JavaDiscord Community](https://join.javadiscord.net
 
 # Usage 
 
-To start up, run the bot once, and it will generate a `config` directory. Stop the bot, and set the up the following values:
+To start up, run the bot once, and it will generate a `config` directory. Stop the bot, and set the up **all of the following values**:
 - in `systems.json`
   - `jdaBotToken` to your bot's token
 - in `{guildId}.json`
