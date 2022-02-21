@@ -14,9 +14,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
-import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
 import net.javadiscord.javabot.command.moderation.UserModerationAction;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
@@ -81,7 +79,7 @@ public class ReportCommand extends UserModerationAction implements IUserContextC
 
 		var config = Bot.config.get(event.getGuild());
 		MessageChannel reportChannel = config.getModeration().getReportChannel();
-		var embed = buildReportEmbed(target.getUser(),commandUser.getUser(), event.getTextChannel(), config.getSlashCommand());
+		var embed = buildReportEmbed(target.getUser(), commandUser.getUser(), event.getTextChannel(), config.getSlashCommand());
 		embed.addField("Reason", String.format("```%s```", reason), false);
 		reportChannel.sendMessage("@here").setEmbeds(embed.build())
 				.setActionRows(setComponents(target.getIdLong()))
