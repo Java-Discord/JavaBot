@@ -160,7 +160,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 
 
 		g2d.drawImage(getImageFromUrl(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
-		var displayName = member.getEffectiveName();
+		var displayName = member.getUser().getAsTag();
 		g2d.drawImage(card, x, y, null);
 		g2d.setColor(PRIMARY_COLOR);
 		g2d.setFont(getResourceFont("fonts/Uni-Sans-Heavy.ttf", 65).orElseThrow());
