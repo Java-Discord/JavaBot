@@ -13,7 +13,7 @@ To start up, run the bot once, and it will generate a `config` directory. Stop t
   - `moderation.adminRoleId` to a roleId
   - `jam.adminRoleId` to a roleId
 
-Note, that this is just what is required for the bot to start. Certain features may require other values to be set.
+Note that this is just what is required for the bot to start. Certain features may require other values to be set.
 
 
 # Commands
