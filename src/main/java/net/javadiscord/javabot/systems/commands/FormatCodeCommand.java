@@ -19,7 +19,7 @@ import java.time.Instant;
  * Command that allows members to format messages.
  */
 public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand {
-	long id;
+	private long id;
 
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
