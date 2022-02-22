@@ -61,7 +61,7 @@ public class ProfileCommand implements ISlashCommand {
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points,
 						points == 1 ? "" : "s",
-						new LeaderboardCommand().getQOTWRank(member.getIdLong())), true)
+						new LeaderboardCommand().getQOTWRank(member, member.getGuild())), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);
 		if (member.getTimeBoosted() != null) {

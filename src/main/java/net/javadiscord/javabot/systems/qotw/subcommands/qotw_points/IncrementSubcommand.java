@@ -78,7 +78,7 @@ public class IncrementSubcommand implements ISlashCommand {
 				.setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
 				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
 				.addField("Total QOTW-Points", "```" + points + "```", true)
-				.addField("Rank", "```#" + new LeaderboardCommand().getQOTWRank(member.getIdLong()) + "```", true)
+				.addField("Rank", "```#" + new LeaderboardCommand().getQOTWRank(member, member.getGuild()) + "```", true)
 				.setFooter("ID: " + member.getId())
 				.setTimestamp(Instant.now())
 				.build();

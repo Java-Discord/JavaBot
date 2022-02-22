@@ -61,14 +61,19 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 	/**
 	 * Gets the given user's QOTW-Rank.
 	 *
-	 * @param userId The id of the user.
+	 * @param member The member whose rank should be returned.
+	 * @param guild The current guild.
 	 * @return The QOTW-Rank as an integer.
 	 */
-	public int getQOTWRank(long userId) {
+	public int getQOTWRank(Member member, Guild guild) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QuestionPointsRepository(con);
 			var accounts = repo.getAllAccountsSortedByPoints();
-			return accounts.stream().map(QOTWAccount::getUserId).toList().indexOf(userId) + 1;
+			return accounts.stream()
+					.map(QOTWAccount::getUserId)
+					.map(guild::getMemberById)
+					.filter(Objects::nonNull)
+					.toList().indexOf(member) + 1;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return 0;
@@ -87,7 +92,8 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 			var repo = new QuestionPointsRepository(con);
 			var accounts = repo.getAllAccountsSortedByPoints();
 			return accounts.stream()
-					.map(QOTWAccount::getUserId).map(guild::getMemberById)
+					.map(QOTWAccount::getUserId)
+					.map(guild::getMemberById)
 					.filter(Objects::nonNull)
 					.limit(n)
 					.toList();
@@ -120,7 +126,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 	 * @return A {@link MessageEmbed} object.
 	 */
 	private MessageEmbed buildLeaderboardRankEmbed(Member member) {
-		var rank = getQOTWRank(member.getIdLong());
+		var rank = getQOTWRank(member, member.getGuild());
 		var rankSuffix = switch (rank % 10) {
 			case 1 -> "st";
 			case 2 -> "nd";
@@ -143,12 +149,12 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 	 *
 	 * @param g2d    Graphics object.
 	 * @param guild  The current Guild.
-	 * @param userId The current User's Discord Id.
+	 * @param member The member.
 	 * @param y      The y-position.
 	 * @param left   Whether the card should be drawn left or right.
 	 * @throws IOException If an error occurs.
 	 */
-	private void drawUserCard(Graphics2D g2d, Guild guild, long userId, int y, boolean left) throws IOException {
+	private void drawUserCard(Graphics2D g2d, Guild guild, Member member, int y, boolean left) throws IOException {
 		var card = getResourceImage("images/leaderboard/LBCard.png");
 		int x;
 		if (left) {
@@ -157,11 +163,9 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 			x = WIDTH - (MARGIN * 5) - card.getWidth();
 		}
 
-		var member = guild.getMemberById(userId);
-		if (member != null) {
-			g2d.drawImage(getImageFromUrl(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
-		}
-		var displayName = member != null ? member.getEffectiveName() : String.valueOf(userId);
+
+		g2d.drawImage(getImageFromUrl(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
+		var displayName = member.getUser().getAsTag();
 		g2d.drawImage(card, x, y, null);
 		g2d.setColor(PRIMARY_COLOR);
 		g2d.setFont(getResourceFont("fonts/Uni-Sans-Heavy.ttf", 65).orElseThrow());
@@ -177,9 +181,9 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 		g2d.setColor(SECONDARY_COLOR);
 		g2d.setFont(getResourceFont("fonts/Uni-Sans-Heavy.ttf", 72).orElseThrow());
 
-		var points = getPoints(userId);
+		var points = getPoints(member.getIdLong());
 		String text = points + (points > 1 ? " points" : " point");
-		String rank = "#" + getQOTWRank(userId);
+		String rank = "#" + getQOTWRank(member, member.getGuild());
 		g2d.drawString(text, x + 430, y + 210);
 		int stringLength = (int) g2d.getFontMetrics().getStringBounds(rank, g2d).getWidth();
 		int start = 185 / 2 - stringLength / 2;
@@ -212,7 +216,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements ISlashCo
 		boolean left = true;
 		int y = logo.getHeight() + 3 * MARGIN;
 		for (var m : topMembers) {
-			drawUserCard(g2d, guild, m.getIdLong(), y, left);
+			drawUserCard(g2d, guild, m, y, left);
 			left = !left;
 			if (left) y = y + card.getHeight() + MARGIN;
 		}
