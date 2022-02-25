@@ -10,14 +10,14 @@ import net.javadiscord.javabot.command.Responses;
 /**
  * A moderation command action like ban, kick, mute, report, etc. | In short, it targets a user.
  */
-public abstract class UserModerationAction extends ModerationCommand {
+public abstract class ModerateUserCommand extends ModerateCommand {
 	private boolean actOnSelf;
 
-	public UserModerationAction() {
+	public ModerateUserCommand() {
 		setActOnSelf(false);
 	}
 
-	public UserModerationAction(boolean actOnSelf) {
+	public ModerateUserCommand(boolean actOnSelf) {
 		setActOnSelf(actOnSelf);
 	}
 
@@ -40,7 +40,7 @@ public abstract class UserModerationAction extends ModerationCommand {
 			return Responses.error(event, "Cannot report a user who is not a member of this server");
 		}
 
-		if (!actOnSelf) {
+		if (!actOnSelf || !commandUser.isOwner()) {
 			if (commandUser.getId().equals(target.getId())) {
 				return Responses.error(event, "You cannot preform actions on yourself.");
 			}

@@ -16,7 +16,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
-import net.javadiscord.javabot.command.moderation.UserModerationAction;
+import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
@@ -24,7 +24,7 @@ import java.time.Instant;
 /**
  * Command that allows members to report other members.
  */
-public class ReportCommand extends UserModerationAction implements IUserContextCommand, IMessageContextCommand {
+public class ReportCommand extends ModerateUserCommand implements IUserContextCommand, IMessageContextCommand {
 	@Override
 	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) throws ResponseException {
 		var config = Bot.config.get(event.getGuild());

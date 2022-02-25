@@ -5,12 +5,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.UserModerationAction;
+import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
 
 /**
  * Command that allows staff-members to ban guild members.
  */
-public class BanCommand extends UserModerationAction {
+public class BanCommand extends ModerateUserCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {

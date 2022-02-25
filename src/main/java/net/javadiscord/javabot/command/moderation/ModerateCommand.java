@@ -11,21 +11,21 @@ import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 /**
  * Basic moderation command.
  */
-public abstract class ModerationCommand implements ISlashCommand {
+public abstract class ModerateCommand implements ISlashCommand {
 	private boolean allowThreads = true;
 
 	@Override
-	public final ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		if (event.getGuild() == null) {
 			return Responses.error(event, "Moderation commands can only be used inside guilds.");
 		}
 
 		if (allowThreads) {
-			if (event.getChannelType() == ChannelType.TEXT || event.getChannelType() == ChannelType.GUILD_PRIVATE_THREAD || event.getChannelType() == ChannelType.GUILD_PUBLIC_THREAD) {
+			if (event.getChannelType() != ChannelType.TEXT && event.getChannelType() != ChannelType.GUILD_PRIVATE_THREAD && event.getChannelType() != ChannelType.GUILD_PUBLIC_THREAD) {
 				return Responses.error(event, "This command can only be performed in a server text channel or thread.");
 			}
 		} else {
-			if (event.getChannelType() == ChannelType.TEXT) {
+			if (event.getChannelType() != ChannelType.TEXT) {
 				return Responses.error(event, "This command can only be performed in a server text channel.");
 			}
 		}

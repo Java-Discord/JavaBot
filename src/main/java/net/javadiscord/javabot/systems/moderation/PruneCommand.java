@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.ModerationCommand;
+import net.javadiscord.javabot.command.moderation.ModerateCommand;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * This command will systematically ban users from the server if they match
  * certain criteria.
  */
-public class PruneCommand extends ModerationCommand {
+public class PruneCommand extends ModerateCommand {
 	private final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	@Override

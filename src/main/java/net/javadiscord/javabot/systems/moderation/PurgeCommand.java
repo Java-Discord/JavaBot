@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.UserModerationAction;
+import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import javax.annotation.Nullable;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * This command deletes messages from a channel.
  */
-public class PurgeCommand extends UserModerationAction {
+public class PurgeCommand extends ModerateUserCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
