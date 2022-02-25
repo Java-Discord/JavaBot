@@ -15,9 +15,6 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.GuildUtils;
 
-import java.util.Arrays;
-
-
 /**
  * Handles all Interactions related to the Self Role System.
  */
@@ -140,6 +137,8 @@ public class SelfRoleInteractionManager {
 							.addField("Age", ageOption.getAsString(), true)
 							.addField("Email", String.format("`%s`", emailOption.getAsString()), true)
 							.addField("Timezone", String.format("`%s`", timezoneOption.getAsString()), true)
+							.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
+							.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true)
 							.addField("Extra Remarks", extraRemarksOption.getAsString(), false)
 							.build();
 					GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(embed).queue();
