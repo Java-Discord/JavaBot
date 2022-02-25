@@ -122,7 +122,7 @@ public class SelfRoleInteractionManager {
 		var emailOption = event.getValue("email");
 		var timezoneOption = event.getValue("timezone");
 		var extraRemarksOption = event.getValue("extra-remarks");
-		if (nameOption == null || ageOption == null || emailOption == null || timezoneOption == null || extraRemarksOption == null) {
+		if (nameOption == null || ageOption == null || emailOption == null || timezoneOption == null) {
 			return;
 		}
 		event.getGuild().retrieveMemberById(userId).queue(
