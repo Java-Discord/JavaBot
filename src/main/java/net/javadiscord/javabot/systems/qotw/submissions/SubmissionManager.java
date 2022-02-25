@@ -43,6 +43,7 @@ public class SubmissionManager {
 	 * @return A {@link WebhookMessageAction}.
 	 */
 	public WebhookMessageAction<?> handleSubmission(ButtonInteractionEvent event, int questionNumber) {
+		event.deferEdit().queue();
 		var member = event.getMember();
 		if (!canCreateSubmissions(member)) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");

@@ -25,6 +25,7 @@ public class HelpChannelInteractionManager {
 	 * @param action        The data extracted from the button id.
 	 */
 	public void handleHelpChannel(ButtonInteractionEvent event, String reservationId, String action) {
+		event.deferEdit().queue();
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
@@ -98,6 +99,7 @@ public class HelpChannelInteractionManager {
 	 * @param action        The data extracted from the button's id.
 	 */
 	public void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
+		event.deferEdit().queue();
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));

@@ -72,6 +72,7 @@ public class SubmissionControlsManager {
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
 	public void handleButtons(String[] id, ButtonInteractionEvent event) {
+		event.deferEdit().queue();
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
@@ -96,6 +97,7 @@ public class SubmissionControlsManager {
 	 * @param event The {@link SelectMenuInteractionEvent} that is fired upon use.
 	 */
 	public void handleSelectMenus(String[] id, SelectMenuInteractionEvent event) {
+		event.deferReply().queue();
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
