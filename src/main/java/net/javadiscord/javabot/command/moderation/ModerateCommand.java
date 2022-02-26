@@ -17,7 +17,7 @@ public abstract class ModerateCommand implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		if (event.getGuild() == null) {
-			return Responses.error(event, "Moderation commands can only be used inside guilds.");
+			return Responses.error(event, "This command can only be used inside servers.");
 		}
 
 		if (allowThreads) {
