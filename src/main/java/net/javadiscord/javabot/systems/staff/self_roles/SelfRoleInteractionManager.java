@@ -12,8 +12,8 @@ import net.dv8tion.jda.api.interactions.components.text.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
-import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 
 /**
  * Handles all Interactions related to the Self Role System.
@@ -32,9 +32,9 @@ public class SelfRoleInteractionManager {
 		if (role == null) return;
 		boolean permanent = Boolean.parseBoolean(args[3]);
 		switch (args[1]) {
-			case "default" -> handleSelfRole(event, role, permanent);
-			case "staff" -> handleStaffApplication(event, role, event.getUser());
-			case "expert" -> handleExpertApplication(event, event.getUser());
+			case "default" -> this.handleSelfRole(event, role, permanent);
+			case "staff" -> this.handleStaffApplication(event, role, event.getUser());
+			case "expert" -> this.handleExpertApplication(event, event.getUser());
 		}
 	}
 
@@ -46,15 +46,22 @@ public class SelfRoleInteractionManager {
 	 */
 	public void handleModalSubmit(ModalInteractionEvent event, String[] args) {
 		event.deferReply(true).queue();
-		SlashCommandConfig config = Bot.config.get(event.getGuild()).getSlashCommand();
+		var config = Bot.config.get(event.getGuild());
 		switch (args[1]) {
-			case "staff" -> sendStaffSubmission(event, config, args[2], args[3]);
-			case "expert" -> sendExpertSubmission(event, config, args[2]);
+			case "staff" -> this.sendStaffSubmission(event, config, args[2], args[3]);
+			case "expert" -> this.sendExpertSubmission(event, config.getModeration(), args[2]);
 		}
 		event.getHook().sendMessage("Your Submission has been sent to our Moderators! Please note that spamming submissions may result in a ban.")
 				.queue();
 	}
 
+	/**
+	 * Builds and replies with a Staff Application Modal.
+	 *
+	 * @param event     The {@link ButtonInteractionEvent} that is fired upon clicking a button.
+	 * @param role      The corresponding {@link Role}.
+	 * @param applicant The Applicant.
+	 */
 	private void handleStaffApplication(ButtonInteractionEvent event, Role role, User applicant) {
 		TextInput name = TextInput.create("name", "Real Name", TextInputStyle.SHORT)
 				.setRequired(true)
@@ -79,6 +86,12 @@ public class SelfRoleInteractionManager {
 		event.replyModal(modal).queue();
 	}
 
+	/**
+	 * Builds and replies with an Expert Application Modal.
+	 *
+	 * @param event     The {@link ButtonInteractionEvent} that is fired upon clicking a button.
+	 * @param applicant The Applicant.
+	 */
 	private void handleExpertApplication(ButtonInteractionEvent event, User applicant) {
 		TextInput experience = TextInput.create("java-experience", "Java Experience", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("How much experience do you have with the Java Programming Language?")
@@ -99,6 +112,13 @@ public class SelfRoleInteractionManager {
 		event.replyModal(modal).queue();
 	}
 
+	/**
+	 * Handles a single Self Role Interaction.
+	 *
+	 * @param event     The {@link ButtonInteractionEvent} that is fired upon clicking a button.
+	 * @param role      The Role that should be assigned/removed
+	 * @param permanent Whether the user is able to remove the role again.
+	 */
 	private void handleSelfRole(ButtonInteractionEvent event, Role role, boolean permanent) {
 		event.deferEdit().queue();
 		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member -> {
@@ -116,7 +136,15 @@ public class SelfRoleInteractionManager {
 		}, e -> log.error("Could not retrieve Member with Id: " + event.getUser().getIdLong()));
 	}
 
-	private void sendStaffSubmission(ModalInteractionEvent event, SlashCommandConfig config, String roleId, String userId) {
+	/**
+	 * Sends the Staff Applications contents to the {@link ModerationConfig#getApplicationChannel()}.
+	 *
+	 * @param event  The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
+	 * @param config The {@link GuildConfig} for the current Guild.
+	 * @param roleId The role's id that was applied for.
+	 * @param userId The applicant's id.
+	 */
+	private void sendStaffSubmission(ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
 		var nameOption = event.getValue("name");
 		var ageOption = event.getValue("age");
 		var emailOption = event.getValue("email");
@@ -132,7 +160,7 @@ public class SelfRoleInteractionManager {
 					MessageEmbed embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 							.setTitle(String.format("%s applied for @%s", user.getAsTag(), role.getName()))
-							.setColor(config.getSuccessColor())
+							.setColor(config.getSlashCommand().getSuccessColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
 							.addField("Email", String.format("`%s`", emailOption.getAsString()), true)
@@ -141,33 +169,35 @@ public class SelfRoleInteractionManager {
 							.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true)
 							.addField("Extra Remarks", extraRemarksOption.getAsString(), false)
 							.build();
-					GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(embed).queue();
+					config.getModeration().getApplicationChannel().sendMessageEmbeds(embed).queue();
 				}
 		);
 	}
 
-	private void sendExpertSubmission(ModalInteractionEvent event, SlashCommandConfig config, String userId) {
+	/**
+	 * Sends the Expert Applications contents to the {@link ModerationConfig#getApplicationChannel()}.
+	 *
+	 * @param event  The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
+	 * @param config The {@link ModerationConfig} for the current Guild.
+	 * @param userId The applicant's id.
+	 */
+	private void sendExpertSubmission(ModalInteractionEvent event, ModerationConfig config, String userId) {
 		var experienceOption = event.getValue("java-experience");
 		var projectInfoOption = event.getValue("project-info");
 		var projectLinksOption = event.getValue("project-links");
 		var reasonOption = event.getValue("reason");
-		if (experienceOption == null || projectInfoOption == null || reasonOption == null) {
-			return;
-		}
 		event.getGuild().retrieveMemberById(userId).queue(
 				member -> {
 					User user = member.getUser();
 					EmbedBuilder embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 							.setTitle(String.format("%s applied for Expert", user.getAsTag()))
-							.setColor(config.getInfoColor())
+							.setColor(config.getExpertRole().getColor())
 							.addField("Java Experience", experienceOption.getAsString(), false)
-							.addField("Project Info", projectInfoOption.getAsString(), false);
-					if (projectLinksOption == null) {
-						embed.addField("Project Links", projectLinksOption.getAsString(), false);
-					}
-					embed.addField("Why should we accept this submission", reasonOption.getAsString(), false);
-					GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(embed.build()).queue();
+							.addField("Project Info", projectInfoOption.getAsString(), false)
+							.addField("Project Links", projectLinksOption.getAsString(), false)
+							.addField("Why should we accept this submission", reasonOption.getAsString(), false);
+					config.getApplicationChannel().sendMessageEmbeds(embed.build()).queue();
 				}
 		);
 	}
