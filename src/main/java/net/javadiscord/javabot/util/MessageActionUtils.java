@@ -38,4 +38,12 @@ public class MessageActionUtils {
 		}
 		return rows;
 	}
+
+	public static List<ActionRow> enableActionRows(List<ActionRow> actionRows) {
+		return actionRows.stream().map(ActionRow::asEnabled).toList();
+	}
+
+	public static List<ActionRow> disableActionRows(List<ActionRow> actionRows) {
+		return actionRows.stream().map(ActionRow::asDisabled).toList();
+	}
 }
