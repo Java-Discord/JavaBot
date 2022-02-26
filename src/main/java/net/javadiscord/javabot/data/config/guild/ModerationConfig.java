@@ -13,11 +13,13 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 @EqualsAndHashCode(callSuper = true)
 public class ModerationConfig extends GuildConfigItem {
 	private long reportChannelId;
+	private long applicationChannelId;
 	private long logChannelId;
 	private long suggestionChannelId;
 	private long jobChannelId;
 	private long staffRoleId;
 	private long adminRoleId;
+	private long expertRoleId;
 
 	/**
 	 * ID of the share-knowledge channel.
@@ -63,6 +65,10 @@ public class ModerationConfig extends GuildConfigItem {
 		return this.getGuild().getTextChannelById(this.reportChannelId);
 	}
 
+	public TextChannel getApplicationChannel() {
+		return this.getGuild().getTextChannelById(this.applicationChannelId);
+	}
+
 	public TextChannel getLogChannel() {
 		return this.getGuild().getTextChannelById(this.logChannelId);
 	}
@@ -85,5 +91,9 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public Role getAdminRole() {
 		return this.getGuild().getRoleById(this.adminRoleId);
+	}
+
+	public Role getExpertRole() {
+		return this.getGuild().getRoleById(this.expertRoleId);
 	}
 }

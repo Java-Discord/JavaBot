@@ -450,52 +450,46 @@
   description: Lists all custom slash commands
   handler: net.javadiscord.javabot.systems.staff.custom_commands.ListCommand
 
-# /reactionrole
-- name: reactionrole
-  description: creates or deletes reaction roles
+# /self-role
+- name: self-role
+  description: Administrative Commands for managing Self Roles.
   enabledByDefault: false
   privileges:
     - type: ROLE
       id: moderation.staffRoleId
   subCommands:
-    # /reactionrole create
+    # /self-role
     - description: Creates a reaction role
       name: create
       options:
-        - name: message-id
-          description: Message, the Reaction Role should be created on
+        - name: type
+          description: The Self-Role's Type.
           required: true
           type: STRING
-        - name: label
-          description: Label, the Button should use
-          required: true
-          type: STRING
+          choices:
+            - name: Default
+              value: DEFAULT
+            - name: Staff Application
+              value: STAFF
+            - name: Expert Application
+              value: EXPERT
         - name: role
           description: Role, the Button should add upon use
           required: true
           type: ROLE
+        - name: description
+          description: The Role's description.
+          required: true
+          type: STRING
         - name: permanent
-          description: It set to true, doesnt let you remove the Role afterwards
+          description: 'Whether the user should be able to remove the role again. (Default: false)'
           required: false
           type: BOOLEAN
-        - name: emote
-          description: Emote, the Button should use
+        - name: message-id
+          description: If set, adds the button to the given message instead of creating a new embed message.
           required: false
           type: STRING
-
-    # /reactionrole delete
-    - description: Deletes a reaction role
-      name: delete
-      options:
-        - name: message-id
-          description: The message
-          required: true
-          type: STRING
-        - name: label
-          description: The button's label
-          required: true
-          type: STRING
-  handler: net.javadiscord.javabot.systems.staff.reaction_roles.ReactionRoleCommandHandler
+  handler: net.javadiscord.javabot.systems.staff.self_roles.SelfRoleCommandHandler
 
 # /expert-question
 - name: expert-question

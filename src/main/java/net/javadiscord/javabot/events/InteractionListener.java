@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.events;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.ThreadChannel;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,6 +13,8 @@ import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
+import net.javadiscord.javabot.systems.staff.self_roles.SelfRoleInteractionManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 
@@ -21,12 +23,20 @@ import java.sql.SQLException;
  */
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
-	// TODO: add Context-Menu Commands (once they're available in JDA)
+
+	@Override
+	public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+		if (event.getUser().isBot()) return;
+		String[] id = event.getModalId().split(":");
+		switch (id[0]) {
+			case "self-role" -> new SelfRoleInteractionManager().handleModalSubmit(event, id);
+			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
+		}
+	}
 
 	@Override
 	public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
 		if (event.getUser().isBot()) return;
-		event.deferEdit().queue();
 		String[] id = event.getComponentId().split(":");
 		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
@@ -47,7 +57,6 @@ public class InteractionListener extends ListenerAdapter {
 	@Override
 	public void onButtonInteraction(ButtonInteractionEvent event) {
 		if (event.getUser().isBot()) return;
-		event.deferEdit().queue();
 		String[] id = event.getComponentId().split(":");
 		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
@@ -66,7 +75,7 @@ public class InteractionListener extends ListenerAdapter {
 					e.printStackTrace();
 				}
 			}
-			case "reaction-role" -> this.handleReactionRoles(id, event);
+			case "self-role" -> new SelfRoleInteractionManager().handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
 			case "utils" -> this.handleUtils(id, event);
@@ -82,6 +91,7 @@ public class InteractionListener extends ListenerAdapter {
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
 	private void handleUtils(String[] id, ButtonInteractionEvent event) {
+		event.deferEdit().queue();
 		var service = new ModerationService(event.getInteraction());
 		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
@@ -103,26 +113,5 @@ public class InteractionListener extends ListenerAdapter {
 					event.getTextChannel(),
 					false);
 		}
-	}
-
-	private void handleReactionRoles(String[] id, ButtonInteractionEvent event) {
-		String roleID = id[1];
-		boolean permanent = Boolean.parseBoolean(id[2]);
-
-		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member -> {
-			Role role = event.getGuild().getRoleById(roleID);
-
-			if (member.getRoles().contains(role)) {
-				if (!permanent) {
-					event.getGuild().removeRoleFromMember(member, role).queue();
-					event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
-				} else {
-					event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
-				}
-			} else {
-				event.getGuild().addRoleToMember(member, role).queue();
-				event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
-			}
-		});
 	}
 }
