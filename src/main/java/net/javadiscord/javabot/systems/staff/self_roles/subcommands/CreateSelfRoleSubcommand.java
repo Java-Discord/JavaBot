@@ -40,7 +40,7 @@ public class CreateSelfRoleSubcommand implements ISlashCommand {
 		String description = descriptionOption.getAsString();
 		boolean permanent = permanentOption != null && permanentOption.getAsBoolean();
 		var config = Bot.config.get(event.getGuild());
-		if (messageIdOption == null) {
+		if (messageIdOption == null || type.equals("NONE")) {
 			event.getChannel().sendMessageEmbeds(this.buildSelfRoleEmbed(role, description, config.getSlashCommand())).queue(
 					message -> this.addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
 					e -> Responses.error(event.getHook(), e.getMessage()));
@@ -64,12 +64,13 @@ public class CreateSelfRoleSubcommand implements ISlashCommand {
 	 * @param config    The {@link GuildConfig} of the current Guild.
 	 */
 	private void addSelfRoleButton(SlashCommandInteractionEvent event, Message message, String type, Role role, boolean permanent, String label, GuildConfig config) {
-		Button roleButton = Button.secondary(this.buildButtonId(type, role, permanent), label);
-		message.editMessageComponents(ActionRow.of(roleButton)).queue(edit -> {
-			MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), edit.getJumpUrl(), type, config.getSlashCommand());
-			GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(logEmbed).queue();
-			event.getHook().sendMessageEmbeds(logEmbed).setEphemeral(true).queue();
-		});
+		if (!type.equals("NONE")) {
+			Button roleButton = Button.secondary(this.buildButtonId(type, role, permanent), label);
+			message.editMessageComponents(ActionRow.of(roleButton)).queue();
+		}
+		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type, config.getSlashCommand());
+		GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(logEmbed).queue();
+		event.getHook().sendMessageEmbeds(logEmbed).setEphemeral(true).queue();
 	}
 
 	/**

@@ -458,7 +458,7 @@
     - type: ROLE
       id: moderation.staffRoleId
   subCommands:
-    # /self-role
+    # /self-role create
     - description: Creates a reaction role
       name: create
       options:
@@ -467,6 +467,8 @@
           required: true
           type: STRING
           choices:
+            - name: None (Just creates the embed)
+              value: NONE
             - name: Default
               value: DEFAULT
             - name: Staff Application
@@ -488,6 +490,24 @@
         - name: message-id
           description: If set, adds the button to the given message instead of creating a new embed message.
           required: false
+          type: STRING
+
+    # / self-role enable
+    - name: enable
+      description: Enables all Message Components.
+      options:
+        - name: message-id
+          description: The message's id.
+          required: true
+          type: STRING
+
+    # / self-role enable
+    - name: disable
+      description: Disables all Message Components.
+      options:
+        - name: message-id
+          description: The message's id.
+          required: true
           type: STRING
   handler: net.javadiscord.javabot.systems.staff.self_roles.SelfRoleCommandHandler
 
