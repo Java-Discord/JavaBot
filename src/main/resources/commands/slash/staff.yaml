@@ -492,7 +492,7 @@
           required: false
           type: STRING
 
-    # / self-role enable
+    # /self-role enable
     - name: enable
       description: Enables all Message Components.
       options:
@@ -501,7 +501,7 @@
           required: true
           type: STRING
 
-    # / self-role diable
+    # /self-role disable
     - name: disable
       description: Disables all Message Components.
       options:
