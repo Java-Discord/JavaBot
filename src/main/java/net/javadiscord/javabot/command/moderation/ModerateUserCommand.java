@@ -42,7 +42,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 
 		if (!actOnSelf || !commandUser.isOwner()) {
 			if (commandUser.getId().equals(target.getId())) {
-				return Responses.error(event, "You cannot preform actions on yourself.");
+				return Responses.error(event, "You cannot perform this action on yourself.");
 			}
 		}
 
