@@ -29,13 +29,10 @@ public abstract class ModerateCommand implements ISlashCommand {
 				return Responses.error(event, "This command can only be performed in a server text channel.");
 			}
 		}
-
 		Member member = event.getMember();
-
 		if (member == null) {
 			return Responses.error(event, "Unexpected error has occurred, Slash Command member was null.");
 		}
-
 		return handleModerationCommand(event, member);
 	}
 
