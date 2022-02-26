@@ -28,14 +28,10 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 	@Override
 	protected final ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) throws ResponseException {
 		OptionMapping targetOption = event.getOption("user");
-		Member target;
-
 		if (targetOption == null) {
 			return Responses.error(event, "Missing required arguments.");
 		}
-
-		target = targetOption.getAsMember();
-
+        Member target = targetOption.getAsMember();
 		if (target == null) {
 			return Responses.error(event, "Cannot report a user who is not a member of this server");
 		}
