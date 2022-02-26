@@ -9,7 +9,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
 /**
- * Basic moderation command.
+ * Abstract class, that represents a single moderation command.
  */
 public abstract class ModerateCommand implements ISlashCommand {
 	private boolean allowThreads = true;
