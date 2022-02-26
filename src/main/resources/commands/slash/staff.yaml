@@ -491,37 +491,6 @@
           type: STRING
   handler: net.javadiscord.javabot.systems.staff.self_roles.SelfRoleCommandHandler
 
-# /expert-question
-- name: expert-question
-  description: Commands for managing the Set of Expert Questions.
-  enabledByDefault: false
-  privileges:
-    - type: ROLE
-      id: moderation.staffRoleId
-  subCommands:
-    - name: add
-      description: Adds an Expert Question to the Set.
-      options:
-        - name: text
-          description: The question's text.
-          type: STRING
-          required: true
-    - name: remove
-      description: Removes an Expert Question from the Set.
-      options:
-        - name: id
-          description: The question's id.
-          type: INTEGER
-          required: true
-    - name: list
-      description: Displays a random amount of Expert Questions.
-      options:
-        - name: amount
-          description: The amount of questions to display.
-          type: INTEGER
-          required: true
-  handler: net.javadiscord.javabot.systems.staff.expert_questions.ExpertQuestionCommandHandler
-
 # /report
 - name: report
   description: Reports a member

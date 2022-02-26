@@ -1,0 +1,1 @@
+DROP TABLE expert_questions;

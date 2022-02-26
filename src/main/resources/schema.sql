@@ -159,12 +159,6 @@ CREATE TABLE qotw_points (
 	 points BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE expert_questions (
-	  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	  guild_id BIGINT NOT NULL,
-	  text VARCHAR(2048) NOT NULL
-);
-
 CREATE TABLE starboard (
 	   original_message_id BIGINT PRIMARY KEY,
 	   guild_id BIGINT NOT NULL,
