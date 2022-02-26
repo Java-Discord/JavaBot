@@ -482,9 +482,13 @@
           required: true
           type: STRING
         - name: permanent
-          description: It set to true, doesnt let you remove the Role afterwards
+          description: 'Whether the user should be able to remove the role again. (Default: false)'
           required: false
           type: BOOLEAN
+        - name: message-id
+          description: If set, adds the button to the given message instead of creating a new embed message.
+          required: false
+          type: STRING
   handler: net.javadiscord.javabot.systems.staff.self_roles.SelfRoleCommandHandler
 
 # /expert-question
