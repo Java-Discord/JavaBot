@@ -605,8 +605,6 @@
               value: ECONOMY_ACCOUNT_PREFERENCES
             - name: Economy Transactions
               value: ECONOMY_TRANSACTIONS
-            - name: Expert Questions
-              value: EXPERT_QUESTIONS
             - name: Help Channel Thanks
               value: HELP_CHANNEL_THANKS
             - name: Java Jams
