@@ -456,7 +456,7 @@
   enabledByDefault: false
   privileges:
     - type: ROLE
-      id: moderation.staffRoleId
+      id: moderation.adminRoleId
   subCommands:
     # /self-role create
     - description: Creates a reaction role
