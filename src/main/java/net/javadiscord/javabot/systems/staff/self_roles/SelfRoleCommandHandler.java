@@ -6,6 +6,8 @@ import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.staff.self_roles.subcommands.CreateSelfRoleSubcommand;
+import net.javadiscord.javabot.systems.staff.self_roles.subcommands.DisableSelfRoleSubcommand;
+import net.javadiscord.javabot.systems.staff.self_roles.subcommands.EnableSelfRoleSubcommand;
 
 /**
  * Handler class for all Reaction Role related commands.
@@ -15,7 +17,9 @@ public class SelfRoleCommandHandler extends DelegatingCommandHandler {
 	 * Adds all subcommands {@link DelegatingCommandHandler}.
 	 */
 	public SelfRoleCommandHandler() {
-		addSubcommand("create", new CreateSelfRoleSubcommand());
+		this.addSubcommand("create", new CreateSelfRoleSubcommand());
+		this.addSubcommand("enable", new EnableSelfRoleSubcommand());
+		this.addSubcommand("disable", new DisableSelfRoleSubcommand());
 	}
 
 	@Override
