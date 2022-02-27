@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -107,6 +108,7 @@ public class SelfRoleInteractionManager {
 				.setRequired(true)
 				.build();
 		TextInput projectLinks = TextInput.create("project-links", "Please provide a link to your project", TextInputStyle.SHORT)
+				.setPlaceholder(Constants.GITHUB_LINK)
 				.setRequired(true)
 				.build();
 		TextInput reason = TextInput.create("reason", "Why should we accept this submission?", TextInputStyle.PARAGRAPH)
