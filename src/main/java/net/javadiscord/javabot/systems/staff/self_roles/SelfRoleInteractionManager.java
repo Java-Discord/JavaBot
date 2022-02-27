@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.staff.self_roles;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -11,15 +12,22 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.text.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.Constants;
+import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+
+import java.time.Instant;
 
 /**
  * Handles all Interactions related to the Self Role System.
  */
 @Slf4j
 public class SelfRoleInteractionManager {
+
+	private final String EMAIL_PATTERN = "[\\w-]+@([\\w-]+\\.)+[\\w-]+";
 
 	/**
 	 * Handles all Button Interactions regarding the Self Role System.
@@ -33,8 +41,8 @@ public class SelfRoleInteractionManager {
 		boolean permanent = Boolean.parseBoolean(args[3]);
 		switch (args[1]) {
 			case "default" -> this.handleSelfRole(event, role, permanent);
-			case "staff" -> this.handleStaffApplication(event, role, event.getUser());
-			case "expert" -> this.handleExpertApplication(event, event.getUser());
+			case "staff" -> this.buildStaffApplication(event, role, event.getUser());
+			case "expert" -> this.buildExpertApplication(event, event.getUser());
 		}
 	}
 
@@ -48,11 +56,9 @@ public class SelfRoleInteractionManager {
 		event.deferReply(true).queue();
 		var config = Bot.config.get(event.getGuild());
 		switch (args[1]) {
-			case "staff" -> this.sendStaffSubmission(event, config, args[2], args[3]);
-			case "expert" -> this.sendExpertSubmission(event, config.getModeration(), args[2]);
-		}
-		event.getHook().sendMessage("Your Submission has been sent to our Moderators! Please note that spamming submissions may result in a ban.")
-				.queue();
+			case "staff" -> this.sendStaffSubmission(event, config, args[2], args[3]).queue();
+			case "expert" -> this.sendExpertSubmission(event, config.getModeration(), args[2]).queue();
+		};
 	}
 
 	/**
@@ -62,7 +68,11 @@ public class SelfRoleInteractionManager {
 	 * @param role      The corresponding {@link Role}.
 	 * @param applicant The Applicant.
 	 */
-	private void handleStaffApplication(ButtonInteractionEvent event, Role role, User applicant) {
+	private void buildStaffApplication(ButtonInteractionEvent event, Role role, User applicant) {
+		if (event.getMember().getRoles().contains(role)) {
+			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+			return;
+		}
 		TextInput name = TextInput.create("name", "Real Name", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("John Doe")
@@ -80,7 +90,7 @@ public class SelfRoleInteractionManager {
 				.build();
 		TextInput extraRemarks = TextInput.create("extra-remarks", "Anything else?", TextInputStyle.PARAGRAPH)
 				.build();
-		Modal modal = Modal.create(String.format("self-role:staff:%s:%s", role.getId(), applicant.getId()), "Apply for @" + role.getName())
+		Modal modal = Modal.create(String.format("self-role:staff:%s:%s", role.getId(), applicant.getId()), "Apply for " + role.getName())
 				.addActionRows(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
 				.build();
 		event.replyModal(modal).queue();
@@ -92,21 +102,28 @@ public class SelfRoleInteractionManager {
 	 * @param event     The {@link ButtonInteractionEvent} that is fired upon clicking a button.
 	 * @param applicant The Applicant.
 	 */
-	private void handleExpertApplication(ButtonInteractionEvent event, User applicant) {
-		TextInput experience = TextInput.create("java-experience", "Java Experience", TextInputStyle.PARAGRAPH)
+	private void buildExpertApplication(ButtonInteractionEvent event, User applicant) {
+		Role role = Bot.config.get(event.getGuild()).getModeration().getExpertRole();
+		if (event.getMember().getRoles().contains(role)) {
+			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+			return;
+		}
+		TextInput experience = TextInput.create("java-experience", "How much Java experience do you have?", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("How much experience do you have with the Java Programming Language?")
 				.setRequired(true)
 				.build();
-		TextInput projectInfo = TextInput.create("project-info", "Project Info", TextInputStyle.PARAGRAPH)
+		TextInput projectInfo = TextInput.create("project-info", "Present us a fitting Java Project", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("Choose a fitting Java Project you've done yourself and present it to us.")
 				.setRequired(true)
 				.build();
-		TextInput projectLinks = TextInput.create("project-links", "Link to your Project", TextInputStyle.SHORT)
+		TextInput projectLinks = TextInput.create("project-links", "Please provide a link to your project", TextInputStyle.SHORT)
+				.setPlaceholder(Constants.GITHUB_LINK)
+				.setRequired(true)
 				.build();
 		TextInput reason = TextInput.create("reason", "Why should we accept this submission?", TextInputStyle.PARAGRAPH)
 				.setRequired(true)
 				.build();
-		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for Expert")
+		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for " + role.getName())
 				.addActionRows(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
 				.build();
 		event.replyModal(modal).queue();
@@ -143,23 +160,27 @@ public class SelfRoleInteractionManager {
 	 * @param config The {@link GuildConfig} for the current Guild.
 	 * @param roleId The role's id that was applied for.
 	 * @param userId The applicant's id.
+	 * @return The {@link WebhookMessageAction}.
 	 */
-	private void sendStaffSubmission(ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
+	private WebhookMessageAction<Message> sendStaffSubmission(ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
 		var nameOption = event.getValue("name");
 		var ageOption = event.getValue("age");
 		var emailOption = event.getValue("email");
 		var timezoneOption = event.getValue("timezone");
 		var extraRemarksOption = event.getValue("extra-remarks");
-		if (nameOption == null || ageOption == null || emailOption == null || timezoneOption == null) {
-			return;
+		if (!emailOption.getAsString().matches(EMAIL_PATTERN)) {
+			return Responses.error(event.getHook(), String.format("`%s` is not a valid Email-Address. Please try again.", emailOption.getAsString()));
+		}
+		Role role = event.getGuild().getRoleById(roleId);
+		if (role == null) {
+			return Responses.error(event.getHook(), "Unknown Role. Please contact an Administrator if this issue persists");
 		}
 		event.getGuild().retrieveMemberById(userId).queue(
 				member -> {
 					User user = member.getUser();
-					Role role = event.getGuild().getRoleById(roleId);
 					MessageEmbed embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for @%s", user.getAsTag(), role.getName()))
+							.setTitle(String.format("%s applied for %s", user.getAsTag(), role.getName()))
 							.setColor(config.getSlashCommand().getSuccessColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
@@ -167,11 +188,14 @@ public class SelfRoleInteractionManager {
 							.addField("Timezone", String.format("`%s`", timezoneOption.getAsString()), true)
 							.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 							.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true)
-							.addField("Extra Remarks", extraRemarksOption.getAsString(), false)
+							.addField("Extra Remarks", extraRemarksOption.getAsString().isEmpty() ? "N/A" : extraRemarksOption.getAsString(), false)
+							.setTimestamp(Instant.now())
 							.build();
 					config.getModeration().getApplicationChannel().sendMessageEmbeds(embed).queue();
 				}
 		);
+		return Responses.info(event.getHook(), "Submission sent!",
+				"Your Submission has been sent to our Moderators! Please note that spamming submissions may result in a ban.");
 	}
 
 	/**
@@ -180,8 +204,9 @@ public class SelfRoleInteractionManager {
 	 * @param event  The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
 	 * @param config The {@link ModerationConfig} for the current Guild.
 	 * @param userId The applicant's id.
+	 * @return The {@link WebhookMessageAction}.
 	 */
-	private void sendExpertSubmission(ModalInteractionEvent event, ModerationConfig config, String userId) {
+	private WebhookMessageAction<Message> sendExpertSubmission(ModalInteractionEvent event, ModerationConfig config, String userId) {
 		var experienceOption = event.getValue("java-experience");
 		var projectInfoOption = event.getValue("project-info");
 		var projectLinksOption = event.getValue("project-links");
@@ -191,14 +216,17 @@ public class SelfRoleInteractionManager {
 					User user = member.getUser();
 					EmbedBuilder embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for Expert", user.getAsTag()))
+							.setTitle(String.format("%s applied for %s", user.getAsTag(), config.getExpertRole().getName()))
 							.setColor(config.getExpertRole().getColor())
-							.addField("Java Experience", experienceOption.getAsString(), false)
-							.addField("Project Info", projectInfoOption.getAsString(), false)
-							.addField("Project Links", projectLinksOption.getAsString(), false)
-							.addField("Why should we accept this submission", reasonOption.getAsString(), false);
+							.addField("How much Java experience do you have?", experienceOption.getAsString(), false)
+							.addField("Present us a fitting Java Project", projectInfoOption.getAsString(), false)
+							.addField("Please provide a link to your project", projectLinksOption.getAsString(), false)
+							.addField("Why should we accept this submission?", reasonOption.getAsString(), false)
+							.setTimestamp(Instant.now());
 					config.getApplicationChannel().sendMessageEmbeds(embed.build()).queue();
 				}
 		);
+		return Responses.info(event.getHook(), "Submission sent!",
+				"Your Submission has been sent to our Moderators! Please note that spamming submissions may result in a ban.");
 	}
 }

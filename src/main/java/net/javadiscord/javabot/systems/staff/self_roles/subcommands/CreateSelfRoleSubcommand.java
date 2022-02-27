@@ -13,8 +13,11 @@ import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.util.MessageActionUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Subcommand that creates a new Reaction Role/Button.
@@ -32,11 +35,11 @@ public class CreateSelfRoleSubcommand implements ISlashCommand {
 			return Responses.error(event, "Missing required arguments");
 		}
 		String type = typeOption.getAsString();
-		String buttonLabel = switch (type) {
-			case "STAFF", "EXPERT" -> "Apply";
-			default -> "Get this Role";
-		};
 		Role role = roleOption.getAsRole();
+		String buttonLabel = switch (type) {
+			case "STAFF", "EXPERT" -> String.format("Apply for \"%s\"", role.getName());
+			default -> String.format("Get \"%s\"", role.getName());
+		};
 		String description = descriptionOption.getAsString();
 		boolean permanent = permanentOption != null && permanentOption.getAsBoolean();
 		var config = Bot.config.get(event.getGuild());
@@ -65,8 +68,12 @@ public class CreateSelfRoleSubcommand implements ISlashCommand {
 	 */
 	private void addSelfRoleButton(SlashCommandInteractionEvent event, Message message, String type, Role role, boolean permanent, String label, GuildConfig config) {
 		if (!type.equals("NONE")) {
-			Button roleButton = Button.secondary(this.buildButtonId(type, role, permanent), label);
-			message.editMessageComponents(ActionRow.of(roleButton)).queue();
+			List<Button> buttons = new ArrayList<>();
+			for (ActionRow actionRow : message.getActionRows()) {
+				buttons.addAll(actionRow.getButtons());
+			}
+			buttons.add(Button.secondary(this.buildButtonId(type, role, permanent), label));
+			message.editMessageComponents(MessageActionUtils.toActionRows(buttons)).queue();
 		}
 		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type, config.getSlashCommand());
 		GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(logEmbed).queue();
