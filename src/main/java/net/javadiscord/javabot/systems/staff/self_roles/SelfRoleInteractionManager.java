@@ -69,6 +69,10 @@ public class SelfRoleInteractionManager {
 	 * @param applicant The Applicant.
 	 */
 	private void buildStaffApplication(ButtonInteractionEvent event, Role role, User applicant) {
+		if (event.getMember().getRoles().contains(role)) {
+			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+			return;
+		}
 		TextInput name = TextInput.create("name", "Real Name", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("John Doe")
@@ -99,6 +103,11 @@ public class SelfRoleInteractionManager {
 	 * @param applicant The Applicant.
 	 */
 	private void buildExpertApplication(ButtonInteractionEvent event, User applicant) {
+		Role role = Bot.config.get(event.getGuild()).getModeration().getExpertRole();
+		if (event.getMember().getRoles().contains(role)) {
+			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+			return;
+		}
 		TextInput experience = TextInput.create("java-experience", "How much Java experience do you have?", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("How much experience do you have with the Java Programming Language?")
 				.setRequired(true)
@@ -114,7 +123,7 @@ public class SelfRoleInteractionManager {
 		TextInput reason = TextInput.create("reason", "Why should we accept this submission?", TextInputStyle.PARAGRAPH)
 				.setRequired(true)
 				.build();
-		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for Expert")
+		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for " + role.getName())
 				.addActionRows(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
 				.build();
 		event.replyModal(modal).queue();
@@ -162,13 +171,16 @@ public class SelfRoleInteractionManager {
 		if (!emailOption.getAsString().matches(EMAIL_PATTERN)) {
 			return Responses.error(event.getHook(), String.format("`%s` is not a valid Email-Address. Please try again.", emailOption.getAsString()));
 		}
+		Role role = event.getGuild().getRoleById(roleId);
+		if (role == null) {
+			return Responses.error(event.getHook(), "Unknown Role. Please contact an Administrator if this issue persists");
+		}
 		event.getGuild().retrieveMemberById(userId).queue(
 				member -> {
 					User user = member.getUser();
-					Role role = event.getGuild().getRoleById(roleId);
 					MessageEmbed embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for @%s", user.getAsTag(), role.getName()))
+							.setTitle(String.format("%s applied for %s", user.getAsTag(), role.getName()))
 							.setColor(config.getSlashCommand().getSuccessColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
@@ -204,7 +216,7 @@ public class SelfRoleInteractionManager {
 					User user = member.getUser();
 					EmbedBuilder embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for Expert", user.getAsTag()))
+							.setTitle(String.format("%s applied for %s", user.getAsTag(), config.getExpertRole().getName()))
 							.setColor(config.getExpertRole().getColor())
 							.addField("How much Java experience do you have?", experienceOption.getAsString(), false)
 							.addField("Present us a fitting Java Project", projectInfoOption.getAsString(), false)
