@@ -521,7 +521,7 @@
       type: USER
     - name: reason
       description: The reason
-      required: false
+      required: true
       type: STRING
   handler: net.javadiscord.javabot.systems.moderation.ReportCommand
 

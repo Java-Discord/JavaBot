@@ -27,12 +27,12 @@ public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand 
 		var formatOption = event.getOption("format");
 		var slashConfig = Bot.config.get(event.getGuild()).getSlashCommand();
 		String format = formatOption == null ? "java" : formatOption.getAsString();
-		if (idOption == null) {
-			if (event.getChannel().hasLatestMessage()) {
+		if(idOption == null) {
+			if(event.getChannel().hasLatestMessage()) {
 				event.getChannel().getHistory().retrievePast(10)
 						.queue(messages -> {
-							for (Message message : messages) {
-								if (!message.getAuthor().isBot()){
+							for(Message message : messages) {
+								if(!message.getAuthor().isBot()) {
 									id = message.getIdLong();
 									break;
 								}

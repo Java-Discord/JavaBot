@@ -37,9 +37,9 @@ public class SelfRoleInteractionManager {
 	 */
 	public void handleButton(ButtonInteractionEvent event, String[] args) {
 		Role role = event.getGuild().getRoleById(args[2]);
-		if (role == null) return;
+		if(role == null) return;
 		boolean permanent = Boolean.parseBoolean(args[3]);
-		switch (args[1]) {
+		switch(args[1]) {
 			case "default" -> this.handleSelfRole(event, role, permanent);
 			case "staff" -> this.buildStaffApplication(event, role, event.getUser());
 			case "expert" -> this.buildExpertApplication(event, event.getUser());
@@ -55,10 +55,10 @@ public class SelfRoleInteractionManager {
 	public void handleModalSubmit(ModalInteractionEvent event, String[] args) {
 		event.deferReply(true).queue();
 		var config = Bot.config.get(event.getGuild());
-		switch (args[1]) {
+		switch(args[1]) {
 			case "staff" -> this.sendStaffSubmission(event, config, args[2], args[3]).queue();
 			case "expert" -> this.sendExpertSubmission(event, config.getModeration(), args[2]).queue();
-		};
+		}
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class SelfRoleInteractionManager {
 	 * @param applicant The Applicant.
 	 */
 	private void buildStaffApplication(ButtonInteractionEvent event, Role role, User applicant) {
-		if (event.getMember().getRoles().contains(role)) {
+		if(event.getMember().getRoles().contains(role)) {
 			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
 		}
@@ -104,7 +104,7 @@ public class SelfRoleInteractionManager {
 	 */
 	private void buildExpertApplication(ButtonInteractionEvent event, User applicant) {
 		Role role = Bot.config.get(event.getGuild()).getModeration().getExpertRole();
-		if (event.getMember().getRoles().contains(role)) {
+		if(event.getMember().getRoles().contains(role)) {
 			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
 		}
@@ -139,8 +139,8 @@ public class SelfRoleInteractionManager {
 	private void handleSelfRole(ButtonInteractionEvent event, Role role, boolean permanent) {
 		event.deferEdit().queue();
 		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member -> {
-			if (member.getRoles().contains(role)) {
-				if (!permanent) {
+			if(member.getRoles().contains(role)) {
+				if(!permanent) {
 					event.getGuild().removeRoleFromMember(member, role).queue();
 					event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
 				} else {
@@ -168,11 +168,11 @@ public class SelfRoleInteractionManager {
 		var emailOption = event.getValue("email");
 		var timezoneOption = event.getValue("timezone");
 		var extraRemarksOption = event.getValue("extra-remarks");
-		if (!emailOption.getAsString().matches(EMAIL_PATTERN)) {
+		if(!emailOption.getAsString().matches(EMAIL_PATTERN)) {
 			return Responses.error(event.getHook(), String.format("`%s` is not a valid Email-Address. Please try again.", emailOption.getAsString()));
 		}
 		Role role = event.getGuild().getRoleById(roleId);
-		if (role == null) {
+		if(role == null) {
 			return Responses.error(event.getHook(), "Unknown Role. Please contact an Administrator if this issue persists");
 		}
 		event.getGuild().retrieveMemberById(userId).queue(
