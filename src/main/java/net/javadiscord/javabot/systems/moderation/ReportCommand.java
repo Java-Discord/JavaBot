@@ -111,9 +111,14 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 	}
 
 	private void handleMessageReport(ModalInteractionEvent event, String messageId) {
+		String reason = event.getValue("reason").getAsString();
+		if(reason.isBlank()) {
+			Responses.error(event.getHook(), "No report reason was provided.").queue();
+			return;
+		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
 			var config = Bot.config.get(event.getGuild());
-			var embed = buildReportEmbed(target.getAuthor(), event.getValue("reason").getAsString(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
+			var embed = buildReportEmbed(target.getAuthor(), reason, event.getUser(), event.getTextChannel(), config.getSlashCommand());
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
 			reportChannel.sendMessage("@here").setEmbeds(embed.build())
@@ -129,6 +134,11 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 	}
 
 	private void handleUserReport(ModalInteractionEvent event, String userId) {
+		String reason = event.getValue("reason").getAsString();
+		if(reason.isBlank()) {
+			Responses.error(event.getHook(), "No report reason was provided.").queue();
+			return;
+		}
 		event.getJDA().retrieveUserById(userId).queue(target -> {
 			var config = Bot.config.get(event.getGuild());
 			var embed = buildReportEmbed(target, event.getValue("reason").getAsString(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
