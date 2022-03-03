@@ -34,9 +34,12 @@ import java.time.Instant;
  */
 @Slf4j
 public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessageContextCommand {
+
+	private static final String REASON_OPTION_NAME = "reason";
+
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		OptionMapping option = event.getOption("reason");
+		OptionMapping option = event.getOption(REASON_OPTION_NAME);
 		String reason = option == null ? "None" : option.getAsString();
 		Member member = event.getOption("user").getAsMember();
 		if(member == null) {
@@ -71,7 +74,7 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 	 * @return the built {@link Modal}
 	 */
 	private Modal buildUserReportModal(UserContextInteractionEvent event) {//TODO use that
-		TextInput messageInput = TextInput.create("reason", "Report description", TextInputStyle.PARAGRAPH).build();
+		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH).build();
 		return Modal.create("report:user:" + event.getTarget().getId(), "Report " + event.getTarget().getAsTag())
 				.addActionRows(ActionRow.of(messageInput))
 				.build();
@@ -90,7 +93,7 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 		if(targetMember != null) {
 			title += " from " + targetMember.getUser().getAsTag();
 		}
-		TextInput messageInput = TextInput.create("reason", "Report description", TextInputStyle.PARAGRAPH).build();
+		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH).build();
 		return Modal.create("report:message:" + event.getTarget().getId(), title)
 				.addActionRows(ActionRow.of(messageInput))
 				.build();
@@ -111,7 +114,7 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 	}
 
 	private void handleMessageReport(ModalInteractionEvent event, String messageId) {
-		String reason = event.getValue("reason").getAsString();
+		String reason = event.getValue(REASON_OPTION_NAME).getAsString();
 		if(reason.isBlank()) {
 			Responses.error(event.getHook(), "No report reason was provided.").queue();
 			return;
@@ -134,14 +137,14 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 	}
 
 	private void handleUserReport(ModalInteractionEvent event, String userId) {
-		String reason = event.getValue("reason").getAsString();
+		String reason = event.getValue(REASON_OPTION_NAME).getAsString();
 		if(reason.isBlank()) {
 			Responses.error(event.getHook(), "No report reason was provided.").queue();
 			return;
 		}
 		event.getJDA().retrieveUserById(userId).queue(target -> {
 			var config = Bot.config.get(event.getGuild());
-			var embed = buildReportEmbed(target, event.getValue("reason").getAsString(), event.getUser(), event.getTextChannel(), config.getSlashCommand());
+			var embed = buildReportEmbed(target, reason, event.getUser(), event.getTextChannel(), config.getSlashCommand());
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
 			reportChannel.sendMessage("@here").setEmbeds(embed.build())
 					.setActionRows(setComponents(target.getIdLong()))
