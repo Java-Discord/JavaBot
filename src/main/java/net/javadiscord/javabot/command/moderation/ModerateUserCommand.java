@@ -31,7 +31,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 		if (targetOption == null) {
 			return Responses.error(event, "Missing required arguments.");
 		}
-        Member target = targetOption.getAsMember();
+		Member target = targetOption.getAsMember();
 		if (target == null) {
 			return Responses.error(event, "Cannot report a user who is not a member of this server");
 		}
