@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.command.interfaces;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 
 /**
@@ -20,5 +21,5 @@ import net.javadiscord.javabot.command.ResponseException;
  * </p>
  */
 public interface ISlashCommand {
-	ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException;
+	InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException;
 }
