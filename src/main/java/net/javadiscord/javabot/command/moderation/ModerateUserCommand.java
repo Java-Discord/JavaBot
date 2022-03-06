@@ -44,14 +44,16 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 
 		if (target.isOwner()) {
 			return Responses.error(event, "You cannot preform actions on a higher member staff member.");
-		}
-
-		//If both users have at least one role.
-		if (target.getRoles().size() > 0 && commandUser.getRoles().size() > 0) {
-			if (commandUser.getRoles().get(0).getPosition() > target.getRoles().get(0).getPosition()) {
-				return Responses.error(event, "You cannot preform actions on a higher member staff member.");
+		}else{
+			//If both users have at least one role.
+			if (target.getRoles().size() > 0 && commandUser.getRoles().size() > 0) {
+				if (commandUser.getRoles().get(0).getPosition() <= target.getRoles().get(0).getPosition()) {
+					return Responses.error(event, "You cannot preform actions on a higher/equal member staff member.");
+				}
 			}
 		}
+
+		//CommandUser role less than or equal to target role
 
 		return handleModerationActionCommand(event, commandUser, target);
 	}
