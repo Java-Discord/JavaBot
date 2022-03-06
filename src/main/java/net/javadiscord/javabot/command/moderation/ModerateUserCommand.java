@@ -44,7 +44,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 
 		if (target.isOwner()) {
 			return Responses.error(event, "You cannot preform actions on a higher member staff member.");
-		}else{
+		} else {
 			//If both users have at least one role.
 			if (target.getRoles().size() > 0 && commandUser.getRoles().size() > 0) {
 				if (commandUser.getRoles().get(0).getPosition() <= target.getRoles().get(0).getPosition()) {
