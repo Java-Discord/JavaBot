@@ -1,11 +1,13 @@
 package net.javadiscord.javabot.systems.moderation;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.moderation.ModerateCommand;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -16,15 +18,11 @@ import java.util.regex.Pattern;
  * This command will systematically ban users from the server if they match
  * certain criteria.
  */
-public class PruneCommand implements ISlashCommand {
+public class PruneCommand extends ModerateCommand {
 	private final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		if (event.getGuild() == null) {
-			return Responses.warning(event, "This command can only be used in a guild.");
-		}
-
+	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) throws ResponseException {
 		var config = Bot.config.get(event.getGuild()).getModeration();
 
 		OptionMapping patternOption = event.getOption("pattern");
@@ -61,5 +59,6 @@ public class PruneCommand implements ISlashCommand {
 			});
 		});
 		return Responses.success(event, "Prune Started", "The prune action has started. Please check the log channel for information on the status of the prune.");
+
 	}
 }

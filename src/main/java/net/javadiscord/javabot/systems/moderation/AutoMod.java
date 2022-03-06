@@ -230,8 +230,7 @@ public class AutoMod extends ListenerAdapter {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
-			if (Arrays.stream(Bot.config.get(message.getGuild()).getModeration().getAutomodInviteExcludes()).anyMatch(message.getContentRaw()::contains)) return false;
-			return true;
+			return Arrays.stream(Bot.config.get(message.getGuild()).getModeration().getAutomodInviteExcludes()).noneMatch(message.getContentRaw()::contains);
 		}
 		return false;
 	}

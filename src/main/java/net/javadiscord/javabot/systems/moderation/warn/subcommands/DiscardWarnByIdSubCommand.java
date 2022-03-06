@@ -1,17 +1,19 @@
 package net.javadiscord.javabot.systems.moderation.warn.subcommands;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.moderation.ModerateCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 /**
  * Subcommand that allows staff-members to discard any warn by their id.
  */
-public class DiscardWarnByIdSubCommand implements ISlashCommand {
+public class DiscardWarnByIdSubCommand extends ModerateCommand {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) throws ResponseException {
 		var idOption = event.getOption("id");
 		if (idOption == null) {
 			return Responses.error(event, "Id may not be empty!");
