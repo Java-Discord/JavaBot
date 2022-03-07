@@ -73,7 +73,7 @@ public class ReportCommand implements ISlashCommand, IUserContextCommand, IMessa
 	 * @param event The {@link UserContextInteractionEvent} fired when reporting the user
 	 * @return the built {@link Modal}
 	 */
-	private Modal buildUserReportModal(UserContextInteractionEvent event) {//TODO use that
+	private Modal buildUserReportModal(UserContextInteractionEvent event) {
 		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH).build();
 		return Modal.create("report:user:" + event.getTarget().getId(), "Report " + event.getTarget().getAsTag())
 				.addActionRows(ActionRow.of(messageInput))
