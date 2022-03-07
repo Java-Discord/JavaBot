@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
@@ -23,8 +24,7 @@ public class KickCommand extends ModerateUserCommand {
 			return Responses.error(event, "Cannot kick a user who is not a member of this server");
 		}
 		var reason = reasonOption.getAsString();
-		var quietOption = event.getOption("quiet");
-		boolean quiet = quietOption != null && quietOption.getAsBoolean();
+		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 
 		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.kick(member, reason, event.getMember(), event.getTextChannel(), quiet)) {

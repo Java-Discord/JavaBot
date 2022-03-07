@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -21,8 +22,7 @@ public class ExportTableSubcommand implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var tableNameOption = event.getOption("table");
-		var includeDataOption = event.getOption("include-data");
-		boolean includeData = includeDataOption != null && includeDataOption.getAsBoolean();
+		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		if (tableNameOption == null) return Responses.error(event, "Missing required Choice Option");
 		Bot.asyncPool.submit(() -> {
 			try (var con = Bot.dataSource.getConnection()) {

@@ -71,7 +71,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 	private Modal buildMessageReportModal(MessageContextInteractionEvent event) {
 		var title = "Report message";
 		var targetMember = event.getTarget().getMember();
-		if(targetMember != null) {
+		if (targetMember != null) {
 			title += " from " + targetMember.getUser().getAsTag();
 		}
 		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH).build();
@@ -88,7 +88,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 	 */
 	public void handleModalSubmit(ModalInteractionEvent event, String[] args) {
 		event.deferReply(true).queue();
-		switch(args[1]) {
+		switch (args[1]) {
 			case "user" -> handleUserReport(event, args[2]);
 			case "message" -> handleMessageReport(event, args[2]);
 		}
@@ -96,7 +96,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 
 	private void handleMessageReport(ModalInteractionEvent event, String messageId) {
 		String reason = event.getValue(REASON_OPTION_NAME).getAsString();
-		if(reason.isBlank()) {
+		if (reason.isBlank()) {
 			Responses.error(event.getHook(), "No report reason was provided.").queue();
 			return;
 		}
@@ -119,7 +119,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 
 	private void handleUserReport(ModalInteractionEvent event, String userId) {
 		String reason = event.getValue(REASON_OPTION_NAME).getAsString();
-		if(reason.isBlank()) {
+		if (reason.isBlank()) {
 			Responses.error(event.getHook(), "No report reason was provided.").queue();
 			return;
 		}
@@ -164,9 +164,8 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
-		OptionMapping option = event.getOption(REASON_OPTION_NAME);
-		String reason = option == null ? "None" : option.getAsString();
-		if(target == null) {
+		String reason = event.getOption(REASON_OPTION_NAME, "N/A", OptionMapping::getAsString);
+		if (target == null) {
 			return Responses.error(event, "Cannot report a user who is not a member of this server");
 		}
 		var config = Bot.config.get(event.getGuild());

@@ -22,12 +22,8 @@ import java.util.List;
 public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
 	@Override
 	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
-		OptionMapping pageOption = event.getOption("page");
+		int page = event.getOption("page", 1, OptionMapping::getAsInt);
 		OptionMapping userOption = event.getOption("user");
-		int page = 1;
-		if (pageOption != null) {
-			page = (int) pageOption.getAsLong();
-		}
 		Long userId = null;
 		if (userOption != null) {
 			userId = userOption.getAsUser().getIdLong();
