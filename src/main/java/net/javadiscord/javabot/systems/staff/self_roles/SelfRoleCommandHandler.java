@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.systems.staff.self_roles;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
@@ -23,10 +24,10 @@ public class SelfRoleCommandHandler extends DelegatingCommandHandler {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		try {
 			return super.handleSlashCommandInteraction(event);
-		} catch (ResponseException e) {
+		} catch(ResponseException e) {
 			return Responses.error(event, String.format("```%s```", e.getMessage()));
 		}
 	}
