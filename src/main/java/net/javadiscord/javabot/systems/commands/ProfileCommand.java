@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -23,8 +24,7 @@ import java.time.Instant;
 public class ProfileCommand implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var profileOption = event.getOption("user");
-		var member = profileOption == null ? event.getMember() : profileOption.getAsMember();
+		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);
 		try {
 			return event.replyEmbeds(buildProfileEmbed(member, Bot.dataSource.getConnection()));
 		} catch (SQLException e) {

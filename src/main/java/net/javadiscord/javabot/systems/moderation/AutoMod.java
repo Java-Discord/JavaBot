@@ -166,11 +166,9 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void handleSpam(@Nonnull Message msg, Member member) {
 		// java files -> not spam
-		if (!msg.getAttachments().isEmpty()
-				&& "java".equals(msg.getAttachments().get(0).getFileExtension())) {
+		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> a.getFileExtension().equals("java"))) {
 			return;
 		}
-
 		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
 				.timeout(
 						member,
@@ -238,5 +236,4 @@ public class AutoMod extends ListenerAdapter {
 	private boolean isSuggestionsChannel(TextChannel channel) {
 		return channel.equals(Bot.config.get(channel.getGuild()).getModeration().getSuggestionChannel());
 	}
-
 }
