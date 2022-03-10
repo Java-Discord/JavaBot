@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.help;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -21,8 +22,7 @@ public class UnreserveCommandHandler implements ISlashCommand {
 		var channelManager = new HelpChannelManager(config);
 		var owner = channelManager.getReservedChannelOwner(channel);
 		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
-			var reasonOption = event.getOption("reason");
-			String reason = (reasonOption == null) ? null : reasonOption.getAsString();
+			String reason = event.getOption("reason", null, OptionMapping::getAsString);
 			channelManager.unreserveChannelByUser(channel, owner, reason, event);
 			return event.deferReply(true);
 		} else {

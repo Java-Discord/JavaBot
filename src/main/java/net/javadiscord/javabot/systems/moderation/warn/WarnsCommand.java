@@ -27,8 +27,7 @@ import java.util.List;
 public class WarnsCommand implements ISlashCommand, IUserContextCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
-		OptionMapping warnsOption = event.getOption("user");
-		Member member = warnsOption == null ? event.getMember() : warnsOption.getAsMember();
+		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);
 		if (member == null) return Responses.error(event, "Member is missing.");
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
 		try (var con = Bot.dataSource.getConnection()) {
