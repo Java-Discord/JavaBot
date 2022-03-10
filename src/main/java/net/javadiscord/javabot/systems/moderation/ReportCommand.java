@@ -44,7 +44,9 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 	 * @return the built {@link Modal}
 	 */
 	private Modal buildUserReportModal(UserContextInteractionEvent event) {
-		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH).build();
+		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report Description", TextInputStyle.PARAGRAPH)
+				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
+				.build();
 		String title = "Report " + event.getTarget().getAsTag();
 		return Modal.create("report:user:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.TITLE_MAX_LENGTH)))
 				.addActionRows(ActionRow.of(messageInput))
@@ -64,7 +66,9 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 		if (targetMember != null) {
 			title += " from " + targetMember.getUser().getAsTag();
 		}
-		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH).build();
+		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH)
+				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
+				.build();
 		return Modal.create("report:message:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.TITLE_MAX_LENGTH)))
 				.addActionRows(ActionRow.of(messageInput))
 				.build();
