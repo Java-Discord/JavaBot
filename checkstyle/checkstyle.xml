@@ -50,7 +50,7 @@ See https://checkstyle.org/ for more information.
         <module name="IllegalType"/>
         <module name="InnerAssignment"/>
         <module name="MultipleStringLiterals">
-            <property name="allowedDuplicates" value="3"/>
+            <property name="allowedDuplicates" value="5"/>
         </module>
         <module name="MultipleVariableDeclarations"/>
         <module name="NoClone"/>
