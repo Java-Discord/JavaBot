@@ -185,11 +185,17 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 
 	@Override
 	public InteractionCallbackAction<InteractionHook> handleMessageContextCommandInteraction(MessageContextInteractionEvent event) throws ResponseException {
+		if (event.getTarget().getAuthor().equals(event.getUser())) {
+			return Responses.error(event, "You cannot perform this action on yourself.");
+		}
 		return event.replyModal(buildMessageReportModal(event));
 	}
 
 	@Override
 	public InteractionCallbackAction<InteractionHook> handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
+		if (event.getTarget().equals(event.getUser())) {
+			return Responses.error(event, "You cannot perform this action on yourself.");
+		}
 		return event.replyModal(buildUserReportModal(event));
 	}
 
