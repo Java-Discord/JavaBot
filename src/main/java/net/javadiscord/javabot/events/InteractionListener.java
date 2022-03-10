@@ -77,6 +77,7 @@ public class InteractionListener extends ListenerAdapter {
 					e.printStackTrace();
 				}
 			}
+			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
 			case "self-role" -> new SelfRoleInteractionManager().handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
@@ -101,18 +102,18 @@ public class InteractionListener extends ListenerAdapter {
 					event.getGuild().getMemberById(id[2]),
 					"None",
 					event.getMember(),
-					event.getTextChannel(),
+					event.getMessageChannel(),
 					false);
 			case "ban" -> service.ban(
 					event.getGuild().getMemberById(id[2]),
 					"None",
 					event.getMember(),
-					event.getTextChannel(),
+					event.getMessageChannel(),
 					false);
 			case "unban" -> service.unban(
 					Long.parseLong(id[2]),
 					event.getMember(),
-					event.getTextChannel(),
+					event.getMessageChannel(),
 					false);
 		}
 	}

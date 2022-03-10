@@ -67,7 +67,7 @@ public class ModerationService {
 	 * @param channel  The channel in which the warning was issued.
 	 * @param quiet    If true, don't send a message in the channel.
 	 */
-	public void warn(Member member, WarnSeverity severity, String reason, Member warnedBy, TextChannel channel, boolean quiet) {
+	public void warn(Member member, WarnSeverity severity, String reason, Member warnedBy, MessageChannel channel, boolean quiet) {
 		DbHelper.doDbAction(con -> {
 			var repo = new WarnRepository(con);
 			var warn = repo.insert(new Warn(member.getIdLong(), warnedBy.getIdLong(), severity, reason));
@@ -152,13 +152,13 @@ public class ModerationService {
 	 * @param quiet      If true, don't send a message in the channel.
 	 * @return Whether the moderator has the permission to time out this member or not.
 	 */
-	public boolean timeout(Member member, String reason, Member timedOutBy, Duration duration, TextChannel channel, boolean quiet) {
+	public boolean timeout(Member member, String reason, Member timedOutBy, Duration duration, MessageChannel channel, boolean quiet) {
 		var timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
 		if (canTimeoutUser(member, timedOutBy)) {
 			member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(timeoutEmbed).queue(),
 					e -> log.info("Could not send Timeout Direct Message to User {}", member.getUser().getAsTag())
 			);
-			channel.getGuild().timeoutFor(member, duration).queue();
+			timedOutBy.getGuild().timeoutFor(member, duration).queue();
 			config.getLogChannel().sendMessageEmbeds(timeoutEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 			return true;
@@ -176,13 +176,13 @@ public class ModerationService {
 	 * @param quiet     If true, don't send a message in the channel.
 	 * @return Whether the moderator has the permission to remove this Timeout or not.
 	 */
-	public boolean removeTimeout(Member member, String reason, Member removedBy, TextChannel channel, boolean quiet) {
+	public boolean removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
 		var removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
 		if (canTimeoutUser(member, removedBy)) {
 			member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(removeTimeoutEmbed).queue(),
 					e -> log.info("Could not send Timeout Direct Message to User {}", member.getUser().getAsTag())
 			);
-			channel.getGuild().removeTimeout(member).queue();
+			removedBy.getGuild().removeTimeout(member).queue();
 			config.getLogChannel().sendMessageEmbeds(removeTimeoutEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 			return true;
@@ -200,14 +200,14 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 * @return Whether the moderator has the permission to ban this member or not.
 	 */
-	public boolean ban(Member member, String reason, Member bannedBy, TextChannel channel, boolean quiet) {
+	public boolean ban(Member member, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		var banEmbed = buildBanEmbed(member, reason, bannedBy);
 		if (canBanUser(member, bannedBy)) {
 			member.getUser().openPrivateChannel().queue(
 					c -> c.sendMessage(config.getBanMessageText()).setEmbeds(banEmbed).queue(),
 					e -> log.info("Could not send Ban Direct Message to User {}", member.getUser().getAsTag())
 			);
-			channel.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
+			bannedBy.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
 			config.getLogChannel().sendMessageEmbeds(banEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 			return true;
@@ -224,10 +224,10 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 * @return Whether the member is banned or not.
 	 */
-	public boolean unban(long userId, Member bannedBy, TextChannel channel, boolean quiet) {
+	public boolean unban(long userId, Member bannedBy, MessageChannel channel, boolean quiet) {
 		var unbanEmbed = buildUnbanEmbed(userId, bannedBy);
-		if (isBanned(channel.getGuild(), userId)) {
-			channel.getGuild().unban(User.fromId(userId)).queue();
+		if (isBanned(bannedBy.getGuild(), userId)) {
+			bannedBy.getGuild().unban(User.fromId(userId)).queue();
 			config.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
 			return true;
@@ -276,13 +276,12 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 * @return Whether the moderator has the permission to kick this member or not.
 	 */
-	public boolean kick(Member member, String reason, Member kickedBy, TextChannel channel, boolean quiet) {
+	public boolean kick(Member member, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
 		var kickEmbed = buildKickEmbed(member, kickedBy, reason);
 		if (canKickUser(member, kickedBy)) {
-			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(kickEmbed).queue(),
-					e -> log.info("Could not send Kick Direct Message to User {}", member.getUser().getAsTag())
-			);
-			channel.getGuild().kick(member).queue();
+			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(kickEmbed).queue(
+					success -> {}, e -> log.info("Could not send Kick Direct Message to User {}", member.getUser().getAsTag())));
+			member.getGuild().kick(member).queue();
 			config.getLogChannel().sendMessageEmbeds(kickEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 			return true;
@@ -295,7 +294,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setColor(Color.ORANGE)
 				.setTitle(String.format("`%d` %s | Warn (%d/%d)", warnId, member.getUser().getAsTag(), totalSeverity, config.getMaxWarnSeverity()))
-				.addField("Warned member", member.getAsMention(), true)
+				.addField("Member", member.getAsMention(), true)
 				.addField("Warned by", warnedBy.getAsMention(), true)
 				.addField("Severity", String.format("`%s (%s)`", severity.name(), severity.getWeight()), true)
 				.addField("Warn Reason", String.format(reasonFormat, reason), false)
@@ -308,7 +307,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setColor(Color.RED)
 				.setTitle(String.format("%s | Kick", member.getUser().getAsTag()))
-				.addField("Kicked member", member.getAsMention(), true)
+				.addField("Member", member.getAsMention(), true)
 				.addField("Kicked by", kickedBy.getAsMention(), true)
 				.addField("Kick Reason", String.format(reasonFormat, reason), false)
 				.setTimestamp(Instant.now())
@@ -320,7 +319,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setColor(Color.RED)
 				.setTitle(String.format("%s | Timeout", member.getUser().getAsTag()))
-				.addField("Timed Out member", member.getAsMention(), true)
+				.addField("Member", member.getAsMention(), true)
 				.addField("Timed Out by", timedOutBy.getAsMention(), true)
 				.addField("Until", String.format("`%s UTC`", LocalDateTime.now().plus(duration).format(TimeUtils.STANDARD_FORMATTER)), true)
 				.addField("Timeout Reason", String.format(reasonFormat, reason), false)
@@ -373,7 +372,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setColor(Color.RED)
 				.setTitle(String.format("%s | Ban", member.getUser().getAsTag()))
-				.addField("Banned User", member.getAsMention(), true)
+				.addField("User", member.getAsMention(), true)
 				.addField("Banned by", bannedBy.getAsMention(), true)
 				.addField("Ban Reason", String.format(reasonFormat, reason), false)
 				.setTimestamp(Instant.now())
