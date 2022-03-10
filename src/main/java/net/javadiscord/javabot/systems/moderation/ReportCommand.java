@@ -66,7 +66,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 		if (targetMember != null) {
 			title += " from " + targetMember.getUser().getAsTag();
 		}
-		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report description", TextInputStyle.PARAGRAPH)
+		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report Description", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		return Modal.create("report:message:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.TITLE_MAX_LENGTH)))
@@ -102,7 +102,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 			return;
 		}
 		Responses.info(event.getHook(), "Report resolved", "Successfully resolved this report!").queue();
-		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("dummy", "Resolved by " + event.getUser().getAsTag()).asDisabled())).queue();
+		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("report-resolved", "Resolved by " + event.getUser().getAsTag()).asDisabled())).queue();
 		thread.sendMessage("This thread was resolved by " + event.getUser().getAsMention()).queue(
 				success -> thread.getManager()
 						.setName(String.format("[Resolved] %s", thread.getName()))
