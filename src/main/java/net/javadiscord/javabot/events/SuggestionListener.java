@@ -2,7 +2,10 @@ package net.javadiscord.javabot.events;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -20,7 +23,6 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class SuggestionListener extends ListenerAdapter {
-
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
@@ -29,33 +31,32 @@ public class SuggestionListener extends ListenerAdapter {
 			return;
 		}
 		var config = Bot.config.get(event.getGuild());
-		var embed = buildSuggestionEmbed(event.getAuthor(), event.getMessage(), config.getSlashCommand());
-		MessageAction action = event.getChannel().sendMessageEmbeds(embed);
-		for (var a : event.getMessage().getAttachments()) {
-			try {
-				action.addFile(a.retrieveInputStream().get(), a.getFileName());
-			} catch (InterruptedException | ExecutionException e) {
-				action.append("Could not add Attachment: " + a.getFileName());
-			}
-		}
-		action.queue(success -> {
-					addReactions(success).queue();
+		MessageEmbed embed = this.buildSuggestionEmbed(event.getMessage(), config.getSlashCommand());
+		this.addAttachments(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).queue(message -> {
+					this.addReactions(message).queue();
 					event.getMessage().delete().queue();
+					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName())).queue();
 				}, e -> log.error("Could not send Submission Embed", e)
 		);
 	}
 
+	/**
+	 * Decides whether the message author is eligible to create new suggestions.
+	 *
+	 * @param event The {@link MessageReceivedEvent} that is fired upon sending a message.
+	 * @return Whether the message author is eligible to create new suggestions.
+	 */
 	private boolean canCreateSuggestion(MessageReceivedEvent event) {
 		if (event.getChannelType() == ChannelType.PRIVATE) return false;
-		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && event.getMessage().getType() != MessageType.THREAD_CREATED
-				&& event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
+		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && !event.getMember().isTimedOut() &&
+				event.getMessage().getType() != MessageType.THREAD_CREATED &&
+				event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
 	}
 
-	private MessageEmbed buildSuggestionEmbed(User user, Message message, SlashCommandConfig config) {
+	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
 		return new EmbedBuilder()
 				.setTitle("Suggestion")
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-				.setImage(null)
+				.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getEffectiveAvatarUrl())
 				.setColor(config.getDefaultColor())
 				.setTimestamp(Instant.now())
 				.setDescription(message.getContentRaw())
@@ -68,5 +69,16 @@ public class SuggestionListener extends ListenerAdapter {
 				m.addReaction(config.getUpvoteEmote()),
 				m.addReaction(config.getDownvoteEmote())
 		);
+	}
+
+	private MessageAction addAttachments(Message message, MessageAction action) {
+		for (Message.Attachment attachment : message.getAttachments()) {
+			try {
+				action.addFile(attachment.retrieveInputStream().get(), attachment.getFileName());
+			} catch (InterruptedException | ExecutionException e) {
+				action.append("Could not add Attachment: " + attachment.getFileName());
+			}
+		}
+		return action;
 	}
 }
