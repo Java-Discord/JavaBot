@@ -561,6 +561,15 @@
           required: true
           type: STRING
 
+    # /suggestion on-hold
+    - name: on-hold
+      description: Mark a single suggestion as On Hold
+      options:
+        - name: message-id
+          description: The message id of the suggestion you want to decline.
+          required: true
+          type: STRING
+
     # /suggestion clear
     - name: clear
       description: Clears a suggestion

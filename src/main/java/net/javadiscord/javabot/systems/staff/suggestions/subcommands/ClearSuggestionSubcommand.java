@@ -2,40 +2,32 @@ package net.javadiscord.javabot.systems.staff.suggestions.subcommands;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.systems.staff.suggestions.SuggestionSubcommand;
 
 /**
  * Subcommand that lets staff members clear suggestions.
  */
 @Slf4j
-public class ClearSuggestionSubcommand implements ISlashCommand {
+public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var messageIdOption = event.getOption("message-id");
-		if (messageIdOption == null) {
-			return Responses.error(event, "Missing required arguments.");
-		}
-		var messageId = messageIdOption.getAsString();
-		var config = Bot.config.get(event.getGuild());
-		config.getModeration().getSuggestionChannel().retrieveMessageById(messageId).queue(m -> {
-			var embed = m.getEmbeds().get(0);
-			m.clearReactions().queue();
-			var clearEmbed = buildSuggestionClearEmbed(embed, config);
-			m.editMessageEmbeds(clearEmbed).queue(
-					message -> {
-						message.addReaction(config.getEmote().getUpvoteEmote()).queue();
-						message.addReaction(config.getEmote().getDownvoteEmote()).queue();
-					},
-					error -> Responses.error(event, error.getMessage()).queue());
-		}, e -> log.error("Could not find suggestion message with id {}", messageId));
-		return Responses.success(event, "Suggestion cleared",
-				String.format("Successfully cleared suggestion with id `%s`", messageId));
+	protected WebhookMessageAction<Message> handleSuggestionCommand(SlashCommandInteractionEvent event, Message message, GuildConfig config) {
+		MessageEmbed embed = message.getEmbeds().get(0);
+		message.clearReactions().queue();
+		MessageEmbed clearEmbed = this.buildSuggestionClearEmbed(embed, config);
+		message.editMessageEmbeds(clearEmbed).queue(
+				edit -> {
+					edit.addReaction(config.getEmote().getUpvoteEmote()).queue();
+					edit.addReaction(config.getEmote().getDownvoteEmote()).queue();
+				},
+				error -> Responses.error(event.getHook(), error.getMessage()).queue());
+		return Responses.success(event.getHook(), "Suggestion Cleared", String.format("Successfully cleared suggestion with id `%s`", message.getId()))
+				.addActionRows(this.getJumpButton(message));
 	}
 
 	private MessageEmbed buildSuggestionClearEmbed(MessageEmbed embed, GuildConfig config) {
