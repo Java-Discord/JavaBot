@@ -10,14 +10,14 @@ import net.javadiscord.javabot.command.Responses;
 /**
  * A moderation command action like ban, kick, mute, report, etc. | In short, it targets a user.
  */
-public abstract class ModerateUserCommand extends ModerateCommand {
+public abstract class ModerateMemberCommand extends ModerateCommand {
 	private boolean actOnSelf;
 
-	public ModerateUserCommand() {
+	public ModerateMemberCommand() {
 		setActOnSelf(false);
 	}
 
-	public ModerateUserCommand(boolean actOnSelf) {
+	public ModerateMemberCommand(boolean actOnSelf) {
 		setActOnSelf(actOnSelf);
 	}
 

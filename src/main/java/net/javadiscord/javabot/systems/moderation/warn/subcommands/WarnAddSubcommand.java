@@ -6,14 +6,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.command.moderation.ModerateMemberCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 
 /**
  * Subcommand that allows staff-members to add a single warn to any user.
  */
-public class WarnAddSubcommand extends ModerateUserCommand {
+public class WarnAddSubcommand extends ModerateMemberCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {

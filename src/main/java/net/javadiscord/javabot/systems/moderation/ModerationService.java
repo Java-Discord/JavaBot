@@ -5,8 +5,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.command.moderation.UserPermissionException;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
@@ -200,19 +203,33 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 * @return Whether the moderator has the permission to ban this member or not.
 	 */
-	public boolean ban(Member member, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
+	public void ban(Member member, String reason, Member bannedBy, MessageChannel channel, boolean quiet) throws IllegalArgumentException, UserPermissionException {
 		var banEmbed = buildBanEmbed(member, reason, bannedBy);
 		if (canBanUser(member, bannedBy)) {
 			member.getUser().openPrivateChannel().queue(
 					c -> c.sendMessage(config.getBanMessageText()).setEmbeds(banEmbed).queue(),
 					e -> log.info("Could not send Ban Direct Message to User {}", member.getUser().getAsTag())
 			);
-			bannedBy.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
+
+			try {
+				bannedBy.getGuild().ban(member, BAN_DELETE_DAYS, reason).queue();
+			} catch (InsufficientPermissionException | HierarchyException e) {
+				throw new UserPermissionException(channel.getJDA().getSelfUser(), e);
+			}
+
 			config.getLogChannel().sendMessageEmbeds(banEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
-			return true;
+		} else {
+			throw new UserPermissionException(bannedBy.getUser(), Permission.BAN_MEMBERS, "User does not have permissions to ban the targeted member.");
 		}
-		return false;
+	}
+
+	public void ban(String snowFlakeID, String reason, Member bannedBy, MessageChannel channel, boolean quiet) throws IllegalArgumentException, InsufficientPermissionException, HierarchyException {
+		var banEmbed = buildBanEmbed(snowFlakeID, reason, bannedBy);
+
+		bannedBy.getGuild().ban(snowFlakeID, BAN_DELETE_DAYS, reason).queue();
+		config.getLogChannel().sendMessageEmbeds(banEmbed).queue();
+		if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 	}
 
 	/**
@@ -280,7 +297,8 @@ public class ModerationService {
 		var kickEmbed = buildKickEmbed(member, kickedBy, reason);
 		if (canKickUser(member, kickedBy)) {
 			member.getUser().openPrivateChannel().queue(pc -> pc.sendMessageEmbeds(kickEmbed).queue(
-					success -> {}, e -> log.info("Could not send Kick Direct Message to User {}", member.getUser().getAsTag())));
+					success -> {
+					}, e -> log.info("Could not send Kick Direct Message to User {}", member.getUser().getAsTag())));
 			member.getGuild().kick(member).queue();
 			config.getLogChannel().sendMessageEmbeds(kickEmbed).queue();
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
@@ -373,6 +391,18 @@ public class ModerationService {
 				.setColor(Color.RED)
 				.setTitle(String.format("%s | Ban", member.getUser().getAsTag()))
 				.addField("User", member.getAsMention(), true)
+				.addField("Banned by", bannedBy.getAsMention(), true)
+				.addField("Ban Reason", String.format(reasonFormat, reason), false)
+				.setTimestamp(Instant.now())
+				.setFooter(bannedBy.getUser().getAsTag(), bannedBy.getEffectiveAvatarUrl())
+				.build();
+	}
+
+	private MessageEmbed buildBanEmbed(String snowflakeID, String reason, Member bannedBy) {
+		return new EmbedBuilder()
+				.setColor(Color.RED)
+				.setTitle(String.format("%s | Ban", snowflakeID))
+				.addField("User", snowflakeID, true)
 				.addField("Banned by", bannedBy.getAsMention(), true)
 				.addField("Ban Reason", String.format(reasonFormat, reason), false)
 				.setTimestamp(Instant.now())

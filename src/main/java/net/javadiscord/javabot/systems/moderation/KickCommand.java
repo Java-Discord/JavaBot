@@ -6,12 +6,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.command.moderation.ModerateMemberCommand;
 
 /**
  * Command that allows staff-members to kick members.
  */
-public class KickCommand extends ModerateUserCommand {
+public class KickCommand extends ModerateMemberCommand {
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
 		var userOption = event.getOption("user");

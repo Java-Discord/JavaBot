@@ -22,7 +22,7 @@ import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.command.moderation.ModerateMemberCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
@@ -32,7 +32,7 @@ import java.time.Instant;
  * Command that allows members to report other members.
  */
 @Slf4j
-public class ReportCommand extends ModerateUserCommand implements IUserContextCommand, IMessageContextCommand {
+public class ReportCommand extends ModerateMemberCommand implements IUserContextCommand, IMessageContextCommand {
 
 	private static final String REASON_OPTION_NAME = "reason";
 
