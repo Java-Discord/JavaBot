@@ -53,24 +53,27 @@ public class SuggestionListener extends ListenerAdapter {
 				event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
 	}
 
-	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
-		return new EmbedBuilder()
-				.setTitle("Suggestion")
-				.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getEffectiveAvatarUrl())
-				.setColor(config.getDefaultColor())
-				.setTimestamp(Instant.now())
-				.setDescription(message.getContentRaw())
-				.build();
-	}
-
-	private RestAction<?> addReactions(Message m) {
-		var config = Bot.config.get(m.getGuild()).getEmote();
+	/**
+	 * Adds the upvote and Downvote emoji to the suggestion message.
+	 *
+	 * @param message The message that was sent.
+	 * @return A {@link RestAction}.
+	 */
+	private RestAction<?> addReactions(Message message) {
+		var config = Bot.config.get(message.getGuild()).getEmote();
 		return RestAction.allOf(
-				m.addReaction(config.getUpvoteEmote()),
-				m.addReaction(config.getDownvoteEmote())
+				message.addReaction(config.getUpvoteEmote()),
+				message.addReaction(config.getDownvoteEmote())
 		);
 	}
 
+	/**
+	 * Adds all Attachments from the initial message to the new message action.
+	 *
+	 * @param message The initial {@link Message} object.
+	 * @param action The new {@link MessageAction}.
+	 * @return The complete {@link MessageAction} with all attachments.
+	 */
 	private MessageAction addAttachments(Message message, MessageAction action) {
 		for (Message.Attachment attachment : message.getAttachments()) {
 			try {
@@ -80,5 +83,15 @@ public class SuggestionListener extends ListenerAdapter {
 			}
 		}
 		return action;
+	}
+
+	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
+		return new EmbedBuilder()
+				.setTitle("Suggestion")
+				.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getEffectiveAvatarUrl())
+				.setColor(config.getDefaultColor())
+				.setTimestamp(Instant.now())
+				.setDescription(message.getContentRaw())
+				.build();
 	}
 }
