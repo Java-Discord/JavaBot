@@ -33,7 +33,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 		}
 		Member target = targetOption.getAsMember();
 		if (target == null) {
-			return Responses.error(event, "Cannot report a user who is not a member of this server");
+			return Responses.error(event, "Cannot perform action on an user that isn't in the server.");
 		}
 
 		if (!actOnSelf || !commandUser.isOwner()) {
