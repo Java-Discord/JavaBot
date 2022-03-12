@@ -5,6 +5,9 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * When a action cannot be completed because of a user's permissions.
+ */
 public class UserPermissionException extends PermissionException {
 	private final User user;
 

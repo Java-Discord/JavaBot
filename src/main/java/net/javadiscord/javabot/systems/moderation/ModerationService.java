@@ -201,7 +201,6 @@ public class ModerationService {
 	 * @param bannedBy The member who is responsible for banning this member.
 	 * @param channel  The channel in which the ban was issued.
 	 * @param quiet    If true, don't send a message in the channel.
-	 * @return Whether the moderator has the permission to ban this member or not.
 	 */
 	public void ban(Member member, String reason, Member bannedBy, MessageChannel channel, boolean quiet) throws IllegalArgumentException, UserPermissionException {
 		var banEmbed = buildBanEmbed(member, reason, bannedBy);
@@ -224,6 +223,15 @@ public class ModerationService {
 		}
 	}
 
+	/**
+	 * Bans a member.
+	 *
+	 * @param snowFlakeID The member to ban.
+	 * @param reason      The reason for banning the member.
+	 * @param bannedBy    The member who is responsible for banning this member.
+	 * @param channel     The channel in which the ban was issued.
+	 * @param quiet       If true, don't send a message in the channel.
+	 */
 	public void ban(String snowFlakeID, String reason, Member bannedBy, MessageChannel channel, boolean quiet) throws IllegalArgumentException, InsufficientPermissionException, HierarchyException {
 		var banEmbed = buildBanEmbed(snowFlakeID, reason, bannedBy);
 
