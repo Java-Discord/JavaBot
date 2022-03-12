@@ -560,6 +560,17 @@
           description: The message id of the suggestion you want to decline.
           required: true
           type: STRING
+        - name: reason
+          description: The reason for declining this suggestion.
+          required: false
+          type: STRING
+          choices:
+            - name: Already Implemented
+              value: Already Implemented
+            - name: Duplicate
+              value: Duplicate
+            - name: Not Possible
+              value: Not Possible
 
     # /suggestion on-hold
     - name: on-hold
