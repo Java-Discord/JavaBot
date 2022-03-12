@@ -183,4 +183,6 @@
           value: swift
         - name: TypeScript
           value: typescript
+        - name: XML
+          value: xml
   handler: net.javadiscord.javabot.systems.commands.FormatCodeCommand
