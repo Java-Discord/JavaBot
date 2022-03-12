@@ -15,6 +15,7 @@ public class EmoteConfig extends GuildConfigItem {
 	private String successId;
 	private String upvoteId;
 	private String downvoteId;
+	private String clockEmoji = "\uD83D\uDD57";
 	private String jobChannelVoteEmoji;
 
 	public Emote getFailureEmote() {
