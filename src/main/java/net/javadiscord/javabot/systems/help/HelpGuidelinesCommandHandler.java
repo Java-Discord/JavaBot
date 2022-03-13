@@ -16,7 +16,7 @@ public class HelpGuidelinesCommandHandler implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		StringBuilder sb = new StringBuilder();
-		for(GuildChannel channel:Bot.config.get(event.getGuild()).getHelp().getOpenChannelCategory().getChannels()) {
+		for (GuildChannel channel : Bot.config.get(event.getGuild()).getHelp().getOpenChannelCategory().getChannels()) {
 			sb.append(channel.getAsMention() + "\n");
 		}
 		var embed = new EmbedBuilder()
