@@ -15,33 +15,29 @@ import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Command that allows members to format messages.
  */
 public class FormatCodeCommand implements ISlashCommand, IMessageContextCommand {
-	private Message target;
-	private int MAX_TRIES = 10;
-
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var idOption = event.getOption("message-id");
 		String format = event.getOption("format", "java", OptionMapping::getAsString);
 		var slashConfig = Bot.config.get(event.getGuild()).getSlashCommand();
 		if (idOption == null) {
-			while (this.target == null && MAX_TRIES > 0) {
-				event.getChannel().getHistory()
-						.retrievePast(10)
-						.queue(messages -> {
-							Collections.reverse(messages);
-							for (Message m : messages) {
-								if (!m.getAuthor().isBot()) this.target = m;
-							}
-							MAX_TRIES--;
-						});
-			}
-			if (this.target == null) return Responses.error(event, "Missing required arguments.");
-			event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(target, format, slashConfig)).queue();
+			event.getChannel().getHistory()
+				.retrievePast(10)
+				.queue(messages -> {
+					Message target = null;
+					Collections.reverse(messages);
+					for (Message m : messages) {
+						if (!m.getAuthor().isBot()) target = m;
+					}
+					if (target != null) event.getHook().sendMessageEmbeds(buildFormatCodeEmbed(target, format, slashConfig)).queue();
+					else Responses.error(event.getHook(), "Missing required arguments.").queue();
+				});
 		} else {
 			long messageId = idOption.getAsLong();
 			event.getTextChannel().retrieveMessageById(messageId).queue(
