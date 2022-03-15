@@ -15,7 +15,6 @@ import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Command that allows members to format messages.
