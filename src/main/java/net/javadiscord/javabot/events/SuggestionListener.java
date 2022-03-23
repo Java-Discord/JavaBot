@@ -35,7 +35,9 @@ public class SuggestionListener extends ListenerAdapter {
 		this.addAttachments(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).queue(message -> {
 					this.addReactions(message).queue();
 					event.getMessage().delete().queue();
-					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName())).queue();
+					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName()))
+							.flatMap(thread -> thread.addThreadMember(event.getAuthor()))
+							.queue();
 				}, e -> log.error("Could not send Submission Embed", e)
 		);
 	}
