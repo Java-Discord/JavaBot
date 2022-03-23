@@ -15,7 +15,9 @@ import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Listens for {@link MessageReceivedEvent}s in the
@@ -32,14 +34,17 @@ public class SuggestionListener extends ListenerAdapter {
 		}
 		var config = Bot.config.get(event.getGuild());
 		MessageEmbed embed = this.buildSuggestionEmbed(event.getMessage(), config.getSlashCommand());
-		this.addAttachments(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).queue(message -> {
+		this.addAttachmentsAndSend(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).thenAccept(message -> {
 					this.addReactions(message).queue();
 					event.getMessage().delete().queue();
 					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName()))
 							.flatMap(thread -> thread.addThreadMember(event.getAuthor()))
 							.queue();
-				}, e -> log.error("Could not send Submission Embed", e)
-		);
+				}
+		).exceptionally(e -> {
+			log.error("Could not send Submission Embed", e);
+			return null;
+		});
 	}
 
 	/**
@@ -70,21 +75,23 @@ public class SuggestionListener extends ListenerAdapter {
 	}
 
 	/**
-	 * Adds all Attachments from the initial message to the new message action.
+	 * Adds all Attachments from the initial message to the new message action and sends the message.
 	 *
 	 * @param message The initial {@link Message} object.
 	 * @param action The new {@link MessageAction}.
-	 * @return The complete {@link MessageAction} with all attachments.
+	 * @return A {@link CompletableFuture} with the message that is being sent.
 	 */
-	private MessageAction addAttachments(Message message, MessageAction action) {
+	private CompletableFuture<Message> addAttachmentsAndSend(Message message, MessageAction action) {
+		List<CompletableFuture<?>> attachmentFutures = new ArrayList<>();
 		for (Message.Attachment attachment : message.getAttachments()) {
-			try {
-				action.addFile(attachment.retrieveInputStream().get(), attachment.getFileName());
-			} catch (InterruptedException | ExecutionException e) {
-				action.append("Could not add Attachment: " + attachment.getFileName());
-			}
+			attachmentFutures.add(
+					attachment.retrieveInputStream()
+							.thenApply(is -> action.addFile(is, attachment.getFileName()))
+							.exceptionally(e -> action.append("Could not add Attachment: " + attachment.getFileName()))
+			);
 		}
-		return action;
+		return CompletableFuture.allOf(attachmentFutures.toArray(new CompletableFuture<?>[0]))
+				.thenCompose(unusedActions -> action.submit());
 	}
 
 	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
