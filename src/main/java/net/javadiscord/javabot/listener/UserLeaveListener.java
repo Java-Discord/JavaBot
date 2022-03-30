@@ -13,13 +13,11 @@ import java.sql.SQLException;
  * Listens for the {@link GuildMemberRemoveEvent}.
  */
 public class UserLeaveListener extends ListenerAdapter {
-
 	@Override
 	public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-		if (event.getUser().isBot()) return;
-
+		if (event.getUser().isBot() || event.getUser().isSystem()) return;
 		if (!Bot.config.get(event.getGuild()).getServerLock().isLocked()) {
-			unreserveAllChannels(event.getUser(), event.getGuild());
+			this.unreserveAllChannels(event.getUser(), event.getGuild());
 		}
 	}
 
