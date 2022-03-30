@@ -38,7 +38,7 @@ public class InteractionListener extends ListenerAdapter {
 		if (event.getUser().isBot()) return;
 		String[] id = event.getModalId().split(":");
 		switch (id[0]) {
-			case "self-role" -> new SelfRoleInteractionManager().handleModalSubmit(event, id);
+			case "self-role" -> SelfRoleInteractionManager.handleModalSubmit(event, id);
 			case "report" -> new ReportCommand().handleModalSubmit(event, id);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
@@ -80,7 +80,7 @@ public class InteractionListener extends ListenerAdapter {
 			}
 			case "submission-controls" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleButtons(id, event);
 			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
-			case "self-role" -> new SelfRoleInteractionManager().handleButton(event, id);
+			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
 			case "utils" -> InteractionUtils.handleButton(event, id);
