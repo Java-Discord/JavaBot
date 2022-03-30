@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class SubmissionControlsManager {
-	private final String SUBMISSION_ACCEPTED = "✅";
-	private final String SUBMISSION_DECLINED = "❌";
+	private final String SUBMISSION_ACCEPTED = "\u2705";
+	private final String SUBMISSION_DECLINED = "\u274C";
 	private final String SUBMISSION_PENDING = "\uD83D\uDD52";
 
 	private final Guild guild;
@@ -103,9 +103,10 @@ public class SubmissionControlsManager {
 	 * @param id    The button's id, split by ":".
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
-	public void handleButtons(String[] id, ButtonInteractionEvent event) {
+	public static void handleButtons(String[] id, ButtonInteractionEvent event) {
 		event.deferEdit().queue();
-		if (!hasPermissions(event.getMember())) {
+		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
+		if (!manager.hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
 		}
@@ -114,10 +115,10 @@ public class SubmissionControlsManager {
 			return;
 		}
 		var thread = (ThreadChannel) event.getGuildChannel();
-		switch (id[1]) {
-			case "accept" -> acceptSubmission(event, thread);
-			case "decline" -> declineButtonSubmission(event);
-			case "delete" -> deleteSubmission(event, thread);
+		switch (id[2]) {
+			case "accept" -> manager.acceptSubmission(event, thread);
+			case "decline" -> manager.declineButtonSubmission(event);
+			case "delete" -> manager.deleteSubmission(event, thread);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
@@ -128,9 +129,10 @@ public class SubmissionControlsManager {
 	 * @param id    The SelectionMenu's id.
 	 * @param event The {@link SelectMenuInteractionEvent} that is fired upon use.
 	 */
-	public void handleSelectMenus(String[] id, SelectMenuInteractionEvent event) {
+	public static void handleSelectMenu(String[] id, SelectMenuInteractionEvent event) {
 		event.deferReply().queue();
-		if (!hasPermissions(event.getMember())) {
+		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
+		if (!manager.hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
 		}
@@ -140,7 +142,7 @@ public class SubmissionControlsManager {
 		}
 		var thread = (ThreadChannel) event.getGuildChannel();
 		switch (id[1]) {
-			case "decline" -> declineSelectSubmission(event, thread);
+			case "decline" -> manager.declineSelectSubmission(event, thread);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
@@ -191,10 +193,7 @@ public class SubmissionControlsManager {
 							return;
 						}
 						member.getUser().openPrivateChannel().queue(
-								c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(
-										s -> { },
-										e -> log.info("Could not send submission notification to user {}", event.getUser().getAsTag())),
-								e -> { });
+								c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(s -> {}, e -> {}));
 						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
 						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s declined %s's submission for: `%s`", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
@@ -214,11 +213,11 @@ public class SubmissionControlsManager {
 		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s deleted submission thread `%s`", event.getUser().getAsTag(), thread.getName()).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.removeSubmission(thread.getIdLong()));
-		event.getHook().sendMessage("Submission will be deleted in 10 seconds...").setEphemeral(true);
+		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
 	}
 
 	private void disableControls(String buttonLabel, Message message) {
-		message.editMessageComponents(ActionRow.of(Button.secondary("submission-controls:dummy", buttonLabel).asDisabled())).queue();
+		message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:controls:dummy", buttonLabel).asDisabled())).queue();
 	}
 
 	private MessageEmbed buildSubmissionDeclinedEmbed(User createdBy, String reasons) {
@@ -239,13 +238,13 @@ public class SubmissionControlsManager {
 
 	private List<ActionRow> buildInteractionControls() {
 		return List.of(ActionRow.of(
-				Button.success("submission-controls:accept", "Accept"),
-				Button.danger("submission-controls:decline", "Decline"),
-				Button.secondary("submission-controls:delete", "🗑️")));
+				Button.success("qotw-submission:controls:accept", "Accept"),
+				Button.danger("qotw-submission:controls:decline", "Decline"),
+				Button.secondary("qotw-submission:controls:delete", "🗑️")));
 	}
 
 	private SelectMenu buildDeclineMenu() {
-		return SelectMenu.create("submission-controls-select:decline")
+		return SelectMenu.create("qotw-submission-select:decline")
 				.setPlaceholder("Select a reason for declining this submission.")
 				.setRequiredRange(1, 3)
 				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")

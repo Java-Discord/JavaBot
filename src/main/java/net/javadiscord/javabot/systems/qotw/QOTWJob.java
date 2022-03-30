@@ -41,7 +41,7 @@ public class QOTWJob extends DiscordApiJob {
 					if (questionChannel == null) continue;
 					questionChannel.sendMessage(config.getQOTWRole().getAsMention())
 							.setEmbeds(buildEmbed(question))
-							.setActionRows(ActionRow.of(Button.success("qotw-submission:" + question.getQuestionNumber(), "Submit your Answer")))
+							.setActionRows(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
 					repo.markUsed(question);
 				}

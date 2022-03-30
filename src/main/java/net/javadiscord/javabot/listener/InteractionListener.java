@@ -1,13 +1,11 @@
 package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
@@ -54,7 +52,7 @@ public class InteractionListener extends ListenerAdapter {
 		if (event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
 		switch (id[0]) {
-			case "submission-controls-select" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleSelectMenus(id, event);
+			case "qotw-submission-select" -> SubmissionControlsManager.handleSelectMenu(id, event);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
@@ -68,17 +66,8 @@ public class InteractionListener extends ListenerAdapter {
 	public void onButtonInteraction(ButtonInteractionEvent event) {
 		if (event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
-		var config = Bot.config.get(event.getGuild());
 		switch (id[0]) {
-			case "qotw-submission" -> {
-				SubmissionManager manager = new SubmissionManager(config.getQotw());
-				if (!id[1].isEmpty() && id[1].equals("delete")) {
-					manager.handleThreadDeletion(event);
-				} else {
-					manager.handleSubmission(event, Integer.parseInt(id[1])).queue();
-				}
-			}
-			case "submission-controls" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleButtons(id, event);
+			case "qotw-submission" -> SubmissionManager.handleButton(event, id);
 			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
 			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);

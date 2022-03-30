@@ -36,6 +36,21 @@ public class SubmissionManager {
 	private final QOTWConfig config;
 
 	/**
+	 * Handles all Interactions regarding the Submission System.
+	 *
+	 * @param event The {@link ButtonInteractionEvent} that was fired.
+	 * @param id The Buttons id, split by ":".
+	 */
+	public static void handleButton(ButtonInteractionEvent event, String[] id) {
+		SubmissionManager manager = new SubmissionManager(Bot.config.get(event.getGuild()).getQotw());
+		switch (id[1]) {
+			case "controls" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleButtons(id, event);
+			case "submit" -> manager.handleSubmission(event, Integer.parseInt(id[2])).queue();
+			case "delete" -> manager.handleThreadDeletion(event);
+		}
+	}
+
+	/**
 	 * Handles the "Submit your Answer" Button interaction.
 	 *
 	 * @param event          The {@link ButtonInteractionEvent} that is fired upon use.
@@ -45,7 +60,7 @@ public class SubmissionManager {
 	public WebhookMessageAction<?> handleSubmission(ButtonInteractionEvent event, int questionNumber) {
 		event.deferEdit().queue();
 		var member = event.getMember();
-		if (!canCreateSubmissions(member)) {
+		if (!this.canCreateSubmissions(member)) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
 		config.getSubmissionChannel().createThreadChannel(
@@ -78,8 +93,7 @@ public class SubmissionManager {
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
 		log.info("Opened new Submission Thread for User {}", member.getUser().getAsTag());
-		return Responses.success(event.getHook(), "Submission Thread created",
-				"Successfully created a new private Thread for your submission.");
+		return Responses.success(event.getHook(), "Submission Thread created", "Successfully created a new private Thread for your submission.");
 
 	}
 
@@ -89,21 +103,18 @@ public class SubmissionManager {
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
 	public void handleThreadDeletion(ButtonInteractionEvent event) {
-		var thread = (ThreadChannel) event.getGuildChannel();
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new QOTWSubmissionRepository(con);
-			var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
+		ThreadChannel thread = (ThreadChannel) event.getGuildChannel();
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+			var submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
 			if (submissionOptional.isPresent()) {
 				var submission = submissionOptional.get();
 				if (submission.getAuthorId() != event.getMember().getIdLong()) {
 					return;
 				}
-				repo.removeSubmission(thread.getIdLong());
+				dao.removeSubmission(thread.getIdLong());
 				thread.delete().queue();
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		});
 	}
 
 	private boolean canCreateSubmissions(Member member) {
