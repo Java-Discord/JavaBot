@@ -31,6 +31,7 @@ public class SlashCommandConfig {
 		SlashCommandConfig c = new SlashCommandConfig();
 		c.setName(data.getName());
 		c.setDescription(data.getDescription());
+		c.setEnabledByDefault(data.isDefaultEnabled());
 		c.setOptions(data.getOptions().stream().map(SlashOptionConfig::fromData).toArray(SlashOptionConfig[]::new));
 		c.setSubCommands(data.getSubcommands().stream().map(SlashSubCommandConfig::fromData).toArray(SlashSubCommandConfig[]::new));
 		c.setSubCommandGroups(data.getSubcommandGroups().stream().map(SlashSubCommandGroupConfig::fromData).toArray(SlashSubCommandGroupConfig[]::new));
@@ -81,6 +82,7 @@ public class SlashCommandConfig {
 		return "CommandConfig{" +
 				"name='" + name + '\'' +
 				", description='" + description + '\'' +
+				", enabledByDefault=" + enabledByDefault +
 				", options=" + Arrays.toString(options) +
 				", subCommands=" + Arrays.toString(subCommands) +
 				", subCommandGroups=" + Arrays.toString(subCommandGroups) +
