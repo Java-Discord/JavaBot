@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.events;
+package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.ThreadChannel;

@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.javadiscord.javabot.command.InteractionHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.events.*;
+import net.javadiscord.javabot.listener.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.moderation.ServerLock;

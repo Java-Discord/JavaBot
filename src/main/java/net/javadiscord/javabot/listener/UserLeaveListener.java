@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.events;
+package net.javadiscord.javabot.listener;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
