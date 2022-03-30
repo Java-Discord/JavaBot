@@ -10,11 +10,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
-import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
 import net.javadiscord.javabot.systems.staff.self_roles.SelfRoleInteractionManager;
+import net.javadiscord.javabot.util.InteractionUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -83,39 +83,8 @@ public class InteractionListener extends ListenerAdapter {
 			case "self-role" -> new SelfRoleInteractionManager().handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
 			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
-			case "utils" -> this.handleUtils(id, event);
+			case "utils" -> InteractionUtils.handleButton(event, id);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
-		}
-	}
-
-	/**
-	 * Some utility methods for interactions.
-	 *
-	 * @param id    The button's id, split by ":".
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
-	 */
-	private void handleUtils(String[] id, ButtonInteractionEvent event) {
-		event.deferEdit().queue();
-		var service = new ModerationService(event.getInteraction());
-		switch (id[1]) {
-			case "delete" -> event.getHook().deleteOriginal().queue();
-			case "kick" -> service.kick(
-					event.getGuild().getMemberById(id[2]),
-					"None",
-					event.getMember(),
-					event.getMessageChannel(),
-					false);
-			case "ban" -> service.ban(
-					event.getGuild().getMemberById(id[2]),
-					"None",
-					event.getMember(),
-					event.getMessageChannel(),
-					false);
-			case "unban" -> service.unban(
-					Long.parseLong(id[2]),
-					event.getMember(),
-					event.getMessageChannel(),
-					false);
 		}
 	}
 }
