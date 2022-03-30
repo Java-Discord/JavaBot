@@ -16,6 +16,7 @@ public class SlashOptionConfig {
 	private String description;
 	private String type;
 	private boolean required;
+	private boolean autocomplete = false;
 	private SlashOptionChoiceConfig[] choices;
 
 	/**
@@ -30,6 +31,7 @@ public class SlashOptionConfig {
 		c.setDescription(data.getDescription());
 		c.setType(data.getType().name());
 		c.setRequired(data.isRequired());
+		c.setAutocomplete(data.isAutoComplete());
 		c.setChoices(data.getChoices().stream().map(SlashOptionChoiceConfig::fromData).toArray(SlashOptionChoiceConfig[]::new));
 		return c;
 	}
@@ -40,7 +42,7 @@ public class SlashOptionConfig {
 	 * @return The {@link OptionData} object.
 	 */
 	public OptionData toData() {
-		var d = new OptionData(OptionType.valueOf(this.type.toUpperCase()), this.name, this.description, this.required);
+		var d = new OptionData(OptionType.valueOf(this.type.toUpperCase()), this.name, this.description, this.required, this.autocomplete);
 		if (this.choices != null && this.choices.length > 0) {
 			d.addChoices(Arrays.stream(this.choices).map(SlashOptionChoiceConfig::toData).toList());
 		}
@@ -54,6 +56,7 @@ public class SlashOptionConfig {
 				", description='" + description + '\'' +
 				", type='" + type + '\'' +
 				", required=" + required +
+				", autocomplete=" + autocomplete +
 				", choices=" + Arrays.toString(choices) +
 				'}';
 	}
