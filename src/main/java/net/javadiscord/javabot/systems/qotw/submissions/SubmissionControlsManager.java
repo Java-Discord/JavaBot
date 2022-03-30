@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -18,6 +17,7 @@ import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionReposi
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.GuildUtils;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
  * Handles and manages Submission controls.
  */
 @Slf4j
-@RequiredArgsConstructor
 public class SubmissionControlsManager {
 	private final String SUBMISSION_ACCEPTED = "✅";
 	private final String SUBMISSION_DECLINED = "❌";
@@ -36,6 +35,39 @@ public class SubmissionControlsManager {
 	private final Guild guild;
 	private final QOTWConfig config;
 	private final QOTWSubmission submission;
+
+	/**
+	 * The constructor of this class.
+	 *
+	 * @param guild The current {@link Guild}.
+	 * @param submission The {@link QOTWSubmission}.
+	 */
+	public SubmissionControlsManager(Guild guild, QOTWSubmission submission) {
+		this.guild = guild;
+		this.submission = submission;
+		this.config = Bot.config.get(guild).getQotw();
+	}
+
+	/**
+	 * The constructor of this class.
+	 *
+	 * @param guild The current {@link Guild}.
+	 * @param channel The {@link ThreadChannel}, which is used to retrieve the corresponding {@link QOTWSubmission}.
+	 */
+	public SubmissionControlsManager(Guild guild, ThreadChannel channel) {
+		QOTWSubmission submission = null;
+		try (Connection con = Bot.dataSource.getConnection()) {
+			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
+			var submissionOptional = repo.getSubmissionByThreadId(channel.getIdLong());
+			if (submissionOptional.isEmpty()) log.error("Could not retrieve Submission from Thread: " + channel.getId());
+			else submission = submissionOptional.get();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		this.guild = guild;
+		this.submission = submission;
+		this.config = Bot.config.get(guild).getQotw();
+	}
 
 	/**
 	 * Sends an embed in the submission's guild channel that allows QOTW-Review Team members to accept, decline or delete submissions.

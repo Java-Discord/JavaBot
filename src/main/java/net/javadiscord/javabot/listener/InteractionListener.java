@@ -40,18 +40,8 @@ public class InteractionListener extends ListenerAdapter {
 	public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
 		if(event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
-		var config = Bot.config.get(event.getGuild());
-		switch(id[0]) {
-			case "submission-controls-select" -> {
-				var thread = (ThreadChannel) event.getGuildChannel();
-				try(var con = Bot.dataSource.getConnection()) {
-					var repo = new QOTWSubmissionRepository(con);
-					var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
-					submissionOptional.ifPresent(qotwSubmission -> new SubmissionControlsManager(event.getGuild(), config.getQotw(), qotwSubmission).handleSelectMenus(id, event));
-				} catch(SQLException e) {
-					e.printStackTrace();
-				}
-			}
+		switch (id[0]) {
+			case "submission-controls-select" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleSelectMenus(id, event);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
@@ -61,22 +51,13 @@ public class InteractionListener extends ListenerAdapter {
 		if(event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
 		var config = Bot.config.get(event.getGuild());
-		switch(id[0]) {
+		switch (id[0]) {
 			case "qotw-submission" -> {
 				var manager = new SubmissionManager(config.getQotw());
-				if(!id[1].isEmpty() && id[1].equals("delete")) manager.handleThreadDeletion(event);
+				if (!id[1].isEmpty() && id[1].equals("delete")) manager.handleThreadDeletion(event);
 				else manager.handleSubmission(event, Integer.parseInt(id[1])).queue();
 			}
-			case "submission-controls" -> {
-				var thread = (ThreadChannel) event.getGuildChannel();
-				try(var con = Bot.dataSource.getConnection()) {
-					var repo = new QOTWSubmissionRepository(con);
-					var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
-					submissionOptional.ifPresent(qotwSubmission -> new SubmissionControlsManager(event.getGuild(), config.getQotw(), qotwSubmission).handleButtons(id, event));
-				} catch(SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			case "submission-controls" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleButtons(id, event);
 			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
 			case "self-role" -> new SelfRoleInteractionManager().handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
@@ -96,7 +77,7 @@ public class InteractionListener extends ListenerAdapter {
 	private void handleUtils(String[] id, ButtonInteractionEvent event) {
 		event.deferEdit().queue();
 		var service = new ModerationService(event.getInteraction());
-		switch(id[1]) {
+		switch (id[1]) {
 			case "delete" -> event.getHook().deleteOriginal().queue();
 			case "kick" -> service.kick(
 					event.getGuild().getMemberById(id[2]),

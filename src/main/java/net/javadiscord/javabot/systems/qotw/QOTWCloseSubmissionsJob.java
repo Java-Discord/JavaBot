@@ -37,7 +37,7 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 					var repo = new QOTWSubmissionRepository(con);
 					var optionalSubmission = repo.getSubmissionByThreadId(thread.getIdLong());
 					if (optionalSubmission.isEmpty()) continue;
-					new SubmissionControlsManager(thread.getGuild(), qotwConfig, optionalSubmission.get()).sendSubmissionControls();
+					new SubmissionControlsManager(thread.getGuild(), optionalSubmission.get()).sendSubmissionControls();
 				} catch (SQLException e) {
 					throw new JobExecutionException(e);
 				}
