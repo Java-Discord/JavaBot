@@ -2,13 +2,10 @@ package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.data.h2db.commands.MigrateSubcommand;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
