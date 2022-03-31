@@ -21,6 +21,7 @@ CREATE TABLE jam (
 	started_by BIGINT NOT NULL,
 	created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 	starts_at DATE NOT NULL COMMENT 'Official start date of the jam. Usually the start of the month.',
+	ends_at DATE COMMENT 'Official end date of the jam.',
 	completed BOOLEAN NOT NULL DEFAULT FALSE,
 	current_phase VARCHAR(64) NULL DEFAULT 'Theme Planning' REFERENCES jam_phase(name)
 		ON UPDATE CASCADE ON DELETE SET NULL

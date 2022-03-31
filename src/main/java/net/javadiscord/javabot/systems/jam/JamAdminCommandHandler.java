@@ -1,6 +1,9 @@
 package net.javadiscord.javabot.systems.jam;
 
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
+import net.javadiscord.javabot.command.interfaces.IAutocomplete;
 import net.javadiscord.javabot.systems.jam.subcommands.admin.*;
 
 import java.util.Map;
@@ -8,7 +11,7 @@ import java.util.Map;
 /**
  * Handler class for all jam-admin commands.
  */
-public class JamAdminCommandHandler extends DelegatingCommandHandler {
+public class JamAdminCommandHandler extends DelegatingCommandHandler implements IAutocomplete {
 	/**
 	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
 	 */
@@ -24,5 +27,14 @@ public class JamAdminCommandHandler extends DelegatingCommandHandler {
 				"remove-submissions", new RemoveSubmissionsSubcommand(),
 				"cancel", new CancelSubcommand()
 		));
+	}
+
+	@Override
+	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
+		return switch (event.getSubcommandName()) {
+			case "remove-submissions" -> ListSubmissionsSubcommand.replySubmissions(event);
+			case "remove-theme" -> ListThemesSubcommand.replyThemes(event);
+			default -> event.replyChoices();
+		};
 	}
 }
