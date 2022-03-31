@@ -18,7 +18,7 @@ import java.time.Instant;
 /**
  * Subcommand that allows to delete Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
  */
-public class DeleteSubCommand implements ISlashCommand {
+public class DeleteSubcommand implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var nameOption = event.getOption("name");

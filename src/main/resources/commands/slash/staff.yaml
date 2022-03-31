@@ -421,6 +421,7 @@
         - name: name
           description: Name of the custom slash command
           required: true
+          autocomplete: true
           type: STRING
         - name: text
           description: Content of the custom slash command
@@ -442,6 +443,7 @@
         - name: name
           description: Name of the custom slash command
           required: true
+          autocomplete: true
           type: STRING
   handler: net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler
 

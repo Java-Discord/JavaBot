@@ -16,9 +16,9 @@ import java.sql.SQLException;
 import java.time.Instant;
 
 /**
- * Subcommand that allows to edit Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
+ * Subcommand that allows to create Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
  */
-public class EditSubCommand implements ISlashCommand {
+public class CreateSubcommand implements ISlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var nameOption = event.getOption("name");
@@ -43,14 +43,13 @@ public class EditSubCommand implements ISlashCommand {
 		command.setReply(reply);
 		command.setEmbed(embed);
 
+		if(Bot.interactionHandler.doesSlashCommandExist(name, event.getGuild())){
+			return Responses.error(event, "This command already exists.");
+		}
+
 		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new CustomCommandRepository(con);
-			var c = repo.findByName(event.getGuild().getIdLong(), name);
-			if (c.isEmpty()) {
-				return Responses.error(event, String.format("A Custom Command called `/%s` does not exist.", name));
-			}
-			var newCommand = repo.edit(c.get(), command);
-			var e = buildEditCommandEmbed(event.getMember(), newCommand);
+			var c = new CustomCommandRepository(con).insert(command);
+			var e = buildCreateCommandEmbed(event.getMember(), c);
 			Bot.interactionHandler.registerCommands(event.getGuild());
 			return event.replyEmbeds(e);
 		} catch (SQLException e) {
@@ -59,10 +58,10 @@ public class EditSubCommand implements ISlashCommand {
 		}
 	}
 
-	private MessageEmbed buildEditCommandEmbed(Member createdBy, CustomCommand command) {
+	private MessageEmbed buildCreateCommandEmbed(Member createdBy, CustomCommand command) {
 		return new EmbedBuilder()
 				.setAuthor(createdBy.getUser().getAsTag(), null, createdBy.getEffectiveAvatarUrl())
-				.setTitle("Custom Command edited")
+				.setTitle("Custom Command created")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`/%s`", command.getName()), true)
 				.addField("Created by", createdBy.getAsMention(), true)

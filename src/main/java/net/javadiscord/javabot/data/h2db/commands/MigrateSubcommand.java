@@ -81,7 +81,7 @@ public class MigrateSubcommand implements ISlashCommand {
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return The {@link AutoCompleteCallbackAction}.
 	 */
-	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
+	public static AutoCompleteCallbackAction replyMigrations(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();

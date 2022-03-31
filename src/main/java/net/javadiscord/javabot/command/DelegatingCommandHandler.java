@@ -4,8 +4,13 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.command.data.slash_commands.SlashCommandConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashOptionConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandGroupConfig;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

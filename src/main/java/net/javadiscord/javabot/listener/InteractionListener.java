@@ -23,15 +23,6 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class InteractionListener extends ListenerAdapter {
 
-	@Override
-	public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-		AutoCompleteCallbackAction action = switch (event.getCommandPath()) {
-			case "db-admin/migrate" -> new MigrateSubcommand().handleAutocomplete(event);
-			default -> event.replyChoices();
-		};
-		action.queue();
-	}
-
 	/**
 	 * Handles the {@link ModalInteractionEvent} and executes the corresponding interaction, based on the id.
 	 *

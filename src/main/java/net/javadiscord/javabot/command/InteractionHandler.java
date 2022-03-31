@@ -2,6 +2,7 @@ package net.javadiscord.javabot.command;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -18,6 +19,10 @@ import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.data.CommandDataLoader;
 import net.javadiscord.javabot.command.data.context_commands.ContextCommandConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashCommandConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashOptionConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandGroupConfig;
+import net.javadiscord.javabot.command.interfaces.IAutocomplete;
 import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.ISlashCommand;
 import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
@@ -53,6 +58,7 @@ public class InteractionHandler extends ListenerAdapter {
 
 	private final Map<String, IUserContextCommand> userContextCommandIndex;
 	private final Map<String, IMessageContextCommand> messageContextCommandIndex;
+	private final Map<ISlashCommand, IAutocomplete> autocompleteIndex;
 
 	private SlashCommandConfig[] slashCommandConfigs;
 	private ContextCommandConfig[] contextCommandConfigs;
@@ -64,6 +70,7 @@ public class InteractionHandler extends ListenerAdapter {
 		this.slashCommandIndex = new HashMap<>();
 		this.userContextCommandIndex = new HashMap<>();
 		this.messageContextCommandIndex = new HashMap<>();
+		this.autocompleteIndex = new HashMap<>();
 	}
 
 	@Override
@@ -79,6 +86,15 @@ public class InteractionHandler extends ListenerAdapter {
 		} catch (ResponseException e) {
 			this.handleResponseException(e, event);
 		}
+	}
+
+	@Override
+	public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
+		if (event.getGuild() == null) return;
+		ISlashCommand command = this.slashCommandIndex.get(event.getName());
+		if (command == null) return;
+		IAutocomplete autocomplete = this.autocompleteIndex.get(command);
+		autocomplete.handleAutocomplete(event).queue();
 	}
 
 	/**
@@ -189,7 +205,11 @@ public class InteractionHandler extends ListenerAdapter {
 			if (config.getHandler() != null && !config.getHandler().isEmpty()) {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
-					this.slashCommandIndex.put(config.getName(), (ISlashCommand) handlerClass.getConstructor().newInstance());
+					Object instance = handlerClass.getConstructor().newInstance();
+					this.slashCommandIndex.put(config.getName(), (ISlashCommand) instance);
+					if (this.hasAutocomplete(config)) {
+						this.autocompleteIndex.put((ISlashCommand) instance, (IAutocomplete) instance);
+					}
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
 				}
@@ -332,5 +352,19 @@ public class InteractionHandler extends ListenerAdapter {
 			var repo = new CustomCommandRepository(con);
 			return repo.findByName(guild.getIdLong(), name);
 		}
+	}
+
+	private boolean hasAutocomplete(SlashCommandConfig config) {
+		return config.getOptions() != null && Arrays.stream(config.getOptions()).anyMatch(SlashOptionConfig::isAutocomplete) ||
+				config.getSubCommandGroups() != null && Arrays.stream(config.getSubCommandGroups()).anyMatch(this::hasAutocomplete) ||
+				config.getSubCommands() != null && Arrays.stream(config.getSubCommands()).anyMatch(this::hasAutocomplete);
+	}
+
+	private boolean hasAutocomplete(SlashSubCommandGroupConfig config) {
+		return config.getSubCommands() != null && Arrays.stream(config.getSubCommands()).anyMatch(this::hasAutocomplete);
+	}
+
+	private boolean hasAutocomplete(SlashSubCommandConfig config) {
+		return config.getOptions() != null && Arrays.stream(config.getOptions()).anyMatch(SlashOptionConfig::isAutocomplete);
 	}
 }
