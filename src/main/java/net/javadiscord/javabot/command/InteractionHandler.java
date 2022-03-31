@@ -54,6 +54,9 @@ public class InteractionHandler extends ListenerAdapter {
 	private final Map<String, IUserContextCommand> userContextCommandIndex;
 	private final Map<String, IMessageContextCommand> messageContextCommandIndex;
 
+	private SlashCommandConfig[] slashCommandConfigs;
+	private ContextCommandConfig[] contextCommandConfigs;
+	
 	/**
 	 * Constructor of this class.
 	 */
@@ -66,16 +69,15 @@ public class InteractionHandler extends ListenerAdapter {
 	@Override
 	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) return;
-		var command = this.slashCommandIndex.get(event.getName());
-
+		ISlashCommand command = this.slashCommandIndex.get(event.getName());
 		try {
 			if (command != null) {
 				command.handleSlashCommandInteraction(event).queue();
 			} else {
-				handleCustomCommand(event).queue();
+				this.handleCustomCommand(event).queue();
 			}
 		} catch (ResponseException e) {
-			handleResponseException(e, event);
+			this.handleResponseException(e, event);
 		}
 	}
 
@@ -87,7 +89,7 @@ public class InteractionHandler extends ListenerAdapter {
 	 */
 	public boolean doesSlashCommandExist(String name, Guild guild){
 		try {
-			return this.slashCommandIndex.containsKey(name) || getCustomCommand(name, guild).isPresent();
+			return this.slashCommandIndex.containsKey(name) || this.getCustomCommand(name, guild).isPresent();
 		} catch(SQLException e) {
 			return false;
 		}
@@ -101,7 +103,7 @@ public class InteractionHandler extends ListenerAdapter {
 			try {
 				command.handleUserContextCommandInteraction(event).queue();
 			} catch (ResponseException e) {
-				handleResponseException(e, event.getInteraction());
+				this.handleResponseException(e, event.getInteraction());
 			}
 		}
 	}
@@ -114,7 +116,7 @@ public class InteractionHandler extends ListenerAdapter {
 			try {
 				command.handleMessageContextCommandInteraction(event).queue();
 			} catch (ResponseException e) {
-				handleResponseException(e, event.getInteraction());
+				this.handleResponseException(e, event.getInteraction());
 			}
 		}
 	}
@@ -150,37 +152,36 @@ public class InteractionHandler extends ListenerAdapter {
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerCommands(Guild guild) {
-		SlashCommandConfig[] slashCommandConfigs = CommandDataLoader.loadSlashCommandConfig(
+		this.slashCommandConfigs = CommandDataLoader.loadSlashCommandConfig(
 				"commands/slash/help.yaml",
 				"commands/slash/jam.yaml",
 				"commands/slash/qotw.yaml",
 				"commands/slash/staff.yaml",
 				"commands/slash/user.yaml"
 		);
-		var contextConfigs = CommandDataLoader.loadContextCommandConfig(
+		this.contextCommandConfigs = CommandDataLoader.loadContextCommandConfig(
 				"commands/context/message.yaml",
 				"commands/context/user.yaml"
 		);
-		var commandUpdateAction = this.updateCommands(slashCommandConfigs, contextConfigs, guild);
-		var customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
-
+		CommandListUpdateAction commandUpdateAction = this.updateCommands(guild);
+		Set<String> customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
 		commandUpdateAction.queue(commands -> {
 			// Add privileges to the non-custom commands, after the commands have been registered.
 			commands.removeIf(cmd -> customCommandNames.contains(cmd.getName()));
 			commands.removeIf(cmd -> cmd.getType() != Command.Type.SLASH);
-			this.addCommandPrivileges(commands, slashCommandConfigs, guild);
+			this.addCommandPrivileges(commands, guild);
 		});
 	}
 	
-	private CommandListUpdateAction updateCommands(SlashCommandConfig[] slashCommandConfigs, ContextCommandConfig[] contextConfigs, Guild guild) {
+	private CommandListUpdateAction updateCommands(Guild guild) {
 		log.info("{}[{}]{} Registering commands", Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
-		if (slashCommandConfigs.length > Commands.MAX_SLASH_COMMANDS) {
+		if (this.slashCommandConfigs.length > Commands.MAX_SLASH_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s commands.", Commands.MAX_SLASH_COMMANDS));
 		}
-		if (Arrays.stream(contextConfigs).filter(p -> p.getEnumType() == Command.Type.USER).count() > Commands.MAX_USER_COMMANDS) {
+		if (Arrays.stream(this.contextCommandConfigs).filter(p -> p.getEnumType() == Command.Type.USER).count() > Commands.MAX_USER_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s User Context Commands", Commands.MAX_USER_COMMANDS));
 		}
-		if (Arrays.stream(contextConfigs).filter(p -> p.getEnumType() == Command.Type.MESSAGE).count() > Commands.MAX_MESSAGE_COMMANDS) {
+		if (Arrays.stream(this.contextCommandConfigs).filter(p -> p.getEnumType() == Command.Type.MESSAGE).count() > Commands.MAX_MESSAGE_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s Message Context Commands", Commands.MAX_MESSAGE_COMMANDS));
 		}
 		CommandListUpdateAction commandUpdateAction = guild.updateCommands();
@@ -197,7 +198,7 @@ public class InteractionHandler extends ListenerAdapter {
 			}
 			commandUpdateAction.addCommands(config.toData());
 		}
-		for (var config : contextConfigs) {
+		for (var config : this.contextCommandConfigs) {
 			if (config.getHandler() != null && !config.getHandler().isEmpty()) {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
@@ -248,7 +249,7 @@ public class InteractionHandler extends ListenerAdapter {
 		}
 	}
 
-	private void addCommandPrivileges(List<Command> commands, SlashCommandConfig[] slashCommandConfigs, Guild guild) {
+	private void addCommandPrivileges(List<Command> commands, Guild guild) {
 		log.info("{}[{}]{} Adding command privileges",
 				Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
 

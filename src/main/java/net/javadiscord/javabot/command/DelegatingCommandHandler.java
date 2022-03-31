@@ -95,18 +95,18 @@ public class DelegatingCommandHandler implements ISlashCommand {
 	@Override
 	public InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		// First we check if the event has specified a subcommand group, and if we have a group handler for it.
-		if(event.getSubcommandGroup() != null) {
+		if (event.getSubcommandGroup() != null) {
 			ISlashCommand groupHandler = this.getSubcommandGroupHandlers().get(event.getSubcommandGroup());
-			if(groupHandler != null) {
+			if (groupHandler != null) {
 				return groupHandler.handleSlashCommandInteraction(event);
 			}
 		}
 		// If the event doesn't have a subcommand group, or no handler was found for the group, we just move on to the subcommand.
-		if(event.getSubcommandName() == null) {
+		if (event.getSubcommandName() == null) {
 			return this.handleNonSubcommand(event);
 		} else {
 			ISlashCommand handler = this.getSubcommandHandlers().get(event.getSubcommandName());
-			if(handler != null) {
+			if (handler != null) {
 				return handler.handleSlashCommandInteraction(event);
 			} else {
 				return Responses.warning(event, "Unknown Subcommand", "The subcommand you entered could not be found.");

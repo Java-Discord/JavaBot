@@ -669,6 +669,7 @@
         - name: name
           description: The name of the migration to run.
           required: true
+          autocomplete: true
           type: STRING
   handler: net.javadiscord.javabot.data.h2db.commands.DbAdminCommandHandler
 

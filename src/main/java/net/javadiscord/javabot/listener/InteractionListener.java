@@ -6,7 +6,9 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.data.h2db.commands.MigrateSubcommand;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
@@ -23,7 +25,11 @@ public class InteractionListener extends ListenerAdapter {
 
 	@Override
 	public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-		// TODO: add autocomplete interactions (next pr)
+		AutoCompleteCallbackAction action = switch (event.getCommandPath()) {
+			case "db-admin/migrate" -> new MigrateSubcommand().handleAutocomplete(event);
+			default -> event.replyChoices();
+		};
+		action.queue();
 	}
 
 	/**
