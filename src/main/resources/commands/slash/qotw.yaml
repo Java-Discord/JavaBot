@@ -39,6 +39,7 @@
             - name: id
               description: The id of the question to remove.
               required: true
+              autocomplete: true
               type: INTEGER
 
       # /qotw account
