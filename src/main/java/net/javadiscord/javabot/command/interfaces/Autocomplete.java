@@ -4,8 +4,15 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 
 /**
- * Implement this interface to declare that your class handles Autocomplete functionality.
+ * Interface that handles Discord's Autocomplete functionality.
+ * <p>
+ * To enable this handler for a particular slash command option, navigate to that
+ * option's entry in the corresponding YAML-file, and add the following property:
+ * <pre><code>
+ * autocomplete: true
+ *     </code></pre>
+ * </p>
  */
-public interface IAutocomplete {
+public interface Autocomplete {
 	AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event);
 }

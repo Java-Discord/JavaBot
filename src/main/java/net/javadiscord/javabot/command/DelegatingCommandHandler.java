@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,23 +16,23 @@ import java.util.Map;
  * that this parent handler can do the logic of finding the right subcommand to
  * invoke depending on the event received.
  */
-public class DelegatingCommandHandler implements ISlashCommand {
-	private final Map<String, ISlashCommand> subcommandHandlers;
-	private final Map<String, ISlashCommand> subcommandGroupHandlers;
+public class DelegatingCommandHandler implements SlashCommand {
+	private final Map<String, SlashCommand> subcommandHandlers;
+	private final Map<String, SlashCommand> subcommandGroupHandlers;
 
 	/**
 	 * Constructs the handler with an already-initialized map of subcommands.
 	 *
 	 * @param subcommandHandlers The map of subcommands to use.
 	 */
-	public DelegatingCommandHandler(Map<String, ISlashCommand> subcommandHandlers) {
+	public DelegatingCommandHandler(Map<String, SlashCommand> subcommandHandlers) {
 		this.subcommandHandlers = subcommandHandlers;
 		this.subcommandGroupHandlers = new HashMap<>();
 	}
 
 	/**
 	 * Constructs the handler with an empty map, which subcommands can be added
-	 * to via {@link DelegatingCommandHandler#addSubcommand(String, ISlashCommand)}.
+	 * to via {@link DelegatingCommandHandler#addSubcommand(String, SlashCommand)}.
 	 */
 	public DelegatingCommandHandler() {
 		this.subcommandHandlers = new HashMap<>();
@@ -45,7 +45,7 @@ public class DelegatingCommandHandler implements ISlashCommand {
 	 *
 	 * @return An unmodifiable map containing all registered subcommands.
 	 */
-	public Map<String, ISlashCommand> getSubcommandHandlers() {
+	public Map<String, SlashCommand> getSubcommandHandlers() {
 		return Collections.unmodifiableMap(this.subcommandHandlers);
 	}
 
@@ -55,7 +55,7 @@ public class DelegatingCommandHandler implements ISlashCommand {
 	 *
 	 * @return An unmodifiable map containing all registered group handlers.
 	 */
-	public Map<String, ISlashCommand> getSubcommandGroupHandlers() {
+	public Map<String, SlashCommand> getSubcommandGroupHandlers() {
 		return Collections.unmodifiableMap(this.subcommandGroupHandlers);
 	}
 
@@ -68,7 +68,7 @@ public class DelegatingCommandHandler implements ISlashCommand {
 	 * @throws UnsupportedOperationException If this handler was initialized
 	 *                                       with an unmodifiable map of subcommand handlers.
 	 */
-	protected void addSubcommand(String name, ISlashCommand handler) {
+	protected void addSubcommand(String name, SlashCommand handler) {
 		this.subcommandHandlers.put(name, handler);
 	}
 
@@ -81,7 +81,7 @@ public class DelegatingCommandHandler implements ISlashCommand {
 	 * @throws UnsupportedOperationException If this handler was initialized
 	 *                                       with an unmodifiable map of subcommand group handlers.
 	 */
-	protected void addSubcommandGroup(String name, ISlashCommand handler) {
+	protected void addSubcommandGroup(String name, SlashCommand handler) {
 		this.subcommandGroupHandlers.put(name, handler);
 	}
 
@@ -96,7 +96,7 @@ public class DelegatingCommandHandler implements ISlashCommand {
 	public InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		// First we check if the event has specified a subcommand group, and if we have a group handler for it.
 		if (event.getSubcommandGroup() != null) {
-			ISlashCommand groupHandler = this.getSubcommandGroupHandlers().get(event.getSubcommandGroup());
+			SlashCommand groupHandler = this.getSubcommandGroupHandlers().get(event.getSubcommandGroup());
 			if (groupHandler != null) {
 				return groupHandler.handleSlashCommandInteraction(event);
 			}
@@ -105,7 +105,7 @@ public class DelegatingCommandHandler implements ISlashCommand {
 		if (event.getSubcommandName() == null) {
 			return this.handleNonSubcommand(event);
 		} else {
-			ISlashCommand handler = this.getSubcommandHandlers().get(event.getSubcommandName());
+			SlashCommand handler = this.getSubcommandHandlers().get(event.getSubcommandName());
 			if (handler != null) {
 				return handler.handleSlashCommandInteraction(event);
 			} else {

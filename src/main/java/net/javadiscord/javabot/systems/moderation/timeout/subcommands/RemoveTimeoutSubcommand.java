@@ -4,13 +4,13 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 /**
  * Subcommand that allows staff-members to manually remove a timeout.
  */
-public class RemoveTimeoutSubcommand implements ISlashCommand {
+public class RemoveTimeoutSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");

@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.command.interfaces.IAutocomplete;
+import net.javadiscord.javabot.command.interfaces.Autocomplete;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CreateSubcommand;
@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * Handler class for the "/customcommand"-slash commands.
  */
-public class CustomCommandHandler extends DelegatingCommandHandler implements IAutocomplete {
+public class CustomCommandHandler extends DelegatingCommandHandler implements Autocomplete {
 	/**
 	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
 	 */

@@ -3,7 +3,7 @@ package net.javadiscord.javabot.systems.qotw.subcommands;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.command.interfaces.IAutocomplete;
+import net.javadiscord.javabot.command.interfaces.Autocomplete;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.ClearSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.SetSubCommand;
@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Handler class for all QOTW Commands.
  */
-public class QOTWCommandHandler extends DelegatingCommandHandler implements IAutocomplete {
+public class QOTWCommandHandler extends DelegatingCommandHandler implements Autocomplete {
 	/**
 	 * Adds all subcommands and subcommand groups
 	 * {@link DelegatingCommandHandler#addSubcommand}

@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 // TODO: Refactor embed editing interface completely.
 
@@ -15,7 +15,7 @@ import net.javadiscord.javabot.command.interfaces.ISlashCommand;
  * Command that allows staff-members to edit embed messages.
  */
 @Deprecated(forRemoval = true)
-public class EditEmbedCommand implements ISlashCommand {
+public class EditEmbedCommand implements SlashCommand {
 
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {

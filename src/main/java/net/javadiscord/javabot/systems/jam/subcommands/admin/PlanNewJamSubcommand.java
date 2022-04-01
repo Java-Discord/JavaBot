@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
@@ -21,7 +21,7 @@ import java.util.Objects;
  * This subcommand allows users to plan a new Jam with some basic starter
  * information.
  */
-public class PlanNewJamSubcommand implements ISlashCommand {
+public class PlanNewJamSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		OptionMapping startOption = event.getOption("start-date");

@@ -22,10 +22,10 @@ import net.javadiscord.javabot.command.data.slash_commands.SlashCommandConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashOptionConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandGroupConfig;
-import net.javadiscord.javabot.command.interfaces.IAutocomplete;
-import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.interfaces.Autocomplete;
+import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
 import net.javadiscord.javabot.util.GuildUtils;
@@ -41,7 +41,7 @@ import java.util.*;
 /**
  * This listener is responsible for handling slash commands sent by users in
  * guilds where the bot is active, and responding to them by calling the
- * appropriate {@link ISlashCommand}.
+ * appropriate {@link SlashCommand}.
  * <p>
  * The list of valid commands, and their associated handlers, are defined in
  * their corresponding YAML-file under the resources/commands directory.
@@ -54,11 +54,11 @@ public class InteractionHandler extends ListenerAdapter {
 	 * Maps every command name and alias to an instance of the command, for
 	 * constant-time lookup.
 	 */
-	private final Map<String, ISlashCommand> slashCommandIndex;
+	private final Map<String, SlashCommand> slashCommandIndex;
 
-	private final Map<String, IUserContextCommand> userContextCommandIndex;
-	private final Map<String, IMessageContextCommand> messageContextCommandIndex;
-	private final Map<ISlashCommand, IAutocomplete> autocompleteIndex;
+	private final Map<String, UserContextCommand> userContextCommandIndex;
+	private final Map<String, MessageContextCommand> messageContextCommandIndex;
+	private final Map<SlashCommand, Autocomplete> autocompleteIndex;
 
 	private SlashCommandConfig[] slashCommandConfigs;
 	private ContextCommandConfig[] contextCommandConfigs;
@@ -76,7 +76,7 @@ public class InteractionHandler extends ListenerAdapter {
 	@Override
 	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) return;
-		ISlashCommand command = this.slashCommandIndex.get(event.getName());
+		SlashCommand command = this.slashCommandIndex.get(event.getName());
 		try {
 			if (command != null) {
 				command.handleSlashCommandInteraction(event).queue();
@@ -91,9 +91,9 @@ public class InteractionHandler extends ListenerAdapter {
 	@Override
 	public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
 		if (event.getGuild() == null) return;
-		ISlashCommand command = this.slashCommandIndex.get(event.getName());
+		SlashCommand command = this.slashCommandIndex.get(event.getName());
 		if (command == null) return;
-		IAutocomplete autocomplete = this.autocompleteIndex.get(command);
+		Autocomplete autocomplete = this.autocompleteIndex.get(command);
 		autocomplete.handleAutocomplete(event).queue();
 	}
 
@@ -206,9 +206,9 @@ public class InteractionHandler extends ListenerAdapter {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
 					Object instance = handlerClass.getConstructor().newInstance();
-					this.slashCommandIndex.put(config.getName(), (ISlashCommand) instance);
+					this.slashCommandIndex.put(config.getName(), (SlashCommand) instance);
 					if (this.hasAutocomplete(config)) {
-						this.autocompleteIndex.put((ISlashCommand) instance, (IAutocomplete) instance);
+						this.autocompleteIndex.put((SlashCommand) instance, (Autocomplete) instance);
 					}
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
@@ -223,9 +223,9 @@ public class InteractionHandler extends ListenerAdapter {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
 					if (config.getEnumType() == Command.Type.USER) {
-						this.userContextCommandIndex.put(config.getName(), (IUserContextCommand) handlerClass.getConstructor().newInstance());
+						this.userContextCommandIndex.put(config.getName(), (UserContextCommand) handlerClass.getConstructor().newInstance());
 					} else if (config.getEnumType() == Command.Type.MESSAGE) {
-						this.messageContextCommandIndex.put(config.getName(), (IMessageContextCommand) handlerClass.getConstructor().newInstance());
+						this.messageContextCommandIndex.put(config.getName(), (MessageContextCommand) handlerClass.getConstructor().newInstance());
 					} else {
 						log.warn("Unknown Context Command Type.");
 					}

@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallback
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.Objects;
  * character, and then proceed to execute each statement.
  * </p>
  */
-public class MigrateSubcommand implements ISlashCommand {
+public class MigrateSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		String migrationName = Objects.requireNonNull(event.getOption("name")).getAsString();

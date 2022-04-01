@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.commands.LeaderboardCommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.util.GuildUtils;
@@ -18,7 +18,7 @@ import java.time.Instant;
 /**
  * Subcommand that allows staff-members to increment the QOTW-Account of any user.
  */
-public class IncrementSubcommand implements ISlashCommand {
+public class IncrementSubcommand implements SlashCommand {
 
 	/**
 	 * Increments the QOTW-Points of the given member by 1.

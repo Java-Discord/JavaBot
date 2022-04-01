@@ -20,8 +20,8 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
+import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
@@ -33,7 +33,7 @@ import java.time.Instant;
  * Command that allows members to report other members.
  */
 @Slf4j
-public class ReportCommand extends ModerateUserCommand implements IUserContextCommand, IMessageContextCommand {
+public class ReportCommand extends ModerateUserCommand implements UserContextCommand, MessageContextCommand {
 
 	private static final String REASON_OPTION_NAME = "reason";
 

@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.GuildUtils;
 import net.javadiscord.javabot.util.MessageActionUtils;
@@ -20,7 +20,7 @@ import java.time.Instant;
  * Subcommand that disables all Elements on an ActionRow.
  */
 @Slf4j
-public class DisableSelfRoleSubcommand implements ISlashCommand {
+public class DisableSelfRoleSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var messageIdOption = event.getOption("message-id");

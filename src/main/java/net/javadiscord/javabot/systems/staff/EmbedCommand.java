@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.awt.*;
 import java.util.function.UnaryOperator;
@@ -19,7 +19,7 @@ import java.util.function.UnaryOperator;
  * Command that allows staff-members to create embed messages.
  */
 @Deprecated(forRemoval = true)
-public class EmbedCommand implements ISlashCommand {
+public class EmbedCommand implements SlashCommand {
 
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {

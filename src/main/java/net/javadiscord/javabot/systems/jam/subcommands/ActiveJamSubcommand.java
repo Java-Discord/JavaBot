@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
@@ -20,7 +20,7 @@ import java.sql.SQLException;
  * handle opening a connection to the data source and fetching the active jam,
  * so that clients only need to implement {@link ActiveJamSubcommand#handleJamCommand(SlashCommandInteractionEvent, Jam, Connection, JamConfig)}.
  */
-public abstract class ActiveJamSubcommand implements ISlashCommand {
+public abstract class ActiveJamSubcommand implements SlashCommand {
 	private static final Logger log = LoggerFactory.getLogger(ActiveJamSubcommand.class);
 
 	@Override
