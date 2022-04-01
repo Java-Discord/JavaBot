@@ -3,12 +3,12 @@ package net.javadiscord.javabot.data.h2db.commands;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.command.interfaces.Autocomplete;
+import net.javadiscord.javabot.command.interfaces.Autocompletable;
 
 /**
  * Handler class for all Database related commands.
  */
-public class DbAdminCommandHandler extends DelegatingCommandHandler implements Autocomplete {
+public class DbAdminCommandHandler extends DelegatingCommandHandler implements Autocompletable {
 	/**
 	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
 	 */

@@ -22,7 +22,7 @@ import net.javadiscord.javabot.command.data.slash_commands.SlashCommandConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashOptionConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandGroupConfig;
-import net.javadiscord.javabot.command.interfaces.Autocomplete;
+import net.javadiscord.javabot.command.interfaces.Autocompletable;
 import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.command.interfaces.UserContextCommand;
@@ -58,7 +58,7 @@ public class InteractionHandler extends ListenerAdapter {
 
 	private final Map<String, UserContextCommand> userContextCommandIndex;
 	private final Map<String, MessageContextCommand> messageContextCommandIndex;
-	private final Map<SlashCommand, Autocomplete> autocompleteIndex;
+	private final Map<SlashCommand, Autocompletable> autocompleteIndex;
 
 	private SlashCommandConfig[] slashCommandConfigs;
 	private ContextCommandConfig[] contextCommandConfigs;
@@ -93,7 +93,7 @@ public class InteractionHandler extends ListenerAdapter {
 		if (event.getGuild() == null) return;
 		SlashCommand command = this.slashCommandIndex.get(event.getName());
 		if (command == null) return;
-		Autocomplete autocomplete = this.autocompleteIndex.get(command);
+		Autocompletable autocomplete = this.autocompleteIndex.get(command);
 		autocomplete.handleAutocomplete(event).queue();
 	}
 
@@ -208,7 +208,7 @@ public class InteractionHandler extends ListenerAdapter {
 					Object instance = handlerClass.getConstructor().newInstance();
 					this.slashCommandIndex.put(config.getName(), (SlashCommand) instance);
 					if (this.hasAutocomplete(config)) {
-						this.autocompleteIndex.put((SlashCommand) instance, (Autocomplete) instance);
+						this.autocompleteIndex.put((SlashCommand) instance, (Autocompletable) instance);
 					}
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();

@@ -13,6 +13,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallback
  *     </code></pre>
  * </p>
  */
-public interface Autocomplete {
+public interface Autocompletable {
 	AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event);
 }
