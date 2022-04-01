@@ -32,8 +32,8 @@ public class JamAdminCommandHandler extends DelegatingCommandHandler implements 
 	@Override
 	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
 		return switch (event.getSubcommandName()) {
-			case "remove-submissions" -> ListSubmissionsSubcommand.replySubmissions(event);
-			case "remove-theme" -> ListThemesSubcommand.replyThemes(event);
+			case "remove-submissions" -> RemoveSubmissionsSubcommand.replySubmissions(event);
+			case "remove-theme" -> RemoveThemeSubcommand.replyThemes(event);
 			default -> event.replyChoices();
 		};
 	}

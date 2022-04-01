@@ -40,7 +40,7 @@ public class QOTWCommandHandler extends DelegatingCommandHandler implements Auto
 	@Override
 	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
 		return switch (event.getSubcommandName()) {
-			case "remove" -> ListQuestionsSubcommand.replyQuestions(event);
+			case "remove" -> RemoveQuestionSubcommand.replyQuestions(event);
 			default -> event.replyChoices();
 		};
 	}
