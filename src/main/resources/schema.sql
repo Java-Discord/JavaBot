@@ -176,3 +176,9 @@ CREATE TABLE qotw_submissions (
 	  reviewed BOOL NOT NULL DEFAULT FALSE,
 	  accepted BOOL NOT NULL DEFAULT FALSE
 );
+
+CREATE TABLE message_cache (
+    message_id BIGINT PRIMARY KEY,
+    author_id BIGINT NOT NULL,
+    message_content VARCHAR(4000)
+)
