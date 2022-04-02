@@ -598,6 +598,12 @@
   privileges:
     - type: ROLE
       id: moderation.adminRoleId
+  subCommandGroups:
+    - name: message-cache
+      description: Administrative tools for managing the Message Cache.
+      subCommands:
+        - name: info
+          description: Displays some info about the Message Cache.
   subCommands:
     # /db-admin export-schema
     - name: export-schema
@@ -641,6 +647,8 @@
               value: JAM_THEME
             - name: Java Jam Theme Votes
               value: JAM_THEME_VOTE
+            - name: Message Cache
+              value: MESSAGE_CACHE
             - name: Question of the Week Accounts
               value: QOTW_POINTS
             - name: Question of the Week Questions

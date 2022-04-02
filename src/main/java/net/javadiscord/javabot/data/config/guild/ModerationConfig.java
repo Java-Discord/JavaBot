@@ -12,6 +12,7 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ModerationConfig extends GuildConfigItem {
+	private int maxCachedMessages = 1000;
 	private long reportChannelId;
 	private long applicationChannelId;
 	private long logChannelId;
