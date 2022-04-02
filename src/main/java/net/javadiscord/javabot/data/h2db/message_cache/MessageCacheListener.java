@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
@@ -49,7 +50,8 @@ public class MessageCacheListener extends ListenerAdapter {
 			if (optional.isPresent()) {
 				CachedMessage before = optional.get();
 				MessageAction action = GuildUtils.getLogChannel(event.getGuild())
-						.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()));
+						.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
+						.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
 				if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 					action.addFile(this.buildEditedMessageFile(event.getAuthor(), before, event.getMessage()), before.getMessageId() + ".txt");
 				}
@@ -84,7 +86,6 @@ public class MessageCacheListener extends ListenerAdapter {
 	private boolean ignoreMessageCache(Message message) {
 		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
 		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
-				message.getContentRaw().length() <= 0 ||
 				Arrays.asList(config.getExcludedUsers()).contains(message.getAuthor().getIdLong()) ||
 				Arrays.asList(config.getExcludedChannels()).contains(message.getChannel().getIdLong());
 	}
