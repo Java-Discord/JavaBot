@@ -33,10 +33,7 @@ import java.util.Optional;
 public class MessageCacheListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (this.ignoreMessageCache(event.getMessage())) {
-			System.out.println("ignore this one");
-			return;
-		}
+		if (this.ignoreMessageCache(event.getMessage())) return;
 		MessageCacheConfig config = Bot.config.get(event.getGuild()).getMessageCache();
 		if (DbActions.count("SELECT count(*) FROM message_cache") + 1 > config.getMaxCachedMessages()) {
 			DbHelper.doDaoAction(MessageCacheRepository::new, dao -> dao.delete(dao.getLast().getMessageId()));
@@ -46,10 +43,7 @@ public class MessageCacheListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
-		if (this.ignoreMessageCache(event.getMessage())) {
-			System.out.println("ignore this one");
-			return;
-		}
+		if (this.ignoreMessageCache(event.getMessage())) return;
 		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
 			Optional<CachedMessage> optional = dao.getByMessageId(event.getMessageIdLong());
 			if (optional.isPresent()) {
