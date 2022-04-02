@@ -13,7 +13,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 
 /**
- *
+ * Allows staff members to get more detailed information about the message cache.
  */
 public class MessageCacheInfoSubcommand implements ISlashCommand {
 	@Override
