@@ -2,7 +2,6 @@ package net.javadiscord.javabot.data.h2db.message_cache.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Message;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 
 import java.sql.*;
@@ -17,20 +16,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MessageCacheRepository {
 	private final Connection con;
-
-	/**
-	 * Converts a {@link Message} object to a {@link CachedMessage}.
-	 *
-	 * @param message The {@link Message} to convert.
-	 * @return The built {@link CachedMessage}.
-	 */
-	public static CachedMessage toCachedMessage(Message message) {
-		CachedMessage cachedMessage = new CachedMessage();
-		cachedMessage.setMessageId(message.getIdLong());
-		cachedMessage.setAuthorId(message.getAuthor().getIdLong());
-		cachedMessage.setMessageContent(message.getContentRaw().trim());
-		return cachedMessage;
-	}
 
 	/**
 	 * Inserts a new {@link CachedMessage} object.
@@ -52,7 +37,7 @@ public class MessageCacheRepository {
 	}
 
 	/**
-	 * Edit an existing {@link Message} object.
+	 * Edit an existing {@link CachedMessage} object.
 	 *
 	 * @param message The new Message object.
 	 * @return Whether there were rows affected by this process.

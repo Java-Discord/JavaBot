@@ -24,10 +24,10 @@ public class IdCalculatorCommand implements ISlashCommand {
 		}
 		long id = idOption.getAsLong();
 		var config = Bot.config.get(event.getGuild()).getSlashCommand();
-		return event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getUnixTimestampFromSnowflakeId(id), config));
+		return event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id), config));
 	}
 
-	public static long getUnixTimestampFromSnowflakeId(long id) {
+	public static long getTimestampFromId(long id) {
 		return id / 4194304 + 1420070400000L;
 	}
 

@@ -31,6 +31,7 @@ public class GuildConfig {
 	private StatsConfig stats;
 	private StarboardConfig starBoard;
 	private JamConfig jam;
+	private MessageCacheConfig messageCache;
 	private EmoteConfig emote;
 	private ServerLockConfig serverLock;
 
@@ -50,6 +51,7 @@ public class GuildConfig {
 		this.stats = new StatsConfig();
 		this.starBoard = new StarboardConfig();
 		this.jam = new JamConfig();
+		this.messageCache = new MessageCacheConfig();
 		this.emote = new EmoteConfig();
 		this.serverLock = new ServerLockConfig();
 		this.setGuild(guild);
@@ -105,6 +107,8 @@ public class GuildConfig {
 		this.starBoard.setGuildConfig(this);
 		if (this.jam == null) this.jam = new JamConfig();
 		this.jam.setGuildConfig(this);
+		if (this.messageCache == null) this.messageCache = new MessageCacheConfig();
+		this.messageCache.setGuildConfig(this);
 		if (this.emote == null) this.emote = new EmoteConfig();
 		this.emote.setGuildConfig(this);
 		if (this.serverLock == null) this.serverLock = new ServerLockConfig();
