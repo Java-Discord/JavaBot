@@ -11,6 +11,7 @@ import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CreateSubcommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.DeleteSubcommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.EditSubcommand;
+import net.javadiscord.javabot.util.AutocompleteUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -46,9 +47,9 @@ public class CustomCommandHandler extends DelegatingCommandHandler implements Au
 	 * Replies with all available custom commands.
 	 *
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return The {@link AutoCompleteCallbackAction}.
+	 * @return A {@link List} with all Option Choices.
 	 */
-	public static AutoCompleteCallbackAction replyCustomCommands(CommandAutoCompleteInteractionEvent event) {
+	public static List<Command.Choice> replyCustomCommands(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.dataSource.getConnection()) {
 			CustomCommandRepository repo = new CustomCommandRepository(con);
@@ -57,14 +58,15 @@ public class CustomCommandHandler extends DelegatingCommandHandler implements Au
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return event.replyChoices(choices);
+		return choices;
 	}
 
 	@Override
 	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
-		return switch (event.getSubcommandName()) {
+		List<Command.Choice> choices = switch (event.getSubcommandName()) {
 			case "delete", "edit" -> CustomCommandHandler.replyCustomCommands(event);
-			default -> event.replyChoices();
+			default -> List.of();
 		};
+		return event.replyChoices(AutocompleteUtils.filterChoices(event, choices));
 	}
 }

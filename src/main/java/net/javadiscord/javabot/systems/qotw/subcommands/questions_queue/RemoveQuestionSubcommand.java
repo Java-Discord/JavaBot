@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -40,9 +39,9 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand {
 	 * Replies with all Question of the Week Questions.
 	 *
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return The {@link AutoCompleteCallbackAction}.
+	 * @return A {@link List} with all Option Choices.
 	 */
-	public static AutoCompleteCallbackAction replyQuestions(CommandAutoCompleteInteractionEvent event) {
+	public static List<Command.Choice> replyQuestions(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.dataSource.getConnection()) {
 			QuestionQueueRepository repo = new QuestionQueueRepository(con);
@@ -51,6 +50,6 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return event.replyChoices(choices);
+		return choices;
 	}
 }

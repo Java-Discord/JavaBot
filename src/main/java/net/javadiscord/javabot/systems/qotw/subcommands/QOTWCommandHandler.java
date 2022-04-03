@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.subcommands;
 
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
@@ -10,7 +11,9 @@ import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.SetSubComman
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.ListQuestionsSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.RemoveQuestionSubcommand;
+import net.javadiscord.javabot.util.AutocompleteUtils;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,9 +42,10 @@ public class QOTWCommandHandler extends DelegatingCommandHandler implements Auto
 
 	@Override
 	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
-		return switch (event.getSubcommandName()) {
+		List<Command.Choice> choices = switch (event.getSubcommandName()) {
 			case "remove" -> RemoveQuestionSubcommand.replyQuestions(event);
-			default -> event.replyChoices();
+			default -> List.of();
 		};
+		return event.replyChoices(AutocompleteUtils.filterChoices(event, choices));
 	}
 }
