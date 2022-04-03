@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * This subcommand exports the database schema to a file, and uploads that file
  * to the channel in which the command was received.
  */
-public class ExportSchemaSubcommand implements ISlashCommand {
+public class ExportSchemaSubcommand implements SlashCommand {
 	private static final Path SCHEMA_FILE = Path.of("___schema.sql");
 
 	@Override

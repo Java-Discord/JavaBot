@@ -87,6 +87,7 @@
         - name: name
           description: The name of the theme to remove.
           required: true
+          autocomplete: true
           type: STRING
 
     # /jam-admin list-submissions
@@ -109,6 +110,7 @@
         - name: id
           description: The id of the submission to remove.
           required: false
+          autocomplete: true
           type: INTEGER
         - name: user
           description: The user whose submissions to remove.

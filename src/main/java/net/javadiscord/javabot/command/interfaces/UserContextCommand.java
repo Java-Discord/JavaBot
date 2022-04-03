@@ -8,6 +8,6 @@ import net.javadiscord.javabot.command.ResponseException;
 /**
  * Interface that handles Discord's User Context Commands.
  */
-public interface IUserContextCommand {
+public interface UserContextCommand {
 	InteractionCallbackAction<InteractionHook> handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException;
 }

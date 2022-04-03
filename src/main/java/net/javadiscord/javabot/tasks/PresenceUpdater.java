@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Constants;
-import net.javadiscord.javabot.events.StartupListener;
+import net.javadiscord.javabot.listener.StartupListener;
 
 import javax.annotation.Nonnull;
 import java.util.List;

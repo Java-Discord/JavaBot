@@ -35,14 +35,15 @@ public class SelfRoleInteractionManager {
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon clicking a button.
 	 * @param args  The button's id, split by ":".
 	 */
-	public void handleButton(ButtonInteractionEvent event, String[] args) {
+	public static void handleButton(ButtonInteractionEvent event, String[] args) {
 		Role role = event.getGuild().getRoleById(args[2]);
 		if(role == null) return;
 		boolean permanent = Boolean.parseBoolean(args[3]);
+		SelfRoleInteractionManager manager = new SelfRoleInteractionManager();
 		switch(args[1]) {
-			case "default" -> this.handleSelfRole(event, role, permanent);
-			case "staff" -> this.buildStaffApplication(event, role, event.getUser());
-			case "expert" -> this.buildExpertApplication(event, event.getUser());
+			case "default" -> manager.handleSelfRole(event, role, permanent);
+			case "staff" -> manager.buildStaffApplication(event, role, event.getUser());
+			case "expert" -> manager.buildExpertApplication(event, event.getUser());
 		}
 	}
 
@@ -52,12 +53,13 @@ public class SelfRoleInteractionManager {
 	 * @param event The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
 	 * @param args  The modal's id, split by ":".
 	 */
-	public void handleModalSubmit(ModalInteractionEvent event, String[] args) {
+	public static void handleModalSubmit(ModalInteractionEvent event, String[] args) {
 		event.deferReply(true).queue();
 		var config = Bot.config.get(event.getGuild());
+		SelfRoleInteractionManager manager = new SelfRoleInteractionManager();
 		switch(args[1]) {
-			case "staff" -> this.sendStaffSubmission(event, config, args[2], args[3]).queue();
-			case "expert" -> this.sendExpertSubmission(event, config.getModeration(), args[2]).queue();
+			case "staff" -> manager.sendStaffSubmission(event, config, args[2], args[3]).queue();
+			case "expert" -> manager.sendExpertSubmission(event, config.getModeration(), args[2]).queue();
 		}
 	}
 

@@ -21,7 +21,7 @@ Commands are defined in this bot using a `.yaml` configuration file located in `
 
 These commands are then used by `net.javadiscord.javabot.command.InteractionHandler#registerSlashCommands(Guild)` to register the defined commands as Discord slash commands which become available to users in guilds and private messages with the bot.
 
-**Each command MUST define a `handler` property, whose name is the fully-qualified class name of a `ISlashCommand`.** When registering commands, the bot will look for such a class, and attempt to create a new instance of it using a no-args constructor. Therefore, make sure that your handler class has a no-args constructor.
+**Each command MUST define a `handler` property, whose name is the fully-qualified class name of a `SlashCommand`.** When registering commands, the bot will look for such a class, and attempt to create a new instance of it using a no-args constructor. Therefore, make sure that your handler class has a no-args constructor.
 
 ### Privileges
 To specify that a command should only be allowed to be executed by certain people, you can specify a list of privileges. For example:
@@ -38,7 +38,38 @@ To specify that a command should only be allowed to be executed by certain peopl
 ```
 In this example, we define that the `jam-admin` command is first of all, *not enabled by default*, and also we say that anyone from the `jam.adminRoleId` role (as found using `Bot.config.getJam().getAdminRoleId()`). Additionally, we also say that the user whose id is `235439851263098880` is allowed to use this command. See `BotConfig#resolve(String)` for more information about how role names are resolved at runtime.
 
-*Context-Commands work in almost the same way, follow the steps above but replace `ISlashCommand` with `IMessageContextCommand` or `IUserContextCommand`.*
+*Context-Commands work in almost the same way, follow the steps above but replace `SlashCommand` with `MessageContextCommand` or `UserContextCommand`.*
+
+### Autocomplete
+To enable Autocomplete for a certain Slash Command Option, head to the command's entry in the corresponding 
+YAML-File and set the `autocomplete` value.
+
+```yaml
+- name: remove
+  description: Removes a question from the queue.
+  options:
+    - name: id
+      description: The id of the question to remove.
+      required: true
+      autocomplete: true
+      type: INTEGER
+```
+
+Now, you just need to implement `Autocompletable` in your handler class.
+
+```java
+@Override
+public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
+    return switch (event.getSubcommandName()) {
+        case "remove" -> ListQuestionsSubcommand.replyQuestions(event);
+        default -> event.replyChoices();
+    };
+}
+```
+
+The `handleAutocomplete` method of your handler class now gets fired once someone is focusing any Slash Command Option that has the `autocomplete`
+property set to true. 
+
 
 # Configuration
 The bot's configuration consists of a collection of simple JSON files:

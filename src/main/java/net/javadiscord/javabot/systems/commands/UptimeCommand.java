@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Command that displays the bot's uptime.
  */
-public class UptimeCommand implements ISlashCommand {
+public class UptimeCommand implements SlashCommand {
 
 	/**
 	 * Calculates the Uptimes and returns a formatted String.

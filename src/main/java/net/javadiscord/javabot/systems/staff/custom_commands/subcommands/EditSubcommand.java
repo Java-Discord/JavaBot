@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
@@ -16,9 +16,9 @@ import java.sql.SQLException;
 import java.time.Instant;
 
 /**
- * Subcommand that allows to create Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
+ * Subcommand that allows to edit Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
  */
-public class CreateSubCommand implements ISlashCommand {
+public class EditSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var nameOption = event.getOption("name");
@@ -43,13 +43,14 @@ public class CreateSubCommand implements ISlashCommand {
 		command.setReply(reply);
 		command.setEmbed(embed);
 
-		if(Bot.interactionHandler.doesSlashCommandExist(name, event.getGuild())){
-			return Responses.error(event, "This command already exists.");
-		}
-
 		try (var con = Bot.dataSource.getConnection()) {
-			var c = new CustomCommandRepository(con).insert(command);
-			var e = buildCreateCommandEmbed(event.getMember(), c);
+			var repo = new CustomCommandRepository(con);
+			var c = repo.findByName(event.getGuild().getIdLong(), name);
+			if (c.isEmpty()) {
+				return Responses.error(event, String.format("A Custom Command called `/%s` does not exist.", name));
+			}
+			var newCommand = repo.edit(c.get(), command);
+			var e = buildEditCommandEmbed(event.getMember(), newCommand);
 			Bot.interactionHandler.registerCommands(event.getGuild());
 			return event.replyEmbeds(e);
 		} catch (SQLException e) {
@@ -58,10 +59,10 @@ public class CreateSubCommand implements ISlashCommand {
 		}
 	}
 
-	private MessageEmbed buildCreateCommandEmbed(Member createdBy, CustomCommand command) {
+	private MessageEmbed buildEditCommandEmbed(Member createdBy, CustomCommand command) {
 		return new EmbedBuilder()
 				.setAuthor(createdBy.getUser().getAsTag(), null, createdBy.getEffectiveAvatarUrl())
-				.setTitle("Custom Command created")
+				.setTitle("Custom Command edited")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`/%s`", command.getName()), true)
 				.addField("Created by", createdBy.getAsMention(), true)

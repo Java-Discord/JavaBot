@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.Scanner;
 /**
  * Command that allows members to search the internet using the bing api.
  */
-public class SearchCommand implements ISlashCommand {
+public class SearchCommand implements SlashCommand {
 
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";

@@ -1,10 +1,13 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
 import java.io.IOException;
@@ -12,6 +15,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -24,7 +29,7 @@ import java.util.Objects;
  * character, and then proceed to execute each statement.
  * </p>
  */
-public class MigrateSubcommand implements ISlashCommand {
+public class MigrateSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		String migrationName = Objects.requireNonNull(event.getOption("name")).getAsString();
@@ -68,5 +73,22 @@ public class MigrateSubcommand implements ISlashCommand {
 		} catch (IOException | URISyntaxException e) {
 			return Responses.error(event, e.getMessage());
 		}
+	}
+
+	/**
+	 * Replies with all available migrations to run.
+	 *
+	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
+	 * @return The {@link AutoCompleteCallbackAction}.
+	 */
+	public static AutoCompleteCallbackAction replyMigrations(CommandAutoCompleteInteractionEvent event) {
+		List<Command.Choice> choices = new ArrayList<>(25);
+		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
+			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
+			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
+		} catch (IOException | URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return event.replyChoices(choices);
 	}
 }

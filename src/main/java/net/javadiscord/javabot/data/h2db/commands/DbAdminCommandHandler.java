@@ -1,11 +1,14 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
+import net.javadiscord.javabot.command.interfaces.Autocompletable;
 
 /**
  * Handler class for all Database related commands.
  */
-public class DbAdminCommandHandler extends DelegatingCommandHandler {
+public class DbAdminCommandHandler extends DelegatingCommandHandler implements Autocompletable {
 	/**
 	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
 	 */
@@ -14,5 +17,13 @@ public class DbAdminCommandHandler extends DelegatingCommandHandler {
 		this.addSubcommand("export-table", new ExportTableSubcommand());
 		this.addSubcommand("migrations-list", new MigrationsListSubcommand());
 		this.addSubcommand("migrate", new MigrateSubcommand());
+	}
+
+	@Override
+	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
+		return switch (event.getSubcommandName()) {
+			case "migrate" -> MigrateSubcommand.replyMigrations(event);
+			default -> event.replyChoices();
+		};
 	}
 }

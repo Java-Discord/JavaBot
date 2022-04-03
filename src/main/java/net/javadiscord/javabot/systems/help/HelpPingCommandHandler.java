@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * Handler for the /help-ping command that allows users to occasionally ping
  * helpers.
  */
-public class HelpPingCommandHandler implements ISlashCommand {
+public class HelpPingCommandHandler implements SlashCommand {
 	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **reserved help channels**.";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 

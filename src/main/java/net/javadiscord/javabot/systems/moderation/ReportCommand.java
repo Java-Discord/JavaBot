@@ -20,11 +20,12 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
+import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
+import net.javadiscord.javabot.util.InteractionUtils;
 
 import java.time.Instant;
 
@@ -32,7 +33,7 @@ import java.time.Instant;
  * Command that allows members to report other members.
  */
 @Slf4j
-public class ReportCommand extends ModerateUserCommand implements IUserContextCommand, IMessageContextCommand {
+public class ReportCommand extends ModerateUserCommand implements UserContextCommand, MessageContextCommand {
 
 	private static final String REASON_OPTION_NAME = "reason";
 
@@ -158,18 +159,16 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 	private ActionRow setComponents(long targetId, long threadId) {
 		return ActionRow.of(
 				Button.secondary("resolve-report:" + threadId, "Mark as resolved"),
-				Button.danger("utils:ban:" + targetId, "Ban"),
-				Button.danger("utils:kick:" + targetId, "Kick")
+				Button.danger(String.format(InteractionUtils.BAN_TEMPLATE, targetId), "Ban"),
+				Button.danger(String.format(InteractionUtils.KICK_TEMPLATE, targetId), "Kick")
 		);
 	}
 
 	private void createReportThread(Message message, long targetId, ModerationConfig config) {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
-				thread -> {
-					thread.sendMessage(config.getStaffRole().getAsMention())
-							.setActionRows(this.setComponents(targetId, thread.getIdLong()))
-							.queue();
-				}
+				thread -> thread.sendMessage(config.getStaffRole().getAsMention())
+						.setActionRows(this.setComponents(targetId, thread.getIdLong()))
+						.queue()
 		);
 	}
 
@@ -192,7 +191,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 		if (event.getTarget().getAuthor().equals(event.getUser())) {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
-		return event.replyModal(buildMessageReportModal(event));
+		return event.replyModal(this.buildMessageReportModal(event));
 	}
 
 	@Override
@@ -200,7 +199,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 		if (event.getTarget().equals(event.getUser())) {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
-		return event.replyModal(buildUserReportModal(event));
+		return event.replyModal(this.buildUserReportModal(event));
 	}
 
 	@Override

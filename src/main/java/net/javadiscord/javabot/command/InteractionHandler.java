@@ -2,6 +2,7 @@ package net.javadiscord.javabot.command;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -18,9 +19,13 @@ import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.data.CommandDataLoader;
 import net.javadiscord.javabot.command.data.context_commands.ContextCommandConfig;
 import net.javadiscord.javabot.command.data.slash_commands.SlashCommandConfig;
-import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.data.slash_commands.SlashOptionConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandConfig;
+import net.javadiscord.javabot.command.data.slash_commands.SlashSubCommandGroupConfig;
+import net.javadiscord.javabot.command.interfaces.Autocompletable;
+import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
 import net.javadiscord.javabot.util.GuildUtils;
@@ -36,7 +41,7 @@ import java.util.*;
 /**
  * This listener is responsible for handling slash commands sent by users in
  * guilds where the bot is active, and responding to them by calling the
- * appropriate {@link ISlashCommand}.
+ * appropriate {@link SlashCommand}.
  * <p>
  * The list of valid commands, and their associated handlers, are defined in
  * their corresponding YAML-file under the resources/commands directory.
@@ -49,11 +54,15 @@ public class InteractionHandler extends ListenerAdapter {
 	 * Maps every command name and alias to an instance of the command, for
 	 * constant-time lookup.
 	 */
-	private final Map<String, ISlashCommand> slashCommandIndex;
+	private final Map<String, SlashCommand> slashCommandIndex;
 
-	private final Map<String, IUserContextCommand> userContextCommandIndex;
-	private final Map<String, IMessageContextCommand> messageContextCommandIndex;
+	private final Map<String, UserContextCommand> userContextCommandIndex;
+	private final Map<String, MessageContextCommand> messageContextCommandIndex;
+	private final Map<SlashCommand, Autocompletable> autocompleteIndex;
 
+	private SlashCommandConfig[] slashCommandConfigs;
+	private ContextCommandConfig[] contextCommandConfigs;
+	
 	/**
 	 * Constructor of this class.
 	 */
@@ -61,22 +70,31 @@ public class InteractionHandler extends ListenerAdapter {
 		this.slashCommandIndex = new HashMap<>();
 		this.userContextCommandIndex = new HashMap<>();
 		this.messageContextCommandIndex = new HashMap<>();
+		this.autocompleteIndex = new HashMap<>();
 	}
 
 	@Override
 	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) return;
-		var command = this.slashCommandIndex.get(event.getName());
-
+		SlashCommand command = this.slashCommandIndex.get(event.getName());
 		try {
 			if (command != null) {
 				command.handleSlashCommandInteraction(event).queue();
 			} else {
-				handleCustomCommand(event).queue();
+				this.handleCustomCommand(event).queue();
 			}
 		} catch (ResponseException e) {
-			handleResponseException(e, event);
+			this.handleResponseException(e, event);
 		}
+	}
+
+	@Override
+	public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
+		if (event.getGuild() == null) return;
+		SlashCommand command = this.slashCommandIndex.get(event.getName());
+		if (command == null) return;
+		Autocompletable autocomplete = this.autocompleteIndex.get(command);
+		autocomplete.handleAutocomplete(event).queue();
 	}
 
 	/**
@@ -87,7 +105,7 @@ public class InteractionHandler extends ListenerAdapter {
 	 */
 	public boolean doesSlashCommandExist(String name, Guild guild){
 		try {
-			return this.slashCommandIndex.containsKey(name) || getCustomCommand(name, guild).isPresent();
+			return this.slashCommandIndex.containsKey(name) || this.getCustomCommand(name, guild).isPresent();
 		} catch(SQLException e) {
 			return false;
 		}
@@ -101,7 +119,7 @@ public class InteractionHandler extends ListenerAdapter {
 			try {
 				command.handleUserContextCommandInteraction(event).queue();
 			} catch (ResponseException e) {
-				handleResponseException(e, event.getInteraction());
+				this.handleResponseException(e, event.getInteraction());
 			}
 		}
 	}
@@ -114,7 +132,7 @@ public class InteractionHandler extends ListenerAdapter {
 			try {
 				command.handleMessageContextCommandInteraction(event).queue();
 			} catch (ResponseException e) {
-				handleResponseException(e, event.getInteraction());
+				this.handleResponseException(e, event.getInteraction());
 			}
 		}
 	}
@@ -150,37 +168,36 @@ public class InteractionHandler extends ListenerAdapter {
 	 * @param guild The guild to update commands for.
 	 */
 	public void registerCommands(Guild guild) {
-		SlashCommandConfig[] slashCommandConfigs = CommandDataLoader.loadSlashCommandConfig(
+		this.slashCommandConfigs = CommandDataLoader.loadSlashCommandConfig(
 				"commands/slash/help.yaml",
 				"commands/slash/jam.yaml",
 				"commands/slash/qotw.yaml",
 				"commands/slash/staff.yaml",
 				"commands/slash/user.yaml"
 		);
-		var contextConfigs = CommandDataLoader.loadContextCommandConfig(
+		this.contextCommandConfigs = CommandDataLoader.loadContextCommandConfig(
 				"commands/context/message.yaml",
 				"commands/context/user.yaml"
 		);
-		var commandUpdateAction = this.updateCommands(slashCommandConfigs, contextConfigs, guild);
-		var customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
-
+		CommandListUpdateAction commandUpdateAction = this.updateCommands(guild);
+		Set<String> customCommandNames = this.updateCustomCommands(commandUpdateAction, guild);
 		commandUpdateAction.queue(commands -> {
 			// Add privileges to the non-custom commands, after the commands have been registered.
 			commands.removeIf(cmd -> customCommandNames.contains(cmd.getName()));
 			commands.removeIf(cmd -> cmd.getType() != Command.Type.SLASH);
-			this.addCommandPrivileges(commands, slashCommandConfigs, guild);
+			this.addCommandPrivileges(commands, guild);
 		});
 	}
 	
-	private CommandListUpdateAction updateCommands(SlashCommandConfig[] slashCommandConfigs, ContextCommandConfig[] contextConfigs, Guild guild) {
+	private CommandListUpdateAction updateCommands(Guild guild) {
 		log.info("{}[{}]{} Registering commands", Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
-		if (slashCommandConfigs.length > Commands.MAX_SLASH_COMMANDS) {
+		if (this.slashCommandConfigs.length > Commands.MAX_SLASH_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s commands.", Commands.MAX_SLASH_COMMANDS));
 		}
-		if (Arrays.stream(contextConfigs).filter(p -> p.getEnumType() == Command.Type.USER).count() > Commands.MAX_USER_COMMANDS) {
+		if (Arrays.stream(this.contextCommandConfigs).filter(p -> p.getEnumType() == Command.Type.USER).count() > Commands.MAX_USER_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s User Context Commands", Commands.MAX_USER_COMMANDS));
 		}
-		if (Arrays.stream(contextConfigs).filter(p -> p.getEnumType() == Command.Type.MESSAGE).count() > Commands.MAX_MESSAGE_COMMANDS) {
+		if (Arrays.stream(this.contextCommandConfigs).filter(p -> p.getEnumType() == Command.Type.MESSAGE).count() > Commands.MAX_MESSAGE_COMMANDS) {
 			throw new IllegalArgumentException(String.format("Cannot add more than %s Message Context Commands", Commands.MAX_MESSAGE_COMMANDS));
 		}
 		CommandListUpdateAction commandUpdateAction = guild.updateCommands();
@@ -188,7 +205,11 @@ public class InteractionHandler extends ListenerAdapter {
 			if (config.getHandler() != null && !config.getHandler().isEmpty()) {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
-					this.slashCommandIndex.put(config.getName(), (ISlashCommand) handlerClass.getConstructor().newInstance());
+					Object instance = handlerClass.getConstructor().newInstance();
+					this.slashCommandIndex.put(config.getName(), (SlashCommand) instance);
+					if (this.hasAutocomplete(config)) {
+						this.autocompleteIndex.put((SlashCommand) instance, (Autocompletable) instance);
+					}
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
 				}
@@ -197,14 +218,14 @@ public class InteractionHandler extends ListenerAdapter {
 			}
 			commandUpdateAction.addCommands(config.toData());
 		}
-		for (var config : contextConfigs) {
+		for (var config : this.contextCommandConfigs) {
 			if (config.getHandler() != null && !config.getHandler().isEmpty()) {
 				try {
 					Class<?> handlerClass = Class.forName(config.getHandler());
 					if (config.getEnumType() == Command.Type.USER) {
-						this.userContextCommandIndex.put(config.getName(), (IUserContextCommand) handlerClass.getConstructor().newInstance());
+						this.userContextCommandIndex.put(config.getName(), (UserContextCommand) handlerClass.getConstructor().newInstance());
 					} else if (config.getEnumType() == Command.Type.MESSAGE) {
-						this.messageContextCommandIndex.put(config.getName(), (IMessageContextCommand) handlerClass.getConstructor().newInstance());
+						this.messageContextCommandIndex.put(config.getName(), (MessageContextCommand) handlerClass.getConstructor().newInstance());
 					} else {
 						log.warn("Unknown Context Command Type.");
 					}
@@ -248,7 +269,7 @@ public class InteractionHandler extends ListenerAdapter {
 		}
 	}
 
-	private void addCommandPrivileges(List<Command> commands, SlashCommandConfig[] slashCommandConfigs, Guild guild) {
+	private void addCommandPrivileges(List<Command> commands, Guild guild) {
 		log.info("{}[{}]{} Adding command privileges",
 				Constants.TEXT_WHITE, guild.getName(), Constants.TEXT_RESET);
 
@@ -331,5 +352,19 @@ public class InteractionHandler extends ListenerAdapter {
 			var repo = new CustomCommandRepository(con);
 			return repo.findByName(guild.getIdLong(), name);
 		}
+	}
+
+	private boolean hasAutocomplete(SlashCommandConfig config) {
+		return config.getOptions() != null && Arrays.stream(config.getOptions()).anyMatch(SlashOptionConfig::isAutocomplete) ||
+				config.getSubCommandGroups() != null && Arrays.stream(config.getSubCommandGroups()).anyMatch(this::hasAutocomplete) ||
+				config.getSubCommands() != null && Arrays.stream(config.getSubCommands()).anyMatch(this::hasAutocomplete);
+	}
+
+	private boolean hasAutocomplete(SlashSubCommandGroupConfig config) {
+		return config.getSubCommands() != null && Arrays.stream(config.getSubCommands()).anyMatch(this::hasAutocomplete);
+	}
+
+	private boolean hasAutocomplete(SlashSubCommandConfig config) {
+		return config.getOptions() != null && Arrays.stream(config.getOptions()).anyMatch(SlashOptionConfig::isAutocomplete);
 	}
 }
