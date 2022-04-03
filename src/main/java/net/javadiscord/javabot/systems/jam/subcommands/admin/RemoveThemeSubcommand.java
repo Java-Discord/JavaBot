@@ -3,7 +3,6 @@ package net.javadiscord.javabot.systems.jam.subcommands.admin;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -47,9 +46,9 @@ public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 	 * Replies with all jam themes.
 	 *
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return The {@link AutoCompleteCallbackAction}.
+	 * @return A {@link List} with all Option Choices.
 	 */
-	public static AutoCompleteCallbackAction replyThemes(CommandAutoCompleteInteractionEvent event) {
+	public static List<Command.Choice> replyThemes(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.dataSource.getConnection()) {
 			JamRepository jamRepo = new JamRepository(con);
@@ -62,6 +61,6 @@ public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return event.replyChoices(choices);
+		return choices;
 	}
 }

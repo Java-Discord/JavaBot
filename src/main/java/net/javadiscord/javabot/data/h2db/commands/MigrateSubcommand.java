@@ -3,7 +3,6 @@ package net.javadiscord.javabot.data.h2db.commands;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
@@ -79,9 +78,9 @@ public class MigrateSubcommand implements SlashCommand {
 	 * Replies with all available migrations to run.
 	 *
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return The {@link AutoCompleteCallbackAction}.
+	 * @return A {@link List} with all Option Choices.
 	 */
-	public static AutoCompleteCallbackAction replyMigrations(CommandAutoCompleteInteractionEvent event) {
+	public static List<Command.Choice> replyMigrations(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
@@ -89,6 +88,6 @@ public class MigrateSubcommand implements SlashCommand {
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
-		return event.replyChoices(choices);
+		return choices;
 	}
 }
