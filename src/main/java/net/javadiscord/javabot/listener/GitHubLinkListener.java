@@ -76,6 +76,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 		} catch (IOException e) {
 			content = e.getMessage();
 		}
+		if (content.equals(reqUrl)) content = "Unable to fetch content.";
 		return new Pair<>(content, file[1].split("#")[0]);
 	}
 
