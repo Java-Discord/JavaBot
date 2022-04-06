@@ -116,6 +116,7 @@ public class Bot {
 	 */
 	private static void addEventListeners(JDA jda) {
 		jda.addEventListener(
+				new GitHubLinkListener(),
 				new MessageLinkListener(),
 				new GuildJoinListener(),
 				new ServerLock(jda),
