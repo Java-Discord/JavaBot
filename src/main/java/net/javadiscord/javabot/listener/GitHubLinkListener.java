@@ -50,7 +50,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 	}
 
 	/**
-	 * Gets the contents of a GitHub Url.
+	 * Gets the contents of a GitHub URL.
 	 *
 	 * @param link The initial input url.
 	 * @return A {@link Pair} containing the files content & extension.
