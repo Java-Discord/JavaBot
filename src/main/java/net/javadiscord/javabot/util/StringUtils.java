@@ -3,6 +3,9 @@ package net.javadiscord.javabot.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+/**
+ * Contains some utility methods for dealing with Strings.
+ */
 public class StringUtils {
 
 	private StringUtils() {
