@@ -14,6 +14,7 @@ import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Command that allows members to format messages.
@@ -34,6 +35,7 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 						}
 						if (target != null) {
 							event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
+									.allowedMentions(List.of())
 									.addActionRows(this.buildActionRow(target))
 									.queue();
 						} else {
@@ -44,6 +46,7 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 			long messageId = idOption.getAsLong();
 			event.getTextChannel().retrieveMessageById(messageId).queue(
 					m -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(m.getContentRaw()))
+							.allowedMentions(List.of())
 							.addActionRows(this.buildActionRow(m))
 							.queue(),
 					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
@@ -54,6 +57,7 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 	@Override
 	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
 		return event.replyFormat("```java\n%s\n```", StringUtils.standardSanitizer().compute(event.getTarget().getContentRaw()))
+				.allowedMentions(List.of())
 				.addActionRows(this.buildActionRow(event.getTarget()));
 	}
 
