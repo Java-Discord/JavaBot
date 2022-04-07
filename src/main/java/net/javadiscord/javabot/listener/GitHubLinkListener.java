@@ -1,12 +1,8 @@
 package net.javadiscord.javabot.listener;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +13,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,19 +31,12 @@ public class GitHubLinkListener extends ListenerAdapter {
 		if (matcher.find()) {
 			Pair<String, String> content = this.parseGithubUrl(matcher.group());
 			if (!content.first().isBlank() && !content.first().isBlank()) {
-				event.getMessage().replyEmbeds(this.buildGitHubEmbed(content, event.getMessage()))
+				event.getMessage().reply(String.format("```%s\n%s\n```", content.second(), StringUtils.standardSanitizer().compute(content.first())))
+						.allowedMentions(List.of())
 						.setActionRow(Button.link(matcher.group(), "View on GitHub"))
 						.queue();
 			}
 		}
-	}
-
-	private MessageEmbed buildGitHubEmbed(Pair<String, String> content, Message message) {
-		return new EmbedBuilder()
-				.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getEffectiveAvatarUrl())
-				.setColor(Bot.config.get(message.getGuild()).getSlashCommand().getDefaultColor())
-				.setDescription(String.format("```%s\n%s\n```", content.second(), content.first()))
-				.build();
 	}
 
 	/**
