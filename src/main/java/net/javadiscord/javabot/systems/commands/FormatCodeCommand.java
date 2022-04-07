@@ -4,11 +4,13 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.util.Collections;
@@ -32,7 +34,7 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 						}
 						if (target != null) {
 							event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
-									.addActionRow(Button.link(target.getJumpUrl(), "View Original"))
+									.addActionRows(this.buildActionRow(target))
 									.queue();
 						} else {
 							Responses.error(event.getHook(), "Missing required arguments.").queue();
@@ -42,7 +44,7 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 			long messageId = idOption.getAsLong();
 			event.getTextChannel().retrieveMessageById(messageId).queue(
 					m -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(m.getContentRaw()))
-							.addActionRow(Button.link(m.getJumpUrl(), "View Original"))
+							.addActionRows(this.buildActionRow(m))
 							.queue(),
 					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
 		}
@@ -52,6 +54,10 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 	@Override
 	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
 		return event.replyFormat("```java\n%s\n```", StringUtils.standardSanitizer().compute(event.getTarget().getContentRaw()))
-				.addActionRow(Button.link(event.getTarget().getJumpUrl(), "View Original"));
+				.addActionRows(this.buildActionRow(event.getTarget()));
+	}
+
+	private ActionRow buildActionRow(Message target) {
+		return ActionRow.of(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"), Button.link(target.getJumpUrl(), "View Original"));
 	}
 }

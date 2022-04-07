@@ -3,6 +3,7 @@ package net.javadiscord.javabot.listener;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,8 +32,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 			Pair<String, String> content = this.parseGithubUrl(matcher.group());
 			if (!content.first().isBlank() && !content.first().isBlank()) {
 				event.getMessage().reply(String.format("```%s\n%s\n```", content.second(), StringUtils.standardSanitizer().compute(content.first())))
-						.allowedMentions(List.of())
-						.setActionRow(Button.link(matcher.group(), "View on GitHub"))
+						.setActionRow(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"), Button.link(matcher.group(), "View on GitHub"))
 						.queue();
 			}
 		}
@@ -67,7 +66,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 			content = e.getMessage();
 		}
 		if (content.equals(reqUrl)) content = "Unable to fetch content.";
-		return new Pair<>(content, file[1].split("#")[0]);
+		return new Pair<>(content, file[file.length - 1].split("#")[0]);
 	}
 
 	private String getContentFromRawGitHubUrl(String reqUrl, int from, int to) throws IOException {
