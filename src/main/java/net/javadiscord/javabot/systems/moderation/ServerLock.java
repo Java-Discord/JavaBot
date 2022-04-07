@@ -222,14 +222,15 @@ public class ServerLock extends ListenerAdapter {
 				))
 				.collect(Collectors.joining("\n"));
 
-		var config = Bot.config.get(guild).getServerLock();
-		config.setLocked("true");
+		var config = Bot.config.get(guild);
+		config.getServerLock().setLocked("true");
 		Bot.config.get(guild).flush();
 		GuildUtils.getLogChannel(guild).sendMessageFormat("""
-						**Server Locked** @here
+						**Server Locked** %s
 						The automated locking system has detected that the following %d users may be part of a raid:
 						%s
 						""",
+				config.getModeration().getStaffRole().getAsMention(),
 				potentialRaiders.size(),
 				membersString
 		).queue();
