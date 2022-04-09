@@ -8,8 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
-import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
-import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
 import net.javadiscord.javabot.systems.staff.self_roles.SelfRoleInteractionManager;
 import net.javadiscord.javabot.util.InteractionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +45,7 @@ public class InteractionListener extends ListenerAdapter {
 		if (event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
 		switch (id[0]) {
-			case "qotw-submission-select" -> SubmissionControlsManager.handleSelectMenu(id, event);
+			case "qotw-submission-select" -> SubmissionInteractionManager.handleSelectMenu(id, event);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
@@ -61,7 +60,7 @@ public class InteractionListener extends ListenerAdapter {
 		if (event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
 		switch (id[0]) {
-			case "qotw-submission" -> SubmissionManager.handleButton(event, id);
+			case "qotw-submission" -> SubmissionInteractionManager.handleButton(event, id);
 			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
 			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);
 			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);

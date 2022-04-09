@@ -27,7 +27,7 @@ public class IncrementSubcommand implements SlashCommand {
 	 * @param quiet  If true, don't send a message in the channel.
 	 * @return The new amount of QOTW-Points.
 	 */
-	public long correct(Member member, boolean quiet) {
+	public static long correct(Member member, boolean quiet) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QuestionPointsRepository(con);
 			var memberId = member.getIdLong();
@@ -60,7 +60,7 @@ public class IncrementSubcommand implements SlashCommand {
 		return event.replyEmbeds(embed);
 	}
 
-	private MessageEmbed buildIncrementDmEmbed(Member member, long points) {
+	private static MessageEmbed buildIncrementDmEmbed(Member member, long points) {
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
@@ -73,7 +73,7 @@ public class IncrementSubcommand implements SlashCommand {
 				.build();
 	}
 
-	private MessageEmbed buildIncrementEmbed(Member member, long points) {
+	private static MessageEmbed buildIncrementEmbed(Member member, long points) {
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
 				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())

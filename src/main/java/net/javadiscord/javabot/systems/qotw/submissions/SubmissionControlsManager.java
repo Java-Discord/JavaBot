@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,7 +40,7 @@ public class SubmissionControlsManager {
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param guild The current {@link Guild}.
+	 * @param guild      The current {@link Guild}.
 	 * @param submission The {@link QOTWSubmission}.
 	 */
 	public SubmissionControlsManager(Guild guild, QOTWSubmission submission) {
@@ -51,17 +52,20 @@ public class SubmissionControlsManager {
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param guild The current {@link Guild}.
+	 * @param guild   The current {@link Guild}.
 	 * @param channel The {@link ThreadChannel}, which is used to retrieve the corresponding {@link QOTWSubmission}.
 	 */
 	public SubmissionControlsManager(Guild guild, ThreadChannel channel) {
 		QOTWSubmission submission = null;
 		try (Connection con = Bot.dataSource.getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			var submissionOptional = repo.getSubmissionByThreadId(channel.getIdLong());
-			if (submissionOptional.isEmpty()) log.error("Could not retrieve Submission from Thread: " + channel.getId());
-			else submission = submissionOptional.get();
-		} catch(SQLException e) {
+			Optional<QOTWSubmission> submissionOptional = repo.getSubmissionByThreadId(channel.getIdLong());
+			if (submissionOptional.isEmpty()) {
+				log.error("Could not retrieve Submission from Thread: " + channel.getId());
+			} else {
+				submission = submissionOptional.get();
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		this.guild = guild;
@@ -70,20 +74,17 @@ public class SubmissionControlsManager {
 	}
 
 	/**
-	 * Sends an embed in the submission's guild channel that allows QOTW-Review Team members to accept, decline or delete submissions.
-	 *
-	 * @return Whether the message was successfully delivered.
+	 * Sends an embed in the submission's thread channel that allows QOTW-Reviewers to perform various actions.
 	 */
-	public boolean sendSubmissionControls() {
-		var thread = this.guild.getThreadChannelById(this.submission.getThreadId());
-		if (thread == null) return false;
-		removeThreadMembers(thread, this.config);
+	public void sendControls() {
+		ThreadChannel thread = this.guild.getThreadChannelById(this.submission.getThreadId());
+		if (thread == null) return;
+		this.removeThreadMembers(thread, this.config);
 		thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 		thread.sendMessage(config.getQOTWReviewRole().getAsMention())
-				.setEmbeds(buildSubmissionControlEmbed())
-				.setActionRows(buildInteractionControls()).queue();
+				.setEmbeds(this.buildSubmissionControlEmbed())
+				.setActionRows(this.buildInteractionControls()).queue();
 		log.info("Sent Submission Controls to thread {}", thread.getName());
-		return true;
 	}
 
 	private void removeThreadMembers(ThreadChannel thread, QOTWConfig config) {
@@ -93,75 +94,26 @@ public class SubmissionControlsManager {
 				.forEach(m -> thread.removeThreadMember(m.getUser()).queue());
 	}
 
-	private boolean hasPermissions(Member member) {
-		return !member.getRoles().isEmpty() && member.getRoles().contains(config.getQOTWReviewRole());
-	}
-
 	/**
-	 * Handles Button interactions regarding the Submission Controls System.
+	 * Accepts the current submission.
 	 *
-	 * @param id    The button's id, split by ":".
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
+	 * @param event The {@link ButtonInteractionEvent} that was fired.
+	 * @param thread The submission's {@link ThreadChannel}.
 	 */
-	public static void handleButtons(String[] id, ButtonInteractionEvent event) {
-		event.deferEdit().queue();
-		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
-		if (!manager.hasPermissions(event.getMember())) {
-			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
-			return;
-		}
-		if (!event.getChannelType().isThread()) {
-			event.getHook().sendMessage("This interaction may only be used in thread channels.").setEphemeral(true).queue();
-			return;
-		}
-		var thread = (ThreadChannel) event.getGuildChannel();
-		switch (id[2]) {
-			case "accept" -> manager.acceptSubmission(event, thread);
-			case "decline" -> manager.declineButtonSubmission(event);
-			case "delete" -> manager.deleteSubmission(event, thread);
-			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
-		}
-	}
-
-	/**
-	 * Handles Select Menu interactions regarding the Submission Controls System.
-	 *
-	 * @param id    The SelectionMenu's id.
-	 * @param event The {@link SelectMenuInteractionEvent} that is fired upon use.
-	 */
-	public static void handleSelectMenu(String[] id, SelectMenuInteractionEvent event) {
-		event.deferReply().queue();
-		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
-		if (!manager.hasPermissions(event.getMember())) {
-			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
-			return;
-		}
-		if (!event.getChannelType().isThread()) {
-			event.getHook().sendMessage("This interaction may only be used in thread channels.").setEphemeral(true).queue();
-			return;
-		}
-		var thread = (ThreadChannel) event.getGuildChannel();
-		switch (id[1]) {
-			case "decline" -> manager.declineSelectSubmission(event, thread);
-			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
-		}
-	}
-
-	private void acceptSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new QOTWSubmissionRepository(con);
-			var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
+	protected void acceptSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
 			if (submissionOptional.isEmpty()) return;
-			var submission = submissionOptional.get();
-			repo.markReviewed(submission);
-			repo.markAccepted(submission);
+			QOTWSubmission submission = submissionOptional.get();
+			dao.markReviewed(submission);
+			dao.markAccepted(submission);
 			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
 					member -> {
 						if (member == null) {
 							Responses.error(event.getHook(), "Cannot accept a submission of a user who is not a member of this server");
 							return;
 						}
-						new IncrementSubcommand().correct(member, true);
+						IncrementSubcommand.correct(member, true);
 						thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
 						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s accepted %s's submission", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag()).queue();
@@ -169,31 +121,29 @@ public class SubmissionControlsManager {
 						Responses.success(event.getHook(), "Submission Accepted", "Successfully accepted submission by " + member.getAsMention()).queue();
 					}
 			);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		});
 	}
 
-	private void declineButtonSubmission(ButtonInteractionEvent event) {
-		event.getMessage().editMessageComponents(ActionRow.of(this.buildDeclineMenu())).queue();
-	}
-
-	private void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
-		var reasons = String.join(", ", event.getValues());
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new QOTWSubmissionRepository(con);
-			var submissionOptional = repo.getSubmissionByThreadId(thread.getIdLong());
+	/**
+	 * Declines the current submission.
+	 *
+	 * @param event The {@link ButtonInteractionEvent} that was fired.
+	 * @param thread The submission's {@link ThreadChannel}.
+	 */
+	protected void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
+		String reasons = String.join(", ", event.getValues());
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
 			if (submissionOptional.isEmpty()) return;
-			var submission = submissionOptional.get();
-			repo.markReviewed(submission);
+			QOTWSubmission submission = submissionOptional.get();
+			dao.markReviewed(submission);
 			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
 					member -> {
 						if (member == null) {
 							Responses.error(event.getHook(), "Cannot accept a submission of a user who is not a member of this server");
 							return;
 						}
-						member.getUser().openPrivateChannel().queue(
-								c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue(s -> {}, e -> {}));
+						member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue());
 						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
 						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s declined %s's submission for: `%s`", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
@@ -202,12 +152,16 @@ public class SubmissionControlsManager {
 								String.format("Successfully declined submission by %s for the following reasons:\n`%s`", member.getAsMention(), reasons)).queue();
 					}
 			);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		});
 	}
 
-	private void deleteSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
+	/**
+	 * Deletes the current submission.
+	 *
+	 * @param event The {@link ButtonInteractionEvent} that was fired.
+	 * @param thread The submission's {@link ThreadChannel}.
+	 */
+	protected void deleteSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 		log.info("{} deleted submission thread {}", event.getUser().getAsTag(), thread.getName());
 		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s deleted submission thread `%s`", event.getUser().getAsTag(), thread.getName()).queue();
@@ -216,14 +170,18 @@ public class SubmissionControlsManager {
 		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
 	}
 
+	protected void declineButtonSubmission(ButtonInteractionEvent event) {
+		event.getMessage().editMessageComponents(ActionRow.of(this.buildDeclineMenu())).queue();
+	}
+
 	private void disableControls(String buttonLabel, Message message) {
 		message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:controls:dummy", buttonLabel).asDisabled())).queue();
 	}
 
 	private MessageEmbed buildSubmissionDeclinedEmbed(User createdBy, String reasons) {
 		return new EmbedBuilder()
-				.setTitle("QOTW Notification")
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setTitle("QOTW Notification")
 				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getErrorColor())
 				.setDescription(String.format("""
 								Hey %s,
@@ -241,6 +199,7 @@ public class SubmissionControlsManager {
 				Button.success("qotw-submission:controls:accept", "Accept"),
 				Button.danger("qotw-submission:controls:decline", "Decline"),
 				Button.secondary("qotw-submission:controls:delete", "🗑️")));
+
 	}
 
 	private SelectMenu buildDeclineMenu() {
