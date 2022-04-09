@@ -11,6 +11,7 @@ import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.SetSubComman
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.ListQuestionsSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.RemoveQuestionSubcommand;
+import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
 import net.javadiscord.javabot.util.AutocompleteUtils;
 
 import java.util.List;
@@ -38,12 +39,18 @@ public class QOTWCommandHandler extends DelegatingCommandHandler implements Auto
 						"clear", new ClearSubcommand(),
 						"set", new SetSubCommand()
 				)));
+		this.addSubcommandGroup(
+				"submissions", new DelegatingCommandHandler(Map.of(
+						"mark-best", new MarkBestAnswerSubcommand()
+				))
+		);
 	}
 
 	@Override
 	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = switch (event.getSubcommandName()) {
 			case "remove" -> RemoveQuestionSubcommand.replyQuestions(event);
+			case "mark-best" -> MarkBestAnswerSubcommand.replyAcceptedSubmissions(event);
 			default -> List.of();
 		};
 		return event.replyChoices(AutocompleteUtils.filterChoices(event, choices));

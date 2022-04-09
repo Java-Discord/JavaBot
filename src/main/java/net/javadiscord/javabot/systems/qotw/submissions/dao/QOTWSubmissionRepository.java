@@ -121,21 +121,37 @@ public class QOTWSubmissionRepository {
 	}
 
 	/**
+	 * Returns the current Question Number.
+	 *
+	 * @return The current Question Number.
+	 * @throws SQLException If an error occurs.
+	 */
+	public int getCurrentQuestionNumber() throws SQLException {
+		PreparedStatement s = con.prepareStatement("SELECT question_number FROM qotw_submissions GROUP BY question_number");
+		ResultSet rs = s.executeQuery();
+		int number = 0;
+		if (rs.next()) {
+			number = rs.getInt("question_number");
+		}
+		return number;
+	}
+
+	/**
 	 * Returns a {@link QOTWSubmission} based on the given question number.
 	 *
-	 * @param questionNumber The discord Id of the user.
+	 * @param questionNumber The week's number.
 	 * @return The {@link QOTWSubmission} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<QOTWSubmission> getSubmissionByQuestionNumber(int questionNumber) throws SQLException {
+	public List<QOTWSubmission> getSubmissionByQuestionNumber(int questionNumber) throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE question_number = ?");
 		s.setInt(1, questionNumber);
-		var rs = s.executeQuery();
-		QOTWSubmission submission = null;
-		if (rs.next()) {
-			submission = read(rs);
+		ResultSet rs = s.executeQuery();
+		List<QOTWSubmission> submissions = new ArrayList<>();
+		while (rs.next()) {
+			submissions.add(this.read(rs));
 		}
-		return Optional.ofNullable(submission);
+		return submissions;
 	}
 
 	/**
