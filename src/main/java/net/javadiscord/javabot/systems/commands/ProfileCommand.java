@@ -34,7 +34,7 @@ public class ProfileCommand implements SlashCommand {
 	}
 
 	private MessageEmbed buildProfileEmbed(Member member, Connection con) throws SQLException {
-		var config = Bot.config.get(member.getGuild()).getModeration();
+		var config = Bot.config.get(member.getGuild());
 		var warns = new ModerationService(member.getJDA(), config).getWarns(member.getIdLong());
 		var points = new QuestionPointsRepository(con).getAccountByUserId(member.getIdLong()).getPoints();
 		var roles = member.getRoles();
@@ -57,7 +57,7 @@ public class ProfileCommand implements SlashCommand {
 		embed.addField("Warns", String.format("`%s (%s/%s)`",
 						warns.size(),
 						warns.stream().mapToLong(Warn::getSeverityWeight).sum(),
-						config.getMaxWarnSeverity()), true)
+						config.getModeration().getMaxWarnSeverity()), true)
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points,
 						points == 1 ? "" : "s",
