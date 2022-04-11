@@ -28,6 +28,7 @@ import java.util.Optional;
  * Allows members of the QOTW Review Team to mark a single submission as the "Best Answer" of the current Week.
  */
 public class MarkBestAnswerSubcommand implements SlashCommand {
+
 	@Override
 	public InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		OptionMapping threadIdOption = event.getOption("thread-id");
@@ -36,22 +37,26 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 		}
 		long threadId = Long.parseLong(threadIdOption.getAsString());
 		GuildConfig config = Bot.config.get(event.getGuild());
-		ThreadChannel submission = event.getGuild().getThreadChannelById(threadId);
-		if (submission == null) {
+		ThreadChannel submissionThread = event.getGuild().getThreadChannelById(threadId);
+		if (submissionThread == null) {
 			return Responses.error(event, String.format("Could not find thread with id: `%s`", threadId));
 		}
-		config.getQotw().getQuestionChannel().createThreadChannel(submission.getName()).queue(
-				thread -> DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-					Optional<QOTWSubmission> sub = dao.getSubmissionByThreadId(thread.getIdLong());
-					if (sub.isEmpty()) {
-						event.getHook().sendMessageFormat("Could not find submission with thread id: `%s`", thread.getIdLong()).queue();
-						return;
-					}
-					List<Message> messages = this.getSubmissionContent(submission);
-					messages.forEach(m -> thread.sendMessage(m.getContentRaw()).queue());
-					event.getHook().sendMessageFormat("Successfully marked %s as the best answer", submission.getAsMention()).queue();
-				})
-		);
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(threadId);
+			if (submissionOptional.isEmpty()) {
+				event.getHook().sendMessageFormat("Could not find submission with thread id: `%s`", threadId).queue();
+				return;
+			}
+			QOTWSubmission submission = submissionOptional.get();
+			config.getQotw().getQuestionChannel().sendMessageFormat("<@%s>'s submission was marked as the best answer.", submission.getAuthorId()).queue(
+					message -> message.createThreadChannel(submissionThread.getName()).queue(
+							thread -> {
+								List<Message> messages = this.getSubmissionContent(submissionThread);
+								messages.forEach(m -> thread.sendMessage(m.getContentRaw()).queue());
+								event.getHook().sendMessageFormat("Successfully marked %s as the best answer", submissionThread.getAsMention()).queue();
+							}
+					));
+		});
 		return event.deferReply();
 	}
 
