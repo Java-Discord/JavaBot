@@ -24,17 +24,18 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void insert(QOTWSubmission submission) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_submissions (thread_id, question_number, guild_id, author_id) VALUES (?, ?, ?, ?)",
+		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_submissions (thread_id, question_number, guild_id, author_id) VALUES (?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
-		);
-		stmt.setLong(1, submission.getThreadId());
-		stmt.setInt(2, submission.getQuestionNumber());
-		stmt.setLong(3, submission.getGuildId());
-		stmt.setLong(4, submission.getAuthorId());
-		int rows = stmt.executeUpdate();
-		if (rows == 0) throw new SQLException("Submission was not inserted.");
-		stmt.close();
-		log.info("Inserted new QOTW-Submission: {}", submission);
+		)) {
+			stmt.setLong(1, submission.getThreadId());
+			stmt.setInt(2, submission.getQuestionNumber());
+			stmt.setLong(3, submission.getGuildId());
+			stmt.setLong(4, submission.getAuthorId());
+			int rows = stmt.executeUpdate();
+			if (rows == 0) throw new SQLException("Submission was not inserted.");
+			stmt.close();
+			log.info("Inserted new QOTW-Submission: {}", submission);
+		}
 	}
 
 	/**
@@ -45,11 +46,12 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public boolean removeSubmission(long threadId) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_submissions WHERE thread_id = ?");
-		stmt.setLong(1, threadId);
-		int rows = stmt.executeUpdate();
-		stmt.close();
-		return rows > 0;
+		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_submissions WHERE thread_id = ?")) {
+			stmt.setLong(1, threadId);
+			int rows = stmt.executeUpdate();
+			stmt.close();
+			return rows > 0;
+		}
 	}
 
 	/**
@@ -92,14 +94,15 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWSubmission> getUnreviewedSubmissions(long authorId) throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE author_id = ? AND reviewed = FALSE AND accepted = FALSE");
-		s.setLong(1, authorId);
-		var rs = s.executeQuery();
-		List<QOTWSubmission> submissions = new ArrayList<>();
-		while (rs.next()) {
-			submissions.add(read(rs));
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE author_id = ? AND reviewed = FALSE AND accepted = FALSE")) {
+			s.setLong(1, authorId);
+			var rs = s.executeQuery();
+			List<QOTWSubmission> submissions = new ArrayList<>();
+			while (rs.next()) {
+				submissions.add(read(rs));
+			}
+			return submissions;
 		}
-		return submissions;
 	}
 
 	/**
@@ -110,14 +113,15 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public Optional<QOTWSubmission> getSubmissionByThreadId(long threadId) throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE thread_id = ?");
-		s.setLong(1, threadId);
-		var rs = s.executeQuery();
-		QOTWSubmission submission = null;
-		if (rs.next()) {
-			submission = read(rs);
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE thread_id = ?")) {
+			s.setLong(1, threadId);
+			var rs = s.executeQuery();
+			QOTWSubmission submission = null;
+			if (rs.next()) {
+				submission = read(rs);
+			}
+			return Optional.ofNullable(submission);
 		}
-		return Optional.ofNullable(submission);
 	}
 
 	/**
@@ -144,14 +148,15 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWSubmission> getSubmissionByQuestionNumber(int questionNumber) throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE question_number = ?");
-		s.setInt(1, questionNumber);
-		ResultSet rs = s.executeQuery();
-		List<QOTWSubmission> submissions = new ArrayList<>();
-		while (rs.next()) {
-			submissions.add(this.read(rs));
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE question_number = ?")) {
+			s.setInt(1, questionNumber);
+			ResultSet rs = s.executeQuery();
+			List<QOTWSubmission> submissions = new ArrayList<>();
+			while (rs.next()) {
+				submissions.add(this.read(rs));
+			}
+			return submissions;
 		}
-		return submissions;
 	}
 
 	/**
