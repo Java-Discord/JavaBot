@@ -14,7 +14,6 @@ import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.time.Instant;
 
 /**
@@ -38,7 +37,6 @@ public class SuggestionListener extends ListenerAdapter {
 					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName()))
 							.flatMap(thread -> thread.addThreadMember(event.getAuthor()))
 							.queue();
-			SQLException
 				}
 		).exceptionally(e -> {
 			log.error("Could not send Submission Embed", e);
