@@ -33,7 +33,6 @@ public class QOTWSubmissionRepository {
 			stmt.setLong(4, submission.getAuthorId());
 			int rows = stmt.executeUpdate();
 			if (rows == 0) throw new SQLException("Submission was not inserted.");
-			stmt.close();
 			log.info("Inserted new QOTW-Submission: {}", submission);
 		}
 	}
@@ -49,7 +48,6 @@ public class QOTWSubmissionRepository {
 		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_submissions WHERE thread_id = ?")) {
 			stmt.setLong(1, threadId);
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
