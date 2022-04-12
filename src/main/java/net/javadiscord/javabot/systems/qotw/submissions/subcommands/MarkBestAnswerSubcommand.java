@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
@@ -19,13 +20,11 @@ import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSub
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.AutocompleteUtils;
+import net.javadiscord.javabot.util.MessageActionUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Allows members of the QOTW Review Team to mark a single submission as the "Best Answer" of the current Week.
@@ -111,9 +110,13 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 		Bot.config.get(member.getGuild()).getQotw().getQuestionChannel().sendMessageEmbeds(this.buildBestAnswerEmbed(member)).queue(
 				message -> message.createThreadChannel(submissionThread.getName()).queue(
 						thread -> {
-							messages.forEach(m -> thread.sendMessage(m.getContentRaw()).queue());
-							Responses.success(hook, "Best Answer",
-									String.format("Successfully marked %s as the best answer", submissionThread.getAsMention())).queue();
+							messages.forEach(m -> {
+								String messageContent = m.getContentRaw();
+								if (messageContent.trim().length() == 0) messageContent = "[attachment]";
+								MessageActionUtils.addAttachmentsAndSend(m, thread.sendMessage(messageContent)
+										.allowedMentions(EnumSet.of(Message.MentionType.EMOTE, Message.MentionType.CHANNEL)));
+							});
+							Responses.success(hook, "Best Answer", String.format("Successfully marked %s as the best answer", submissionThread.getAsMention())).queue();
 						}
 				));
 	}

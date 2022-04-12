@@ -1,10 +1,14 @@
 package net.javadiscord.javabot.util;
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Utility class for message actions.
@@ -45,5 +49,25 @@ public class MessageActionUtils {
 
 	public static List<ActionRow> disableActionRows(List<ActionRow> actionRows) {
 		return actionRows.stream().map(ActionRow::asDisabled).toList();
+	}
+
+	/**
+	 * Adds all Attachments from the initial message to the new message action and sends the message.
+	 *
+	 * @param message The initial {@link Message} object.
+	 * @param action  The new {@link MessageAction}.
+	 * @return A {@link CompletableFuture} with the message that is being sent.
+	 */
+	public static CompletableFuture<Message> addAttachmentsAndSend(Message message, MessageAction action) {
+		List<CompletableFuture<?>> attachmentFutures = new ArrayList<>();
+		for (Message.Attachment attachment : message.getAttachments()) {
+			attachmentFutures.add(
+					attachment.retrieveInputStream()
+							.thenApply(is -> action.addFile(is, attachment.getFileName()))
+							.exceptionally(e -> action.append("Could not add Attachment: " + attachment.getFileName()))
+			);
+		}
+		return CompletableFuture.allOf(attachmentFutures.toArray(new CompletableFuture<?>[0]))
+				.thenCompose(unusedActions -> action.submit());
 	}
 }
