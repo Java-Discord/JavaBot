@@ -42,7 +42,7 @@
               autocomplete: true
               type: INTEGER
 
-      # /qotw account
+    # /qotw account
     - name: account
       description: Commands for interaction with Users Question of the Week points.
       subCommands:
@@ -76,4 +76,19 @@
               description: The amount of points.
               required: true
               type: INTEGER
+
+    # /qotw submissions
+    - name: submissions
+      description: Commands for managing QOTW Submissions.
+      subCommands:
+        # /qotw submissions mark-best
+        - name: mark-best
+          description: Marks a single QOTW Submission as the best answer.
+          options:
+            - name: thread-id
+              description: The submission's thread id.
+              required: true
+              autocomplete: true
+              type: STRING
+
   handler: net.javadiscord.javabot.systems.qotw.subcommands.QOTWCommandHandler

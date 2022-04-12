@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.qotw;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -27,24 +28,29 @@ import java.time.OffsetDateTime;
 public class QOTWJob extends DiscordApiJob {
 	@Override
 	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
-		for (var guild : jda.getGuilds()) {
+		for (Guild guild : jda.getGuilds()) {
+			if (guild.getBoostTier() == Guild.BoostTier.TIER_1) {
+				log.error("Guild {} does not have access to private threads. ({})", guild.getName(), guild.getBoostTier().name());
+				return;
+			}
 			GuildConfig config = Bot.config.get(guild);
 			if (config.getModeration().getLogChannel() == null) continue;
 			try (var c = Bot.dataSource.getConnection()) {
-				var repo = new QuestionQueueRepository(c);
+				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
 					GuildUtils.getLogChannel(guild).sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotw().getQOTWReviewRole().getAsMention()).queue();
 				} else {
 					QOTWQuestion question = nextQuestion.get();
 					QOTWConfig qotw = config.getQotw();
+					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setArchived(true).queue());
 					if (question.getQuestionNumber() == null) {
 						question.setQuestionNumber(repo.getNextQuestionNumber());
 					}
 					NewsChannel questionChannel = qotw.getQuestionChannel();
 					if (questionChannel == null) continue;
 					questionChannel.sendMessage(qotw.getQOTWRole().getAsMention())
-							.setEmbeds(buildEmbed(question))
+							.setEmbeds(this.buildQuestionEmbed(question))
 							.setActionRows(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
 					repo.markUsed(question);
@@ -57,7 +63,7 @@ public class QOTWJob extends DiscordApiJob {
 		}
 	}
 
-	private MessageEmbed buildEmbed(QOTWQuestion question) {
+	private MessageEmbed buildQuestionEmbed(QOTWQuestion question) {
 		var checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())

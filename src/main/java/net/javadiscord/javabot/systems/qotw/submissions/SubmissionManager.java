@@ -36,21 +36,6 @@ public class SubmissionManager {
 	private final QOTWConfig config;
 
 	/**
-	 * Handles all Interactions regarding the Submission System.
-	 *
-	 * @param event The {@link ButtonInteractionEvent} that was fired.
-	 * @param id The Buttons id, split by ":".
-	 */
-	public static void handleButton(ButtonInteractionEvent event, String[] id) {
-		SubmissionManager manager = new SubmissionManager(Bot.config.get(event.getGuild()).getQotw());
-		switch (id[1]) {
-			case "controls" -> new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel()).handleButtons(id, event);
-			case "submit" -> manager.handleSubmission(event, Integer.parseInt(id[2])).queue();
-			case "delete" -> manager.handleThreadDeletion(event);
-		}
-	}
-
-	/**
 	 * Handles the "Submit your Answer" Button interaction.
 	 *
 	 * @param event          The {@link ButtonInteractionEvent} that is fired upon use.
