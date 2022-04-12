@@ -79,7 +79,7 @@ public class IncrementSubcommand implements SlashCommand {
 						"""
 								Your submission was accepted! %s
 								You've been granted **`1 QOTW-Point`**! (total: %s)""",
-						"Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention()", points))
+						Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
 				.setTimestamp(Instant.now())
 				.build();
 	}
