@@ -36,13 +36,14 @@ public class QOTWJob extends DiscordApiJob {
 			GuildConfig config = Bot.config.get(guild);
 			if (config.getModeration().getLogChannel() == null) continue;
 			try (var c = Bot.dataSource.getConnection()) {
-				var repo = new QuestionQueueRepository(c);
+				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
 					GuildUtils.getLogChannel(guild).sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotw().getQOTWReviewRole().getAsMention()).queue();
 				} else {
 					QOTWQuestion question = nextQuestion.get();
 					QOTWConfig qotw = config.getQotw();
+					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setArchived(true).queue());
 					if (question.getQuestionNumber() == null) {
 						question.setQuestionNumber(repo.getNextQuestionNumber());
 					}

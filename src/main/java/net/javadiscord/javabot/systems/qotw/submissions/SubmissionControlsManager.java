@@ -114,7 +114,7 @@ public class SubmissionControlsManager {
 							return;
 						}
 						IncrementSubcommand.correct(member, true);
-						thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
+						thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
 						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s accepted %s's submission", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag()).queue();
 						this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
@@ -144,7 +144,7 @@ public class SubmissionControlsManager {
 							return;
 						}
 						member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue());
-						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).setArchived(true).queueAfter(5, TimeUnit.SECONDS);
+						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queueAfter(5, TimeUnit.SECONDS);
 						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
 						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s declined %s's submission for: `%s`", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
 						this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
