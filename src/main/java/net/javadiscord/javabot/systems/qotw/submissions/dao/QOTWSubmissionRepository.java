@@ -131,13 +131,12 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getCurrentQuestionNumber() throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT question_number FROM qotw_submissions GROUP BY question_number");
+		PreparedStatement s = con.prepareStatement("SELECT MAX(question_number) FROM qotw_submissions");
 		ResultSet rs = s.executeQuery();
-		int number = 0;
 		if (rs.next()) {
-			number = rs.getInt("question_number");
+			return rs.getInt(1);
 		}
-		return number;
+		return 0;
 	}
 
 	/**
