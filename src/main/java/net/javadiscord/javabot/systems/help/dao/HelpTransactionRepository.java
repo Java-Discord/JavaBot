@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Dao class that represents the HELP_TRANSACTION SQL Table.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class HelpTransactionRepository {

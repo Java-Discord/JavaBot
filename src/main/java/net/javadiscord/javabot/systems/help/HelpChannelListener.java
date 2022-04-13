@@ -3,13 +3,17 @@ package net.javadiscord.javabot.systems.help;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.*;
 
 /**
  * This listener is responsible for handling messages that are sent in one or
@@ -17,14 +21,24 @@ import java.sql.SQLException;
  */
 @Slf4j
 public class HelpChannelListener extends ListenerAdapter {
+
+	/**
+	 * A static Map that holds all messages that was sent in a specific reserved channel.
+	 */
+	public static Map<ChannelReservation, List<Message>> helpMessages;
+
+	public HelpChannelListener() {
+		HelpChannelListener.helpMessages = new HashMap<>();
+	}
+
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) {
 			return;
 		}
-		var config = Bot.config.get(event.getGuild()).getHelp();
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
 		TextChannel channel = event.getTextChannel();
-		var manager = new HelpChannelManager(config);
+		HelpChannelManager manager = new HelpChannelManager(config);
 
 		// If a message was sent in an open text channel, reserve it.
 		Category openChannelCategory = config.getOpenChannelCategory();
@@ -43,6 +57,16 @@ public class HelpChannelListener extends ListenerAdapter {
 			} else {
 				event.getMessage().reply(config.getReservationNotAllowedMessage()).queue();
 			}
+		} else if (config.getReservedChannelCategory().equals(channel.getParentCategory())) {
+			Optional<ChannelReservation> reservationOptional = manager.getReservationForChannel(event.getChannel().getIdLong());
+			reservationOptional.ifPresent(reservation -> {
+				List<Message> messages = new ArrayList<>();
+				messages.add(event.getMessage());
+				if (HelpChannelListener.helpMessages.containsKey(reservation)) {
+					messages.addAll(HelpChannelListener.helpMessages.get(reservation));
+				}
+				HelpChannelListener.helpMessages.put(reservation, messages);
+			});
 		} else if (config.getDormantChannelCategory().equals(channel.getParentCategory())) {
 			// Prevent anyone from sending messages in dormant channels.
 			event.getMessage().delete().queue();

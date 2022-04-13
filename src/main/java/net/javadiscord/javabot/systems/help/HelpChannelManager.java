@@ -319,6 +319,15 @@ public class HelpChannelManager {
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
 			try (var con = Bot.dataSource.getConnection()) {
+				HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
+				if (reservationOptional.isPresent()) {
+					ChannelReservation reservation = reservationOptional.get();
+					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.helpMessages.get(reservation), reservation.getUserId());
+					for (Long recipient : experience.keySet()) {
+						service.performTransaction(recipient, experience.get(recipient), String.format("Helped <@%s> in <@%s>", reservation.getUserId(), channel.getIdLong()));
+					}
+				}
 				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
@@ -506,5 +515,19 @@ public class HelpChannelManager {
 			e.printStackTrace();
 			return Optional.empty();
 		}
+	}
+
+	private Map<Long, Double> calculateExperience(List<Message> messages, long ownerId) {
+		Map<Long, Double> experience = new HashMap<>();
+		for (User user : messages.stream().map(Message::getAuthor).toList()) {
+			if (user.getIdLong() == ownerId) continue;
+			int xp = 0;
+			for (Message message : messages.stream()
+					.filter(f -> f.getAuthor().getIdLong() == ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
+				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(Math.exp(1)));
+			}
+			experience.put(user.getIdLong(), Math.max(xp, config.getMaxExperiencePerChannel()));
+		}
+		return experience;
 	}
 }

@@ -136,6 +136,26 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private int helpPingTimeoutSeconds = 300;
 
+	/**
+	 * The maximum amount of experience one can get from one help channel.
+	 */
+	private double maxExperiencePerChannel = 50;
+
+	/**
+	 * The base experience one gets for every message.
+	 */
+	private double baseExperience = 5;
+
+	/**
+	 * The weight for each character.
+	 */
+	private double perCharacterExperience = 1;
+
+	/**
+	 * The message's minimum length.
+	 */
+	private int minimumMessageLength = 10;
+
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);
 	}
