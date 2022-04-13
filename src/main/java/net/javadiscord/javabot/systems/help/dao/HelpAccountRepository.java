@@ -67,19 +67,17 @@ public class HelpAccountRepository {
 	}
 
 	/**
-	 * Gets all {@link HelpAccount}s.
+	 * Removes the specified amount of experience from all {@link HelpAccount}s.
 	 *
-	 * @return A list with all {@link HelpAccount}s.
+	 * @param change The amount to subtract.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<HelpAccount> getAccounts() throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM help_account ")) {
-			ResultSet rs = s.executeQuery();
-			List<HelpAccount> accounts = new ArrayList<>();
-			while (rs.next()) {
-				accounts.add(this.read(rs));
-			}
-			return accounts;
+	public void removeExperienceFromAllAccounts(long change) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = experience - ? WHERE experience > ?")) {
+			s.setLong(1, change);
+			s.setLong(2, change);
+			long rows = s.executeLargeUpdate();
+			log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
 		}
 	}
 
