@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help;
+package net.javadiscord.javabot.systems.help.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -13,7 +13,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
  * Handles commands to show information about how a user has been thanked for
  * their help.
  */
-public class ThanksCommandHandler implements SlashCommand {
+public class ThanksCommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);

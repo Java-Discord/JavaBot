@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help;
+package net.javadiscord.javabot.systems.help.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildChannel;
@@ -12,7 +12,7 @@ import net.javadiscord.javabot.util.StringResourceCache;
 /**
  * Shows the server's help-guidelines.
  */
-public class HelpGuidelinesCommandHandler implements SlashCommand {
+public class HelpGuidelinesCommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		StringBuilder sb = new StringBuilder();
