@@ -79,27 +79,6 @@ CREATE TABLE jam_message_id (
 	UNIQUE (jam_id, message_type)
 );
 
-// Economy relations
-CREATE TABLE economy_account (
-	user_id BIGINT PRIMARY KEY,
-	created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-	balance BIGINT NOT NULL DEFAULT 0
-);
-
-CREATE TABLE economy_transaction (
-	id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-	from_user_id BIGINT NULL,
-	to_user_id BIGINT NULL,
-	value BIGINT NOT NULL,
-	message VARCHAR(127)
-);
-
-CREATE TABLE economy_account_preferences (
-	user_id BIGINT PRIMARY KEY,
-	receive_transaction_dms BOOLEAN NOT NULL DEFAULT TRUE
-);
-
 // Help system.
 CREATE TABLE reserved_help_channels (
 	id BIGINT PRIMARY KEY AUTO_INCREMENT,
