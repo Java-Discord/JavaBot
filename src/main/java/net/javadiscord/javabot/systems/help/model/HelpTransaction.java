@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.help.model;
 
 import lombok.Data;
+import net.javadiscord.javabot.util.TimeUtils;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,6 @@ public class HelpTransaction {
 	}
 
 	public String format() {
-		return String.format("%s%s XP\n%s", value > 0 ? "+" : "-", value, this.getMessage());
+		return String.format("%s%s XP (%s)\n%s", value > 0 ? "+" : "-", value, createdAt.format(TimeUtils.STANDARD_FORMATTER), this.getMessage());
 	}
 }

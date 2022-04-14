@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * This manager is responsible for all the main interactions that affect the
@@ -324,7 +325,7 @@ public class HelpChannelManager {
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
 					ChannelReservation reservation = reservationOptional.get();
-					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation), reservation.getUserId());
+					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId());
 					for (Long recipient : experience.keySet()) {
 						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED);
 					}
@@ -520,14 +521,15 @@ public class HelpChannelManager {
 
 	private Map<Long, Double> calculateExperience(List<Message> messages, long ownerId) {
 		Map<Long, Double> experience = new HashMap<>();
-		for (User user : messages.stream().map(Message::getAuthor).toList()) {
+		if (messages == null || messages.size() == 0) return Map.of();
+		for (User user : messages.stream().map(Message::getAuthor).collect(Collectors.toSet())) {
 			if (user.getIdLong() == ownerId) continue;
 			int xp = 0;
 			for (Message message : messages.stream()
-					.filter(f -> f.getAuthor().getIdLong() == ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
+					.filter(f -> f.getAuthor().getIdLong() != ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
 				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(2));
 			}
-			experience.put(user.getIdLong(), Math.max(xp, config.getMaxExperiencePerChannel()));
+			experience.put(user.getIdLong(), Math.min(xp, config.getMaxExperiencePerChannel()));
 		}
 		return experience;
 	}
