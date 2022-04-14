@@ -6,8 +6,10 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
+import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 
 import java.sql.SQLException;
 
@@ -175,6 +177,11 @@ public class HelpChannelInteractionManager {
 							helper.getIdLong()
 					);
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", helper.getAsTag()).setEphemeral(true).queue();
+					HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
+					HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+					// Perform experience transactions
+					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED);
+					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(

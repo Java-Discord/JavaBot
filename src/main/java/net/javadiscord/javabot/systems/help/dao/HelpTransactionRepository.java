@@ -25,13 +25,11 @@ public class HelpTransactionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public HelpTransaction save(HelpTransaction transaction) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_transaction (recipient, value, message) VALUES ( ?, ?, ?, ? )")) {
+		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_transaction (recipient, value, messageType) VALUES ( ?, ?, ? )")) {
 			s.setLong(1, transaction.getRecipient());
 			s.setDouble(2, transaction.getValue());
 			if (transaction.getMessage() != null) {
-				s.setString(3, transaction.getMessage());
-			} else {
-				s.setNull(3, Types.VARCHAR);
+				s.setInt(3, transaction.getMessageType());
 			}
 			s.executeUpdate();
 			ResultSet rs = s.getGeneratedKeys();
@@ -89,7 +87,7 @@ public class HelpTransactionRepository {
 		transaction.setRecipient(rs.getLong("recipient"));
 		transaction.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 		transaction.setValue(rs.getDouble("value"));
-		transaction.setMessage(rs.getString("message"));
+		transaction.setMessageType(rs.getInt("messageType"));
 		return transaction;
 	}
 }

@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.help.model;
 
 import lombok.Data;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 
 /**
@@ -14,6 +13,19 @@ public class HelpTransaction {
 	private long recipient;
 	private LocalDateTime createdAt;
 	private double value;
-	@Nullable
-	private String message;
+	private int messageType;
+
+	public String getMessage() {
+		return switch (HelpTransactionMessage.values()[messageType]) {
+			case UNKNOWN -> "Unknown";
+			case HELPED -> "For helping another user in a reserved help channel";
+			case GOT_THANKED -> "For receiving a thank from another user";
+			case THANKED_USER -> "For thanking another user";
+			case DAILY_SUBTRACTION -> "Daily Experience Subtraction";
+		};
+	}
+
+	public String format() {
+		return String.format("%s%s XP\n%s", value > 0 ? "+" : "-", value, this.getMessage());
+	}
 }

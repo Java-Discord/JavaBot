@@ -42,7 +42,8 @@ public class HelpAccountRepository {
 	public void update(HelpAccount account) throws SQLException {
 		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = ? WHERE user_id = ?")) {
 			s.setDouble(1, account.getExperience());
-			s.setLong(3, account.getUserId());
+			s.setLong(2, account.getUserId());
+			s.executeUpdate();
 		}
 	}
 
@@ -71,10 +72,10 @@ public class HelpAccountRepository {
 	 * @param change The amount to subtract.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void removeExperienceFromAllAccounts(long change) throws SQLException {
+	public void removeExperienceFromAllAccounts(double change) throws SQLException {
 		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = experience - ? WHERE experience > ?")) {
-			s.setLong(1, change);
-			s.setLong(2, change);
+			s.setDouble(1, change);
+			s.setDouble(2, change);
 			long rows = s.executeLargeUpdate();
 			log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
 		}

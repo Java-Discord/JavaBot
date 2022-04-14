@@ -156,6 +156,21 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private int minimumMessageLength = 10;
 
+	/**
+	 * The amount of experience points one gets for being thanked by the help channel owner.
+	 */
+	private double thankedExperience = 50;
+
+	/**
+	 * The amount of experience one gets for thanking other users.
+	 */
+	private double thankExperience = 3;
+
+	/**
+	 * The amount that should be subtracted from every Help Account each day.
+	 */
+	private double dailyExperienceSubtraction = 5;
+
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);
 	}

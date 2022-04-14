@@ -8,20 +8,25 @@
       type: STRING
       required: false
 
-# /thanks
-- name: thanks
-  description: Show an overview of how a user has been thanked for their help.
-  handler: net.javadiscord.javabot.systems.help.commands.ThanksCommand
-  options:
-    - name: user
-      description: The user to check.
-      type: USER
-      required: false
+# /help
+- name: help
+  description: Commands for managing your Help Account.
+  subCommands:
+    # /help account
+    - name: account
+      description: Shows an overview of your Help Account.
+      options:
+        - name: user
+          description: The user to check.
+          type: USER
+          required: false
 
-# /thanks-leaderboard
-- name: thanks-leaderboard
-  description: Show a leaderboard of the most thanked users.
-  handler: net.javadiscord.javabot.systems.help.commands.ThanksLeaderboardCommand
+    # /help thanks-leaderboard
+    - name: thanks-leaderboard
+      description: Show a leaderboard of the most thanked users.
+
+  handler: net.javadiscord.javabot.systems.help.commands.HelpCommandHandler
+
 
 # /help-guidelines
 - name: help-guidelines

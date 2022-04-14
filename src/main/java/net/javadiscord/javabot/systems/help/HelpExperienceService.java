@@ -6,8 +6,8 @@ import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
+import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 
-import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -39,7 +39,6 @@ public class HelpExperienceService {
 				account = new HelpAccount();
 				account.setUserId(userId);
 				account.setExperience(0);
-				account.setHelpContributions(0);
 				accountRepository.insert(account);
 			}
 			con.commit();
@@ -74,12 +73,12 @@ public class HelpExperienceService {
 	 * @return A {@link HelpTransaction} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public HelpTransaction performTransaction(long recipient, double value, @Nullable String message) throws SQLException {
+	public HelpTransaction performTransaction(long recipient, double value, HelpTransactionMessage message) throws SQLException {
 		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
 		HelpTransaction transaction = new HelpTransaction();
 		transaction.setRecipient(recipient);
 		transaction.setValue(value);
-		transaction.setMessage(message);
+		transaction.setMessageType(message.ordinal());
 		try (Connection con = dataSource.getConnection()) {
 			con.setAutoCommit(false);
 			HelpAccountRepository accountRepository = new HelpAccountRepository(con);
