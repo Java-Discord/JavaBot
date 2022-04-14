@@ -9,7 +9,6 @@ import lombok.Data;
 public class HelpAccount {
 	private long userId;
 	private double experience;
-	private int helpContributions;
 
 	public void updateExperience(double change) {
 		this.experience += change;

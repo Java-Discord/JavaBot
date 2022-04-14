@@ -159,7 +159,6 @@ CREATE TABLE qotw_submissions (
 CREATE TABLE help_account (
 	  user_id BIGINT PRIMARY KEY,
 	  experience DOUBLE NOT NULL,
-	  help_contributions INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE help_transaction (

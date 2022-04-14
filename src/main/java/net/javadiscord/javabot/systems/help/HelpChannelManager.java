@@ -323,7 +323,7 @@ public class HelpChannelManager {
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
 					ChannelReservation reservation = reservationOptional.get();
-					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.helpMessages.get(reservation), reservation.getUserId());
+					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation), reservation.getUserId());
 					for (Long recipient : experience.keySet()) {
 						service.performTransaction(recipient, experience.get(recipient), String.format("Helped <@%s> in <@%s>", reservation.getUserId(), channel.getIdLong()));
 					}
@@ -524,7 +524,7 @@ public class HelpChannelManager {
 			int xp = 0;
 			for (Message message : messages.stream()
 					.filter(f -> f.getAuthor().getIdLong() == ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
-				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(Math.exp(1)));
+				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(2));
 			}
 			experience.put(user.getIdLong(), Math.max(xp, config.getMaxExperiencePerChannel()));
 		}

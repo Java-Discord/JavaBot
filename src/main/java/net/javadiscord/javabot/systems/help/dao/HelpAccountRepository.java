@@ -25,10 +25,9 @@ public class HelpAccountRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void insert(HelpAccount account) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_account (user_id, experience, help_contributions) VALUES ( ?, ?, ? )")) {
+		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_account (user_id, experience) VALUES ( ?, ? )")) {
 			s.setLong(1, account.getUserId());
 			s.setDouble(2, account.getExperience());
-			s.setInt(3, account.getHelpContributions());
 			s.executeUpdate();
 			log.info("Inserted new Help Account: {}", account);
 		}
@@ -41,9 +40,8 @@ public class HelpAccountRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void update(HelpAccount account) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = ?, help_contributions = ? WHERE user_id = ?")) {
+		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = ? WHERE user_id = ?")) {
 			s.setDouble(1, account.getExperience());
-			s.setInt(2, account.getHelpContributions());
 			s.setLong(3, account.getUserId());
 		}
 	}
@@ -86,7 +84,6 @@ public class HelpAccountRepository {
 		HelpAccount account = new HelpAccount();
 		account.setUserId(rs.getLong("user_id"));
 		account.setExperience(rs.getDouble("experience"));
-		account.setHelpContributions(rs.getInt("help_contributions"));
 		return account;
 	}
 }
