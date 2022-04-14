@@ -23,6 +23,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.InteractionUtils;
@@ -62,8 +63,8 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 	 * @return the built {@link Modal}
 	 */
 	private Modal buildMessageReportModal(MessageContextInteractionEvent event) {
-		var title = "Report message";
-		var targetMember = event.getTarget().getMember();
+		String title = "Report message";
+		Member targetMember = event.getTarget().getMember();
 		if (targetMember != null) {
 			title += " from " + targetMember.getUser().getAsTag();
 		}
@@ -119,8 +120,8 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 			return;
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
-			var config = Bot.config.get(hook.getInteraction().getGuild());
-			var embed = buildReportEmbed(target, reason, reportedBy, hook.getInteraction().getTextChannel(), config.getSlashCommand());
+			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
+			var embed = buildReportEmbed(target, reason, reportedBy, hook.getInteraction().getChannel(), config.getSlashCommand());
 			embed.setTitle(String.format("%s reported %s", reportedBy.getName(), target.getName()));
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
 			reportChannel.sendMessageEmbeds(embed.build())
@@ -140,7 +141,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 			return;
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
-			var config = Bot.config.get(event.getGuild());
+			GuildConfig config = Bot.config.get(event.getGuild());
 			var embed = buildReportEmbed(target.getAuthor(), reason, event.getUser(), event.getTextChannel(), config.getSlashCommand());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
@@ -172,7 +173,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 		);
 	}
 
-	private EmbedBuilder buildReportEmbed(User reported, String reason, User reportedBy, TextChannel channel, SlashCommandConfig config) {
+	private EmbedBuilder buildReportEmbed(User reported, String reason, User reportedBy, Channel channel, SlashCommandConfig config) {
 		return new EmbedBuilder()
 				.setAuthor(reported.getAsTag(), null, reported.getEffectiveAvatarUrl())
 				.setColor(config.getDefaultColor())
