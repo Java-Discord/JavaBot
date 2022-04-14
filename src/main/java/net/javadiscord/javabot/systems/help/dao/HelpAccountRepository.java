@@ -73,9 +73,8 @@ public class HelpAccountRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void removeExperienceFromAllAccounts(double change) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = experience - ? WHERE experience > ?")) {
+		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = GREATEST(experience - ?, 0)")) {
 			s.setDouble(1, change);
-			s.setDouble(2, change);
 			long rows = s.executeLargeUpdate();
 			log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
 		}
