@@ -122,7 +122,9 @@ public class MessageCache extends ListenerAdapter {
 	}
 
 	/**
-	 * Checks, whether the message meets the following criteria;
+	 * Checks whether the given message should be ignored by the cache.
+	 *
+	 * This is done with the following criteria:
 	 * <ol>
 	 *     <li>Message author is a bot</li>
 	 *     <li>Message author is a system account</li>
