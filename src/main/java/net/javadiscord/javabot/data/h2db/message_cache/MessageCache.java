@@ -36,12 +36,12 @@ import java.util.Optional;
 @Slf4j
 public class MessageCache extends ListenerAdapter {
 	List<CachedMessage> cache = new ArrayList<>();
-    /**
-     * Amount of messages since the last synchronization.
-     *
-     * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
-     * messages during an unexpected shutdown.
-     */
+	/**
+	 * Amount of messages since the last synchronization.
+	 * <p>
+	 * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
+	 * messages during an unexpected shutdown.
+	 */
 	int messageCount = 0;
 
 	/**
@@ -62,7 +62,7 @@ public class MessageCache extends ListenerAdapter {
 		try {
 			new MessageCacheRepository(Bot.dataSource.getConnection()).delete(cache.size());
 			new MessageCacheRepository(Bot.dataSource.getConnection()).insertList(cache);
-            messageCount = 0;
+			messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
 		} catch (SQLException e) {
 			log.error("Something went wrong during synchronization of messages with DB.");
@@ -78,9 +78,9 @@ public class MessageCache extends ListenerAdapter {
 			cache.remove(0);
 		}
 		if (messageCount >= 50) {
-            synchronize();
-        }
-        messageCount++;
+			synchronize();
+		}
+		messageCount++;
 		cache.add(CachedMessage.of(event.getMessage()));
 	}
 
