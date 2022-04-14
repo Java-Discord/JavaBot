@@ -13,12 +13,10 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
-import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.util.StringUtils;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -62,9 +60,9 @@ public class HelpAccountSubcommand implements SlashCommand {
 
 	private String formatTransactionHistory(long userId) {
 		StringBuilder sb = new StringBuilder();
-		try (Connection con = Bot.dataSource.getConnection()) {
-			HelpTransactionRepository repo = new HelpTransactionRepository(con);
-			for (HelpTransaction t : repo.getTransactions(userId, 3)) {
+		try {
+			HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+			for (HelpTransaction t :service.getRecentTransactions(userId, 3)) {
 				sb.append(t.format()).append("\n\n");
 			}
 		} catch (SQLException e) {
