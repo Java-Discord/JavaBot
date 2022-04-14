@@ -35,6 +35,26 @@ public class MessageCacheRepository {
 		stmt.close();
 		return rows > 0;
 	}
+	/**
+	 * Inserts a {@link List} of {@link CachedMessage} objects..
+	 *
+	 * @param messages The List to insert.
+	 * @return Whether there were rows affected by this process.
+	 * @throws SQLException If an error occurs.
+	 */
+	public boolean insertList(List<CachedMessage> messages) throws SQLException {
+		StringBuilder statementString = new StringBuilder("INSERT INTO message_cache (message_id, author_id, message_content) VALUES");
+		for (CachedMessage msg:messages) {
+			statementString.append(String.format(" (%s, %s, '%s'),", msg.getMessageId(), msg.getAuthorId(), msg.getMessageContent()));
+		}
+		statementString.deleteCharAt(statementString.toString().length() - 1).append(";");
+		PreparedStatement stmt = con.prepareStatement(statementString.toString(),
+				Statement.RETURN_GENERATED_KEYS
+		);
+		int rows = stmt.executeUpdate();
+		stmt.close();
+		return rows > 0;
+	}
 
 	/**
 	 * Edit an existing {@link CachedMessage} object.
@@ -72,39 +92,28 @@ public class MessageCacheRepository {
 	}
 
 	/**
-	 * Retrieves a single {@link CachedMessage} from the Message Cache.
+	 * Delete all messages saved in the Database.
 	 *
-	 * @param messageId The message's id.
-	 * @return The {@link CachedMessage} object - as an {@link Optional}.
+	 * @return Whether there were rows affected by this process.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<CachedMessage> getByMessageId(long messageId) throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache WHERE message_id = ?");
-		s.setLong(1, messageId);
-		var rs = s.executeQuery();
-		CachedMessage cachedMessage = null;
-		if (rs.next()) {
-			cachedMessage = this.read(rs);
-		}
-		return Optional.ofNullable(cachedMessage);
+	public boolean deleteAll() throws SQLException {
+		PreparedStatement stmt = con.prepareStatement("TRUNCATE TABLE message_cache",
+				Statement.RETURN_GENERATED_KEYS
+		);
+		int rows = stmt.executeUpdate();
+		stmt.close();
+		return rows > 0;
 	}
 
-	/**
-	 * Gets all cached messages of a single user.
-	 *
-	 * @param userId The user's id.
-	 * @return A list of {@link CachedMessage} objects.
-	 * @throws SQLException If an error occurs.
-	 */
-	public List<CachedMessage> getByUserId(long userId) throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache WHERE author_id = ?");
-		s.setLong(1, userId);
+	public List<CachedMessage> getAll() throws SQLException {
+		PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache");
 		var rs = s.executeQuery();
-		List<CachedMessage> messages = new ArrayList<>();
+		List<CachedMessage> cachedMessages = new ArrayList<>();
 		while (rs.next()) {
-			messages.add(this.read(rs));
+			cachedMessages.add(this.read(rs));
 		}
-		return messages;
+		return cachedMessages;
 	}
 
 	/**

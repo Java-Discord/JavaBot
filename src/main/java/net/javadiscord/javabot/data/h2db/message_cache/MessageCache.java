@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.data.h2db.message_cache;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
@@ -10,8 +11,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
-import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
@@ -22,65 +21,102 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Listens for Incoming Messages and stores them in the Message Cache.
  */
-public class MessageCacheListener extends ListenerAdapter {
+@Slf4j
+public class MessageCache extends ListenerAdapter {
+	List<CachedMessage> cache = new ArrayList<>();
+    /**
+     * Amount of messages since the last synchronization.
+     *
+     * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
+     * messages during an unexpected shutdown.
+     */
+    int messageCount = 0;
+
+	public MessageCache() {
+		try {
+			cache = new MessageCacheRepository(Bot.dataSource.getConnection()).getAll();
+		} catch (SQLException e) {
+			log.error("Something went wrong while retrieving stored messages.");
+		}
+	}
+
+	/**
+	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
+	 */
+	public void synchronize() {
+		try {
+			new MessageCacheRepository(Bot.dataSource.getConnection()).deleteAll();
+			new MessageCacheRepository(Bot.dataSource.getConnection()).insertList(cache);
+            messageCount = 0;
+			log.info("Synchronized Database with local Cache.");
+		} catch (SQLException e) {
+			log.error("Something went wrong while synchronizing messages with DB.");
+			log.error(e.getMessage());
+		}
+	}
+
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
 		MessageCacheConfig config = Bot.config.get(event.getGuild()).getMessageCache();
-		if (DbActions.count("SELECT count(*) FROM message_cache") + 1 > config.getMaxCachedMessages()) {
-			DbHelper.doDaoAction(MessageCacheRepository::new, dao -> dao.delete(dao.getLast().getMessageId()));
+		if (cache.size() + 1 > config.getMaxCachedMessages()) {
+			cache.remove(0);
 		}
-		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> dao.insert(CachedMessage.of(event.getMessage())));
+        if (messageCount >= config.getMaxCachedMessages()) {
+            synchronize();
+        }
+        messageCount++;
+		cache.add(CachedMessage.of(event.getMessage()));
 	}
 
 	@Override
 	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
-		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
-			Optional<CachedMessage> optional = dao.getByMessageId(event.getMessageIdLong());
-			if (optional.isPresent()) {
-				CachedMessage before = optional.get();
-				MessageAction action = GuildUtils.getLogChannel(event.getGuild())
-						.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
-						.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
-				if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-					action.addFile(this.buildEditedMessageFile(event.getAuthor(), before, event.getMessage()), before.getMessageId() + ".txt");
-				}
-				action.queue();
-				dao.update(CachedMessage.of(event.getMessage()));
-			} else {
-				GuildUtils.getLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
+		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
+		if (optional.isPresent()) {
+			CachedMessage before = optional.get();
+			MessageAction action = GuildUtils.getLogChannel(event.getGuild())
+					.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
+					.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
+			if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
+				action.addFile(this.buildEditedMessageFile(event.getAuthor(), before, event.getMessage()), before.getMessageId() + ".txt");
 			}
-		});
+			action.queue();
+			cache.set(cache.indexOf(before), CachedMessage.of(event.getMessage()));
+		} else {
+			GuildUtils.getLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I could not retrieve its content.", event.getMessageIdLong())).queue();
+		}
 	}
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
-			Optional<CachedMessage> optional = dao.getByMessageId(event.getMessageIdLong());
-			if (optional.isPresent()) {
-				CachedMessage message = optional.get();
-				User author = event.getJDA().retrieveUserById(message.getAuthorId()).complete();
-				MessageAction action = GuildUtils.getLogChannel(event.getGuild())
-						.sendMessageEmbeds(this.buildMessageDeleteEmbed(event.getGuild(), author, event.getChannel(), message));
-				if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-					action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
-				}
-				action.queue();
-			} else {
-				GuildUtils.getLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
+		System.out.println(cache.toString());
+		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
+		if (optional.isPresent()) {
+			CachedMessage message = optional.get();
+			User author = event.getJDA().retrieveUserById(message.getAuthorId()).complete();
+			MessageAction action = GuildUtils.getLogChannel(event.getGuild())
+					.sendMessageEmbeds(this.buildMessageDeleteEmbed(event.getGuild(), author, event.getChannel(), message));
+			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
+				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
 			}
-			dao.delete(event.getMessageIdLong());
-		});
+			action.queue();
+			cache.remove(message);
+		} else {
+			GuildUtils.getLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
+		}
 	}
 
 	private boolean ignoreMessageCache(Message message) {

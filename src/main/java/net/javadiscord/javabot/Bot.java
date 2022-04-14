@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.javadiscord.javabot.command.InteractionHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
+import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.events.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
@@ -51,6 +51,7 @@ public class Bot {
 	 * An instance of {@link AutoMod}.
 	 * */
 	public static AutoMod autoMod;
+	public static MessageCache messageCache;
 	/**
 	 * A reference to the data source that provides access to the relational
 	 * database that this bot users for certain parts of the application. Use
@@ -88,6 +89,7 @@ public class Bot {
 		config = new BotConfig(Path.of("config"));
 		dataSource = DbHelper.initDataSource(config);
 		interactionHandler = new InteractionHandler();
+		messageCache = new MessageCache();
 		autoMod = new AutoMod();
 		imageCache = new ImageCacheUtils();
 		asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
@@ -97,7 +99,7 @@ public class Bot {
 				.setMemberCachePolicy(MemberCachePolicy.ALL)
 				.enableCache(CacheFlag.ACTIVITY)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-				.addEventListeners(interactionHandler, autoMod)
+				.addEventListeners(interactionHandler, autoMod, messageCache)
 				.build();
 		addEventListeners(jda);
 		try {
@@ -117,7 +119,6 @@ public class Bot {
 	 */
 	private static void addEventListeners(JDA jda) {
 		jda.addEventListener(
-				new MessageCacheListener(),
 				new MessageLinkListener(),
 				new GuildJoinListener(),
 				new ServerLock(jda),
