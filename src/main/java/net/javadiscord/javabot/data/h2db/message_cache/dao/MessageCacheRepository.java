@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.data.h2db.message_cache.dao;
 
-import com.google.gson.internal.sql.SqlTypesSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
@@ -8,7 +7,6 @@ import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Dao class that represents the QOTW_POINTS SQL Table.
@@ -36,6 +34,7 @@ public class MessageCacheRepository {
 		stmt.close();
 		return rows > 0;
 	}
+
 	/**
 	 * Inserts a {@link List} of {@link CachedMessage} objects..
 	 *
@@ -107,6 +106,11 @@ public class MessageCacheRepository {
 		return rows > 0;
 	}
 
+	/**
+	 * Gets all Messages from the Database.
+	 * @return A {@link List} of {@link CachedMessage}s.
+	 * @throws SQLException
+	 */
 	public List<CachedMessage> getAll() throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache");
 		var rs = s.executeQuery();
@@ -117,6 +121,13 @@ public class MessageCacheRepository {
 		return cachedMessages;
 	}
 
+	/**
+	 * Deletes the given amount of Messages.
+	 *
+	 * @param amount The amount to delete.
+	 * @return If any rows we're affected.
+	 * @throws SQLException If anything goes wrong.
+	 */
 	public boolean delete(int amount) throws SQLException {
 		PreparedStatement stmt = con.prepareStatement("DELETE FROM message_cache LIMIT ?",
 				Statement.RETURN_GENERATED_KEYS

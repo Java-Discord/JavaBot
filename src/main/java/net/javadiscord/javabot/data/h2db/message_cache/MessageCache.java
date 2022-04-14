@@ -42,8 +42,11 @@ public class MessageCache extends ListenerAdapter {
      * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
      * messages during an unexpected shutdown.
      */
-    int messageCount = 0;
+	int messageCount = 0;
 
+	/**
+	 * Creates a new messages & loads messages from the DB into a List.
+	 */
 	public MessageCache() {
 		try {
 			cache = new MessageCacheRepository(Bot.dataSource.getConnection()).getAll();
@@ -74,7 +77,7 @@ public class MessageCache extends ListenerAdapter {
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
-        if (messageCount >= 50) {
+		if (messageCount >= 50) {
             synchronize();
         }
         messageCount++;

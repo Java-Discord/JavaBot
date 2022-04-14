@@ -54,6 +54,9 @@ public class Bot {
 	 * An instance of {@link AutoMod}.
 	 * */
 	public static AutoMod autoMod;
+	/**
+	 * The Bots {@link MessageCache}, which handles logging of deleted and edited messages.
+	 */
 	public static MessageCache messageCache;
 	/**
 	 * A reference to the data source that provides access to the relational
