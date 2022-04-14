@@ -109,7 +109,7 @@ public class MessageCacheRepository {
 	/**
 	 * Gets all Messages from the Database.
 	 * @return A {@link List} of {@link CachedMessage}s.
-	 * @throws SQLException
+	 * @throws SQLException If anything goes wrong.
 	 */
 	public List<CachedMessage> getAll() throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache");
