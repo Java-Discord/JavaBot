@@ -9,6 +9,7 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 import net.javadiscord.javabot.systems.help.naming_strategies.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Configuration for the guild's help system.
@@ -170,6 +171,11 @@ public class HelpConfig extends GuildConfigItem {
 	 * The amount that should be subtracted from every Help Account each day.
 	 */
 	private double dailyExperienceSubtraction = 5;
+
+	/**
+	 * A list with all roles that are awarded by experience.
+	 */
+	private Map<Long, Double> experienceRoles = Map.of(0L, 0.0);
 
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);

@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -19,6 +20,7 @@ import net.javadiscord.javabot.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Handles commands to show information about how a user has been thanked for
@@ -38,27 +40,25 @@ public class HelpAccountSubcommand implements SlashCommand {
 		);
 		try {
 			HelpAccount account = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(user.getIdLong());
-			return event.replyEmbeds(this.buildHelpAccountEmbed(account, user, totalThanks, weekThanks));
+			return event.replyEmbeds(this.buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks));
 		} catch (SQLException e) {
 			return Responses.error(event, e.getMessage());
 		}
 	}
 
-	// TODO: add roles
-	private MessageEmbed buildHelpAccountEmbed(HelpAccount account, User user, long totalThanks, long weekThanks) {
-		// placeholder
-		double maxXp = 1000;
+	private MessageEmbed buildHelpAccountEmbed(HelpAccount account, User user, Guild guild, long totalThanks, long weekThanks) {
+		double current = account.getExperience() - account.getLastExperienceGoal(guild);
+		Map.Entry<Long, Double> role = account.getNextExperienceGoal(guild);
+		double goal = role.getValue() - account.getLastExperienceGoal(guild);
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
-				.addField("Experience (BETA)", String.format("%.2f XP / %.2f XP (%.2f%%)\n%s\n\n**Recent Transactions**\n```%s```",
-						account.getExperience(),
-						maxXp,
-						(account.getExperience() / maxXp) * 100,
-						StringUtils.buildProgressBar(account.getExperience(), maxXp, "\u2B1B", "\uD83D\uDFE5", 15),
-						this.formatTransactionHistory(user.getIdLong())), false)
+				.addField("Experience (BETA)", String.format("<@&%s>: %.2f XP / %.2f XP (%.2f%%)\n%s\n\n**Recent Transactions**\n```%s(Received a total of %.2f XP)```",
+						role.getKey(), current, goal, (current / goal) * 100,
+						StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 15),
+						this.formatTransactionHistory(user.getIdLong()), account.getExperience()), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
 				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true)
 				.build();
