@@ -327,7 +327,7 @@ public class HelpChannelManager {
 					ChannelReservation reservation = reservationOptional.get();
 					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId());
 					for (Long recipient : experience.keySet()) {
-						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED);
+						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
 					}
 				}
 				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");

@@ -180,8 +180,8 @@ public class HelpChannelInteractionManager {
 					HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
 					HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
 					// Perform experience transactions
-					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED);
-					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER);
+					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
+					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 				} catch (SQLException e) {
 					e.printStackTrace();
 					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(

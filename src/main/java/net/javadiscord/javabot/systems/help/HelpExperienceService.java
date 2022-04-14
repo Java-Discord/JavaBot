@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.help;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Guild;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -72,10 +74,11 @@ public class HelpExperienceService {
 	 * @param recipient   The recipient's user id.
 	 * @param value      The transaction's value.
 	 * @param message    The transaction's message.
+	 * @param guild      The current guild.
 	 * @return A {@link HelpTransaction} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public HelpTransaction performTransaction(long recipient, double value, HelpTransactionMessage message) throws SQLException {
+	public HelpTransaction performTransaction(long recipient, double value, HelpTransactionMessage message, Guild guild) throws SQLException {
 		if (value == 0) {
 			log.error("Cannot make zero-value transactions");
 			return null;
@@ -92,8 +95,21 @@ public class HelpExperienceService {
 			account.updateExperience(value);
 			accountRepository.update(account);
 			transaction = transactionRepository.save(transaction);
+			this.checkExperienceRoles(guild, account);
 			con.commit();
 			return transactionRepository.getTransaction(transaction.getId()).orElse(null);
 		}
+	}
+
+	private void checkExperienceRoles(Guild guild, HelpAccount account) {
+		guild.retrieveMemberById(account.getUserId()).queue(member -> {
+			Bot.config.get(guild).getHelp().getExperienceRoles().forEach((key, value) -> {
+				if (key.equals(account.getCurrentExperienceGoal(guild).getKey())) {
+					guild.addRoleToMember(member, guild.getRoleById(key)).queue();
+				} else {
+					guild.removeRoleFromMember(member, guild.getRoleById(key)).queue();
+				}
+			});
+		}, e -> {});
 	}
 }

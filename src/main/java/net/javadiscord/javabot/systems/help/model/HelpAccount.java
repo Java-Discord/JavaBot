@@ -4,9 +4,7 @@ import lombok.Data;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Data class that represents a single Help User Account.
@@ -21,6 +19,23 @@ public class HelpAccount {
 	}
 
 	/**
+	 * Tries to get the current experience role.
+	 *
+	 * @param guild The current {@link Guild}.
+	 * @return An {@link java.util.Map.Entry} that has the role's id as its key, and the experience needed as its value.
+	 */
+	public Map.Entry<Long, Double> getCurrentExperienceGoal(Guild guild) {
+		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
+		Map.Entry<Long, Double> highestExperience = Map.entry(0L, 0.0);
+		for (Map.Entry<Long, Double> entry : experienceRoles.entrySet()) {
+			if (experience > entry.getValue() && entry.getValue() > highestExperience.getValue()) {
+				highestExperience = entry;
+			}
+		}
+		return highestExperience;
+	}
+
+	/**
 	 * Tries to get the current, and thus last, experience goal.
 	 *
 	 * @param guild The current {@link Guild}.
@@ -29,7 +44,8 @@ public class HelpAccount {
 	public double getLastExperienceGoal(Guild guild) {
 		Optional<Double> experienceOptional = Bot.config.get(guild).getHelp().getExperienceRoles()
 				.values().stream()
-				.filter(r -> r <= experience).max(Comparator.naturalOrder());
+				.filter(r -> r <= experience)
+				.max(Comparator.naturalOrder());
 		return experienceOptional.orElse(0.0);
 	}
 
@@ -43,7 +59,8 @@ public class HelpAccount {
 		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
 		Optional<Map.Entry<Long, Double>> experienceOptional = experienceRoles.entrySet()
 				.stream()
-				.filter(r -> r.getValue() > experience).sorted().findFirst();
+				.filter(r -> r.getValue() > experience)
+				.findFirst();
 		return experienceOptional.orElse(Map.entry(experienceRoles.keySet().stream().max(Comparator.naturalOrder()).orElse(0L), 0.0));
 	}
 }
