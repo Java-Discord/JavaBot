@@ -40,9 +40,10 @@ public class HelpAccount {
 	 * @return An {@link java.util.Map.Entry} that has the role's id as its key, and the experience needed as its value.
 	 */
 	public Map.Entry<Long, Double> getNextExperienceGoal(Guild guild) {
-		Optional<Map.Entry<Long, Double>> experienceOptional = Bot.config.get(guild).getHelp().getExperienceRoles()
-				.entrySet().stream()
+		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
+		Optional<Map.Entry<Long, Double>> experienceOptional = experienceRoles.entrySet()
+				.stream()
 				.filter(r -> r.getValue() > experience).sorted().findFirst();
-		return experienceOptional.orElse(Map.entry(0L, 0.0));
+		return experienceOptional.orElse(Map.entry(experienceRoles.keySet().stream().max(Comparator.naturalOrder()).orElse(0L), 0.0));
 	}
 }

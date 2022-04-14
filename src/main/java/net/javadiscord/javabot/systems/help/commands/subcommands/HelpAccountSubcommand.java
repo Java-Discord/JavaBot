@@ -47,17 +47,13 @@ public class HelpAccountSubcommand implements SlashCommand {
 	}
 
 	private MessageEmbed buildHelpAccountEmbed(HelpAccount account, User user, Guild guild, long totalThanks, long weekThanks) {
-		double current = account.getExperience() - account.getLastExperienceGoal(guild);
-		Map.Entry<Long, Double> role = account.getNextExperienceGoal(guild);
-		double goal = role.getValue() - account.getLastExperienceGoal(guild);
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
-				.addField("Experience (BETA)", String.format("<@&%s>: %.2f XP / %.2f XP (%.2f%%)\n%s\n\n**Recent Transactions**\n```%s(Received a total of %.2f XP)```",
-						role.getKey(), current, goal, (current / goal) * 100,
-						StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 15),
+				.addField("Experience (BETA)", String.format("%s\n\n**Recent Transactions**\n```%s(Received a total of %.2f XP)```",
+						this.formatExperience(guild, account),
 						this.formatTransactionHistory(user.getIdLong()), account.getExperience()), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
 				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true)
@@ -74,6 +70,20 @@ public class HelpAccountSubcommand implements SlashCommand {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return sb.toString().length() <= 0 ? "None" : sb.toString();
+		return sb.toString();
+	}
+
+	private String formatExperience(Guild guild, HelpAccount account) {
+		double current = account.getExperience() - account.getLastExperienceGoal(guild);
+		Map.Entry<Long, Double> role = account.getNextExperienceGoal(guild);
+		double goal = role.getValue() - account.getLastExperienceGoal(guild);
+		StringBuilder sb = new StringBuilder(String.format("<@&%s>: ", role.getKey()));
+		if (goal > 0) {
+			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100));
+		} else {
+			sb.append("MAX LEVEL");
+		}
+		sb.append("\n").append(StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 15));
+		return sb.toString();
 	}
 }
