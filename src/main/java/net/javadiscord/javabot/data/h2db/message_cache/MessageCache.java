@@ -49,7 +49,7 @@ public class MessageCache extends ListenerAdapter {
 		try {
 			cache = new MessageCacheRepository(Bot.dataSource.getConnection()).getAll();
 		} catch (SQLException e) {
-			log.error("Something went wrong while retrieving stored messages.");
+			log.error("Something went wrong during retrieval of stored messages.");
 		}
 	}
 
@@ -63,7 +63,7 @@ public class MessageCache extends ListenerAdapter {
             messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
 		} catch (SQLException e) {
-			log.error("Something went wrong while synchronizing messages with DB.");
+			log.error("Something went wrong during synchronization of messages with DB.");
 			log.error(e.getMessage());
 		}
 	}
