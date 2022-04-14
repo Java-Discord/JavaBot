@@ -121,6 +121,18 @@ public class MessageCache extends ListenerAdapter {
 		}
 	}
 
+	/**
+	 * Checks, whether the message meets the following criteria;
+	 * <ol>
+	 *     <li>Message author is a bot</li>
+	 *     <li>Message author is a system account</li>
+	 *     <li>Message author is part of the excluded users</li>
+	 *     <li>Channel is excluded from the cache</li>
+	 * </ol>
+	 *
+	 * @param message The message to check
+	 * @return true if any of the criteria above apply
+	 */
 	private boolean ignoreMessageCache(Message message) {
 		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
 		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
