@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.data.h2db.message_cache.dao;
 
+import com.google.gson.internal.sql.SqlTypesSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
@@ -114,6 +115,16 @@ public class MessageCacheRepository {
 			cachedMessages.add(this.read(rs));
 		}
 		return cachedMessages;
+	}
+
+	public boolean delete(int amount) throws SQLException {
+		PreparedStatement stmt = con.prepareStatement("DELETE FROM message_cache LIMIT ?",
+				Statement.RETURN_GENERATED_KEYS
+		);
+		stmt.setInt(1, amount);
+		int rows = stmt.executeUpdate();
+		stmt.close();
+		return rows > 0;
 	}
 
 	/**

@@ -58,7 +58,7 @@ public class MessageCache extends ListenerAdapter {
 	 */
 	public void synchronize() {
 		try {
-			new MessageCacheRepository(Bot.dataSource.getConnection()).deleteAll();
+			new MessageCacheRepository(Bot.dataSource.getConnection()).delete(cache.size());
 			new MessageCacheRepository(Bot.dataSource.getConnection()).insertList(cache);
             messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
@@ -75,7 +75,7 @@ public class MessageCache extends ListenerAdapter {
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
-        if (messageCount >= config.getMaxCachedMessages()) {
+        if (messageCount >= 50) {
             synchronize();
         }
         messageCount++;
