@@ -19,6 +19,10 @@ public class GuildUtils {
 		return Bot.config.get(guild).getModeration().getLogChannel();
 	}
 
+	public static MessageChannel getCacheLogChannel(Guild guild) {
+		return Bot.config.get(guild).getMessageCache().getMessageCacheLogChannel();
+	}
+
 	/**
 	 * Gets all guilds and formats them nicely.
 	 *

@@ -2,6 +2,7 @@ package net.javadiscord.javabot.data.h2db.message_cache;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -87,7 +88,7 @@ public class MessageCache extends ListenerAdapter {
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		if (optional.isPresent()) {
 			CachedMessage before = optional.get();
-			MessageAction action = GuildUtils.getLogChannel(event.getGuild())
+			MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
 					.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
 					.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
 			if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
@@ -96,7 +97,7 @@ public class MessageCache extends ListenerAdapter {
 			action.queue();
 			cache.set(cache.indexOf(before), CachedMessage.of(event.getMessage()));
 		} else {
-			GuildUtils.getLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I could not retrieve its content.", event.getMessageIdLong())).queue();
+			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I could not retrieve its content.", event.getMessageIdLong())).queue();
 		}
 	}
 
@@ -107,7 +108,7 @@ public class MessageCache extends ListenerAdapter {
 		if (optional.isPresent()) {
 			CachedMessage message = optional.get();
 			User author = event.getJDA().retrieveUserById(message.getAuthorId()).complete();
-			MessageAction action = GuildUtils.getLogChannel(event.getGuild())
+			MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
 					.sendMessageEmbeds(this.buildMessageDeleteEmbed(event.getGuild(), author, event.getChannel(), message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
@@ -115,7 +116,7 @@ public class MessageCache extends ListenerAdapter {
 			action.queue();
 			cache.remove(message);
 		} else {
-			GuildUtils.getLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
+			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
 		}
 	}
 
