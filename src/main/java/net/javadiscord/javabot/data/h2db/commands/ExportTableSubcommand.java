@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * This subcommand exports a single database table to a file, and uploads that file
  * to the channel in which the command was received.
  */
-public class ExportTableSubcommand implements ISlashCommand {
+public class ExportTableSubcommand implements SlashCommand {
 	private static final Path TABLE_FILE = Path.of("___table.sql");
 
 	@Override

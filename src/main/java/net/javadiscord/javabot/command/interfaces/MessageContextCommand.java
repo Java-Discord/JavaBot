@@ -8,6 +8,6 @@ import net.javadiscord.javabot.command.ResponseException;
 /**
  * Interface that handles Discord's Message Context Commands.
  */
-public interface IMessageContextCommand {
+public interface MessageContextCommand {
 	InteractionCallbackAction<InteractionHook> handleMessageContextCommandInteraction(MessageContextInteractionEvent event) throws ResponseException;
 }

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 /**
  * Command that lets staff-members redeploy the bot.
@@ -15,7 +15,7 @@ import net.javadiscord.javabot.command.interfaces.ISlashCommand;
  * I have explained how we do it in https://github.com/Java-Discord/JavaBot/pull/195
  */
 @Slf4j
-public class RedeployCommand implements ISlashCommand {
+public class RedeployCommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());

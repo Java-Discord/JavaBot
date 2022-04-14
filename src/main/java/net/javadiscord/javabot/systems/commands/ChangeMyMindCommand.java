@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
@@ -23,7 +23,7 @@ import java.util.Objects;
  * Command that generates the "Change my mind" meme with the given text input.
  */
 @Deprecated
-public class ChangeMyMindCommand implements ISlashCommand {
+public class ChangeMyMindCommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var hook = event.getHook();

@@ -15,9 +15,6 @@ public class ServerLockConfig extends GuildConfigItem {
 	private int lockThreshold = 5;
 	private float minimumSecondsBetweenJoins = 1.0f;
 
-	@Deprecated
-	private String lockMessageTemplate;
-
 	public boolean isLocked() {
 		return Boolean.parseBoolean(this.locked);
 	}

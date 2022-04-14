@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
@@ -21,7 +21,7 @@ import java.time.Instant;
 /**
  * Command that allows members to display info about themselves or other users.
  */
-public class ProfileCommand implements ISlashCommand {
+public class ProfileCommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);
@@ -34,7 +34,7 @@ public class ProfileCommand implements ISlashCommand {
 	}
 
 	private MessageEmbed buildProfileEmbed(Member member, Connection con) throws SQLException {
-		var config = Bot.config.get(member.getGuild()).getModeration();
+		var config = Bot.config.get(member.getGuild());
 		var warns = new ModerationService(member.getJDA(), config).getWarns(member.getIdLong());
 		var points = new QuestionPointsRepository(con).getAccountByUserId(member.getIdLong()).getPoints();
 		var roles = member.getRoles();
@@ -57,7 +57,7 @@ public class ProfileCommand implements ISlashCommand {
 		embed.addField("Warns", String.format("`%s (%s/%s)`",
 						warns.size(),
 						warns.stream().mapToLong(Warn::getSeverityWeight).sum(),
-						config.getMaxWarnSeverity()), true)
+						config.getModeration().getMaxWarnSeverity()), true)
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points,
 						points == 1 ? "" : "s",

@@ -6,12 +6,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 /**
  * Abstract class, that represents a single moderation command.
  */
-public abstract class ModerateCommand implements ISlashCommand {
+public abstract class ModerateCommand implements SlashCommand {
 	private boolean allowThreads = true;
 
 	@Override

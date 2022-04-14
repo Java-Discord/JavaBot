@@ -1,14 +1,19 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.data.h2db.commands.message_cache.MessageCacheInfoSubcommand;
-
 import java.util.Map;
+import net.javadiscord.javabot.command.interfaces.Autocompletable;
+import net.javadiscord.javabot.util.AutocompleteUtils;
+import java.util.List;
 
 /**
  * Handler class for all Database related commands.
  */
-public class DbAdminCommandHandler extends DelegatingCommandHandler {
+public class DbAdminCommandHandler extends DelegatingCommandHandler implements Autocompletable {
 	/**
 	 * Adds all subcommands {@link DelegatingCommandHandler#addSubcommand}.
 	 */
@@ -21,5 +26,14 @@ public class DbAdminCommandHandler extends DelegatingCommandHandler {
 		this.addSubcommandGroup("message-cache", new DelegatingCommandHandler(Map.of(
 				"info", new MessageCacheInfoSubcommand()
 		)));
+	}
+
+	@Override
+	public AutoCompleteCallbackAction handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
+		List<Command.Choice> choices = switch (event.getSubcommandName()) {
+			case "migrate" -> MigrateSubcommand.replyMigrations(event);
+			default -> List.of();
+		};
+		return event.replyChoices(AutocompleteUtils.filterChoices(event, choices));
 	}
 }

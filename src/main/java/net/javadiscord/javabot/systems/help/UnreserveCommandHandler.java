@@ -7,14 +7,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 
 /**
  * A simple command that can be used inside reserved help channels to
  * immediately unreserve them, instead of waiting for a timeout.
  */
-public class UnreserveCommandHandler implements ISlashCommand {
+public class UnreserveCommandHandler implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var channel = event.getTextChannel();

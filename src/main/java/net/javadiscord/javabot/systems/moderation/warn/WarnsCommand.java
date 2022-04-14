@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Command that allows users to see all their active warns.
  */
-public class WarnsCommand implements ISlashCommand, IUserContextCommand {
+public class WarnsCommand implements SlashCommand, UserContextCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);

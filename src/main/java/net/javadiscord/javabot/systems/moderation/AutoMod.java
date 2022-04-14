@@ -92,7 +92,7 @@ public class AutoMod extends ListenerAdapter {
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
 		if (message.getMentionedMembers().size() >= 5) {
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
 							WarnSeverity.MEDIUM,
@@ -126,7 +126,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
 			GuildUtils.getLogChannel(message.getGuild()).sendMessage("Message: `" + message.getContentRaw() + "`").queue();
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
 							WarnSeverity.MEDIUM,
@@ -144,7 +144,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
 			GuildUtils.getLogChannel(message.getGuild()).sendMessage(String.format("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message)).queue();
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()).getModeration())
+			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
 							WarnSeverity.MEDIUM,
@@ -169,7 +169,7 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> a.getFileExtension().equals("java"))) {
 			return;
 		}
-		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()).getModeration())
+		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()))
 				.timeout(
 						member,
 						"Automod: Spam",

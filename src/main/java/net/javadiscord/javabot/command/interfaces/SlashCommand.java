@@ -20,6 +20,6 @@ import net.javadiscord.javabot.command.ResponseException;
  *     </code></pre>
  * </p>
  */
-public interface ISlashCommand {
+public interface SlashCommand {
 	InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException;
 }

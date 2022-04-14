@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.ISlashCommand;
+import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
@@ -16,41 +16,25 @@ import java.sql.SQLException;
 import java.time.Instant;
 
 /**
- * Subcommand that allows to edit Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
+ * Subcommand that allows to delete Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}
  */
-public class EditSubCommand implements ISlashCommand {
+public class DeleteSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var nameOption = event.getOption("name");
-		var responseOption = event.getOption("text");
-		if (nameOption == null || responseOption == null) {
+		if (nameOption == null) {
 			return Responses.error(event, "Missing required arguments.");
 		}
-		var replyOption = event.getOption("reply");
-		boolean reply = replyOption == null || replyOption.getAsBoolean();
-
-		var embedOption = event.getOption("embed");
-		boolean embed = embedOption == null || embedOption.getAsBoolean();
-
 		String name = CustomCommandHandler.cleanString(nameOption.getAsString());
-		String response = responseOption.getAsString();
-
-		var command = new CustomCommand();
-		command.setGuildId(event.getGuild().getIdLong());
-		command.setCreatedBy(event.getUser().getIdLong());
-		command.setName(name);
-		command.setResponse(response);
-		command.setReply(reply);
-		command.setEmbed(embed);
 
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new CustomCommandRepository(con);
-			var c = repo.findByName(event.getGuild().getIdLong(), name);
-			if (c.isEmpty()) {
-				return Responses.error(event, String.format("A Custom Command called `/%s` does not exist.", name));
+			var command = repo.findByName(event.getGuild().getIdLong(), name);
+			if (command.isEmpty()) {
+				return Responses.error(event, String.format("Could not find Custom Command with name `/%s`.", name));
 			}
-			var newCommand = repo.edit(c.get(), command);
-			var e = buildEditCommandEmbed(event.getMember(), newCommand);
+			repo.delete(command.get());
+			var e = buildDeleteCommandEmbed(event.getMember(), command.get());
 			Bot.interactionHandler.registerCommands(event.getGuild());
 			return event.replyEmbeds(e);
 		} catch (SQLException e) {
@@ -59,17 +43,17 @@ public class EditSubCommand implements ISlashCommand {
 		}
 	}
 
-	private MessageEmbed buildEditCommandEmbed(Member createdBy, CustomCommand command) {
+	private MessageEmbed buildDeleteCommandEmbed(Member deletedBy, CustomCommand command) {
 		return new EmbedBuilder()
-				.setAuthor(createdBy.getUser().getAsTag(), null, createdBy.getEffectiveAvatarUrl())
-				.setTitle("Custom Command edited")
+				.setAuthor(deletedBy.getUser().getAsTag(), null, deletedBy.getEffectiveAvatarUrl())
+				.setTitle("Custom Command deleted")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`/%s`", command.getName()), true)
-				.addField("Created by", createdBy.getAsMention(), true)
+				.addField("Created by", deletedBy.getAsMention(), true)
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
 				.addField("Embed?", String.format("`%s`", command.isEmbed()), true)
-				.setColor(Bot.config.get(createdBy.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Bot.config.get(deletedBy.getGuild()).getSlashCommand().getDefaultColor())
 				.setTimestamp(Instant.now())
 				.build();
 	}

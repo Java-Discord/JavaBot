@@ -21,6 +21,7 @@ CREATE TABLE jam (
 	started_by BIGINT NOT NULL,
 	created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 	starts_at DATE NOT NULL COMMENT 'Official start date of the jam. Usually the start of the month.',
+	ends_at DATE COMMENT 'Official end date of the jam.',
 	completed BOOLEAN NOT NULL DEFAULT FALSE,
 	current_phase VARCHAR(64) NULL DEFAULT 'Theme Planning' REFERENCES jam_phase(name)
 		ON UPDATE CASCADE ON DELETE SET NULL
@@ -76,27 +77,6 @@ CREATE TABLE jam_message_id (
 	PRIMARY KEY (jam_id, message_id),
 	message_type VARCHAR(64) NOT NULL,
 	UNIQUE (jam_id, message_type)
-);
-
-// Economy relations
-CREATE TABLE economy_account (
-	user_id BIGINT PRIMARY KEY,
-	created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-	balance BIGINT NOT NULL DEFAULT 0
-);
-
-CREATE TABLE economy_transaction (
-	id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-	from_user_id BIGINT NULL,
-	to_user_id BIGINT NULL,
-	value BIGINT NOT NULL,
-	message VARCHAR(127)
-);
-
-CREATE TABLE economy_account_preferences (
-	user_id BIGINT PRIMARY KEY,
-	receive_transaction_dms BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 // Help system.

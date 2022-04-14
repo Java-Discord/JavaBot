@@ -20,11 +20,13 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.IMessageContextCommand;
-import net.javadiscord.javabot.command.interfaces.IUserContextCommand;
+import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
+import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
+import net.javadiscord.javabot.util.InteractionUtils;
 
 import java.time.Instant;
 
@@ -32,7 +34,7 @@ import java.time.Instant;
  * Command that allows members to report other members.
  */
 @Slf4j
-public class ReportCommand extends ModerateUserCommand implements IUserContextCommand, IMessageContextCommand {
+public class ReportCommand extends ModerateUserCommand implements UserContextCommand, MessageContextCommand {
 
 	private static final String REASON_OPTION_NAME = "reason";
 
@@ -61,8 +63,8 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 	 * @return the built {@link Modal}
 	 */
 	private Modal buildMessageReportModal(MessageContextInteractionEvent event) {
-		var title = "Report message";
-		var targetMember = event.getTarget().getMember();
+		String title = "Report message";
+		Member targetMember = event.getTarget().getMember();
 		if (targetMember != null) {
 			title += " from " + targetMember.getUser().getAsTag();
 		}
@@ -118,8 +120,8 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 			return;
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
-			var config = Bot.config.get(hook.getInteraction().getGuild());
-			var embed = buildReportEmbed(target, reason, reportedBy, hook.getInteraction().getTextChannel(), config.getSlashCommand());
+			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
+			var embed = buildReportEmbed(target, reason, reportedBy, hook.getInteraction().getChannel(), config.getSlashCommand());
 			embed.setTitle(String.format("%s reported %s", reportedBy.getName(), target.getName()));
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
 			reportChannel.sendMessageEmbeds(embed.build())
@@ -139,7 +141,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 			return;
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
-			var config = Bot.config.get(event.getGuild());
+			GuildConfig config = Bot.config.get(event.getGuild());
 			var embed = buildReportEmbed(target.getAuthor(), reason, event.getUser(), event.getTextChannel(), config.getSlashCommand());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
@@ -158,22 +160,20 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 	private ActionRow setComponents(long targetId, long threadId) {
 		return ActionRow.of(
 				Button.secondary("resolve-report:" + threadId, "Mark as resolved"),
-				Button.danger("utils:ban:" + targetId, "Ban"),
-				Button.danger("utils:kick:" + targetId, "Kick")
+				Button.danger(String.format(InteractionUtils.BAN_TEMPLATE, targetId), "Ban"),
+				Button.danger(String.format(InteractionUtils.KICK_TEMPLATE, targetId), "Kick")
 		);
 	}
 
 	private void createReportThread(Message message, long targetId, ModerationConfig config) {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
-				thread -> {
-					thread.sendMessage(config.getStaffRole().getAsMention())
-							.setActionRows(this.setComponents(targetId, thread.getIdLong()))
-							.queue();
-				}
+				thread -> thread.sendMessage(config.getStaffRole().getAsMention())
+						.setActionRows(this.setComponents(targetId, thread.getIdLong()))
+						.queue()
 		);
 	}
 
-	private EmbedBuilder buildReportEmbed(User reported, String reason, User reportedBy, TextChannel channel, SlashCommandConfig config) {
+	private EmbedBuilder buildReportEmbed(User reported, String reason, User reportedBy, Channel channel, SlashCommandConfig config) {
 		return new EmbedBuilder()
 				.setAuthor(reported.getAsTag(), null, reported.getEffectiveAvatarUrl())
 				.setColor(config.getDefaultColor())
@@ -192,7 +192,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 		if (event.getTarget().getAuthor().equals(event.getUser())) {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
-		return event.replyModal(buildMessageReportModal(event));
+		return event.replyModal(this.buildMessageReportModal(event));
 	}
 
 	@Override
@@ -200,7 +200,7 @@ public class ReportCommand extends ModerateUserCommand implements IUserContextCo
 		if (event.getTarget().equals(event.getUser())) {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
-		return event.replyModal(buildUserReportModal(event));
+		return event.replyModal(this.buildUserReportModal(event));
 	}
 
 	@Override
