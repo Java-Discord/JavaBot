@@ -105,7 +105,6 @@ public class MessageCache extends ListenerAdapter {
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		System.out.println(cache.toString());
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		if (optional.isPresent()) {
 			CachedMessage message = optional.get();

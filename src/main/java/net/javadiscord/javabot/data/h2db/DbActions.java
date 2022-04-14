@@ -109,8 +109,7 @@ public class DbActions {
 	 * @return The column value.
 	 */
 	public static long count(String query) {
-		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
-			var rs = stmt.executeQuery();
+		try (var rs = Bot.dataSource.getConnection().createStatement().executeQuery(query)) {
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
