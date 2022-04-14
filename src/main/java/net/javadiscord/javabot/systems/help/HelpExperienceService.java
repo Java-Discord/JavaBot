@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.help;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -16,6 +17,7 @@ import java.util.Optional;
 /**
  * Service class that handles Help Experience Transactions.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class HelpExperienceService {
 	private final HikariDataSource dataSource;
@@ -74,7 +76,10 @@ public class HelpExperienceService {
 	 * @throws SQLException If an error occurs.
 	 */
 	public HelpTransaction performTransaction(long recipient, double value, HelpTransactionMessage message) throws SQLException {
-		if (value == 0) throw new IllegalArgumentException("Cannot create zero-value transaction.");
+		if (value == 0) {
+			log.error("Cannot make zero-value transactions");
+			return null;
+		}
 		HelpTransaction transaction = new HelpTransaction();
 		transaction.setRecipient(recipient);
 		transaction.setValue(value);
