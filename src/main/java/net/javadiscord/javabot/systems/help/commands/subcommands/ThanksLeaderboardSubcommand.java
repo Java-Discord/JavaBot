@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help;
+package net.javadiscord.javabot.systems.help.commands.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Command that generates a leaderboard based on the help channel thanks count.
  */
-public class ThanksLeaderboardCommandHandler implements SlashCommand {
+public class ThanksLeaderboardSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		var collector = Collectors.joining("\n");

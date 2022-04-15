@@ -58,7 +58,7 @@ public class BotConfig {
 			}
 		}
 		this.guilds = new ConcurrentHashMap<>();
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 		Path systemsFile = dir.resolve(SYSTEMS_FILE);
 		if (Files.exists(systemsFile)) {
 			try (var reader = Files.newBufferedReader(systemsFile)) {

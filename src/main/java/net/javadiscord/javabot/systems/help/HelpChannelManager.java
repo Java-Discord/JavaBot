@@ -19,6 +19,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
+import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.MessageActionUtils;
 
 import javax.annotation.Nullable;
@@ -26,6 +27,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * This manager is responsible for all the main interactions that affect the
@@ -319,6 +321,15 @@ public class HelpChannelManager {
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
 			try (var con = Bot.dataSource.getConnection()) {
+				HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
+				if (reservationOptional.isPresent()) {
+					ChannelReservation reservation = reservationOptional.get();
+					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId());
+					for (Long recipient : experience.keySet()) {
+						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
+					}
+				}
 				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
 				stmt.setLong(1, channel.getIdLong());
 				stmt.executeUpdate();
@@ -506,5 +517,20 @@ public class HelpChannelManager {
 			e.printStackTrace();
 			return Optional.empty();
 		}
+	}
+
+	private Map<Long, Double> calculateExperience(List<Message> messages, long ownerId) {
+		Map<Long, Double> experience = new HashMap<>();
+		if (messages == null || messages.size() == 0) return Map.of();
+		for (User user : messages.stream().map(Message::getAuthor).collect(Collectors.toSet())) {
+			if (user.getIdLong() == ownerId) continue;
+			int xp = 0;
+			for (Message message : messages.stream()
+					.filter(f -> f.getAuthor().getIdLong() != ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
+				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(2));
+			}
+			experience.put(user.getIdLong(), Math.min(xp, config.getMaxExperiencePerChannel()));
+		}
+		return experience;
 	}
 }

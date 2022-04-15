@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.tasks;
 
 import net.dv8tion.jda.api.JDA;
+import net.javadiscord.javabot.systems.help.HelpExperienceJob;
 import net.javadiscord.javabot.systems.qotw.QOTWCloseSubmissionsJob;
 import net.javadiscord.javabot.systems.qotw.QOTWJob;
 import net.javadiscord.javabot.systems.qotw.QOTWReminderJob;
@@ -58,6 +59,9 @@ public class ScheduledTasks {
 		// Schedule checking to make sure there's a new QOTW question in the queue.
 		// We schedule this to run daily at 9am, just so we're always aware when the QOTW queue goes empty.
 		scheduleApiJob(scheduler, jda, QOTWReminderJob.class, CronScheduleBuilder.dailyAtHourAndMinute(9, 0));
+
+		// Schedule daily experience subtraction
+		scheduleApiJob(scheduler, jda, HelpExperienceJob.class, CronScheduleBuilder.dailyAtHourAndMinute(0, 0));
 	}
 
 	/**

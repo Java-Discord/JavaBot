@@ -627,14 +627,12 @@
           choices:
             - name: Custom Commands
               value: CUSTOM_COMMANDS
-            - name: Economy Account
-              value: ECONOMY_ACCOUNT
-            - name: Economy Account Preferences
-              value: ECONOMY_ACCOUNT_PREFERENCES
-            - name: Economy Transactions
-              value: ECONOMY_TRANSACTIONS
+            - name: Help Account
+              value: HELP_ACCOUNT
             - name: Help Channel Thanks
               value: HELP_CHANNEL_THANKS
+            - name: Help Transactions
+              value: HELP_TRANSACTION
             - name: Java Jams
               value: JAM
             - name: Java Jam Messages

@@ -160,4 +160,17 @@ CREATE TABLE message_cache (
 	 message_id BIGINT PRIMARY KEY,
 	 author_id BIGINT NOT NULL,
 	 message_content VARCHAR(4000) DEFAULT ''
-)
+);
+
+CREATE TABLE help_account (
+	  user_id BIGINT PRIMARY KEY,
+	  experience DOUBLE NOT NULL
+);
+
+CREATE TABLE help_transaction (
+	  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+	  recipient BIGINT NOT NULL,
+	  created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+	  value DOUBLE NOT NULL,
+	  messageType INT NOT NULL DEFAULT 0
+);
