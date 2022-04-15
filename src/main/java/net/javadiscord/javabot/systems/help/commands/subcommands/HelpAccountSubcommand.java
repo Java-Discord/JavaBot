@@ -50,9 +50,9 @@ public class HelpAccountSubcommand implements SlashCommand {
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
-				.addField("Experience (BETA)", String.format("%s\n\n**Recent Transactions**\n```%s(Received a total of %.2f XP)```",
+				.addField("Experience (BETA)", String.format("%s\n\n**Recent Transactions**\n```diff\n%s```",
 						this.formatExperience(guild, account),
-						this.formatTransactionHistory(user.getIdLong()), account.getExperience()), false)
+						this.formatTransactionHistory(user.getIdLong())), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
 				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true)
 				.build();
@@ -68,7 +68,7 @@ public class HelpAccountSubcommand implements SlashCommand {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return sb.toString();
+		return sb.toString().length() > 0 ? sb.toString() : "No recent transactions";
 	}
 
 	private String formatExperience(Guild guild, HelpAccount account) {
@@ -77,11 +77,12 @@ public class HelpAccountSubcommand implements SlashCommand {
 		double goal = role.getValue() - account.getLastExperienceGoal(guild);
 		StringBuilder sb = new StringBuilder(String.format("<@&%s>: ", role.getKey()));
 		if (goal > 0) {
-			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100));
+			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100))
+					.append("\n")
+					.append(StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 14));
 		} else {
-			sb.append("MAX LEVEL");
+			sb.append(String.format("%.2f XP (MAX. LEVEL)", account.getExperience()));
 		}
-		sb.append("\n").append(StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 15));
 		return sb.toString();
 	}
 }
