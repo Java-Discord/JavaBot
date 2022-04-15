@@ -6,9 +6,10 @@ import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
-import net.javadiscord.javabot.systems.help.*;
+import net.javadiscord.javabot.systems.help.naming_strategies.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Configuration for the guild's help system.
@@ -135,6 +136,46 @@ public class HelpConfig extends GuildConfigItem {
 	 * How often users may use the /help-ping command.
 	 */
 	private int helpPingTimeoutSeconds = 300;
+
+	/**
+	 * The maximum amount of experience one can get from one help channel.
+	 */
+	private double maxExperiencePerChannel = 50;
+
+	/**
+	 * The base experience one gets for every message.
+	 */
+	private double baseExperience = 5;
+
+	/**
+	 * The weight for each character.
+	 */
+	private double perCharacterExperience = 1;
+
+	/**
+	 * The message's minimum length.
+	 */
+	private int minimumMessageLength = 10;
+
+	/**
+	 * The amount of experience points one gets for being thanked by the help channel owner.
+	 */
+	private double thankedExperience = 50;
+
+	/**
+	 * The amount of experience one gets for thanking other users.
+	 */
+	private double thankExperience = 3;
+
+	/**
+	 * The amount that should be subtracted from every Help Account each day.
+	 */
+	private double dailyExperienceSubtraction = 5;
+
+	/**
+	 * A list with all roles that are awarded by experience.
+	 */
+	private Map<Long, Double> experienceRoles = Map.of(0L, 0.0);
 
 	public Category getOpenChannelCategory() {
 		return getGuild().getCategoryById(this.openCategoryId);

@@ -53,4 +53,21 @@ public class StringUtils {
 		}
 		return output.toString();
 	}
+
+	/**
+	 * Builds a progress bar out of Strings.
+	 *
+	 * @param current The current value.
+	 * @param max The max value.
+	 * @param off The String that should be used for the "off" state
+	 * @param on The String that should be used for the "on" state
+	 * @param length The amount of repetitions.
+	 * @return The formatted String.
+	 */
+	public static String buildProgressBar(double current, double max, String off, String on, int length) {
+		if (current > max) current = max;
+		double percent = current / max;
+		int onLength = (int) (length * percent);
+		return on.repeat(onLength) + off.repeat(length - onLength);
+	}
 }

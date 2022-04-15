@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help;
+package net.javadiscord.javabot.systems.help.commands;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -8,6 +8,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.systems.help.HelpChannelManager;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Handler for the /help-ping command that allows users to occasionally ping
  * helpers.
  */
-public class HelpPingCommandHandler implements SlashCommand {
+public class HelpPingCommand implements SlashCommand {
 	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **reserved help channels**.";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
@@ -26,7 +27,7 @@ public class HelpPingCommandHandler implements SlashCommand {
 	/**
 	 * Constructor that initializes and handles the cooldown map.
 	 */
-	public HelpPingCommandHandler() {
+	public HelpPingCommand() {
 		lastPingTimes = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
 			var membersToRemove = lastPingTimes.entrySet().stream().filter(entry -> {
