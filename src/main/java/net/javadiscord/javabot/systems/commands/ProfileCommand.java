@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
@@ -39,6 +40,7 @@ public class ProfileCommand implements SlashCommand {
 		var points = new QuestionPointsRepository(con).getAccountByUserId(member.getIdLong()).getPoints();
 		var roles = member.getRoles();
 		var status = member.getOnlineStatus().name();
+		var helpXP = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(member.getIdLong()).getExperience();
 		var embed = new EmbedBuilder()
 				.setTitle("Profile")
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
@@ -62,8 +64,10 @@ public class ProfileCommand implements SlashCommand {
 						points,
 						points == 1 ? "" : "s",
 						new LeaderboardCommand().getQOTWRank(member, member.getGuild())), true)
+				.addField("Total Help XP", String.format("%.2f XP", helpXP), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);
+
 		if (member.getTimeBoosted() != null) {
 			embed.addField("Boosted since", String.format("<t:%s:R>", member.getTimeBoosted().toEpochSecond()), true);
 		}
