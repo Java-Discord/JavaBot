@@ -3,6 +3,7 @@ package net.javadiscord.javabot.data.h2db;
 import net.javadiscord.javabot.Bot;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -93,6 +94,22 @@ public class DbActions {
 		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			var rs = stmt.executeQuery();
+			if (!rs.next()) return 0;
+			return rs.getLong(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
+	/**
+	 * Counts the amount of rows that fit the given query.
+	 *
+	 * @param query    The query.
+	 * @return The column value.
+	 */
+	public static long count(String query) {
+		try (var rs = Bot.dataSource.getConnection().createStatement().executeQuery(query)) {
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
@@ -201,5 +218,24 @@ public class DbActions {
 			e.printStackTrace();
 			return Optional.empty();
 		}
+	}
+
+	/**
+	 * Gets the logical size of a single database table in bytes.
+	 *
+	 * @param table The database table.
+	 * @return The logical size, in bytes.
+	 */
+	public static int getLogicalSize(String table) {
+		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement("CALL DISK_SPACE_USED(?)")) {
+			stmt.setString(1, table);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 }

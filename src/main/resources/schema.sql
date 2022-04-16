@@ -156,6 +156,12 @@ CREATE TABLE qotw_submissions (
 	  accepted BOOL NOT NULL DEFAULT FALSE
 );
 
+CREATE TABLE message_cache (
+	 message_id BIGINT PRIMARY KEY,
+	 author_id BIGINT NOT NULL,
+	 message_content VARCHAR(4000) NOT NULL
+);
+
 CREATE TABLE help_account (
 	  user_id BIGINT PRIMARY KEY,
 	  experience DOUBLE NOT NULL

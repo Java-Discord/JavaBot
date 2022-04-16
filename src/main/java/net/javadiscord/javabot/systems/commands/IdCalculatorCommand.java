@@ -23,21 +23,23 @@ public class IdCalculatorCommand implements SlashCommand {
 			return Responses.error(event, "Missing required arguments");
 		}
 		long id = idOption.getAsLong();
-		long unixTimestampMilliseconds = id / 4194304 + 1420070400000L;
-		long unixTimestamp = unixTimestampMilliseconds / 1000;
 		var config = Bot.config.get(event.getGuild()).getSlashCommand();
-		return event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, unixTimestamp, unixTimestampMilliseconds, config));
+		return event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id), config));
 	}
 
-	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp, long unixTimestampMillis, SlashCommandConfig config) {
-		var instant = Instant.ofEpochMilli(unixTimestampMillis);
+	public static long getTimestampFromId(long id) {
+		return id / 4194304 + 1420070400000L;
+	}
+
+	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp, SlashCommandConfig config) {
+		Instant instant = Instant.ofEpochMilli(unixTimestamp / 1000);
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("ID-Calculator")
 				.setColor(config.getDefaultColor())
 				.addField("Input", String.format("`%s`", id), false)
 				.addField("Unix-Timestamp", String.format("`%s`", unixTimestamp), true)
-				.addField("Unix-Timestamp (+ milliseconds)", String.format("`%s`", unixTimestampMillis), true)
+				.addField("Unix-Timestamp (+ milliseconds)", String.format("`%s`", unixTimestamp / 1000), true)
 				.addField("Date", String.format("<t:%s:F>", instant.getEpochSecond()), false)
 				.build();
 	}

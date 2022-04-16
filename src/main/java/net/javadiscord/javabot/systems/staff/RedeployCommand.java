@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.staff;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 /**
@@ -19,6 +20,7 @@ public class RedeployCommand implements SlashCommand {
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
 		event.reply("Redeploying... this can take up to 2 Minutes.").queue();
+		Bot.messageCache.synchronize();
 		System.exit(0);
 		return null;
 	}

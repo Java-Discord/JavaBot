@@ -4,9 +4,10 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
+import net.javadiscord.javabot.data.h2db.commands.message_cache.MessageCacheInfoSubcommand;
+import java.util.Map;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
 import net.javadiscord.javabot.util.AutocompleteUtils;
-
 import java.util.List;
 
 /**
@@ -21,6 +22,10 @@ public class DbAdminCommandHandler extends DelegatingCommandHandler implements A
 		this.addSubcommand("export-table", new ExportTableSubcommand());
 		this.addSubcommand("migrations-list", new MigrationsListSubcommand());
 		this.addSubcommand("migrate", new MigrateSubcommand());
+
+		this.addSubcommandGroup("message-cache", new DelegatingCommandHandler(Map.of(
+				"info", new MessageCacheInfoSubcommand()
+		)));
 	}
 
 	@Override
