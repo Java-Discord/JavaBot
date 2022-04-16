@@ -3,10 +3,6 @@ package net.javadiscord.javabot.data.h2db.message_cache;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
@@ -17,7 +13,6 @@ import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
 import net.javadiscord.javabot.util.GuildUtils;
 import net.javadiscord.javabot.util.TimeUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -29,7 +24,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Listens for Incoming Messages and stores them in the Message Cache.
@@ -89,7 +83,7 @@ public class MessageCache {
 	 * Sends the updated message's content to the {@link MessageCacheConfig#getMessageCacheLogChannel()}.
 	 *
 	 * @param updated The new {@link Message}.
-	 * @param before The {@link CachedMessage}.
+	 * @param before  The {@link CachedMessage}.
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
@@ -105,7 +99,7 @@ public class MessageCache {
 	/**
 	 * Sends the deleted message's content to the {@link MessageCacheConfig#getMessageCacheLogChannel()}.
 	 *
-	 * @param guild The message's {@link Guild}.
+	 * @param guild   The message's {@link Guild}.
 	 * @param channel The message's {@link MessageChannel}.
 	 * @param message The {@link CachedMessage}.
 	 */
@@ -121,7 +115,7 @@ public class MessageCache {
 		cache.remove(message);
 	}
 
-	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, CachedMessage before){
+	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, CachedMessage before) {
 		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
 		return new EmbedBuilder()
 				.addField("Channel", channel.getAsMention(), true)
@@ -160,8 +154,8 @@ public class MessageCache {
 	/**
 	 * Builds a {@link MessageEmbed} object that is used for messages, that were deleted but not cached.
 	 *
-	 * @param guild The message's guild.
-	 * @param channel The message's channel.
+	 * @param guild     The message's guild.
+	 * @param channel   The message's channel.
 	 * @param messageId The message's id.
 	 * @return The fully-built {@link MessageEmbed} object.
 	 */

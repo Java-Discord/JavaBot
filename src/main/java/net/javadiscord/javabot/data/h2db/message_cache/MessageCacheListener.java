@@ -58,7 +58,7 @@ public class MessageCacheListener extends ListenerAdapter {
 
 	/**
 	 * Checks whether the given message should be ignored by the cache.
-	 *
+	 * <p>
 	 * This is done with the following criteria:
 	 * <ol>
 	 *     <li>Message author is a bot</li>
