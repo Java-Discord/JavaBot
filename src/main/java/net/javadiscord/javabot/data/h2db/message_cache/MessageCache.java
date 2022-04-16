@@ -59,15 +59,12 @@ public class MessageCache extends ListenerAdapter {
 	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
 	 */
 	public void synchronize() {
-		try {
-			new MessageCacheRepository(Bot.dataSource.getConnection()).delete(cache.size());
-			new MessageCacheRepository(Bot.dataSource.getConnection()).insertList(cache);
-			messageCount = 0;
+		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
+		    dao.delete(cache.size());
+		    dao.insertList(cache);
+		    messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
-		} catch (SQLException e) {
-			log.error("Something went wrong during synchronization of messages with DB.");
-			log.error(e.getMessage());
-		}
+		});
 	}
 
 	@Override
