@@ -31,7 +31,6 @@ public class MessageCacheRepository {
 			stmt.setLong(2, message.getAuthorId());
 			stmt.setString(3, message.getMessageContent());
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
@@ -53,7 +52,6 @@ public class MessageCacheRepository {
 				Statement.RETURN_GENERATED_KEYS
 		)) {
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
@@ -72,7 +70,6 @@ public class MessageCacheRepository {
 			stmt.setString(1, message.getMessageContent());
 			stmt.setLong(2, message.getMessageId());
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
@@ -90,7 +87,6 @@ public class MessageCacheRepository {
 		)) {
 			stmt.setLong(1, messageId);
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
@@ -106,7 +102,6 @@ public class MessageCacheRepository {
 				Statement.RETURN_GENERATED_KEYS
 		)) {
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
@@ -140,7 +135,6 @@ public class MessageCacheRepository {
 		)) {
 			stmt.setInt(1, amount);
 			int rows = stmt.executeUpdate();
-			stmt.close();
 			return rows > 0;
 		}
 	}
