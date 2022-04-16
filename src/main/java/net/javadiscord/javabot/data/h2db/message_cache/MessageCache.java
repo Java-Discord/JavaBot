@@ -48,8 +48,8 @@ public class MessageCache extends ListenerAdapter {
 	 * Creates a new messages & loads messages from the DB into a List.
 	 */
 	public MessageCache() {
-		try {
-			cache = new MessageCacheRepository(Bot.dataSource.getConnection()).getAll();
+		try (Connection con = Bot.dataSource.getConnection()){
+			cache = new MessageCacheRepository(con).getAll();
 		} catch (SQLException e) {
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
