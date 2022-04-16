@@ -98,7 +98,10 @@ public class MessageCache extends ListenerAdapter {
 			action.queue();
 			cache.set(cache.indexOf(before), CachedMessage.of(event.getMessage()));
 		} else {
-			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I could not retrieve its content.", event.getMessageIdLong())).queue();
+			CachedMessage before = new CachedMessage();
+			before.setMessageId(event.getMessageIdLong());
+			before.setMessageContent("[unknown content]");
+			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage())).queue();
 		}
 	}
 
