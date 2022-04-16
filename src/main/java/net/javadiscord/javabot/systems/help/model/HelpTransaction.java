@@ -27,6 +27,6 @@ public class HelpTransaction {
 	}
 
 	public String format() {
-		return String.format("%s%s XP (%s)\n%s", value > 0 ? "+" : "-", value, createdAt.format(TimeUtils.STANDARD_FORMATTER), this.getMessage());
+		return String.format("%s%s XP (%s UTC)\n%s", value > 0 ? "+" : "-", value, createdAt.format(TimeUtils.STANDARD_FORMATTER), this.getMessage());
 	}
 }
