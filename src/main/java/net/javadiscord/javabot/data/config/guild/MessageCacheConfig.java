@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
+import java.util.List;
+
 /**
  * Configuration for the bot's message cache.
  */
@@ -29,12 +31,12 @@ public class MessageCacheConfig extends GuildConfigItem {
 	/**
 	 * Channels the Bot should ignore.
 	 */
-	private Long[] excludedChannels;
+	private List<Long> excludedChannels;
 
 	/**
 	 * Users the Bot should ignore.
 	 */
-	private Long[] excludedUsers;
+	private List<Long> excludedUsers;
 
 	public TextChannel getMessageCacheLogChannel() {
 		return this.getGuild().getTextChannelById(this.messageCacheLogChannelId);
