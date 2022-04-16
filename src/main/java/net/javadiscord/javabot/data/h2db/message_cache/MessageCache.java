@@ -86,23 +86,24 @@ public class MessageCache extends ListenerAdapter {
 	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
+		CachedMessage before;
 		if (optional.isPresent()) {
-			CachedMessage before = optional.get();
-			if (event.getMessage().getContentRaw().trim().equals(before.getMessageContent())) return;
-			MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
-					.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
-					.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
-			if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-				action.addFile(this.buildEditedMessageFile(event.getAuthor(), before, event.getMessage()), before.getMessageId() + ".txt");
-			}
-			action.queue();
+			before = optional.get();
 			cache.set(cache.indexOf(before), CachedMessage.of(event.getMessage()));
 		} else {
-			CachedMessage before = new CachedMessage();
+			before = new CachedMessage();
 			before.setMessageId(event.getMessageIdLong());
 			before.setMessageContent("[unknown content]");
-			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage())).queue();
+			cache.add(CachedMessage.of(event.getMessage()));
 		}
+		if (event.getMessage().getContentRaw().trim().equals(before.getMessageContent())) return;
+		MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
+				.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
+				.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
+		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
+			action.addFile(this.buildEditedMessageFile(event.getAuthor(), before, event.getMessage()), before.getMessageId() + ".txt");
+		}
+		action.queue();
 	}
 
 	@Override
