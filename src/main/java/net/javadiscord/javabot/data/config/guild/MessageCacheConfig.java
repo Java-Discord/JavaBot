@@ -31,12 +31,12 @@ public class MessageCacheConfig extends GuildConfigItem {
 	/**
 	 * Channels the Bot should ignore.
 	 */
-	private List<Long> excludedChannels;
+	private List<Long> excludedChannels = List.of();
 
 	/**
 	 * Users the Bot should ignore.
 	 */
-	private List<Long> excludedUsers;
+	private List<Long> excludedUsers = List.of();
 
 	public TextChannel getMessageCacheLogChannel() {
 		return this.getGuild().getTextChannelById(this.messageCacheLogChannelId);
