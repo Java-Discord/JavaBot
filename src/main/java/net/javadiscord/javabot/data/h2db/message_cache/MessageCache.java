@@ -48,8 +48,8 @@ public class MessageCache extends ListenerAdapter {
 	 * Creates a new messages & loads messages from the DB into a List.
 	 */
 	public MessageCache() {
-		try (Connection con = Bot.dataSource.getConnection()){
-			cache = new MessageCacheRepository(con).getAll();
+		try {
+			cache = new MessageCacheRepository(Bot.dataSource.getConnection()).getAll();
 		} catch (SQLException e) {
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
@@ -105,13 +105,14 @@ public class MessageCache extends ListenerAdapter {
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		if (optional.isPresent()) {
 			CachedMessage message = optional.get();
-			User author = event.getJDA().retrieveUserById(message.getAuthorId()).complete();
-			MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
-					.sendMessageEmbeds(this.buildMessageDeleteEmbed(event.getGuild(), author, event.getChannel(), message));
-			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
-			}
-			action.queue();
+			event.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
+				MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
+						.sendMessageEmbeds(this.buildMessageDeleteEmbed(event.getGuild(), author, event.getChannel(), message));
+				if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
+					action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
+				}
+				action.queue();
+			});
 			cache.remove(message);
 		} else {
 			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
@@ -139,39 +140,35 @@ public class MessageCache extends ListenerAdapter {
 				config.getExcludedChannels().contains(message.getChannel().getIdLong());
 	}
 
-	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
+	private EmbedBuilder buildMessageCacheEmbed(User author, MessageChannel channel, CachedMessage before){
 		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
-				.setTitle("Message Edited")
-				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
 				.addField("Author", author.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
+				.setFooter("ID: " + before.getMessageId());
+	}
+	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
+		return buildMessageCacheEmbed(author, channel, before)
+				.setTitle("Message Edited")
+				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
 				.addField("Before", before.getMessageContent().substring(0, Math.min(
 						before.getMessageContent().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
 				.addField("After", after.getContentRaw().substring(0, Math.min(
 						after.getContentRaw().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
-				.setFooter("ID: " + before.getMessageId())
 				.build();
 	}
-
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
-		long epoch = IdCalculatorCommand.getTimestampFromId(message.getMessageId()) / 1000;
-		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+		return buildMessageCacheEmbed(author, channel, message)
 				.setTitle("Message Deleted")
 				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
-				.addField("Author", author.getAsMention(), true)
-				.addField("Channel", channel.getAsMention(), true)
-				.addField("Created at", String.format("<t:%s:F>", epoch), true)
 				.addField("Message Content",
 						message.getMessageContent().substring(0, Math.min(
 								message.getMessageContent().length(),
 								MessageEmbed.VALUE_MAX_LENGTH)), false)
-				.setFooter("ID: " + message.getMessageId())
 				.build();
 	}
 
