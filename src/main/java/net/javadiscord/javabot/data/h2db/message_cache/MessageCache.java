@@ -150,6 +150,7 @@ public class MessageCache extends ListenerAdapter {
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
 				.setFooter("ID: " + before.getMessageId());
 	}
+
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
 		return buildMessageCacheEmbed(author, channel, before)
 				.setTitle("Message Edited")
@@ -162,6 +163,7 @@ public class MessageCache extends ListenerAdapter {
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
 				.build();
 	}
+
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
 		return buildMessageCacheEmbed(author, channel, message)
 				.setTitle("Message Deleted")
