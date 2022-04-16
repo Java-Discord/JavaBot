@@ -15,6 +15,7 @@ import net.javadiscord.javabot.command.InteractionHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
+import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
@@ -126,6 +127,7 @@ public class Bot {
 	 */
 	private static void addEventListeners(JDA jda) {
 		jda.addEventListener(
+				new MessageCacheListener(),
 				new GitHubLinkListener(),
 				new MessageLinkListener(),
 				new GuildJoinListener(),

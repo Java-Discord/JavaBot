@@ -4,7 +4,9 @@ import lombok.Data;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Data class that represents a single Help User Account.
