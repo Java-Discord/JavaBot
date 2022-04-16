@@ -4,11 +4,12 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
-import net.javadiscord.javabot.data.h2db.commands.message_cache.MessageCacheInfoSubcommand;
-import java.util.Map;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
+import net.javadiscord.javabot.data.h2db.commands.message_cache.MessageCacheInfoSubcommand;
 import net.javadiscord.javabot.util.AutocompleteUtils;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handler class for all Database related commands.
