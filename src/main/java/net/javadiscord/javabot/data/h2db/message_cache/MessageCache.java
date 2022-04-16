@@ -151,7 +151,7 @@ public class MessageCache extends ListenerAdapter {
 	}
 
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
-		return buildMessageCacheEmbed( channel, before)
+		return buildMessageCacheEmbed(channel, before)
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("Message Edited")
 				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
