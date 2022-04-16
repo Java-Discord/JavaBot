@@ -40,7 +40,7 @@ public class MessageCache {
 	 * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
 	 * messages during an unexpected shutdown.
 	 */
-	private int messageCount = 0;
+	public int messageCount = 0;
 
 	/**
 	 * Creates a new messages & loads messages from the DB into a List.
