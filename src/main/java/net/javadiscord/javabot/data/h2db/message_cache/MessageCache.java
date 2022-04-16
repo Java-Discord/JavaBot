@@ -88,6 +88,7 @@ public class MessageCache extends ListenerAdapter {
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		if (optional.isPresent()) {
 			CachedMessage before = optional.get();
+			if (event.getMessage().getContentRaw().trim().equals(before.getMessageContent())) return;
 			MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
 					.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
 					.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
