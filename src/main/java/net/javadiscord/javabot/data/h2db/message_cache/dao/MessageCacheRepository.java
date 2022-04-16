@@ -36,23 +36,21 @@ public class MessageCacheRepository {
 	}
 
 	/**
-	 * Inserts a {@link List} of {@link CachedMessage} objects..
+	 * Inserts a {@link List} of {@link CachedMessage} objects.
 	 *
 	 * @param messages The List to insert.
-	 * @return Whether there were rows affected by this process.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean insertList(List<CachedMessage> messages) throws SQLException {
-		StringBuilder statementString = new StringBuilder("INSERT INTO message_cache (message_id, author_id, message_content) VALUES");
-		for (CachedMessage msg:messages) {
-			statementString.append(String.format(" (%s, %s, '%s'),", msg.getMessageId(), msg.getAuthorId(), msg.getMessageContent()));
-		}
-		statementString.deleteCharAt(statementString.toString().length() - 1).append(";");
-		try (		PreparedStatement stmt = con.prepareStatement(statementString.toString(),
+	public void insertList(List<CachedMessage> messages) throws SQLException {
+		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
-			int rows = stmt.executeUpdate();
-			return rows > 0;
+			for (CachedMessage msg:messages) {
+				stmt.setLong(1, msg.getMessageId());
+				stmt.setLong(2, msg.getAuthorId());
+				stmt.setString(3, msg.getMessageContent());
+				stmt.executeUpdate();
+			}
 		}
 	}
 
