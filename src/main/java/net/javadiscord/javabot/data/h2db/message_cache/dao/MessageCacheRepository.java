@@ -24,15 +24,16 @@ public class MessageCacheRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public boolean insert(CachedMessage message) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
+		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
-		);
-		stmt.setLong(1, message.getMessageId());
-		stmt.setLong(2, message.getAuthorId());
-		stmt.setString(3, message.getMessageContent());
-		int rows = stmt.executeUpdate();
-		stmt.close();
-		return rows > 0;
+		)) {
+	    	stmt.setLong(1, message.getMessageId());
+	    	stmt.setLong(2, message.getAuthorId());
+	    	stmt.setString(3, message.getMessageContent());
+		    int rows = stmt.executeUpdate();
+		    stmt.close();
+		    return rows > 0;
+   }
 	}
 
 	/**
