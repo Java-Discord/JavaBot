@@ -35,7 +35,7 @@ import java.util.Optional;
  * Listens for Incoming Messages and stores them in the Message Cache.
  */
 @Slf4j
-public class MessageCache extends ListenerAdapter {
+public class MessageCache {
 	List<CachedMessage> cache = new ArrayList<>();
 	/**
 	 * Amount of messages since the last synchronization.
@@ -68,10 +68,13 @@ public class MessageCache extends ListenerAdapter {
 		});
 	}
 
-	@Override
-	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (this.ignoreMessageCache(event.getMessage())) return;
-		MessageCacheConfig config = Bot.config.get(event.getGuild()).getMessageCache();
+	/**
+	 * Caches a single {@link Message} object.
+	 *
+	 * @param message The message to cache.
+	 */
+	public void cache(Message message) {
+		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
@@ -79,71 +82,43 @@ public class MessageCache extends ListenerAdapter {
 			synchronize();
 		}
 		messageCount++;
-		cache.add(CachedMessage.of(event.getMessage()));
+		cache.add(CachedMessage.of(message));
 	}
 
-	@Override
-	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
-		if (this.ignoreMessageCache(event.getMessage())) return;
-		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
-		CachedMessage before;
-		if (optional.isPresent()) {
-			before = optional.get();
-			cache.set(cache.indexOf(before), CachedMessage.of(event.getMessage()));
-		} else {
-			before = new CachedMessage();
-			before.setMessageId(event.getMessageIdLong());
-			before.setMessageContent("[unknown content]");
-			cache.add(CachedMessage.of(event.getMessage()));
-		}
-		if (event.getMessage().getContentRaw().trim().equals(before.getMessageContent())) return;
-		MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
-				.sendMessageEmbeds(this.buildMessageEditEmbed(event.getGuild(), event.getAuthor(), event.getChannel(), before, event.getMessage()))
-				.setActionRow(Button.link(event.getMessage().getJumpUrl(), "Jump to Message"));
-		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || event.getMessage().getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-			action.addFile(this.buildEditedMessageFile(event.getAuthor(), before, event.getMessage()), before.getMessageId() + ".txt");
+	/**
+	 * Sends the updated message's content to the {@link MessageCacheConfig#getMessageCacheLogChannel()}.
+	 *
+	 * @param updated The new {@link Message}.
+	 * @param before The {@link CachedMessage}.
+	 */
+	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
+		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
+		MessageAction action = GuildUtils.getCacheLogChannel(updated.getGuild())
+				.sendMessageEmbeds(this.buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
+				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
+		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
+			action.addFile(this.buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt");
 		}
 		action.queue();
 	}
 
-	@Override
-	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
-		if (optional.isPresent()) {
-			CachedMessage message = optional.get();
-			event.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-				MessageAction action = GuildUtils.getCacheLogChannel(event.getGuild())
-						.sendMessageEmbeds(this.buildMessageDeleteEmbed(event.getGuild(), author, event.getChannel(), message));
-				if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-					action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
-				}
-				action.queue();
-			});
-			cache.remove(message);
-		} else {
-			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessageEmbeds(buildMessageNotCachedEmbed(event.getGuild(), event.getChannel(), event.getMessageIdLong())).queue();
-		}
-	}
-
 	/**
-	 * Checks whether the given message should be ignored by the cache.
+	 * Sends the deleted message's content to the {@link MessageCacheConfig#getMessageCacheLogChannel()}.
 	 *
-	 * This is done with the following criteria:
-	 * <ol>
-	 *     <li>Message author is a bot</li>
-	 *     <li>Message author is a system account</li>
-	 *     <li>Message author is part of the excluded users</li>
-	 *     <li>Channel is excluded from the cache</li>
-	 * </ol>
-	 *
-	 * @param message The message to check
-	 * @return true if any of the criteria above apply
+	 * @param guild The message's {@link Guild}.
+	 * @param channel The message's {@link MessageChannel}.
+	 * @param message The {@link CachedMessage}.
 	 */
-	private boolean ignoreMessageCache(Message message) {
-		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
-		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
-				config.getExcludedUsers().contains(message.getAuthor().getIdLong()) ||
-				config.getExcludedChannels().contains(message.getChannel().getIdLong());
+	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
+		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
+			MessageAction action = GuildUtils.getCacheLogChannel(guild)
+					.sendMessageEmbeds(this.buildMessageDeleteEmbed(guild, author, channel, message));
+			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
+				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
+			}
+			action.queue();
+		});
+		cache.remove(message);
 	}
 
 	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, CachedMessage before){
@@ -182,7 +157,15 @@ public class MessageCache extends ListenerAdapter {
 				.build();
 	}
 
-	private MessageEmbed buildMessageNotCachedEmbed(Guild guild, MessageChannel channel, long messageId) {
+	/**
+	 * Builds a {@link MessageEmbed} object that is used for messages, that were deleted but not cached.
+	 *
+	 * @param guild The message's guild.
+	 * @param channel The message's channel.
+	 * @param messageId The message's id.
+	 * @return The fully-built {@link MessageEmbed} object.
+	 */
+	public MessageEmbed buildMessageNotCachedEmbed(Guild guild, MessageChannel channel, long messageId) {
 		CachedMessage message = new CachedMessage();
 		message.setMessageId(messageId);
 		return buildMessageCacheEmbed(channel, message)
