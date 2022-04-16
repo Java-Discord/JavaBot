@@ -36,7 +36,7 @@ import java.util.Optional;
  */
 @Slf4j
 public class MessageCache {
-	List<CachedMessage> cache = new ArrayList<>();
+	public List<CachedMessage> cache = new ArrayList<>();
 	/**
 	 * Amount of messages since the last synchronization.
 	 * <p>
