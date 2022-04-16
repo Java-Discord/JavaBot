@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -48,8 +49,8 @@ public class MessageCache extends ListenerAdapter {
 	 * Creates a new messages & loads messages from the DB into a List.
 	 */
 	public MessageCache() {
-		try {
-			cache = new MessageCacheRepository(Bot.dataSource.getConnection()).getAll();
+		try (Connection con = Bot.dataSource.getConnection()) {
+			cache = new MessageCacheRepository(con).getAll();
 		} catch (SQLException e) {
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
