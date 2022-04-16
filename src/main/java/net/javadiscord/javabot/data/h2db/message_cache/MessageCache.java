@@ -117,7 +117,7 @@ public class MessageCache extends ListenerAdapter {
 			});
 			cache.remove(message);
 		} else {
-			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessage(String.format("Message `%s` was not cached, thus, I cannot retrieve its content.", event.getMessageIdLong())).queue();
+			GuildUtils.getCacheLogChannel(event.getGuild()).sendMessageEmbeds(buildMessageNotCachedEmbed(event.getGuild(), event.getChannel(), event.getMessageIdLong())).queue();
 		}
 	}
 
@@ -142,20 +142,20 @@ public class MessageCache extends ListenerAdapter {
 				config.getExcludedChannels().contains(message.getChannel().getIdLong());
 	}
 
-	private EmbedBuilder buildMessageCacheEmbed(User author, MessageChannel channel, CachedMessage before){
+	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, CachedMessage before){
 		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
 		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
-				.addField("Author", author.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
 				.setFooter("ID: " + before.getMessageId());
 	}
 
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
-		return buildMessageCacheEmbed(author, channel, before)
+		return buildMessageCacheEmbed( channel, before)
+				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("Message Edited")
 				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
+				.addField("Author", author.getAsMention(), true)
 				.addField("Before", before.getMessageContent().substring(0, Math.min(
 						before.getMessageContent().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
@@ -166,13 +166,25 @@ public class MessageCache extends ListenerAdapter {
 	}
 
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
-		return buildMessageCacheEmbed(author, channel, message)
+		return buildMessageCacheEmbed(channel, message)
+				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("Message Deleted")
 				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.addField("Author", author.getAsMention(), true)
 				.addField("Message Content",
 						message.getMessageContent().substring(0, Math.min(
 								message.getMessageContent().length(),
 								MessageEmbed.VALUE_MAX_LENGTH)), false)
+				.build();
+	}
+
+	private MessageEmbed buildMessageNotCachedEmbed(Guild guild, MessageChannel channel, long messageId) {
+		CachedMessage message = new CachedMessage();
+		message.setMessageId(messageId);
+		return buildMessageCacheEmbed(channel, message)
+				.setTitle("Message Deleted")
+				.setDescription("The message was not cached, thus, I could not retrieve its content.")
+				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
 				.build();
 	}
 
