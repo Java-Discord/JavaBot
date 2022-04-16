@@ -44,7 +44,7 @@ public class MessageCacheRepository {
 	 */
 	public boolean insertList(List<CachedMessage> messages) throws SQLException {
 		StringBuilder statementString = new StringBuilder("INSERT INTO message_cache (message_id, author_id, message_content) VALUES");
-		for (CachedMessage msg:messages) {
+		for (CachedMessage msg : messages) {
 			statementString.append(String.format(" (%s, %s, '%s'),", msg.getMessageId(), msg.getAuthorId(), msg.getMessageContent()));
 		}
 		statementString.deleteCharAt(statementString.toString().length() - 1).append(";");
