@@ -75,7 +75,7 @@ public class MessageCache extends ListenerAdapter {
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
-		if (messageCount >= 50) {
+		if (messageCount >= config.getMessageSynchronizationInterval()) {
 			synchronize();
 		}
 		messageCount++;

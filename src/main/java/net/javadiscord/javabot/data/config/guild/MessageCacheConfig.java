@@ -22,6 +22,11 @@ public class MessageCacheConfig extends GuildConfigItem {
 	private long messageCacheLogChannelId;
 
 	/**
+	 * The amount of messages after which the DB is synchronized with the local cache.
+	 */
+	private int messageSynchronizationInterval = 50;
+
+	/**
 	 * Channels the Bot should ignore.
 	 */
 	private Long[] excludedChannels;
