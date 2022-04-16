@@ -105,7 +105,7 @@ public class Bot {
 				.setMemberCachePolicy(MemberCachePolicy.ALL)
 				.enableCache(CacheFlag.ACTIVITY)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-				.addEventListeners(interactionHandler, autoMod, messageCache)
+				.addEventListeners(interactionHandler, autoMod)
 				.build();
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOTE));
 		addEventListeners(jda);
