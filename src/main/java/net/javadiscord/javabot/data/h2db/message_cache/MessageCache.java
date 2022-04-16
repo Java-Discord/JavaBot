@@ -136,8 +136,8 @@ public class MessageCache extends ListenerAdapter {
 	private boolean ignoreMessageCache(Message message) {
 		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
 		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
-				Arrays.asList(config.getExcludedUsers()).contains(message.getAuthor().getIdLong()) ||
-				Arrays.asList(config.getExcludedChannels()).contains(message.getChannel().getIdLong());
+				config.getExcludedUsers().contains(message.getAuthor().getIdLong()) ||
+				config.getExcludedChannels().contains(message.getChannel().getIdLong());
 	}
 
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
