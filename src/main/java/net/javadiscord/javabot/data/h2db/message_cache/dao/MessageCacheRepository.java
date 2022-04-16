@@ -92,21 +92,6 @@ public class MessageCacheRepository {
 	}
 
 	/**
-	 * Delete all messages saved in the Database.
-	 *
-	 * @return Whether there were rows affected by this process.
-	 * @throws SQLException If an error occurs.
-	 */
-	public boolean deleteAll() throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("TRUNCATE TABLE message_cache",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			int rows = stmt.executeUpdate();
-			return rows > 0;
-		}
-	}
-
-	/**
 	 * Gets all Messages from the Database.
 	 * @return A {@link List} of {@link CachedMessage}s.
 	 * @throws SQLException If anything goes wrong.
@@ -136,23 +121,6 @@ public class MessageCacheRepository {
 			stmt.setInt(1, amount);
 			int rows = stmt.executeUpdate();
 			return rows > 0;
-		}
-	}
-
-	/**
-	 * Returns the last cached Message of the Message Cache.
-	 *
-	 * @return The last {@link CachedMessage}.
-	 * @throws SQLException If an error occurs.
-	 */
-	public CachedMessage getLast() throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache ORDER BY message_id LIMIT 1")) {
-			var rs = s.executeQuery();
-			CachedMessage message = null;
-			while (rs.next()) {
-				message = this.read(rs);
-			}
-			return message;
 		}
 	}
 
