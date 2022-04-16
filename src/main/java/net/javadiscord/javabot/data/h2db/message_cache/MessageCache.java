@@ -30,6 +30,9 @@ import java.util.List;
  */
 @Slf4j
 public class MessageCache {
+	/**
+	 * A memory-cache (list) of sent Messages, wrapped to a {@link CachedMessage} object.
+	 */
 	public List<CachedMessage> cache = new ArrayList<>();
 	/**
 	 * Amount of messages since the last synchronization.
