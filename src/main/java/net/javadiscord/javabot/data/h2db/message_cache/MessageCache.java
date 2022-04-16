@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
@@ -42,7 +43,7 @@ public class MessageCache extends ListenerAdapter {
 	 * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
 	 * messages during an unexpected shutdown.
 	 */
-	int messageCount = 0;
+	private int messageCount = 0;
 
 	/**
 	 * Creates a new messages & loads messages from the DB into a List.
@@ -60,9 +61,9 @@ public class MessageCache extends ListenerAdapter {
 	 */
 	public void synchronize() {
 		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
-		    dao.delete(cache.size());
-		    dao.insertList(cache);
-		    messageCount = 0;
+			dao.delete(cache.size());
+			dao.insertList(cache);
+			messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
 		});
 	}
