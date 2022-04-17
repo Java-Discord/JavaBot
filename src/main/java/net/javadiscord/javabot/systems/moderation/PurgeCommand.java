@@ -55,13 +55,13 @@ public class PurgeCommand extends ModerateCommand {
 	/**
 	 * Purges messages from a channel.
 	 *
-	 * @param amount     The number of messages to remove. If null, all messages
-	 *                   will be removed.
-	 * @param user       The user whose messages to remove. If null, messages from any
-	 *                   user are removed.
-	 * @param archive    Whether to create an archive file for the purge.
-	 * @param channel    The channel to remove messages from.
-	 * @param logChannel The channel to write log messages to during the purge.
+	 * @param amount      The number of messages to remove.
+	 * @param user        The user whose messages to remove. If null, messages from any
+	 *                    user are removed.
+	 * @param initiatedBy The user which initiated the purge.
+	 * @param archive     Whether to create an archive file for the purge.
+	 * @param channel     The channel to remove messages from.
+	 * @param logChannel  The channel to write log messages to during the purge.
 	 */
 	private void purge(@Nullable Long amount, @Nullable User user, User initiatedBy, boolean archive, MessageChannel channel, TextChannel logChannel) {
 		MessageHistory history = channel.getHistory();
@@ -129,7 +129,7 @@ public class PurgeCommand extends ModerateCommand {
 	 *
 	 * @param channel    The channel to create the writer for.
 	 * @param logChannel The log channel, where log messages can be sent.
-	 * @param file The archive's filename.
+	 * @param file       The archive's filename.
 	 * @return The print writer to use.
 	 */
 	private PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
