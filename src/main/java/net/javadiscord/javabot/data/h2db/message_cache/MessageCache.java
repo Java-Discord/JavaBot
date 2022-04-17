@@ -115,23 +115,22 @@ public class MessageCache {
 			}
 			action.queue();
 		});
-		cache.remove(message);
 	}
 
-	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, CachedMessage before) {
+	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage before) {
 		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
 		return new EmbedBuilder()
+				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+				.addField("Author", author.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
 				.setFooter("ID: " + before.getMessageId());
 	}
 
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
-		return buildMessageCacheEmbed(channel, before)
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+		return buildMessageCacheEmbed(channel, author, before)
 				.setTitle("Message Edited")
 				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
-				.addField("Author", author.getAsMention(), true)
 				.addField("Before", before.getMessageContent().substring(0, Math.min(
 						before.getMessageContent().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
@@ -142,33 +141,13 @@ public class MessageCache {
 	}
 
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
-		return buildMessageCacheEmbed(channel, message)
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+		return buildMessageCacheEmbed(channel, author, message)
 				.setTitle("Message Deleted")
 				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
-				.addField("Author", author.getAsMention(), true)
 				.addField("Message Content",
 						message.getMessageContent().substring(0, Math.min(
 								message.getMessageContent().length(),
 								MessageEmbed.VALUE_MAX_LENGTH)), false)
-				.build();
-	}
-
-	/**
-	 * Builds a {@link MessageEmbed} object that is used for messages, that were deleted but not cached.
-	 *
-	 * @param guild     The message's guild.
-	 * @param channel   The message's channel.
-	 * @param messageId The message's id.
-	 * @return The fully-built {@link MessageEmbed} object.
-	 */
-	public MessageEmbed buildMessageNotCachedEmbed(Guild guild, MessageChannel channel, long messageId) {
-		CachedMessage message = new CachedMessage();
-		message.setMessageId(messageId);
-		return buildMessageCacheEmbed(channel, message)
-				.setTitle("Message Deleted")
-				.setDescription("The message was not cached, thus, I could not retrieve its content.")
-				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
 				.build();
 	}
 

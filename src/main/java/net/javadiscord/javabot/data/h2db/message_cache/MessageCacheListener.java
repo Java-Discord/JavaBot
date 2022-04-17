@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
-import net.javadiscord.javabot.util.GuildUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -46,15 +45,10 @@ public class MessageCacheListener extends ListenerAdapter {
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
 		Optional<CachedMessage> optional = Bot.messageCache.cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
-		if (optional.isPresent()) {
-			CachedMessage message = optional.get();
-			if (message.getAuthorId() == event.getJDA().getSelfUser().getIdLong()) return;
+		optional.ifPresent(message -> {
 			Bot.messageCache.sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
-		} else {
-			GuildUtils.getCacheLogChannel(event.getGuild())
-					.sendMessageEmbeds(Bot.messageCache.buildMessageNotCachedEmbed(event.getGuild(), event.getChannel(), event.getMessageIdLong()))
-					.queue();
-		}
+			Bot.messageCache.cache.remove(message);
+		});
 	}
 
 
@@ -74,7 +68,7 @@ public class MessageCacheListener extends ListenerAdapter {
 	 */
 	private boolean ignoreMessageCache(Message message) {
 		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
-		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
+		return !message.isFromGuild() || message.getAuthor().isBot() || message.getAuthor().isSystem() ||
 				config.getExcludedUsers().contains(message.getAuthor().getIdLong()) ||
 				config.getExcludedChannels().contains(message.getChannel().getIdLong());
 	}
