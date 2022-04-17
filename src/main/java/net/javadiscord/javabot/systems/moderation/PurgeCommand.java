@@ -30,6 +30,7 @@ public class PurgeCommand extends ModerateCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
+		this.setAllowThreads(true);
 		OptionMapping amountOption = event.getOption("amount");
 		OptionMapping userOption = event.getOption("user");
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
@@ -62,7 +63,7 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param channel    The channel to remove messages from.
 	 * @param logChannel The channel to write log messages to during the purge.
 	 */
-	private void purge(@Nullable Long amount, @Nullable User user, boolean archive, TextChannel channel, TextChannel logChannel) {
+	private void purge(@Nullable Long amount, @Nullable User user, boolean archive, MessageChannel channel, TextChannel logChannel) {
 		MessageHistory history = channel.getHistory();
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 		String file = String.format("purge_%s_%s.txt", channel.getName(), timestamp);
@@ -130,7 +131,7 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param file The archive's filename.
 	 * @return The print writer to use.
 	 */
-	private PrintWriter createArchiveWriter(TextChannel channel, TextChannel logChannel, String file) {
+	private PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
 		try {
 			if (Files.notExists(ARCHIVE_DIR)) Files.createDirectory(ARCHIVE_DIR);
 			Path archiveFile = ARCHIVE_DIR.resolve(file);
