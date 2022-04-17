@@ -238,15 +238,15 @@
       id: moderation.staffRoleId
   options:
     - name: amount
-      description: Number of messages to remove. If left blank, all messages will be removed.
+      description: Number of messages to remove.
       type: INTEGER
-      required: false
+      required: true
     - name: user
       description: The user whose messages to remove. If left blank, messages from any user are removed.
       type: USER
       required: false
     - name: archive
-      description: If true, save removed messages in an archive.
+      description: Whether the removed messages should be saved in an archive. This defaults to true, if left blank.
       type: BOOLEAN
       required: false
   handler: net.javadiscord.javabot.systems.moderation.PurgeCommand

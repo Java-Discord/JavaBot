@@ -7,7 +7,8 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.command.moderation.ModerateCommand;
+import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import javax.annotation.Nullable;
@@ -23,32 +24,23 @@ import java.util.List;
 /**
  * This command deletes messages from a channel.
  */
-public class PurgeCommand extends ModerateUserCommand {
-
+public class PurgeCommand extends ModerateCommand {
 	@Override
-	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
-		Member member = event.getMember();
-		if (member == null) {
-			return Responses.warning(event, "This command can only be used in a guild.");
-		}
-		var config = Bot.config.get(event.getGuild()).getModeration();
-
+	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping amountOption = event.getOption("amount");
 		OptionMapping userOption = event.getOption("user");
-		OptionMapping archiveOption = event.getOption("archive");
+		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
+		ModerationConfig config = Bot.config.get(event.getGuild()).getModeration();
 		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
-		boolean archive = archiveOption != null && archiveOption.getAsBoolean();
 		int maxAmount = config.getPurgeMaxMessageCount();
-
-		if (amount != null && (amount < 1 || amount > maxAmount)) {
-			return Responses.warning(event, "Invalid amount. If specified, should be between 1 and " + maxAmount + ", inclusive.");
+		if (amount == null || amount < 1 || amount > maxAmount) {
+			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-
 		Bot.asyncPool.submit(() -> this.purge(amount, user, archive, event.getTextChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
-		sb.append(amount != null ? (amount > 1 ? "Up to " + amount + " messages " : "1 message ") : "All messages ");
+		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {
 			sb.append("by the user ").append(user.getAsTag()).append(' ');
 		}
