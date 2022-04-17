@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.qotw.submissions;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
@@ -79,19 +80,22 @@ public class SubmissionControlsManager {
 	public void sendControls() {
 		ThreadChannel thread = this.guild.getThreadChannelById(this.submission.getThreadId());
 		if (thread == null) return;
-		this.removeThreadMembers(thread, this.config);
 		thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 		thread.sendMessage(config.getQOTWReviewRole().getAsMention())
 				.setEmbeds(this.buildSubmissionControlEmbed())
 				.setActionRows(this.buildInteractionControls()).queue();
+		this.removeThreadOwner(thread.getJDA(), thread);
 		log.info("Sent Submission Controls to thread {}", thread.getName());
+
 	}
 
-	private void removeThreadMembers(ThreadChannel thread, QOTWConfig config) {
-		thread.getThreadMembers()
-				.stream()
-				.filter(m -> !m.getMember().getRoles().contains(config.getQOTWReviewRole()) && !m.getMember().getUser().isBot())
-				.forEach(m -> thread.removeThreadMember(m.getUser()).queue());
+	private void removeThreadOwner(JDA jda, ThreadChannel thread) {
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
+			submissionOptional.ifPresent(submission -> jda.retrieveUserById(submission.getAuthorId()).queue(
+					author -> thread.removeThreadMember(author).queue()
+			));
+		});
 	}
 
 	/**
