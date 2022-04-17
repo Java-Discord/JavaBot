@@ -3,11 +3,12 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.command.moderation.ModerateCommand;
+import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import javax.annotation.Nullable;
@@ -21,34 +22,29 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * This command deletes messages from a channel.
+ * Moderation command that deletes multiple messages from a single channel.
  */
-public class PurgeCommand extends ModerateUserCommand {
+public class PurgeCommand extends ModerateCommand {
+
+	private final Path ARCHIVE_DIR = Path.of("purgeArchives");
 
 	@Override
-	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
-		Member member = event.getMember();
-		if (member == null) {
-			return Responses.warning(event, "This command can only be used in a guild.");
-		}
-		var config = Bot.config.get(event.getGuild()).getModeration();
-
+	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
+		this.setAllowThreads(true);
 		OptionMapping amountOption = event.getOption("amount");
 		OptionMapping userOption = event.getOption("user");
-		OptionMapping archiveOption = event.getOption("archive");
+		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
+		ModerationConfig config = Bot.config.get(event.getGuild()).getModeration();
 		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
-		boolean archive = archiveOption != null && archiveOption.getAsBoolean();
 		int maxAmount = config.getPurgeMaxMessageCount();
-
-		if (amount != null && (amount < 1 || amount > maxAmount)) {
-			return Responses.warning(event, "Invalid amount. If specified, should be between 1 and " + maxAmount + ", inclusive.");
+		if (amount == null || amount < 1 || amount > maxAmount) {
+			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-
-		Bot.asyncPool.submit(() -> this.purge(amount, user, archive, event.getTextChannel(), config.getLogChannel()));
+		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getTextChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
-		sb.append(amount != null ? (amount > 1 ? "Up to " + amount + " messages " : "1 message ") : "All messages ");
+		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {
 			sb.append("by the user ").append(user.getAsTag()).append(' ');
 		}
@@ -59,21 +55,24 @@ public class PurgeCommand extends ModerateUserCommand {
 	/**
 	 * Purges messages from a channel.
 	 *
-	 * @param amount     The number of messages to remove. If null, all messages
-	 *                   will be removed.
-	 * @param user       The user whose messages to remove. If null, messages from any
-	 *                   user are removed.
-	 * @param archive    Whether to create an archive file for the purge.
-	 * @param channel    The channel to remove messages from.
-	 * @param logChannel The channel to write log messages to during the purge.
+	 * @param amount      The number of messages to remove.
+	 * @param user        The user whose messages to remove. If null, messages from any
+	 *                    user are removed.
+	 * @param initiatedBy The user which initiated the purge.
+	 * @param archive     Whether to create an archive file for the purge.
+	 * @param channel     The channel to remove messages from.
+	 * @param logChannel  The channel to write log messages to during the purge.
 	 */
-	private void purge(@Nullable Long amount, @Nullable User user, boolean archive, TextChannel channel, TextChannel logChannel) {
+	private void purge(@Nullable Long amount, @Nullable User user, User initiatedBy, boolean archive, MessageChannel channel, TextChannel logChannel) {
 		MessageHistory history = channel.getHistory();
-		PrintWriter archiveWriter = archive ? createArchiveWriter(channel, logChannel) : null;
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+		String file = String.format("purge_%s_%s.txt", channel.getName(), timestamp);
+		PrintWriter archiveWriter = archive ? createArchiveWriter(channel, logChannel, file) : null;
 		List<Message> messages;
 		OffsetDateTime startTime = OffsetDateTime.now();
 		long count = 0;
-		logChannel.sendMessage("Starting purge of channel " + channel.getAsMention()).queue();
+		logChannel.sendMessageFormat("Starting purge of channel %s, initiated by %s", channel.getAsMention(), initiatedBy.getAsMention())
+				.queue();
 		do {
 			messages = history.retrievePast(amount == null ? 100 : (int) Math.min(100, amount)).complete();
 			if (!messages.isEmpty()) {
@@ -90,12 +89,14 @@ public class PurgeCommand extends ModerateUserCommand {
 		if (archiveWriter != null) {
 			archiveWriter.close();
 		}
-		logChannel.sendMessage(String.format(
+		MessageAction action = logChannel.sendMessage(String.format(
 				"Purge of channel %s has completed. %d messages have been removed, and the purge took %s.",
 				channel.getAsMention(),
 				count,
 				new TimeUtils().formatDurationToNow(startTime)
-		)).queue();
+		));
+		if (archive) action.addFile(ARCHIVE_DIR.resolve(file).toFile());
+		action.queue();
 	}
 
 	/**
@@ -128,16 +129,15 @@ public class PurgeCommand extends ModerateUserCommand {
 	 *
 	 * @param channel    The channel to create the writer for.
 	 * @param logChannel The log channel, where log messages can be sent.
+	 * @param file       The archive's filename.
 	 * @return The print writer to use.
 	 */
-	private PrintWriter createArchiveWriter(TextChannel channel, TextChannel logChannel) {
+	private PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
 		try {
-			Path purgeArchivesDir = Path.of("purgeArchives");
-			if (Files.notExists(purgeArchivesDir)) Files.createDirectory(purgeArchivesDir);
-			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-			Path archiveFile = purgeArchivesDir.resolve("purge_" + channel.getName() + "_" + timestamp + ".txt");
+			if (Files.notExists(ARCHIVE_DIR)) Files.createDirectory(ARCHIVE_DIR);
+			Path archiveFile = ARCHIVE_DIR.resolve(file);
 			var archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
-			logChannel.sendMessage("Created archive of purge of channel " + channel.getAsMention() + " at " + archiveFile).queue();
+			logChannel.sendMessageFormat("Created archive of purge of channel %s at `%s`", channel.getAsMention(), archiveFile).queue();
 			archiveWriter.println("Purge of channel " + channel.getName());
 			return archiveWriter;
 		} catch (IOException e) {
