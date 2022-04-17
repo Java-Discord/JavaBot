@@ -47,7 +47,9 @@ public class MessageCacheListener extends ListenerAdapter {
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
 		Optional<CachedMessage> optional = Bot.messageCache.cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		if (optional.isPresent()) {
-			Bot.messageCache.sendDeletedMessageToLog(event.getGuild(), event.getChannel(), optional.get());
+			CachedMessage message = optional.get();
+			if (message.getAuthorId() == event.getJDA().getSelfUser().getIdLong()) return;
+			Bot.messageCache.sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
 		} else {
 			GuildUtils.getCacheLogChannel(event.getGuild())
 					.sendMessageEmbeds(Bot.messageCache.buildMessageNotCachedEmbed(event.getGuild(), event.getChannel(), event.getMessageIdLong()))
