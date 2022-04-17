@@ -42,7 +42,7 @@ public class PurgeCommand extends ModerateCommand {
 		if (amount == null || amount < 1 || amount > maxAmount) {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-		Bot.asyncPool.submit(() -> this.purge(amount, user, archive, event.getTextChannel(), config.getLogChannel()));
+		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getTextChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
 		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {
@@ -63,7 +63,7 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param channel    The channel to remove messages from.
 	 * @param logChannel The channel to write log messages to during the purge.
 	 */
-	private void purge(@Nullable Long amount, @Nullable User user, boolean archive, MessageChannel channel, TextChannel logChannel) {
+	private void purge(@Nullable Long amount, @Nullable User user, User initiatedBy, boolean archive, MessageChannel channel, TextChannel logChannel) {
 		MessageHistory history = channel.getHistory();
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 		String file = String.format("purge_%s_%s.txt", channel.getName(), timestamp);
@@ -71,7 +71,8 @@ public class PurgeCommand extends ModerateCommand {
 		List<Message> messages;
 		OffsetDateTime startTime = OffsetDateTime.now();
 		long count = 0;
-		logChannel.sendMessage("Starting purge of channel " + channel.getAsMention()).queue();
+		logChannel.sendMessageFormat("Starting purge of channel %s, initiated by %s", channel.getAsMention(), initiatedBy.getAsMention())
+				.queue();
 		do {
 			messages = history.retrievePast(amount == null ? 100 : (int) Math.min(100, amount)).complete();
 			if (!messages.isEmpty()) {
@@ -136,7 +137,7 @@ public class PurgeCommand extends ModerateCommand {
 			if (Files.notExists(ARCHIVE_DIR)) Files.createDirectory(ARCHIVE_DIR);
 			Path archiveFile = ARCHIVE_DIR.resolve(file);
 			var archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
-			logChannel.sendMessage("Created archive of purge of channel " + channel.getAsMention() + " at " + archiveFile).queue();
+			logChannel.sendMessageFormat("Created archive of purge of channel %s at `%s`", channel.getAsMention(), archiveFile).queue();
 			archiveWriter.println("Purge of channel " + channel.getName());
 			return archiveWriter;
 		} catch (IOException e) {
