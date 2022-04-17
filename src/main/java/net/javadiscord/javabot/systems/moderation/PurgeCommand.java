@@ -3,9 +3,9 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.moderation.ModerateCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -22,9 +22,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * This command deletes messages from a channel.
+ * Moderation command that deletes multiple messages from a single channel.
  */
 public class PurgeCommand extends ModerateCommand {
+
+	private final Path ARCHIVE_DIR = Path.of("purgeArchives");
+
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping amountOption = event.getOption("amount");
@@ -61,7 +64,9 @@ public class PurgeCommand extends ModerateCommand {
 	 */
 	private void purge(@Nullable Long amount, @Nullable User user, boolean archive, TextChannel channel, TextChannel logChannel) {
 		MessageHistory history = channel.getHistory();
-		PrintWriter archiveWriter = archive ? createArchiveWriter(channel, logChannel) : null;
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+		String file = String.format("purge_%s_%s.txt", channel.getName(), timestamp);
+		PrintWriter archiveWriter = archive ? createArchiveWriter(channel, logChannel, file) : null;
 		List<Message> messages;
 		OffsetDateTime startTime = OffsetDateTime.now();
 		long count = 0;
@@ -82,12 +87,14 @@ public class PurgeCommand extends ModerateCommand {
 		if (archiveWriter != null) {
 			archiveWriter.close();
 		}
-		logChannel.sendMessage(String.format(
+		MessageAction action = logChannel.sendMessage(String.format(
 				"Purge of channel %s has completed. %d messages have been removed, and the purge took %s.",
 				channel.getAsMention(),
 				count,
 				new TimeUtils().formatDurationToNow(startTime)
-		)).queue();
+		));
+		if (archive) action.addFile(ARCHIVE_DIR.resolve(file).toFile());
+		action.queue();
 	}
 
 	/**
@@ -120,14 +127,13 @@ public class PurgeCommand extends ModerateCommand {
 	 *
 	 * @param channel    The channel to create the writer for.
 	 * @param logChannel The log channel, where log messages can be sent.
+	 * @param file The archive's filename.
 	 * @return The print writer to use.
 	 */
-	private PrintWriter createArchiveWriter(TextChannel channel, TextChannel logChannel) {
+	private PrintWriter createArchiveWriter(TextChannel channel, TextChannel logChannel, String file) {
 		try {
-			Path purgeArchivesDir = Path.of("purgeArchives");
-			if (Files.notExists(purgeArchivesDir)) Files.createDirectory(purgeArchivesDir);
-			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-			Path archiveFile = purgeArchivesDir.resolve("purge_" + channel.getName() + "_" + timestamp + ".txt");
+			if (Files.notExists(ARCHIVE_DIR)) Files.createDirectory(ARCHIVE_DIR);
+			Path archiveFile = ARCHIVE_DIR.resolve(file);
 			var archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
 			logChannel.sendMessage("Created archive of purge of channel " + channel.getAsMention() + " at " + archiveFile).queue();
 			archiveWriter.println("Purge of channel " + channel.getName());
