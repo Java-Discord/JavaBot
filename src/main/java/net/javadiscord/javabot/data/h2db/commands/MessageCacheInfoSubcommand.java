@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.data.h2db.commands.message_cache;
+package net.javadiscord.javabot.data.h2db.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;

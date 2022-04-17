@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
-import net.javadiscord.javabot.data.h2db.commands.message_cache.MessageCacheInfoSubcommand;
 import net.javadiscord.javabot.util.AutocompleteUtils;
 
 import java.util.List;
