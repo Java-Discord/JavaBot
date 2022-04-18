@@ -2,8 +2,6 @@ package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.javadiscord.javabot.Bot;
 
 import java.util.List;
 
@@ -13,14 +11,6 @@ import java.util.List;
 public class GuildUtils {
 
 	private GuildUtils() {
-	}
-
-	public static MessageChannel getLogChannel(Guild guild) {
-		return Bot.config.get(guild).getModeration().getLogChannel();
-	}
-
-	public static MessageChannel getCacheLogChannel(Guild guild) {
-		return Bot.config.get(guild).getMessageCache().getMessageCacheLogChannel();
 	}
 
 	/**

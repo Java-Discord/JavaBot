@@ -14,7 +14,7 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
-import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -39,7 +39,7 @@ public class QOTWJob extends DiscordApiJob {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
-					GuildUtils.getLogChannel(guild).sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotw().getQOTWReviewRole().getAsMention()).queue();
+					new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s No available next question for QOTW!", config.getQotw().getQOTWReviewRole().getAsMention());
 				} else {
 					QOTWQuestion question = nextQuestion.get();
 					QOTWConfig qotw = config.getQotw();
@@ -57,7 +57,7 @@ public class QOTWJob extends DiscordApiJob {
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
-				GuildUtils.getLogChannel(guild).sendMessageFormat("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotw().getQOTWReviewRole().getAsMention(), e.getMessage()).queue();
+				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotw().getQOTWReviewRole().getAsMention(), e.getMessage());
 				throw new JobExecutionException(e);
 			}
 		}

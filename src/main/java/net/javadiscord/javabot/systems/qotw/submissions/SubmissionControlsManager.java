@@ -8,21 +8,20 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
+import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 
 import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -117,7 +116,8 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-				IncrementSubcommand.correct(user, true);
+				DbHelper.doDaoAction(QuestionPointsRepository::new, repo -> repo.increment(user.getIdLong()));
+				new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
 				Responses.success(event.getHook(), "Submission Accepted",
 						"Successfully accepted submission by " + user.getAsMention()).queue();
 				}
@@ -164,7 +164,7 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
 			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
-				GuildUtils.getLogChannel(guild).sendMessageEmbeds(this.buildLogEmbed(thread, author, reviewedBy, status, reason)).queue();
+				new GuildNotificationService(guild).sendLogChannelNotification(this.buildLogEmbed(thread, author, reviewedBy, status, reason));
 				log.info("{} {} {}'s QOTW Submission{}", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag(), reason != null ? " for: " + reason : ".");
 					}));
 		});

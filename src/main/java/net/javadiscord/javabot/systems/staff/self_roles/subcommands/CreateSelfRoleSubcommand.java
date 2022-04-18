@@ -12,7 +12,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
-import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
 
 import java.time.Instant;
@@ -76,7 +76,7 @@ public class CreateSelfRoleSubcommand implements SlashCommand {
 			message.editMessageComponents(MessageActionUtils.toActionRows(buttons)).queue();
 		}
 		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type, config.getSlashCommand());
-		GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(logEmbed).queue();
+		new GuildNotificationService(event.getGuild()).sendLogChannelNotification(logEmbed);
 		event.getHook().sendMessageEmbeds(logEmbed).setEphemeral(true).queue();
 	}
 

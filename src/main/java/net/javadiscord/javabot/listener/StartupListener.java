@@ -9,6 +9,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.GuildUtils;
 
 import java.util.Comparator;
@@ -51,7 +52,7 @@ public class StartupListener extends ListenerAdapter {
 					helpConfig.getUpdateIntervalSeconds(),
 					TimeUnit.SECONDS
 			);
-			GuildUtils.getLogChannel(guild).sendMessage("I have just been booted up!").queue();
+			new GuildNotificationService(guild).sendLogChannelNotification("I have just been booted up!");
 		}
 	}
 }

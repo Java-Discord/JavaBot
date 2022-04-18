@@ -11,7 +11,6 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
-import net.javadiscord.javabot.util.GuildUtils;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.io.ByteArrayInputStream;
@@ -90,7 +89,7 @@ public class MessageCache {
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
-		MessageAction action = GuildUtils.getCacheLogChannel(updated.getGuild())
+		MessageAction action = Bot.config.get(updated.getGuild()).getMessageCache().getMessageCacheLogChannel()
 				.sendMessageEmbeds(this.buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
 				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
@@ -108,7 +107,7 @@ public class MessageCache {
 	 */
 	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-			MessageAction action = GuildUtils.getCacheLogChannel(guild)
+			MessageAction action = Bot.config.get(guild).getMessageCache().getMessageCacheLogChannel()
 					.sendMessageEmbeds(this.buildMessageDeleteEmbed(guild, author, channel, message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
