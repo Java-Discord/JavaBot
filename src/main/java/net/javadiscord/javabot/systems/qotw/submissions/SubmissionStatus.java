@@ -5,6 +5,10 @@ package net.javadiscord.javabot.systems.qotw.submissions;
  */
 public enum SubmissionStatus {
 	/**
+	 * Used for submissions that were yet unreviewed.
+	 */
+	UNREVIEWED,
+	/**
 	 * Used for submissions that were accepted.
 	 */
 	ACCEPTED,
@@ -15,9 +19,5 @@ public enum SubmissionStatus {
 	/**
 	 * Used for submissions that were deleted.
 	 */
-	DELETED,
-	/**
-	 * Used for submissions that were yet unreviewed.
-	 */
-	UNREVIEWED
+	DELETED
 }
