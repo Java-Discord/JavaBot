@@ -1,8 +1,10 @@
 package net.javadiscord.javabot.systems.qotw.subcommands.qotw_points;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
@@ -18,6 +20,7 @@ import java.time.Instant;
 /**
  * Subcommand that allows staff-members to increment the QOTW-Account of any user.
  */
+//TODO: refactor this whole thing
 public class IncrementSubcommand implements SlashCommand {
 
 	/**
@@ -27,8 +30,8 @@ public class IncrementSubcommand implements SlashCommand {
 	 * @param quiet  If true, don't send a message in the channel.
 	 * @return The new amount of QOTW-Points.
 	 */
-	public static long correct(Member member, boolean quiet) {
-		return correct(member, quiet, false);
+	public static long correct(User user, Guild guild, boolean quiet) {
+		return correct(user, guild, quiet, false);
 	}
 
 	/**
@@ -39,18 +42,16 @@ public class IncrementSubcommand implements SlashCommand {
 	 * @param bestAnswer Whether it should send the Best Answer Embed instead.
 	 * @return The new amount of QOTW-Points.
 	 */
-	public static long correct(Member member, boolean quiet, boolean bestAnswer) {
+	public static long correct(User user, Guild guild, boolean quiet, boolean bestAnswer) {
 		try (var con = Bot.dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
-			long memberId = member.getIdLong();
-			repo.increment(memberId);
-			long points = repo.getAccountByUserId(memberId).getPoints();
-			MessageEmbed dmEmbed = bestAnswer ? buildBestAnswerDmEmbed(member, points) : buildIncrementDmEmbed(member, points);
-			MessageEmbed embed = buildIncrementEmbed(member, points);
-			if (!quiet) GuildUtils.getLogChannel(member.getGuild()).sendMessageEmbeds(embed).queue();
-			member.getUser().openPrivateChannel().queue(
+			long points = repo.increment(user.getIdLong());
+			MessageEmbed dmEmbed = bestAnswer ? buildBestAnswerDmEmbed(user, guild, points) : buildIncrementDmEmbed(user, guild, points);
+			MessageEmbed embed = buildIncrementEmbed(user, guild, points);
+			if (!quiet) GuildUtils.getLogChannel(guild).sendMessageEmbeds(embed).queue();
+			user.openPrivateChannel().queue(
 					c -> c.sendMessageEmbeds(dmEmbed).queue(),
-					e -> GuildUtils.getLogChannel(member.getGuild()).sendMessage("Could not send direct message to member " + member.getAsMention()).queue());
+					e -> GuildUtils.getLogChannel(guild).sendMessage("Could not send direct message to member " + user.getAsMention()).queue());
 			return points;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -64,31 +65,31 @@ public class IncrementSubcommand implements SlashCommand {
 		if (memberOption == null) {
 			return Responses.error(event, "Missing required arguments.");
 		}
-		Member member = memberOption.getAsMember();
-		long points = correct(member, false);
-		MessageEmbed embed = buildIncrementEmbed(member, points);
+		User user = memberOption.getAsUser();
+		long points = correct(user, false);
+		MessageEmbed embed = buildIncrementEmbed(user, points);
 		return event.replyEmbeds(embed);
 	}
 
-	private static MessageEmbed buildIncrementDmEmbed(Member member, long points) {
+	private static MessageEmbed buildIncrementDmEmbed(User user, Guild guild, long points) {
 		return new EmbedBuilder()
-				.setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
+				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
-				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
+				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
 				.setDescription(String.format(
 						"""
 								Your submission was accepted! %s
 								You've been granted **`1 QOTW-Point`**! (total: %s)""",
-						Bot.config.get(member.getGuild()).getEmote().getSuccessEmote().getAsMention(), points))
+						Bot.config.get(guild).getEmote().getSuccessEmote().getAsMention(), points))
 				.setTimestamp(Instant.now())
 				.build();
 	}
 
-	private static MessageEmbed buildBestAnswerDmEmbed(Member member, long points) {
+	private static MessageEmbed buildBestAnswerDmEmbed(User user, Guild guild, long points) {
 		return new EmbedBuilder()
-				.setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
+				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
-				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
+				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
 				.setDescription(String.format(
 						"""
 								Your submission was marked as the best answer!
@@ -97,13 +98,13 @@ public class IncrementSubcommand implements SlashCommand {
 				.build();
 	}
 
-	private static MessageEmbed buildIncrementEmbed(Member member, long points) {
+	private static MessageEmbed buildIncrementEmbed(User user, Guild guild, long points) {
 		return new EmbedBuilder()
-				.setAuthor(member.getUser().getAsTag() + " | QOTW-Point added", null, member.getUser().getEffectiveAvatarUrl())
-				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
+				.setAuthor(user.getAsTag() + " | QOTW-Point added", null, user.getEffectiveAvatarUrl())
+				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
 				.addField("Total QOTW-Points", "```" + points + "```", true)
-				.addField("Rank", "```#" + new LeaderboardCommand().getQOTWRank(member, member.getGuild()) + "```", true)
-				.setFooter("ID: " + member.getId())
+				.addField("Rank", "```#" + LeaderboardCommand.getQOTWRank(user, guild) + "```", true)
+				.setFooter("ID: " + user.getId())
 				.setTimestamp(Instant.now())
 				.build();
 	}

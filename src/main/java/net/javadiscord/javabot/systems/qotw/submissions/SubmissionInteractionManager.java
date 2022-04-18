@@ -4,10 +4,11 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.util.GuildUtils;
 
 /**
  * Handles all interactions regarding the QOTW Submission System.
@@ -51,7 +52,7 @@ public class SubmissionInteractionManager {
 		ThreadChannel thread = (ThreadChannel) event.getGuildChannel();
 		switch (id[2]) {
 			case "accept" -> manager.acceptSubmission(event, thread);
-			case "decline" -> manager.declineButtonSubmission(event);
+			case "decline" -> event.getMessage().editMessageComponents(ActionRow.of(buildDeclineMenu())).queue();
 			case "delete" -> manager.deleteSubmission(event, thread);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
@@ -84,5 +85,15 @@ public class SubmissionInteractionManager {
 	private static boolean hasPermissions(Member member) {
 		QOTWConfig config = Bot.config.get(member.getGuild()).getQotw();
 		return !member.getRoles().isEmpty() && member.getRoles().contains(config.getQOTWReviewRole());
+	}
+
+	private static SelectMenu buildDeclineMenu() {
+		return SelectMenu.create("qotw-submission-select:decline")
+				.setPlaceholder("Select a reason for declining this submission.")
+				.setRequiredRange(1, 3)
+				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")
+				.addOption("Incomplete Answer", "Incomplete Answer", "The submission was missing some important things and was overall incomplete.")
+				.addOption("Too short", "Too short", "The submission was way too short in comparison to other submissions.")
+				.build();
 	}
 }

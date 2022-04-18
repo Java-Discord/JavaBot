@@ -65,7 +65,7 @@ public class LeaderboardCommand extends ImageGenerationUtils implements SlashCom
 	 * @param guild The current guild.
 	 * @return The QOTW-Rank as an integer.
 	 */
-	public int getQOTWRank(Member member, Guild guild) {
+	public static int getQOTWRank(Member member, Guild guild) {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new QuestionPointsRepository(con);
 			var accounts = repo.getAllAccountsSortedByPoints();

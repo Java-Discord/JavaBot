@@ -83,8 +83,16 @@ public class SubmissionControlsManager {
 		if (thread == null) return;
 		thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 		thread.sendMessage(config.getQOTWReviewRole().getAsMention())
-				.setEmbeds(this.buildSubmissionControlEmbed())
-				.setActionRows(this.buildInteractionControls()).queue();
+				.setEmbeds(new EmbedBuilder()
+						.setTitle("Submission Controls")
+						.setDescription("Please choose an action for this Submission.")
+						.setTimestamp(Instant.now())
+						.build())
+				.setActionRow(
+						Button.success("qotw-submission:controls:accept", "Accept"),
+						Button.danger("qotw-submission:controls:decline", "Decline"),
+						Button.secondary("qotw-submission:controls:delete", "🗑️")
+				).queue();
 		this.removeThreadOwner(thread.getJDA(), thread);
 		log.info("Sent Submission Controls to thread {}", thread.getName());
 
@@ -106,27 +114,16 @@ public class SubmissionControlsManager {
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
 	protected void acceptSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
-			if (submissionOptional.isEmpty()) return;
-			QOTWSubmission submission = submissionOptional.get();
-			dao.markReviewed(submission);
-			dao.markAccepted(submission);
-			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
-					member -> {
-						if (member == null) {
-							Responses.error(event.getHook(), "Cannot accept a submission of a user who is not a member of this server");
-							return;
-						}
-						IncrementSubcommand.correct(member, true);
-						thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queueAfter(5, TimeUnit.SECONDS);
-						log.info("{} accepted {}'s submission", event.getUser().getAsTag(), member.getUser().getAsTag());
-						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s accepted %s's submission", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag()).queue();
-						this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
-						Responses.success(event.getHook(), "Submission Accepted", "Successfully accepted submission by " + member.getAsMention()).queue();
-					}
-			);
-		});
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
+		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
+		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
+				IncrementSubcommand.correct(user, true);
+				Responses.success(event.getHook(), "Submission Accepted",
+						"Successfully accepted submission by " + user.getAsMention()).queue();
+				}
+		);
+		this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
+		this.sendLogMessage(thread, event.getUser(), SubmissionStatus.ACCEPTED, null);
 	}
 
 	/**
@@ -137,27 +134,16 @@ public class SubmissionControlsManager {
 	 */
 	protected void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
 		String reasons = String.join(", ", event.getValues());
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
-			if (submissionOptional.isEmpty()) return;
-			QOTWSubmission submission = submissionOptional.get();
-			dao.markReviewed(submission);
-			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
-					member -> {
-						if (member == null) {
-							Responses.error(event.getHook(), "Cannot accept a submission of a user who is not a member of this server");
-							return;
-						}
-						member.getUser().openPrivateChannel().queue(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(member.getUser(), reasons)).queue());
-						thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queueAfter(5, TimeUnit.SECONDS);
-						log.info("{} declined {}'s submission for: {}", event.getUser().getAsTag(), member.getUser().getAsTag(), reasons);
-						GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("%s\n%s declined %s's submission for: `%s`", thread.getAsMention(), event.getUser().getAsTag(), member.getUser().getAsTag(), reasons).queue();
-						this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
-						Responses.success(event.getHook(), "Submission Declined",
-								String.format("Successfully declined submission by %s for the following reasons:\n`%s`", member.getAsMention(), reasons)).queue();
-					}
-			);
-		});
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
+		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
+		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
+				user.openPrivateChannel().queue(c -> c.sendMessageEmbeds(this.buildSubmissionDeclinedEmbed(user, reasons)).queue());
+				Responses.success(event.getHook(), "Submission Declined",
+						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), reasons)).queue();
+				}
+		);
+		this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
+		this.sendLogMessage(thread, event.getUser(), SubmissionStatus.DECLINED, reasons);
 	}
 
 	/**
@@ -167,24 +153,21 @@ public class SubmissionControlsManager {
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
 	protected void deleteSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
-		thread.delete().queueAfter(10, TimeUnit.SECONDS);
-		log.info("{} deleted submission thread {}", event.getUser().getAsTag(), thread.getName());
-		this.sendLogMessage(event.getGuild(), thread, event.getUser(), SubmissionStatus.DELETED, null);
-		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.removeSubmission(thread.getIdLong()));
+		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
 		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
+		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
+		this.sendLogMessage(thread, event.getUser(), SubmissionStatus.DELETED, null);
+		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 	}
 
-	private void sendLogMessage(Guild guild, ThreadChannel thread, User reviewedBy, SubmissionStatus status, @Nullable String reason) {
+	private void sendLogMessage(ThreadChannel thread, User reviewedBy, SubmissionStatus status, @Nullable String reason) {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
-			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author ->
-					GuildUtils.getLogChannel(guild).sendMessageEmbeds(this.buildLogEmbed(thread, author, reviewedBy, status, reason)).queue()));
+			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
+				GuildUtils.getLogChannel(guild).sendMessageEmbeds(this.buildLogEmbed(thread, author, reviewedBy, status, reason)).queue();
+				log.info("{} {} {}'s QOTW Submission{}", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag(), reason != null ? " for: " + reason : ".");
+					}));
 		});
-	}
-
-	protected void declineButtonSubmission(ButtonInteractionEvent event) {
-		event.getMessage().editMessageComponents(ActionRow.of(this.buildDeclineMenu())).queue();
 	}
 
 	private void disableControls(String buttonLabel, Message message) {
@@ -203,32 +186,6 @@ public class SubmissionControlsManager {
 
 								However, you can try your luck again next week!""",
 						createdBy.getAsMention(), reasons))
-				.setTimestamp(Instant.now())
-				.build();
-	}
-
-	private List<ActionRow> buildInteractionControls() {
-		return List.of(ActionRow.of(
-				Button.success("qotw-submission:controls:accept", "Accept"),
-				Button.danger("qotw-submission:controls:decline", "Decline"),
-				Button.secondary("qotw-submission:controls:delete", "🗑️")));
-
-	}
-
-	private SelectMenu buildDeclineMenu() {
-		return SelectMenu.create("qotw-submission-select:decline")
-				.setPlaceholder("Select a reason for declining this submission.")
-				.setRequiredRange(1, 3)
-				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")
-				.addOption("Incomplete Answer", "Incomplete Answer", "The submission was missing some important things and was overall incomplete.")
-				.addOption("Too short", "Too short", "The submission was way too short in comparison to other submissions.")
-				.build();
-	}
-
-	private MessageEmbed buildSubmissionControlEmbed() {
-		return new EmbedBuilder()
-				.setTitle("Submission Controls")
-				.setDescription("Please choose an action for this Submission.")
 				.setTimestamp(Instant.now())
 				.build();
 	}
