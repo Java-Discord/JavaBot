@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.UserContextCommand;
@@ -50,7 +49,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		String title = "Report " + event.getTarget().getAsTag();
-		return Modal.create("report:user:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.TITLE_MAX_LENGTH)))
+		return Modal.create("report:user:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
 				.addActionRows(ActionRow.of(messageInput))
 				.build();
 	}
@@ -71,7 +70,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 		TextInput messageInput = TextInput.create(REASON_OPTION_NAME, "Report Description", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
-		return Modal.create("report:message:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.TITLE_MAX_LENGTH)))
+		return Modal.create("report:message:" + event.getTarget().getId(), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
 				.addActionRows(ActionRow.of(messageInput))
 				.build();
 	}
@@ -188,7 +187,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 	}
 
 	@Override
-	public InteractionCallbackAction<InteractionHook> handleMessageContextCommandInteraction(MessageContextInteractionEvent event) throws ResponseException {
+	public InteractionCallbackAction<?> handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
 		if (event.getTarget().getAuthor().equals(event.getUser())) {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
@@ -196,7 +195,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 	}
 
 	@Override
-	public InteractionCallbackAction<InteractionHook> handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
+	public InteractionCallbackAction<?> handleUserContextCommandInteraction(UserContextInteractionEvent event) {
 		if (event.getTarget().equals(event.getUser())) {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
@@ -204,7 +203,7 @@ public class ReportCommand extends ModerateUserCommand implements UserContextCom
 	}
 
 	@Override
-	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
+	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) {
 		this.handleUserReport(event.getHook(), event.getOption("reason", "N/A", OptionMapping::getAsString), commandUser.getUser(), target.getId());
 		return event.deferReply(true);
 	}
