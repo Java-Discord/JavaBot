@@ -16,9 +16,7 @@ import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 
-import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -123,7 +121,7 @@ public class SubmissionControlsManager {
 				}
 		);
 		this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
-		this.sendLogMessage(thread, event.getUser(), SubmissionStatus.ACCEPTED, null);
+		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);
 	}
 
 	/**
@@ -133,17 +131,16 @@ public class SubmissionControlsManager {
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
 	protected void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
-		String reasons = String.join(", ", event.getValues());
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-				new QOTWNotificationService(user, event.getGuild()).sendSubmissionDeclinedEmbed(reasons);
+				new QOTWNotificationService(user, event.getGuild()).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
 				Responses.success(event.getHook(), "Submission Declined",
-						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), reasons)).queue();
+						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
 				}
 		);
 		this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
-		this.sendLogMessage(thread, event.getUser(), SubmissionStatus.DECLINED, reasons);
+		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DECLINED, event.getValues().toArray(new String[0]));
 	}
 
 	/**
@@ -156,35 +153,11 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
 		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
-		this.sendLogMessage(thread, event.getUser(), SubmissionStatus.DELETED, null);
+		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DELETED);
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
-	}
-
-	private void sendLogMessage(ThreadChannel thread, User reviewedBy, SubmissionStatus status, @Nullable String reason) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
-			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
-				new GuildNotificationService(guild).sendLogChannelNotification(this.buildLogEmbed(thread, author, reviewedBy, status, reason));
-				log.info("{} {} {}'s QOTW Submission{}", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag(), reason != null ? " for: " + reason : ".");
-					}));
-		});
 	}
 
 	private void disableControls(String buttonLabel, Message message) {
 		message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:controls:dummy", buttonLabel).asDisabled())).queue();
-	}
-
-	private MessageEmbed buildLogEmbed(ThreadChannel thread, User threadOwner, User reviewedBy, SubmissionStatus status, @Nullable String reason) {
-		EmbedBuilder builder = new EmbedBuilder()
-				.setAuthor(reviewedBy.getAsTag(), null, reviewedBy.getEffectiveAvatarUrl())
-				.setTitle(String.format("%s %s %s's QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), threadOwner.getAsTag()))
-				.setTimestamp(Instant.now());
-		if (thread != null && status != SubmissionStatus.DELETED) {
-			builder.addField("Thread", thread.getAsMention(), true);
-		}
-		if (reason != null) {
-			builder.addField("Reason(s)", reason, true);
-		}
-		return builder.build();
 	}
 }
