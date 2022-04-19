@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.qotw;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -15,6 +16,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import java.sql.SQLException;
+import java.util.Collections;
 
 /**
  * Job which disables the Submission button.
@@ -27,6 +29,9 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 			// Disable 'Submit your Answer' button on latest QOTW
 			var config = Bot.config.get(guild);
 			var qotwConfig = config.getQotw();
+			qotwConfig.getSubmissionChannel().getManager()
+					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS))
+					.queue();
 			if (config.getModeration().getLogChannel() == null) continue;
 			if (qotwConfig.getSubmissionChannel() == null || qotwConfig.getQuestionChannel() == null) continue;
 			var message = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);

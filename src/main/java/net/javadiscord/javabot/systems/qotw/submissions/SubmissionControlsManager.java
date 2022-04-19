@@ -90,18 +90,7 @@ public class SubmissionControlsManager {
 						Button.danger("qotw-submission:controls:decline", "Decline"),
 						Button.secondary("qotw-submission:controls:delete", "🗑️")
 				).queue();
-		this.removeThreadOwner(thread.getJDA(), thread);
 		log.info("Sent Submission Controls to thread {}", thread.getName());
-
-	}
-
-	private void removeThreadOwner(JDA jda, ThreadChannel thread) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
-			submissionOptional.ifPresent(submission -> jda.retrieveUserById(submission.getAuthorId()).queue(
-					author -> thread.removeThreadMember(author).queue()
-			));
-		});
 	}
 
 	/**

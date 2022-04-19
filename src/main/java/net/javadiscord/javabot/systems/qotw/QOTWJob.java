@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.qotw;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.NewsChannel;
@@ -20,6 +21,7 @@ import org.quartz.JobExecutionException;
 
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 
 /**
  * Job which posts a new question to the QOTW channel.
@@ -44,6 +46,9 @@ public class QOTWJob extends DiscordApiJob {
 					QOTWQuestion question = nextQuestion.get();
 					QOTWConfig qotw = config.getQotw();
 					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setArchived(true).queue());
+					qotw.getSubmissionChannel().getManager()
+							.putRolePermissionOverride(guild.getIdLong(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS), Collections.emptySet())
+							.queue();
 					if (question.getQuestionNumber() == null) {
 						question.setQuestionNumber(repo.getNextQuestionNumber());
 					}
