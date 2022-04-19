@@ -28,6 +28,9 @@ public class IncrementSubcommand implements SlashCommand {
 			return Responses.error(event, "Missing required arguments.");
 		}
 		Member member = userOption.getAsMember();
+		if (member == null) {
+			return Responses.error(event, "User must be a part of this server.");
+		}
 		DbHelper.doDaoAction(QuestionPointsRepository::new, dao -> {
 			long points = dao.increment(member.getIdLong());
 			MessageEmbed embed = this.buildIncrementEmbed(member, points);
