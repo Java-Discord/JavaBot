@@ -9,6 +9,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 
+import javax.annotation.Nonnull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -51,30 +52,49 @@ public non-sealed class QOTWNotificationService extends NotificationService {
 		this.sendDirectMessageNotification(user, this.buildAccountIncrementEmbed(account.getPoints()));
 	}
 
-	private MessageEmbed buildBestAnswerEmbed(long points) {
+	public void sendSubmissionDeclinedEmbed(@Nonnull String reason) {
+		this.sendDirectMessageNotification(user, this.buildSubmissionDeclinedEmbed(reason));
+	}
+
+	private EmbedBuilder buildQOTWNotificationEmbed() {
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
+				.setTimestamp(Instant.now());
+	}
+
+	private MessageEmbed buildBestAnswerEmbed(long points) {
+		return this.buildQOTWNotificationEmbed()
 				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
 				.setDescription(String.format(
 						"""
 								Your submission was marked as the best answer!
 								You've been granted **`1 extra QOTW-Point`**! (total: %s)""", points))
-				.setTimestamp(Instant.now())
 				.build();
 	}
 
 	private MessageEmbed buildAccountIncrementEmbed(long points) {
-		return new EmbedBuilder()
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-				.setTitle("QOTW Notification")
+		return this.buildQOTWNotificationEmbed()
 				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
 				.setDescription(String.format(
 						"""
 								Your submission was accepted! %s
 								You've been granted **`1 QOTW-Point`**! (total: %s)""",
 						Bot.config.get(guild).getEmote().getSuccessEmote().getAsMention(), points))
-				.setTimestamp(Instant.now())
 				.build();
 	}
+
+	private MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
+		return this.buildQOTWNotificationEmbed()
+				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setDescription(String.format("""
+								Hey %s,
+								Your QOTW-Submission was **declined** for the following reasons:
+								**`%s`**
+
+								However, you can try your luck again next week!""",
+						user.getAsMention(), reasons))
+				.build();
+	}
+
 }

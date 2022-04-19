@@ -137,7 +137,7 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-				user.openPrivateChannel().queue(c -> c.sendMessageEmbeds(this.buildSubmissionDeclinedEmbed(user, reasons)).queue());
+				new QOTWNotificationService(user, event.getGuild()).sendSubmissionDeclinedEmbed(reasons);
 				Responses.success(event.getHook(), "Submission Declined",
 						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), reasons)).queue();
 				}
@@ -172,22 +172,6 @@ public class SubmissionControlsManager {
 
 	private void disableControls(String buttonLabel, Message message) {
 		message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:controls:dummy", buttonLabel).asDisabled())).queue();
-	}
-
-	private MessageEmbed buildSubmissionDeclinedEmbed(User createdBy, String reasons) {
-		return new EmbedBuilder()
-				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
-				.setTitle("QOTW Notification")
-				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getErrorColor())
-				.setDescription(String.format("""
-								Hey %s,
-								Your QOTW-Submission was **declined** for the following reasons:
-								**`%s`**
-
-								However, you can try your luck again next week!""",
-						createdBy.getAsMention(), reasons))
-				.setTimestamp(Instant.now())
-				.build();
 	}
 
 	private MessageEmbed buildLogEmbed(ThreadChannel thread, User threadOwner, User reviewedBy, SubmissionStatus status, @Nullable String reason) {
