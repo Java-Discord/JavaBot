@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.User;
  * Abstract class used for sending Notifications to Discord Users and Channels.
  */
 @Slf4j
-public abstract sealed class NotificationService permits GuildNotificationService, QOTWNotificationService {
+public abstract class NotificationService {
 	void sendDirectMessageNotification(User user, MessageEmbed message) {
 		user.openPrivateChannel().queue(
 				channel -> channel.sendMessageEmbeds(message).queue(),
