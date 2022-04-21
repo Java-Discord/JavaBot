@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
@@ -55,7 +56,7 @@ public class FormatCodeCommand implements SlashCommand, MessageContextCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
+	public InteractionCallbackAction<?> handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
 		return event.replyFormat("```java\n%s\n```", StringUtils.standardSanitizer().compute(event.getTarget().getContentRaw()))
 				.allowedMentions(List.of())
 				.addActionRows(this.buildActionRow(event.getTarget()));

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.ResponseException;
@@ -39,7 +40,7 @@ public class WarnsCommand implements SlashCommand, UserContextCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
+	public InteractionCallbackAction<?> handleUserContextCommandInteraction(UserContextInteractionEvent event) throws ResponseException {
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
 		Member member = event.getTargetMember();
 		try (var con = Bot.dataSource.getConnection()) {
