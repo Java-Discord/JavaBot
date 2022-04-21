@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.command;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
@@ -93,7 +92,7 @@ public class DelegatingCommandHandler implements SlashCommand {
 	 * @return The reply action that is sent to the user.
 	 */
 	@Override
-	public InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public InteractionCallbackAction<?> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
 		// First we check if the event has specified a subcommand group, and if we have a group handler for it.
 		if (event.getSubcommandGroup() != null) {
 			SlashCommand groupHandler = this.getSubcommandGroupHandlers().get(event.getSubcommandGroup());
