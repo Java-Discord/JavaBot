@@ -3,7 +3,7 @@ package net.javadiscord.javabot.systems.qotw.subcommands.questions_queue;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -19,7 +19,7 @@ import java.time.ZoneOffset;
  */
 public class ListQuestionsSubcommand extends QOTWSubcommand {
 	@Override
-	protected ReplyCallbackAction handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
+	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
 		var repository = new QuestionQueueRepository(con);
 		OptionMapping pageOption = event.getOption("page");
 		int page = 0;

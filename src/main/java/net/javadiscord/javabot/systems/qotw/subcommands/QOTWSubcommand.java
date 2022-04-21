@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.subcommands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
  */
 public abstract class QOTWSubcommand implements SlashCommand {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public InteractionCallbackAction<?> handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
 			return Responses.warning(event, "This command can only be used in the context of a guild.");
 		}
@@ -31,5 +31,5 @@ public abstract class QOTWSubcommand implements SlashCommand {
 		}
 	}
 
-	protected abstract ReplyCallbackAction handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException;
+	protected abstract InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException;
 }

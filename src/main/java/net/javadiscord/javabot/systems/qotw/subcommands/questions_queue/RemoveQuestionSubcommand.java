@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class RemoveQuestionSubcommand extends QOTWSubcommand {
 	@Override
-	protected ReplyCallbackAction handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
+	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null) {
 			return Responses.warning(event, "Missing required arguments.");
