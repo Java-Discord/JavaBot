@@ -46,7 +46,7 @@ public final class QOTWNotificationService extends NotificationService {
 			QuestionPointsRepository dao = new QuestionPointsRepository(connection);
 			account = dao.getAccountByUserId(user.getIdLong());
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
 			account = null;
 		}
 		this.account = account;
