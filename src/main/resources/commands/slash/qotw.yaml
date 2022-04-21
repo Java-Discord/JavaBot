@@ -22,15 +22,6 @@
         # /qotw questions-queue add
         - name: add
           description: Add a question to the queue.
-          options:
-            - name: question
-              description: The question to add.
-              required: true
-              type: STRING
-            - name: priority
-              description: The priority to give the question. Questions with higher priority show up first.
-              required: false
-              type: INTEGER
 
         # /qotw questions-queue remove
         - name: remove

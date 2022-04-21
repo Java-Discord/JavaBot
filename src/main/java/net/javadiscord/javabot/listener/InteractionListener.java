@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
+import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
 import net.javadiscord.javabot.systems.staff.self_roles.SelfRoleInteractionManager;
 import net.javadiscord.javabot.util.InteractionUtils;
@@ -31,6 +32,7 @@ public class InteractionListener extends ListenerAdapter {
 		switch (id[0]) {
 			case "self-role" -> SelfRoleInteractionManager.handleModalSubmit(event, id);
 			case "report" -> new ReportCommand().handleModalSubmit(event, id);
+			case "qotw-add-question" -> AddQuestionSubcommand.handleModalSubmit(event).queue();
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
 	}
