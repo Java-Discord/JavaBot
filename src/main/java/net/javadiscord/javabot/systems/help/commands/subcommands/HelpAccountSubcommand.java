@@ -79,7 +79,7 @@ public class HelpAccountSubcommand implements SlashCommand {
 		if (goal > 0) {
 			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100))
 					.append("\n")
-					.append(StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 14));
+					.append(String.format("`[%s]`", StringUtils.buildProgressBar(current, goal, "\u2581", "\u2588", 40)));
 		} else {
 			sb.append(String.format("%.2f XP (MAX. LEVEL)", account.getExperience()));
 		}
