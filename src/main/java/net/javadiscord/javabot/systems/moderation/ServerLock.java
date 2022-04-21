@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
-import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -190,7 +190,7 @@ public class ServerLock extends ListenerAdapter {
 			});
 		});
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
-		GuildUtils.getLogChannel(event.getGuild()).sendMessageFormat("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff).queue();
+		new GuildNotificationService(event.getGuild()).sendLogChannelNotification("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff);
 	}
 
 	/**
@@ -205,9 +205,8 @@ public class ServerLock extends ListenerAdapter {
 			member.getUser().openPrivateChannel().queue(c -> {
 				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
-							success -> {
-							},
-							error -> GuildUtils.getLogChannel(guild).sendMessageFormat("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()).queue());
+							success -> {},
+							error -> new GuildNotificationService(guild).sendLogChannelNotification("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()));
 				});
 			});
 		}
@@ -225,7 +224,7 @@ public class ServerLock extends ListenerAdapter {
 		var config = Bot.config.get(guild);
 		config.getServerLock().setLocked("true");
 		Bot.config.get(guild).flush();
-		GuildUtils.getLogChannel(guild).sendMessageFormat("""
+		new GuildNotificationService(guild).sendLogChannelNotification("""
 						**Server Locked** %s
 						The automated locking system has detected that the following %d users may be part of a raid:
 						%s
@@ -233,7 +232,7 @@ public class ServerLock extends ListenerAdapter {
 				config.getModeration().getStaffRole().getAsMention(),
 				potentialRaiders.size(),
 				membersString
-		).queue();
+		);
 	}
 
 	/**
@@ -245,6 +244,6 @@ public class ServerLock extends ListenerAdapter {
 		var config = Bot.config.get(guild).getServerLock();
 		config.setLocked("false");
 		Bot.config.get(guild).flush();
-		GuildUtils.getLogChannel(guild).sendMessage("Server unlocked automatically.").queue();
+		new GuildNotificationService(guild).sendLogChannelNotification("Server unlocked automatically.");
 	}
 }

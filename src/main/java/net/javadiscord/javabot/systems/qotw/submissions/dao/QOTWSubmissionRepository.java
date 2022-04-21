@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.qotw.submissions.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 
 import java.sql.*;
@@ -44,7 +45,7 @@ public class QOTWSubmissionRepository {
 	 * @return Whether the {@link QOTWSubmission} was actually removed.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean removeSubmission(long threadId) throws SQLException {
+	public boolean deleteSubmission(long threadId) throws SQLException {
 		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_submissions WHERE thread_id = ?")) {
 			stmt.setLong(1, threadId);
 			int rows = stmt.executeUpdate();
@@ -53,33 +54,16 @@ public class QOTWSubmissionRepository {
 	}
 
 	/**
-	 * Marks a single {@link QOTWSubmission} as reviewed.
+	 * Updates the status of a single {@link QOTWSubmission}.
 	 *
-	 * @param submission The {@link QOTWSubmission} that should be marked as reviewed.
+	 * @param threadId The submission's thread id.
+	 * @param status The new {@link SubmissionStatus}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void markReviewed(QOTWSubmission submission) throws SQLException {
-		try (var stmt = con.prepareStatement("""
-				UPDATE qotw_submissions
-				SET reviewed = TRUE
-				WHERE thread_id = ?""")) {
-			stmt.setLong(1, submission.getThreadId());
-			stmt.executeUpdate();
-		}
-	}
-
-	/**
-	 * Marks a single {@link QOTWSubmission} as accepted.
-	 *
-	 * @param submission The {@link QOTWSubmission} that should be marked as accepted.
-	 * @throws SQLException If an error occurs.
-	 */
-	public void markAccepted(QOTWSubmission submission) throws SQLException {
-		try (var stmt = con.prepareStatement("""
-				UPDATE qotw_submissions
-				SET accepted = TRUE
-				WHERE thread_id = ?""")) {
-			stmt.setLong(1, submission.getThreadId());
+	public void updateStatus(long threadId, SubmissionStatus status) throws SQLException {
+		try (var stmt = con.prepareStatement(" UPDATE qotw_submissions SET status = ? WHERE thread_id = ?")) {
+			stmt.setInt(1, status.ordinal());
+			stmt.setLong(2, threadId);
 			stmt.executeUpdate();
 		}
 	}
@@ -92,7 +76,7 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWSubmission> getUnreviewedSubmissions(long authorId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE author_id = ? AND reviewed = FALSE AND accepted = FALSE")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE author_id = ? AND status = 0")) {
 			s.setLong(1, authorId);
 			var rs = s.executeQuery();
 			List<QOTWSubmission> submissions = new ArrayList<>();
@@ -138,10 +122,10 @@ public class QOTWSubmissionRepository {
 	}
 
 	/**
-	 * Returns a {@link QOTWSubmission} based on the given question number.
+	 * Returns all {@link QOTWSubmission}s based on the given question number.
 	 *
 	 * @param questionNumber The week's number.
-	 * @return The {@link QOTWSubmission} object.
+	 * @return All {@link QOTWSubmission}s, as a {@link List}.
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWSubmission> getSubmissionByQuestionNumber(int questionNumber) throws SQLException {
@@ -169,8 +153,7 @@ public class QOTWSubmissionRepository {
 		submission.setQuestionNumber(rs.getInt("question_number"));
 		submission.setGuildId(rs.getLong("guild_id"));
 		submission.setAuthorId(rs.getLong("author_id"));
-		submission.setReviewed(rs.getBoolean("reviewed"));
-		submission.setAccepted(rs.getBoolean("accepted"));
+		submission.setStatus(SubmissionStatus.values()[rs.getInt("status")]);
 		return submission;
 	}
 }

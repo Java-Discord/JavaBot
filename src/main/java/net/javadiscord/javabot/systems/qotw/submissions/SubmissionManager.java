@@ -22,6 +22,7 @@ import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -90,13 +91,13 @@ public class SubmissionManager {
 	public void handleThreadDeletion(ButtonInteractionEvent event) {
 		ThreadChannel thread = (ThreadChannel) event.getGuildChannel();
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			var submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
+			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
 			if (submissionOptional.isPresent()) {
-				var submission = submissionOptional.get();
+				QOTWSubmission submission = submissionOptional.get();
 				if (submission.getAuthorId() != event.getMember().getIdLong()) {
 					return;
 				}
-				dao.removeSubmission(thread.getIdLong());
+				dao.deleteSubmission(thread.getIdLong());
 				thread.delete().queue();
 			}
 		});

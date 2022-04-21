@@ -28,6 +28,7 @@ import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.command.interfaces.UserContextCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.GuildUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -146,13 +147,13 @@ public class InteractionHandler extends ListenerAdapter {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.getCause().printStackTrace(pw);
-			GuildUtils.getLogChannel(interaction.getGuild()).sendMessageFormat(
+			new GuildNotificationService(interaction.getGuild()).sendLogChannelNotification(
 					"An exception occurred when %s issued the **%s** command in %s:\n```%s```\n",
 					interaction.getUser().getAsMention(),
 					interaction.getName(),
 					interaction.getTextChannel().getAsMention(),
 					sw.toString()
-			).queue();
+			);
 		}
 	}
 

@@ -152,8 +152,7 @@ CREATE TABLE qotw_submissions (
 	  question_number INTEGER NOT NULL,
 	  guild_id BIGINT NOT NULL,
 	  author_id BIGINT NOT NULL,
-	  reviewed BOOL NOT NULL DEFAULT FALSE,
-	  accepted BOOL NOT NULL DEFAULT FALSE
+	  status INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE message_cache (

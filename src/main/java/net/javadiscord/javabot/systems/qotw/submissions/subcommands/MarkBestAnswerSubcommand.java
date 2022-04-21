@@ -18,7 +18,9 @@ import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
+import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.AutocompleteUtils;
@@ -52,7 +54,7 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 				return;
 			}
 			QOTWSubmission submission = submissionOptional.get();
-			if (!submission.isReviewed() || !submission.isAccepted()) {
+			if (submission.getStatus() != SubmissionStatus.ACCEPTED) {
 				Responses.error(event.getHook(), String.format("Submission must be reviewed and accepted!", threadId)).queue();
 				return;
 			}
@@ -67,7 +69,8 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 							Responses.error(event.getHook(), String.format("Could not find member with id: `%s`", submission.getAuthorId())).queue();
 							return;
 						}
-						IncrementSubcommand.correct(member, true, true);
+						DbHelper.doDaoAction(QuestionPointsRepository::new, repo -> repo.increment(member.getIdLong()));
+						new QOTWNotificationService(member.getUser(), event.getGuild()).sendBestAnswerNotification();
 						this.sendBestAnswer(event.getHook(), messages, member, submissionThread);
 					}
 			);
@@ -136,7 +139,7 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 			QOTWConfig config = Bot.config.get(event.getGuild()).getQotw();
 			List<QOTWSubmission> submissions = repo.getSubmissionByQuestionNumber(repo.getCurrentQuestionNumber())
 					.stream()
-					.filter(submission -> submission.isAccepted() && submission.isReviewed())
+					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)
 					.toList();
 			submissions.forEach(submission -> {
 				ThreadChannel thread = event.getGuild().getThreadChannelById(submission.getThreadId());

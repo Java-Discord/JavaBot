@@ -11,7 +11,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
-import net.javadiscord.javabot.util.GuildUtils;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
 
 import java.time.Instant;
@@ -31,7 +31,7 @@ public class EnableSelfRoleSubcommand implements SlashCommand {
 		event.getChannel().retrieveMessageById(messageIdOption.getAsString()).queue(message -> {
 			message.editMessageComponents(MessageActionUtils.enableActionRows(message.getActionRows())).queue();
 			MessageEmbed embed = buildSelfRoleEnabledEmbed(event.getUser(), message, config);
-			GuildUtils.getLogChannel(event.getGuild()).sendMessageEmbeds(embed).queue();
+			new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
 			event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
 		}, e -> Responses.error(event.getHook(), e.getMessage()));
 		return event.deferReply(true);
