@@ -57,7 +57,7 @@ public class HelpAccount {
 	 * Tries to get the next experience goal based on the current experience count.
 	 *
 	 * @param guild The current {@link Guild}.
-	 * @return An {@link java.util.Map.Entry} that has the role's id as its key, and the experience needed as its value.
+	 * @return A {@link Pair} with both the Role, and the experience needed.
 	 */
 	public Pair<Role, Double> getNextExperienceGoal(Guild guild) {
 		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
