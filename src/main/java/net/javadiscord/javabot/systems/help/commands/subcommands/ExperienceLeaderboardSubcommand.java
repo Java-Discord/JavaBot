@@ -1,10 +1,7 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -18,10 +15,10 @@ import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
+import net.javadiscord.javabot.util.Pair;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Command that generates a leaderboard based on the help channel experience.
@@ -71,12 +68,11 @@ public class ExperienceLeaderboardSubcommand implements SlashCommand {
 				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
 				.setFooter(String.format("Page %s/%s", Math.min(page, maxPage), maxPage));
 		accounts.forEach(account -> {
-			Map.Entry<Long, Double> currentRole = account.getCurrentExperienceGoal(guild);
-			System.out.println(guild.getJDA().getUserCache().toString());
+			Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(guild);
 			User user = guild.getJDA().getUserById(account.getUserId());
 			builder.addField(
 					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, user == null ? account.getUserId() : user.getAsTag()),
-					String.format("<@&%s>: `%.0f XP`\n", currentRole.getKey(), account.getExperience()),
+					String.format("%s`%.0f XP`\n", currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "", account.getExperience()),
 					false);
 		});
 		return builder.build();
