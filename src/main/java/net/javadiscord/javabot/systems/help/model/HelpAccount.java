@@ -61,13 +61,12 @@ public class HelpAccount {
 	 */
 	public Pair<Role, Double> getNextExperienceGoal(Guild guild) {
 		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
-		Optional<Map.Entry<Long, Double>> experienceOptional = experienceRoles.entrySet()
+		Map.Entry<Long, Double> entry = experienceRoles.entrySet()
 				.stream()
 				.filter(r -> r.getValue() > experience)
-				.findFirst();
-		Map.Entry<Long, Double> entry = experienceOptional.orElseGet(() ->
-				Map.entry(experienceRoles.keySet().stream().max(Comparator.naturalOrder()).orElse(0L), 0.0)
-		);
+				.findFirst().orElseGet(() ->
+						Map.entry(experienceRoles.keySet().stream().max(Comparator.naturalOrder()).orElse(0L), 0.0)
+				);
 		return new Pair<>(guild.getRoleById(entry.getKey()), entry.getValue());
 	}
 }
