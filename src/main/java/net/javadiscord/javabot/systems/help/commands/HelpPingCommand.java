@@ -10,6 +10,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,7 @@ public class HelpPingCommand implements SlashCommand {
 			lastPingTimes.put(event.getMember(), System.currentTimeMillis());
 			Role role = channelManager.getConfig().getHelpPingRole();
 			event.getChannel().sendMessage(role.getAsMention())
+					.allowedMentions(EnumSet.of(Message.MentionType.ROLE))
 					.setEmbeds(this.buildAuthorEmbed(event.getUser()))
 					.queue();
 			return event.replyFormat("Successfully pinged " + role.getAsMention()).setEphemeral(true);
