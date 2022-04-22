@@ -2,9 +2,6 @@ package net.javadiscord.javabot.systems.help.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Guild;
-import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 
 import java.sql.Connection;
@@ -79,7 +76,7 @@ public class HelpAccountRepository {
 	 * @return A {@link List} containing the specified amount of {@link HelpAccount}s.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<HelpAccount> getAccountsWithRank(int page, int size) throws SQLException {
+	public List<HelpAccount> getAccounts(int page, int size) throws SQLException {
 		String sql = "SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT %d OFFSET %d";
 		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, (page * size) - size));
 		ResultSet rs = stmt.executeQuery();
@@ -97,7 +94,7 @@ public class HelpAccountRepository {
 	 * @return The amount, as an {@link Integer}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public int getTotalRankedAccounts() throws SQLException {
+	public int getTotalAccounts() throws SQLException {
 		try (PreparedStatement s = con.prepareStatement("SELECT COUNT(*) FROM help_account WHERE experience > 0")) {
 			ResultSet rs = s.executeQuery();
 			if (rs.next()) return rs.getInt(1);

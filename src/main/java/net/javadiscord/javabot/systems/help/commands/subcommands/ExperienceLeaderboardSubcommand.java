@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -53,7 +54,7 @@ public class ExperienceLeaderboardSubcommand implements SlashCommand {
 				case "left" -> page--;
 				case "right" -> page++;
 			}
-			int maxPage = dao.getTotalRankedAccounts() / PAGE_SIZE;
+			int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
 			if (page <= 0) page = maxPage;
 			if (page > maxPage) page = 1;
 			event.getHook().editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
@@ -63,17 +64,18 @@ public class ExperienceLeaderboardSubcommand implements SlashCommand {
 	}
 
 	private static MessageEmbed buildExperienceLeaderboard(Guild guild, HelpAccountRepository dao, int page) throws SQLException {
-		int maxPage = dao.getTotalRankedAccounts() / PAGE_SIZE;
-		List<HelpAccount> accounts = dao.getAccountsWithRank(Math.min(page, maxPage), PAGE_SIZE);
+		int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
+		List<HelpAccount> accounts = dao.getAccounts(Math.min(page, maxPage), PAGE_SIZE);
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Experience Leaderboard")
 				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
 				.setFooter(String.format("Page %s/%s", Math.min(page, maxPage), maxPage));
 		accounts.forEach(account -> {
 			Map.Entry<Long, Double> currentRole = account.getCurrentExperienceGoal(guild);
+			System.out.println(guild.getJDA().getUserCache().toString());
+			User user = guild.getJDA().getUserById(account.getUserId());
 			builder.addField(
-					// TODO: implement without using blocking complete calls
-					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, guild.getJDA().retrieveUserById(account.getUserId()).complete().getAsTag()),
+					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, user == null ? account.getUserId() : user.getAsTag()),
 					String.format("<@&%s>: `%.0f XP`\n", currentRole.getKey(), account.getExperience()),
 					false);
 		});
