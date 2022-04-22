@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
@@ -10,6 +10,7 @@ import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -52,11 +53,20 @@ public class HelpPingCommand implements SlashCommand {
 				return Responses.warning(event, "Sorry, but you can only use this command occasionally. Please try again later.");
 			}
 			lastPingTimes.put(event.getMember(), System.currentTimeMillis());
-			var role = channelManager.getConfig().getHelpPingRole();
-			event.getChannel().sendMessage(role.getAsMention()).queue();
-			return event.replyFormat("Done!").setEphemeral(true);
+			Role role = channelManager.getConfig().getHelpPingRole();
+			event.getChannel().sendMessage(role.getAsMention())
+					.allowedMentions(EnumSet.of(Message.MentionType.ROLE))
+					.setEmbeds(this.buildAuthorEmbed(event.getUser()))
+					.queue();
+			return event.replyFormat("Successfully pinged " + role.getAsMention()).setEphemeral(true);
 		} else {
 			return Responses.warning(event, WRONG_CHANNEL_MSG);
 		}
+	}
+
+	private MessageEmbed buildAuthorEmbed(User author) {
+		return new EmbedBuilder()
+				.setTitle("Requested by " + author.getAsTag())
+				.build();
 	}
 }
