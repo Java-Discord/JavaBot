@@ -69,10 +69,10 @@ public class HelpAccountRepository {
 	}
 
 	/**
-	 * Gets as many Accounts as specified.
+	 * Gets a specified amount of {@link HelpAccount}s.
 	 *
 	 * @param page    The page.
-	 * @param size    The amount of account to return.
+	 * @param size    The amount of {@link HelpAccount}s to return.
 	 * @return A {@link List} containing the specified amount of {@link HelpAccount}s.
 	 * @throws SQLException If an error occurs.
 	 */
