@@ -110,7 +110,7 @@ public class HelpExperienceService {
 					if (key.equals(role.first().getIdLong())) {
 						guild.addRoleToMember(member, role.first()).queue();
 					} else {
-						guild.removeRoleFromMember(member, role.first()).queue();
+						guild.removeRoleFromMember(member, guild.getRoleById(key)).queue();
 					}
 		}), e -> {});
 	}
