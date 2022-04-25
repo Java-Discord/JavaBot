@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.help.commands.subcommands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -15,10 +16,10 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
+import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * Handles commands to show information about how a user has been thanked for
@@ -73,9 +74,9 @@ public class HelpAccountSubcommand implements SlashCommand {
 
 	private String formatExperience(Guild guild, HelpAccount account) {
 		double current = account.getExperience() - account.getLastExperienceGoal(guild);
-		Map.Entry<Long, Double> role = account.getNextExperienceGoal(guild);
-		double goal = role.getValue() - account.getLastExperienceGoal(guild);
-		StringBuilder sb = new StringBuilder(String.format("<@&%s>: ", role.getKey()));
+		Pair<Role, Double> role = account.getNextExperienceGoal(guild);
+		double goal = role.second() - account.getLastExperienceGoal(guild);
+		StringBuilder sb = new StringBuilder(String.format("%s: ", role.first().getAsMention()));
 		if (goal > 0) {
 			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100))
 					.append("\n")

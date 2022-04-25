@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
+import net.javadiscord.javabot.systems.help.commands.subcommands.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
@@ -62,6 +63,7 @@ public class InteractionListener extends ListenerAdapter {
 		if (event.getUser().isBot()) return;
 		String[] id = event.getComponentId().split(":");
 		switch (id[0]) {
+			case "experience-leaderboard" -> ExperienceLeaderboardSubcommand.handleButtons(event, id);
 			case "qotw-submission" -> SubmissionInteractionManager.handleButton(event, id);
 			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
 			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);

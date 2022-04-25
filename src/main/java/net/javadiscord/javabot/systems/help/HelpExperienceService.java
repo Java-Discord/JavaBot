@@ -4,12 +4,14 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
+import net.javadiscord.javabot.util.Pair;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -102,14 +104,14 @@ public class HelpExperienceService {
 	}
 
 	private void checkExperienceRoles(Guild guild, HelpAccount account) {
-		guild.retrieveMemberById(account.getUserId()).queue(member -> {
-			Bot.config.get(guild).getHelp().getExperienceRoles().forEach((key, value) -> {
-				if (key.equals(account.getCurrentExperienceGoal(guild).getKey())) {
-					guild.addRoleToMember(member, guild.getRoleById(key)).queue();
-				} else {
-					guild.removeRoleFromMember(member, guild.getRoleById(key)).queue();
-				}
-			});
-		}, e -> {});
+		guild.retrieveMemberById(account.getUserId()).queue(member ->
+				Bot.config.get(guild).getHelp().getExperienceRoles().forEach((key, value) -> {
+					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
+					if (key.equals(role.first().getIdLong())) {
+						guild.addRoleToMember(member, role.first()).queue();
+					} else {
+						guild.removeRoleFromMember(member, role.first()).queue();
+					}
+		}), e -> {});
 	}
 }

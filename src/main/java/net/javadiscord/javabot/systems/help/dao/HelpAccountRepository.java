@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -63,6 +65,40 @@ public class HelpAccountRepository {
 				account = this.read(rs);
 			}
 			return Optional.ofNullable(account);
+		}
+	}
+
+	/**
+	 * Gets a specified amount of {@link HelpAccount}s.
+	 *
+	 * @param page    The page.
+	 * @param size    The amount of {@link HelpAccount}s to return.
+	 * @return A {@link List} containing the specified amount of {@link HelpAccount}s.
+	 * @throws SQLException If an error occurs.
+	 */
+	public List<HelpAccount> getAccounts(int page, int size) throws SQLException {
+		String sql = "SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT %d OFFSET %d";
+		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, (page * size) - size));
+		ResultSet rs = stmt.executeQuery();
+		List<HelpAccount> accounts = new ArrayList<>(size);
+		while (rs.next()) {
+			accounts.add(this.read(rs));
+		}
+		stmt.close();
+		return accounts;
+	}
+
+	/**
+	 * Gets the total amount of {@link HelpAccount}s stored in the database, that have more than 0 experience.
+	 *
+	 * @return The amount, as an {@link Integer}.
+	 * @throws SQLException If an error occurs.
+	 */
+	public int getTotalAccounts() throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("SELECT COUNT(*) FROM help_account WHERE experience > 0")) {
+			ResultSet rs = s.executeQuery();
+			if (rs.next()) return rs.getInt(1);
+			return 0;
 		}
 	}
 
