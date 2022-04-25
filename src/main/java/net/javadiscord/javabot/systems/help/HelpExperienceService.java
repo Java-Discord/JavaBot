@@ -107,6 +107,7 @@ public class HelpExperienceService {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
 				Bot.config.get(guild).getHelp().getExperienceRoles().forEach((key, value) -> {
 					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
+					if (role.first() == null) return;
 					if (key.equals(role.first().getIdLong())) {
 						guild.addRoleToMember(member, role.first()).queue();
 					} else {
