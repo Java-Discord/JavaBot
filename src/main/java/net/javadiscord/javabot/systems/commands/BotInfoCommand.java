@@ -52,8 +52,7 @@ public class BotInfoCommand implements SlashCommand {
 				String[] cmd = {"/bin/sh", "-c", "cat /etc/*-release" };
 
 				Process p = Runtime.getRuntime().exec(cmd);
-				BufferedReader bri = new BufferedReader(new InputStreamReader(
-						p.getInputStream()));
+				BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
 				String line = "";
 				while ((line = bri.readLine()) != null) {
