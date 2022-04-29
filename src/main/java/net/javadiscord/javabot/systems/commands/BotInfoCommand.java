@@ -50,7 +50,6 @@ public class BotInfoCommand implements SlashCommand {
 		if(os.equals("Linux")) {
 			try {
 				String[] cmd = {"/bin/sh", "-c", "cat /etc/*-release" };
-
 				Process p = Runtime.getRuntime().exec(cmd);
 				BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
