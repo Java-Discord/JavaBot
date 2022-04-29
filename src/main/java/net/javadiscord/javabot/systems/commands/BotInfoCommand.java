@@ -47,7 +47,7 @@ public class BotInfoCommand implements SlashCommand {
 
 	private String getOs() {
 		String os = System.getProperty("os.name");
-        if(os.equals("Linux")) {
+		if(os.equals("Linux")) {
 			try {
 				String[] cmd = {"/bin/sh", "-c", "cat /etc/*-release" };
 
