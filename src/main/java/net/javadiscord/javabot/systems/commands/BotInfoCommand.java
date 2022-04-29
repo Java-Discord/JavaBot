@@ -36,7 +36,7 @@ public class BotInfoCommand implements SlashCommand {
 				.setThumbnail(bot.getEffectiveAvatarUrl())
 				.setAuthor(bot.getAsTag(), null, bot.getEffectiveAvatarUrl())
 				.setTitle("Info")
-				.addField("OS", String.format("```%s```", getOs()), true)
+				.addField("OS", String.format("```%s```", getOperatingSystem()), true)
 				.addField("Library", "```JDA```", true)
 				.addField("JDK", String.format("```%s```", System.getProperty("java.version")), true)
 				.addField("Gateway Ping", String.format("```%sms```", jda.getGatewayPing()), true)
@@ -45,7 +45,7 @@ public class BotInfoCommand implements SlashCommand {
 				.build();
 	}
 
-	private String getOs() {
+	private String getOperatingSystem() {
 		String os = System.getProperty("os.name");
 		if(os.equals("Linux")) {
 			try {
