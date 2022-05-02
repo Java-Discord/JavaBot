@@ -11,6 +11,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
@@ -77,6 +78,12 @@ public class SubmissionControlsManager {
 	public void sendControls() {
 		ThreadChannel thread = this.guild.getThreadChannelById(this.submission.getThreadId());
 		if (thread == null) return;
+		if (thread.getMessageCount() < 2) {
+			new QOTWNotificationService(guild)
+					.sendSubmissionActionNotification(guild.getJDA().getSelfUser(), thread, SubmissionStatus.DELETED, "Empty Submission");
+			thread.delete().queue();
+			return;
+		}
 		thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 		thread.sendMessage(config.getQOTWReviewRole().getAsMention())
 				.setEmbeds(new EmbedBuilder()
@@ -124,7 +131,7 @@ public class SubmissionControlsManager {
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
 				new QOTWNotificationService(user, event.getGuild()).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
 				Responses.success(event.getHook(), "Submission Declined",
-						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
+						String.format("Successfully declined submission by %s for the following reasons:%n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
 				}
 		);
 		this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());

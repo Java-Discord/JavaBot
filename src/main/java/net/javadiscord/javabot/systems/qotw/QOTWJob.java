@@ -72,7 +72,7 @@ public class QOTWJob extends DiscordApiJob {
 		var checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
-				.setDescription(String.format("%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",
+				.setDescription(String.format("%s%n%nClick the button below to submit your answer.%nYour answers will be checked by <t:%d:F>",
 						question.getText(), checkTime.toEpochSecond()))
 				.build();
 	}
