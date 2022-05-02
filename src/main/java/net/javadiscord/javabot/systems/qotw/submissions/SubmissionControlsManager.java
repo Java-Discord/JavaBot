@@ -11,7 +11,6 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
@@ -28,9 +27,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class SubmissionControlsManager {
-	private final String SUBMISSION_ACCEPTED = "\u2705";
-	private final String SUBMISSION_DECLINED = "\u274C";
-	private final String SUBMISSION_PENDING = "\uD83D\uDD52";
+	private static final String SUBMISSION_ACCEPTED = "\u2705";
+	private static final String SUBMISSION_DECLINED = "\u274C";
+	private static final String SUBMISSION_PENDING = "\uD83D\uDD52";
 
 	private final Guild guild;
 	private final QOTWConfig config;
@@ -78,7 +77,8 @@ public class SubmissionControlsManager {
 	public void sendControls() {
 		ThreadChannel thread = this.guild.getThreadChannelById(this.submission.getThreadId());
 		if (thread == null) return;
-		if (thread.getMessageCount() <= 2) {
+		// The Thread's starting message
+		if (thread.getMessageCount() <= 1) {
 			new QOTWNotificationService(guild)
 					.sendSubmissionActionNotification(guild.getJDA().getSelfUser(), thread, SubmissionStatus.DELETED, "Empty Submission");
 			thread.delete().queue();
