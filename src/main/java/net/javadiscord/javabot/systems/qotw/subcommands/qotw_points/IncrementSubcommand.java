@@ -9,8 +9,8 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.commands.LeaderboardCommand;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 
@@ -47,7 +47,7 @@ public class IncrementSubcommand implements SlashCommand {
 				.setTitle("QOTW Account Incremented")
 				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
 				.addField("Total QOTW-Points", "```" + points + "```", true)
-				.addField("Rank", "```#" + LeaderboardCommand.getQOTWRank(member, member.getGuild()) + "```", true)
+				.addField("Rank", "```#" + QOTWLeaderboardSubcommand.getQOTWRank(member, member.getGuild()) + "```", true)
 				.setFooter("ID: " + member.getId())
 				.setTimestamp(Instant.now())
 				.build();

@@ -13,6 +13,7 @@ import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
+import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 
 import java.sql.Connection;
@@ -63,7 +64,7 @@ public class ProfileCommand implements SlashCommand {
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points,
 						points == 1 ? "" : "s",
-						new LeaderboardCommand().getQOTWRank(member, member.getGuild())), true)
+						QOTWLeaderboardSubcommand.getQOTWRank(member, member.getGuild())), true)
 				.addField("Total Help XP", String.format("`%.2f XP`", helpXP), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);

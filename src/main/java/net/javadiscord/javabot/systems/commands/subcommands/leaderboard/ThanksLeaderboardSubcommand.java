@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help.commands.subcommands;
+package net.javadiscord.javabot.systems.commands.subcommands.leaderboard;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;

@@ -20,20 +20,6 @@
           description: The user to check.
           type: USER
           required: false
-
-    # /help thanks-leaderboard
-    - name: thanks-leaderboard
-      description: Show a leaderboard of the most thanked users.
-
-    # /help experience-leaderboard
-    - name: experience-leaderboard
-      description: Show a leaderboard of the users with the most help-experience.
-      options:
-        - name: page
-          description: The page of results to show. By default it starts at 1.
-          type: INTEGER
-          required: false
-
   handler: net.javadiscord.javabot.systems.help.commands.HelpCommandHandler
 
 
