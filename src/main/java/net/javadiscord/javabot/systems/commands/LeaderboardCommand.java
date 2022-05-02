@@ -5,6 +5,9 @@ import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.Experien
 import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.ThanksLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLeaderboardSubcommand;
 
+/**
+ * Single command housing all leaderboards.
+ */
 public class LeaderboardCommand extends DelegatingCommandHandler {
     public LeaderboardCommand() {
         this.addSubcommand("qotw", new QOTWLeaderboardSubcommand());
