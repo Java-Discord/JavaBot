@@ -9,9 +9,12 @@ import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLead
  * Single command housing all leaderboards.
  */
 public class LeaderboardCommand extends DelegatingCommandHandler {
-    public LeaderboardCommand() {
-        this.addSubcommand("qotw", new QOTWLeaderboardSubcommand());
-        this.addSubcommand("thanks", new ThanksLeaderboardSubcommand());
-        this.addSubcommand("help-xp", new ExperienceLeaderboardSubcommand());
-    }
+	/**
+	 * Leaderboard command handler.
+	 */
+	public LeaderboardCommand() {
+		this.addSubcommand("qotw", new QOTWLeaderboardSubcommand());
+		this.addSubcommand("thanks", new ThanksLeaderboardSubcommand());
+		this.addSubcommand("help-xp", new ExperienceLeaderboardSubcommand());
+	}
 }

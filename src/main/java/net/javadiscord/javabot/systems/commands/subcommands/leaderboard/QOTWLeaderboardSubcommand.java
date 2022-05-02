@@ -25,6 +25,9 @@ import java.util.Objects;
 
 import static net.javadiscord.javabot.Bot.imageCache;
 
+/**
+ * Command for QOTW Leaderboard.
+ */
 public class QOTWLeaderboardSubcommand extends ImageGenerationUtils implements SlashCommand {
 	private final Color BACKGROUND_COLOR = Color.decode("#011E2F");
 	private final Color PRIMARY_COLOR = Color.WHITE;
@@ -35,6 +38,7 @@ public class QOTWLeaderboardSubcommand extends ImageGenerationUtils implements S
 	private final int MARGIN = 40;
 	private final int WIDTH = 3000;
 
+	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		Bot.asyncPool.submit(() -> {
 			try {
