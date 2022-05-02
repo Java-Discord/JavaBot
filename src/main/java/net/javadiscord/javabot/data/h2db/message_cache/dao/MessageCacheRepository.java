@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.data.h2db.message_cache.dao;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 
 import java.sql.*;
@@ -11,7 +10,6 @@ import java.util.List;
 /**
  * Dao class that represents the QOTW_POINTS SQL Table.
  */
-@Slf4j
 @RequiredArgsConstructor
 public class MessageCacheRepository {
 	private final Connection con;

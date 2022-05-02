@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.listener;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
  * Listens for reactions in #looking-for-programmer.
  * Automatically deletes messages below a certain score.
  */
-@Slf4j
 public class JobChannelVoteListener extends ListenerAdapter {
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {

@@ -25,11 +25,7 @@ public class HelpChannelListener extends ListenerAdapter {
 	/**
 	 * A static Map that holds all messages that was sent in a specific reserved channel.
 	 */
-	public static Map<Long, List<Message>> reservationMessages;
-
-	public HelpChannelListener() {
-		HelpChannelListener.reservationMessages = new HashMap<>();
-	}
+	public static Map<Long, List<Message>> reservationMessages = new HashMap<>();
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
@@ -62,10 +58,10 @@ public class HelpChannelListener extends ListenerAdapter {
 			reservationOptional.ifPresent(reservation -> {
 				List<Message> messages = new ArrayList<>();
 				messages.add(event.getMessage());
-				if (HelpChannelListener.reservationMessages.containsKey(reservation.getId())) {
-					messages.addAll(HelpChannelListener.reservationMessages.get(reservation.getId()));
+				if (reservationMessages.containsKey(reservation.getId())) {
+					messages.addAll(reservationMessages.get(reservation.getId()));
 				}
-				HelpChannelListener.reservationMessages.put(reservation.getId(), messages);
+				reservationMessages.put(reservation.getId(), messages);
 			});
 		} else if (config.getDormantChannelCategory().equals(channel.getParentCategory())) {
 			// Prevent anyone from sending messages in dormant channels.

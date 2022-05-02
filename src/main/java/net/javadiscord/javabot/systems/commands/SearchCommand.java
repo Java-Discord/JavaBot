@@ -10,9 +10,8 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -34,12 +33,14 @@ public class SearchCommand implements SlashCommand {
 		URL url = new URL(HOST + PATH + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=" + "en-US" + "&safeSearch=Strict");
 
 		// Open the connection.
-		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.config.getSystems().azureSubscriptionKey);
 
 		// Receive the JSON response body.
-		InputStream stream = connection.getInputStream();
-		String response = new Scanner(stream).useDelimiter("\\A").next();
+		String response;
+		try(Scanner scan=new Scanner(connection.getInputStream()).useDelimiter("\\A")){
+			response = scan.next();
+		}
 
 		// Construct the result object.
 		SearchResults results = new SearchResults(new HashMap<>(), response);
@@ -52,7 +53,6 @@ public class SearchCommand implements SlashCommand {
 				results.relevantHeaders.put(header, headers.get(header).get(0));
 			}
 		}
-		stream.close();
 		return results;
 	}
 
