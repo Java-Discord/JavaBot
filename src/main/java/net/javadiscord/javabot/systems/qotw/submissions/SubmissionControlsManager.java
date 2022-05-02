@@ -131,7 +131,7 @@ public class SubmissionControlsManager {
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
 				new QOTWNotificationService(user, event.getGuild()).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
 				Responses.success(event.getHook(), "Submission Declined",
-						String.format("Successfully declined submission by %s for the following reasons:%n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
+						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
 				}
 		);
 		this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
