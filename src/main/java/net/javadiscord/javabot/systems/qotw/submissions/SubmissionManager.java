@@ -64,7 +64,7 @@ public class SubmissionManager {
 						DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> {
 							var questionOptional = dao.findByQuestionNumber(questionNumber);
 							if (questionOptional.isPresent()) {
-								thread.sendMessage(String.format("%s %s", config.getQOTWReviewRole(), member.getAsMention()))
+								thread.sendMessage(member.getAsMention())
 										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
 										.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
 										.queue();

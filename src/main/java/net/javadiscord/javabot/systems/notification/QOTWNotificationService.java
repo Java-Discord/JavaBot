@@ -145,7 +145,7 @@ public final class QOTWNotificationService extends NotificationService {
 		if (thread != null && status != SubmissionStatus.DELETED) {
 			builder.addField("Thread", thread.getAsMention(), true);
 		}
-		if (reasons != null) {
+		if (reasons != null && reasons.length > 0) {
 			builder.addField("Reason(s)", String.join(", ", reasons), true);
 		}
 		return builder.build();

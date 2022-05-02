@@ -27,9 +27,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class SubmissionControlsManager {
-	private final String SUBMISSION_ACCEPTED = "\u2705";
-	private final String SUBMISSION_DECLINED = "\u274C";
-	private final String SUBMISSION_PENDING = "\uD83D\uDD52";
+	private static final String SUBMISSION_ACCEPTED = "\u2705";
+	private static final String SUBMISSION_DECLINED = "\u274C";
+	private static final String SUBMISSION_PENDING = "\uD83D\uDD52";
 
 	private final Guild guild;
 	private final QOTWConfig config;
@@ -77,6 +77,13 @@ public class SubmissionControlsManager {
 	public void sendControls() {
 		ThreadChannel thread = this.guild.getThreadChannelById(this.submission.getThreadId());
 		if (thread == null) return;
+		// The Thread's starting message
+		if (thread.getMessageCount() <= 1) {
+			new QOTWNotificationService(guild)
+					.sendSubmissionActionNotification(guild.getJDA().getSelfUser(), thread, SubmissionStatus.DELETED, "Empty Submission");
+			thread.delete().queue();
+			return;
+		}
 		thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 		thread.sendMessage(config.getQOTWReviewRole().getAsMention())
 				.setEmbeds(new EmbedBuilder()

@@ -55,11 +55,11 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 			}
 			QOTWSubmission submission = submissionOptional.get();
 			if (submission.getStatus() != SubmissionStatus.ACCEPTED) {
-				Responses.error(event.getHook(), String.format("Submission must be reviewed and accepted!", threadId)).queue();
+				Responses.error(event.getHook(), "The Submission must be reviewed and accepted!").queue();
 				return;
 			}
 			if (config.getQotw().getQuestionChannel().getThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()))) {
-				Responses.error(event.getHook(), String.format("Submission was already marked as the best answer.", threadId)).queue();
+				Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
 				return;
 			}
 			List<Message> messages = this.getSubmissionContent(submissionThread);
@@ -98,7 +98,7 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
 				.setTitle("Best Answer")
 				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor())
-				.setDescription(String.format("%s's submission was marked as the **best answer.**", member.getAsMention()))
+				.setDescription(String.format("%s's submission was marked as one of the **best answers** (+1 QOTW-Point)", member.getAsMention()))
 				.build();
 	}
 
