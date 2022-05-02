@@ -38,7 +38,7 @@ public class SearchCommand implements SlashCommand {
 
 		// Receive the JSON response body.
 		String response;
-		try(Scanner scan=new Scanner(connection.getInputStream()).useDelimiter("\\A")){
+		try(Scanner scan = new Scanner(connection.getInputStream()).useDelimiter("\\A")){
 			response = scan.next();
 		}
 

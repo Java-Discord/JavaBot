@@ -43,7 +43,7 @@ public class AutoMod extends ListenerAdapter {
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
 	 */
 	public AutoMod() {
-		try(Scanner scan=new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
+		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
 		} catch (IOException e) {
