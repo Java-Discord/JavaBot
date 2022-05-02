@@ -78,7 +78,7 @@ public class SubmissionControlsManager {
 	public void sendControls() {
 		ThreadChannel thread = this.guild.getThreadChannelById(this.submission.getThreadId());
 		if (thread == null) return;
-		if (thread.getMessageCount() < 2) {
+		if (thread.getMessageCount() <= 2) {
 			new QOTWNotificationService(guild)
 					.sendSubmissionActionNotification(guild.getJDA().getSelfUser(), thread, SubmissionStatus.DELETED, "Empty Submission");
 			thread.delete().queue();
