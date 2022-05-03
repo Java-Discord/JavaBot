@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.staff.suggestions.subcommands;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -15,7 +14,6 @@ import net.javadiscord.javabot.systems.staff.suggestions.SuggestionSubcommand;
 /**
  * Subcommand that lets staff members decline suggestions.
  */
-@Slf4j
 public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 	@Override
 	protected WebhookMessageAction<Message> handleSuggestionCommand(SlashCommandInteractionEvent event, Message message, GuildConfig config) {

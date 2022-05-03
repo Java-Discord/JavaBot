@@ -63,7 +63,7 @@ public class ProfileCommand implements SlashCommand {
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points,
 						points == 1 ? "" : "s",
-						new LeaderboardCommand().getQOTWRank(member, member.getGuild())), true)
+						LeaderboardCommand.getQOTWRank(member, member.getGuild())), true)
 				.addField("Total Help XP", String.format("`%.2f XP`", helpXP), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);

@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.staff.self_roles.subcommands;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -19,7 +18,6 @@ import java.time.Instant;
 /**
  * Subcommand that disables all Elements on an ActionRow.
  */
-@Slf4j
 public class DisableSelfRoleSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
