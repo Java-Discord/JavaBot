@@ -59,18 +59,4 @@ public final class GuildNotificationService extends NotificationService {
 		}
 		this.sendMessageChannelNotification(config.getMessageCache().getMessageCacheLogChannel(), embed);
 	}
-
-	/**
-	 * Sends a simple Message to the Guild's message log channel.
-	 *
-	 * @param string The message that should be sent.
-	 * @param args Optional args for formatting.
-	 */
-	private void sendMessageLogChannelNotification(String string, Object... args) {
-		if (config.getMessageCache().getMessageCacheLogChannel() == null) {
-			log.warn("Could not find Message Log Channel for Guild {}", guild.getName());
-			return;
-		}
-		this.sendMessageChannelNotification(config.getMessageCache().getMessageCacheLogChannel(), string, args);
-	}
 }

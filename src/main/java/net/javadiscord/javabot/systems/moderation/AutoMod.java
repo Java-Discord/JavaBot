@@ -13,9 +13,7 @@ import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 
 import javax.annotation.Nonnull;
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,11 +43,8 @@ public class AutoMod extends ListenerAdapter {
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
 	 */
 	public AutoMod() {
-		try {
-			URL url = new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt");
-			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-			InputStream stream = connection.getInputStream();
-			String response = new Scanner(stream).useDelimiter("\\A").next();
+		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
+			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
 		} catch (IOException e) {
 			e.printStackTrace();

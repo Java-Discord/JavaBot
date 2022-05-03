@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.listener;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
@@ -18,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Listens for Interaction Events and handles them.
  */
-@Slf4j
 public class InteractionListener extends ListenerAdapter {
 
 	/**

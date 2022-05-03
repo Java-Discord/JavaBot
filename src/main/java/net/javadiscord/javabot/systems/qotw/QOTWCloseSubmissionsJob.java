@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.qotw;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
@@ -21,7 +20,6 @@ import java.util.Collections;
 /**
  * Job which disables the Submission button.
  */
-@Slf4j
 public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 	@Override
 	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
