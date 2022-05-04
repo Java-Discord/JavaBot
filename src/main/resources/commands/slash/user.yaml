@@ -198,5 +198,10 @@
     # /leaderboard help-xp
     - description: Help Experience Leaderboard.
       name: help-xp
+      options:
+        - name: page
+          description: The page of results to show. By default it starts at 1.
+          type: INTEGER
+          required: false
 
   handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
