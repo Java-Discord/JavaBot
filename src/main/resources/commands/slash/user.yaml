@@ -33,11 +33,6 @@
       type: STRING
   handler: net.javadiscord.javabot.systems.commands.IdCalculatorCommand
 
-# /leaderboard
-- name: leaderboard
-  description: Generates the question of the week leaderboard
-  handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
-
 # /search
 - name: search
   description: Turns your text-input into a search query
@@ -186,3 +181,27 @@
         - name: XML
           value: xml
   handler: net.javadiscord.javabot.systems.commands.FormatCodeCommand
+
+# /leaderboard
+- name: leaderboard
+  description: Command for all leaderboards.
+  enabledByDefault: true
+  subCommands:
+    # /leaderboard qotw
+    - description: Question-Of-The-Week Leaderboard.
+      name: qotw
+
+    # /leaderboard thanks
+    - description: Thanks leaderboard.
+      name: thanks
+
+    # /leaderboard help-xp
+    - description: Help Experience Leaderboard.
+      name: help-xp
+      options:
+        - name: page
+          description: The page of results to show. By default it starts at 1.
+          type: INTEGER
+          required: false
+
+  handler: net.javadiscord.javabot.systems.commands.LeaderboardCommand
