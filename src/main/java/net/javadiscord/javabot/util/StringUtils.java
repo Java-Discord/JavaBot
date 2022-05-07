@@ -72,7 +72,7 @@ public class StringUtils {
 	}
 
 	/**
-	 * Capitalizes the given word,
+	 * Capitalizes the given word.
 	 *
 	 * @param word The word to capitalize.
 	 * @return The capitalized word.
