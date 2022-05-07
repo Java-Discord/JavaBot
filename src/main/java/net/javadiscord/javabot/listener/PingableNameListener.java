@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.GuildUtils;
 import net.javadiscord.javabot.util.StringUtils;
 
@@ -40,15 +41,15 @@ public class PingableNameListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		if (!isPingable(event.getUser().getName()) && !canBypassCheck(event.getMember())) {
-			changeName(event.getMember(), Bot.config.get(event.getGuild()).getModeration().getLogChannel());
+		if (!isPingable(event.getUser().getName())) {
+			changeName(event.getMember());
 		}
 	}
 
 	@Override
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
-		if (!isPingable(event.getNewNickname()) && !isPingable(event.getUser().getName()) && !canBypassCheck(event.getMember())) {
-			changeName(event.getMember(), Bot.config.get(event.getGuild()).getModeration().getLogChannel());
+		if (!isPingable(event.getNewNickname()) && !isPingable(event.getUser().getName())) {
+			changeName(event.getMember());
 		}
 	}
 
@@ -56,13 +57,14 @@ public class PingableNameListener extends ListenerAdapter {
 	 * Changes the given {@link Member}s name to a randomly generated one.
 	 * @param member The Member whose name should be changed.
 	 */
-	private void changeName(Member member, TextChannel logChannel) {
+	private void changeName(Member member) {
+		String oldName = member.getNickname();
 		String newName = generateRandomName();
-		member.modifyNickname(newName).queue();
+		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
 				.flatMap(channel -> channel.sendMessageFormat("Your nickname has been set to `%s` since both your user- and nickname's first three characters were deemed as not-pingable.", newName))
 				.queue();
-		logChannel.sendMessageFormat("Changed %s's nickname to %s.", member.getAsMention(), newName).queue();
+		new GuildNotificationService(member.getGuild()).sendLogChannelNotification("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName);
 	}
 
 	/**
@@ -73,7 +75,7 @@ public class PingableNameListener extends ListenerAdapter {
 	private boolean isPingable(String name) {
 		if (name == null) return true;
 		char[] nameChars = name.toCharArray();
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < Math.min(2,name.length()); i++) {
 			char c = nameChars[i];
 			if (c < 32 || c > 126) {
 				return false;
@@ -101,8 +103,7 @@ public class PingableNameListener extends ListenerAdapter {
 	private static List<String> readStrings(String url) {
 		List<String> list;
 		try (Scanner scan = new Scanner(new URL(url).openStream()).useDelimiter("\\A")) {
-			String response = scan.next();
-			list = Arrays.stream(response.split("\n")).collect(Collectors.toList());
+			list = Arrays.stream(scan.next().split("\n")).collect(Collectors.toList());
 		} catch (IOException e) {
 			log.error("Error during retrieval of words.");
 			list = new ArrayList<>();
@@ -110,14 +111,5 @@ public class PingableNameListener extends ListenerAdapter {
 
 		list.removeIf(word -> word.contains("-"));
 		return list;
-	}
-
-	/**
-	 * Checks if the given {@link Member} can bypass the name-check.
-	 * @param member The {@link Member} to check.
-	 * @return Whether the Member can bypass name-checks or not.
-	 */
-	private static boolean canBypassCheck(Member member) {
-		return member.getUser().isBot() || member.getUser().isSystem() || member.hasPermission(Permission.NICKNAME_MANAGE, Permission.MESSAGE_MANAGE);
 	}
 }
