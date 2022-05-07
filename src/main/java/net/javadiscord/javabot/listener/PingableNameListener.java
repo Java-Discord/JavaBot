@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
