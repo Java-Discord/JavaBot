@@ -106,8 +106,8 @@ public class PingableNameListener extends ListenerAdapter {
 	 */
 	private static List<String> readStrings(String url) {
 		List<String> list;
-		try (Scanner scan = new Scanner(new URL(url).openStream()).useDelimiter("\\A")) {
-			list = Arrays.stream(scan.next().split("\n")).collect(Collectors.toList());
+		try (Scanner scan = new Scanner(new URL(url).openStream()).useDelimiter("\\n")) {
+			list = scan.tokens().collect(Collectors.toList());
 		} catch (IOException e) {
 			log.error("Error during retrieval of words.");
 			list = new ArrayList<>();
