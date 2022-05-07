@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
@@ -51,7 +52,7 @@ public class PingableNameListener extends ListenerAdapter {
 	 * @param nickname The {@link Member}'s new Nickname, null if that does not exist.
 	 */
 	private void checkNickname(Member member, String nickname) {
-		if (!(nickname==null||isPingable(nickname)) && !isPingable(member.getUser().getName())) {
+		if (!(nickname==null||isPingable(nickname)) && !isPingable(member.getUser().getName()) && !canBypassCheck(member)) {
 			changeName(member);
 		}
 	}
@@ -114,5 +115,14 @@ public class PingableNameListener extends ListenerAdapter {
 
 		list.removeIf(word -> word.contains("-"));
 		return list;
+	}
+
+	/**
+	 * Checks if the given {@link Member} can bypass the name-check.
+	 * @param member The {@link Member} to check.
+	 * @return Whether the Member can bypass name-checks or not.
+	 */
+	private static boolean canBypassCheck(Member member) {
+		return member.getUser().isBot() || member.getUser().isSystem() || member.getGuild().getSelfMember().canInteract(member);
 	}
 }
