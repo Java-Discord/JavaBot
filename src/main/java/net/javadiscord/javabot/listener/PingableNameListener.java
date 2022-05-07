@@ -1,15 +1,11 @@
 package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
-import net.javadiscord.javabot.util.GuildUtils;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.io.IOException;
@@ -41,15 +37,22 @@ public class PingableNameListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		if (!isPingable(event.getUser().getName())) {
-			changeName(event.getMember());
-		}
+		checkNickname(event.getMember(), null);
 	}
 
 	@Override
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
-		if (!isPingable(event.getNewNickname()) && !isPingable(event.getUser().getName())) {
-			changeName(event.getMember());
+		checkNickname(event.getMember(), event.getNewNickname());
+	}
+
+	/**
+	 * Checks whether the given {@link Member}'s nickname should be changed.
+	 * @param member The {@link Member} to check.
+	 * @param nickname The {@link Member}'s new Nickname, null if that does not exist.
+	 */
+	private void checkNickname(Member member, String nickname) {
+		if (!(nickname==null||isPingable(nickname)) && !isPingable(member.getUser().getName())) {
+			changeName(member);
 		}
 	}
 
