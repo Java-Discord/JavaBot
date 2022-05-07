@@ -141,7 +141,8 @@ public class Bot {
 				new InteractionListener(),
 				new HelpChannelListener(),
 				new ShareKnowledgeVoteListener(),
-				new JobChannelVoteListener()
+				new JobChannelVoteListener(),
+				new PingableNameListener()
 		);
 	}
 }

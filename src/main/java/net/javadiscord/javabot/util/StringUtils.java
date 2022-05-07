@@ -70,4 +70,15 @@ public class StringUtils {
 		int onLength = (int) (length * percent);
 		return on.repeat(onLength) + off.repeat(length - onLength);
 	}
+
+	/**
+	 * Capitalizes the given word,
+	 *
+	 * @param word The word to capitalize.
+	 * @return The capitalized word.
+	 */
+	public static String capitalize(String word) {
+		if (word == null || word.isEmpty()) return word;
+		return word.substring(0, 1).toUpperCase() + word.substring(1);
+	}
 }
