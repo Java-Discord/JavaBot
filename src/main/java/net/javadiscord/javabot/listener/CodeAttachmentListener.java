@@ -23,7 +23,7 @@ public class CodeAttachmentListener extends ListenerAdapter {
 			fetchSource(event.getMessage())
 				.thenApply(this::processSource)
 				.thenAcceptAsync(blocks -> {
-                    Message lastMsg = event.getMessage();
+					Message lastMsg = event.getMessage();
 					for (var block : blocks) {
 						lastMsg = lastMsg.reply(block).complete();
 					}
@@ -31,25 +31,25 @@ public class CodeAttachmentListener extends ListenerAdapter {
 		}
 	}
 
-    /**
-     * Checks if a message is considered to be a valid "code" message that we
-     * can process into code blocks. A message is a code message if it contains
-     * exactly 1 attachment whose name is "message.txt" and whose size does not
-     * exceed 10KB.
-     * @param msg The message to check.
-     * @return True if the message is eligible for processing, or false otherwise.
-     */
+	/**
+	 * Checks if a message is considered to be a valid "code" message that we
+	 * can process into code blocks. A message is a code message if it contains
+	 * exactly 1 attachment whose name is "message.txt" and whose size does not
+	 * exceed 10KB.
+	 * @param msg The message to check.
+	 * @return True if the message is eligible for processing, or false otherwise.
+	 */
 	private boolean isCodeMessage(Message msg) {
 		return msg.getAttachments().size() == 1 &&
 				msg.getAttachments().get(0).getFileName().equals("message.txt") &&
 				msg.getAttachments().get(0).getSize() < 10000;
 	}
 
-    /**
-     * Fetches the source code attached to a message.
-     * @param msg The message to fetch from.
-     * @return A future that completes when the source code is fetched.
-     */
+	/**
+	 * Fetches the source code attached to a message.
+	 * @param msg The message to fetch from.
+	 * @return A future that completes when the source code is fetched.
+	 */
 	private CompletableFuture<String> fetchSource(Message msg) {
 		return msg.getAttachments().get(0).retrieveInputStream().thenApply(in -> {
 			try {
@@ -62,12 +62,12 @@ public class CodeAttachmentListener extends ListenerAdapter {
 		});
 	}
 
-    /**
-     * Processes a source code string into a series of smaller code block
-     * snippets for use in discord messages.
-     * @param source The source to process.
-     * @return A list of code block strings.
-     */
+	/**
+	 * Processes a source code string into a series of smaller code block
+	 * snippets for use in discord messages.
+	 * @param source The source to process.
+	 * @return A list of code block strings.
+	 */
 	private List<String> processSource(String source) {
 		List<String> blocks = new ArrayList<>(5);
 		StringBuilder sb = new StringBuilder(2000);
