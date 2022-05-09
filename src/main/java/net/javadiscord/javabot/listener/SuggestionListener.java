@@ -2,10 +2,7 @@ package net.javadiscord.javabot.listener;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageType;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -74,9 +71,12 @@ public class SuggestionListener extends ListenerAdapter {
 
 
 	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
+		Member member = message.getMember();
+		// Note: member will never be null in practice. This is to satisfy code analysis tools.
+		if (member == null) throw new IllegalStateException("Member was null when building suggestion embed.");
 		return new EmbedBuilder()
 				.setTitle("Suggestion")
-				.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getEffectiveAvatarUrl())
+				.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
 				.setColor(config.getDefaultColor())
 				.setTimestamp(Instant.now())
 				.setDescription(message.getContentRaw())
