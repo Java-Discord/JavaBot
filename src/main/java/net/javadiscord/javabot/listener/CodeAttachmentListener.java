@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Listens for messages containing "message.txt" or similar file attachments
@@ -74,7 +76,7 @@ public class CodeAttachmentListener extends ListenerAdapter {
 		int currentBlockLength = 0;
 		String[] lines = source.split("\\r?\\n");
 		for (int i = 0; i < lines.length; i++) {
-			String line = lines[i];
+			String line = squishIndentation(lines[i]);
 			// Append the line to the current block, if we can fit it.
 			if (currentBlockLength + line.length() + 1 < 1900) {
 				sb.append(line).append('\n');
@@ -94,5 +96,28 @@ public class CodeAttachmentListener extends ListenerAdapter {
 			blocks.add(String.format("```java%n%s```", sb));
 		}
 		return blocks;
+	}
+
+	private String squishIndentation(String line) {
+		return line.replaceFirst("^[ \t]+", " ".repeat(getIndentLevel(line) * 2));
+	}
+
+	private int getIndentLevel(String s) {
+		Pattern space4IndentPattern = Pattern.compile("^[ {4}]+");
+		Matcher mSpace4 = space4IndentPattern.matcher(s);
+		if (mSpace4.find()) {
+			return mSpace4.end() / 4;
+		}
+		Pattern space2IndentPattern = Pattern.compile("^[ {2}]+");
+		Matcher mSpace2 = space4IndentPattern.matcher(s);
+		if (mSpace2.find()) {
+			return mSpace2.end() / 2;
+		}
+		Pattern tabIndentPattern = Pattern.compile("^[ {4}]+");
+		Matcher mTab = space4IndentPattern.matcher(s);
+		if (mTab.find()) {
+			return mTab.end();
+		}
+		return 0;
 	}
 }
