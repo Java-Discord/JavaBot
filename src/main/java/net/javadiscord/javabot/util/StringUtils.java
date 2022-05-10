@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Contains some utility methods for dealing with Strings.
@@ -91,8 +90,17 @@ public class StringUtils {
 	 * Enum that represents the possible ways source text can be indented.
 	 */
 	public enum IndentationScheme {
+		/**
+		 * Indentation of two spaces.
+		 */
 		TWO_SPACES,
+		/**
+		 * Indentation of four spaces.
+		 */
 		FOUR_SPACES,
+		/**
+		 * Indentation of tabs.
+		 */
 		TABS
 	}
 
@@ -141,6 +149,8 @@ public class StringUtils {
 	 * Gets the indentation level of a line of source code, based on a variety
 	 * of possible indentation patterns.
 	 * @param line The line of code.
+	 * @param indentationScheme The indentation scheme that is used for the
+	 *                          source code that the given line belongs to.
 	 * @return An integer representing the indentation level.
 	 */
 	public static int getIndentLevel(String line, IndentationScheme indentationScheme) {
