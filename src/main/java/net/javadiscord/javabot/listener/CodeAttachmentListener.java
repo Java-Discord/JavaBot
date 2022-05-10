@@ -52,15 +52,11 @@ public class CodeAttachmentListener extends ListenerAdapter {
 	private boolean isCodeMessage(Message msg) {
 		if (msg.getAttachments().isEmpty()) return false;
 		int totalSize = 0;
-		boolean containsCode = false;
 		for (var atc : msg.getAttachments()) {
-			totalSize += atc.getSize();
 			if (attachmentFilter.apply(atc)) {
-				containsCode = true;
+				totalSize += atc.getSize();
 			}
 		}
-		return totalSize < 10000 && containsCode;
+		return totalSize > 0 && totalSize < 10000;
 	}
-
-
 }
