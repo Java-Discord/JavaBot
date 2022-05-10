@@ -14,7 +14,6 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.javadiscord.javabot.util.TimeUtils;
 
 import java.sql.SQLException;
 import java.time.Duration;
@@ -326,7 +325,7 @@ public class ModerationService {
 				.setColor(slashCommandConfig.getErrorColor())
 				.addField("Member", member.getAsMention(), true)
 				.addField("Timed Out by", timedOutBy.getAsMention(), true)
-				.addField("Until", String.format("`%s UTC`", LocalDateTime.now().plus(duration).format(TimeUtils.STANDARD_FORMATTER)), true)
+				.addField("Until", String.format("<t:%d>", Instant.now().plus(duration).getEpochSecond()), true)
 				.addField("Timeout Reason", String.format(reasonFormat, reason), false)
 				.setTimestamp(Instant.now())
 				.setFooter(member.getUser().getAsTag(), member.getEffectiveAvatarUrl())
