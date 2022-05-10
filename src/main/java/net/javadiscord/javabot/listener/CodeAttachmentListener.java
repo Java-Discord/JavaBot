@@ -8,7 +8,6 @@ import net.javadiscord.javabot.util.CodeAttachmentExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -29,16 +28,15 @@ public class CodeAttachmentListener extends ListenerAdapter {
 		if (isCodeMessage(event.getMessage())) {
 			new CodeAttachmentExtractor(attachmentFilter)
 				.extractCodeBlocks(event.getMessage())
-				.handleAsync((blocks, throwable) -> {
-					if (throwable != null) {
-						log.warn("An error occurred while fetching source code from a message attachment.", throwable);
-					} else {
-						Message lastMsg = event.getMessage();
-						for (var block : blocks) {
-							lastMsg = lastMsg.reply(block).allowedMentions(Collections.emptySet()).complete();
-						}
+				.exceptionally(throwable -> {
+					log.warn("An error occurred while fetching source code from a message attachment.", throwable);
+					return Collections.emptyList();
+				})
+				.thenAcceptAsync(blocks -> {
+					Message lastMsg = event.getMessage();
+					for (var block : blocks) {
+						lastMsg = lastMsg.reply(block).allowedMentions(Collections.emptySet()).complete();
 					}
-					return null;
 				});
 		}
 	}
