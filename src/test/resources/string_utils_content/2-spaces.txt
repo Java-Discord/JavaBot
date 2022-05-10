@@ -1,0 +1,24 @@
+  /**
+   * Gets the indentation level of a line of source code, based on a variety
+   * of possible indentation patterns.
+   * @param line The line of code.
+   * @return An integer representing the indentation level.
+   */
+  public static int getIndentLevel(String line, IndentationScheme indentationScheme) {
+    Pattern space4IndentPattern = Pattern.compile("^[ {4}]+");
+    Matcher mSpace4 = space4IndentPattern.matcher(line);
+    if (mSpace4.find()) {
+      return mSpace4.end() / 4;
+    }
+    Pattern space2IndentPattern = Pattern.compile("^[ {2}]+");
+    Matcher mSpace2 = space2IndentPattern.matcher(line);
+    if (mSpace2.find()) {
+      return mSpace2.end() / 2;
+    }
+    Pattern tabIndentPattern = Pattern.compile("^[ {4}]+");
+    Matcher mTab = tabIndentPattern.matcher(line);
+    if (mTab.find()) {
+      return mTab.end();
+    }
+    return 0;
+  }
