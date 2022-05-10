@@ -83,7 +83,7 @@ public class CodeAttachmentListener extends ListenerAdapter {
 				currentBlockLength += line.length() + 1;
 			} else {
 				// Otherwise, finalize this block and start a new one.
-				blocks.add(String.format("```java%n%s```", sb));
+				blocks.add(String.format("```java\n%s```", sb));
 				sb.setLength(0);
 				if (line.length() > 1900) {
 					line = String.format("// Line %d omitted because it was too long.", i + 1);
@@ -93,7 +93,7 @@ public class CodeAttachmentListener extends ListenerAdapter {
 			}
 		}
 		if (currentBlockLength > 0) {
-			blocks.add(String.format("```java%n%s```", sb));
+			blocks.add(String.format("```java\n%s```", sb));
 		}
 		return blocks;
 	}
