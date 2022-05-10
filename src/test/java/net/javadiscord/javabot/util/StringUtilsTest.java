@@ -7,7 +7,13 @@ import java.util.List;
 import static net.javadiscord.javabot.util.StringUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests for the {@link StringUtils} class.
+ */
 public class StringUtilsTest {
+	/**
+	 * Tests the {@link StringUtils#squishIndentation(String, IndentationScheme)} method.
+	 */
 	@Test
 	public void testSquishIndentation() {
 		assertEquals("  Hello", squishIndentation("\tHello", IndentationScheme.TABS));
@@ -18,6 +24,9 @@ public class StringUtilsTest {
 		assertEquals("    Hello", squishIndentation("    Hello", IndentationScheme.TWO_SPACES));
 	}
 
+	/**
+	 * Tests the {@link StringUtils#determineIndentationScheme(String)} method.
+	 */
 	@Test
 	public void testDetermineIndentationScheme() {
 		assertEquals(IndentationScheme.FOUR_SPACES, determineIndentationScheme(StringResourceCache.load("/string_utils_content/4-spaces.txt")));
@@ -25,6 +34,9 @@ public class StringUtilsTest {
 		assertEquals(IndentationScheme.TABS, determineIndentationScheme(StringResourceCache.load("/string_utils_content/tabs.txt")));
 	}
 
+	/**
+	 * Tests the {@link StringUtils#getIndentLevel(String, IndentationScheme)} method.
+	 */
 	@Test
 	public void testGetIndentLevel() {
 		testIndentLevelWithScheme(IndentationScheme.TABS, List.of(
