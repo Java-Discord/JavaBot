@@ -86,7 +86,7 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
-		if (message.getMentionedMembers().size() >= 5) {
+		if (message.getMentions().getUsersBag().size() >= 5) {
 			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
