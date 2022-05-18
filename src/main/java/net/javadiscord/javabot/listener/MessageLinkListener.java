@@ -62,10 +62,10 @@ public class MessageLinkListener extends ListenerAdapter {
 		String[] segments = Arrays.copyOfRange(arr, 4, arr.length);
 		if (jda.getGuilds().stream().map(Guild::getId).anyMatch(s -> s.contains(segments[0]))) {
 			Guild guild = jda.getGuildById(segments[0]);
-			if (guild != null && guild.getChannels().stream().map(GuildChannel::getId).anyMatch(s -> s.contains(segments[1]))) {
-				TextChannel channel = guild.getTextChannelById(segments[1]);
-				if (channel != null) {
-					optional = channel.retrieveMessageById(segments[2]);
+			if (guild != null) {
+				GuildChannel channel = guild.getGuildChannelById(segments[1]);
+				if (channel instanceof MessageChannel chan) {
+					optional = chan.retrieveMessageById(segments[2]);
 				}
 			}
 		}
