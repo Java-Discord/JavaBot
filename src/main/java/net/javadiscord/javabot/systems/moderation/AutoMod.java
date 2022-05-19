@@ -202,11 +202,10 @@ public class AutoMod extends ListenerAdapter {
 				String url = urlMatcher.group(0).trim();
 				try {
 					URI uri = new URI(url);
-					if (spamUrls.contains(uri.getHost())) {
+					if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
 						return true;
 					}
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
+				} catch (URISyntaxException ignored) {
 				}
 			}
 		}
