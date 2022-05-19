@@ -205,7 +205,8 @@ public class AutoMod extends ListenerAdapter {
 					if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
 						return true;
 					}
-				} catch (URISyntaxException ignored) {
+				} catch (URISyntaxException e) {
+					log.error("Error while parsing URL: " + url, e);
 				}
 			}
 		}
