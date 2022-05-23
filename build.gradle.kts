@@ -1,6 +1,6 @@
 plugins {
     java
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     checkstyle
 }
 
@@ -24,10 +24,10 @@ dependencies {
 
     implementation("net.dv8tion:JDA:5.0.0-alpha.12")
     implementation("com.google.code.gson:gson:2.9.0")
-    implementation("org.yaml:snakeyaml:1.29")
+    implementation("org.yaml:snakeyaml:1.30")
     implementation("com.google.re2j:re2j:1.6")
 
-    implementation("ch.qos.logback:logback-classic:1.2.10")
+    implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.mashape.unirest:unirest-java:1.4.9")
 
     // H2 Database
@@ -38,10 +38,10 @@ dependencies {
     implementation("org.quartz-scheduler:quartz:2.3.2")
 
     // Lombok Annotations
-    compileOnly("org.projectlombok:lombok:1.18.22")
-    annotationProcessor("org.projectlombok:lombok:1.18.22")
-    testCompileOnly("org.projectlombok:lombok:1.18.22")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.22")
+    compileOnly("org.projectlombok:lombok:1.18.24")
+    annotationProcessor("org.projectlombok:lombok:1.18.24")
+    testCompileOnly("org.projectlombok:lombok:1.18.24")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
 }
 
 tasks.withType<Jar> {
