@@ -1,1 +1,1 @@
-UPDATE qotw_submissions SET status = 2 WHERE question_number = 71
+UPDATE qotw_submissions SET status = 2 WHERE question_number < 74
