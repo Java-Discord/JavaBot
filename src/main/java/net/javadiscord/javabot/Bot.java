@@ -112,7 +112,7 @@ public class Bot {
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(ExecutableCommand.Type.GUILD)
 				.build();
-		addEventListeners(jda);
+		addEventListeners(jda, dih4jda);
 		// initialize Sentry
 		Sentry.init(options -> {
 			options.setDsn(config.getSystems().getSentryDsn());
@@ -134,7 +134,7 @@ public class Bot {
 	 *
 	 * @param jda The JDA bot instance to add listeners to.
 	 */
-	private static void addEventListeners(JDA jda) {
+	private static void addEventListeners(JDA jda, DIH4JDA dih4jda) {
 		jda.addEventListener(
 				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),
@@ -153,6 +153,7 @@ public class Bot {
 				new JobChannelVoteListener(),
 				new PingableNameListener()
 		);
+		dih4jda.addListener(new DIH4JDAListener());
 	}
 }
 
