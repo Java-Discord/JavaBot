@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.commands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -7,27 +8,35 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
+
+import javax.annotation.Nullable;
 
 /**
  * Command for displaying a full-size version of a user's avatar.
  */
-public class AvatarCommand implements SlashCommand {
-	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);
-		if (member == null) {
-			return Responses.warning(event, "Sorry, this command can only be used in servers.");
-		}
-		return event.replyEmbeds(buildAvatarEmbed(member.getGuild(), member.getUser()));
+public class AvatarCommand extends SlashCommand {
+	public AvatarCommand() {
+		setCommandData(Commands.slash("avatar", "Shows your or someone else's profile picture")
+				.addOption(OptionType.USER, "user", "If given, shows the profile picture of the given user", false));
 	}
 
-	private MessageEmbed buildAvatarEmbed(Guild guild, User createdBy) {
+	@Override
+	public void execute(SlashCommandInteractionEvent event) {
+		long userId = event.getOption("user", event.getUser().getIdLong(), OptionMapping::getAsLong);
+		event.deferReply().queue();
+		event.getJDA().retrieveUserById(userId).queue(
+				user -> event.getHook().sendMessageEmbeds(buildAvatarEmbed(event.getGuild(), user)).queue(),
+				err -> Responses.error(event.getHook(), String.format("Could not retrieve user with id: `%s`", userId)).queue()
+		);
+	}
+
+	private MessageEmbed buildAvatarEmbed(@Nullable Guild guild, User createdBy) {
 		return new EmbedBuilder()
-				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
+				.setColor(guild == null ? null : Bot.config.get(guild).getSlashCommand().getDefaultColor())
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Avatar")
 				.setImage(createdBy.getEffectiveAvatarUrl() + "?size=4096")

@@ -4,6 +4,7 @@ import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
 import com.dynxsty.dih4jda.interactions.commands.ExecutableCommand;
 import com.zaxxer.hikari.HikariDataSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -51,9 +52,17 @@ public class Bot {
 	 * */
 	public static AutoMod autoMod;
 	/**
+	 * A reference to the Bot's {@link DIH4JDA}.
+	 */
+	public static DIH4JDA dih4jda;
+	/**
 	 * The Bots {@link MessageCache}, which handles logging of deleted and edited messages.
 	 */
 	public static MessageCache messageCache;
+	/**
+	 * A reference to the Bot's {@link ImageCache}.
+	 */
+	public static ImageCache imageCache;
 	/**
 	 * A reference to the data source that provides access to the relational
 	 * database that this bot users for certain parts of the application. Use
@@ -65,10 +74,6 @@ public class Bot {
 	 * tasks outside the main event processing thread.
 	 */
 	public static ScheduledExecutorService asyncPool;
-	/**
-	 * A reference to the Bot's {@link ImageCache}.
-	 */
-	public static ImageCache imageCache;
 
 	private Bot() {
 	}
@@ -103,11 +108,17 @@ public class Bot {
 				.addEventListeners(autoMod)
 				.build();
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOTE));
-		DIH4JDA dih4jda = DIH4JDABuilder.setJDA(jda)
+		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(ExecutableCommand.Type.GUILD)
 				.build();
 		addEventListeners(jda);
+		// initialize Sentry
+		Sentry.init(options -> {
+			options.setDsn(config.getSystems().getSentryDsn());
+			options.setTracesSampleRate(1.0);
+			options.setDebug(false);
+		});
 		try {
 			ScheduledTasks.init(jda);
 			log.info("Initialized scheduled tasks.");
@@ -132,7 +143,7 @@ public class Bot {
 				new GuildJoinListener(),
 				new ServerLock(jda),
 				new UserLeaveListener(),
-				new StartupListener(),
+				new StateListener(),
 				new StatsUpdater(),
 				new SuggestionListener(),
 				new StarboardManager(),

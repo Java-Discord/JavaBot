@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * Contains some utility methods for dealing with Strings.
@@ -80,5 +81,27 @@ public class StringUtils {
 	public static String capitalize(String word) {
 		if (word == null || word.isEmpty()) return word;
 		return word.substring(0, 1).toUpperCase() + word.substring(1);
+	}
+
+	public static String getOperatingSystem() {
+		String os = System.getProperty("os.name");
+		if(os.equals("Linux")) {
+			try {
+				String[] cmd = {"/bin/sh", "-c", "cat /etc/*-release" };
+				Process p = Runtime.getRuntime().exec(cmd);
+				BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+				String line = "";
+				while ((line = bri.readLine()) != null) {
+					if (line.startsWith("PRETTY_NAME")) {
+						return line.split("\"")[1];
+					}
+				}
+			} catch (IOException e) {
+				log.error("Error while getting Linux Distribution.");
+			}
+
+		}
+		return os;
 	}
 }

@@ -47,6 +47,9 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.24")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
+
+    // Sentry
+    implementation("io.sentry:sentry:5.7.3")
 }
 
 tasks.withType<Jar> {

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.listener;
 
+import com.dynxsty.dih4jda.util.Pair;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -30,8 +31,8 @@ public class GitHubLinkListener extends ListenerAdapter {
 		Matcher matcher = GITHUB_LINK_PATTERN.matcher(event.getMessage().getContentRaw());
 		if (matcher.find()) {
 			Pair<String, String> content = this.parseGithubUrl(matcher.group());
-			if (!content.first().isBlank() && !content.second().isBlank()) {
-				event.getMessage().reply(String.format("```%s\n%s\n```", content.second(), StringUtils.standardSanitizer().compute(content.first())))
+			if (!content.getFirst().isBlank() && !content.getSecond().isBlank()) {
+				event.getMessage().reply(String.format("```%s\n%s\n```", content.getSecond(), StringUtils.standardSanitizer().compute(content.getFirst())))
 						.allowedMentions(List.of())
 						.setActionRow(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"), Button.link(matcher.group(), "View on GitHub"))
 						.queue();
