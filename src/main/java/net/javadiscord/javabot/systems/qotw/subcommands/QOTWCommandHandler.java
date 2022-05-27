@@ -3,7 +3,6 @@ package net.javadiscord.javabot.systems.qotw.subcommands;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.ClearSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.qotw_points.IncrementSubcommand;
@@ -12,7 +11,6 @@ import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.AddQuest
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.ListQuestionsSubcommand;
 import net.javadiscord.javabot.systems.qotw.subcommands.questions_queue.RemoveQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
-import net.javadiscord.javabot.util.AutocompleteUtils;
 
 import java.util.List;
 import java.util.Map;

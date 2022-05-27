@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.Constants;
+import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;

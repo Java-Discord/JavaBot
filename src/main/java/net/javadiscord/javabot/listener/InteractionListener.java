@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.moderation.ReportCommand;

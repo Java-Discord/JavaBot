@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 
 /**

@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.commands;
 
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.ThanksLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLeaderboardSubcommand;

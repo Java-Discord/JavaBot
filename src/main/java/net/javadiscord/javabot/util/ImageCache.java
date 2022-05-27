@@ -10,11 +10,11 @@ import java.util.Map;
  * Utility class for caching images.
  */
 @Slf4j
-public class ImageCacheUtils {
+public class ImageCache {
 
 	private final Map<String, BufferedImage> cache;
 
-	public ImageCacheUtils() {
+	public ImageCache() {
 		this.cache = new HashMap<>();
 	}
 

@@ -1,5 +1,8 @@
 package net.javadiscord.javabot;
 
+import com.dynxsty.dih4jda.DIH4JDA;
+import com.dynxsty.dih4jda.DIH4JDABuilder;
+import com.dynxsty.dih4jda.interactions.commands.ExecutableCommand;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
@@ -11,7 +14,6 @@ import net.dv8tion.jda.api.utils.AllowedMentions;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.javadiscord.javabot.command.InteractionHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
@@ -24,7 +26,7 @@ import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
 import net.javadiscord.javabot.tasks.StatsUpdater;
-import net.javadiscord.javabot.util.ImageCacheUtils;
+import net.javadiscord.javabot.util.ImageCache;
 import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
@@ -45,13 +47,6 @@ public class Bot {
 	 */
 	public static BotConfig config;
 	/**
-	 * A reference to the slash command listener that's the main point of
-	 * interaction for users with this bot. It's marked as a publicly accessible
-	 * reference so that {@link InteractionHandler#registerCommands} can
-	 * be called wherever it's needed.
-	 */
-	public static InteractionHandler interactionHandler;
-	/**
 	 * An instance of {@link AutoMod}.
 	 * */
 	public static AutoMod autoMod;
@@ -71,9 +66,9 @@ public class Bot {
 	 */
 	public static ScheduledExecutorService asyncPool;
 	/**
-	 * A reference to the Bot's {@link ImageCacheUtils}.
+	 * A reference to the Bot's {@link ImageCache}.
 	 */
-	public static ImageCacheUtils imageCache;
+	public static ImageCache imageCache;
 
 	private Bot() {
 	}
@@ -83,8 +78,8 @@ public class Bot {
 	 * <ol>
 	 *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
 	 *     <li>Loading the configuration JSON file.</li>
-	 *     <li>Initializing the {@link InteractionHandler} listener (which reads command data from a YAML file).</li>
 	 *     <li>Creating and configuring the {@link JDA} instance that enables the bot's Discord connectivity.</li>
+	 *     <li>Initializing the {@link DIH4JDA} instance.</li>
 	 *     <li>Adding event listeners to the bot.</li>
 	 * </ol>
 	 *
@@ -95,20 +90,23 @@ public class Bot {
 		TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 		config = new BotConfig(Path.of("config"));
 		dataSource = DbHelper.initDataSource(config);
-		interactionHandler = new InteractionHandler();
 		messageCache = new MessageCache();
 		autoMod = new AutoMod();
-		imageCache = new ImageCacheUtils();
+		imageCache = new ImageCache();
 		asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
-		var jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
+		JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
 				.setStatus(OnlineStatus.DO_NOT_DISTURB)
 				.setChunkingFilter(ChunkingFilter.ALL)
 				.setMemberCachePolicy(MemberCachePolicy.ALL)
 				.enableCache(CacheFlag.ACTIVITY)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-				.addEventListeners(interactionHandler, autoMod)
+				.addEventListeners(autoMod)
 				.build();
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOTE));
+		DIH4JDA dih4jda = DIH4JDABuilder.setJDA(jda)
+				.setCommandsPackage("net.javadiscord.javabot")
+				.setDefaultCommandType(ExecutableCommand.Type.GUILD)
+				.build();
 		addEventListeners(jda);
 		try {
 			ScheduledTasks.init(jda);
@@ -120,13 +118,14 @@ public class Bot {
 	}
 
 	/**
-	 * Adds all the bot's event listeners to the JDA instance, except for the
-	 * main {@link InteractionHandler} listener and {@link AutoMod}.
+	 * Adds all the bot's event listeners to the JDA instance, except for
+	 * the {@link AutoMod} instance.
 	 *
 	 * @param jda The JDA bot instance to add listeners to.
 	 */
 	private static void addEventListeners(JDA jda) {
 		jda.addEventListener(
+				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),
 				new GitHubLinkListener(),
 				new MessageLinkListener(),
@@ -134,7 +133,6 @@ public class Bot {
 				new ServerLock(jda),
 				new UserLeaveListener(),
 				new StartupListener(),
-				PresenceUpdater.standardActivities(),
 				new StatsUpdater(),
 				new SuggestionListener(),
 				new StarboardManager(),

@@ -9,14 +9,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
-import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
-import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.sql.SQLException;

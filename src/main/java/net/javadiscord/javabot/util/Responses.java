@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command;
+package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;

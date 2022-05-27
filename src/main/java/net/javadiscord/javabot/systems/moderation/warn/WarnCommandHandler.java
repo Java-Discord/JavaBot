@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.systems.moderation.warn.subcommands.DiscardAllWarnsSubcommand;
 import net.javadiscord.javabot.systems.moderation.warn.subcommands.DiscardWarnByIdSubCommand;
 import net.javadiscord.javabot.systems.moderation.warn.subcommands.WarnAddSubcommand;

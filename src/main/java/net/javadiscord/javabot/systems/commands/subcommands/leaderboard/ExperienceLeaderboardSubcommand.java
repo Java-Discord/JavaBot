@@ -10,12 +10,10 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
-import net.javadiscord.javabot.util.Pair;
 
 import java.sql.SQLException;
 import java.util.List;

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.Constants;
+import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;

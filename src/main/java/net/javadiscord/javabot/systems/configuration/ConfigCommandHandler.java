@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.configuration;
 
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.systems.configuration.subcommands.GetSubcommand;
 import net.javadiscord.javabot.systems.configuration.subcommands.ListSubcommand;
 import net.javadiscord.javabot.systems.configuration.subcommands.SetSubcommand;

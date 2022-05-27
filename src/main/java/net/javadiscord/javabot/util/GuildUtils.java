@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * Utility class for various things.
  */
+@Deprecated(forRemoval = true)
 public class GuildUtils {
 
 	private GuildUtils() {

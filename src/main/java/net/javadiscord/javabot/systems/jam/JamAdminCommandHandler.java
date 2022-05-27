@@ -3,10 +3,8 @@ package net.javadiscord.javabot.systems.jam;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
 import net.javadiscord.javabot.systems.jam.subcommands.admin.*;
-import net.javadiscord.javabot.util.AutocompleteUtils;
 
 import java.util.List;
 import java.util.Map;

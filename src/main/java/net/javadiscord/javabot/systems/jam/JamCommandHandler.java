@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.jam;
 
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.systems.jam.subcommands.JamInfoSubcommand;
 import net.javadiscord.javabot.systems.jam.subcommands.JamSubmitSubcommand;
 

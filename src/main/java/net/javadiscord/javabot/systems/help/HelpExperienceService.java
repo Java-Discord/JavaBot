@@ -11,7 +11,6 @@ import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
-import net.javadiscord.javabot.util.Pair;
 
 import java.sql.Connection;
 import java.sql.SQLException;

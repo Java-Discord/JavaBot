@@ -61,7 +61,7 @@ public class MessageActionUtils {
 		List<CompletableFuture<?>> attachmentFutures = new ArrayList<>();
 		for (Message.Attachment attachment : message.getAttachments()) {
 			attachmentFutures.add(
-					attachment.retrieveInputStream()
+					attachment.getProxy().download()
 							.thenApply(is -> action.addFile(is, attachment.getFileName()))
 							.exceptionally(e -> action.append("Could not add Attachment: " + attachment.getFileName()))
 			);

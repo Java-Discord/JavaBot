@@ -1,4 +1,4 @@
-package net.javadiscord.javabot;
+package net.javadiscord.javabot.util;
 
 /**
  * Utility class that contains some constant variables.

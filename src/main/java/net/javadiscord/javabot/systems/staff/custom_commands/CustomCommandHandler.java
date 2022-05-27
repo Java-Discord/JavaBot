@@ -4,14 +4,12 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.DelegatingCommandHandler;
 import net.javadiscord.javabot.command.interfaces.Autocompletable;
 import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CreateSubcommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.DeleteSubcommand;
 import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.EditSubcommand;
-import net.javadiscord.javabot.util.AutocompleteUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;

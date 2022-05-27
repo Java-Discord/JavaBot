@@ -3,12 +3,12 @@ package net.javadiscord.javabot.util;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
-import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 /**
  * Utility class that contains several methods for managing utility interactions, such as ban, kick, warn, etc.
  */
+// TODO: Implement DIH4JDA
 public class InteractionUtils {
 
 	/**
