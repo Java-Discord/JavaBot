@@ -1,5 +1,7 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.util.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -7,10 +9,8 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -23,9 +23,9 @@ import java.sql.SQLException;
  * Handles commands to show information about how a user has been thanked for
  * their help.
  */
-public class HelpAccountSubcommand implements SlashCommand {
+public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public void execute(SlashCommandInteractionEvent event) {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
 		long totalThanks = DbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ?",
@@ -37,9 +37,9 @@ public class HelpAccountSubcommand implements SlashCommand {
 		);
 		try {
 			HelpAccount account = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(user.getIdLong());
-			return event.replyEmbeds(this.buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks));
+			event.replyEmbeds(this.buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks)).queue();
 		} catch (SQLException e) {
-			return Responses.error(event, e.getMessage());
+			Responses.error(event, e.getMessage()).queue();
 		}
 	}
 
@@ -50,8 +50,7 @@ public class HelpAccountSubcommand implements SlashCommand {
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
 				.addField("Experience (BETA)", String.format("%s\n\n**Recent Transactions**\n```diff\n%s```",
-						this.formatExperience(guild, account),
-						this.formatTransactionHistory(user.getIdLong())), false)
+						formatExperience(guild, account), formatTransactionHistory(user.getIdLong())), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
 				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true)
 				.build();
@@ -73,8 +72,8 @@ public class HelpAccountSubcommand implements SlashCommand {
 	private String formatExperience(Guild guild, HelpAccount account) {
 		double current = account.getExperience() - account.getLastExperienceGoal(guild);
 		Pair<Role, Double> role = account.getNextExperienceGoal(guild);
-		double goal = role.second() - account.getLastExperienceGoal(guild);
-		StringBuilder sb = new StringBuilder(String.format("%s: ", role.first().getAsMention()));
+		double goal = role.getSecond() - account.getLastExperienceGoal(guild);
+		StringBuilder sb = new StringBuilder(String.format("%s: ", role.getFirst().getAsMention()));
 		if (goal > 0) {
 			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100))
 					.append("\n")

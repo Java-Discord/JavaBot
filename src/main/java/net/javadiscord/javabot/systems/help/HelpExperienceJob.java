@@ -11,12 +11,14 @@ import org.quartz.JobExecutionException;
 /**
  * Removes a specified amount of experience from everyone's help account.
  */
+// TODO: Exponentially remove experience
 public class HelpExperienceJob extends DiscordApiJob {
 	@Override
 	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> dao.removeExperienceFromAllAccounts(
 				// just get the config for the first guild the bot is in, as it's not designed to work in multiple guilds anyway
-				Bot.config.get(jda.getGuilds().get(0)).getHelp().getDailyExperienceSubtraction())
+				// TODO: remove those placeholder values
+				Bot.config.get(jda.getGuilds().get(0)).getHelp().getDailyExperienceSubtraction(), 100, 100)
 		);
 	}
 }

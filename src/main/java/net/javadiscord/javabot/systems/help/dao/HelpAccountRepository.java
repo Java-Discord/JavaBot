@@ -108,9 +108,11 @@ public class HelpAccountRepository {
 	 * @param change The amount to subtract.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void removeExperienceFromAllAccounts(double change) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = GREATEST(experience - ?, 0)")) {
+	public void removeExperienceFromAllAccounts(double change, int min, int max) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (1 - ? / 100), ?), ?), 0)")) {
 			s.setDouble(1, change);
+			s.setInt(2, min);
+			s.setInt(3, max);
 			long rows = s.executeLargeUpdate();
 			log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
 		}
