@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
@@ -42,9 +43,9 @@ public final class QOTWNotificationService extends NotificationService {
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;
-		try (Connection connection = Bot.dataSource.getConnection()) {
-			QuestionPointsRepository dao = new QuestionPointsRepository(connection);
-			account = dao.getByUserId(user.getIdLong());
+		try {
+			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+			account = service.getOrCreateAccount(user.getIdLong());
 		} catch (SQLException e) {
 			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
 			account = null;
