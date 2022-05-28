@@ -65,8 +65,6 @@ public class InteractionListener extends ListenerAdapter {
 			case "qotw-submission" -> SubmissionInteractionManager.handleButton(event, id);
 			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
 			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);
-			case "help-channel" -> new HelpChannelInteractionManager().handleHelpChannel(event, id[1], id[2]);
-			case "help-thank" -> new HelpChannelInteractionManager().handleHelpThank(event, id[1], id[2]);
 			case "utils" -> InteractionUtils.handleButton(event, id);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}

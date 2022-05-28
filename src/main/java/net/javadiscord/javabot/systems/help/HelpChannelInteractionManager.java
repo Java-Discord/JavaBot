@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help;
 
+import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -17,7 +18,10 @@ import java.sql.SQLException;
  * Handles various interactions regarding the help channel system.
  */
 @Slf4j
-public class HelpChannelInteractionManager {
+public class HelpChannelInteractionManager extends ComponentHandler {
+	public HelpChannelInteractionManager() {
+		handleButtonIds("help-channel", "help-thank");
+	}
 
 	/**
 	 * Handles button interactions for help channel activity checks.
@@ -26,7 +30,7 @@ public class HelpChannelInteractionManager {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button id.
 	 */
-	public void handleHelpChannel(ButtonInteractionEvent event, String reservationId, String action) {
+	private void handleHelpChannel(ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
@@ -100,7 +104,7 @@ public class HelpChannelInteractionManager {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button's id.
 	 */
-	public void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
+	private void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
 		var config = Bot.config.get(event.getGuild()).getHelp();
 		var channelManager = new HelpChannelManager(config);
