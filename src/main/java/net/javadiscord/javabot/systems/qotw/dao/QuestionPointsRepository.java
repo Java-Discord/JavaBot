@@ -7,6 +7,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Dao class that represents the QOTW_POINTS SQL Table.
@@ -41,50 +42,29 @@ public class QuestionPointsRepository {
 	 * @return The {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public QOTWAccount getAccountByUserId(long userId) throws SQLException {
+	public Optional<QOTWAccount> getByUserId(long userId) throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points WHERE user_id = ?");
 		s.setLong(1, userId);
-		var rs = s.executeQuery();
+		QOTWAccount account = null;
+		ResultSet rs = s.executeQuery();
 		if (rs.next()) {
-			return read(rs);
-		} else {
-			QOTWAccount account = new QOTWAccount();
-			account.setUserId(userId);
-			account.setPoints(0);
-			insert(account);
-			return account;
+			account = read(rs);
 		}
+		return Optional.ofNullable(account);
 	}
 
 	/**
-	 * Updates a single user's QOTW-Points.
+	 * Updates a single QOTW Account.
 	 *
-	 * @param userId The discord Id of the user.
-	 * @param points The points that should be set.
-	 * @return The {@link QOTWAccount} object.
+	 * @param account The updated QOTW Account.
+	 * @return Whether the update affected rows.
 	 * @throws SQLException If an error occurs.
 	 */
-	public QOTWAccount update(long userId, long points) throws SQLException {
-		createAccountIfUserHasNone(userId);
+	public boolean update(QOTWAccount account) throws SQLException {
 		PreparedStatement s = con.prepareStatement("UPDATE qotw_points SET points = ? WHERE user_id = ?");
-		s.setLong(1, points);
-		s.setLong(2, userId);
-		s.executeUpdate();
-		return getAccountByUserId(userId);
-	}
-
-	/**
-	 * Increments a single user's QOTW-Points.
-	 *
-	 * @param userId The discord Id of the user.
-	 * @return The total points after the update.
-	 * @throws SQLException If an error occurs.
-	 */
-	public long increment(long userId) throws SQLException {
-		createAccountIfUserHasNone(userId);
-		var points = getAccountByUserId(userId).getPoints() + 1;
-		update(userId, points);
-		return points;
+		s.setLong(1, account.getPoints());
+		s.setLong(2, account.getUserId());
+		return s.executeUpdate() > 0;
 	}
 
 	/**
@@ -93,7 +73,7 @@ public class QuestionPointsRepository {
 	 * @return A {@link List} that contains all {@link QOTWAccount}s sorted by their points.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<QOTWAccount> getAllAccountsSortedByPoints() throws SQLException {
+	public List<QOTWAccount> sortByPoints() throws SQLException {
 		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points ORDER BY points DESC");
 		var rs = s.executeQuery();
 		List<QOTWAccount> accounts = new ArrayList<>();
@@ -101,21 +81,6 @@ public class QuestionPointsRepository {
 			accounts.add(read(rs));
 		}
 		return accounts;
-	}
-
-	/**
-	 * Creates a new {@link QOTWAccount} for the given user if they have none.
-	 *
-	 * @param userId The discord Id of the user.
-	 * @throws SQLException If an error occurs.
-	 */
-	private void createAccountIfUserHasNone(long userId) throws SQLException {
-		if (getAccountByUserId(userId) == null) {
-			QOTWAccount account = new QOTWAccount();
-			account.setUserId(userId);
-			account.setPoints(0);
-			insert(account);
-		}
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help;
 
+import com.dynxsty.dih4jda.util.Pair;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,9 +107,9 @@ public class HelpExperienceService {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
 				Bot.config.get(guild).getHelp().getExperienceRoles().forEach((key, value) -> {
 					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
-					if (role.first() == null) return;
-					if (key.equals(role.first().getIdLong())) {
-						guild.addRoleToMember(member, role.first()).queue();
+					if (role.getFirst() == null) return;
+					if (key.equals(role.getFirst().getIdLong())) {
+						guild.addRoleToMember(member, role.getFirst()).queue();
 					} else {
 						guild.removeRoleFromMember(member, guild.getRoleById(key)).queue();
 					}

@@ -44,7 +44,7 @@ public final class QOTWNotificationService extends NotificationService {
 		QOTWAccount account;
 		try (Connection connection = Bot.dataSource.getConnection()) {
 			QuestionPointsRepository dao = new QuestionPointsRepository(connection);
-			account = dao.getAccountByUserId(user.getIdLong());
+			account = dao.getByUserId(user.getIdLong());
 		} catch (SQLException e) {
 			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
 			account = null;

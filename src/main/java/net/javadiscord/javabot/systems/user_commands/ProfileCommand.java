@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.user_commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -9,12 +10,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
-import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.QOTWLeaderboardSubcommand;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -34,21 +33,23 @@ public class ProfileCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);
 		if (member == null) {
 			Responses.error(event, "The user must be a part of this server!").queue();
 			return;
 		}
-		event.deferReply().queue();
-		DbHelper.doDaoAction(QuestionPointsRepository::new, dao ->
-				event.getHook().sendMessageEmbeds(buildProfileEmbed(member, dao)).queue());
+		try {
+			event.replyEmbeds(buildProfileEmbed(member, new QOTWPointsService(Bot.dataSource))).queue();
+		} catch (SQLException e) {
+			Sentry.captureException(e);
+		}
 	}
 
-	private MessageEmbed buildProfileEmbed(Member member, QuestionPointsRepository qotwRepo) throws SQLException {
+	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member, @NotNull QOTWPointsService service) throws SQLException {
 		GuildConfig config = Bot.config.get(member.getGuild());
 		List<Warn> warns = new ModerationService(member.getJDA(), config).getWarns(member.getIdLong());
-		long points = qotwRepo.getAccountByUserId(member.getIdLong()).getPoints();
+		long points = service.getPoints(member.getIdLong());
 		List<Role> roles = member.getRoles();
 		String status = member.getOnlineStatus().name();
 		double helpXP = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(member.getIdLong()).getExperience();
@@ -71,7 +72,7 @@ public class ProfileCommand extends SlashCommand {
 						config.getModeration().getMaxWarnSeverity()), true)
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points, points == 1 ? "" : "s",
-						QOTWLeaderboardSubcommand.getQOTWRank(member, member.getGuild())), true)
+						service.getQOTWRank(member.getIdLong())), true)
 				.addField("Total Help XP", String.format("`%.2f XP`", helpXP), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);
