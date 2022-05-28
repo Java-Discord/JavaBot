@@ -10,7 +10,7 @@ import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
-import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLeaderboardSubcommand;
+import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.QOTWLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 

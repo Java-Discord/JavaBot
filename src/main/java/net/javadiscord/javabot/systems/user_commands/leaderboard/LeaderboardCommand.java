@@ -1,8 +1,8 @@
-package net.javadiscord.javabot.systems.commands;
+package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
-import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.ExperienceLeaderboardSubcommand;
-import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.ThanksLeaderboardSubcommand;
-import net.javadiscord.javabot.systems.commands.subcommands.leaderboard.QOTWLeaderboardSubcommand;
+import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.ExperienceLeaderboardSubcommand;
+import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.QOTWLeaderboardSubcommand;
+import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.ThanksLeaderboardSubcommand;
 
 /**
  * Single command housing all leaderboards.

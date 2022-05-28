@@ -1,14 +1,17 @@
-package net.javadiscord.javabot.systems.commands;
+package net.javadiscord.javabot.systems.user_commands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -23,10 +26,13 @@ import java.util.Scanner;
 /**
  * Command that allows members to search the internet using the bing api.
  */
-public class SearchCommand implements SlashCommand {
-
+public class SearchCommand extends SlashCommand {
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
+	public SearchCommand() {
+		setCommandData(Commands.slash("search", "Searches the web using the provided query")
+				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true));
+	}
 
 	private SearchResults searchWeb(String searchQuery) throws IOException {
 		// Construct the URL.
@@ -35,13 +41,11 @@ public class SearchCommand implements SlashCommand {
 		// Open the connection.
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.config.getSystems().azureSubscriptionKey);
-
 		// Receive the JSON response body.
 		String response;
-		try(Scanner scan = new Scanner(connection.getInputStream()).useDelimiter("\\A")){
+		try (Scanner scan = new Scanner(connection.getInputStream()).useDelimiter("\\A")) {
 			response = scan.next();
 		}
-
 		// Construct the result object.
 		SearchResults results = new SearchResults(new HashMap<>(), response);
 
@@ -57,19 +61,19 @@ public class SearchCommand implements SlashCommand {
 	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var query = event.getOption("query");
+	public void execute(SlashCommandInteractionEvent event) {
+		OptionMapping query = event.getOption("query");
 		if (query == null) {
-			return Responses.warning(event, "Missing Required Query");
+			Responses.warning(event, "Missing required query option.");
+			return;
 		}
 		String searchTerm = query.getAsString();
 		String name;
 		String url;
 		String snippet;
-		var embed = new EmbedBuilder()
+		EmbedBuilder embed = new EmbedBuilder()
 				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
 				.setTitle("Search Results");
-
 		try {
 			SearchResults result = searchWeb(searchTerm);
 			JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
@@ -92,12 +96,14 @@ public class SearchCommand implements SlashCommand {
 				resultString.append("**").append(i + 1).append(". [").append(name).append("](")
 						.append(url).append(")** \n").append(snippet).append("\n\n");
 			}
-
 			embed.setDescription(resultString);
 		} catch (IOException e) {
-			return Responses.info(event, "Not Found", "There were no results for your search. This might be due to safe-search or because your search was too complex. Please try again.");
+			Sentry.captureException(e);
+			Responses.info(event, "Not Found", "There were no results for your search. This might be due to safe-search or because your search was too complex. Please try again.")
+					.queue();
+			return;
 		}
-		return event.replyEmbeds(embed.build());
+		event.replyEmbeds(embed.build()).queue();
 	}
 
 	/**
@@ -106,6 +112,5 @@ public class SearchCommand implements SlashCommand {
 	 * @param relevantHeaders The most relevant headers.
 	 * @param jsonResponse    The HTTP Response, formatted as a JSON.
 	 */
-	public record SearchResults(Map<String, String> relevantHeaders, String jsonResponse) {
-	}
+	public record SearchResults(Map<String, String> relevantHeaders, String jsonResponse) {}
 }

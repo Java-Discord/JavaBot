@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.util;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 
 import java.io.BufferedReader;
@@ -9,6 +10,7 @@ import java.io.InputStreamReader;
 /**
  * Contains some utility methods for dealing with Strings.
  */
+@Slf4j
 public class StringUtils {
 
 	private StringUtils() {

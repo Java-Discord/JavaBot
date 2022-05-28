@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.commands.subcommands.leaderboard;
+package net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;

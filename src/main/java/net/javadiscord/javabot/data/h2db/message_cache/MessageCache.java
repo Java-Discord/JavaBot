@@ -10,7 +10,7 @@ import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
-import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
+import net.javadiscord.javabot.systems.user_commands.IdCalculatorCommand;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.io.ByteArrayInputStream;
