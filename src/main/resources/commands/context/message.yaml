@@ -1,6 +1,6 @@
 - name: Report Message
   type: MESSAGE
-  handler: net.javadiscord.javabot.systems.moderation.ReportCommand
+  handler: net.javadiscord.javabot.systems.moderation.report.ReportCommand
 
 - name: Format Code
   type: MESSAGE

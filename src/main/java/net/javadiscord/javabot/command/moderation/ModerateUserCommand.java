@@ -6,56 +6,48 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.util.Responses;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A moderation command action like ban, kick, mute, report, etc. | In short, it targets a user.
  */
 public abstract class ModerateUserCommand extends ModerateCommand {
-	private boolean actOnSelf;
+	private boolean actOnSelf = false;
+	private boolean requireReason = true;
 
 	public ModerateUserCommand() {
 		setActOnSelf(false);
-	}
-
-	public ModerateUserCommand(boolean actOnSelf) {
-		setActOnSelf(actOnSelf);
 	}
 
 	protected void setActOnSelf(boolean actOnSelf) {
 		this.actOnSelf = actOnSelf;
 	}
 
+	protected void setRequireReason(boolean requireReason) {
+		this.requireReason = requireReason;
+	}
+
 	@Override
-	protected final ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) throws ResponseException {
+	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping targetOption = event.getOption("user");
-		if (targetOption == null) {
+		OptionMapping reasonOption = event.getOption("reason");
+		if (targetOption == null || (targetOption == null && requireReason)) {
 			return Responses.error(event, "Missing required arguments.");
 		}
 		Member target = targetOption.getAsMember();
+		String reason = reasonOption == null ? null : reasonOption.getAsString();
 		if (target == null) {
-			return Responses.error(event, "Cannot perform action on an user that isn't in the server.");
+			return Responses.error(event, "This command may only be used inside servers.");
 		}
-
-		if (!actOnSelf || !commandUser.isOwner()) {
-			if (commandUser.getId().equals(target.getId())) {
-				return Responses.error(event, "You cannot perform this action on yourself.");
-			}
+		if ((!actOnSelf || !commandUser.isOwner()) && commandUser.getIdLong() == target.getIdLong()) {
+			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
-
-		if (target.isOwner()) {
-			return Responses.error(event, "You cannot preform actions on a higher member staff member.");
-		} else {
-			//If both users have at least one role.
-			if (target.getRoles().size() > 0 && commandUser.getRoles().size() > 0) {
-				if (commandUser.getRoles().get(0).getPosition() <= target.getRoles().get(0).getPosition()) {
-					return Responses.error(event, "You cannot preform actions on a higher/equal member staff member.");
-				}
-			}
+		if (target.isOwner() || !commandUser.canInteract(target)) {
+			return Responses.error(event, "You cannot perform actions on a higher member staff member.");
 		}
-
-		//CommandUser role less than or equal to target role
-
-		return handleModerationActionCommand(event, commandUser, target);
+		return handleModerationActionCommand(event, commandUser, target, reason);
 	}
 
-	protected abstract ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException;
+	protected abstract ReplyCallbackAction handleModerationActionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull Member target, @Nullable String reason);
 }

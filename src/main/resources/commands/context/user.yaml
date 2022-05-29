@@ -1,6 +1,6 @@
 - name: Report User
   type: USER
-  handler: net.javadiscord.javabot.systems.moderation.ReportCommand
+  handler: net.javadiscord.javabot.systems.moderation.report.ReportCommand
 
 - name: Show Warns
   type: USER

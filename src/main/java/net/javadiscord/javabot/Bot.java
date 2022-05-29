@@ -22,7 +22,8 @@ import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
-import net.javadiscord.javabot.systems.moderation.ServerLock;
+import net.javadiscord.javabot.systems.moderation.server_lock.ServerLock;
+import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockCommand;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
@@ -63,6 +64,10 @@ public class Bot {
 	 * A reference to the Bot's {@link ImageCache}.
 	 */
 	public static ImageCache imageCache;
+	/**
+	 * A reference to the bot's serverlock.
+	 */
+	public static ServerLock serverLock;
 	/**
 	 * A reference to the data source that provides access to the relational
 	 * database that this bot users for certain parts of the application. Use
@@ -112,6 +117,7 @@ public class Bot {
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(ExecutableCommand.Type.GUILD)
 				.build();
+		serverLock = new ServerLock(jda);
 		addEventListeners(jda, dih4jda);
 		// initialize Sentry
 		Sentry.init(options -> {
@@ -136,12 +142,12 @@ public class Bot {
 	 */
 	private static void addEventListeners(JDA jda, DIH4JDA dih4jda) {
 		jda.addEventListener(
+				serverLock,
 				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),
 				new GitHubLinkListener(),
 				new MessageLinkListener(),
 				new GuildJoinListener(),
-				new ServerLock(jda),
 				new UserLeaveListener(),
 				new StateListener(),
 				new StatsUpdater(),

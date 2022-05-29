@@ -1,24 +1,35 @@
 package net.javadiscord.javabot.systems.moderation;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.command.moderation.ModerateCommand;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 
 /**
  * Command that allows staff-members to unban users from the current guild by their id.
  */
-public class UnbanCommand implements SlashCommand {
+public class UnbanCommand extends ModerateCommand {
+	public UnbanCommand() {
+		setCommandData(Commands.slash("unban", "Unbans a member")
+				.addOption(OptionType.STRING, "id", "The ID of the user you want to unban", true)
+				// TODO: Implement App Permissions V2 once JDA releases them
+				.setDefaultEnabled(false));
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var idOption = event.getOption("id");
-		if (idOption == null) {
+	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
+		OptionMapping idOption = event.getOption("id");
+		if (idOption == null || !Checks.checkLongInput(idOption)) {
 			return Responses.error(event, "Missing required arguments.");
 		}
-		var id = idOption.getAsLong();
+		long id = idOption.getAsLong();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		var moderationService = new ModerationService(event.getInteraction());
+		ModerationService moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.unban(id, event.getMember(), event.getTextChannel(), quiet)) {
 			return Responses.success(event, "User Unbanned", String.format("User with id `%s` has been unbanned.", id));
 		} else {

@@ -525,7 +525,7 @@
       description: The reason
       required: true
       type: STRING
-  handler: net.javadiscord.javabot.systems.moderation.ReportCommand
+  handler: net.javadiscord.javabot.systems.moderation.report.ReportCommand
 
 # /warns
 - name: warns

@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
  * This class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
 @Slf4j
+// TODO: Refactor this to be more efficient. Especially AutoMod#checkNewMessageAutomod
 public class AutoMod extends ListenerAdapter {
 
 	private final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
@@ -86,8 +87,8 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
-		if (message.getMentions().getUsersBag().size() >= 5) {
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
+		if (message.getMentions().getUsers().size() >= 5) {
+			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
 							WarnSeverity.MEDIUM,
@@ -121,7 +122,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Message: `" + message.getContentRaw() + "`");
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
 							WarnSeverity.MEDIUM,
@@ -139,7 +140,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message);
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
 							message.getMember(),
 							WarnSeverity.MEDIUM,
@@ -164,7 +165,7 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> a.getFileExtension().equals("java"))) {
 			return;
 		}
-		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()))
+		new ModerationService(Bot.config.get(member.getGuild()))
 				.timeout(
 						member,
 						"Automod: Spam",

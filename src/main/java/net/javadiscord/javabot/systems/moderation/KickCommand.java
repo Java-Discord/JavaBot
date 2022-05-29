@@ -3,33 +3,34 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Command that allows staff-members to kick members.
  */
 public class KickCommand extends ModerateUserCommand {
-	@Override
-	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
-		var userOption = event.getOption("user");
-		var reasonOption = event.getOption("reason");
-		if (userOption == null || reasonOption == null) {
-			return Responses.error(event, "Missing required arguments.");
-		}
-		var member = userOption.getAsMember();
-		if (member == null) {
-			return Responses.error(event, "Cannot kick a user who is not a member of this server");
-		}
-		var reason = reasonOption.getAsString();
-		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
+	public KickCommand() {
+		setCommandData(Commands.slash("kick", "Kicks a member")
+				.addOption(OptionType.USER, "user", "The user to kick.", true)
+				.addOption(OptionType.STRING, "reason", "The reason for kicking this user.", true)
+				.addOption(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the kick is issued.", false)
+						// TODO: Implement App Permissions V2 once JDA releases them
+				.setDefaultEnabled(false));
+	}
 
-		var moderationService = new ModerationService(event.getInteraction());
-		if (moderationService.kick(member, reason, event.getMember(), event.getTextChannel(), quiet)) {
-			return Responses.success(event, "User Kicked", String.format("%s has been kicked.", member.getAsMention()));
-		} else {
-			return Responses.warning(event, "You're not permitted to kick this user.");
-		}
+	@Override
+	protected ReplyCallbackAction handleModerationActionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull Member target, @Nullable String reason) {
+		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
+		ModerationService moderationService = new ModerationService(event.getInteraction());
+		moderationService.kick(target, reason, event.getMember(), event.getTextChannel(), quiet);
+		return Responses.success(event, "User Kicked", String.format("%s has been kicked.", target.getAsMention()));
 	}
 }

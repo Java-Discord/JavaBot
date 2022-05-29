@@ -18,6 +18,13 @@ public abstract class NotificationService {
 		);
 	}
 
+	void sendDirectMessageNotification(User user, String s, Object... args) {
+		user.openPrivateChannel().queue(
+				channel -> channel.sendMessageFormat(s, args).queue(),
+				error -> log.warn("Could not send private Notification to User " + user.getAsTag())
+		);
+	}
+
 	void sendMessageChannelNotification(MessageChannel channel, MessageEmbed message) {
 		channel.sendMessageEmbeds(message).queue();
 	}

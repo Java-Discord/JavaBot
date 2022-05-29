@@ -1,43 +1,61 @@
 package net.javadiscord.javabot.systems.moderation.timeout.subcommands;
 
-import net.dv8tion.jda.api.entities.ChannelType;
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.util.Responses;
 
 /**
  * Subcommand that allows staff-members to manually remove a timeout.
  */
-public class RemoveTimeoutSubcommand implements SlashCommand {
+public class RemoveTimeoutSubcommand extends SlashCommand.Subcommand {
+	public RemoveTimeoutSubcommand() {
+		setSubcommandData(new SubcommandData("remove", "Removes a Timeout from the given User.")
+				.addOptions(
+						new OptionData(OptionType.USER, "user", "The user whose Timeout should be removed.", true),
+						new OptionData(OptionType.STRING, "reason", "The reason for removing this Timeout.", true),
+						new OptionData(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the Timeout is issued.", false)
+				)
+		);
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var userOption = event.getOption("user");
-		var reasonOption = event.getOption("reason");
+	public void execute(SlashCommandInteractionEvent event) {
+		OptionMapping userOption = event.getOption("user");
+		OptionMapping reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {
-			return Responses.error(event, "Missing required arguments.");
+			Responses.error(event, "Missing required arguments.").queue();
+			return;
 		}
-		var member = userOption.getAsMember();
+		Member member = userOption.getAsMember();
 		if (member == null) {
-			return Responses.error(event, "Cannot remove a timeout of a user who is not a member of this server");
+			Responses.error(event, "Cannot remove a timeout of a user who is not a member of this server").queue();
+			return;
 		}
-		var reason = reasonOption.getAsString();
-		var channel = event.getTextChannel();
-		if (channel.getType() != ChannelType.TEXT) {
-			return Responses.error(event, "This command can only be performed in a server text channel.");
+		String reason = reasonOption.getAsString();
+		MessageChannel channel = event.getMessageChannel();
+		if (!channel.getType().isMessage()) {
+			Responses.error(event, "This command can only be performed in a server message channel.").queue();
+			return;
 		}
 		var quietOption = event.getOption("quiet");
 		boolean quiet = quietOption != null && quietOption.getAsBoolean();
 
 		if (!member.isTimedOut()) {
-			return Responses.error(event, String.format("Could not remove Timeout from member %s; they are not timed out.", member.getAsMention()));
+			Responses.error(event, String.format("Could not remove Timeout from member %s; they are not timed out.", member.getAsMention())).queue();
+			return;
 		}
 		var moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.removeTimeout(member, reason, event.getMember(), channel, quiet)) {
-			return Responses.success(event, "Timeout Removed", String.format("%s's Timeout has been removed.", member.getAsMention()));
+			Responses.success(event, "Timeout Removed", String.format("%s's Timeout has been removed.", member.getAsMention())).queue();
 		} else {
-			return Responses.warning(event, "You're not permitted to remove Timeouts from this user.");
+			Responses.warning(event, "You're not permitted to remove Timeouts from this user.").queue();
 		}
 	}
 }

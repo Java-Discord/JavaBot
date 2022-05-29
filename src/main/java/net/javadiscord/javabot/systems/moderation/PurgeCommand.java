@@ -3,12 +3,14 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.moderation.ModerateCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import javax.annotation.Nullable;
@@ -25,8 +27,16 @@ import java.util.List;
  * Moderation command that deletes multiple messages from a single channel.
  */
 public class PurgeCommand extends ModerateCommand {
-
 	private final Path ARCHIVE_DIR = Path.of("purgeArchives");
+
+	public PurgeCommand() {
+		setCommandData(Commands.slash("purge", "Deletes messages from a channel.")
+				.addOption(OptionType.INTEGER, "amount", "Number of messages to remove.", true)
+				.addOption(OptionType.USER, "user", "The user whose messages to remove. If left blank, messages from any user are removed.", false)
+				.addOption(OptionType.BOOLEAN, "archive", "Whether the removed messages should be saved in an archive. This defaults to true, if left blank.", false)
+				// TODO: Implement App Permissions V2 once JDA releases them
+				.setDefaultEnabled(false));
+	}
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {

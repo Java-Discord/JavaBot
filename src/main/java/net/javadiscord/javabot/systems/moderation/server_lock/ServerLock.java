@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.moderation;
+package net.javadiscord.javabot.systems.moderation.server_lock;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.data.config.guild.ServerLockConfig;
 import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.TimeUtils;
@@ -84,7 +86,7 @@ public class ServerLock extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
-		var g = event.getGuild();
+		Guild g = event.getGuild();
 		getMemberQueue(g).addFirst(event.getMember());
 		if (isLocked(g)) {
 			rejectUserDuringRaid(event);
@@ -200,7 +202,7 @@ public class ServerLock extends ListenerAdapter {
 	 * @param potentialRaiders The list of members that we think are starting
 	 *                         the raid.
 	 */
-	private void lockServer(Guild guild, Collection<Member> potentialRaiders) {
+	public void lockServer(Guild guild, Collection<Member> potentialRaiders) {
 		for (var member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
 				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
@@ -240,10 +242,11 @@ public class ServerLock extends ListenerAdapter {
 	 *
 	 * @param guild The guild to unlock.
 	 */
-	private void unlockServer(Guild guild) {
-		var config = Bot.config.get(guild).getServerLock();
+	public void unlockServer(Guild guild) {
+		ServerLockConfig config = Bot.config.get(guild).getServerLock();
 		config.setLocked("false");
 		Bot.config.get(guild).flush();
+		guildMemberQueues.clear();
 		new GuildNotificationService(guild).sendLogChannelNotification("Server unlocked automatically.");
 	}
 }
