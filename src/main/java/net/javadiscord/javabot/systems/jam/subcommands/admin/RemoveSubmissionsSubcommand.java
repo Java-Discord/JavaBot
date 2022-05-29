@@ -1,9 +1,15 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
+import com.dynxsty.dih4jda.interactions.commands.AutoCompleteHandler;
+import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
@@ -22,7 +28,15 @@ import java.util.List;
 /**
  * Subcommand that allows jam-admins to manually remove submissions.
  */
-public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand {
+public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand implements AutoCompleteHandler {
+	public RemoveSubmissionsSubcommand() {
+		setSubcommandData(new SubcommandData("remove-submissions", "Removes one or more submissions from the Jam.")
+				.addOption(OptionType.INTEGER, "id", "The id of the submission to remove.", false, true)
+				.addOption(OptionType.USER, "user", "The user whose submissions to remove.", false)
+		);
+		enableAutoCompleteHandling();
+	}
+
 	@Override
 	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		OptionMapping idOption = event.getOption("id");
@@ -44,13 +58,8 @@ public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand {
 		return Responses.success(event, "Submissions Removed", "Removed " + removed + " submissions from the " + activeJam.getFullName() + ".");
 	}
 
-	/**
-	 * Replies with all jam submissions.
-	 *
-	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return A {@link List} with all Option Choices.
-	 */
-	public static List<Command.Choice> replySubmissions(CommandAutoCompleteInteractionEvent event) {
+	@Override
+	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.dataSource.getConnection()) {
 			JamRepository jamRepo = new JamRepository(con);
@@ -62,8 +71,9 @@ public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand {
 						choices.add(new Command.Choice(String.format("Submission by %s", event.getJDA().getUserById(submission.getUserId()).getAsTag()), submission.getId())));
 			}
 		} catch (SQLException e) {
+			Sentry.captureException(e);
 			e.printStackTrace();
 		}
-		return choices;
+		event.replyChoices(AutoCompleteUtils.filterChoices(event, choices)).queue();
 	}
 }

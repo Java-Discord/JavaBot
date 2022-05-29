@@ -2,14 +2,16 @@ package net.javadiscord.javabot.systems.jam.subcommands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamSubmissionRepository;
 import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
+import net.javadiscord.javabot.util.Responses;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,12 +27,19 @@ import java.util.regex.Pattern;
 public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
+	public JamSubmitSubcommand() {
+		setSubcommandData(new SubcommandData("submit", "Submit your project for the current Java Jam.")
+				.addOption(OptionType.STRING, "link", "A link to your project's source (i.e. a GitHub repository)", true)
+				.addOption(OptionType.STRING, "description", "A brief description of your project", true)
+				.addOption(OptionType.STRING, "theme", "The name of the theme that you're submitting for. Required when the Jam has multiple themes.", false)
+		);
+	}
+
 	@Override
 	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		if (!activeJam.submissionsAllowed()) {
 			return Responses.warning(event, "Submissions Not Permitted", "The Jam is not currently accepting submissions.");
 		}
-
 		OptionMapping sourceLinkOption = event.getOption("link");
 		OptionMapping descriptionOption = event.getOption("description");
 
@@ -38,14 +47,13 @@ public class JamSubmitSubcommand extends ActiveJamSubcommand {
 			return Responses.warning(event, "Missing required arguments.");
 		}
 		String link = sourceLinkOption.getAsString();
-		if (!this.validateLink(link)) {
+		if (!validateLink(link)) {
 			return Responses.warning(event, "Invalid Source", "The source link you provide must lead to a valid web page.");
 		}
-
 		JamSubmission submission = new JamSubmission();
 		submission.setUserId(event.getUser().getIdLong());
 		submission.setJam(activeJam);
-		submission.setThemeName(this.getThemeName(con, activeJam, event));
+		submission.setThemeName(getThemeName(con, activeJam, event));
 		submission.setSourceLink(link);
 		submission.setDescription(descriptionOption.getAsString());
 

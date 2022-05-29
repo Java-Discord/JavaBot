@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.systems.jam.subcommands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
@@ -20,33 +20,34 @@ import java.sql.SQLException;
  * handle opening a connection to the data source and fetching the active jam,
  * so that clients only need to implement {@link ActiveJamSubcommand#handleJamCommand(SlashCommandInteractionEvent, Jam, Connection, JamConfig)}.
  */
-public abstract class ActiveJamSubcommand implements SlashCommand {
+public abstract class ActiveJamSubcommand extends SlashCommand.Subcommand {
 	private static final Logger log = LoggerFactory.getLogger(ActiveJamSubcommand.class);
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void execute(SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
-			return Responses.warning(event, "This command can only be used in a guild.");
+			Responses.warning(event, "This command can only be used inside servers.");
+			return;
 		}
-
 		try (Connection con = Bot.dataSource.getConnection()) {
 			con.setAutoCommit(false);
 			Jam activeJam = new JamRepository(con).getActiveJam(event.getGuild().getIdLong());
 			if (activeJam == null) {
-				return Responses.warning(event, "No Active Jam", "There is currently no active jam in this guild.");
+				Responses.warning(event, "No Active Jam", "There is currently no active jam in this guild.").queue();
+				return;
 			}
 			try {
-				var reply = this.handleJamCommand(event, activeJam, con, Bot.config.get(event.getGuild()).getJam());
+				ReplyCallbackAction reply = handleJamCommand(event, activeJam, con, Bot.config.get(event.getGuild()).getJam());
 				con.commit();
-				return reply;
+				reply.queue();
 			} catch (SQLException e) {
 				con.rollback();
 				log.warn("Exception thrown while handling Jam command: {}", e.getMessage());
-				return Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```");
+				Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```").queue();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return Responses.error(event, "An SQL error occurred.");
+			Responses.error(event, "An SQL error occurred.").queue();
 		}
 	}
 

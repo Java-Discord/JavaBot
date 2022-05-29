@@ -1,12 +1,13 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
@@ -21,21 +22,30 @@ import java.util.Objects;
  * This subcommand allows users to plan a new Jam with some basic starter
  * information.
  */
-public class PlanNewJamSubcommand implements SlashCommand {
+public class PlanNewJamSubcommand extends SlashCommand.Subcommand {
+	public PlanNewJamSubcommand() {
+		setSubcommandData(new SubcommandData("plan-new-jam", "Creates a new Java Jam for the future.")
+				.addOption(OptionType.STRING, "start-date", "The date at which the Jam should start. Format as DD-MM-YYYY.", true)
+				.addOption(OptionType.STRING, "name", "A name for this Jam. Typical usage is `'{name} Jam'`.", false));
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void execute(SlashCommandInteractionEvent event) {
 		OptionMapping startOption = event.getOption("start-date");
 		if (startOption == null) {
-			return Responses.warning(event, "Missing start date.");
+			Responses.warning(event, "Missing start date.").queue();
+			return;
 		}
 		LocalDate startsAt;
 		try {
 			startsAt = LocalDate.parse(startOption.getAsString(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 		} catch (DateTimeParseException e) {
-			return Responses.warning(event, "Invalid start date. Must be formatted as `dd-MM-yyyy`. For example, June 5th, 2017 is formatted as `05-06-2017`.");
+			Responses.warning(event, "Invalid start date. Must be formatted as `dd-MM-yyyy`. For example, June 5th, 2017 is formatted as `05-06-2017`.").queue();
+			return;
 		}
 		if (startsAt.isBefore(LocalDate.now())) {
-			return Responses.warning(event, "Invalid start date. The Jam cannot start in the past.");
+			Responses.warning(event, "Invalid start date. The Jam cannot start in the past.").queue();
+			return;
 		}
 		long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 		String name = null;
@@ -44,8 +54,8 @@ public class PlanNewJamSubcommand implements SlashCommand {
 			name = nameOption.getAsString();
 		}
 		final String nameFinal = name; // So we can pass the variable in the lambda expression.
-		Bot.asyncPool.submit(() -> this.createNewJam(event.getHook(), guildId, nameFinal, startsAt));
-		return event.deferReply();
+		event.deferReply().queue();
+		Bot.asyncPool.submit(() -> createNewJam(event.getHook(), guildId, nameFinal, startsAt));
 	}
 
 	private void createNewJam(InteractionHook hook, long guildId, String name, LocalDate startsAt) {

@@ -120,6 +120,7 @@
     # /jam-admin next-phase
     - name: next-phase
       description: Manually moves the currently active Jam to the next phase.
+
     - name: cancel
       description: Cancels the current Jam. Use with caution!
       options:

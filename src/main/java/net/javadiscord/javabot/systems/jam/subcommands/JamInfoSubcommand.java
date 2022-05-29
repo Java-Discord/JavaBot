@@ -1,13 +1,14 @@
 package net.javadiscord.javabot.systems.jam.subcommands;
 
-import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
@@ -18,15 +19,18 @@ import java.time.format.DateTimeFormatter;
 /**
  * Shows some basic information about the current Java Jam.
  */
-@RequiredArgsConstructor
-public class JamInfoSubcommand implements SlashCommand {
+public class JamInfoSubcommand extends ActiveJamSubcommand {
+	public JamInfoSubcommand() {
+		setSubcommandData(new SubcommandData("info", "Shows information about the current state of the Java Jam.")
+				.addOption(OptionType.INTEGER, "id", "The id of the Jam to get information for.", false));
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) {
 		Jam jam = this.fetchJam(event);
 		if (jam == null) {
 			return Responses.warning(event, "No Jam was found.");
 		}
-
 		event.getJDA().retrieveUserById(jam.getStartedBy()).queue(user -> {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("Jam Information")
@@ -40,7 +44,6 @@ public class JamInfoSubcommand implements SlashCommand {
 			if (jam.getEndsAt() != null) {
 				embedBuilder.addField("Ends at", jam.getEndsAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy")), true);
 			}
-
 			event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
 		});
 		return event.deferReply();

@@ -1,8 +1,14 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
+import com.dynxsty.dih4jda.interactions.commands.AutoCompleteHandler;
+import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
@@ -23,7 +29,14 @@ import java.util.Objects;
 /**
  * Subcommand that allows jam-admins to manually remove themes.
  */
-public class RemoveThemeSubcommand extends ActiveJamSubcommand {
+public class RemoveThemeSubcommand extends ActiveJamSubcommand implements AutoCompleteHandler {
+	public RemoveThemeSubcommand() {
+		setSubcommandData(new SubcommandData("remove-theme", "Removes a theme from the current Jam. Only allowed prior to theme voting.")
+				.addOption(OptionType.STRING, "name", "The name of the theme to remove", true, true)
+		);
+		enableAutoCompleteHandling();
+	}
+
 	@Override
 	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		if (activeJam.getCurrentPhase() == null || !activeJam.getCurrentPhase().equals(JamPhase.THEME_PLANNING)) {
@@ -42,13 +55,8 @@ public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 		return Responses.warning(event, "Theme Not Found", "No theme with that name was found.");
 	}
 
-	/**
-	 * Replies with all jam themes.
-	 *
-	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return A {@link List} with all Option Choices.
-	 */
-	public static List<Command.Choice> replyThemes(CommandAutoCompleteInteractionEvent event) {
+	@Override
+	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.dataSource.getConnection()) {
 			JamRepository jamRepo = new JamRepository(con);
@@ -59,8 +67,9 @@ public class RemoveThemeSubcommand extends ActiveJamSubcommand {
 				themes.forEach(theme -> choices.add(new Command.Choice(theme.getName(), theme.getName())));
 			}
 		} catch (SQLException e) {
+			Sentry.captureException(e);
 			e.printStackTrace();
 		}
-		return choices;
+		event.replyChoices(AutoCompleteUtils.filterChoices(event, choices)).queue();
 	}
 }

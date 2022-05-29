@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamSubmissionRepository;
@@ -20,6 +22,12 @@ import java.util.List;
  * Subcommand that allows jam-admin to list all jam submissions.
  */
 public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
+	public ListSubmissionsSubcommand() {
+		setSubcommandData(new SubcommandData("list-submissions", "Shows a list of all submissions that have been made so far.")
+				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
+				.addOption(OptionType.USER, "user", "The user to get submissions for.", false));
+	}
+
 	@Override
 	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		int page = event.getOption("page", 1, OptionMapping::getAsInt);

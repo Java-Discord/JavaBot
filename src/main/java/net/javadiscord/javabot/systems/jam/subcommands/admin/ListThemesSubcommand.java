@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
@@ -17,6 +18,10 @@ import java.util.List;
  * Subcommand that allows jam-admins to list all added themes.
  */
 public class ListThemesSubcommand extends ActiveJamSubcommand {
+	public ListThemesSubcommand() {
+		setSubcommandData(new SubcommandData("list-themes", "Show a list of all themes for the current Jam."));
+	}
+
 	@Override
 	protected ReplyCallbackAction handleJamCommand(SlashCommandInteractionEvent event, Jam activeJam, Connection con, JamConfig config) throws SQLException {
 		List<JamTheme> themes = new JamThemeRepository(con).getThemes(activeJam);
