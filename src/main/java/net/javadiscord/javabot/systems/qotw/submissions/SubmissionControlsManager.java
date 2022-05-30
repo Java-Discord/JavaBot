@@ -81,6 +81,7 @@ public class SubmissionControlsManager {
 		if (thread.getMessageCount() <= 1) {
 			new QOTWNotificationService(guild)
 					.sendSubmissionActionNotification(guild.getJDA().getSelfUser(), thread, SubmissionStatus.DELETED, "Empty Submission");
+			DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
 			thread.delete().queue();
 			return;
 		}
