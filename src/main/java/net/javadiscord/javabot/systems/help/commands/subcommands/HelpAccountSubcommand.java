@@ -85,11 +85,11 @@ public class HelpAccountSubcommand implements SlashCommand {
 		// Below, show the progress to the next level, or just the XP if they've reached the max level.
 		if (goalXp > 0) {
 			double percentToGoalXp = (currentXp / goalXp) * 100.0;
-			sb.append(String.format("%.0f / %.0f XP (%.2f%%) until %s", currentXp, goalXp, percentToGoalXp, nextRoleAndXp.first().getAsMention()))
-					.append('\n')
+			sb.append(String.format("%.0f / %.0f XP (%.2f%%) until %s\n", currentXp, goalXp, percentToGoalXp, nextRoleAndXp.first().getAsMention()))
+					.append(String.format("%.0f Total XP\n", account.getExperience()))
 					.append(StringUtils.buildProgressBar(currentXp, goalXp, "\u2B1B", "\uD83D\uDFE5", 14));
 		} else {
-			sb.append(String.format("%.0f XP (MAX. LEVEL)", account.getExperience()));
+			sb.append(String.format("%.0f Total XP (MAX. LEVEL)", account.getExperience()));
 		}
 		return sb.toString();
 	}
