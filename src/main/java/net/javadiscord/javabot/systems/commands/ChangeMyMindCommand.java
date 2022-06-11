@@ -13,7 +13,6 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import org.json.JSONException;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -36,12 +35,7 @@ public class ChangeMyMindCommand implements SlashCommand {
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var hook = event.getHook();
 		String encodedSearchTerm;
-		try {
-			encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8.toString());
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return event.reply("The text you provided is using an unsupported encoding.");
-		}
+		encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8);
 		if (encodedSearchTerm.toCharArray().length > MAX_SEARCH_TERM_LENGTH) {
 			return event.reply("The text you provided is too long. It may not be more than " + MAX_SEARCH_TERM_LENGTH + " characters.");
 		}
