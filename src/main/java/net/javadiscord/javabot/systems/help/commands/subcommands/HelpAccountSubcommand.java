@@ -73,16 +73,23 @@ public class HelpAccountSubcommand implements SlashCommand {
 	}
 
 	private String formatExperience(Guild guild, HelpAccount account) {
-		double current = account.getExperience() - account.getLastExperienceGoal(guild);
-		Pair<Role, Double> role = account.getNextExperienceGoal(guild);
-		double goal = role.second() - account.getLastExperienceGoal(guild);
-		StringBuilder sb = new StringBuilder(String.format("%s: ", role.first().getAsMention()));
-		if (goal > 0) {
-			sb.append(String.format("%.2f XP / %.2f XP (%.2f%%)", current, goal, (current / goal) * 100))
-					.append("\n")
-					.append(StringUtils.buildProgressBar(current, goal, "\u2B1B", "\uD83D\uDFE5", 14));
+		double currentXp = account.getExperience() - account.getLastExperienceGoal(guild);
+		Pair<Role, Double> currentRoleAndXp = account.getCurrentExperienceGoal(guild);
+		Pair<Role, Double> nextRoleAndXp = account.getNextExperienceGoal(guild);
+		double goalXp = nextRoleAndXp.second() - account.getLastExperienceGoal(guild);
+		StringBuilder sb = new StringBuilder();
+
+		// Show the current experience level on the first line.
+		sb.append(String.format("%s\n", currentRoleAndXp.first().getAsMention()));
+
+		// Below, show the progress to the next level, or just the XP if they've reached the max level.
+		if (goalXp > 0) {
+			double percentToGoalXp = (currentXp / goalXp) * 100.0;
+			sb.append(String.format("%.0f / %.0f XP (%.2f%%) until %s", currentXp, goalXp, percentToGoalXp, nextRoleAndXp.first().getAsMention()))
+					.append('\n')
+					.append(StringUtils.buildProgressBar(currentXp, goalXp, "\u2B1B", "\uD83D\uDFE5", 14));
 		} else {
-			sb.append(String.format("%.2f XP (MAX. LEVEL)", account.getExperience()));
+			sb.append(String.format("%.0f XP (MAX. LEVEL)", account.getExperience()));
 		}
 		return sb.toString();
 	}
