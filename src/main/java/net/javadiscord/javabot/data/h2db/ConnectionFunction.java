@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Interface for connecting to the H2 SQL Database.
+ * Functional interface for a function which produces some object using a
+ * connection.
  *
  * @param <T> The generic type that is returned.
  */
