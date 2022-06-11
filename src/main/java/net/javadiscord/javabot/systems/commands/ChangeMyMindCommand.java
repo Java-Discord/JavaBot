@@ -29,7 +29,7 @@ public class ChangeMyMindCommand implements SlashCommand {
 	 * lower to avoid issues, since the API fails with a 501 error. People
 	 * shouldn't really be putting paragraphs into this anyway.
 	 */
-	private static final int MAX_SEARCH_TERM_LENGTH = 1500;
+	private static final int MAX_SEARCH_TERM_LENGTH = 500;
 
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
