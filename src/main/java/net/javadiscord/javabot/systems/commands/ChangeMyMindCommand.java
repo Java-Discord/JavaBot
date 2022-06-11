@@ -36,7 +36,7 @@ public class ChangeMyMindCommand implements SlashCommand {
 		var hook = event.getHook();
 		String encodedSearchTerm;
 		encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8);
-		if (encodedSearchTerm.toCharArray().length > MAX_SEARCH_TERM_LENGTH) {
+		if (encodedSearchTerm.length() > MAX_SEARCH_TERM_LENGTH) {
 			return event.reply("The text you provided is too long. It may not be more than " + MAX_SEARCH_TERM_LENGTH + " characters.");
 		}
 
