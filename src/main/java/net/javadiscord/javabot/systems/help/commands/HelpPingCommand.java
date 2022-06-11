@@ -107,10 +107,8 @@ public class HelpPingCommand implements SlashCommand {
 	 */
 	private boolean isHelpPingTimeoutElapsed(Member member, GuildConfig config) {
 		Long lastPing = lastPingTimes.get(member);
-		return (
-				lastPing == null ||
-				lastPing + config.getHelp().getHelpPingTimeoutSeconds() * 1000L < System.currentTimeMillis()
-		);
+		return lastPing == null ||
+				lastPing + config.getHelp().getHelpPingTimeoutSeconds() * 1000L < System.currentTimeMillis();
 	}
 
 	/**
