@@ -127,7 +127,7 @@ public class DbActions {
 	/**
 	 * Convenience method similar to {@link DbActions#count(String, StatementModifier)}
 	 * which allows for getting the count from a query using simple string
-	 * formatting instead of
+	 * formatting instead of having to define a statement modifier.
 	 * <p>
 	 *     <strong>WARNING</strong>: This method should NEVER be called with
 	 *     user-provided data.
