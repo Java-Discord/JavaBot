@@ -1,9 +1,13 @@
 package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 /**
@@ -52,10 +56,34 @@ public class InteractionUtils {
 			return;
 		}
 		switch (id[1]) {
-			case "delete" -> event.getHook().deleteOriginal().queue();
+			case "delete" -> InteractionUtils.delete(event.getInteraction());
 			case "kick" -> InteractionUtils.kick(event.getInteraction(), event.getGuild(), id[2]);
 			case "ban" -> InteractionUtils.ban(event.getInteraction(), event.getGuild(), id[2]);
 			case "unban" -> InteractionUtils.unban(event.getInteraction(), Long.parseLong(id[2]));
+		}
+	}
+
+	/**
+	 * Deletes a message, only if the person deleting the message is the author
+	 * of the message, a staff member, or the owner.
+	 * @param interaction The button interaction.
+	 */
+	private static void delete(ButtonInteraction interaction) {
+		Member member = interaction.getMember();
+		if (member == null) {
+			Responses.warning(interaction.getHook(), "Could not get member.").queue();
+			return;
+		}
+		GuildConfig config = Bot.config.get(interaction.getGuild());
+		Message msg = interaction.getMessage();
+		if (
+				member.getUser().getIdLong() == msg.getAuthor().getIdLong() ||
+				member.getRoles().contains(config.getModeration().getStaffRole()) ||
+				member.isOwner()
+		) {
+			msg.delete().queue();
+		} else {
+			Responses.warning(interaction.getHook(), "You don't have permission to delete this message.").queue();
 		}
 	}
 
