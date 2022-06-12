@@ -74,7 +74,7 @@ public class StringUtils {
 	/**
 	 * Builds a progress bar that uses block characters.
 	 * <p>
-	 *     For example: <pre>[███████    ]</pre>
+	 *     For example: <pre>[███████▁▁▁▁]</pre>
 	 * </p>
 	 *
 	 * @param value The floating-point value. This should be between 0 and 1,
@@ -94,7 +94,7 @@ public class StringUtils {
 		double elementsFilled = barElements * value;
 		int wholeElementsFilled = (int) Math.floor(elementsFilled);
 		sb.append("█".repeat(wholeElementsFilled));
-		sb.append(" ".repeat(barElements - wholeElementsFilled));
+		sb.append("▁".repeat(barElements - wholeElementsFilled));
 		sb.append(']');
 		return sb.toString();
 	}
