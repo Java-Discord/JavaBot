@@ -88,7 +88,7 @@ public class HelpAccountSubcommand implements SlashCommand {
 			double percentToGoalXp = (currentXp / goalXp) * 100.0;
 			sb.append(String.format("%.0f / %.0f XP (%.2f%%) until %s\n", currentXp, goalXp, percentToGoalXp, nextRoleAndXp.first().getAsMention()))
 					.append(String.format("%.0f Total XP\n", account.getExperience()))
-					.append(StringUtils.buildProgressBar(currentXp, goalXp, "\u2B1B", "\uD83D\uDFE5", 14));
+					.append(StringUtils.buildTextProgressBar(percentToGoalXp / 100.0, 12));
 		} else {
 			sb.append(String.format("%.0f Total XP (MAX. LEVEL)", account.getExperience()));
 		}
