@@ -1,14 +1,18 @@
 package net.javadiscord.javabot.systems.staff.self_roles.subcommands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
@@ -21,36 +25,54 @@ import java.util.List;
 /**
  * Subcommand that creates a new Reaction Role/Button.
  */
-public class CreateSelfRoleSubcommand implements SlashCommand {
+public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
+	public CreateSelfRoleSubcommand() {
+		setSubcommandData(new SubcommandData("create", "Creates a reaction role")
+				.addOptions(
+						new OptionData(OptionType.STRING, "type", "The self-role's type.", true)
+								.addChoices(
+										new Command.Choice("None (Just creates the embed)", "NONE"),
+										new Command.Choice("Default", "DEFAULT"),
+										new Command.Choice("Staff Application", "STAFF"),
+										new Command.Choice("Expert Application", "EXPERT")
+								),
+						new OptionData(OptionType.ROLE, "role", "The role the button should add upon use.", true),
+						new OptionData(OptionType.STRING, "description", "The embed's description. This should not be longer than 4096 characters.", true),
+						new OptionData(OptionType.BOOLEAN, "permanent", "Whether the user should be able to remove the role again. This defaults to 'false'.", false),
+						new OptionData(OptionType.STRING, "message-id", "If set, adds the button to the given message instead of creating a new embed message.", false)
+				)
+		);
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var typeOption = event.getOption("type");
-		var roleOption = event.getOption("role");
-		var descriptionOption = event.getOption("description");
-		var permanentOption = event.getOption("permanent");
-		var messageIdOption = event.getOption("message-id");
-		if (typeOption == null || roleOption == null || descriptionOption == null) {
-			return Responses.error(event, "Missing required arguments");
+	public void execute(SlashCommandInteractionEvent event) {
+		OptionMapping typeMapping = event.getOption("type");
+		OptionMapping roleMapping = event.getOption("role");
+		OptionMapping descriptionMapping = event.getOption("description");
+		boolean permanent = event.getOption("permanent", false, OptionMapping::getAsBoolean);
+		OptionMapping messageIdOption = event.getOption("message-id");
+		if (typeMapping == null || roleMapping == null || descriptionMapping == null) {
+			Responses.error(event, "Missing required arguments").queue();
+			return;
 		}
-		String type = typeOption.getAsString();
-		Role role = roleOption.getAsRole();
+		String type = typeMapping.getAsString();
+		Role role = roleMapping.getAsRole();
 		String buttonLabel = switch (type) {
 			case "STAFF", "EXPERT" -> String.format("Apply for \"%s\"", role.getName());
 			default -> String.format("Get \"%s\"", role.getName());
 		};
-		String description = descriptionOption.getAsString();
-		boolean permanent = permanentOption != null && permanentOption.getAsBoolean();
-		var config = Bot.config.get(event.getGuild());
+		String description = descriptionMapping.getAsString();
+		GuildConfig config = Bot.config.get(event.getGuild());
+		event.deferReply(true).queue();
 		if (messageIdOption == null || type.equals("NONE")) {
-			event.getChannel().sendMessageEmbeds(this.buildSelfRoleEmbed(role, description, config.getSlashCommand())).queue(
-					message -> this.addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
+			event.getChannel().sendMessageEmbeds(buildSelfRoleEmbed(role, description, config.getSlashCommand())).queue(
+					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
 					e -> Responses.error(event.getHook(), e.getMessage()));
 		} else {
 			event.getChannel().retrieveMessageById(messageIdOption.getAsString()).queue(
-					message -> this.addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
+					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
 					e -> Responses.error(event.getHook(), e.getMessage()));
 		}
-		return event.deferReply(true);
 	}
 
 	/**

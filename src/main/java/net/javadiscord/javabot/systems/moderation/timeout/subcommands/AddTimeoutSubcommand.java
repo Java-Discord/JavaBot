@@ -69,10 +69,7 @@ public class AddTimeoutSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		ModerationService moderationService = new ModerationService(event.getInteraction());
-		if (moderationService.timeout(member, reason, event.getMember(), duration, channel, quiet)) {
-			Responses.success(event, "User Timed Out", String.format("%s has been timed out.", member.getAsMention())).queue();
-		} else {
-			Responses.warning(event, "You're not permitted to time out this user.").queue();
-		}
+		moderationService.timeout(member, reason, event.getMember(), duration, channel, quiet);
+		Responses.success(event, "User Timed Out", String.format("%s has been timed out.", member.getAsMention())).queue();
 	}
 }
