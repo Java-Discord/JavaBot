@@ -94,7 +94,7 @@ public class StringUtils {
 		double elementsFilled = barElements * value;
 		int wholeElementsFilled = (int) Math.floor(elementsFilled);
 		sb.append("█".repeat(wholeElementsFilled));
-		sb.append("▁".repeat(barElements - wholeElementsFilled));
+		sb.append("░".repeat(barElements - wholeElementsFilled));
 		sb.append(']');
 		return sb.toString();
 	}
