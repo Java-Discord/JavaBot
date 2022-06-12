@@ -79,9 +79,10 @@ public class HelpAccountSubcommand implements SlashCommand {
 		double goalXp = nextRoleAndXp.second() - account.getLastExperienceGoal(guild);
 		StringBuilder sb = new StringBuilder();
 
-		// Show the current experience level on the first line.
-		sb.append(String.format("%s\n", currentRoleAndXp.first().getAsMention()));
-
+		if (currentRoleAndXp.first() != null) {
+			// Show the current experience level on the first line.
+			sb.append(String.format("%s\n", currentRoleAndXp.first().getAsMention()));
+		}
 		// Below, show the progress to the next level, or just the XP if they've reached the max level.
 		if (goalXp > 0) {
 			double percentToGoalXp = (currentXp / goalXp) * 100.0;
