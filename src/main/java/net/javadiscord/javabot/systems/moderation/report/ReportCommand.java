@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 @Slf4j
 public class ReportCommand extends ModerateUserCommand {
 	public ReportCommand() {
-		setCommandData(Commands.slash("report", "Reports a member.")
+		setSlashCommandData(Commands.slash("report", "Reports a member.")
 				.addOption(OptionType.USER, "user", "The user you want to report", true)
 				.addOption(OptionType.STRING, "reason", "The reason", true)
 		);

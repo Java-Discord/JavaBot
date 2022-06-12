@@ -3,6 +3,7 @@ package net.javadiscord.javabot;
 import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
 import com.dynxsty.dih4jda.interactions.commands.ExecutableCommand;
+import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.zaxxer.hikari.HikariDataSource;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
@@ -115,7 +116,7 @@ public class Bot {
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOTE));
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
-				.setDefaultCommandType(ExecutableCommand.Type.GUILD)
+				.setDefaultCommandType(RegistrationType.GUILD)
 				.build();
 		serverLock = new ServerLock(jda);
 		addEventListeners(jda, dih4jda);

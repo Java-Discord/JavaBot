@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -21,14 +22,15 @@ import java.util.regex.Pattern;
  */
 public class PruneCommand extends ModerateCommand {
 	public PruneCommand() {
-		setCommandData(Commands.slash("prune", "Removes members from the server.")
+		setSlashCommandData(Commands.slash("prune", "Removes members from the server.")
 				.addOption(OptionType.STRING, "pattern", "A regular expression pattern to use, to remove members whose contains a match with the pattern.", false)
 				.addOption(OptionType.STRING, "before", "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
 				.addOption(OptionType.STRING, "after", "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
 				.addOption(OptionType.STRING, "reason", "The reason for issuing the prune command. This will be provided as the reason for each ban.", false)
 				.addOption(OptionType.INTEGER, "delete-days-of-history", "The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.", false)
-				// TODO: Implement App Permissions V2 once JDA releases them
-				.setDefaultEnabled(false));
+				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setGuildOnly(true)
+		);
 	}
 
 	private final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

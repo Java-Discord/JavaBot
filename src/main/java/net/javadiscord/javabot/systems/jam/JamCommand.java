@@ -13,7 +13,7 @@ import java.util.Map;
 public class JamCommand extends SlashCommand {
 
 	public JamCommand() {
-		setCommandData(Commands.slash("jam", "Interact with Java Jam functionality."));
-		setSubcommands(new JamInfoSubcommand(), new JamSubmitSubcommand());
+		setSlashCommandData(Commands.slash("jam", "Interact with Java Jam functionality."));
+		addSubcommands(new JamInfoSubcommand(), new JamSubmitSubcommand());
 	}
 }

@@ -20,7 +20,9 @@ import java.time.Instant;
  */
 public class BotInfoCommand extends SlashCommand {
 	public BotInfoCommand() {
-		setCommandData(Commands.slash("botinfo", "Shows some information about the Bot"));
+		setSlashCommandData(Commands.slash("botinfo", "Shows some information about the Bot")
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

@@ -11,7 +11,9 @@ import net.javadiscord.javabot.Bot;
  */
 public class PingCommand extends SlashCommand {
 	public PingCommand() {
-		setCommandData(Commands.slash("ping", "Shows the bot's gateway ping."));
+		setSlashCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

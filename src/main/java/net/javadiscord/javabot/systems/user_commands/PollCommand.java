@@ -18,7 +18,7 @@ import java.time.Instant;
  */
 public class PollCommand extends SlashCommand {
 	public PollCommand() {
-		setCommandData(Commands.slash("poll", "Creates a simple poll")
+		setSlashCommandData(Commands.slash("poll", "Creates a simple poll")
 				.addOptions(
 						new OptionData(OptionType.STRING, "title", "The title of your poll", true),
 						new OptionData(OptionType.STRING, "option-1", "Adds an option", true),
@@ -31,7 +31,9 @@ public class PollCommand extends SlashCommand {
 						new OptionData(OptionType.STRING, "option-8", "Adds an option", false),
 						new OptionData(OptionType.STRING, "option-9", "Adds an option", false),
 						new OptionData(OptionType.STRING, "option-10", "Adds an option", false)
-				));
+				)
+				.setGuildOnly(true)
+		);
 	}
 
 	private final String[] EMOTES = new String[]{"0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"};

@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -19,12 +20,13 @@ import javax.annotation.Nullable;
  */
 public class BanCommand extends ModerateUserCommand {
 	public BanCommand() {
-		setCommandData(Commands.slash("ban", "Ban a user.")
+		setSlashCommandData(Commands.slash("ban", "Ban a user.")
 						.addOption(OptionType.USER, "user", "The user to ban.", true)
 						.addOption(OptionType.STRING, "reason", "The reason for banning this user.", true)
 						.addOption(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the ban is issued.", false)
-				// TODO: Implement App Permissions V2 once JDA releases them
-				.setDefaultEnabled(false));
+				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setGuildOnly(true)
+		);
 		setRequireReason(true);
 	}
 

@@ -18,7 +18,7 @@ import net.javadiscord.javabot.systems.help.HelpChannelManager;
  */
 public class UnreserveCommand extends SlashCommand {
 	public UnreserveCommand() {
-		setCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
+		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
 				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false));
 	}
 

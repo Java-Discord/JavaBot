@@ -20,8 +20,10 @@ import java.time.Instant;
  */
 public class IdCalculatorCommand extends SlashCommand {
 	public IdCalculatorCommand() {
-		setCommandData(Commands.slash("id-calc", "Generates a human-readable timestamp out of any discord id")
-				.addOption(OptionType.STRING, "snowflake", "The ID which should be converted.", true));
+		setSlashCommandData(Commands.slash("id-calc", "Generates a human-readable timestamp out of any discord id")
+				.addOption(OptionType.STRING, "snowflake", "The ID which should be converted.", true)
+				.setGuildOnly(true)
+		);
 	}
 
 	public static long getTimestampFromId(long id) {

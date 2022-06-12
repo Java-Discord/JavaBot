@@ -19,8 +19,10 @@ import javax.annotation.Nullable;
  */
 public class AvatarCommand extends SlashCommand {
 	public AvatarCommand() {
-		setCommandData(Commands.slash("avatar", "Shows your or someone else's profile picture")
-				.addOption(OptionType.USER, "user", "If given, shows the profile picture of the given user", false));
+		setSlashCommandData(Commands.slash("avatar", "Shows your or someone else's profile picture")
+				.addOption(OptionType.USER, "user", "If given, shows the profile picture of the given user", false)
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

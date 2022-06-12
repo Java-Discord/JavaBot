@@ -12,8 +12,10 @@ import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.Tha
 public class LeaderboardCommand extends SlashCommand {
 
 	public LeaderboardCommand() {
-		setCommandData(Commands.slash("leaderboard", "Command for all leaderboards."));
-		setSubcommands(
+		setSlashCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
+				.setGuildOnly(true)
+		);
+		addSubcommands(
 				new QOTWLeaderboardSubcommand(),
 				new ThanksLeaderboardSubcommand(),
 				new ExperienceLeaderboardSubcommand());

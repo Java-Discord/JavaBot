@@ -30,8 +30,10 @@ public class SearchCommand extends SlashCommand {
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
 	public SearchCommand() {
-		setCommandData(Commands.slash("search", "Searches the web using the provided query")
-				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true));
+		setSlashCommandData(Commands.slash("search", "Searches the web using the provided query")
+				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true)
+				.setGuildOnly(true)
+		);
 	}
 
 	private SearchResults searchWeb(String searchQuery) throws IOException {

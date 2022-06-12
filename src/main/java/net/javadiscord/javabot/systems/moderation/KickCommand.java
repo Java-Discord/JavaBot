@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -18,12 +19,13 @@ import javax.annotation.Nullable;
  */
 public class KickCommand extends ModerateUserCommand {
 	public KickCommand() {
-		setCommandData(Commands.slash("kick", "Kicks a member")
+		setSlashCommandData(Commands.slash("kick", "Kicks a member")
 				.addOption(OptionType.USER, "user", "The user to kick.", true)
 				.addOption(OptionType.STRING, "reason", "The reason for kicking this user.", true)
 				.addOption(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the kick is issued.", false)
-						// TODO: Implement App Permissions V2 once JDA releases them
-				.setDefaultEnabled(false));
+				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

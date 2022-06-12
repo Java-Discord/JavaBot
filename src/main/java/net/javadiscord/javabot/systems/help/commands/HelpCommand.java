@@ -9,7 +9,9 @@ import net.javadiscord.javabot.systems.help.commands.subcommands.HelpAccountSubc
  */
 public class HelpCommand extends SlashCommand {
 	public HelpCommand() {
-		setCommandData(Commands.slash("help", "Commands for managing your Help Account."));
-		setSubcommands(new HelpAccountSubcommand());
+		setSlashCommandData(Commands.slash("help", "Commands for managing your Help Account.")
+				.setGuildOnly(true)
+		);
+		addSubcommands(new HelpAccountSubcommand());
 	}
 }

@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -15,10 +16,11 @@ import net.javadiscord.javabot.util.Responses;
  */
 public class UnbanCommand extends ModerateCommand {
 	public UnbanCommand() {
-		setCommandData(Commands.slash("unban", "Unbans a member")
+		setSlashCommandData(Commands.slash("unban", "Unbans a member")
 				.addOption(OptionType.STRING, "id", "The ID of the user you want to unban", true)
-				// TODO: Implement App Permissions V2 once JDA releases them
-				.setDefaultEnabled(false));
+				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

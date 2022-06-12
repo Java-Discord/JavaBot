@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class HelpGuidelinesCommand extends SlashCommand {
 	public HelpGuidelinesCommand() {
-		setCommandData(Commands.slash("help-guidelines", "Show the server's help guidelines in a simple format."));
+		setSlashCommandData(Commands.slash("help-guidelines", "Show the server's help guidelines in a simple format."));
 	}
 
 	@Override

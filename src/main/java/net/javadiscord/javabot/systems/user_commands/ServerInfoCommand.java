@@ -19,7 +19,9 @@ import java.time.Instant;
  */
 public class ServerInfoCommand extends SlashCommand {
 	public ServerInfoCommand() {
-		setCommandData(Commands.slash("serverinfo", "Shows some information about the current server."));
+		setSlashCommandData(Commands.slash("serverinfo", "Shows some information about the current server.")
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

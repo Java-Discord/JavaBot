@@ -28,8 +28,10 @@ import java.util.Optional;
  */
 public class ProfileCommand extends SlashCommand {
 	public ProfileCommand() {
-		setCommandData(Commands.slash("profile", "Shows your server profile.")
-				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false));
+		setSlashCommandData(Commands.slash("profile", "Shows your server profile.")
+				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override
@@ -48,7 +50,7 @@ public class ProfileCommand extends SlashCommand {
 
 	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member, @NotNull QOTWPointsService service) throws SQLException {
 		GuildConfig config = Bot.config.get(member.getGuild());
-		List<Warn> warns = new ModerationService(member.getJDA(), config).getWarns(member.getIdLong());
+		List<Warn> warns = new ModerationService(config).getWarns(member.getIdLong());
 		long points = service.getPoints(member.getIdLong());
 		List<Role> roles = member.getRoles();
 		String status = member.getOnlineStatus().name();

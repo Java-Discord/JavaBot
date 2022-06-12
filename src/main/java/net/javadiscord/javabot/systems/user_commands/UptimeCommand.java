@@ -15,7 +15,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class UptimeCommand extends SlashCommand {
 	public UptimeCommand() {
-		setCommandData(Commands.slash("uptime", "Shows the bot's current uptime."));
+		setSlashCommandData(Commands.slash("uptime", "Shows the bot's current uptime.")
+				.setGuildOnly(true)
+		);
 	}
 
 

@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
 // TODO: Refactor this to be more efficient. Especially AutoMod#checkNewMessageAutomod
 public class AutoMod extends ListenerAdapter {
 
-	private final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
-	private final Pattern URL_PATTERN = Pattern.compile(
+	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private static final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
 					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
@@ -90,7 +90,7 @@ public class AutoMod extends ListenerAdapter {
 		if (message.getMentions().getUsers().size() >= 5) {
 			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
-							message.getMember(),
+							message.getAuthor(),
 							WarnSeverity.MEDIUM,
 							"Automod: Mention Spam",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
@@ -124,7 +124,7 @@ public class AutoMod extends ListenerAdapter {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Message: `" + message.getContentRaw() + "`");
 			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
-							message.getMember(),
+							message.getAuthor(),
 							WarnSeverity.MEDIUM,
 							"Automod: Advertising",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
@@ -142,7 +142,7 @@ public class AutoMod extends ListenerAdapter {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message);
 			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
-							message.getMember(),
+							message.getAuthor(),
 							WarnSeverity.MEDIUM,
 							"Automod: Suspicious Link",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),

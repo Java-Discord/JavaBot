@@ -21,7 +21,7 @@
       description: your text-input
       required: true
       type: STRING
-  handler: net.javadiscord.javabot.systems.commands.ChangeMyMindCommand
+  handler: net.javadiscord.javabot.systems.user_commands.ChangeMyMindCommand
 
 # /idcalc
 - name: idcalc

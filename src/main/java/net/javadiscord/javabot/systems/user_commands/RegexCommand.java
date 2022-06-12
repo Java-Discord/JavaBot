@@ -17,9 +17,11 @@ import net.javadiscord.javabot.util.Responses;
  */
 public class RegexCommand extends SlashCommand {
 	public RegexCommand() {
-		setCommandData(Commands.slash("regex", "Checks if the given string matches the regex pattern")
+		setSlashCommandData(Commands.slash("regex", "Checks if the given string matches the regex pattern")
 				.addOption(OptionType.STRING, "regex", "The regex pattern", true)
-				.addOption(OptionType.STRING, "string", "The string which is tested", true));
+				.addOption(OptionType.STRING, "string", "The string which is tested", true)
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

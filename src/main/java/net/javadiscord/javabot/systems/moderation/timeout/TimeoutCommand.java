@@ -11,7 +11,7 @@ import net.javadiscord.javabot.systems.moderation.timeout.subcommands.RemoveTime
 public class TimeoutCommand extends SlashCommand {
 
 	public TimeoutCommand() {
-		setCommandData(Commands.slash("timeout", "Commands for managing User Timeouts."));
-		setSubcommands(new AddTimeoutSubcommand(), new RemoveTimeoutSubcommand());
+		setSlashCommandData(Commands.slash("timeout", "Commands for managing User Timeouts."));
+		addSubcommands(new AddTimeoutSubcommand(), new RemoveTimeoutSubcommand());
 	}
 }
