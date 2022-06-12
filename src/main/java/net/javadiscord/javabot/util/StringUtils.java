@@ -74,7 +74,7 @@ public class StringUtils {
 	/**
 	 * Builds a progress bar that uses block characters.
 	 * <p>
-	 *     For example: <pre>[███████▁▁▁▁]</pre>
+	 *     For example: <pre>[███████░░░░]</pre>
 	 * </p>
 	 *
 	 * @param value The floating-point value. This should be between 0 and 1,

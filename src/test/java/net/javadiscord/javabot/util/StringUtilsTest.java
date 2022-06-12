@@ -16,18 +16,18 @@ public class StringUtilsTest {
 	@Test
 	public void testBuildTextProgressBar() {
 		assertThrows(IllegalArgumentException.class, () -> StringUtils.buildTextProgressBar(0.5, 4));
-		assertEquals("[   ]", StringUtils.buildTextProgressBar(0, 5));
-		assertEquals("[   ]", StringUtils.buildTextProgressBar(-100, 5));
+		assertEquals("[░░░]", StringUtils.buildTextProgressBar(0, 5));
+		assertEquals("[░░░]", StringUtils.buildTextProgressBar(-100, 5));
 		assertEquals("[███]", StringUtils.buildTextProgressBar(1, 5));
 		assertEquals("[███]", StringUtils.buildTextProgressBar(3, 5));
-		assertEquals("[    ]", StringUtils.buildTextProgressBar(0.1, 6));
-		assertEquals("[    ]", StringUtils.buildTextProgressBar(0.24, 6));
-		assertEquals("[█   ]", StringUtils.buildTextProgressBar(0.25, 6));
-		assertEquals("[█   ]", StringUtils.buildTextProgressBar(0.45, 6));
-		assertEquals("[██  ]", StringUtils.buildTextProgressBar(0.5, 6));
-		assertEquals("[██  ]", StringUtils.buildTextProgressBar(0.65, 6));
-		assertEquals("[███ ]", StringUtils.buildTextProgressBar(0.75, 6));
-		assertEquals("[███ ]", StringUtils.buildTextProgressBar(0.95, 6));
+		assertEquals("[░░░░]", StringUtils.buildTextProgressBar(0.1, 6));
+		assertEquals("[░░░░]", StringUtils.buildTextProgressBar(0.24, 6));
+		assertEquals("[█░░░]", StringUtils.buildTextProgressBar(0.25, 6));
+		assertEquals("[█░░░]", StringUtils.buildTextProgressBar(0.45, 6));
+		assertEquals("[██░░]", StringUtils.buildTextProgressBar(0.5, 6));
+		assertEquals("[██░░]", StringUtils.buildTextProgressBar(0.65, 6));
+		assertEquals("[███░]", StringUtils.buildTextProgressBar(0.75, 6));
+		assertEquals("[███░]", StringUtils.buildTextProgressBar(0.95, 6));
 		assertEquals("[████]", StringUtils.buildTextProgressBar(1, 6));
 	}
 }
