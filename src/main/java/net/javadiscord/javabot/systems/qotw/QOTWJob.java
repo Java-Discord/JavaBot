@@ -22,6 +22,7 @@ import org.quartz.JobExecutionException;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * Job which posts a new question to the QOTW channel.
@@ -47,7 +48,7 @@ public class QOTWJob extends DiscordApiJob {
 					QOTWConfig qotw = config.getQotw();
 					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setLocked(true).setArchived(true).queue());
 					qotw.getSubmissionChannel().getManager()
-							.putRolePermissionOverride(guild.getIdLong(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS), Collections.emptySet())
+							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.emptySet())
 							.queue();
 					if (question.getQuestionNumber() == null) {
 						question.setQuestionNumber(repo.getNextQuestionNumber());

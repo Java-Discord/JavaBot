@@ -75,6 +75,34 @@ public class StringUtils {
 	}
 
 	/**
+	 * Builds a progress bar that uses block characters.
+	 * <p>
+	 *     For example: <pre>[███████░░░░]</pre>
+	 * </p>
+	 *
+	 * @param value The floating-point value. This should be between 0 and 1,
+	 *              inclusive. Any value outside that range will be truncated
+	 *              to either 0 or 1, depending on if it's positive or negative.
+	 * @param length The length of the progress bar string, including the
+	 *               brackets. It must be at least 5.
+	 * @return The progress bar string.
+	 */
+	public static String buildTextProgressBar(double value, int length) {
+		if (value < 0.0) value = 0.0;
+		if (value > 1.0) value = 1.0;
+		if (length < 5) throw new IllegalArgumentException("Length must be at least 5.");
+		StringBuilder sb = new StringBuilder(length);
+		sb.append('[');
+		int barElements = length - 2;
+		double elementsFilled = barElements * value;
+		int wholeElementsFilled = (int) Math.floor(elementsFilled);
+		sb.append("█".repeat(wholeElementsFilled));
+		sb.append("░".repeat(barElements - wholeElementsFilled));
+		sb.append(']');
+		return sb.toString();
+	}
+
+	/**
 	 * Capitalizes the given word.
 	 *
 	 * @param word The word to capitalize.
