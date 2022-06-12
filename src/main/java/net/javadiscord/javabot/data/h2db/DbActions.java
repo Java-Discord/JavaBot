@@ -84,10 +84,11 @@ public class DbActions {
 	}
 
 	/**
-	 * Counts the amount of rows that fit the given query.
+	 * Gets a count, using a query which <strong>must</strong> return a long
+	 * integer value as the first column of the result set.
 	 *
 	 * @param query    The query.
-	 * @param modifier The {@link StatementModifier}.
+	 * @param modifier A modifier to use to set parameters for the query.
 	 * @return The column value.
 	 */
 	public static long count(String query, StatementModifier modifier) {
@@ -103,19 +104,41 @@ public class DbActions {
 	}
 
 	/**
-	 * Counts the amount of rows that fit the given query.
+	 * Gets a count, using a query which <strong>must</strong> return a long
+	 * integer value as the first column of the result set.
 	 *
 	 * @param query    The query.
 	 * @return The column value.
 	 */
 	public static long count(String query) {
-		try (var rs = Bot.dataSource.getConnection().createStatement().executeQuery(query)) {
+		try (
+				var conn = Bot.dataSource.getConnection();
+				var stmt = conn.createStatement()
+		) {
+			var rs = stmt.executeQuery(query);
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return 0;
 		}
+	}
+
+	/**
+	 * Convenience method similar to {@link DbActions#count(String, StatementModifier)}
+	 * which allows for getting the count from a query using simple string
+	 * formatting instead of having to define a statement modifier.
+	 * <p>
+	 *     <strong>WARNING</strong>: This method should NEVER be called with
+	 *     user-provided data.
+	 * </p>
+	 *
+	 * @param queryFormat The format string.
+	 * @param args The set of arguments to pass to the formatter.
+	 * @return The count.
+	 */
+	public static long countf(String queryFormat, Object... args) {
+		return count(String.format(queryFormat, args));
 	}
 
 	/**
