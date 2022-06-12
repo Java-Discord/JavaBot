@@ -13,7 +13,6 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import org.json.JSONException;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -24,14 +23,21 @@ import java.util.Objects;
  */
 @Deprecated
 public class ChangeMyMindCommand implements SlashCommand {
+	/**
+	 * The maximum acceptable length for texts to send to the API. Technically,
+	 * the API supports up to but not including 2000, but we'll make that much
+	 * lower to avoid issues, since the API fails with a 501 error. People
+	 * shouldn't really be putting paragraphs into this anyway.
+	 */
+	private static final int MAX_SEARCH_TERM_LENGTH = 500;
+
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var hook = event.getHook();
-		String encodedSearchTerm = null;
-		try {
-			encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8.toString());
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		String encodedSearchTerm;
+		encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8);
+		if (encodedSearchTerm.length() > MAX_SEARCH_TERM_LENGTH) {
+			return event.reply("The text you provided is too long. It may not be more than " + MAX_SEARCH_TERM_LENGTH + " characters.");
 		}
 
 		Unirest.get("https://nekobot.xyz/api/imagegen?type=changemymind&text=" + encodedSearchTerm).asJsonAsync(new Callback<>() {
@@ -49,12 +55,15 @@ public class ChangeMyMindCommand implements SlashCommand {
 					hook.sendMessageEmbeds(e).queue();
 				} catch (JSONException jsonException) {
 					jsonException.printStackTrace();
+					hook.sendMessage("The response from the ChangeMyMind API was not properly formatted.").queue();
 				}
 			}
 
 			@Override
 			public void failed(UnirestException ue) {
 				// Shouldn't happen
+				ue.printStackTrace();
+				hook.sendMessage("The request to the ChangeMyMind API failed.").queue();
 			}
 
 			@Override
