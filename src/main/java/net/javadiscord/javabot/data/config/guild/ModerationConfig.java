@@ -21,6 +21,8 @@ public class ModerationConfig extends GuildConfigItem {
 	private long adminRoleId;
 	private long expertRoleId;
 
+	private long minActiveHoursToSendMedia;
+
 	/**
 	 * ID of the share-knowledge channel.
 	 */
@@ -96,4 +98,6 @@ public class ModerationConfig extends GuildConfigItem {
 	public Role getExpertRole() {
 		return this.getGuild().getRoleById(this.expertRoleId);
 	}
+
+	public long getMinActiveHoursToSendMedia() { return this.minActiveHoursToSendMedia; }
 }
