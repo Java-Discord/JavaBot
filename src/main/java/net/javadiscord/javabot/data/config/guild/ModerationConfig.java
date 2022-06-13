@@ -99,5 +99,7 @@ public class ModerationConfig extends GuildConfigItem {
 		return this.getGuild().getRoleById(this.expertRoleId);
 	}
 
-	public long getMinActiveHoursToSendMedia() { return this.minActiveHoursToSendMedia; }
+	public long getMinActiveHoursToSendMedia() {
+		return this.minActiveHoursToSendMedia;
+	}
 }

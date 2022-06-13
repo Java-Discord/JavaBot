@@ -8,9 +8,7 @@ import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
@@ -124,7 +122,7 @@ public class AutoMod extends ListenerAdapter {
 		if (Bot.config.get(message.getGuild()).getModeration().getMinActiveHoursToSendMedia() > 0 && message.getMember() != null) {
 			List<String> imageOrVideo = new ArrayList<>();
 			for (Attachment attachment : message.getAttachments()) {
-				if ((attachment.isImage() || attachment.isVideo())) {
+				if (attachment.isImage() || attachment.isVideo()) {
 					imageOrVideo.add(attachment.getUrl());
 				}
 			}
@@ -133,14 +131,16 @@ public class AutoMod extends ListenerAdapter {
 			long minHours = Bot.config.get(message.getGuild()).getModeration().getMinActiveHoursToSendMedia();
 
 			if (duration.toHours() < minHours) {
-				if (message.getType().canDelete())
+				if (message.getType().canDelete()) {
 					message.delete().queue();
+				}
 
-				if(!consideredSpam.get())
+				if(!consideredSpam.get()) {
 					message.getChannel()
 							.sendMessage(message.getMember().getAsMention())
 							.setEmbeds(buildNotEnoughTimeEmbed(message, minHours, TimeUnit.HOURS))
 							.queue(msg -> msg.delete().queueAfter(15, TimeUnit.SECONDS));
+				}
 
 				Bot.config.get(message.getGuild()).getMessageCache().getMessageCacheLogChannel()
 						.sendMessageEmbeds(this.buildNotEnoughTimeLogEmbed(message, imageOrVideo)).queue();
@@ -269,6 +269,8 @@ public class AutoMod extends ListenerAdapter {
 	/**
 	 * Builds an embed that tells the user that he/she has to wait a certain amount of time before posting media.
 	 * @param message The message that was sent.
+	 * @param delay The delay that the user has to wait.
+	 * @param delayUnit The unit of the delay.
 	 * @return The {@link MessageEmbed}.
 	 */
 	public MessageEmbed buildNotEnoughTimeEmbed(Message message, long delay, TimeUnit delayUnit) {
@@ -286,8 +288,9 @@ public class AutoMod extends ListenerAdapter {
 
 	/**
 	 * Builds an embed that tells the moderators that a user tried to post media while he is not active long enough.
+	 *
 	 * @param message The message that was sent.
-	 * @param links A {@link List<String>} of attachment links that were sent.
+	 * @param links A {@link List} of attachment links that were sent.
 	 * @return The {@link MessageEmbed}.
 	 */
 	private MessageEmbed buildNotEnoughTimeLogEmbed(Message message, List<String> links) {
