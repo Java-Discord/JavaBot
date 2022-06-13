@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.listener.StartupListener;
 
 import javax.annotation.Nonnull;
@@ -76,12 +75,9 @@ public class PresenceUpdater extends ListenerAdapter {
 	 * has all the necessary properties defined to reasonable defaults.
 	 */
 	public static PresenceUpdater standardActivities() {
-		var format = "%s | %s members";
+		var format = "%s members";
 		return new PresenceUpdater(List.of(
-				jda -> Activity.watching(String.format(format, Constants.WEBSITE_LINK, StartupListener.defaultGuild.getMemberCount())),
-				jda -> Activity.watching(String.format(format, Constants.JAM_LINK, StartupListener.defaultGuild.getMemberCount())),
-				jda -> Activity.watching(String.format(format, Constants.QOTW_LINK, StartupListener.defaultGuild.getMemberCount())),
-				jda -> Activity.watching(String.format(format, Constants.GITHUB_LINK, StartupListener.defaultGuild.getMemberCount()))
+				jda -> Activity.watching(String.format(format, StartupListener.defaultGuild.getMemberCount()))
 		), 35, TimeUnit.SECONDS);
 	}
 
