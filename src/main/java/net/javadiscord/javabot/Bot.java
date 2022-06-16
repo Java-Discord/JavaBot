@@ -142,7 +142,8 @@ public class Bot {
 				new HelpChannelListener(),
 				new ShareKnowledgeVoteListener(),
 				new JobChannelVoteListener(),
-				new PingableNameListener()
+				new PingableNameListener(),
+				new HugListener()
 		);
 	}
 }
