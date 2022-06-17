@@ -10,6 +10,7 @@ import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
@@ -23,6 +24,7 @@ import net.javadiscord.javabot.Bot;
 /**
  * Replaces all occurences of 'fuck' in incoming messages with 'hug'.
  */
+@Slf4j
 public class HugListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
@@ -60,23 +62,21 @@ public class HugListener extends ListenerAdapter {
 			}
 			
 			sb.append(content.substring(indexBkp,content.length()));
-			event.getMessage().delete().queue(unused->{
-				textChannel.retrieveWebhooks().queue(webhooks->{
-					Optional<Webhook> hook = webhooks
-					.stream()
-					.filter(webhook->webhook.getChannel().getIdLong() == event.getChannel().getIdLong())
-					.filter(wh->wh.getToken()!=null)
-					.findAny();
-					if(hook.isPresent()) {
-						sendWebhookMessage(hook.get(), event.getMessage(), sb.toString(),threadId);
-					}else {
-						textChannel
-							.createWebhook("JavaBot-hug")
-							.queue(wh->
-								sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId)
-							);
-					}
-				});
+			textChannel.retrieveWebhooks().queue(webhooks->{
+				Optional<Webhook> hook = webhooks
+				.stream()
+				.filter(webhook->webhook.getChannel().getIdLong() == textChannel.getIdLong())
+				.filter(wh->wh.getToken()!=null)
+				.findAny();
+				if(hook.isPresent()) {
+					sendWebhookMessage(hook.get(), event.getMessage(), sb.toString(),threadId);
+				}else {
+					textChannel
+						.createWebhook("JavaBot-hug")
+						.queue(wh->
+							sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId)
+						);
+				}
 			});
 		}
 	}
@@ -107,6 +107,11 @@ public class HugListener extends ListenerAdapter {
 					);
 		}
 		CompletableFuture.allOf(futures)
-			.thenAccept(unused->client.send(message.build()));
+			.thenAccept(unused -> client.send(message.build()))
+			.thenAccept(unused -> originalMessage.delete().queue())
+			.exceptionally(e ->{
+				log.error("replacing the content 'fuck' with 'hug' in an incoming message failed", e);
+				return null;
+			});
 	}
 }
