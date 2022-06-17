@@ -1,6 +1,6 @@
-package net.javadiscord.javabot.systems.staff.custom_commands.subcommands;
+package net.javadiscord.javabot.systems.custom_commands.subcommands;
 
-import net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler;
+import net.javadiscord.javabot.systems.custom_commands.CustomCommandHandler;
 
 /**
  * Subcommand that allows to create Custom Slash Commands. {@link CustomCommandHandler#CustomCommandHandler()}

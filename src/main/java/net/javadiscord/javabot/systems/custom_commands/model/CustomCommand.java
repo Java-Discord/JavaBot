@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.custom_commands.model;
+package net.javadiscord.javabot.systems.custom_commands.model;
 
 import lombok.Data;
 

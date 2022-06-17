@@ -1,7 +1,7 @@
-package net.javadiscord.javabot.systems.staff.custom_commands.dao;
+package net.javadiscord.javabot.systems.custom_commands.dao;
 
 import lombok.RequiredArgsConstructor;
-import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
+import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff;
+package net.javadiscord.javabot.systems.staff_commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;

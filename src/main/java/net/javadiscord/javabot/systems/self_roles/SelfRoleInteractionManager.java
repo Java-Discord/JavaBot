@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.self_roles;
+package net.javadiscord.javabot.systems.self_roles;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;

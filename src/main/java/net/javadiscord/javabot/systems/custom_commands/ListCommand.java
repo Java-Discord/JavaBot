@@ -1,11 +1,11 @@
-package net.javadiscord.javabot.systems.staff.custom_commands;
+package net.javadiscord.javabot.systems.custom_commands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
-import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
 
 import java.sql.SQLException;
 

@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.self_roles.subcommands;
+package net.javadiscord.javabot.systems.self_roles.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -16,9 +16,9 @@ import net.javadiscord.javabot.util.MessageActionUtils;
 import java.time.Instant;
 
 /**
- * Subcommand that enables all Elements on an ActionRow.
+ * Subcommand that disables all Elements on an ActionRow.
  */
-public class EnableSelfRoleSubcommand implements SlashCommand {
+public class DisableSelfRoleSubcommand implements SlashCommand {
 	@Override
 	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		var messageIdOption = event.getOption("message-id");
@@ -27,18 +27,18 @@ public class EnableSelfRoleSubcommand implements SlashCommand {
 		}
 		SlashCommandConfig config = Bot.config.get(event.getGuild()).getSlashCommand();
 		event.getChannel().retrieveMessageById(messageIdOption.getAsString()).queue(message -> {
-			message.editMessageComponents(MessageActionUtils.enableActionRows(message.getActionRows())).queue();
-			MessageEmbed embed = buildSelfRoleEnabledEmbed(event.getUser(), message, config);
+			message.editMessageComponents(MessageActionUtils.disableActionRows(message.getActionRows())).queue();
+			MessageEmbed embed = buildSelfRoleDisabledEmbed(event.getUser(), message, config);
 			new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
 			event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
 		}, e -> Responses.error(event.getHook(), e.getMessage()));
 		return event.deferReply(true);
 	}
 
-	private MessageEmbed buildSelfRoleEnabledEmbed(User enabledBy, Message message, SlashCommandConfig config) {
+	private MessageEmbed buildSelfRoleDisabledEmbed(User disabledBy, Message message, SlashCommandConfig config) {
 		return new EmbedBuilder()
-				.setAuthor(enabledBy.getAsTag(), message.getJumpUrl(), enabledBy.getEffectiveAvatarUrl())
-				.setTitle("Self Role enabled")
+				.setAuthor(disabledBy.getAsTag(), message.getJumpUrl(), disabledBy.getEffectiveAvatarUrl())
+				.setTitle("Self Role disabled")
 				.setColor(config.getDefaultColor())
 				.addField("Channel", message.getChannel().getAsMention(), true)
 				.addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)

@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.suggestions.subcommands;
+package net.javadiscord.javabot.systems.staff_commands.suggestions.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -9,9 +9,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.systems.staff_commands.suggestions.SuggestionSubcommand;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
-import net.javadiscord.javabot.systems.staff.suggestions.SuggestionSubcommand;
 import org.jetbrains.annotations.NotNull;
 
 /**

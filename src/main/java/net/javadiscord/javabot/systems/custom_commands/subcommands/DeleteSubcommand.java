@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.custom_commands.subcommands;
+package net.javadiscord.javabot.systems.custom_commands.subcommands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -6,11 +6,11 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.custom_commands.CustomCommandHandler;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
-import net.javadiscord.javabot.systems.staff.custom_commands.CustomCommandHandler;
-import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
-import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
+import net.javadiscord.javabot.systems.custom_commands.dao.CustomCommandRepository;
+import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
 
 import java.sql.SQLException;
 import java.time.Instant;

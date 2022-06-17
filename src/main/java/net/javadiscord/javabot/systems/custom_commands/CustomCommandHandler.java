@@ -1,19 +1,7 @@
-package net.javadiscord.javabot.systems.staff.custom_commands;
+package net.javadiscord.javabot.systems.custom_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
-import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.staff.custom_commands.dao.CustomCommandRepository;
-import net.javadiscord.javabot.systems.staff.custom_commands.model.CustomCommand;
-import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.CreateSubcommand;
-import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.DeleteSubcommand;
-import net.javadiscord.javabot.systems.staff.custom_commands.subcommands.EditSubcommand;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

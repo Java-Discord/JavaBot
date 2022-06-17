@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff.suggestions;
+package net.javadiscord.javabot.systems.staff_commands.suggestions;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.ChannelType;
