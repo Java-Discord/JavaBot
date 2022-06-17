@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +26,10 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 		OptionMapping userMapping = event.getOption("user");
 		if (userMapping == null) {
 			Responses.error(event, "Please provide a valid user.").queue();
+			return;
+		}
+		if (Checks.checkGuild(event)) {
+			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}
 		User target = userMapping.getAsUser();
