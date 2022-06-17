@@ -1,13 +1,19 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
+import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import io.sentry.Sentry;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
+import net.javadiscord.javabot.util.Responses;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -28,9 +34,33 @@ import java.util.Objects;
  * character, and then proceed to execute each statement.
  * </p>
  */
-public class MigrateSubcommand implements SlashCommand {
+public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCompletable {
+	public MigrateSubcommand() {
+		setSubcommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
+				.addOption(OptionType.STRING, "name", "The migration's filename", true, true));
+		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requirePermissions(Permission.MANAGE_SERVER);
+	}
+
+	/**
+	 * Replies with all available migrations to run.
+	 *
+	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
+	 * @return A {@link List} with all Option Choices.
+	 */
+	public static List<Command.Choice> replyMigrations(CommandAutoCompleteInteractionEvent event) {
+		List<Command.Choice> choices = new ArrayList<>(25);
+		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
+			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
+			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
+		} catch (IOException | URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return choices;
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void execute(SlashCommandInteractionEvent event) {
 		String migrationName = Objects.requireNonNull(event.getOption("name")).getAsString();
 		if (!migrationName.endsWith(".sql")) {
 			migrationName = migrationName + ".sql";
@@ -39,12 +69,14 @@ public class MigrateSubcommand implements SlashCommand {
 			Path migrationsDir = MigrationUtils.getMigrationsDirectory();
 			Path migrationFile = migrationsDir.resolve(migrationName);
 			if (Files.notExists(migrationFile)) {
-				return Responses.warning(event, "The specified migration `" + migrationName + "` does not exist.");
+				Responses.error(event, "The specified migration `" + migrationName + "` does not exist.").queue();
+				return;
 			}
 			String sql = Files.readString(migrationFile);
 			String[] statements = sql.split("\\s*;\\s*");
 			if (statements.length == 0) {
-				return Responses.warning(event, "The migration `" + migrationName + "` does not contain any statements. Please remove or edit it before running again.");
+				Responses.error(event, "The migration `" + migrationName + "` does not contain any statements. Please remove or edit it before running again.").queue();
+				return;
 			}
 			Bot.asyncPool.submit(() -> {
 				try (var con = Bot.dataSource.getConnection()) {
@@ -68,26 +100,16 @@ public class MigrateSubcommand implements SlashCommand {
 					event.getChannel().sendMessage("Could not obtain a connection to the database.").queue();
 				}
 			});
-			return Responses.info(event, "Migration Started", "Execution of the migration `" + migrationName + "` has been started. " + statements.length + " statements will be executed.");
+			Responses.info(event, "Migration Started",
+					"Execution of the migration `" + migrationName + "` has been started. " + statements.length + " statements will be executed.").queue();
 		} catch (IOException | URISyntaxException e) {
-			return Responses.error(event, e.getMessage());
+			Sentry.captureException(e);
+			Responses.error(event, e.getMessage()).queue();
 		}
 	}
 
-	/**
-	 * Replies with all available migrations to run.
-	 *
-	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
-	 * @return A {@link List} with all Option Choices.
-	 */
-	public static List<Command.Choice> replyMigrations(CommandAutoCompleteInteractionEvent event) {
-		List<Command.Choice> choices = new ArrayList<>(25);
-		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
-			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
-			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
-		} catch (IOException | URISyntaxException e) {
-			e.printStackTrace();
-		}
-		return choices;
+	@Override
+	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
+		event.replyChoices(AutoCompleteUtils.filterChoices(event, replyMigrations(event))).queue();
 	}
 }

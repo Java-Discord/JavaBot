@@ -1,30 +1,42 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 /**
  * This subcommand shows a list of all available migrations, and a short preview
  * of their source code.
  */
-public class MigrationsListSubcommand implements SlashCommand {
+public class MigrationsListSubcommand extends SlashCommand.Subcommand {
+
+	public MigrationsListSubcommand() {
+		setSubcommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
+		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requirePermissions(Permission.MANAGE_SERVER);
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void execute(SlashCommandInteractionEvent event) {
 		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("List of Runnable Migrations");
-			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
+			List<Path> paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
 			if (paths.isEmpty()) {
 				embedBuilder.setDescription("There are no migrations to run. Please add them to the `/migrations/` resource directory.");
-				return event.replyEmbeds(embedBuilder.build());
+				event.replyEmbeds(embedBuilder.build()).queue();
+				return;
 			}
 			paths.forEach(path -> {
 				StringBuilder sb = new StringBuilder(150);
@@ -40,9 +52,9 @@ public class MigrationsListSubcommand implements SlashCommand {
 				sb.append("\n```");
 				embedBuilder.addField(path.getFileName().toString(), sb.toString(), false);
 			});
-			return event.replyEmbeds(embedBuilder.build());
+			event.replyEmbeds(embedBuilder.build()).queue();
 		} catch (IOException | URISyntaxException e) {
-			return Responses.error(event, e.getMessage());
+			Responses.error(event, e.getMessage()).queue();
 		}
 	}
 }

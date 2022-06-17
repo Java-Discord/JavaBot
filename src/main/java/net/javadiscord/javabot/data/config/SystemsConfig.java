@@ -2,29 +2,39 @@ package net.javadiscord.javabot.data.config;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Contains configuration settings for various systems which the bot uses, such
  * as databases or dependencies that have runtime properties.
  */
 @Data
 public class SystemsConfig {
+
 	/**
 	 * The token used to create the JDA Discord bot instance.
 	 */
 	private String jdaBotToken = "";
+
 	/**
 	 * The Key used for the bing-search-api.
 	 */
-	public String azureSubscriptionKey = "";
+	private String azureSubscriptionKey = "";
+
 	/**
 	 * The DSN for the Sentry API.
 	 */
-	public String sentryDsn = "";
+	private String sentryDsn = "";
+
+	/**
+	 * An array of user-Ids only which can manage some of the bot's systems.
+	 */
+	private Long[] adminUsers = new Long[]{};
+
 	/**
 	 * The number of threads to allocate to the bot's general purpose async
 	 * thread pool.
 	 */
-
 	private int asyncPoolSize = 4;
 
 	/**
