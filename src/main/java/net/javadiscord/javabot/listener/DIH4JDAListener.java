@@ -39,7 +39,12 @@ public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 	}
 
 	@Override
-	public void onUserNotAllowed(CommandInteraction interaction, Set<Long> userIds) {
+	public void onInvalidUser(CommandInteraction interaction, Set<Long> userIds) {
+		handleReply(interaction, buildNoAccessEmbed(interaction.getGuild()));
+	}
+
+	@Override
+	public void onInvalidRole(CommandInteraction interaction, Set<Long> userIds) {
 		handleReply(interaction, buildNoAccessEmbed(interaction.getGuild()));
 	}
 

@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -8,10 +9,12 @@ import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.time.Instant;
+import java.util.function.Function;
 
 /**
  * Utility class that provides standardized formatting for responses the bot

@@ -1,22 +1,35 @@
 package net.javadiscord.javabot.systems.moderation.warn.subcommands;
 
-import net.dv8tion.jda.api.entities.Member;
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Subcommand that allows staff-members to discard all warns from a user.
  */
-public class DiscardAllWarnsSubcommand extends ModerateUserCommand {
+public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
+	public DiscardAllWarnsSubcommand() {
+		setSubcommandData(new SubcommandData("discard-all", "Discards all warns from a single user.")
+				.addOption(OptionType.USER, "user", "The user which warns should be discarded.", true)
+		);
+	}
 
 	@Override
-	protected ReplyCallbackAction handleModerationActionCommand(SlashCommandInteractionEvent event, Member commandUser, Member target) throws ResponseException {
-		var moderationService = new ModerationService(event.getInteraction());
-		moderationService.discardAllWarns(target.getUser(), commandUser.getUser());
-		return Responses.success(event, "Warns Discarded", String.format("Discarded all warns from %s.", target.getUser().getAsTag()));
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		OptionMapping userMapping = event.getOption("user");
+		if (userMapping == null) {
+			Responses.error(event, "Please provide a valid user.").queue();
+			return;
+		}
+		User target = userMapping.getAsUser();
+		new ModerationService(event.getInteraction()).discardAllWarns(target, event.getUser());
+		Responses.success(event, "Warns Discarded", String.format("Successfully discarded all warns from **%s**.", target.getAsTag())).queue();
 	}
 }
 
