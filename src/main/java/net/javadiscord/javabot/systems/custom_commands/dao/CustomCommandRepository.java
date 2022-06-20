@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.custom_commands.dao;
 
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,7 +56,7 @@ public class CustomCommandRepository {
 	 * @return The updated {@link CustomCommand} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public CustomCommand edit(CustomCommand old, CustomCommand update) throws SQLException {
+	public CustomCommand edit(@NotNull CustomCommand old, CustomCommand update) throws SQLException {
 		if (findByName(old.getGuildId(), old.getName()).isEmpty()) {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s does not exist.", old.getGuildId(), old.getName()));
 		}
@@ -81,7 +82,7 @@ public class CustomCommandRepository {
 	 * @param command The custom command to delete.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void delete(CustomCommand command) throws SQLException {
+	public void delete(@NotNull CustomCommand command) throws SQLException {
 		try (var s = con.prepareStatement("DELETE FROM custom_commands WHERE id = ?")) {
 			s.setLong(1, command.getId());
 			s.executeUpdate();
@@ -157,7 +158,7 @@ public class CustomCommandRepository {
 	 * @return The {@link CustomCommand} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	private CustomCommand read(ResultSet rs) throws SQLException {
+	private @NotNull CustomCommand read(@NotNull ResultSet rs) throws SQLException {
 		CustomCommand command = new CustomCommand();
 		command.setId(rs.getLong("id"));
 		command.setGuildId(rs.getLong("guild_id"));

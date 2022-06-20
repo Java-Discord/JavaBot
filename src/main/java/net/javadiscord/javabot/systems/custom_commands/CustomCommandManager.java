@@ -213,7 +213,7 @@ public class CustomCommandManager extends ListenerAdapter {
 	}
 
 	@Contract(pure = true)
-	private RestAction<?> handleCustomCommand(@NotNull SlashCommandInteractionEvent event, @NotNull CustomCommand command) {
+	private @NotNull RestAction<?> handleCustomCommand(@NotNull SlashCommandInteractionEvent event, @NotNull CustomCommand command) {
 		Set<RestAction<?>> actions = new HashSet<>();
 		if (command.isEmbed()) {
 			MessageEmbed embed = command.toEmbed();

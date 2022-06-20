@@ -15,7 +15,7 @@ import java.sql.SQLException;
 @Slf4j
 public abstract class CustomCommandsSubcommand extends SlashCommand.Subcommand {
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
 			Responses.error(event, "Missing required arguments.").queue();
