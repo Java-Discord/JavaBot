@@ -3,6 +3,7 @@ package net.javadiscord.javabot.data.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import io.sentry.Sentry;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
@@ -142,7 +143,7 @@ public class GuildConfig {
 			try {
 				return pair.first().get(pair.second());
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 				return null;
 			}
 		}).orElse(null);
@@ -162,7 +163,7 @@ public class GuildConfig {
 				ReflectionUtils.set(pair.first(), pair.second(), value);
 				this.flush();
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 			}
 		});
 	}

@@ -43,21 +43,20 @@ public class RegexCommand extends SlashCommand {
 			Responses.warning(event, "Pattern and String cannot be longer than 1018 Characters each.").queue();
 			return;
 		}
-		event.replyEmbeds(buildRegexEmbed(pattern.matcher(string).matches(), pattern, string, event.getGuild()).build())
+		event.replyEmbeds(buildRegexEmbed(pattern.matcher(string).matches(), pattern, string).build())
 				.queue();
 	}
 
-	private EmbedBuilder buildRegexEmbed(boolean matches, Pattern pattern, String string, Guild guild) {
+	private EmbedBuilder buildRegexEmbed(boolean matches, Pattern pattern, String string) {
 		EmbedBuilder eb = new EmbedBuilder()
 				.addField("Regex:", String.format("```%s```", pattern.toString()), true)
 				.addField("String:", String.format("```%s```", string), true);
-		SlashCommandConfig config = Bot.config.get(guild).getSlashCommand();
 		if (matches) {
 			eb.setTitle("Regex Tester | ✓ Match");
-			eb.setColor(config.getSuccessColor());
+			eb.setColor(Responses.Type.SUCCESS.getColor());
 		} else {
 			eb.setTitle("Regex Tester | ✗ No Match");
-			eb.setColor(config.getErrorColor());
+			eb.setColor(Responses.Type.ERROR.getColor());
 		}
 		return eb;
 	}

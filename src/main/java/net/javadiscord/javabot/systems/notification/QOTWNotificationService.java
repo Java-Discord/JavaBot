@@ -14,6 +14,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
+import net.javadiscord.javabot.util.Responses;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -106,7 +107,7 @@ public final class QOTWNotificationService extends NotificationService {
 
 	private MessageEmbed buildBestAnswerEmbed(long points) {
 		return this.buildQOTWNotificationEmbed()
-				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.setDescription(String.format(
 						"""
 								Your submission was marked as the best answer!
@@ -116,7 +117,7 @@ public final class QOTWNotificationService extends NotificationService {
 
 	private MessageEmbed buildAccountIncrementEmbed(long points) {
 		return this.buildQOTWNotificationEmbed()
-				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.setDescription(String.format(
 						"""
 								Your submission was accepted! %s
@@ -127,7 +128,7 @@ public final class QOTWNotificationService extends NotificationService {
 
 	private MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
 		return this.buildQOTWNotificationEmbed()
-				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor())
 				.setDescription(String.format("""
 								Hey %s,
 								Your QOTW-Submission was **declined** for the following reasons:

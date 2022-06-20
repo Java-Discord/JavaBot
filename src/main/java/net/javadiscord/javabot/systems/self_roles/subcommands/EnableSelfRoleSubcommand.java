@@ -38,7 +38,7 @@ public class EnableSelfRoleSubcommand implements SlashCommand {
 		return new EmbedBuilder()
 				.setAuthor(enabledBy.getAsTag(), message.getJumpUrl(), enabledBy.getEffectiveAvatarUrl())
 				.setTitle("Self Role enabled")
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", message.getChannel().getAsMention(), true)
 				.addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)
 				.setTimestamp(Instant.now())

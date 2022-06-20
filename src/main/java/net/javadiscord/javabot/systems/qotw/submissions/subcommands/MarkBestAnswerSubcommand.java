@@ -95,7 +95,7 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
 				.setTitle("Best Answer")
-				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(String.format("%s's submission was marked as one of the **best answers** (+1 QOTW-Point)", member.getAsMention()))
 				.build();
 	}
@@ -147,7 +147,7 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 				}
 			});
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		return AutocompleteUtils.filterChoices(event, choices);
 	}

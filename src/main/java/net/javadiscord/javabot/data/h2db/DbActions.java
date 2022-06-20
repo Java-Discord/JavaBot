@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.data.h2db;
 
+import io.sentry.Sentry;
 import net.javadiscord.javabot.Bot;
 
 import java.sql.Connection;
@@ -98,7 +99,7 @@ public class DbActions {
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return 0;
 		}
 	}
@@ -119,7 +120,7 @@ public class DbActions {
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return 0;
 		}
 	}
@@ -238,7 +239,7 @@ public class DbActions {
 				return Optional.of(mapper.map(rs));
 			});
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return Optional.empty();
 		}
 	}
@@ -257,7 +258,7 @@ public class DbActions {
 				return rs.getInt(1);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		return 0;
 	}

@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.help;
 
 import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -144,7 +145,7 @@ public class HelpChannelInteractionManager extends ComponentHandler {
 				try {
 					channelManager.setTimeout(channel, config.getInactivityTimeouts().get(0));
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Sentry.captureException(e);
 				}
 			} else {
 				long helperId = Long.parseLong(action);
@@ -187,7 +188,7 @@ public class HelpChannelInteractionManager extends ComponentHandler {
 					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
 					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Sentry.captureException(e);
 					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
 							"Could not record user %s thanking %s for help in channel %s: %s",
 							owner.getAsTag(),

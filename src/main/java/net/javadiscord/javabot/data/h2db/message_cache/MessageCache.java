@@ -11,6 +11,7 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.user_commands.IdCalculatorCommand;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.io.ByteArrayInputStream;
@@ -129,7 +130,7 @@ public class MessageCache {
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
 		return buildMessageCacheEmbed(channel, author, before)
 				.setTitle("Message Edited")
-				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.addField("Before", before.getMessageContent().substring(0, Math.min(
 						before.getMessageContent().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
@@ -142,7 +143,7 @@ public class MessageCache {
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
 		return buildMessageCacheEmbed(channel, author, message)
 				.setTitle("Message Deleted")
-				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Message Content",
 						message.getMessageContent().substring(0, Math.min(
 								message.getMessageContent().length(),

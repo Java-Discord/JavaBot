@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.starboard;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -11,6 +12,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
 import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -57,7 +59,7 @@ public class StarboardManager extends ListenerAdapter {
 								}
 							}
 						} catch (SQLException e) {
-							e.printStackTrace();
+							Sentry.captureException(e);
 						}
 					}, e -> log.error("Could not add Message to Starboard", e)
 			);
@@ -87,7 +89,7 @@ public class StarboardManager extends ListenerAdapter {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 	}
 
@@ -152,7 +154,7 @@ public class StarboardManager extends ListenerAdapter {
 								log.error("Could not remove Message from Starboard");
 							}
 						} catch (SQLException e) {
-							e.printStackTrace();
+							Sentry.captureException(e);
 						}
 					} else {
 						var starEmote = config.getEmotes().get(0);
@@ -224,7 +226,7 @@ public class StarboardManager extends ListenerAdapter {
 				);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 	}
 
@@ -233,7 +235,7 @@ public class StarboardManager extends ListenerAdapter {
 		return new EmbedBuilder()
 				.setAuthor("Jump to Message", message.getJumpUrl())
 				.setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
-				.setColor(Bot.config.get(message.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(message.getContentRaw())
 				.build();
 	}

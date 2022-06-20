@@ -20,21 +20,21 @@ import java.util.stream.Collectors;
 public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 	@Override
 	public void onCommandException(CommandInteraction interaction, Exception e) {
-		e.printStackTrace();
+		Sentry.captureException(e);
 		Sentry.captureException(e);
 		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
 	}
 
 	@Override
 	public void onComponentException(ComponentInteraction interaction, Exception e) {
-		e.printStackTrace();
+		Sentry.captureException(e);
 		Sentry.captureException(e);
 		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
 	}
 
 	@Override
 	public void onModalException(ModalInteraction interaction, Exception e) {
-		e.printStackTrace();
+		Sentry.captureException(e);
 		Sentry.captureException(e);
 		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
 	}

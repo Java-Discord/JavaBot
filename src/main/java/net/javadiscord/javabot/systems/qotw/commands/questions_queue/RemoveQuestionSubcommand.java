@@ -1,5 +1,6 @@
-package net.javadiscord.javabot.systems.qotw.subcommands.questions_queue;
+package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -9,7 +10,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.systems.qotw.subcommands.QOTWSubcommand;
+import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -48,7 +49,7 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand {
 			List<QOTWQuestion> questions = repo.getQuestions(event.getGuild().getIdLong(), 0, 25);
 			questions.forEach(question -> choices.add(new Command.Choice(String.format("(Priority: %s) %s", question.getPriority(), question.getText()), question.getId())));
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		return choices;
 	}

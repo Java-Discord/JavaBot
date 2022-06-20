@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
@@ -64,7 +66,7 @@ public class SubmissionControlsManager {
 				submission = submissionOptional.get();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		this.guild = guild;
 		this.submission = submission;
@@ -110,11 +112,12 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-				DbHelper.doDaoAction(QuestionPointsRepository::new, repo -> repo.increment(user.getIdLong()));
-				new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
-				Responses.success(event.getHook(), "Submission Accepted",
-						"Successfully accepted submission by " + user.getAsMention()).queue();
-				}
+			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+			service.increment(user.getIdLong());
+			new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
+			Responses.success(event.getHook(), "Submission Accepted",
+					"Successfully accepted submission by " + user.getAsMention()).queue();
+			}
 		);
 		this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
 		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);

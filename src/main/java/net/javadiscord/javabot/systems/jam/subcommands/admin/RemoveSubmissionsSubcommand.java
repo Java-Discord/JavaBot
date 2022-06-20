@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompleteHandler;
+import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -28,13 +28,13 @@ import java.util.List;
 /**
  * Subcommand that allows jam-admins to manually remove submissions.
  */
-public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand implements AutoCompleteHandler {
+public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand implements AutoCompletable {
 	public RemoveSubmissionsSubcommand() {
 		setSubcommandData(new SubcommandData("remove-submissions", "Removes one or more submissions from the Jam.")
 				.addOption(OptionType.INTEGER, "id", "The id of the submission to remove.", false, true)
 				.addOption(OptionType.USER, "user", "The user whose submissions to remove.", false)
 		);
-		enableAutoCompleteHandling();
+		setAutoCompleteHandling(true);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand implements 
 			}
 		} catch (SQLException e) {
 			Sentry.captureException(e);
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		event.replyChoices(AutoCompleteUtils.filterChoices(event, choices)).queue();
 	}

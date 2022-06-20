@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -62,7 +63,7 @@ public class QOTWJob extends DiscordApiJob {
 					repo.markUsed(question);
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotw().getQOTWReviewRole().getAsMention(), e.getMessage());
 				throw new JobExecutionException(e);
 			}

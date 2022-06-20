@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.MessageActionUtils;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -26,7 +27,7 @@ public class SuggestionListener extends ListenerAdapter {
 			return;
 		}
 		var config = Bot.config.get(event.getGuild());
-		MessageEmbed embed = this.buildSuggestionEmbed(event.getMessage(), config.getSlashCommand());
+		MessageEmbed embed = this.buildSuggestionEmbed(event.getMessage());
 		MessageActionUtils.addAttachmentsAndSend(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).thenAccept(message -> {
 					this.addReactions(message).queue();
 					event.getMessage().delete().queue();
@@ -69,14 +70,14 @@ public class SuggestionListener extends ListenerAdapter {
 
 
 
-	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
+	private MessageEmbed buildSuggestionEmbed(Message message) {
 		Member member = message.getMember();
 		// Note: member will never be null in practice. This is to satisfy code analysis tools.
 		if (member == null) throw new IllegalStateException("Member was null when building suggestion embed.");
 		return new EmbedBuilder()
 				.setTitle("Suggestion")
 				.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
 				.setDescription(message.getContentRaw())
 				.build();

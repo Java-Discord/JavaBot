@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.jam.dao;
 
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 
@@ -84,7 +85,7 @@ public class JamRepository {
 				return null;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return null;
 		}
 	}
@@ -107,7 +108,7 @@ public class JamRepository {
 				return null;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return null;
 		}
 	}

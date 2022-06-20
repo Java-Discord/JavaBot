@@ -183,7 +183,7 @@ public class SelfRoleInteractionManager {
 					MessageEmbed embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 							.setTitle(String.format("%s applied for %s", user.getAsTag(), role.getName()))
-							.setColor(config.getSlashCommand().getSuccessColor())
+							.setColor(Responses.Type.SUCCESS.getColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
 							.addField("Email", String.format("`%s`", emailOption.getAsString()), true)

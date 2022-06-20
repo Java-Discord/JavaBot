@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -74,7 +75,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 				sb.append(t.format()).append("\n\n");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		return sb.toString().length() > 0 ? sb.toString() : "No recent transactions";
 	}

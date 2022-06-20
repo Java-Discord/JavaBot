@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.jam.subcommands;
 
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -63,7 +64,7 @@ public class JamInfoSubcommand extends ActiveJamSubcommand {
 				jam = jamRepository.getJam(idOption.getAsLong());
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			throw new RuntimeException("Error occurred while fetching the Jam info.", e);
 		}
 		return jam;

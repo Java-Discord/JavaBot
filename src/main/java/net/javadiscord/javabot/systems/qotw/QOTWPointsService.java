@@ -62,7 +62,7 @@ public class QOTWPointsService {
 					       .indexOf(userId) + 1;
 		} catch (SQLException e) {
 			Sentry.captureException(e);
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return -1;
 		}
 	}

@@ -37,7 +37,7 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 
 	private @NotNull MessageEmbed buildSuggestionAcceptEmbed(@NotNull User user, @NotNull MessageEmbed embed, @NotNull GuildConfig config) {
 		return new EmbedBuilder()
-				.setColor(config.getSlashCommand().getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion On Hold")
 				.setDescription(embed.getDescription())

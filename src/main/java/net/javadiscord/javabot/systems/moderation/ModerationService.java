@@ -15,6 +15,7 @@ import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.notification.UserNotificationService;
+import net.javadiscord.javabot.util.Responses;
 
 import javax.annotation.Nonnull;
 import java.sql.Connection;
@@ -119,7 +120,7 @@ public class ModerationService {
 			}
 		} catch (SQLException e) {
 			Sentry.captureException(e);
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		return false;
 	}
@@ -137,7 +138,7 @@ public class ModerationService {
 			return repo.getWarnsByUserId(userId, cutoff);
 		} catch (SQLException e) {
 			Sentry.captureException(e);
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return List.of();
 		}
 	}
@@ -250,14 +251,14 @@ public class ModerationService {
 	private MessageEmbed buildBanEmbed(User user, Member bannedBy, String reason) {
 		return buildModerationEmbed(user, bannedBy, reason)
 				.setTitle("Ban")
-				.setColor(slashCommandConfig.getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor());
 				.build();
 	}
 
 	private MessageEmbed buildKickEmbed(Member member, Member kickedBy, String reason) {
 		return buildModerationEmbed(member.getUser(), kickedBy, reason)
 				.setTitle("Kick")
-				.setColor(slashCommandConfig.getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor());
 				.build();
 	}
 
@@ -265,7 +266,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setAuthor(unbannedBy.getUser().getAsTag(), null, unbannedBy.getEffectiveAvatarUrl())
 				.setTitle("Ban Revoked")
-				.setColor(slashCommandConfig.getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor());
 				.addField("Moderator", unbannedBy.getAsMention(), true)
 				.addField("User Id", MarkdownUtil.codeblock(String.valueOf(userId)), false)
 				.setTimestamp(Instant.now())
@@ -275,7 +276,7 @@ public class ModerationService {
 	private MessageEmbed buildWarnEmbed(User user, Member warnedBy, WarnSeverity severity, int totalSeverity, String reason) {
 		return buildModerationEmbed(user, warnedBy, reason)
 				.setTitle(String.format("Warn Added (%d/%d)", totalSeverity, moderationConfig.getMaxWarnSeverity()))
-				.setColor(slashCommandConfig.getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.addField("Severity", String.format("`%s (%s)`", severity.name(), severity.getWeight()), true)
 				.build();
 	}
@@ -284,7 +285,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setAuthor(clearedBy.getAsTag(), null, clearedBy.getEffectiveAvatarUrl())
 				.setTitle("Warns Cleared")
-				.setColor(slashCommandConfig.getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.setDescription("All warns have been cleared from " + user.getAsMention() + "'s record.")
 				.setTimestamp(Instant.now())
 				.setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
@@ -295,7 +296,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setAuthor(clearedBy.getAsTag(), null, clearedBy.getEffectiveAvatarUrl())
 				.setTitle("Warn Cleared")
-				.setColor(slashCommandConfig.getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.setDescription(String.format("""
 								Cleared the following warn from <@%s>'s record:
 
@@ -312,7 +313,7 @@ public class ModerationService {
 	private MessageEmbed buildTimeoutEmbed(Member member, Member timedOutBy, String reason, Duration duration) {
 		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
 				.setTitle("Timeout")
-				.setColor(slashCommandConfig.getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor());
 				.addField("Until", String.format("<t:%d>", Instant.now().plus(duration).getEpochSecond()), true)
 				.build();
 	}
@@ -320,7 +321,7 @@ public class ModerationService {
 	private MessageEmbed buildTimeoutRemovedEmbed(Member member, Member timedOutBy, String reason) {
 		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
 				.setTitle("Timeout Removed")
-				.setColor(slashCommandConfig.getSuccessColor())
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.build();
 	}
 }

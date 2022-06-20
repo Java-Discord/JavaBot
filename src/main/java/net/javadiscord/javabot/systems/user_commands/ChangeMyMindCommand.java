@@ -6,6 +6,7 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.async.Callback;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -68,7 +69,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 			@Override
 			public void failed(UnirestException ue) {
 				// Shouldn't happen
-				ue.printStackTrace();
+				Sentry.captureException(ue);
 				hook.sendMessage("The request to the ChangeMyMind API failed.").queue();
 			}
 

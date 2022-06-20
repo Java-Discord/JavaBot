@@ -2,6 +2,7 @@ package net.javadiscord.javabot.data.h2db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -59,7 +60,7 @@ public class DbHelper {
 			try {
 				initializeSchema(ds);
 			} catch (IOException | SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 				throw new IllegalStateException("Cannot initialize database schema.", e);
 			}
 		}
@@ -76,7 +77,7 @@ public class DbHelper {
 			try (var c = Bot.dataSource.getConnection()) {
 				consumer.consume(c);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 			}
 		});
 	}
@@ -96,7 +97,7 @@ public class DbHelper {
 				var dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 			}
 		});
 	}

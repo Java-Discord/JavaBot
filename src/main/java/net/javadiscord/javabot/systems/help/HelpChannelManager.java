@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help;
 
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
@@ -79,7 +80,7 @@ public class HelpChannelManager {
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			logChannel.sendMessage("Error while checking if a user can reserve a help channel: " + e.getMessage()).queue();
 			return false;
 		}
@@ -171,7 +172,7 @@ public class HelpChannelManager {
 					}
 			);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return null;
 		}
 	}
@@ -263,7 +264,7 @@ public class HelpChannelManager {
 			try {
 				setTimeout(channel, 5);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 			}
 		});
 	}
@@ -349,7 +350,7 @@ public class HelpChannelManager {
 								channel.sendMessage(config.getReopenedChannelMessage()))
 				);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 				return logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage());
 			}
 		} else {
@@ -514,7 +515,7 @@ public class HelpChannelManager {
 					}
 			);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return Optional.empty();
 		}
 	}

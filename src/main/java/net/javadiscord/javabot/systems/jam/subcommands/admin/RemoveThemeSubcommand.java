@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompleteHandler;
+import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -29,12 +29,12 @@ import java.util.Objects;
 /**
  * Subcommand that allows jam-admins to manually remove themes.
  */
-public class RemoveThemeSubcommand extends ActiveJamSubcommand implements AutoCompleteHandler {
+public class RemoveThemeSubcommand extends ActiveJamSubcommand implements AutoCompletable {
 	public RemoveThemeSubcommand() {
 		setSubcommandData(new SubcommandData("remove-theme", "Removes a theme from the current Jam. Only allowed prior to theme voting.")
 				.addOption(OptionType.STRING, "name", "The name of the theme to remove", true, true)
 		);
-		enableAutoCompleteHandling();
+		setAutoCompleteHandling(true);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class RemoveThemeSubcommand extends ActiveJamSubcommand implements AutoCo
 			}
 		} catch (SQLException e) {
 			Sentry.captureException(e);
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		event.replyChoices(AutoCompleteUtils.filterChoices(event, choices)).queue();
 	}

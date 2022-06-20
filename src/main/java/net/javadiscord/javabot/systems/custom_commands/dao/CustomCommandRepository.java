@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.custom_commands.dao;
 
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
 import org.jetbrains.annotations.NotNull;
@@ -146,7 +147,7 @@ public class CustomCommandRepository {
 			rs.close();
 			return commands;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return List.of();
 		}
 	}

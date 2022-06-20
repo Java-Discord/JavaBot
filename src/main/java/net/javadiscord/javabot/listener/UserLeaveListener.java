@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.listener;
 
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
@@ -32,7 +33,7 @@ public class UserLeaveListener extends ListenerAdapter {
 			var manager = new HelpChannelManager(Bot.config.get(guild).getHelp());
 			manager.unreserveAllOwnedChannels(user);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			var logChannel = Bot.config.get(guild).getModeration().getLogChannel();
 			logChannel.sendMessage("Database error while unreserving channels for a user who left: " + e.getMessage()).queue();
 		}

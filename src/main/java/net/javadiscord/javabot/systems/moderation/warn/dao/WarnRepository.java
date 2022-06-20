@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn.dao;
 
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 
@@ -153,7 +154,7 @@ public class WarnRepository {
 			rs.close();
 			return warns;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return List.of();
 		}
 	}

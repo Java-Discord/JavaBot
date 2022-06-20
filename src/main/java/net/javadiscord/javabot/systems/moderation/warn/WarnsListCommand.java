@@ -53,7 +53,7 @@ public class WarnsListCommand extends SlashCommand {
 				.setTitle("Recent Warns")
 				.setDescription(String.format("%s has `%s` active warns with a total of `%s` severity.\n",
 						user.getAsMention(), warns.size(), warns.stream().mapToInt(Warn::getSeverityWeight).sum()))
-				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.setTimestamp(Instant.now());
 		warns.forEach(w -> builder.getDescriptionBuilder().append(
 				String.format("\n`%s` <t:%s>\nWarned by: <@%s>\nSeverity: `%s (%s)`\nReason: %s\n",

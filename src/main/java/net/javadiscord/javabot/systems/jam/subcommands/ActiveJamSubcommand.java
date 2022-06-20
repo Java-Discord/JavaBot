@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.jam.subcommands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
@@ -46,7 +47,7 @@ public abstract class ActiveJamSubcommand extends SlashCommand.Subcommand {
 				Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```").queue();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			Responses.error(event, "An SQL error occurred.").queue();
 		}
 	}

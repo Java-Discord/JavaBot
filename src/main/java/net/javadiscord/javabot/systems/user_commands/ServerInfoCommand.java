@@ -29,15 +29,15 @@ public class ServerInfoCommand extends SlashCommand {
 			Responses.warning(event, "This command may only be used inside servers.").queue();
 			return;
 		}
-		event.replyEmbeds(buildServerInfoEmbed(event.getGuild(), Bot.config.get(event.getGuild()).getSlashCommand()))
+		event.replyEmbeds(buildServerInfoEmbed(event.getGuild()))
 				.addActionRow(Button.link(Constants.WEBSITE_LINK, "Website")).queue();
 	}
 
-	private MessageEmbed buildServerInfoEmbed(Guild guild, SlashCommandConfig config) {
+	private MessageEmbed buildServerInfoEmbed(Guild guild) {
 		long categories = guild.getCategories().size();
 		long channels = guild.getChannels().size() - categories;
 		return new EmbedBuilder()
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setThumbnail(guild.getIconUrl())
 				.setAuthor(guild.getName(), null, guild.getIconUrl())
 				.setTitle("Server Information")

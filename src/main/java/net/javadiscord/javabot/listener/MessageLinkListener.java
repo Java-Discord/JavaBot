@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.InteractionUtils;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -42,7 +43,7 @@ public class MessageLinkListener extends ListenerAdapter {
 		User author = m.getAuthor();
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), m.getJumpUrl(), author.getEffectiveAvatarUrl())
-				.setColor(Bot.config.get(m.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(m.getContentRaw())
 				.setTimestamp(m.getTimeCreated())
 				.setFooter("#" + m.getChannel().getName())

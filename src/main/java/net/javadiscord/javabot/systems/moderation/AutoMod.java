@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -48,7 +49,7 @@ public class AutoMod extends ListenerAdapter {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());

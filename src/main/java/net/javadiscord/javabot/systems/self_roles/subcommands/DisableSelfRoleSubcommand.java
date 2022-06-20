@@ -37,7 +37,7 @@ public class DisableSelfRoleSubcommand implements SlashCommand {
 		return new EmbedBuilder()
 				.setAuthor(disabledBy.getAsTag(), message.getJumpUrl(), disabledBy.getEffectiveAvatarUrl())
 				.setTitle("Self Role disabled")
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", message.getChannel().getAsMention(), true)
 				.addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)
 				.setTimestamp(Instant.now())

@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.qotw.subcommands.questions_queue;
+package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -14,7 +14,7 @@ import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.systems.qotw.subcommands.QOTWSubcommand;
+import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 
 import java.sql.Connection;
 

@@ -114,7 +114,7 @@ public class ReportManager extends ComponentHandler {
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
 			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
-			var embed = buildReportEmbed(target, reason, hook.getInteraction().getChannel(), config.getSlashCommand());
+			var embed = buildReportEmbed(target, reason, hook.getInteraction().getChannel());
 			embed.setTitle(String.format("%s reported %s", reportedBy.getName(), target.getName()));
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
 			reportChannel.sendMessageEmbeds(embed.build())
@@ -135,7 +135,7 @@ public class ReportManager extends ComponentHandler {
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
 			GuildConfig config = Bot.config.get(event.getGuild());
-			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), reason, event.getTextChannel(), config.getSlashCommand());
+			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), reason, event.getTextChannel());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
@@ -165,10 +165,10 @@ public class ReportManager extends ComponentHandler {
 		);
 	}
 
-	private EmbedBuilder buildReportEmbed(User reported, String reason, Channel channel, SlashCommandConfig config) {
+	private EmbedBuilder buildReportEmbed(User reported, String reason, Channel channel) {
 		return new EmbedBuilder()
 				.setAuthor(reported.getAsTag(), null, reported.getEffectiveAvatarUrl())
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Member", reported.getAsMention(), true)
 				.addField("Reported by", reportedBy.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)

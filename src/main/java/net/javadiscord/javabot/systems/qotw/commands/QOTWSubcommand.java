@@ -1,10 +1,12 @@
-package net.javadiscord.javabot.systems.qotw.subcommands;
+package net.javadiscord.javabot.systems.qotw.commands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,20 +16,21 @@ import java.sql.SQLException;
  * behavior of preparing a connection and obtaining the guild id; these two
  * things are required for all QOTW subcommands.
  */
-public abstract class QOTWSubcommand implements SlashCommand {
+public abstract class QOTWSubcommand extends SlashCommand.Subcommand {
 	@Override
-	public InteractionCallbackAction<?> handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
-			return Responses.warning(event, "This command can only be used in the context of a guild.");
+			Responses.warning(event, "This command can only be used in the context of a guild.").queue();
+			return;
 		}
 		try (Connection con = Bot.dataSource.getConnection()) {
 			con.setAutoCommit(false);
-			var reply = this.handleCommand(event, con, event.getGuild().getIdLong());
+			InteractionCallbackAction<?> reply = handleCommand(event, con, event.getGuild().getIdLong());
 			con.commit();
-			return reply;
+			reply.queue();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return Responses.error(event, "An error occurred: " + e.getMessage());
+			Sentry.captureException(e);
+			Responses.error(event, "An error occurred: " + e.getMessage()).queue();
 		}
 	}
 

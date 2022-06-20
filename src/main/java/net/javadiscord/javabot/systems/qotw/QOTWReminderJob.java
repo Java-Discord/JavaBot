@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -28,7 +29,7 @@ public class QOTWReminderJob extends DiscordApiJob {
 							config.getStaffRole().getAsMention());
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Sentry.captureException(e);
 				new GuildNotificationService(guild).sendLogChannelNotification(
 						"Warning! %s Could not check to see if there's a question in the QOTW queue:\n```\n%s\n```\n",
 						config.getStaffRole().getAsMention(), e.getMessage());

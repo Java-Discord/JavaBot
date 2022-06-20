@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -74,7 +75,7 @@ public class SubmissionManager {
 							}
 						});
 					} catch (SQLException e) {
-						e.printStackTrace();
+						Sentry.captureException(e);
 					}
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
@@ -121,14 +122,14 @@ public class SubmissionManager {
 			var repo = new QOTWSubmissionRepository(con);
 			return repo.getUnreviewedSubmissions(authorId).size() > 0;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 			return false;
 		}
 	}
 
 	private MessageEmbed buildSubmissionThreadEmbed(User createdBy, QOTWQuestion question, QOTWConfig config) {
 		return new EmbedBuilder()
-				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle(String.format("Question of the Week #%s", question.getQuestionNumber()))
 				.setDescription(String.format("""

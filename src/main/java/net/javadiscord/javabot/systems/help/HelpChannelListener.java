@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -47,7 +48,7 @@ public class HelpChannelListener extends ListenerAdapter {
 				try {
 					manager.reserve(channel, event.getAuthor(), event.getMessage());
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Sentry.captureException(e);
 					channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
 				}
 			} else {

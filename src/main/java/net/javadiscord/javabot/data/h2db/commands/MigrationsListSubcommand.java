@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -46,7 +47,7 @@ public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 					sb.append(sql, 0, Math.min(sql.length(), 100));
 					if (sql.length() > 100) sb.append("...");
 				} catch (IOException e) {
-					e.printStackTrace();
+					Sentry.captureException(e);
 					sb.append("Error: Could not read SQL: ").append(e.getMessage());
 				}
 				sb.append("\n```");

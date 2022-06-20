@@ -54,7 +54,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
 			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
 		} catch (IOException | URISyntaxException e) {
-			e.printStackTrace();
+			Sentry.captureException(e);
 		}
 		return choices;
 	}
@@ -91,7 +91,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 									"Executed statement %d of %d:\n```sql\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
 							).queue();
 						} catch (SQLException e) {
-							e.printStackTrace();
+							Sentry.captureException(e);
 							event.getChannel().sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
 							return;
 						}
