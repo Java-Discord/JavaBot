@@ -37,7 +37,7 @@ public class AvatarCommand extends SlashCommand {
 
 	private MessageEmbed buildAvatarEmbed(@Nullable Guild guild, User createdBy) {
 		return new EmbedBuilder()
-				.setColor(guild == null ? null : Bot.config.get(guild).getSlashCommand().getDefaultColor())
+				.setColor(guild == null ? null : Responses.Type.DEFAULT.getColor())
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Avatar")
 				.setImage(createdBy.getEffectiveAvatarUrl() + "?size=4096")

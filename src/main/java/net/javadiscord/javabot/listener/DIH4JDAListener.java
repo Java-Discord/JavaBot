@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.Responses;
 
 import java.time.Instant;
 import java.util.Set;
@@ -69,7 +70,7 @@ public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 	private EmbedBuilder buildErrorEmbed(Guild guild) {
 		return new EmbedBuilder()
 				.setTitle("An error occurred!")
-				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor())
 				.setTimestamp(Instant.now());
 	}
 

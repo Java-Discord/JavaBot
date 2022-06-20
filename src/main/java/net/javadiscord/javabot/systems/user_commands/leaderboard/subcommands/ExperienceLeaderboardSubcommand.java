@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -18,6 +17,8 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
+import net.javadiscord.javabot.util.Pair;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,14 +62,14 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
 		List<HelpAccount> accounts = dao.getAccounts(Math.min(page, maxPage), PAGE_SIZE);
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Experience Leaderboard")
-				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setFooter(String.format("Page %s/%s", Math.min(page, maxPage), maxPage));
 		accounts.forEach(account -> {
 			Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(guild);
 			User user = guild.getJDA().getUserById(account.getUserId());
 			builder.addField(
 					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, user == null ? account.getUserId() : user.getAsTag()),
-					String.format("%s`%.0f XP`\n", currentRole.getFirst() != null ? currentRole.getFirst().getAsMention() + ": " : "", account.getExperience()),
+					String.format("%s`%.0f XP`\n", currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "", account.getExperience()),
 					false);
 		});
 		return builder.build();

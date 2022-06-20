@@ -20,7 +20,7 @@ public class PingCommand extends SlashCommand {
 	public void execute(SlashCommandInteractionEvent event) {
 		event.replyEmbeds(new EmbedBuilder()
 				.setAuthor(event.getJDA().getGatewayPing() + "ms", null, event.getJDA().getSelfUser().getAvatarUrl())
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.build()
 		).queue();
 	}

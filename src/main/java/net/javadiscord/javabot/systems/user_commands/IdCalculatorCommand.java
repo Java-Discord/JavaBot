@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
@@ -42,15 +41,14 @@ public class IdCalculatorCommand extends SlashCommand {
 			return;
 		}
 		long id = idOption.getAsLong();
-		SlashCommandConfig config = Bot.config.get(event.getGuild()).getSlashCommand();
-		event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id), config)).queue();
+		event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id))).queue();
 	}
 
-	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp, SlashCommandConfig config) {
+	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp) {
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("ID-Calculator")
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Input", String.format("`%s`", id), false)
 				.addField("Unix-Timestamp", String.format("`%s`", unixTimestamp), true)
 				.addField("Unix-Timestamp (+ milliseconds)", String.format("`%s`", unixTimestamp / 1000), true)

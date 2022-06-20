@@ -79,7 +79,7 @@ public class EditCustomCommandSubcommand extends CustomCommandsSubcommand implem
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
 				.addField("Embed?", String.format("`%s`", command.isEmbed()), true)
-				.setColor(Bot.config.get(createdBy.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
 				.build();
 	}

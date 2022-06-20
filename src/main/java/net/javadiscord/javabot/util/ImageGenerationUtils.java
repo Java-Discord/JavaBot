@@ -36,7 +36,7 @@ public class ImageGenerationUtils {
 	 * @throws IOException If an error occurs.
 	 */
 	public static BufferedImage getResourceImage(String path) throws IOException {
-		return ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path)));
+		return ImageIO.read(Objects.requireNonNull(ImageGenerationUtils.class.getClassLoader().getResourceAsStream(path)));
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class ImageGenerationUtils {
 	public static Optional<Font> getResourceFont(String path, float size) {
 		Font font = null;
 		try {
-			font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path))).deriveFont(size);
+			font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ImageGenerationUtils.class.getClassLoader().getResourceAsStream(path))).deriveFont(size);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
 		} catch (IOException | FontFormatException e) {
 			log.warn("Could not load Font from path " + path);

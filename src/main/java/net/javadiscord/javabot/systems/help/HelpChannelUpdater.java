@@ -11,6 +11,7 @@ import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.SQLException;
 import java.time.Duration;
@@ -398,7 +399,7 @@ public class HelpChannelUpdater implements Runnable {
 		}
 		return new EmbedBuilder()
 				.setTitle("Help Overview")
-				.setColor(Bot.config.get(config.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Available Help Channels", availableHelpChannels, false)
 				.addField("Reserved Help Channels", reservedHelpChannels.toString(), false)
 				.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false)

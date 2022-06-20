@@ -1,54 +1,64 @@
 package net.javadiscord.javabot.systems.qotw.subcommands.qotw_points;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
-import net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands.QOTWLeaderboardSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
 /**
  * Subcommand that allows staff-members to increment the QOTW-Account of any user.
  */
-public class IncrementSubcommand implements SlashCommand {
+public class IncrementSubcommand extends SlashCommand.Subcommand {
+	public IncrementSubcommand() {
+		setSubcommandData(new SubcommandData("increment", "Adds one point to the user's QOTW-Account")
+				.addOption(OptionType.USER, "user", "The user whose points should be incremented.", true)
+		);
+	}
 
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");
 		if (userOption == null) {
-			return Responses.error(event, "Missing required arguments.");
+			Responses.error(event, "Missing required arguments.").queue();
+			return;
 		}
 		Member member = userOption.getAsMember();
 		if (member == null) {
-			return Responses.error(event, "User must be a part of this server.");
+			Responses.error(event, "User must be a part of this server.").queue();
+			return;
 		}
-		DbHelper.doDaoAction(QuestionPointsRepository::new, dao -> {
-			long points = dao.increment(member.getIdLong());
-			MessageEmbed embed = this.buildIncrementEmbed(member, points);
-			new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
-			new QOTWNotificationService(member.getUser(), event.getGuild()).sendAccountIncrementedNotification();
-			event.getHook().sendMessageEmbeds(embed).queue();
-		});
-		return event.deferReply();
+		event.deferReply().queue();
+		QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+		long points = service.increment(member.getIdLong());
+		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
+		new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
+		new QOTWNotificationService(member.getUser(), event.getGuild()).sendAccountIncrementedNotification();
+		event.getHook().sendMessageEmbeds(embed).queue();
 	}
 
-	private MessageEmbed buildIncrementEmbed(Member member, long points) {
+	private @NotNull MessageEmbed buildIncrementEmbed(@NotNull User user, long points) {
+		QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
 		return new EmbedBuilder()
-				.setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
+				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Account Incremented")
-				.setColor(Bot.config.get(member.getGuild()).getSlashCommand().getSuccessColor())
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.addField("Total QOTW-Points", "```" + points + "```", true)
-				.addField("Rank", "```#" + QOTWLeaderboardSubcommand.getQOTWRank(member, member.getGuild()) + "```", true)
-				.setFooter("ID: " + member.getId())
+				.addField("Rank", "```#" + service.getQOTWRank(user.getIdLong()) + "```", true)
+				.setFooter("ID: " + user.getId())
 				.setTimestamp(Instant.now())
 				.build();
 	}

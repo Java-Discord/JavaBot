@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.help;
 
-import com.dynxsty.dih4jda.util.Pair;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
+import net.javadiscord.javabot.util.Pair;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -107,9 +107,9 @@ public class HelpExperienceService {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
 				Bot.config.get(guild).getHelp().getExperienceRoles().forEach((key, value) -> {
 					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
-					if (role.getFirst() == null) return;
-					if (key.equals(role.getFirst().getIdLong())) {
-						guild.addRoleToMember(member, role.getFirst()).queue();
+					if (role.first() == null) return;
+					if (key.equals(role.first().getIdLong())) {
+						guild.addRoleToMember(member, role.first()).queue();
 					} else {
 						guild.removeRoleFromMember(member, guild.getRoleById(key)).queue();
 					}

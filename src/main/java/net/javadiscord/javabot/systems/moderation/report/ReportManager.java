@@ -19,7 +19,6 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 

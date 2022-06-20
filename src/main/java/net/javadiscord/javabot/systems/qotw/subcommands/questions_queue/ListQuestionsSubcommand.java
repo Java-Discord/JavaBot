@@ -34,7 +34,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
 				.setTitle("QOTW Questions Queue")
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor());
+				.setColor(Responses.Type.DEFAULT.getColor());
 		if (questions.isEmpty()) {
 			embedBuilder.setDescription("There are no questions in the queue.");
 			return event.replyEmbeds(embedBuilder.build());

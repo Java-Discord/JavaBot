@@ -74,7 +74,7 @@ public class SearchCommand extends SlashCommand {
 		String url;
 		String snippet;
 		EmbedBuilder embed = new EmbedBuilder()
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTitle("Search Results");
 		try {
 			SearchResults result = searchWeb(searchTerm);

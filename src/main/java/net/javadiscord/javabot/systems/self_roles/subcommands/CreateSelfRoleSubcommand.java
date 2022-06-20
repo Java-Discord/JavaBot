@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
 
@@ -65,7 +64,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 		GuildConfig config = Bot.config.get(event.getGuild());
 		event.deferReply(true).queue();
 		if (messageIdOption == null || type.equals("NONE")) {
-			event.getChannel().sendMessageEmbeds(buildSelfRoleEmbed(role, description, config.getSlashCommand())).queue(
+			event.getChannel().sendMessageEmbeds(buildSelfRoleEmbed(role, description)).queue(
 					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
 					e -> Responses.error(event.getHook(), e.getMessage()));
 		} else {
@@ -95,7 +94,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 			buttons.add(Button.secondary(this.buildButtonId(type, role, permanent), label));
 			message.editMessageComponents(MessageActionUtils.toActionRows(buttons)).queue();
 		}
-		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type, config.getSlashCommand());
+		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type);
 		new GuildNotificationService(event.getGuild()).sendLogChannelNotification(logEmbed);
 		event.getHook().sendMessageEmbeds(logEmbed).setEphemeral(true).queue();
 	}
@@ -112,18 +111,18 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 		return String.format("self-role:%s:%s:%s", type.toLowerCase(), role.getId(), permanent);
 	}
 
-	private MessageEmbed buildSelfRoleEmbed(Role role, String description, SlashCommandConfig config) {
+	private MessageEmbed buildSelfRoleEmbed(Role role, String description) {
 		return new EmbedBuilder()
 				.setDescription(String.format("%s\n%s", role.getAsMention(), description))
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.build();
 	}
 
-	private MessageEmbed buildSelfRoleCreateEmbed(User createdBy, Role role, Channel channel, String jumpUrl, String type, SlashCommandConfig config) {
+	private MessageEmbed buildSelfRoleCreateEmbed(User createdBy, Role role, Channel channel, String jumpUrl, String type) {
 		return new EmbedBuilder()
 				.setAuthor(createdBy.getAsTag(), jumpUrl, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Self Role created")
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Role", role.getAsMention(), true)
 				.addField("Type", String.format("`%s`", type), true)

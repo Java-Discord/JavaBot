@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.Responses;
 import org.json.JSONException;
 
 import java.net.URLEncoder;
@@ -52,7 +53,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 			public void completed(HttpResponse<JsonNode> hr) {
 				try {
 					hook.sendMessageEmbeds(new EmbedBuilder()
-							.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+							.setColor(Responses.Type.DEFAULT.getColor())
 							.setImage(hr.getBody().getObject().getString("message"))
 							.setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
 							.setTimestamp(Instant.now())

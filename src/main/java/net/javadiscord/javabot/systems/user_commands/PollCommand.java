@@ -50,7 +50,7 @@ public class PollCommand extends SlashCommand {
 		EmbedBuilder embed = new EmbedBuilder()
 				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
 				.setTitle(titleOption.getAsString())
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now());
 		event.getHook().sendMessageEmbeds(embed.build()).queue(m -> {
 			for (int i = 1; i < MAX_OPTIONS + 1; i++) {

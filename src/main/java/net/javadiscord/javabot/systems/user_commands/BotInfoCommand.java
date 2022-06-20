@@ -9,8 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.util.Constants;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.time.Instant;
@@ -27,14 +27,14 @@ public class BotInfoCommand extends SlashCommand {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		event.replyEmbeds(buildBotInfoEmbed(event.getJDA(), Bot.config.get(event.getGuild()).getSlashCommand()))
+		event.replyEmbeds(buildBotInfoEmbed(event.getJDA()))
 				.addActionRow(Button.link(Constants.GITHUB_LINK, "View on GitHub"))
 				.queue();
 	}
 
-	private MessageEmbed buildBotInfoEmbed(JDA jda, SlashCommandConfig config) {
+	private MessageEmbed buildBotInfoEmbed(JDA jda) {
 		return new EmbedBuilder()
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setThumbnail(jda.getSelfUser().getEffectiveAvatarUrl())
 				.setAuthor(jda.getSelfUser().getAsTag(), null, jda.getSelfUser().getEffectiveAvatarUrl())
 				.setTitle("Info")

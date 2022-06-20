@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -7,17 +8,17 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
-import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.util.Pair;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 
@@ -26,8 +27,14 @@ import java.sql.SQLException;
  * their help.
  */
 public class HelpAccountSubcommand extends SlashCommand.Subcommand {
+	public HelpAccountSubcommand() {
+		setSubcommandData(new SubcommandData("account", "Shows an overview of your Help Account.")
+				.addOption(OptionType.USER, "user", "The user to check.", false)
+		);
+	}
+
 	@Override
-	public void execute(SlashCommandInteractionEvent event) throws ResponseException {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
 		long totalThanks = DbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ?",

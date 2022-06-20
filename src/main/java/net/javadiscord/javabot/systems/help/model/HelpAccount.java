@@ -1,10 +1,10 @@
 package net.javadiscord.javabot.systems.help.model;
 
-import com.dynxsty.dih4jda.util.Pair;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.Pair;
 
 import java.util.Comparator;
 import java.util.Map;

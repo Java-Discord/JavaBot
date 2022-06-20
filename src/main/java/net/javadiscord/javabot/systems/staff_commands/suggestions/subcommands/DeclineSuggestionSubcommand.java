@@ -39,7 +39,7 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 
 	private @NotNull MessageEmbed buildSuggestionDeclineEmbed(@NotNull User user, @NotNull MessageEmbed embed, String reason, @NotNull GuildConfig config) {
 		EmbedBuilder builder = new EmbedBuilder()
-				.setColor(config.getSlashCommand().getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion Declined")
 				.setDescription(embed.getDescription())

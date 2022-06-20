@@ -37,7 +37,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 
 	private @NotNull MessageEmbed buildSuggestionAcceptEmbed(@NotNull User user, @NotNull MessageEmbed embed, @NotNull GuildConfig config) {
 		return new EmbedBuilder()
-				.setColor(config.getSlashCommand().getSuccessColor())
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion Accepted")
 				.setDescription(embed.getDescription())

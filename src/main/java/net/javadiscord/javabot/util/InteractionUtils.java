@@ -1,9 +1,12 @@
 package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
-import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 
 /**
@@ -95,9 +98,9 @@ public class InteractionUtils {
 
 	private static void ban(ButtonInteraction interaction, Guild guild, String memberId) {
 		ModerationService service = new ModerationService(interaction);
-		guild.retrieveMemberById(memberId).queue(
-				member -> {
-					service.ban(member, "None", interaction.getMember(), interaction.getMessageChannel(), false);
+		guild.getJDA().retrieveUserById(memberId).queue(
+				user -> {
+					service.ban(user, "None", interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.editButton(interaction.getButton().withLabel("Banned by " + interaction.getUser().getAsTag()).asDisabled()).queue();
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);

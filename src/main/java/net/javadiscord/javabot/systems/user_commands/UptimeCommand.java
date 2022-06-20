@@ -43,7 +43,7 @@ public class UptimeCommand extends SlashCommand {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		event.replyEmbeds(new EmbedBuilder()
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setAuthor(getUptime(), null, event.getJDA().getSelfUser().getAvatarUrl()).build()
 		).queue();
 	}

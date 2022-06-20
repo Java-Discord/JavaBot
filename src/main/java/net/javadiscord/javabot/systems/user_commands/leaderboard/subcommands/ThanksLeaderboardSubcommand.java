@@ -62,7 +62,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 					.collect(collector);
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle("Thanks Leaderboard")
-					.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+					.setColor(Responses.Type.DEFAULT.getColor())
 					.addField("Most Thanked This Week", helpersThisWeek, false)
 					.addField("Most Thanked All Time", totalHelpers, false)
 					.addField("Most Thankful This Week", helpedThisWeek, false)

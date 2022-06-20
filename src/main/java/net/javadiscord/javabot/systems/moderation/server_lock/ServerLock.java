@@ -77,7 +77,7 @@ public class ServerLock extends ListenerAdapter {
 	public static MessageEmbed buildServerLockEmbed(Guild guild) {
 		return new EmbedBuilder()
 				.setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
-				.setColor(Bot.config.get(guild).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(String.format("""
 						Unfortunately, this server is currently locked. Please try to join again later.
 						Contact the server owner, %s, for more info.""", guild.getOwner().getAsMention())

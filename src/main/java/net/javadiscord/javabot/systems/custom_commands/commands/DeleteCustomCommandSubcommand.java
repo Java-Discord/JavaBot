@@ -57,7 +57,7 @@ public class DeleteCustomCommandSubcommand extends CustomCommandsSubcommand impl
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
 				.addField("Embed?", String.format("`%s`", command.isEmbed()), true)
-				.setColor(Bot.config.get(deletedBy.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
 				.build();
 	}

@@ -39,7 +39,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 
 	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull MessageEmbed embed, @NotNull GuildConfig config) {
 		return new EmbedBuilder()
-				.setColor(config.getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion")
 				.setDescription(embed.getDescription())

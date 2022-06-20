@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -9,12 +8,10 @@ import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.time.Instant;
-import java.util.function.Function;
 
 /**
  * Utility class that provides standardized formatting for responses the bot
@@ -26,27 +23,27 @@ public final class Responses {
 	}
 
 	public static ReplyCallbackAction success(CommandInteraction event, String title, String message) {
-		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
+		return reply(event, title, message, Type.SUCCESS.getColor(), true);
 	}
 
 	public static WebhookMessageAction<Message> success(InteractionHook hook, String title, String message) {
-		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getSuccessColor(), true);
+		return reply(hook, title, message, Type.SUCCESS.getColor(), true);
 	}
 
 	public static ReplyCallbackAction info(CommandInteraction event, String title, String message) {
-		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getInfoColor(), true);
+		return reply(event, title, message, Type.INFO.getColor(), true);
 	}
 
 	public static WebhookMessageAction<Message> info(InteractionHook hook, String title, String message) {
-		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getInfoColor(), true);
+		return reply(hook, title, message, Type.INFO.getColor(), true);
 	}
 
 	public static ReplyCallbackAction error(CommandInteraction event, String message) {
-		return reply(event, "An Error Occurred", message, Bot.config.get(event.getGuild()).getSlashCommand().getErrorColor(), true);
+		return reply(event, "An Error Occurred", message, Type.ERROR.getColor(), true);
 	}
 
 	public static WebhookMessageAction<Message> error(InteractionHook hook, String message) {
-		return reply(hook, "An Error Occurred", message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getErrorColor(), true);
+		return reply(hook, "An Error Occurred", message, Type.ERROR.getColor(), true);
 	}
 
 	public static ReplyCallbackAction warning(CommandInteraction event, String message) {
@@ -58,11 +55,11 @@ public final class Responses {
 	}
 
 	public static ReplyCallbackAction warning(CommandInteraction event, String title, String message) {
-		return reply(event, title, message, Bot.config.get(event.getGuild()).getSlashCommand().getWarningColor(), true);
+		return reply(event, title, message, Type.WARN.getColor(), true);
 	}
 
 	public static WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message) {
-		return reply(hook, title, message, Bot.config.get(hook.getInteraction().getGuild()).getSlashCommand().getWarningColor(), true);
+		return reply(hook, title, message, Type.WARN.getColor(), true);
 	}
 
 	/**
@@ -102,5 +99,23 @@ public final class Responses {
 		}
 		embedBuilder.setDescription(message);
 		return embedBuilder.build();
+	}
+
+	public enum Type {
+		DEFAULT(Color.decode("#2F3136")),
+		INFO(Color.decode("#34A2EB")),
+		SUCCESS(Color.decode("#49DE62")),
+		WARN(Color.decode("#EBA434")),
+		ERROR(Color.decode("#EB3434"));
+
+		private final Color color;
+
+		Type(Color color) {
+			this.color = color;
+		}
+
+		public Color getColor() {
+			return this.color;
+		}
 	}
 }

@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.custom_commands.commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -48,14 +49,14 @@ public class CreateCustomCommandSubcommand extends CustomCommandsSubcommand {
 		command.setReply(reply);
 		command.setEmbed(embed);
 		if (Bot.customCommandManager.addCommand(event.getGuild(), command)) {
-			return event.replyEmbeds(buildCreateCommandEmbed(event.getMember(), command));
+			return event.replyEmbeds(buildCreateCommandEmbed(event.getUser(), command));
 		}
 		return Responses.error(event, "Could not create Custom Command. Please try again.");
 	}
 
-	private @NotNull MessageEmbed buildCreateCommandEmbed(@NotNull Member createdBy, @NotNull CustomCommand command) {
+	private @NotNull MessageEmbed buildCreateCommandEmbed(@NotNull User createdBy, @NotNull CustomCommand command) {
 		return new EmbedBuilder()
-				.setAuthor(createdBy.getUser().getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Custom Command created")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`/%s`", command.getName()), true)
@@ -63,7 +64,7 @@ public class CreateCustomCommandSubcommand extends CustomCommandsSubcommand {
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
 				.addField("Embed?", String.format("`%s`", command.isEmbed()), true)
-				.setColor(Bot.config.get(createdBy.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
 				.build();
 	}
