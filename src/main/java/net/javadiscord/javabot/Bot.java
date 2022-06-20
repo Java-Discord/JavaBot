@@ -21,6 +21,7 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
+import net.javadiscord.javabot.systems.custom_commands.CustomCommandManager;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.moderation.server_lock.ServerLock;
@@ -49,32 +50,44 @@ public class Bot {
 	 * The set of configuration properties that this bot uses.
 	 */
 	public static BotConfig config;
+
 	/**
 	 * An instance of {@link AutoMod}.
 	 * */
 	public static AutoMod autoMod;
+
 	/**
 	 * A reference to the Bot's {@link DIH4JDA}.
 	 */
 	public static DIH4JDA dih4jda;
+
 	/**
 	 * The Bots {@link MessageCache}, which handles logging of deleted and edited messages.
 	 */
 	public static MessageCache messageCache;
+
 	/**
 	 * A reference to the Bot's {@link ImageCache}.
 	 */
 	public static ImageCache imageCache;
+
 	/**
 	 * A reference to the bot's serverlock.
 	 */
 	public static ServerLock serverLock;
+
+	/**
+	 * A static reference to the {@link CustomCommandManager} which handles and loads all registered Custom Commands.
+	 */
+	public static CustomCommandManager customCommandManager;
+
 	/**
 	 * A reference to the data source that provides access to the relational
 	 * database that this bot users for certain parts of the application. Use
 	 * this to obtain a connection and perform transactions.
 	 */
 	public static HikariDataSource dataSource;
+
 	/**
 	 * A general-purpose thread pool that can be used by the bot to execute
 	 * tasks outside the main event processing thread.
@@ -119,6 +132,7 @@ public class Bot {
 				.setDefaultCommandType(RegistrationType.GUILD)
 				.build();
 		serverLock = new ServerLock(jda);
+		customCommandManager = new CustomCommandManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
 		// initialize Sentry
 		Sentry.init(options -> {
@@ -143,6 +157,7 @@ public class Bot {
 	 */
 	private static void addEventListeners(JDA jda, DIH4JDA dih4jda) {
 		jda.addEventListener(
+				customCommandManager,
 				serverLock,
 				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),

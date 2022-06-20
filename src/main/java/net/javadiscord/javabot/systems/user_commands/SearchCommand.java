@@ -42,7 +42,7 @@ public class SearchCommand extends SlashCommand {
 
 		// Open the connection.
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.config.getSystems().azureSubscriptionKey);
+		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.config.getSystems().getAzureSubscriptionKey());
 		// Receive the JSON response body.
 		String response;
 		try (Scanner scan = new Scanner(connection.getInputStream()).useDelimiter("\\A")) {
