@@ -48,7 +48,7 @@ public class QOTWJob extends DiscordApiJob {
 					QOTWConfig qotw = config.getQotw();
 					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setLocked(true).setArchived(true).queue());
 					qotw.getSubmissionChannel().getManager()
-							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.emptySet())
+							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
 							.queue();
 					if (question.getQuestionNumber() == null) {
 						question.setQuestionNumber(repo.getNextQuestionNumber());
