@@ -50,7 +50,7 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand {
 			List<QOTWQuestion> questions = repo.getQuestions(event.getGuild().getIdLong(), 0, 25);
 			questions.forEach(question -> choices.add(new Command.Choice(String.format("(Priority: %s) %s", question.getPriority(), question.getText()), question.getId())));
 		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
+			ExceptionLogger.capture(e, RemoveQuestionSubcommand.class.getSimpleName());
 		}
 		return choices;
 	}

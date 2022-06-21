@@ -55,7 +55,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
 			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
 		} catch (IOException | URISyntaxException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
+			ExceptionLogger.capture(e, MigrateSubcommand.class.getSimpleName());
 		}
 		return choices;
 	}

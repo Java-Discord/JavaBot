@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff_commands.embeds.subcommands;
+package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
@@ -65,6 +65,8 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand {
 					// TODO: add missing types
 					Modal modal = switch (type) {
 						case "TITLE_DESC_COLOR" -> buildTitleDescColorModal(embed, messageId);
+						// temp
+						default ->  buildTitleDescColorModal(embed, messageId);
 					};
 					event.replyModal(modal).queue();
 				},
@@ -73,7 +75,7 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand {
 	}
 
 	@Override
-	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
 		if (Checks.checkGuild(event)) {
 			Responses.error(event.getHook(), "This command may only be used inside of a server.").queue();

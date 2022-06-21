@@ -3,9 +3,6 @@ package net.javadiscord.javabot.systems.staff_commands.suggestions;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.systems.staff_commands.suggestions.subcommands.AcceptSuggestionSubcommand;
-import net.javadiscord.javabot.systems.staff_commands.suggestions.subcommands.ClearSuggestionSubcommand;
-import net.javadiscord.javabot.systems.staff_commands.suggestions.subcommands.DeclineSuggestionSubcommand;
 
 /**
  * Represents the `/suggestion` command. This holds administrative commands for managing server suggestions.

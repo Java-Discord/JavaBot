@@ -37,7 +37,6 @@ public class ModerationService {
 	private static final int BAN_DELETE_DAYS = 7;
 
 	private final ModerationConfig moderationConfig;
-	private final SlashCommandConfig slashCommandConfig;
 
 	/**
 	 * Constructs the service.
@@ -46,7 +45,6 @@ public class ModerationService {
 	 */
 	public ModerationService(GuildConfig config) {
 		this.moderationConfig = config.getModeration();
-		this.slashCommandConfig = config.getSlashCommand();
 	}
 
 	/**
@@ -250,14 +248,14 @@ public class ModerationService {
 	private MessageEmbed buildBanEmbed(User user, Member bannedBy, String reason) {
 		return buildModerationEmbed(user, bannedBy, reason)
 				.setTitle("Ban")
-				.setColor(Responses.Type.ERROR.getColor());
+				.setColor(Responses.Type.ERROR.getColor())
 				.build();
 	}
 
 	private MessageEmbed buildKickEmbed(Member member, Member kickedBy, String reason) {
 		return buildModerationEmbed(member.getUser(), kickedBy, reason)
 				.setTitle("Kick")
-				.setColor(Responses.Type.ERROR.getColor());
+				.setColor(Responses.Type.ERROR.getColor())
 				.build();
 	}
 
@@ -265,7 +263,7 @@ public class ModerationService {
 		return new EmbedBuilder()
 				.setAuthor(unbannedBy.getUser().getAsTag(), null, unbannedBy.getEffectiveAvatarUrl())
 				.setTitle("Ban Revoked")
-				.setColor(Responses.Type.ERROR.getColor());
+				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Moderator", unbannedBy.getAsMention(), true)
 				.addField("User Id", MarkdownUtil.codeblock(String.valueOf(userId)), false)
 				.setTimestamp(Instant.now())
@@ -312,7 +310,7 @@ public class ModerationService {
 	private MessageEmbed buildTimeoutEmbed(Member member, Member timedOutBy, String reason, Duration duration) {
 		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
 				.setTitle("Timeout")
-				.setColor(Responses.Type.ERROR.getColor());
+				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Until", String.format("<t:%d>", Instant.now().plus(duration).getEpochSecond()), true)
 				.build();
 	}

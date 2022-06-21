@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.staff_commands.embeds.subcommands;
+package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;

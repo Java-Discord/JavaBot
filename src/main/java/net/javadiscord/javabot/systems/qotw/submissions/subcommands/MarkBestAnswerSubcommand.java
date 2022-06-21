@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.submissions.subcommands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -11,11 +12,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
@@ -25,6 +29,7 @@ import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.MessageActionUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -33,20 +38,28 @@ import java.util.*;
 /**
  * Allows members of the QOTW Review Team to mark a single submission as the "Best Answer" of the current Week.
  */
-public class MarkBestAnswerSubcommand implements SlashCommand {
+public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
+	public MarkBestAnswerSubcommand() {
+		setSubcommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
+				.addOption(OptionType.STRING, "thread-id", "The submission's thread id.", true, true)
+		);
+	}
 
 	@Override
-	public InteractionCallbackAction<InteractionHook> handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
-		OptionMapping threadIdOption = event.getOption("thread-id");
-		if (threadIdOption == null) {
-			return Responses.error(event, "Missing required Arguments.");
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		OptionMapping idMapping = event.getOption("thread-id");
+		if (idMapping == null || !Checks.checkLongInput(idMapping)) {
+			Responses.error(event, "Please provide a valid thread id-").queue();
+			return;
 		}
-		long threadId = Long.parseLong(threadIdOption.getAsString());
+		long threadId = Long.parseLong(idMapping.getAsString());
 		GuildConfig config = Bot.config.get(event.getGuild());
 		ThreadChannel submissionThread = event.getGuild().getThreadChannelById(threadId);
 		if (submissionThread == null) {
-			return Responses.error(event, String.format("Could not find thread with id: `%s`", threadId));
+			Responses.error(event, String.format("Could not find thread with id: `%s`", threadId)).queue();
+			return;
 		}
+		event.deferReply(true).queue();
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(threadId);
 			if (submissionOptional.isEmpty()) {
@@ -62,20 +75,20 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 				Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
 				return;
 			}
-			List<Message> messages = this.getSubmissionContent(submissionThread);
+			List<Message> messages = getSubmissionContent(submissionThread);
 			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
 					member -> {
 						if (member == null) {
 							Responses.error(event.getHook(), String.format("Could not find member with id: `%s`", submission.getAuthorId())).queue();
 							return;
 						}
-						DbHelper.doDaoAction(QuestionPointsRepository::new, repo -> repo.increment(member.getIdLong()));
+						QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+						service.increment(member.getIdLong());
 						new QOTWNotificationService(member.getUser(), event.getGuild()).sendBestAnswerNotification();
-						this.sendBestAnswer(event.getHook(), messages, member, submissionThread);
+						sendBestAnswer(event.getHook(), messages, member, submissionThread);
 					}
 			);
 		});
-		return event.deferReply(true);
 	}
 
 	private List<Message> getSubmissionContent(ThreadChannel thread) {

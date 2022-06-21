@@ -1,8 +1,9 @@
-package net.javadiscord.javabot.systems.staff_commands.suggestions.subcommands;
+package net.javadiscord.javabot.systems.staff_commands.suggestions;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -13,12 +14,12 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Subcommand that lets staff members clear suggestions.
+ * Subcommand that lets staff members mark suggestions as "On Hold".
  */
-public class ClearSuggestionSubcommand extends SuggestionSubcommand {
-	public ClearSuggestionSubcommand() {
-		setSubcommandData(new SubcommandData("clear", "Clears a single suggestion.")
-				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to clear.", true)
+public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
+	public OnHoldSuggestionSubcommand() {
+		setSubcommandData(new SubcommandData("on-hold", "Marks a single suggestion as \"On Hold\".")
+				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to mark as \"On Hold\".", true)
 		);
 	}
 
@@ -26,25 +27,22 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		message.clearReactions().queue();
-		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed, config);
-		message.editMessageEmbeds(clearEmbed).queue(
-				edit -> {
-					edit.addReaction(config.getEmote().getUpvoteEmote()).queue();
-					edit.addReaction(config.getEmote().getDownvoteEmote()).queue();
-				},
+		MessageEmbed onHoldEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
+		message.editMessageEmbeds(onHoldEmbed).queue(
+				edit -> edit.addReaction(config.getEmote().getClockEmoji()).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
-		return Responses.success(event.getHook(), "Suggestion Cleared", String.format("Successfully cleared suggestion with id `%s`", message.getId()))
+		return Responses.success(event.getHook(), "Suggestion On Hold", String.format("Successfully marked suggestion with id `%s` as On Hold", message.getId()))
 				.addActionRows(getJumpButton(message));
 	}
 
-	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull MessageEmbed embed, @NotNull GuildConfig config) {
+	private @NotNull MessageEmbed buildSuggestionAcceptEmbed(@NotNull User user, @NotNull MessageEmbed embed, @NotNull GuildConfig config) {
 		return new EmbedBuilder()
-				.setColor(Responses.Type.DEFAULT.getColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
-				.setTitle("Suggestion")
+				.setTitle("Suggestion On Hold")
 				.setDescription(embed.getDescription())
 				.setTimestamp(embed.getTimestamp())
-				.setFooter(null)
+				.setFooter("Suggestion marked as On Hold by " + user.getAsTag())
 				.build();
 	}
 }
