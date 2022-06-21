@@ -10,10 +10,10 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -32,7 +32,9 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
 	private static final int PAGE_SIZE = 5;
 
 	public ExperienceLeaderboardSubcommand() {
-		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard."));
+		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
+				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
+		);
 	}
 
 	/**
@@ -46,8 +48,11 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> {
 			int page = Integer.parseInt(id[2]);
 			// increment/decrement page
-			if (id[1].equals("left")) page--;
-			else page++;
+			if (id[1].equals("left")) {
+				page--;
+			} else {
+				page++;
+			}
 			int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
 			if (page <= 0) page = maxPage;
 			if (page > maxPage) page = 1;

@@ -20,17 +20,17 @@ public class PollCommand extends SlashCommand {
 	public PollCommand() {
 		setSlashCommandData(Commands.slash("poll", "Creates a simple poll")
 				.addOptions(
-						new OptionData(OptionType.STRING, "title", "The title of your poll", true),
-						new OptionData(OptionType.STRING, "option-1", "Adds an option", true),
-						new OptionData(OptionType.STRING, "option-2", "Adds an option", true),
-						new OptionData(OptionType.STRING, "option-3", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-4", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-5", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-6", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-7", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-8", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-9", "Adds an option", false),
-						new OptionData(OptionType.STRING, "option-10", "Adds an option", false)
+						new OptionData(OptionType.STRING, "title", "The title of your poll.", true),
+						new OptionData(OptionType.STRING, "option-1", "Adds an option.", true),
+						new OptionData(OptionType.STRING, "option-2", "Adds an option.", true),
+						new OptionData(OptionType.STRING, "option-3", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-4", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-5", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-6", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-7", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-8", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-9", "Adds an option.", false),
+						new OptionData(OptionType.STRING, "option-10", "Adds an option.", false)
 				)
 				.setGuildOnly(true)
 		);

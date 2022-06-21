@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -14,6 +13,7 @@ import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
@@ -40,6 +40,10 @@ public class ProfileCommand extends SlashCommand {
 		Member member = event.getOption("user", event::getMember, OptionMapping::getAsMember);
 		if (member == null) {
 			Responses.error(event, "The user must be a part of this server!").queue();
+			return;
+		}
+		if (!Checks.checkGuild(event)) {
+			Responses.error(event, "This command may only be used inside a server.").queue();
 			return;
 		}
 		try {
@@ -94,12 +98,12 @@ public class ProfileCommand extends SlashCommand {
 		return sb.toString();
 	}
 
-	private Optional<Activity> getCustomActivity(@NotNull Member member) {
+	private @NotNull Optional<Activity> getCustomActivity(@NotNull Member member) {
 		return member.getActivities().stream()
 				.filter(a -> a.getType() == Activity.ActivityType.CUSTOM_STATUS).findFirst();
 	}
 
-	private Optional<Activity> getGameActivity(@NotNull Member member) {
+	private @NotNull Optional<Activity> getGameActivity(@NotNull Member member) {
 		return member.getActivities().stream()
 				.filter(a -> a.getType() != Activity.ActivityType.CUSTOM_STATUS).findFirst();
 	}

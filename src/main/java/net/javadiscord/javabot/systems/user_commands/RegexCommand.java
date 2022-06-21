@@ -4,12 +4,12 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.google.re2j.Pattern;
 import com.google.re2j.PatternSyntaxException;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Command that allows members to test regex patterns.
@@ -24,9 +24,9 @@ public class RegexCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
-		var patternOption = event.getOption("regex");
-		var stringOption = event.getOption("string");
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		OptionMapping patternOption = event.getOption("regex");
+		OptionMapping stringOption = event.getOption("string");
 		if (patternOption == null || stringOption == null) {
 			Responses.error(event, "Missing required arguments").queue();
 			return;

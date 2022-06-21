@@ -6,6 +6,9 @@ import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Contains some utility methods for dealing with Strings.
@@ -113,6 +116,11 @@ public class StringUtils {
 		return word.substring(0, 1).toUpperCase() + word.substring(1);
 	}
 
+	/**
+	 * Tries to get the current operating system.
+	 *
+	 * @return The current operating system, as a {@link String}.
+	 */
 	public static String getOperatingSystem() {
 		String os = System.getProperty("os.name");
 		if(os.equals("Linux")) {
@@ -135,4 +143,24 @@ public class StringUtils {
 		}
 		return os;
 	}
+
+	/**
+	 * Calculates the Uptimes and returns a formatted String.
+	 *
+	 * @return The current Uptime as a String.
+	 */
+	public static String formatUptime() {
+		RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
+		long uptimeMS = rb.getUptime();
+		long uptimeDAYS = TimeUnit.MILLISECONDS.toDays(uptimeMS);
+		uptimeMS -= TimeUnit.DAYS.toMillis(uptimeDAYS);
+		long uptimeHRS = TimeUnit.MILLISECONDS.toHours(uptimeMS);
+		uptimeMS -= TimeUnit.HOURS.toMillis(uptimeHRS);
+		long uptimeMIN = TimeUnit.MILLISECONDS.toMinutes(uptimeMS);
+		uptimeMS -= TimeUnit.MINUTES.toMillis(uptimeMIN);
+		long uptimeSEC = TimeUnit.MILLISECONDS.toSeconds(uptimeMS);
+		return String.format("%sd %sh %smin %ss",
+				uptimeDAYS, uptimeHRS, uptimeMIN, uptimeSEC);
+	}
+
 }

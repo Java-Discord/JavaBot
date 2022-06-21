@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
@@ -48,9 +47,9 @@ public class IdCalculatorCommand extends SlashCommand {
 	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp) {
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
-				.setTitle("ID-Calculator")
+				.setTitle("ID Calculator")
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.addField("Input", String.format(MarkdownUtil.codeblock("%s"), id), false)
+				.addField("Snowflake Input", String.format(MarkdownUtil.codeblock("%s"), id), false)
 				.addField("Unix-Timestamp", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp), true)
 				.addField("Unix-Timestamp (+ milliseconds)", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp / 1000), true)
 				.addField("Date", String.format("<t:%s:F>", Instant.ofEpochMilli(unixTimestamp / 1000).getEpochSecond()), false)

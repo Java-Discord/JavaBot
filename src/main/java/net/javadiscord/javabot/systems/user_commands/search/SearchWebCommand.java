@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public class SearchWebCommand extends SlashCommand {
 	public SearchWebCommand() {
-		setSlashCommandData(Commands.slash("search", "Searches the web by turning your text-input into a search query")
+		setSlashCommandData(Commands.slash("search-web", "Searches the web by turning your text-input into a search query")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true)
 		);
