@@ -165,8 +165,7 @@ public class JamRepository {
 	 */
 	public void cancelJam(Jam jam) throws SQLException {
 		this.completeJam(jam);
-		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?");
-		     PreparedStatement s = con.prepareStatement("UPDATE jam_theme SET accepted = FALSE WHERE jam_id = ? AND accepted IS NULL;")) {
+		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?"); PreparedStatement s = con.prepareStatement("UPDATE jam_theme SET accepted = FALSE WHERE jam_id = ? AND accepted IS NULL;")) {
 			stmt.setLong(1, jam.getId());
 			stmt.executeUpdate();
 			s.setLong(1, jam.getId());

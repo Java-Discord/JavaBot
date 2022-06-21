@@ -76,8 +76,7 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
-		try (Connection con = Bot.dataSource.getConnection();
-		     PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
+		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -431,8 +430,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void setTimeout(TextChannel channel, int timeout) throws SQLException {
-		try (Connection con = Bot.dataSource.getConnection();
-		     PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
+		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
 			stmt.setInt(1, timeout);
 			stmt.setLong(2, channel.getIdLong());
 			stmt.executeUpdate();
@@ -447,9 +445,8 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getTimeout(TextChannel channel) throws SQLException {
-		try (Connection con = Bot.dataSource.getConnection();
-		     PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
-						stmt.setLong(1, channel.getIdLong());
+		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
+			stmt.setLong(1, channel.getIdLong());
 			var rs = stmt.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1);

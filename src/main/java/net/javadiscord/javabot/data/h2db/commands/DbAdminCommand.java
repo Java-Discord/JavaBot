@@ -24,7 +24,7 @@ public class DbAdminCommand extends SlashCommand {
 		setSlashCommandData(Commands.slash("db-admin", "(ADMIN ONLY) Administrative Commands for managing the bot's database.")
 				.setDefaultPermissions(CommandPermissions.enabledFor(Permission.MANAGE_SERVER))
 		);
-		addSubcommands(new ExportSchemaSubcommand(), new ExportTableSubcommand(), new MigrationsListSubcommand(), new MigrateSubcommand());
+		addSubcommands(new ExportSchemaSubcommand(), new ExportTableSubcommand(), new MigrationsListSubcommand(), new MigrateSubcommand(), new QuickMigrateSubcommand());
 		addSubcommandGroups(Map.of(
 				new SubcommandGroupData("message-cache", "Administrative tools for managing the Message Cache."), Set.of(new MessageCacheInfoSubcommand())
 		));
