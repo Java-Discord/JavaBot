@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class SearchWebMessageContext extends ContextCommand.Message {
 	}
 
 	@Override
-	public void execute(MessageContextInteractionEvent event) {
+	public void execute(@NotNull MessageContextInteractionEvent event) {
 		String query = event.getTarget().getContentDisplay();
 		if (query.isEmpty() || query.isBlank()) {
 			Responses.warning(event, "No Content", "The message doesn't have any content to search for").queue();
