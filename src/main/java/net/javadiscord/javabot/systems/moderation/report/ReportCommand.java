@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.moderation.report;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -11,10 +11,13 @@ import net.javadiscord.javabot.systems.moderation.ModerateUserCommand;
 import javax.annotation.Nonnull;
 
 /**
- * Command that allows members to report other members.
+ * <h3>This class represents the /report command.</h3>
  */
 @Slf4j
 public class ReportCommand extends ModerateUserCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public ReportCommand() {
 		setSlashCommandData(Commands.slash("report", "Reports a member.")
 				.addOption(OptionType.USER, "user", "The user you want to report", true)

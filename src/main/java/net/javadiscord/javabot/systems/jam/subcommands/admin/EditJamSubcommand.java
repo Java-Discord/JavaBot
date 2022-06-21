@@ -5,11 +5,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,13 +20,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Subcommand that allows admins to edit certain properties of the Jam. Uses a
+ * <h3>This class represents the /jam-admin edit jam command.</h3>
+ * This Subcommand allows admins to edit certain properties of the Jam. Uses a
  * mapping of {@link PropertyHandler} instances to handle updates to any
  * eligible property.
  */
 public class EditJamSubcommand extends ActiveJamSubcommand {
 	private static final Map<String, PropertyHandler> propertyHandlers = new HashMap<>();
 
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public EditJamSubcommand() {
 		setSubcommandData(new SubcommandData("edit-jam", "Edit certain properties of the Jam.")
 				.addOption(OptionType.STRING, "property", "The name of the property to edit.", true)

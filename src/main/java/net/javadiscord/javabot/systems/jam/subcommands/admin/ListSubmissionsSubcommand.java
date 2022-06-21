@@ -19,9 +19,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Subcommand that allows jam-admin to list all jam submissions.
+ * <h3>This class represents the /jam-admin list-submissions command.</h3>
+ * This Subcommand allows jam-admins to list all jam submissions.
  */
 public class ListSubmissionsSubcommand extends ActiveJamSubcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public ListSubmissionsSubcommand() {
 		setSubcommandData(new SubcommandData("list-submissions", "Shows a list of all submissions that have been made so far.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)

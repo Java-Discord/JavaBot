@@ -16,9 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 
 /**
- * Command that provides some basic info about the bot.
+ * This class represents the `/botinfo` command.
  */
 public class BotInfoCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public BotInfoCommand() {
 		setSlashCommandData(Commands.slash("botinfo", "Shows some information about the Bot.")
 				.setGuildOnly(true)

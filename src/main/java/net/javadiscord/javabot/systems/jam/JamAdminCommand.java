@@ -6,10 +6,12 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.systems.jam.subcommands.admin.*;
 
 /**
- * Handler class for all jam-admin commands.
+ * Represents the `/jam-admin` command. This holds administrative commands for configuring the Java Jam.
  */
 public class JamAdminCommand extends SlashCommand {
-
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public JamAdminCommand() {
 		setSlashCommandData(Commands.slash("jam-admin", "Administrator actions for configuring the Java Jam.")
 				.setDefaultPermissions(CommandPermissions.DISABLED)

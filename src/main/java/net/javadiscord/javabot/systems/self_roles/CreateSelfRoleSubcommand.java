@@ -12,19 +12,22 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
+import net.javadiscord.javabot.util.Responses;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Subcommand that creates a new Reaction Role/Button.
+ * This class represents the `/self-role create` command.
  */
 public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public CreateSelfRoleSubcommand() {
 		setSubcommandData(new SubcommandData("create", "Creates a reaction role")
 				.addOptions(

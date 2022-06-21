@@ -5,8 +5,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
+import net.javadiscord.javabot.util.Responses;
 
 import javax.annotation.Nonnull;
 

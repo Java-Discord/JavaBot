@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -12,14 +11,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.util.ExceptionLogger;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.dao.JamSubmissionRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,9 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Subcommand that allows jam-admins to manually remove submissions.
+ * <h3>This class represents the /jam-admin remove-submissions command.</h3>
  */
 public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand implements AutoCompletable {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public RemoveSubmissionsSubcommand() {
 		setSubcommandData(new SubcommandData("remove-submissions", "Removes one or more submissions from the Jam.")
 				.addOption(OptionType.INTEGER, "id", "The id of the submission to remove.", false, true)

@@ -24,7 +24,13 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * This class represents the `/embed create` command.
+ */
 public class CreateEmbedSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public CreateEmbedSubcommand() {
 		setSubcommandData(new SubcommandData("create", "Creates a new basic embed message.")
 				.addOptions(

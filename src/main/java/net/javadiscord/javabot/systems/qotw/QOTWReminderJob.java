@@ -1,12 +1,11 @@
 package net.javadiscord.javabot.systems.qotw;
 
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

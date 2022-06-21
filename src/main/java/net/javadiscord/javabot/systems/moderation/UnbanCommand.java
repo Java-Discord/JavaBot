@@ -11,9 +11,13 @@ import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 /**
- * Command that allows staff-members to unban users from the current guild by their id.
+ * <h3>This class represents the /unban command.</h3>
+ * This Command allows staff-members to unban users from the current guild by their id.
  */
 public class UnbanCommand extends ModerateCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public UnbanCommand() {
 		setSlashCommandData(Commands.slash("unban", "Unbans a member")
 				.addOption(OptionType.STRING, "id", "The ID of the user you want to unban", true)

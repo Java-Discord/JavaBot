@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.jam.subcommands.admin;
 
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -11,8 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.util.ExceptionLogger;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
@@ -20,6 +17,8 @@ import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamPhase;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,9 +27,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Subcommand that allows jam-admins to manually remove themes.
+ * <h3>This class represents the /jam-admin remove-theme command.</h3>
  */
 public class RemoveThemeSubcommand extends ActiveJamSubcommand implements AutoCompletable {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public RemoveThemeSubcommand() {
 		setSubcommandData(new SubcommandData("remove-theme", "Removes a theme from the current Jam. Only allowed prior to theme voting.")
 				.addOption(OptionType.STRING, "name", "The name of the theme to remove", true, true)

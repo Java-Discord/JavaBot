@@ -17,11 +17,14 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
+ * <h3>This class represents the /db-admin migrations-list command.</h3>
  * This subcommand shows a list of all available migrations, and a short preview
  * of their source code.
  */
 public class MigrationsListSubcommand extends SlashCommand.Subcommand {
-
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public MigrationsListSubcommand() {
 		setSubcommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
 		requireUsers(Bot.config.getSystems().getAdminUsers());

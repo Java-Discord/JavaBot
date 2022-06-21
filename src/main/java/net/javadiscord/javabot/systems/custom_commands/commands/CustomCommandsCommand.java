@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
- * Represents the `/custom-commands` command. This holds administrative commands for managing "Custom Commands".
+ * Represents the `/customcommands-admin` command. This holds administrative commands for managing "Custom Commands".
  */
 public class CustomCommandsCommand extends SlashCommand {
 	/**

@@ -13,9 +13,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Command that allows staff-members to kick members.
+ * <h3>This class represents the /kick command.</h3>
  */
 public class KickCommand extends ModerateUserCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public KickCommand() {
 		setSlashCommandData(Commands.slash("kick", "Kicks a member")
 				.addOption(OptionType.USER, "user", "The user to kick.", true)

@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * A moderation command action like ban, kick, mute, report, etc. | In short, it targets a user.
+ * An abstraction of {@link ModerateCommand} which is used for commands that require a user.
  */
 public abstract class ModerateUserCommand extends ModerateCommand {
 	private boolean actOnSelf = false;
@@ -32,7 +32,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping targetOption = event.getOption("user");
 		OptionMapping reasonOption = event.getOption("reason");
-		if (targetOption == null || (targetOption == null && requireReason)) {
+		if (targetOption == null || targetOption == null && requireReason) {
 			return Responses.error(event, "Missing required arguments.");
 		}
 		Member target = targetOption.getAsMember();

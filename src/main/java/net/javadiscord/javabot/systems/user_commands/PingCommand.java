@@ -4,14 +4,16 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Command that displays the current Gateway ping.
+ * <h3>This class represents the /ping command.</h3>
  */
 public class PingCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public PingCommand() {
 		setSlashCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
 				.setGuildOnly(true)

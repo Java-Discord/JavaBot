@@ -24,6 +24,9 @@ import net.javadiscord.javabot.util.Responses;
 
 import java.time.Instant;
 
+/**
+ * Manages all interactions regarding the report-system.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class ReportManager extends ComponentHandler {
@@ -107,6 +110,13 @@ public class ReportManager extends ComponentHandler {
 	}
 
 
+	/**
+	 * Handles a single user report.
+	 *
+	 * @param hook The {@link InteractionHook} to respond to.
+	 * @param reason The reason for reporting this user.
+	 * @param targetId The targeted user's id.
+	 */
 	protected void handleUserReport(InteractionHook hook, String reason, String targetId) {
 		if (reason.isBlank()) {
 			Responses.error(hook, "No report reason was provided.").queue();

@@ -1,11 +1,9 @@
 package net.javadiscord.javabot.systems.qotw;
 
-import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -17,6 +15,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Service class which is used to get and manipulate other {@link QOTWAccount}s.
+ */
 @RequiredArgsConstructor
 public class QOTWPointsService {
 	private final DataSource dataSource;
@@ -25,7 +26,7 @@ public class QOTWPointsService {
 	 * Creates a new QOTW Account if none exists.
 	 *
 	 * @param userId The user's id.
-	 * @return An {@link HelpAccount} object.
+	 * @return An {@link QOTWAccount} object.
 	 * @throws SQLException If an error occurs.
 	 */
 	public QOTWAccount getOrCreateAccount(long userId) throws SQLException {
@@ -58,9 +59,9 @@ public class QOTWPointsService {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints();
 			return accounts.stream()
-					       .map(QOTWAccount::getUserId)
-					       .toList()
-					       .indexOf(userId) + 1;
+					.map(QOTWAccount::getUserId)
+					.toList()
+					.indexOf(userId) + 1;
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return -1;

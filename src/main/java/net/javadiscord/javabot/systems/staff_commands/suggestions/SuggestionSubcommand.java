@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.data.config.GuildConfig;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;

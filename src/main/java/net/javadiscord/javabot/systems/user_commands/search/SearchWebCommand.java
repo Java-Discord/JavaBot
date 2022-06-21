@@ -12,9 +12,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Command that allows members to search the internet using the Bing API.
+ * <h3>This class represents the /search-web command.</h3>
+ * This Command allows members to search the internet using the Bing API.
  */
 public class SearchWebCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public SearchWebCommand() {
 		setSlashCommandData(Commands.slash("search-web", "Searches the web by turning your text-input into a search query")
 				.setGuildOnly(true)

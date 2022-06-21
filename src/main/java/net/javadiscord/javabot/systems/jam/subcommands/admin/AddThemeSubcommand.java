@@ -5,12 +5,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,6 +20,9 @@ import java.util.List;
  * Subcommand that allows jam-admins to add themes to vote on for the current JavaJam.
  */
 public class AddThemeSubcommand extends ActiveJamSubcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public AddThemeSubcommand() {
 		setSubcommandData(new SubcommandData("add-theme", "Adds a new theme to the next upcoming Jam.")
 				.addOption(OptionType.STRING, "name", "The name of this theme. Should be short (< 64 characters), and unique for the Jam.", true)

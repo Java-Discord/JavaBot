@@ -9,18 +9,22 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
 /**
- * Subcommand that allows staff-members to increment the QOTW-Account of any user.
+ * <h3>This class represents the /qotw account increment command.</h3>
+ * This Subcommand allows staff-members to increment the QOTW-Account of any user.
  */
 public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public IncrementPointsSubcommand() {
 		setSubcommandData(new SubcommandData("increment", "Adds one point to the user's QOTW-Account")
 				.addOption(OptionType.USER, "user", "The user whose points should be incremented.", true)

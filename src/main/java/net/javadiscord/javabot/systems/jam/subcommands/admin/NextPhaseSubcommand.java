@@ -3,12 +3,12 @@ package net.javadiscord.javabot.systems.jam.subcommands.admin;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.JamChannelManager;
 import net.javadiscord.javabot.systems.jam.JamPhaseManager;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.subcommands.ActiveJamSubcommand;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 

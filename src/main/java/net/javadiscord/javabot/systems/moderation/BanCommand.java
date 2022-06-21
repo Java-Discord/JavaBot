@@ -16,6 +16,9 @@ import javax.annotation.Nullable;
  * Command that allows staff-members to ban guild members.
  */
 public class BanCommand extends ModerateUserCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public BanCommand() {
 		setSlashCommandData(Commands.slash("ban", "Ban a user.")
 						.addOption(OptionType.USER, "user", "The user to ban.", true)

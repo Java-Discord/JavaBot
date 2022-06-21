@@ -14,21 +14,19 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
-import net.javadiscord.javabot.util.Checks;
-import net.javadiscord.javabot.util.ExceptionLogger;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
+import net.javadiscord.javabot.util.Checks;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -36,9 +34,15 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Allows members of the QOTW Review Team to mark a single submission as the "Best Answer" of the current Week.
+ * <h3>This class represents the /qotw submissions mark-best command.</h3>
+ * This Subcommand allows members of the QOTW Review Team to mark a single submission
+ * as the "Best Answer" of the current Week, which then get sent back into the submission channel for
+ * others to view.
  */
 public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public MarkBestAnswerSubcommand() {
 		setSubcommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
 				.addOption(OptionType.STRING, "thread-id", "The submission's thread id.", true, true)

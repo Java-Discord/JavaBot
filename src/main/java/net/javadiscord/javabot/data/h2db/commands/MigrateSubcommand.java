@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * <h3>This class represents the /db-admin migrate command.</h3>
  * This subcommand is responsible for executing SQL migrations on the bot's
  * schema.
  * <p>
@@ -35,6 +36,9 @@ import java.util.Objects;
  * </p>
  */
 public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCompletable {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public MigrateSubcommand() {
 		setSubcommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
 				.addOption(OptionType.STRING, "name", "The migration's filename", true, true));

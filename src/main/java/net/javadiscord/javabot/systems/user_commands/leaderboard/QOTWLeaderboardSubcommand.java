@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -71,7 +70,8 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * Builds the Leaderboard Rank {@link MessageEmbed}.
 	 *
-	 * @param member The member which executed the command.
+	 * @param member  The member which executed the command.
+	 * @param service The {@link QOTWPointsService}.
 	 * @return A {@link MessageEmbed} object.
 	 */
 	private MessageEmbed buildLeaderboardRankEmbed(Member member, QOTWPointsService service) {
@@ -96,10 +96,11 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * Draws a single "user card" at the given coordinates.
 	 *
-	 * @param g2d    Graphics object.
-	 * @param member The member.
-	 * @param y      The y-position.
-	 * @param left   Whether the card should be drawn left or right.
+	 * @param g2d     Graphics object.
+	 * @param member  The member.
+	 * @param service The {@link QOTWPointsService}.
+	 * @param y       The y-position.
+	 * @param left    Whether the card should be drawn left or right.
 	 * @throws IOException If an error occurs.
 	 */
 	private void drawUserCard(Graphics2D g2d, Member member, QOTWPointsService service, int y, boolean left) throws IOException {
@@ -135,7 +136,8 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * Draws and constructs the leaderboard image.
 	 *
-	 * @param guild The current guild.
+	 * @param guild   The current guild.
+	 * @param service The {@link QOTWPointsService}.
 	 * @return The finished image as a {@link ByteArrayInputStream}.
 	 * @throws IOException If an error occurs.
 	 */
@@ -145,7 +147,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 		List<Member> topMembers = service.getTopMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
-		             (ImageGenerationUtils.getResourceImage("images/leaderboard/LBCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
+				(ImageGenerationUtils.getResourceImage("images/leaderboard/LBCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = image.createGraphics();
 

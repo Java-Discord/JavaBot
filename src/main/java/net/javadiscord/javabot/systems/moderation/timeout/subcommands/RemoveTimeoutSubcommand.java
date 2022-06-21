@@ -8,14 +8,17 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.util.Responses;
 
 /**
- * Subcommand that allows staff-members to manually remove a timeout.
+ * <h3>This class represents the /timeout remove command.</h3>
+ * This Subcommand allows staff-members to manually remove a timeout.
  */
 public class RemoveTimeoutSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public RemoveTimeoutSubcommand() {
 		setSubcommandData(new SubcommandData("remove", "Removes a Timeout from the given User.")
 				.addOptions(

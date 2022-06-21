@@ -11,9 +11,12 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Subcommand that allows staff-members to discard any warn by their id.
+ * <h3>This class represents the /warn discard-by-id command.</h3>
  */
 public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public DiscardWarnByIdSubCommand() {
 		setSubcommandData(new SubcommandData("discard-by-id", "Discards a single warn, based on its id.")
 				.addOption(OptionType.INTEGER, "id", "The warn's unique identifier.", true)

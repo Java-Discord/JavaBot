@@ -9,9 +9,12 @@ import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Command that displays the bot's uptime.
+ * <h3>This class represents the /uptime command.</h3>
  */
 public class UptimeCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public UptimeCommand() {
 		setSlashCommandData(Commands.slash("uptime", "Shows the bot's current uptime.")
 				.setGuildOnly(true)

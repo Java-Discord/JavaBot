@@ -12,9 +12,12 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Command that allows members to test regex patterns.
+ * <h3>This class represents the /regex command.</h3>
  */
 public class RegexCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public RegexCommand() {
 		setSlashCommandData(Commands.slash("regex", "Checks if the given string matches the regex pattern")
 				.addOption(OptionType.STRING, "regex", "The regex pattern", true)

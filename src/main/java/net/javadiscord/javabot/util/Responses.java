@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -101,11 +100,29 @@ public final class Responses {
 		return embedBuilder.build();
 	}
 
+	/**
+	 * This enum contains all possible response types.
+	 */
 	public enum Type {
+		/**
+		 * The default response.
+		 */
 		DEFAULT(Color.decode("#2F3136")),
+		/**
+		 * An informing response.
+		 */
 		INFO(Color.decode("#34A2EB")),
+		/**
+		 * A successful response.
+		 */
 		SUCCESS(Color.decode("#49DE62")),
+		/**
+		 * A warning response.
+		 */
 		WARN(Color.decode("#EBA434")),
+		/**
+		 * An error response.
+		 */
 		ERROR(Color.decode("#EB3434"));
 
 		private final Color color;

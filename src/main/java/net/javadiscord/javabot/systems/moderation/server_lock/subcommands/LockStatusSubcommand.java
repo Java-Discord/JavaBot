@@ -11,10 +11,15 @@ import net.javadiscord.javabot.data.config.UnknownPropertyException;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * <h3>This class represents the /server-lock status command.</h3>
+ */
 public class LockStatusSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public LockStatusSubcommand() {
 		setSubcommandData(new SubcommandData("status", "Command for changing the current server lock status.")
 				.addOption(OptionType.BOOLEAN, "locked", "Whether the server should be locked or not.", true));

@@ -14,9 +14,13 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Subcommand that allows staff-members to add a single warn to any user.
+ * <h3>This class represents the /warn add command.</h3>
+ * This Subcommand allows staff-members to add a single warn to any user.
  */
 public class WarnAddSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public WarnAddSubcommand() {
 		setSubcommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
 				.addOptions(

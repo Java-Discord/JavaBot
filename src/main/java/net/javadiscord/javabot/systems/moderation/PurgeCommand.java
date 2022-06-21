@@ -25,11 +25,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
+ * <h3>This class represents the /purge command.</h3>
  * Moderation command that deletes multiple messages from a single channel.
  */
 public class PurgeCommand extends ModerateCommand {
-	private final Path ARCHIVE_DIR = Path.of("purgeArchives");
+	private static final Path ARCHIVE_DIR = Path.of("purgeArchives");
 
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public PurgeCommand() {
 		setSlashCommandData(Commands.slash("purge", "Deletes messages from a channel.")
 				.addOption(OptionType.INTEGER, "amount", "Number of messages to remove.", true)

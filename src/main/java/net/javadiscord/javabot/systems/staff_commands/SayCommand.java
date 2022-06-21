@@ -13,10 +13,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 
 /**
- * Command that lets staff-members let the bot say whatever they want.
+ * <h3>This class represents the /say command.</h3>
+ * This Command lets staff-members let the bot say whatever they want.
  */
 @Slf4j
 public class SayCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public SayCommand() {
 		setSlashCommandData(Commands.slash("say", "Let the bot say everything you want!")
 				.setDefaultPermissions(CommandPermissions.DISABLED)

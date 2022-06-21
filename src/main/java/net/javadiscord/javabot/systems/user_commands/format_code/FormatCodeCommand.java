@@ -18,9 +18,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Command that allows members to format messages.
+ * <h3>This class represents the /format-code command.</h3>
  */
 public class FormatCodeCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public FormatCodeCommand() {
 		setSlashCommandData(Commands.slash("format-code", "Format unformatted code from a message")
 				.setGuildOnly(true)

@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.tasks;
 
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
 import net.javadiscord.javabot.systems.help.HelpExperienceJob;
 import net.javadiscord.javabot.systems.qotw.QOTWCloseSubmissionsJob;

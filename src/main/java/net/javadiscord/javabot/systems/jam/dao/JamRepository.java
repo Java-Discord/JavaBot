@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.jam.dao;
 
-import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.util.ExceptionLogger;

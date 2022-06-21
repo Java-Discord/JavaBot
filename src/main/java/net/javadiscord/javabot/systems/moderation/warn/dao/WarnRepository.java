@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.moderation.warn.dao;
 
-import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.util.ExceptionLogger;

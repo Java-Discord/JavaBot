@@ -12,9 +12,12 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Command for displaying a full-size version of a user's avatar.
+ * This class represents the `/avatar` command.
  */
 public class AvatarCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public AvatarCommand() {
 		setSlashCommandData(Commands.slash("avatar", "Shows your or someone else's profile picture")
 				.addOption(OptionType.USER, "user", "If given, shows the profile picture of the given user", false)

@@ -13,9 +13,12 @@ import net.javadiscord.javabot.util.Responses;
 import java.time.Instant;
 
 /**
- * Command that displays some server information.
+ * <h3>This class represents the /serverinfo command.</h3>
  */
 public class ServerInfoCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public ServerInfoCommand() {
 		setSlashCommandData(Commands.slash("serverinfo", "Shows some information about the current server.")
 				.setGuildOnly(true)

@@ -12,9 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * Command that lists Custom Slash Commands.
+ * <h3>This class represents the /customcommands command.</h3>
  */
 public class ListCustomCommandsCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public ListCustomCommandsCommand() {
 		setSlashCommandData(Commands.slash("customcommands", "Lists all custom commands")
 				.setGuildOnly(true)

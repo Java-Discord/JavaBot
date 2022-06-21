@@ -24,9 +24,12 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * Administrative Subcommand that allows to edit {@link CustomCommand}s.
+ * <h3>This class represents the /customcommands-admin command.</h3>
  */
 public class EditCustomCommandSubcommand extends CustomCommandsSubcommand implements AutoCompletable {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public EditCustomCommandSubcommand() {
 		setSubcommandData(new SubcommandData("edit", "Edits a single Custom Commands.")
 				.addOption(OptionType.STRING, "name", "The command's name.", true, true)

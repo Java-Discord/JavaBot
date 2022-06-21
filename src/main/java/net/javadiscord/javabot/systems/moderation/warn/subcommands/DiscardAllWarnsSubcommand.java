@@ -12,9 +12,12 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Subcommand that allows staff-members to discard all warns from a user.
+ * <h3>This class represents the /warn discard-all command.</h3>
  */
 public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public DiscardAllWarnsSubcommand() {
 		setSubcommandData(new SubcommandData("discard-all", "Discards all warns from a single user.")
 				.addOption(OptionType.USER, "user", "The user which warns should be discarded.", true)

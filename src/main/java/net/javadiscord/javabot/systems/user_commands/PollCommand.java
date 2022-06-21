@@ -8,36 +8,39 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
 
 import java.time.Instant;
 
 /**
- * Command that allows user to create polls with up to 10 options.
+ * <h3>This class represents the /poll command.</h3>
  */
 public class PollCommand extends SlashCommand {
+	private static final String ADD_OPTION = "Adds an option.";
+	private static final String[] EMOTES = new String[]{"0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"};
+	private static final int MAX_OPTIONS = 10;
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public PollCommand() {
 		setSlashCommandData(Commands.slash("poll", "Creates a simple poll")
 				.addOptions(
 						new OptionData(OptionType.STRING, "title", "The title of your poll.", true),
-						new OptionData(OptionType.STRING, "option-1", "Adds an option.", true),
-						new OptionData(OptionType.STRING, "option-2", "Adds an option.", true),
-						new OptionData(OptionType.STRING, "option-3", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-4", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-5", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-6", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-7", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-8", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-9", "Adds an option.", false),
-						new OptionData(OptionType.STRING, "option-10", "Adds an option.", false)
+						new OptionData(OptionType.STRING, "option-1", ADD_OPTION, true),
+						new OptionData(OptionType.STRING, "option-2", ADD_OPTION, true),
+						new OptionData(OptionType.STRING, "option-3", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-4", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-5", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-6", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-7", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-8", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-9", ADD_OPTION, false),
+						new OptionData(OptionType.STRING, "option-10", ADD_OPTION, false)
 				)
 				.setGuildOnly(true)
 		);
 	}
-
-	private final String[] EMOTES = new String[]{"0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"};
-	private final int MAX_OPTIONS = 10;
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {

@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.configuration.subcommands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
@@ -12,8 +11,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
+/**
+ * An abstraction of {@link com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand} which handles all
+ * config-related commands.
+ */
 public abstract class ConfigSubcommand extends SlashCommand.Subcommand {
-
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (!event.isFromGuild()) {

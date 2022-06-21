@@ -25,9 +25,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Command that allows members to display info about themselves or other users.
+ * <h3>This class represents the /profile command.</h3>
  */
 public class ProfileCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public ProfileCommand() {
 		setSlashCommandData(Commands.slash("profile", "Shows your server profile.")
 				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)

@@ -5,8 +5,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.systems.jam.subcommands.JamInfoSubcommand;
 import net.javadiscord.javabot.systems.jam.subcommands.JamSubmitSubcommand;
 
-import java.util.Map;
-
 /**
  * Handler class for all Jam commands.
  */

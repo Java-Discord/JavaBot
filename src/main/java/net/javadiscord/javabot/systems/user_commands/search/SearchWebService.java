@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * Service class which is used to search the internet for a specifed query using
+ * the Bing API.
+ */
 public final class SearchWebService {
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
@@ -47,6 +51,13 @@ public final class SearchWebService {
 		return results;
 	}
 
+	/**
+	 * Creates the embed which contains the search results.
+	 *
+	 * @param query The specified query.
+	 * @return A {@link MessageEmbed}.
+	 * @throws IOException If an error occurs.
+	 */
 	public @NotNull MessageEmbed buildSearchWebEmbed(@NotNull String query) throws IOException {
 		EmbedBuilder embed = new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
@@ -82,5 +93,6 @@ public final class SearchWebService {
 	 * @param relevantHeaders The most relevant headers.
 	 * @param jsonResponse    The HTTP Response, formatted as a JSON.
 	 */
-	private record SearchResult(Map<String, String> relevantHeaders, String jsonResponse) {}
+	private record SearchResult(Map<String, String> relevantHeaders, String jsonResponse) {
+	}
 }

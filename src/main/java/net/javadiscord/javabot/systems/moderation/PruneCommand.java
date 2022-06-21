@@ -16,10 +16,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 /**
+ * <h3>This class represents the /prune export-schema command.</h3>
  * This command will systematically ban users from the server if they match
  * certain criteria.
  */
 public class PruneCommand extends ModerateCommand {
+	private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public PruneCommand() {
 		setSlashCommandData(Commands.slash("prune", "Removes members from the server.")
 				.addOption(OptionType.STRING, "pattern", "A regular expression pattern to use, to remove members whose contains a match with the pattern.", false)
@@ -31,8 +37,6 @@ public class PruneCommand extends ModerateCommand {
 				.setGuildOnly(true)
 		);
 	}
-
-	private final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {

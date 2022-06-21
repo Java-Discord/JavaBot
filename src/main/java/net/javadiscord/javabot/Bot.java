@@ -2,7 +2,6 @@ package net.javadiscord.javabot;
 
 import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
-import com.dynxsty.dih4jda.interactions.commands.ExecutableCommand;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.zaxxer.hikari.HikariDataSource;
 import io.sentry.Sentry;
@@ -25,7 +24,6 @@ import net.javadiscord.javabot.systems.custom_commands.CustomCommandManager;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.moderation.server_lock.ServerLock;
-import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockCommand;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
@@ -54,7 +52,7 @@ public class Bot {
 
 	/**
 	 * An instance of {@link AutoMod}.
-	 * */
+	 */
 	public static AutoMod autoMod;
 
 	/**
@@ -155,7 +153,8 @@ public class Bot {
 	 * Adds all the bot's event listeners to the JDA instance, except for
 	 * the {@link AutoMod} instance.
 	 *
-	 * @param jda The JDA bot instance to add listeners to.
+	 * @param jda     The JDA bot instance to add listeners to.
+	 * @param dih4jda The {@link DIH4JDA} instance.
 	 */
 	private static void addEventListeners(JDA jda, DIH4JDA dih4jda) {
 		jda.addEventListener(

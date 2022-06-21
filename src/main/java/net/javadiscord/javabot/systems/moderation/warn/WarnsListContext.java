@@ -12,9 +12,13 @@ import net.javadiscord.javabot.util.Responses;
 import java.time.LocalDateTime;
 
 /**
- * Command that allows users to see all their active warns.
+ * <h3>This class represents the "Show Warns" User Context Menu command.</h3>
+ * This Command allows users to see all their active warns.
  */
 public class WarnsListContext extends ContextCommand.User {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.CommandData}.
+	 */
 	public WarnsListContext() {
 		setCommandData(Commands.user("Show Warns")
 				.setGuildOnly(true)
@@ -30,7 +34,7 @@ public class WarnsListContext extends ContextCommand.User {
 		event.deferReply(false).queue();
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
 		DbHelper.doDaoAction(WarnRepository::new, dao ->
-				event.getHook().sendMessageEmbeds(WarnsListCommand.buildWarnsEmbed(dao.getWarnsByUserId(event.getTarget().getIdLong(), cutoff), event.getGuild(), event.getTarget())).queue());
+				event.getHook().sendMessageEmbeds(WarnsListCommand.buildWarnsEmbed(dao.getWarnsByUserId(event.getTarget().getIdLong(), cutoff), event.getTarget())).queue());
 	}
 
 }

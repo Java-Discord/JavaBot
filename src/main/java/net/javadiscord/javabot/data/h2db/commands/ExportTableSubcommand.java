@@ -17,12 +17,16 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 
 /**
+ * <h3>This class represents the /db-admin export-table command.</h3>
  * This subcommand exports a single database table to a file, and uploads that file
  * to the channel in which the command was received.
  */
 public class ExportTableSubcommand extends SlashCommand.Subcommand {
 	private static final Path TABLE_FILE = Path.of("___table.sql");
 
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public ExportTableSubcommand() {
 		setSubcommandData(new SubcommandData("export-table", "(ADMIN ONLY) Export a single database table")
 				.addOptions(new OptionData(OptionType.STRING, "table", "What table should be exported", true)

@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.custom_commands.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,6 +20,9 @@ import java.time.Instant;
  * Administrative Subcommand that allows to create {@link CustomCommand}s.
  */
 public class CreateCustomCommandSubcommand extends CustomCommandsSubcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public CreateCustomCommandSubcommand() {
 		setSubcommandData(new SubcommandData("create", "Creates a new Custom Commands.")
 				.addOption(OptionType.STRING, "name", "The command's name.", true)

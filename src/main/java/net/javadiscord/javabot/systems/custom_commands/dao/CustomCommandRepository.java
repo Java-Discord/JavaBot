@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.custom_commands.dao;
 
-import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
 import net.javadiscord.javabot.util.ExceptionLogger;

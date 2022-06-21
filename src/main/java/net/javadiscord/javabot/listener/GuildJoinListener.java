@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.listener;
 
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;

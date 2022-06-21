@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -25,10 +24,14 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 
 /**
+ * <h3>This class represents the /help account command.</h3>
  * Handles commands to show information about how a user has been thanked for
  * their help.
  */
 public class HelpAccountSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public HelpAccountSubcommand() {
 		setSubcommandData(new SubcommandData("account", "Shows an overview of your Help Account.")
 				.addOption(OptionType.USER, "user", "The user to check.", false)

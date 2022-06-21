@@ -7,6 +7,9 @@ import net.javadiscord.javabot.util.StringUtils;
 
 import java.util.List;
 
+/**
+ * <h3>This class represents the "Format Code" Message Context command.</h3>
+ */
 public class FormatCodeMessageContext extends ContextCommand.Message {
 	public FormatCodeMessageContext() {
 		setCommandData(Commands.message("Format Code"));

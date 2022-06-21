@@ -5,6 +5,9 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.util.Responses;
 
+/**
+ * <h3>This class represents the "Report User" User Context Menu command.</h3>
+ */
 public class ReportUserContext extends ContextCommand.User {
 	public ReportUserContext() {
 		setCommandData(Commands.user("Report User"));

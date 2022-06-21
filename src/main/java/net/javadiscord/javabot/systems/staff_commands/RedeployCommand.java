@@ -9,6 +9,7 @@ import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
 
 /**
+ * <h3>This class represents the /redeploy command.</h3>
  * Command that lets staff-members redeploy the bot.
  * <p>
  * This only works if the way the bot is hosted is set up correctly, for example with a bash script that handles
@@ -18,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
  */
 @Slf4j
 public class RedeployCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public RedeployCommand() {
 		setSlashCommandData(Commands.slash("redeploy", "(ADMIN-ONLY) Makes the bot redeploy.")
 				.setDefaultPermissions(CommandPermissions.DISABLED)

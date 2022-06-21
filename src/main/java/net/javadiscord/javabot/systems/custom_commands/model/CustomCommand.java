@@ -27,9 +27,7 @@ public class CustomCommand {
 	}
 
 	public MessageEmbed toEmbed() {
-		return new EmbedBuilder()
-				.setDescription(response)
-				.setTimestamp(Instant.now())
+		return new EmbedBuilder().setDescription(response).setTimestamp(Instant.now())
 				.build();
 	}
 }

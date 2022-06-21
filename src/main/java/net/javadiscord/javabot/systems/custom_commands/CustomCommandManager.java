@@ -20,6 +20,10 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * This class is used to manage the so-called "Custom Commands", which are
+ * basically customizable Slash Commands.
+ */
 @Slf4j
 public class CustomCommandManager extends ListenerAdapter {
 
@@ -33,6 +37,12 @@ public class CustomCommandManager extends ListenerAdapter {
 	private final DataSource dataSource;
 	private final Map<Long, List<Command>> existingCommands;
 
+	/**
+	 * The constructor of this class.
+	 *
+	 * @param jda        The {@link JDA} instance.
+	 * @param dataSource The {@link DataSource} which is used to make connections to the database.
+	 */
 	public CustomCommandManager(@NotNull JDA jda, @NotNull DataSource dataSource) {
 		this.jda = jda;
 		this.dataSource = dataSource;

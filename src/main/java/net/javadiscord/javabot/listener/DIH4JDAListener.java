@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.listener;
 
 import com.dynxsty.dih4jda.events.DIH4JDAListenerAdapter;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -10,7 +9,6 @@ import net.dv8tion.jda.api.interactions.ModalInteraction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
@@ -18,6 +16,9 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Listener class for various events provided by {@link com.dynxsty.dih4jda.DIH4JDA}.
+ */
 public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 	@Override
 	public void onCommandException(CommandInteraction interaction, Exception e) {

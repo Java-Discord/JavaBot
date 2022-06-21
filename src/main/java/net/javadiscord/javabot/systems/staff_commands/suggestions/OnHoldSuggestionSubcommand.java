@@ -8,15 +8,17 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
-import net.javadiscord.javabot.systems.staff_commands.suggestions.SuggestionSubcommand;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Subcommand that lets staff members mark suggestions as "On Hold".
+ * <h3>This class represents the /suggestion on-hold command.</h3>
  */
 public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public OnHoldSuggestionSubcommand() {
 		setSubcommandData(new SubcommandData("on-hold", "Marks a single suggestion as \"On Hold\".")
 				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to mark as \"On Hold\".", true)

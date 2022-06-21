@@ -106,6 +106,8 @@ public class HelpAccountRepository {
 	 * Removes the specified amount of experience from all {@link HelpAccount}s.
 	 *
 	 * @param change The amount to subtract.
+	 * @param min The minimum amount to subtract.
+	 * @param max The maximum amount to subtract.
 	 * @throws SQLException If an error occurs.
 	 */
 	public void removeExperienceFromAllAccounts(double change, int min, int max) throws SQLException {

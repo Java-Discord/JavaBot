@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.moderation.warn;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -24,9 +23,13 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 /**
- * Command that allows users to see all their active warns.
+ * <h3>This class represents the /warns command.</h3>
+ * This Command allows users to see all their active warns.
  */
 public class WarnsListCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public WarnsListCommand() {
 		setSlashCommandData(Commands.slash("warns", "Shows a list of all recent warning.")
 				.addOption(OptionType.USER, "user", "If given, shows the recent warns of the given user instead.", false)
@@ -34,20 +37,14 @@ public class WarnsListCommand extends SlashCommand {
 		);
 	}
 
-	@Override
-	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
-		if (Checks.checkGuild(event)) {
-			Responses.error(event, "This command may only be used inside of a server.").queue();
-			return;
-		}
-		event.deferReply(false).queue();
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
-		DbHelper.doDaoAction(WarnRepository::new, dao ->
-				event.getHook().sendMessageEmbeds(buildWarnsEmbed(dao.getWarnsByUserId(user.getIdLong(), cutoff), event.getGuild(), user)).queue());
-	}
-
-	protected static @NotNull MessageEmbed buildWarnsEmbed(@Nonnull List<Warn> warns, @Nonnull Guild guild, @Nonnull User user) {
+	/**
+	 * Builds an {@link MessageEmbed} which contains all recents warnings of a user.
+	 *
+	 * @param warns A {@link List} with all {@link Warn}s.
+	 * @param user  The corresponding {@link User}.
+	 * @return The fully-built {@link MessageEmbed}.
+	 */
+	protected static @NotNull MessageEmbed buildWarnsEmbed(@Nonnull List<Warn> warns, @Nonnull User user) {
 		EmbedBuilder builder = new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("Recent Warns")
@@ -60,5 +57,18 @@ public class WarnsListCommand extends SlashCommand {
 						w.getId(), w.getCreatedAt().toInstant(ZoneOffset.UTC).getEpochSecond(),
 						w.getWarnedBy(), w.getSeverity(), w.getSeverityWeight(), w.getReason())));
 		return builder.build();
+	}
+
+	@Override
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
+		if (Checks.checkGuild(event)) {
+			Responses.error(event, "This command may only be used inside of a server.").queue();
+			return;
+		}
+		event.deferReply(false).queue();
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
+		DbHelper.doDaoAction(WarnRepository::new, dao ->
+				event.getHook().sendMessageEmbeds(buildWarnsEmbed(dao.getWarnsByUserId(user.getIdLong(), cutoff), user)).queue());
 	}
 }

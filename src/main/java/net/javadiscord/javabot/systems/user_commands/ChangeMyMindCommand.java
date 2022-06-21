@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Command that generates the "Change my mind" meme with the given text input.
+ * This class represents the `/change-my-mind` command.
  */
 public class ChangeMyMindCommand extends SlashCommand {
 	/**
@@ -31,6 +31,9 @@ public class ChangeMyMindCommand extends SlashCommand {
 	 */
 	private static final int MAX_SEARCH_TERM_LENGTH = 500;
 
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public ChangeMyMindCommand() {
 		setSlashCommandData(Commands.slash("change-my-mind", "Generates the \"Change My Mind\" meme from your given input.")
 				.addOption(OptionType.STRING, "text", "The text which should be used on the template.", false)

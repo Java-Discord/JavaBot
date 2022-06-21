@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.help;
 
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;

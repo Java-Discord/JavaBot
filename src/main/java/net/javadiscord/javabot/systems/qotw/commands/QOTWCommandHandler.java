@@ -11,7 +11,6 @@ import net.javadiscord.javabot.systems.qotw.commands.questions_queue.ListQuestio
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.RemoveQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

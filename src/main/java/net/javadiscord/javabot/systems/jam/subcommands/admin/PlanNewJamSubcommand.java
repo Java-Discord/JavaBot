@@ -7,10 +7,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.util.ExceptionLogger;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,10 +20,14 @@ import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 /**
+ * <h3>This class represents the /jam-admin plan-new-jam command.</h3>
  * This subcommand allows users to plan a new Jam with some basic starter
  * information.
  */
 public class PlanNewJamSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public PlanNewJamSubcommand() {
 		setSubcommandData(new SubcommandData("plan-new-jam", "Creates a new Java Jam for the future.")
 				.addOption(OptionType.STRING, "start-date", "The date at which the Jam should start. Format as DD-MM-YYYY.", true)

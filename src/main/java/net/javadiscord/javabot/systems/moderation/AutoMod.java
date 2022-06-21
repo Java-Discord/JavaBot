@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.moderation;
 
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;

@@ -22,9 +22,12 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * Administrative Subcommand that allows to delete {@link CustomCommand}s.
+ * <h3>This class represents the /customcommand-admin delete command.</h3>
  */
 public class DeleteCustomCommandSubcommand extends CustomCommandsSubcommand implements AutoCompletable {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public DeleteCustomCommandSubcommand() {
 		setSubcommandData(new SubcommandData("delete", "Deletes a single Custom Command.")
 				.addOption(OptionType.STRING, "name", "The command's name.", true, true)

@@ -22,7 +22,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * <h3>This class represents the /embed edit command.</h3>
+ */
 public class EditEmbedSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public EditEmbedSubcommand() {
 		setSubcommandData(new SubcommandData("edit", "Edits a single embed message.")
 				.addOptions(

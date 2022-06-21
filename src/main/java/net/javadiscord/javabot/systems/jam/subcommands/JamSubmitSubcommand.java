@@ -11,7 +11,6 @@ import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import java.io.IOException;
@@ -23,11 +22,15 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
+ * <h3>This class represents the /jam submit command.</h3>
  * This command is used to submit a submission for a Java Jam.
  */
 public class JamSubmitSubcommand extends ActiveJamSubcommand {
 	private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public JamSubmitSubcommand() {
 		setSubcommandData(new SubcommandData("submit", "Submit your project for the current Java Jam.")
 				.addOption(OptionType.STRING, "link", "A link to your project's source (i.e. a GitHub repository)", true)

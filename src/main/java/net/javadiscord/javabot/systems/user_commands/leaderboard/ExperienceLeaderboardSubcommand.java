@@ -26,11 +26,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Command that generates a leaderboard based on the help channel experience.
+ * <h3>This class represents the /leaderboard help-experience command.</h3>
  */
 public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
 	private static final int PAGE_SIZE = 5;
 
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public ExperienceLeaderboardSubcommand() {
 		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)

@@ -10,9 +10,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Context Command that allows members to search the internet using the Bing API.
+ * <h3>This class represents the "Search the Web" Message Context Menu command.</h3>
+ * This Context Command allows members to search the internet using the Bing API.
  */
 public class SearchWebMessageContext extends ContextCommand.Message {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.CommandData}.
+	 */
 	public SearchWebMessageContext() {
 		setCommandData(Commands.message("Search the Web")
 				.setGuildOnly(true)

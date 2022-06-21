@@ -20,6 +20,9 @@ import java.time.temporal.ChronoUnit;
  * Subcommand that allows staff-members to add timeouts to a single users.
  */
 public class AddTimeoutSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public AddTimeoutSubcommand() {
 		setSubcommandData(new SubcommandData("add", "Adds a Timeout to the given User.")
 				.addOptions(

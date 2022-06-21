@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.qotw_points;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -9,20 +8,23 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Optional;
 
 /**
- * Subcommand that allows staff-members to edit the QOTW-Point amount of any user.
+ * <h3>This class represents the /qotw account set command.</h3>
+ * This Subcommand allows staff-members to edit the QOTW-Point amount of any user.
  */
 public class SetPointsSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public SetPointsSubcommand() {
 		setSubcommandData(new SubcommandData("set", "Allows to modify the QOTW-Points of a single user.")
 				.addOption(OptionType.USER, "user", "The user whose points should be changed.", true)

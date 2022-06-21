@@ -15,9 +15,12 @@ import net.javadiscord.javabot.util.Responses;
 import java.time.Instant;
 
 /**
- * Command that allows users to convert discord ids into a human-readable timestamp.
+ * <h3>This class represents the /id-calc command.</h3>
  */
 public class IdCalculatorCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public IdCalculatorCommand() {
 		setSlashCommandData(Commands.slash("id-calc", "Generates a human-readable timestamp out of any discord id")
 				.addOption(OptionType.STRING, "id", "The ID which should be converted.", true)

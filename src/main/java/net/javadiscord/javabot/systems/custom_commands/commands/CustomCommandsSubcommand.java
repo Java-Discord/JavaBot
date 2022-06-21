@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.custom_commands.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -13,6 +12,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 
+/**
+ * An abstraction of {@link com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand} which handles all
+ * custom-command-related commands.
+ */
 @Slf4j
 public abstract class CustomCommandsSubcommand extends SlashCommand.Subcommand {
 	@Override
