@@ -1,9 +1,13 @@
 package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
+import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
@@ -20,7 +24,16 @@ import java.util.List;
 /**
  * Subcommand that allows staff-members to remove single questions from the QOTW Queue.
  */
-public class RemoveQuestionSubcommand extends QOTWSubcommand {
+public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoCompletable {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
+	public RemoveQuestionSubcommand() {
+		setSubcommandData(new SubcommandData("remove", "Removes a question from the queue.")
+				.addOption(OptionType.INTEGER, "id", "The id of the question to remove.", true, true)
+		);
+	}
+
 	@Override
 	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
 		OptionMapping idOption = event.getOption("id");
@@ -52,5 +65,10 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand {
 			ExceptionLogger.capture(e, RemoveQuestionSubcommand.class.getSimpleName());
 		}
 		return choices;
+	}
+
+	@Override
+	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
+		//TODO: add
 	}
 }

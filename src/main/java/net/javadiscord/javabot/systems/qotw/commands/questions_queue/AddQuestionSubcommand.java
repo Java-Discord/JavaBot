@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
@@ -22,9 +23,13 @@ import java.sql.Connection;
  * Subcommand that allows staff-members to add question to the QOTW-Queue.
  */
 public class AddQuestionSubcommand extends QOTWSubcommand {
+	public AddQuestionSubcommand() {
+		setSubcommandData(new SubcommandData("add", "Add a question to the queue."));
+	}
+
 	@Override
 	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) {
-		return event.replyModal(this.buildQuestionModal());
+		return event.replyModal(buildQuestionModal());
 	}
 
 	private Modal buildQuestionModal() {

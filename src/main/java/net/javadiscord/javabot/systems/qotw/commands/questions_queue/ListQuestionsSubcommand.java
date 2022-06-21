@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
@@ -18,6 +20,15 @@ import java.time.ZoneOffset;
  * Subcommand that allows staff-members to list QOTW Questions.
  */
 public class ListQuestionsSubcommand extends QOTWSubcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
+	public ListQuestionsSubcommand() {
+		setSubcommandData(new SubcommandData("list", "Show a list of all questions in the queue.")
+				.addOption(OptionType.INTEGER, "page", "The page of results you get.", false)
+		);
+	}
+
 	@Override
 	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
 		var repository = new QuestionQueueRepository(con);

@@ -17,12 +17,12 @@ import java.util.Set;
 /**
  * Represents the `/qotw` command. This holds administrative commands for managing the Question of the Week.
  */
-public class QOTWCommandHandler extends SlashCommand {
+public class QOTWCommand extends SlashCommand {
 	/**
 	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.SubcommandGroup}s.
 	 */
-	public QOTWCommandHandler() {
+	public QOTWCommand() {
 		setSlashCommandData(Commands.slash("qotw", "Administrative tools for managing the Question of the Week.")
 				.setDefaultPermissions(CommandPermissions.DISABLED)
 				.setGuildOnly(true)

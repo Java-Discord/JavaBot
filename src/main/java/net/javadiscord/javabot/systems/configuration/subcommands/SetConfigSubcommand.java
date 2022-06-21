@@ -2,6 +2,8 @@ package net.javadiscord.javabot.systems.configuration.subcommands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
@@ -13,7 +15,17 @@ import javax.annotation.Nonnull;
 /**
  * Subcommand that allows staff-members to edit the bot's configuration.
  */
-public class SetSubcommand extends ConfigSubcommand {
+public class SetConfigSubcommand extends ConfigSubcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
+	public SetConfigSubcommand() {
+		setSubcommandData(new SubcommandData("set", "Sets the value of a configuration property.")
+				.addOption(OptionType.STRING, "property", "The name of a property.", true)
+				.addOption(OptionType.STRING, "value", "The value to set for the property.", true)
+		);
+	}
+
 	@Override
 	public ReplyCallbackAction handleConfigSubcommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull GuildConfig config) throws UnknownPropertyException {
 		OptionMapping propertyOption = event.getOption("property");
