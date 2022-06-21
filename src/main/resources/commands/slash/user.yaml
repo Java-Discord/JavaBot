@@ -41,7 +41,7 @@
       description: Text that will be converted into a search query
       required: true
       type: STRING
-  handler: net.javadiscord.javabot.systems.commands.SearchCommand
+  handler: net.javadiscord.javabot.systems.user_commands.search.SearchCommand
 
 # /ping
 - name: ping

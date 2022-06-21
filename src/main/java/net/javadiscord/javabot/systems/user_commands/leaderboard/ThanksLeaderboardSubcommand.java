@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.user_commands.leaderboard.subcommands;
+package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.util.Pair;
