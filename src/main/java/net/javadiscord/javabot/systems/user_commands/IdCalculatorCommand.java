@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
@@ -20,7 +21,7 @@ import java.time.Instant;
 public class IdCalculatorCommand extends SlashCommand {
 	public IdCalculatorCommand() {
 		setSlashCommandData(Commands.slash("id-calc", "Generates a human-readable timestamp out of any discord id")
-				.addOption(OptionType.STRING, "snowflake", "The ID which should be converted.", true)
+				.addOption(OptionType.STRING, "id", "The ID which should be converted.", true)
 				.setGuildOnly(true)
 		);
 	}
@@ -31,16 +32,16 @@ public class IdCalculatorCommand extends SlashCommand {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		OptionMapping idOption = event.getOption("id");
-		if (idOption == null) {
+		OptionMapping idMapping = event.getOption("id");
+		if (idMapping == null) {
 			Responses.error(event, "Missing required arguments").queue();
 			return;
 		}
-		if (!Checks.checkLongInput(idOption)) {
-			Responses.error(event, "Please provide a valid Discord ID!").queue();
+		if (!Checks.checkLongInput(idMapping)) {
+			Responses.error(event, "Please provide a valid Discord Snowflake!").queue();
 			return;
 		}
-		long id = idOption.getAsLong();
+		long id = idMapping.getAsLong();
 		event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id))).queue();
 	}
 
@@ -49,9 +50,9 @@ public class IdCalculatorCommand extends SlashCommand {
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("ID-Calculator")
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.addField("Input", String.format("`%s`", id), false)
-				.addField("Unix-Timestamp", String.format("`%s`", unixTimestamp), true)
-				.addField("Unix-Timestamp (+ milliseconds)", String.format("`%s`", unixTimestamp / 1000), true)
+				.addField("Input", String.format(MarkdownUtil.codeblock("%s"), id), false)
+				.addField("Unix-Timestamp", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp), true)
+				.addField("Unix-Timestamp (+ milliseconds)", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp / 1000), true)
 				.addField("Date", String.format("<t:%s:F>", Instant.ofEpochMilli(unixTimestamp / 1000).getEpochSecond()), false)
 				.build();
 	}

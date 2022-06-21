@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
@@ -75,7 +76,7 @@ public class SubmissionManager {
 							}
 						});
 					} catch (SQLException e) {
-						Sentry.captureException(e);
+						ExceptionLogger.capture(e, getClass().getSimpleName());
 					}
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
@@ -122,7 +123,7 @@ public class SubmissionManager {
 			var repo = new QOTWSubmissionRepository(con);
 			return repo.getUnreviewedSubmissions(authorId).size() > 0;
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return false;
 		}
 	}

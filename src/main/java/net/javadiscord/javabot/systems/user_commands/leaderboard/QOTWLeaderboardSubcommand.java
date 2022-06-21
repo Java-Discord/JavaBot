@@ -184,7 +184,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 			accounts.forEach(account -> sb.append(String.format(":%s:%s", account.getUserId(), account.getPoints())));
 			return sb.toString();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return "";
 		}
 	}

@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import java.time.Instant;
@@ -20,22 +21,19 @@ import java.util.stream.Collectors;
 public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 	@Override
 	public void onCommandException(CommandInteraction interaction, Exception e) {
-		Sentry.captureException(e);
-		Sentry.captureException(e);
+		ExceptionLogger.capture(e, getClass().getSimpleName());
 		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
 	}
 
 	@Override
 	public void onComponentException(ComponentInteraction interaction, Exception e) {
-		Sentry.captureException(e);
-		Sentry.captureException(e);
+		ExceptionLogger.capture(e, getClass().getSimpleName());
 		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
 	}
 
 	@Override
 	public void onModalException(ModalInteraction interaction, Exception e) {
-		Sentry.captureException(e);
-		Sentry.captureException(e);
+		ExceptionLogger.capture(e, getClass().getSimpleName());
 		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
 	}
 

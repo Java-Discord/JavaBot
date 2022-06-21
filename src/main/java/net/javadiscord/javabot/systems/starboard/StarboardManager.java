@@ -155,7 +155,7 @@ public class StarboardManager extends ListenerAdapter {
 								log.error("Could not remove Message from Starboard");
 							}
 						} catch (SQLException e) {
-							Sentry.captureException(e);
+							ExceptionLogger.capture(e, getClass().getSimpleName());
 						}
 					} else {
 						var starEmote = config.getEmotes().get(0);
@@ -227,7 +227,7 @@ public class StarboardManager extends ListenerAdapter {
 				);
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
 

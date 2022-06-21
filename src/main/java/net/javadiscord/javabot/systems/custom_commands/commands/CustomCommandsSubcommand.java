@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.systems.custom_commands.CustomCommandManager;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +29,7 @@ public abstract class CustomCommandsSubcommand extends SlashCommand.Subcommand {
 		try {
 			handleCustomCommandsSubcommand(event, CustomCommandManager.cleanString(nameMapping.getAsString())).queue();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, "An error occurred while executing this command.");
 		}
 	}
