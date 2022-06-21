@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +49,7 @@ public class SetPointsSubcommand extends SlashCommand.Subcommand {
 			Responses.success(event, "Set QOTW-Points",
 					String.format("Successfully changed the points of %s to %s", member.getUser().getAsMention(), points)).queue();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, "An Error occurred. Please try again.").queue();
 		}
 

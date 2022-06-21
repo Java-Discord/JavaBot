@@ -5,6 +5,7 @@ import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
@@ -42,12 +43,13 @@ public abstract class ActiveJamSubcommand extends SlashCommand.Subcommand {
 				con.commit();
 				reply.queue();
 			} catch (SQLException e) {
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				con.rollback();
 				log.warn("Exception thrown while handling Jam command: {}", e.getMessage());
 				Responses.error(event, "An error occurred:\n```" + e.getMessage() + "```").queue();
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, "An SQL error occurred.").queue();
 		}
 	}

@@ -5,6 +5,7 @@ import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +30,7 @@ public abstract class QOTWSubcommand extends SlashCommand.Subcommand {
 			con.commit();
 			reply.queue();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, "An error occurred: " + e.getMessage()).queue();
 		}
 	}

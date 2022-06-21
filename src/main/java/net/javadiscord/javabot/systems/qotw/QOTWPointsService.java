@@ -8,6 +8,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -61,8 +62,7 @@ public class QOTWPointsService {
 					       .toList()
 					       .indexOf(userId) + 1;
 		} catch (SQLException e) {
-			Sentry.captureException(e);
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return -1;
 		}
 	}
@@ -77,7 +77,7 @@ public class QOTWPointsService {
 		try {
 			return getOrCreateAccount(userId).getPoints();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return -1;
 		}
 	}
@@ -100,7 +100,7 @@ public class QOTWPointsService {
 					.limit(n)
 					.toList();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
 		}
 	}
@@ -122,7 +122,7 @@ public class QOTWPointsService {
 				return 0;
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return 0;
 		}
 	}

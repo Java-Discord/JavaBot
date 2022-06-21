@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,13 +44,13 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 						try {
 							Files.delete(SCHEMA_FILE);
 						} catch (IOException e) {
-							Sentry.captureException(e);
+							ExceptionLogger.capture(e, getClass().getSimpleName());
 							event.getHook().sendMessage("An error occurred, and the export could not be made: " + e.getMessage()).queue();
 						}
 					});
 				}
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				event.getHook().sendMessage("An error occurred, and the export could not be made: " + e.getMessage()).queue();
 			}
 		});

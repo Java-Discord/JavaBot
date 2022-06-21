@@ -14,6 +14,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
 
 import javax.imageio.ImageIO;
@@ -62,7 +63,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 						generateLeaderboard(event.getGuild(), service).toByteArray();
 				action.addFile(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png").queue();
 			} catch (IOException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 			}
 		});
 	}

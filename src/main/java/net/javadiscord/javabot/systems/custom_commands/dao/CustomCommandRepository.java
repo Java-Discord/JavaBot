@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.custom_commands.dao;
 import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -147,7 +148,7 @@ public class CustomCommandRepository {
 			rs.close();
 			return commands;
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
 		}
 	}

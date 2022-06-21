@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
@@ -80,7 +81,7 @@ public class HelpChannelManager {
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			logChannel.sendMessage("Error while checking if a user can reserve a help channel: " + e.getMessage()).queue();
 			return false;
 		}
@@ -172,7 +173,7 @@ public class HelpChannelManager {
 					}
 			);
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return null;
 		}
 	}
@@ -264,7 +265,7 @@ public class HelpChannelManager {
 			try {
 				setTimeout(channel, 5);
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 			}
 		});
 	}
@@ -350,7 +351,7 @@ public class HelpChannelManager {
 								channel.sendMessage(config.getReopenedChannelMessage()))
 				);
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage());
 			}
 		} else {
@@ -515,7 +516,7 @@ public class HelpChannelManager {
 					}
 			);
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return Optional.empty();
 		}
 	}

@@ -12,6 +12,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
 import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,7 +60,7 @@ public class StarboardManager extends ListenerAdapter {
 								}
 							}
 						} catch (SQLException e) {
-							Sentry.captureException(e);
+							ExceptionLogger.capture(e, getClass().getSimpleName());
 						}
 					}, e -> log.error("Could not add Message to Starboard", e)
 			);
@@ -89,7 +90,7 @@ public class StarboardManager extends ListenerAdapter {
 				}
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
 

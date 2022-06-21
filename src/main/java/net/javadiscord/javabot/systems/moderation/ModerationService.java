@@ -15,6 +15,7 @@ import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.notification.UserNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import javax.annotation.Nonnull;
@@ -119,8 +120,7 @@ public class ModerationService {
 				return true;
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		return false;
 	}
@@ -137,8 +137,7 @@ public class ModerationService {
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays());
 			return repo.getWarnsByUserId(userId, cutoff);
 		} catch (SQLException e) {
-			Sentry.captureException(e);
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
 		}
 	}

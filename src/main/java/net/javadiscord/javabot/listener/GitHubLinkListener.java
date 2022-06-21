@@ -4,6 +4,7 @@ import com.dynxsty.dih4jda.util.Pair;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -65,6 +66,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 		try {
 			content = this.getContentFromRawGitHubUrl(reqUrl, lines[0], to);
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			content = e.getMessage();
 		}
 		if (content.equals(reqUrl)) content = "Unable to fetch content.";

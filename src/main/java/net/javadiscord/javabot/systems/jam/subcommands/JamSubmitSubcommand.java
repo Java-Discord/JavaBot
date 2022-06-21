@@ -11,6 +11,7 @@ import net.javadiscord.javabot.systems.jam.dao.JamThemeRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamSubmission;
 import net.javadiscord.javabot.systems.jam.model.JamTheme;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import java.io.IOException;

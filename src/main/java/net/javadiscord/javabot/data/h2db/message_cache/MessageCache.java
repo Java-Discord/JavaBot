@@ -11,6 +11,7 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.user_commands.IdCalculatorCommand;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 
@@ -49,6 +50,7 @@ public class MessageCache {
 		try (Connection con = Bot.dataSource.getConnection()) {
 			cache = new MessageCacheRepository(con).getAll();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
 	}

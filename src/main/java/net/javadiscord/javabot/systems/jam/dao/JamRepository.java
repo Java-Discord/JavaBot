@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.jam.dao;
 import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.jam.model.Jam;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.sql.*;
 
@@ -85,7 +86,7 @@ public class JamRepository {
 				return null;
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return null;
 		}
 	}
@@ -108,7 +109,7 @@ public class JamRepository {
 				return null;
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return null;
 		}
 	}

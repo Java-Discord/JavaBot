@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
@@ -87,6 +88,7 @@ public class HelpChannelInteractionManager extends ComponentHandler {
 							nextTimeout
 					)).queue();
 				} catch (SQLException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					Responses.error(event.getHook(), "An error occurred while managing this help channel.").queue();
 				}
 			}
@@ -145,7 +147,7 @@ public class HelpChannelInteractionManager extends ComponentHandler {
 				try {
 					channelManager.setTimeout(channel, config.getInactivityTimeouts().get(0));
 				} catch (SQLException e) {
-					Sentry.captureException(e);
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 				}
 			} else {
 				long helperId = Long.parseLong(action);
@@ -188,7 +190,7 @@ public class HelpChannelInteractionManager extends ComponentHandler {
 					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
 					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 				} catch (SQLException e) {
-					Sentry.captureException(e);
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
 							"Could not record user %s thanking %s for help in channel %s: %s",
 							owner.getAsTag(),

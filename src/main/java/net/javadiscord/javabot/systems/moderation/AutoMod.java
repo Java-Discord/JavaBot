@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class AutoMod extends ListenerAdapter {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
 		} catch (IOException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());
@@ -208,6 +209,7 @@ public class AutoMod extends ListenerAdapter {
 						return true;
 					}
 				} catch (URISyntaxException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					log.error("Error while parsing URL: " + url, e);
 				}
 			}

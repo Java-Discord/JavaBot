@@ -2,6 +2,7 @@ package net.javadiscord.javabot.data.h2db;
 
 import io.sentry.Sentry;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -78,6 +79,7 @@ public class DbActions {
 			try {
 				cf.complete(mapQuery(query, modifier, mapper));
 			} catch (SQLException e) {
+				ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 				cf.completeExceptionally(e);
 			}
 		});
@@ -99,7 +101,7 @@ public class DbActions {
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 			return 0;
 		}
 	}
@@ -120,7 +122,7 @@ public class DbActions {
 			if (!rs.next()) return 0;
 			return rs.getLong(1);
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 			return 0;
 		}
 	}
@@ -173,6 +175,7 @@ public class DbActions {
 				consumer.consume(c);
 				future.complete(null);
 			} catch (SQLException e) {
+				ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 				future.completeExceptionally(e);
 			}
 		});
@@ -197,6 +200,7 @@ public class DbActions {
 				consumer.consume(dao);
 				future.complete(null);
 			} catch (SQLException e) {
+				ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 				future.completeExceptionally(e);
 			}
 		});
@@ -216,6 +220,7 @@ public class DbActions {
 			try (var c = Bot.dataSource.getConnection()) {
 				future.complete(function.apply(c));
 			} catch (SQLException e) {
+				ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 				future.completeExceptionally(e);
 			}
 		});
@@ -239,7 +244,7 @@ public class DbActions {
 				return Optional.of(mapper.map(rs));
 			});
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 			return Optional.empty();
 		}
 	}
@@ -258,7 +263,7 @@ public class DbActions {
 				return rs.getInt(1);
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, DbActions.class.getSimpleName());
 		}
 		return 0;
 	}

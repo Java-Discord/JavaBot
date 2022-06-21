@@ -7,6 +7,7 @@ import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -29,7 +30,7 @@ public class QOTWReminderJob extends DiscordApiJob {
 							config.getStaffRole().getAsMention());
 				}
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				new GuildNotificationService(guild).sendLogChannelNotification(
 						"Warning! %s Could not check to see if there's a question in the QOTW queue:\n```\n%s\n```\n",
 						config.getStaffRole().getAsMention(), e.getMessage());

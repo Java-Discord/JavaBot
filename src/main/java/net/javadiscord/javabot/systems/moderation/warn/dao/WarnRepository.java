@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.moderation.warn.dao;
 import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -154,7 +155,7 @@ public class WarnRepository {
 			rs.close();
 			return warns;
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
 		}
 	}

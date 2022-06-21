@@ -16,6 +16,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
@@ -49,6 +50,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 			HelpAccount account = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(user.getIdLong());
 			event.replyEmbeds(buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks)).queue();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, e.getMessage()).queue();
 		}
 	}
@@ -75,7 +77,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 				sb.append(t.format()).append("\n\n");
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		return sb.toString().length() > 0 ? sb.toString() : "No recent transactions";
 	}

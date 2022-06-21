@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.data.config;
 
 import lombok.extern.slf4j.Slf4j;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 
 import java.lang.reflect.Field;
@@ -68,6 +69,7 @@ public class ReflectionUtils {
 		} catch (NoSuchFieldException e) {
 			throw new UnknownPropertyException(fieldNames[0], parent.getClass());
 		} catch (IllegalAccessException e) {
+			ExceptionLogger.capture(e, ReflectionUtils.class.getSimpleName());
 			log.warn("Reflection error occurred while resolving property " + Arrays.toString(fieldNames) + " of object of type " + parent.getClass().getSimpleName(), e);
 			return null;
 		}

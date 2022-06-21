@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
@@ -66,7 +67,7 @@ public class SubmissionControlsManager {
 				submission = submissionOptional.get();
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		this.guild = guild;
 		this.submission = submission;

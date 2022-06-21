@@ -12,6 +12,7 @@ import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import java.sql.SQLException;
@@ -131,7 +132,7 @@ public class HelpChannelUpdater implements Runnable {
 					}
 				}
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return new CompletedRestAction<>(this.jda, e);
 			}
 			// No action needed.

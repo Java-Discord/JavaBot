@@ -11,6 +11,7 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -42,6 +43,7 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 					if (optionalSubmission.isEmpty()) continue;
 					new SubmissionControlsManager(thread.getGuild(), optionalSubmission.get()).sendControls();
 				} catch (SQLException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					throw new JobExecutionException(e);
 				}
 			}

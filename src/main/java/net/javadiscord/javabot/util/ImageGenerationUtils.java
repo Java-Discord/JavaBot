@@ -52,6 +52,7 @@ public class ImageGenerationUtils {
 			font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ImageGenerationUtils.class.getClassLoader().getResourceAsStream(path))).deriveFont(size);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
 		} catch (IOException | FontFormatException e) {
+			ExceptionLogger.capture(e, ImageGenerationUtils.class.getSimpleName());
 			log.warn("Could not load Font from path " + path);
 		}
 		return Optional.ofNullable(font);

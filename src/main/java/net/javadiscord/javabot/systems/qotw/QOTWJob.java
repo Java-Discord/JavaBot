@@ -17,6 +17,7 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -63,7 +64,7 @@ public class QOTWJob extends DiscordApiJob {
 					repo.markUsed(question);
 				}
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotw().getQOTWReviewRole().getAsMention(), e.getMessage());
 				throw new JobExecutionException(e);
 			}

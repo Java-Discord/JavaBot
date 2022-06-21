@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
@@ -71,8 +72,7 @@ public class RemoveSubmissionsSubcommand extends ActiveJamSubcommand implements 
 						choices.add(new Command.Choice(String.format("Submission by %s", event.getJDA().getUserById(submission.getUserId()).getAsTag()), submission.getId())));
 			}
 		} catch (SQLException e) {
-			Sentry.captureException(e);
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		event.replyChoices(AutoCompleteUtils.filterChoices(event, choices)).queue();
 	}

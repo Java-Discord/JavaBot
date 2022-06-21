@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class BotConfig {
 				try {
 					Files.createDirectories(dir);
 				} catch (IOException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					log.error("Could not create config directory " + dir, e);
 				}
 			} else {
@@ -65,6 +67,7 @@ public class BotConfig {
 				this.systemsConfig = gson.fromJson(reader, SystemsConfig.class);
 				log.info("Loaded systems config from {}", systemsFile);
 			} catch (JsonSyntaxException e) {
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				log.error("Invalid JSON found! Please fix or remove config file " + systemsFile + " and restart.", e);
 				throw e;
 			} catch (IOException e) {
@@ -132,6 +135,7 @@ public class BotConfig {
 			gson.toJson(this.systemsConfig, writer);
 			writer.flush();
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not save systems config.", e);
 		}
 		for (var config : this.guilds.values()) {

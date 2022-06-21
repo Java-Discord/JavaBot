@@ -6,6 +6,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.jam.model.Jam;
 import net.javadiscord.javabot.systems.jam.model.JamPhase;
 import net.javadiscord.javabot.systems.jam.phase_transitions.*;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +58,13 @@ public class JamPhaseManager {
 				transition.transition(jam, event, channelManager, c);
 				c.commit();
 			} catch (SQLException e) {
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				log.error("An error occurred while transitioning the Jam phase.", e);
 				channelManager.sendErrorMessageAsync(event, "An error occurred: " + e.getMessage());
 				try {
 					if (bkpCon != null) bkpCon.rollback();
 				} catch (SQLException ex) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					log.error("SEVERE ERROR: Could not rollback changes made during a failed transition to new Jam state.", ex);
 					channelManager.sendErrorMessageAsync(event, "Could not rollback phase change transaction. Please check database for errors: " + ex.getMessage());
 				}

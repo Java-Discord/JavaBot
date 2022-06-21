@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.StringUtils;
 
 import java.io.IOException;
@@ -108,6 +109,7 @@ public class PingableNameListener extends ListenerAdapter {
 		try (Scanner scan = new Scanner(new URL(url).openStream()).useDelimiter("\\n")) {
 			list = scan.tokens().collect(Collectors.toList());
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Error during retrieval of words.");
 			list = new ArrayList<>();
 		}

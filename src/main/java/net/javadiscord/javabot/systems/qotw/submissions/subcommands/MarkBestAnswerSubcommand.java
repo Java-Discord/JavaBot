@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.submissions.subcommands;
 
+import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -12,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.GuildConfig;
@@ -147,8 +149,8 @@ public class MarkBestAnswerSubcommand implements SlashCommand {
 				}
 			});
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, MarkBestAnswerSubcommand.class.getSimpleName());
 		}
-		return AutocompleteUtils.filterChoices(event, choices);
+		return AutoCompleteUtils.filterChoices(event, choices);
 	}
 }

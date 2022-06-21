@@ -6,6 +6,7 @@ import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.h2.tools.Server;
 
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class DbHelper {
 		try {
 			server = Server.createTcpServer("-tcpPort", "9123", "-ifNotExists").start();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			throw new IllegalStateException("Cannot start database server.", e);
 		}
 		var hikariConfig = new HikariConfig();
@@ -60,7 +62,7 @@ public class DbHelper {
 			try {
 				initializeSchema(ds);
 			} catch (IOException | SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 				throw new IllegalStateException("Cannot initialize database schema.", e);
 			}
 		}
@@ -77,7 +79,7 @@ public class DbHelper {
 			try (var c = Bot.dataSource.getConnection()) {
 				consumer.consume(c);
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			}
 		});
 	}
@@ -97,7 +99,7 @@ public class DbHelper {
 				var dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			}
 		});
 	}

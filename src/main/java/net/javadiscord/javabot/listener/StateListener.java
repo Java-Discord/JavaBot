@@ -14,6 +14,7 @@ import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,6 +52,7 @@ public class StateListener extends ListenerAdapter {
 		try {
 			Bot.customCommandManager.init();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not initialize CustomCommandManager: ", e);
 		}
 	}

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.data.config.guild.*;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -121,6 +122,7 @@ public class GuildConfig {
 			gson.toJson(this, writer);
 			writer.flush();
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not flush config.", e);
 		}
 	}
@@ -143,7 +145,7 @@ public class GuildConfig {
 			try {
 				return pair.first().get(pair.second());
 			} catch (IllegalAccessException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return null;
 			}
 		}).orElse(null);
@@ -163,7 +165,7 @@ public class GuildConfig {
 				ReflectionUtils.set(pair.first(), pair.second(), value);
 				this.flush();
 			} catch (IllegalAccessException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 			}
 		});
 	}

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.systems.jam.dao.JamRepository;
 import net.javadiscord.javabot.systems.jam.model.Jam;
@@ -76,6 +77,7 @@ public class PlanNewJamSubcommand extends SlashCommand.Subcommand {
 			jamRepository.saveNewJam(jam);
 			Responses.success(hook, "Jam Created", "Jam has been created! *Jam ID = `" + jam.getId() + "`*. Use `/jam info` for more info.").queue();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(hook, "Error occurred while creating the Jam: " + e.getMessage()).queue();
 		}
 	}

@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import java.io.IOException;
@@ -69,13 +70,13 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 						try {
 							Files.delete(TABLE_FILE);
 						} catch (IOException e) {
-							Sentry.captureException(e);
+							ExceptionLogger.capture(e, getClass().getSimpleName());
 							event.getHook().sendMessageFormat("An error occurred, and the export could not be made: ```\n%s\n```", e.getMessage()).queue();
 						}
 					});
 				}
 			} catch (SQLException e) {
-				Sentry.captureException(e);
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				event.getHook().sendMessageFormat("An error occurred, and the export could not be made: ```\n%s\n```", e.getMessage()).queue();
 			}
 		});

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
@@ -47,7 +48,7 @@ public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 					sb.append(sql, 0, Math.min(sql.length(), 100));
 					if (sql.length() > 100) sb.append("...");
 				} catch (IOException e) {
-					Sentry.captureException(e);
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					sb.append("Error: Could not read SQL: ").append(e.getMessage());
 				}
 				sb.append("\n```");
@@ -55,6 +56,7 @@ public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 			});
 			event.replyEmbeds(embedBuilder.build()).queue();
 		} catch (IOException | URISyntaxException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, e.getMessage()).queue();
 		}
 	}

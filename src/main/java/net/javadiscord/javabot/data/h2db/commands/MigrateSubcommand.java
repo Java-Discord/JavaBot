@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
 			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
 		} catch (IOException | URISyntaxException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		return choices;
 	}
@@ -91,19 +92,20 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 									"Executed statement %d of %d:\n```sql\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
 							).queue();
 						} catch (SQLException e) {
-							Sentry.captureException(e);
+							ExceptionLogger.capture(e, getClass().getSimpleName());
 							event.getChannel().sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
 							return;
 						}
 					}
 				} catch (SQLException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					event.getChannel().sendMessage("Could not obtain a connection to the database.").queue();
 				}
 			});
 			Responses.info(event, "Migration Started",
 					"Execution of the migration `" + migrationName + "` has been started. " + statements.length + " statements will be executed.").queue();
 		} catch (IOException | URISyntaxException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, e.getMessage()).queue();
 		}
 	}

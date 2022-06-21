@@ -30,6 +30,7 @@ import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
 import net.javadiscord.javabot.tasks.StatsUpdater;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.ImageCache;
 import org.quartz.SchedulerException;
 
@@ -144,6 +145,7 @@ public class Bot {
 			ScheduledTasks.init(jda);
 			log.info("Initialized scheduled tasks.");
 		} catch (SchedulerException e) {
+			ExceptionLogger.capture(e, Bot.class.getSimpleName());
 			log.error("Could not initialize all scheduled tasks.", e);
 			jda.shutdown();
 		}

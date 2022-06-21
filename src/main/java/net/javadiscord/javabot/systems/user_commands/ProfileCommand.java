@@ -14,6 +14,7 @@ import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +45,7 @@ public class ProfileCommand extends SlashCommand {
 		try {
 			event.replyEmbeds(buildProfileEmbed(member, new QOTWPointsService(Bot.dataSource))).queue();
 		} catch (SQLException e) {
-			Sentry.captureException(e);
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
 

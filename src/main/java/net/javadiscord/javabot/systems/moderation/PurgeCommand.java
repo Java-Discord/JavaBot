@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.moderation.ModerateCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 
@@ -153,6 +154,7 @@ public class PurgeCommand extends ModerateCommand {
 			archiveWriter.println("Purge of channel " + channel.getName());
 			return archiveWriter;
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			logChannel.sendMessage("Could not create archive file for purge of channel " + channel.getAsMention() + ".").queue();
 			return null;
 		}

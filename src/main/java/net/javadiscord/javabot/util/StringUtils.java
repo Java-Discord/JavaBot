@@ -128,6 +128,7 @@ public class StringUtils {
 					}
 				}
 			} catch (IOException e) {
+				ExceptionLogger.capture(e, StringUtils.class.getSimpleName());
 				log.error("Error while getting Linux Distribution.");
 			}
 
