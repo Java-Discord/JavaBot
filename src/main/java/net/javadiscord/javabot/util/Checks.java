@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.regex.Pattern;
 
-public class Checks {
-
+public final class Checks {
 	public static final Pattern HEX_PATERN = Pattern.compile("^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
 
 	private Checks() {

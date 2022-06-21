@@ -3,7 +3,7 @@ package net.javadiscord.javabot.util;
 /**
  * Utility class that contains some constant variables.
  */
-public class Constants {
+public final class Constants {
 
 	/**
 	 * A static String referencing to the Java Discord's Website.

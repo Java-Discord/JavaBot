@@ -7,8 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Utility class for generating colors.
  */
-public class ColorUtils {
-
+public final class ColorUtils {
 	private ColorUtils() {
 	}
 
