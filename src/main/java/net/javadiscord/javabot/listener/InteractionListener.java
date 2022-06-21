@@ -29,7 +29,7 @@ public class InteractionListener extends ListenerAdapter {
 		String[] id = event.getModalId().split(":");
 		switch (id[0]) {
 			case "self-role" -> SelfRoleInteractionManager.handleModalSubmit(event, id);
-			case "report" -> new ReportManager(event.getUser()).handleModalSubmit(event, id);
+			case "report" -> new ReportManager().handleModalSubmit(event, id);
 			case "qotw-add-question" -> AddQuestionSubcommand.handleModalSubmit(event).queue();
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
@@ -62,7 +62,7 @@ public class InteractionListener extends ListenerAdapter {
 		switch (id[0]) {
 			case "experience-leaderboard" -> ExperienceLeaderboardSubcommand.handleButtons(event, id);
 			case "qotw-submission" -> SubmissionInteractionManager.handleButton(event, id);
-			case "resolve-report" -> new ReportManager(event.getUser()).markAsResolved(event, id[1]);
+			case "resolve-report" -> new ReportManager().markAsResolved(event, id[1]);
 			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);
 			case "utils" -> InteractionUtils.handleButton(event, id);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();

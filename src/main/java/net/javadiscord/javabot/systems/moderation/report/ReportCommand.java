@@ -27,7 +27,7 @@ public class ReportCommand extends ModerateUserCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull Member target, @Nonnull String reason) {
-		new ReportManager(event.getUser()).handleUserReport(event.getHook(), reason, target.getId());
+		new ReportManager().handleUserReport(event.getHook(), reason, target.getId());
 		return event.deferReply(true);
 	}
 }

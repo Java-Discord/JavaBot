@@ -19,6 +19,6 @@ public class ReportMessageContext extends ContextCommand.Message {
 			Responses.error(event, "You cannot perform this action on yourself.").queue();
 			return;
 		}
-		event.replyModal(new ReportManager(event.getUser()).buildMessageReportModal(event)).queue();
+		event.replyModal(new ReportManager().buildMessageReportModal(event)).queue();
 	}
 }

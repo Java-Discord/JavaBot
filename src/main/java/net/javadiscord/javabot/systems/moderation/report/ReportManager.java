@@ -28,10 +28,7 @@ import java.time.Instant;
  * Manages all interactions regarding the report-system.
  */
 @Slf4j
-@RequiredArgsConstructor
 public class ReportManager extends ComponentHandler {
-
-	private final User reportedBy;
 
 	/**
 	 * Handles all Modal Submit Interactions regarding the Report System.
@@ -124,8 +121,8 @@ public class ReportManager extends ComponentHandler {
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
 			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
-			var embed = buildReportEmbed(target, reason, hook.getInteraction().getChannel());
-			embed.setTitle(String.format("%s reported %s", reportedBy.getName(), target.getName()));
+			var embed = buildReportEmbed(target, hook.getInteraction().getUser(), reason, hook.getInteraction().getChannel());
+			embed.setTitle(String.format("%s reported %s", hook.getInteraction().getUser().getName(), target.getName()));
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
 			reportChannel.sendMessageEmbeds(embed.build())
 					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModeration()));
@@ -145,7 +142,7 @@ public class ReportManager extends ComponentHandler {
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
 			GuildConfig config = Bot.config.get(event.getGuild());
-			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), reason, event.getTextChannel());
+			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), event.getUser(), reason, event.getTextChannel());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
@@ -175,7 +172,7 @@ public class ReportManager extends ComponentHandler {
 		);
 	}
 
-	private EmbedBuilder buildReportEmbed(User reported, String reason, Channel channel) {
+	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, String reason, Channel channel) {
 		return new EmbedBuilder()
 				.setAuthor(reported.getAsTag(), null, reported.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
