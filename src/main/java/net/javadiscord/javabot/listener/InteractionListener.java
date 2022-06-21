@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.systems.moderation.report.ReportCommand;
+import net.javadiscord.javabot.systems.moderation.report.ReportManager;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
 import net.javadiscord.javabot.systems.self_roles.SelfRoleInteractionManager;
@@ -29,7 +29,7 @@ public class InteractionListener extends ListenerAdapter {
 		String[] id = event.getModalId().split(":");
 		switch (id[0]) {
 			case "self-role" -> SelfRoleInteractionManager.handleModalSubmit(event, id);
-			case "report" -> new ReportCommand().handleModalSubmit(event, id);
+			case "report" -> new ReportManager(event.getUser()).handleModalSubmit(event, id);
 			case "qotw-add-question" -> AddQuestionSubcommand.handleModalSubmit(event).queue();
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();
 		}
@@ -62,7 +62,7 @@ public class InteractionListener extends ListenerAdapter {
 		switch (id[0]) {
 			case "experience-leaderboard" -> ExperienceLeaderboardSubcommand.handleButtons(event, id);
 			case "qotw-submission" -> SubmissionInteractionManager.handleButton(event, id);
-			case "resolve-report" -> new ReportCommand().markAsResolved(event, id[1]);
+			case "resolve-report" -> new ReportManager(event.getUser()).markAsResolved(event, id[1]);
 			case "self-role" -> SelfRoleInteractionManager.handleButton(event, id);
 			case "utils" -> InteractionUtils.handleButton(event, id);
 			default -> Responses.error(event.getHook(), "Unknown Interaction").queue();

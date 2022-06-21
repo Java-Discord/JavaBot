@@ -142,7 +142,6 @@ public class WarnRepository {
 	 * @param userId The id of the user.
 	 * @param cutoff The time after which to look for warns.
 	 * @return A List with all Warns.
-	 * @throws SQLException If an error occurs.
 	 */
 	public List<Warn> getWarnsByUserId(long userId, LocalDateTime cutoff) {
 		List<Warn> warns = new ArrayList<>();

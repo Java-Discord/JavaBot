@@ -78,14 +78,15 @@ public class HelpAccountRepository {
 	 */
 	public List<HelpAccount> getAccounts(int page, int size) throws SQLException {
 		String sql = "SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT %d OFFSET %d";
-		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, (page * size) - size));
-		ResultSet rs = stmt.executeQuery();
-		List<HelpAccount> accounts = new ArrayList<>(size);
-		while (rs.next()) {
-			accounts.add(this.read(rs));
+		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, (page * size) - size))) {
+			ResultSet rs = stmt.executeQuery();
+			List<HelpAccount> accounts = new ArrayList<>(size);
+			while (rs.next()) {
+				accounts.add(this.read(rs));
+			}
+			stmt.close();
+			return accounts;
 		}
-		stmt.close();
-		return accounts;
 	}
 
 	/**
