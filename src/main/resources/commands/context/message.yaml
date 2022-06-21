@@ -5,3 +5,7 @@
 - name: Format Code
   type: MESSAGE
   handler: net.javadiscord.javabot.systems.commands.FormatCodeCommand
+
+- name: Search the Web
+  type: MESSAGE
+  handler: net.javadiscord.javabot.systems.commands.SearchCommand

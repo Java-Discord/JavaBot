@@ -4,11 +4,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.command.Responses;
+import net.javadiscord.javabot.command.interfaces.MessageContextCommand;
 import net.javadiscord.javabot.command.interfaces.SlashCommand;
+import net.javadiscord.javabot.data.config.GuildConfig;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -23,7 +29,7 @@ import java.util.Scanner;
 /**
  * Command that allows members to search the internet using the bing api.
  */
-public class SearchCommand implements SlashCommand {
+public class SearchCommand implements SlashCommand, MessageContextCommand {
 
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
@@ -56,20 +62,14 @@ public class SearchCommand implements SlashCommand {
 		return results;
 	}
 
-	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var query = event.getOption("query");
-		if (query == null) {
-			return Responses.warning(event, "Missing Required Query");
-		}
-		String searchTerm = query.getAsString();
+	private MessageEmbed handleSearch(String searchTerm, Guild guild) {
+		GuildConfig config = Bot.config.get(guild);
 		String name;
 		String url;
 		String snippet;
 		var embed = new EmbedBuilder()
-				.setColor(Bot.config.get(event.getGuild()).getSlashCommand().getDefaultColor())
+				.setColor(config.getSlashCommand().getDefaultColor())
 				.setTitle("Search Results");
-
 		try {
 			SearchResults result = searchWeb(searchTerm);
 			JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
@@ -92,12 +92,33 @@ public class SearchCommand implements SlashCommand {
 				resultString.append("**").append(i + 1).append(". [").append(name).append("](")
 						.append(url).append(")** \n").append(snippet).append("\n\n");
 			}
-
 			embed.setDescription(resultString);
 		} catch (IOException e) {
-			return Responses.info(event, "Not Found", "There were no results for your search. This might be due to safe-search or because your search was too complex. Please try again.");
+			return new EmbedBuilder()
+					.setColor(config.getSlashCommand().getDefaultColor())
+					.setTitle("No Results")
+					.setDescription("There were no results for your search. This might be due to safe-search or because your search was too complex. Please try again.")
+					.build();
 		}
-		return event.replyEmbeds(embed.build());
+		return embed.build();
+	}
+
+	@Override
+	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
+		var query = event.getOption("query");
+		if (query == null) {
+			return Responses.warning(event, "No Query", "Missing Required Query");
+		}
+		return event.replyEmbeds(handleSearch(query.getAsString(), event.getGuild()));
+	}
+
+	@Override
+	public InteractionCallbackAction<?> handleMessageContextCommandInteraction(MessageContextInteractionEvent event) {
+		String query = event.getTarget().getContentDisplay();
+		if (query.equals("")) {
+			return Responses.warning(event, "No Content", "Message doesn't have any content.");
+		}
+		return event.replyEmbeds(handleSearch(query, event.getGuild()));
 	}
 
 	/**
