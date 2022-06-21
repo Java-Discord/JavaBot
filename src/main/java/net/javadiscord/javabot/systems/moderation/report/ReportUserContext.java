@@ -9,8 +9,13 @@ import net.javadiscord.javabot.util.Responses;
  * <h3>This class represents the "Report User" User Context Menu command.</h3>
  */
 public class ReportUserContext extends ContextCommand.User {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.CommandData}.
+	 */
 	public ReportUserContext() {
-		setCommandData(Commands.user("Report User"));
+		setCommandData(Commands.user("Report User")
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

@@ -17,9 +17,14 @@ import net.javadiscord.javabot.util.Responses;
  * immediately unreserve them, instead of waiting for a timeout.
  */
 public class UnreserveCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public UnreserveCommand() {
 		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
-				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false));
+				.setGuildOnly(true)
+				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
+		);
 	}
 
 	@Override

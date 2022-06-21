@@ -90,9 +90,8 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand {
 	private @NotNull Modal buildQuickMigrateModal() {
 		TextInput sqlInput = TextInput.create("sql", "SQL-Statement (H2)", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("""
-						CREATE TABLE qotw_submissions (
+						CREATE TABLE my_table (
 							thread_id BIGINT PRIMARY KEY,
-							question_number INTEGER NOT NULL,
 							[...]
 						);
 						""")

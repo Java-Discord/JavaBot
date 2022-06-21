@@ -22,6 +22,7 @@ public class ReportCommand extends ModerateUserCommand {
 		setSlashCommandData(Commands.slash("report", "Reports a member.")
 				.addOption(OptionType.USER, "user", "The user you want to report", true)
 				.addOption(OptionType.STRING, "reason", "The reason", true)
+				.setGuildOnly(true)
 		);
 	}
 

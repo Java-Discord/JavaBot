@@ -68,14 +68,14 @@ public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 
 	private EmbedBuilder buildErrorEmbed(Guild guild) {
 		return new EmbedBuilder()
-				.setTitle("An error occurred!")
+				.setTitle("An Error occurred!")
 				.setColor(Responses.Type.ERROR.getColor())
 				.setTimestamp(Instant.now());
 	}
 
 	private MessageEmbed buildExceptionEmbed(Guild guild, Exception e) {
 		return buildErrorEmbed(guild)
-				.setDescription("An unexpected error occurred!")
+				.setDescription("An unexpected Error occurred!")
 				.setFooter(e.getClass().getSimpleName())
 				.build();
 	}

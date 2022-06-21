@@ -26,7 +26,7 @@ dependencies {
     implementation("com.github.Xirado:JDA:b54a2a95c0") {
         exclude(module = "opus-java")
     }
-    implementation("com.github.DynxstyGIT:DIH4JDA:749d679703")
+    implementation("com.github.DynxstyGIT:DIH4JDA:53481c7608")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")

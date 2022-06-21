@@ -43,7 +43,7 @@ public class DbHelper {
 		// Now that we have remembered whether we need to initialize the schema, start up the server.
 		Server server;
 		try {
-			server = Server.createTcpServer("-tcpPort", "9123", "-ifNotExists").start();
+			server = Server.createTcpServer("-tcpPort", "9122", "-ifNotExists").start();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			throw new IllegalStateException("Cannot start database server.", e);

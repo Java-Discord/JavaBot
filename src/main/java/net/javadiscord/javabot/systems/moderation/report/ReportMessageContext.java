@@ -9,8 +9,13 @@ import net.javadiscord.javabot.util.Responses;
  * <h3>This class represents the "Report Message" Message Context Menu command.</h3>
  */
 public class ReportMessageContext extends ContextCommand.Message {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.CommandData}.
+	 */
 	public ReportMessageContext() {
-		setCommandData(Commands.message("Report Message"));
+		setCommandData(Commands.message("Report Message")
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

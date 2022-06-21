@@ -14,8 +14,13 @@ import java.util.stream.Collectors;
  * Shows the server's help-guidelines.
  */
 public class HelpGuidelinesCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
 	public HelpGuidelinesCommand() {
-		setSlashCommandData(Commands.slash("help-guidelines", "Show the server's help guidelines in a simple format."));
+		setSlashCommandData(Commands.slash("help-guidelines", "Show the server's help guidelines in a simple format.")
+				.setGuildOnly(true)
+		);
 	}
 
 	@Override

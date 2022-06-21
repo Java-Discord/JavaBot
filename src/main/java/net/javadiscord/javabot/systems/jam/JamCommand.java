@@ -11,7 +11,9 @@ import net.javadiscord.javabot.systems.jam.subcommands.JamSubmitSubcommand;
 public class JamCommand extends SlashCommand {
 
 	public JamCommand() {
-		setSlashCommandData(Commands.slash("jam", "Interact with Java Jam functionality."));
+		setSlashCommandData(Commands.slash("jam", "Interact with Java Jam functionality.")
+				.setGuildOnly(true)
+		);
 		addSubcommands(new JamInfoSubcommand(), new JamSubmitSubcommand());
 	}
 }

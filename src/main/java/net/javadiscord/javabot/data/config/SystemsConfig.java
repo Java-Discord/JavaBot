@@ -46,7 +46,7 @@ public class SystemsConfig {
 	 */
 	@Data
 	public static class HikariConfig {
-		private String jdbcUrl = "jdbc:h2:tcp://localhost:9123/./java_bot";
+		private String jdbcUrl = "jdbc:h2:tcp://localhost:9122/./java_bot";
 		private int maximumPoolSize = 5;
 	}
 }
