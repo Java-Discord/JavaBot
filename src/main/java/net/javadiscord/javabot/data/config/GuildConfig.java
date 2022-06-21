@@ -3,7 +3,6 @@ package net.javadiscord.javabot.data.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import io.sentry.Sentry;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;

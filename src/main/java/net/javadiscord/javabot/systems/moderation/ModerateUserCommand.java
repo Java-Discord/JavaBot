@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.command.moderation;
+package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

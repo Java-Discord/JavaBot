@@ -2,12 +2,12 @@ package net.javadiscord.javabot.data.h2db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.h2.tools.Server;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ public class DbHelper {
 	 * @throws IllegalStateException If an error occurs and we're unable to
 	 *                               start the database.
 	 */
-	public static HikariDataSource initDataSource(BotConfig config) {
+	public static @NotNull HikariDataSource initDataSource(@NotNull BotConfig config) {
 		// Determine if we need to initialize the schema, before starting up the server.
 		boolean shouldInitSchema = shouldInitSchema(config.getSystems().getHikariConfig().getJdbcUrl());
 

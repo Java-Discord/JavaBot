@@ -3,7 +3,6 @@ package net.javadiscord.javabot.data.h2db.commands;
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

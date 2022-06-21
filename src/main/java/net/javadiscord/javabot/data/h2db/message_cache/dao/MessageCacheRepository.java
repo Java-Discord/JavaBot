@@ -43,7 +43,7 @@ public class MessageCacheRepository {
 		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
-			for (CachedMessage msg:messages) {
+			for (CachedMessage msg : messages) {
 				stmt.setLong(1, msg.getMessageId());
 				stmt.setLong(2, msg.getAuthorId());
 				stmt.setString(3, msg.getMessageContent());
@@ -89,6 +89,7 @@ public class MessageCacheRepository {
 
 	/**
 	 * Gets all Messages from the Database.
+	 *
 	 * @return A {@link List} of {@link CachedMessage}s.
 	 * @throws SQLException If anything goes wrong.
 	 */
@@ -111,7 +112,7 @@ public class MessageCacheRepository {
 	 * @throws SQLException If anything goes wrong.
 	 */
 	public boolean delete(int amount) throws SQLException {
-		try (		PreparedStatement stmt = con.prepareStatement("DELETE FROM message_cache LIMIT ?",
+		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM message_cache LIMIT ?",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
 			stmt.setInt(1, amount);

@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.data.h2db;
 
-import io.sentry.Sentry;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,7 +26,7 @@ public class DbActions {
 	 * @param consumer The {@link ConnectionConsumer}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static void doAction(ConnectionConsumer consumer) throws SQLException {
+	public static void doAction(@NotNull ConnectionConsumer consumer) throws SQLException {
 		try (var c = Bot.dataSource.getConnection()) {
 			consumer.consume(c);
 		}
@@ -40,7 +40,7 @@ public class DbActions {
 	 * @return A generic type.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static <T> T map(ConnectionFunction<T> function) throws SQLException {
+	public static <T> T map(@NotNull ConnectionFunction<T> function) throws SQLException {
 		try (var c = Bot.dataSource.getConnection()) {
 			return function.apply(c);
 		}
@@ -56,7 +56,7 @@ public class DbActions {
 	 * @return A generic type.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static <T> T mapQuery(String query, StatementModifier modifier, ResultSetMapper<T> mapper) throws SQLException {
+	public static <T> T mapQuery(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) throws SQLException {
 		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			var rs = stmt.executeQuery();
@@ -73,7 +73,7 @@ public class DbActions {
 	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 */
-	public static <T> CompletableFuture<T> mapQueryAsync(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {
+	public static <T> @NotNull CompletableFuture<T> mapQueryAsync(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) {
 		CompletableFuture<T> cf = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try {
@@ -94,7 +94,7 @@ public class DbActions {
 	 * @param modifier A modifier to use to set parameters for the query.
 	 * @return The column value.
 	 */
-	public static long count(String query, StatementModifier modifier) {
+	public static long count(@NotNull String query, @NotNull StatementModifier modifier) {
 		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			var rs = stmt.executeQuery();
@@ -110,10 +110,10 @@ public class DbActions {
 	 * Gets a count, using a query which <strong>must</strong> return a long
 	 * integer value as the first column of the result set.
 	 *
-	 * @param query    The query.
+	 * @param query The query.
 	 * @return The column value.
 	 */
-	public static long count(String query) {
+	public static long count(@NotNull String query) {
 		try (
 				var conn = Bot.dataSource.getConnection();
 				var stmt = conn.createStatement()
@@ -132,15 +132,15 @@ public class DbActions {
 	 * which allows for getting the count from a query using simple string
 	 * formatting instead of having to define a statement modifier.
 	 * <p>
-	 *     <strong>WARNING</strong>: This method should NEVER be called with
-	 *     user-provided data.
+	 * <strong>WARNING</strong>: This method should NEVER be called with
+	 * user-provided data.
 	 * </p>
 	 *
 	 * @param queryFormat The format string.
-	 * @param args The set of arguments to pass to the formatter.
+	 * @param args        The set of arguments to pass to the formatter.
 	 * @return The count.
 	 */
-	public static long countf(String queryFormat, Object... args) {
+	public static long countf(@NotNull String queryFormat, @NotNull Object... args) {
 		return count(String.format(queryFormat, args));
 	}
 
@@ -152,7 +152,7 @@ public class DbActions {
 	 * @return The rows that got updates during this process.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static int update(String query, Object... params) throws SQLException {
+	public static int update(@NotNull String query, Object @NotNull ... params) throws SQLException {
 		try (var c = Bot.dataSource.getConnection(); var stmt = c.prepareStatement(query)) {
 			int i = 1;
 			for (var param : params) {
@@ -168,7 +168,7 @@ public class DbActions {
 	 * @param consumer The consumer that will use a connection.
 	 * @return A future that completes when the action is complete.
 	 */
-	public static CompletableFuture<Void> doAsyncAction(ConnectionConsumer consumer) {
+	public static @NotNull CompletableFuture<Void> doAsyncAction(ConnectionConsumer consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try (var c = Bot.dataSource.getConnection()) {
@@ -192,7 +192,7 @@ public class DbActions {
 	 * @param <T>            The type of data access object. Usually some kind of repository.
 	 * @return A future that completes when the action is complete.
 	 */
-	public static <T> CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
+	public static <T> @NotNull CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try (var c = Bot.dataSource.getConnection()) {
@@ -214,7 +214,7 @@ public class DbActions {
 	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 */
-	public static <T> CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {
+	public static <T> @NotNull CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {
 		CompletableFuture<T> future = new CompletableFuture<>();
 		Bot.asyncPool.submit(() -> {
 			try (var c = Bot.dataSource.getConnection()) {

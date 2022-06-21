@@ -1,15 +1,14 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.h2db.MigrationUtils;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.data.h2db.MigrationUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

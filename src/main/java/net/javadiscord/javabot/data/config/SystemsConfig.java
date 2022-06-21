@@ -2,8 +2,6 @@ package net.javadiscord.javabot.data.config;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * Contains configuration settings for various systems which the bot uses, such
  * as databases or dependencies that have runtime properties.

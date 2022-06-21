@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -55,7 +54,7 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 		OptionMapping tableOption = event.getOption("table");
 		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		if (tableOption == null) {
-			Responses.error(event,"Missing required arguments").queue();
+			Responses.error(event, "Missing required arguments").queue();
 			return;
 		}
 		event.deferReply(false).queue();

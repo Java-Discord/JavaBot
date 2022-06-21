@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.command.moderation.ModerateUserCommand;
+import net.javadiscord.javabot.systems.moderation.ModerateUserCommand;
 
 import javax.annotation.Nonnull;
 

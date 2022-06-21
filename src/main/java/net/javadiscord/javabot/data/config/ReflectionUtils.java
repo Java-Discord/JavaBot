@@ -3,6 +3,8 @@ package net.javadiscord.javabot.data.config;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -35,7 +37,7 @@ public class ReflectionUtils {
 	private ReflectionUtils() {
 	}
 
-	public static Optional<Pair<Field, Object>> resolveField(String propertyName, Object parent) throws UnknownPropertyException {
+	public static Optional<Pair<Field, Object>> resolveField(@NotNull String propertyName, Object parent) throws UnknownPropertyException {
 		return Optional.ofNullable(resolveField(propertyName.split("\\."), parent));
 	}
 
@@ -49,7 +51,7 @@ public class ReflectionUtils {
 	 * @return The field and the object upon which it can be applied.
 	 * @throws UnknownPropertyException If no field could be resolved.
 	 */
-	public static Pair<Field, Object> resolveField(String[] fieldNames, Object parent) throws UnknownPropertyException {
+	public static @Nullable Pair<Field, Object> resolveField(@NotNull String[] fieldNames, @NotNull Object parent) throws UnknownPropertyException {
 		if (fieldNames.length == 0) return null;
 		try {
 			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
@@ -85,7 +87,7 @@ public class ReflectionUtils {
 	 * @return The map of properties and their types.
 	 * @throws IllegalAccessException If a field cannot have its value obtained.
 	 */
-	public static Map<String, Class<?>> getFields(String parentPropertyName, Class<?> parentClass) throws IllegalAccessException {
+	public static @NotNull Map<String, Class<?>> getFields(@NotNull String parentPropertyName, @NotNull Class<?> parentClass) throws IllegalAccessException {
 		Map<String, Class<?>> fieldsMap = new HashMap<>();
 		for (var field : parentClass.getDeclaredFields()) {
 			// Skip transient fields.
@@ -112,7 +114,7 @@ public class ReflectionUtils {
 	 * @param s      The string representation of the value.
 	 * @throws IllegalAccessException If the field cannot be set.
 	 */
-	public static void set(Field field, Object parent, String s) throws IllegalAccessException {
+	public static void set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
 		var parser = propertyTypeParsers.get(field.getType());
 		if (parser == null) {
 			throw new IllegalArgumentException("No supported property type parser for the type " + field.getType().getSimpleName());

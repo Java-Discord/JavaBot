@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.moderation.ModerateCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;

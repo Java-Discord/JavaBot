@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -85,7 +86,7 @@ public class BotConfig {
 	 *
 	 * @param guilds The list of guilds to load config for.
 	 */
-	public void loadGuilds(List<Guild> guilds) {
+	public void loadGuilds(@NotNull List<Guild> guilds) {
 		for (Guild guild : guilds) {
 			var file = dir.resolve(guild.getId() + ".json");
 			var config = GuildConfig.loadOrCreate(guild, file);
@@ -101,7 +102,7 @@ public class BotConfig {
 	 *
 	 * @param guild The guild to add configuration for.
 	 */
-	public void addGuild(Guild guild) {
+	public void addGuild(@NotNull Guild guild) {
 		var file = dir.resolve(guild.getId() + ".json");
 		this.guilds.put(guild.getIdLong(), GuildConfig.loadOrCreate(guild, file));
 		log.info("Added guild config for guild {} ({}).", guild.getName(), guild.getId());
