@@ -26,10 +26,9 @@ public class SuggestionListener extends ListenerAdapter {
 			event.getMessage().delete().queue();
 			return;
 		}
-		var config = Bot.config.get(event.getGuild());
-		MessageEmbed embed = this.buildSuggestionEmbed(event.getMessage());
+		MessageEmbed embed = buildSuggestionEmbed(event.getMessage());
 		MessageActionUtils.addAttachmentsAndSend(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).thenAccept(message -> {
-					this.addReactions(message).queue();
+					addReactions(message).queue();
 					event.getMessage().delete().queue();
 					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName()))
 							.flatMap(thread -> thread.addThreadMember(event.getAuthor()))

@@ -6,10 +6,13 @@ import net.javadiscord.javabot.systems.jam.subcommands.JamInfoSubcommand;
 import net.javadiscord.javabot.systems.jam.subcommands.JamSubmitSubcommand;
 
 /**
- * Handler class for all Jam commands.
+ * Represents the `/jam` command. This holds commands for interacting with the Java Jam functionality.
  */
 public class JamCommand extends SlashCommand {
-
+	/**
+	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
+	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.Subcommand}s.
+	 */
 	public JamCommand() {
 		setSlashCommandData(Commands.slash("jam", "Interact with Java Jam functionality.")
 				.setGuildOnly(true)

@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.moderation.report;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -16,31 +15,53 @@ import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Manages all interactions regarding the report-system.
  */
 @Slf4j
 public class ReportManager extends ComponentHandler {
+	public ReportManager() {
+		handleButtonIds("resolve-report");
+		handleModalIds("report");
+	}
 
-	/**
-	 * Handles all Modal Submit Interactions regarding the Report System.
-	 *
-	 * @param event The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
-	 * @param args  The modal's id, split by ":".
-	 */
-	public void handleModalSubmit(ModalInteractionEvent event, String[] args) {
+	@Override
+	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		event.deferReply(true).queue();
-		switch (args[1]) {
-			case "user" -> handleUserReport(event.getHook(), event.getValue("reason").getAsString(), args[2]);
-			case "message" -> handleMessageReport(event, args[2]);
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		ThreadChannel thread = event.getGuild().getThreadChannelById(id[1]);
+		if (thread == null) {
+			Responses.error(event.getHook(), "Could not find the corresponding thread channel.").queue();
+			return;
+		}
+		Responses.info(event.getHook(), "Report resolved", "Successfully resolved this report!").queue();
+		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("report-resolved", "Resolved by " + event.getUser().getAsTag()).asDisabled())).queue();
+		thread.sendMessage("This thread was resolved by " + event.getUser().getAsMention()).queue(
+				success -> thread.getManager()
+						.setName(String.format("[Resolved] %s", thread.getName()))
+						.setArchived(true)
+						.queue()
+		);
+	}
+
+	@Override
+	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+		event.deferReply(true).queue();
+		String[] id = ComponentIdBuilder.split(event.getModalId());
+		switch (id[1]) {
+			case "user" -> handleUserReport(event.getHook(), event.getValue("reason").getAsString(), id[2]);
+			case "message" -> handleMessageReport(event, id[2]);
 		}
 	}
 
@@ -81,31 +102,6 @@ public class ReportManager extends ComponentHandler {
 				.addActionRows(ActionRow.of(messageInput))
 				.build();
 	}
-
-
-	/**
-	 * Marks a Report Thread as resolved.
-	 *
-	 * @param event    The {@link ButtonInteractionEvent} that is fired upon use.
-	 * @param threadId The report thread's id.
-	 */
-	public void markAsResolved(ButtonInteractionEvent event, String threadId) {
-		event.deferReply(true).queue();
-		ThreadChannel thread = event.getGuild().getThreadChannelById(threadId);
-		if (thread == null) {
-			Responses.error(event.getHook(), "Could not find the corresponding thread channel.").queue();
-			return;
-		}
-		Responses.info(event.getHook(), "Report resolved", "Successfully resolved this report!").queue();
-		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("report-resolved", "Resolved by " + event.getUser().getAsTag()).asDisabled())).queue();
-		thread.sendMessage("This thread was resolved by " + event.getUser().getAsMention()).queue(
-				success -> thread.getManager()
-						.setName(String.format("[Resolved] %s", thread.getName()))
-						.setArchived(true)
-						.queue()
-		);
-	}
-
 
 	/**
 	 * Handles a single user report.

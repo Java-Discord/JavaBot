@@ -170,7 +170,6 @@ public class Bot {
 				new StatsUpdater(),
 				new SuggestionListener(),
 				new StarboardManager(),
-				new InteractionListener(),
 				new HelpChannelListener(),
 				new ShareKnowledgeVoteListener(),
 				new JobChannelVoteListener(),

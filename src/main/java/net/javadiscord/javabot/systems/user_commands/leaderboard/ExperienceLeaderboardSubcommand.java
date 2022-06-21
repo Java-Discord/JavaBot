@@ -38,16 +38,13 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
 		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
 		);
+		handleButtonIds("experience-leaderboard");
 	}
 
-	/**
-	 * Handles all Button Interactions that regard this command.
-	 *
-	 * @param event The {@link ButtonInteractionEvent} that was fired upon use.
-	 * @param id    The component's id, split by ":".
-	 */
-	public static void handleButtons(@NotNull ButtonInteractionEvent event, String[] id) {
+	@Override
+	public void handleButton(ButtonInteractionEvent event, Button button) {
 		event.deferEdit().queue();
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> {
 			int page = Integer.parseInt(id[2]);
 			// increment/decrement page

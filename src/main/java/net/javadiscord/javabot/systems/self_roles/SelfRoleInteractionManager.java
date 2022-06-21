@@ -1,5 +1,7 @@
 package net.javadiscord.javabot.systems.self_roles;
 
+import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
+import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -10,8 +12,10 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
@@ -20,46 +24,43 @@ import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.util.Responses;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Handles all Interactions related to the Self Role System.
  */
 @Slf4j
-public class SelfRoleInteractionManager {
-
+public class SelfRoleInteractionManager extends ComponentHandler {
 	private static final String EMAIL_PATTERN = "[\\w-]+@([\\w-]+\\.)+[\\w-]+";
 
-	/**
-	 * Handles all Button Interactions regarding the Self Role System.
-	 *
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon clicking a button.
-	 * @param args  The button's id, split by ":".
-	 */
-	public static void handleButton(ButtonInteractionEvent event, String[] args) {
-		Role role = event.getGuild().getRoleById(args[2]);
+	public SelfRoleInteractionManager() {
+		handleButtonIds("self-role");
+		handleModalIds("self-role");
+	}
+
+	@Override
+	public void handleButton(ButtonInteractionEvent event, Button button) {
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		Role role = event.getGuild().getRoleById(id[2]);
 		if(role == null) return;
-		boolean permanent = Boolean.parseBoolean(args[3]);
+		boolean permanent = Boolean.parseBoolean(id[3]);
 		SelfRoleInteractionManager manager = new SelfRoleInteractionManager();
-		switch(args[1]) {
+		switch(id[1]) {
 			case "default" -> manager.handleSelfRole(event, role, permanent);
 			case "staff" -> manager.buildStaffApplication(event, role, event.getUser());
 			case "expert" -> manager.buildExpertApplication(event, event.getUser());
 		}
 	}
 
-	/**
-	 * Handles all Modal Submit Interactions regarding the Self Role System.
-	 *
-	 * @param event The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
-	 * @param args  The modal's id, split by ":".
-	 */
-	public static void handleModalSubmit(ModalInteractionEvent event, String[] args) {
+	@Override
+	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
-		var config = Bot.config.get(event.getGuild());
+		String[] id = ComponentIdBuilder.split(event.getModalId());
+		GuildConfig config = Bot.config.get(event.getGuild());
 		SelfRoleInteractionManager manager = new SelfRoleInteractionManager();
-		switch(args[1]) {
-			case "staff" -> manager.sendStaffSubmission(event, config, args[2], args[3]).queue();
-			case "expert" -> manager.sendExpertSubmission(event, config.getModeration(), args[2]).queue();
+		switch(id[1]) {
+			case "staff" -> manager.sendStaffSubmission(event, config, id[2], id[3]).queue();
+			case "expert" -> manager.sendExpertSubmission(event, config.getModeration(), id[2]).queue();
 		}
 	}
 
