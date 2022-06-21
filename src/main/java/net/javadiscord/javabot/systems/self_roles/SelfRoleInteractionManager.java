@@ -27,7 +27,7 @@ import java.time.Instant;
 @Slf4j
 public class SelfRoleInteractionManager {
 
-	private final String EMAIL_PATTERN = "[\\w-]+@([\\w-]+\\.)+[\\w-]+";
+	private static final String EMAIL_PATTERN = "[\\w-]+@([\\w-]+\\.)+[\\w-]+";
 
 	/**
 	 * Handles all Button Interactions regarding the Self Role System.

@@ -20,31 +20,31 @@ public class JamRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void saveNewJam(Jam jam) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement(
+		try (PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO jam (guild_id, name, started_by, starts_at, ends_at) VALUES (?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
-		);
-		stmt.setLong(1, jam.getGuildId());
-		if (jam.getName() != null) {
-			stmt.setString(2, jam.getName());
-		} else {
-			stmt.setNull(2, Types.VARCHAR);
-		}
-		stmt.setLong(3, jam.getStartedBy());
-		stmt.setDate(4, Date.valueOf(jam.getStartsAt()));
-		if (jam.getEndsAt() == null) {
-			stmt.setNull(5, Types.DATE);
-		} else {
-			stmt.setDate(5, Date.valueOf(jam.getEndsAt()));
-		}
+		)) {
+			stmt.setLong(1, jam.getGuildId());
+			if (jam.getName() != null) {
+				stmt.setString(2, jam.getName());
+			} else {
+				stmt.setNull(2, Types.VARCHAR);
+			}
+			stmt.setLong(3, jam.getStartedBy());
+			stmt.setDate(4, Date.valueOf(jam.getStartsAt()));
+			if (jam.getEndsAt() == null) {
+				stmt.setNull(5, Types.DATE);
+			} else {
+				stmt.setDate(5, Date.valueOf(jam.getEndsAt()));
+			}
 
-		int rows = stmt.executeUpdate();
-		if (rows == 0) throw new SQLException("New Jam was not inserted.");
-		ResultSet rs = stmt.getGeneratedKeys();
-		if (rs.next()) {
-			jam.setId(rs.getLong(1));
+			int rows = stmt.executeUpdate();
+			if (rows == 0) throw new SQLException("New Jam was not inserted.");
+			ResultSet rs = stmt.getGeneratedKeys();
+			if (rs.next()) {
+				jam.setId(rs.getLong(1));
+			}
 		}
-		stmt.close();
 	}
 
 	/**
@@ -54,17 +54,17 @@ public class JamRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void updateJam(Jam jam) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET name = ?, starts_at = ?, ends_at = ? WHERE id = ?");
-		stmt.setString(1, jam.getName());
-		stmt.setDate(2, Date.valueOf(jam.getStartsAt()));
-		if (jam.getEndsAt() == null) {
-			stmt.setNull(3, Types.DATE);
-		} else {
-			stmt.setDate(3, Date.valueOf(jam.getEndsAt()));
+		try (PreparedStatement stmt = con.prepareStatement("UPDATE jam SET name = ?, starts_at = ?, ends_at = ? WHERE id = ?")) {
+			stmt.setString(1, jam.getName());
+			stmt.setDate(2, Date.valueOf(jam.getStartsAt()));
+			if (jam.getEndsAt() == null) {
+				stmt.setNull(3, Types.DATE);
+			} else {
+				stmt.setDate(3, Date.valueOf(jam.getEndsAt()));
+			}
+			stmt.setLong(4, jam.getId());
+			stmt.executeUpdate();
 		}
-		stmt.setLong(4, jam.getId());
-		stmt.executeUpdate();
-		stmt.close();
 	}
 
 	/**
@@ -74,8 +74,7 @@ public class JamRepository {
 	 * @return The {@link Jam} object.
 	 */
 	public Jam getJam(long id) {
-		try {
-			PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE id = ?");
+		try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE id = ?")) {
 			stmt.setLong(1, id);
 			stmt.execute();
 			ResultSet rs = stmt.getResultSet();
@@ -97,8 +96,7 @@ public class JamRepository {
 	 * @return The {@link Jam} object.
 	 */
 	public Jam getActiveJam(long guildId) {
-		try {
-			PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE guild_id = ? AND completed = FALSE");
+		try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM jam WHERE guild_id = ? AND completed = FALSE")) {
 			stmt.setLong(1, guildId);
 			stmt.execute();
 			ResultSet rs = stmt.getResultSet();
@@ -137,10 +135,10 @@ public class JamRepository {
 	public void completeJam(Jam jam) throws SQLException {
 		jam.setCompleted(true);
 		jam.setCurrentPhase(null);
-		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET completed = TRUE, current_phase = NULL WHERE id = ?");
-		stmt.setLong(1, jam.getId());
-		stmt.executeUpdate();
-		stmt.close();
+		try (PreparedStatement stmt = con.prepareStatement("UPDATE jam SET completed = TRUE, current_phase = NULL WHERE id = ?")) {
+			stmt.setLong(1, jam.getId());
+			stmt.executeUpdate();
+		}
 	}
 
 	/**
@@ -152,11 +150,11 @@ public class JamRepository {
 	 */
 	public void updateJamPhase(Jam jam, String nextPhaseName) throws SQLException {
 		jam.setCurrentPhase(nextPhaseName);
-		PreparedStatement stmt = con.prepareStatement("UPDATE jam SET current_phase = ? WHERE id = ?");
-		stmt.setString(1, nextPhaseName);
-		stmt.setLong(2, jam.getId());
-		stmt.executeUpdate();
-		stmt.close();
+		try (PreparedStatement stmt = con.prepareStatement("UPDATE jam SET current_phase = ? WHERE id = ?")) {
+			stmt.setString(1, nextPhaseName);
+			stmt.setLong(2, jam.getId());
+			stmt.executeUpdate();
+		}
 	}
 
 	/**
@@ -167,13 +165,12 @@ public class JamRepository {
 	 */
 	public void cancelJam(Jam jam) throws SQLException {
 		this.completeJam(jam);
-		PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?");
-		stmt.setLong(1, jam.getId());
-		stmt.executeUpdate();
-		stmt.close();
-		stmt = con.prepareStatement("UPDATE jam_theme SET accepted = FALSE WHERE jam_id = ? AND accepted IS NULL;");
-		stmt.setLong(1, jam.getId());
-		stmt.executeUpdate();
-		stmt.close();
+		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM jam_message_id WHERE jam_id = ?");
+		     PreparedStatement s = con.prepareStatement("UPDATE jam_theme SET accepted = FALSE WHERE jam_id = ? AND accepted IS NULL;")) {
+			stmt.setLong(1, jam.getId());
+			stmt.executeUpdate();
+			s.setLong(1, jam.getId());
+			s.executeUpdate();
+		}
 	}
 }

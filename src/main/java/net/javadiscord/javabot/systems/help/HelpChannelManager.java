@@ -24,6 +24,8 @@ import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 
 import javax.annotation.Nullable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -74,8 +76,8 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
-		try (var con = Bot.dataSource.getConnection()) {
-			var stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?");
+		try (Connection con = Bot.dataSource.getConnection();
+		     PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
 			var rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -429,8 +431,8 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void setTimeout(TextChannel channel, int timeout) throws SQLException {
-		try (var con = Bot.dataSource.getConnection()) {
-			var stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?");
+		try (Connection con = Bot.dataSource.getConnection();
+		     PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
 			stmt.setInt(1, timeout);
 			stmt.setLong(2, channel.getIdLong());
 			stmt.executeUpdate();
@@ -445,9 +447,9 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getTimeout(TextChannel channel) throws SQLException {
-		try (var con = Bot.dataSource.getConnection()) {
-			var stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?");
-			stmt.setLong(1, channel.getIdLong());
+		try (Connection con = Bot.dataSource.getConnection();
+		     PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
+						stmt.setLong(1, channel.getIdLong());
 			var rs = stmt.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1);
@@ -522,7 +524,7 @@ public class HelpChannelManager {
 
 	private Map<Long, Double> calculateExperience(List<Message> messages, long ownerId) {
 		Map<Long, Double> experience = new HashMap<>();
-		if (messages == null || messages.size() == 0) return Map.of();
+		if (messages == null || messages.isEmpty()) return Map.of();
 		for (User user : messages.stream().map(Message::getAuthor).collect(Collectors.toSet())) {
 			if (user.getIdLong() == ownerId) continue;
 			int xp = 0;
