@@ -32,8 +32,8 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * downvotes there are than upvotes. If this value is higher than or equal
 	 * to the threshold value returned by this method, the message is deleted.
 	 * <p>
-	 *     Note that usually, you want to return a positive value, to indicate
-	 *     that the message should have <em>more</em> downvotes than upvotes.
+	 * Note that usually, you want to return a positive value, to indicate
+	 * that the message should have <em>more</em> downvotes than upvotes.
 	 * </p>
 	 *
 	 * @param guild The guild to get the threshold for.
@@ -132,7 +132,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 		Emoji reaction = event.getEmoji();
 		if (
 				!reaction.equals(getUpvoteEmote(event.getJDA())) &&
-				!reaction.equals(getDownvoteEmote(event.getJDA()))
+						!reaction.equals(getDownvoteEmote(event.getJDA()))
 		) {
 			return false;
 		}
@@ -168,10 +168,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 			msg.delete().queue();
 			msg.getAuthor().openPrivateChannel()
 					.queue(
-							s -> s.sendMessageFormat(
-									"Your message in %s has been removed due to community feedback.",
-									getChannel(guild).getAsMention()
-							).queue(),
+							s -> s.sendMessageFormat("Your message in %s has been removed due to community feedback.", getChannel(guild).getAsMention()).queue(),
 							e -> {}
 					);
 		}
