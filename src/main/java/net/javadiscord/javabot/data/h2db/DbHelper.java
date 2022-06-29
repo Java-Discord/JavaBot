@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -123,13 +125,17 @@ public class DbHelper {
 	private static void initializeSchema(HikariDataSource dataSource) throws IOException, SQLException {
 		InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("database/schema.sql");
 		if (is == null) throw new IOException("Could not load schema.sql.");
-		var queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
+		List<String> queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
 				.filter(s -> !s.isBlank()).toList();
-		try (var c = dataSource.getConnection()) {
-			for (var query : queries) {
-				var stmt = c.createStatement();
-				stmt.executeUpdate(query);
-				stmt.close();
+		try (Connection c = dataSource.getConnection()) {
+			for (String rawQuery : queries) {
+				StringBuilder query = new StringBuilder();
+				rawQuery.lines()
+						.map(s -> s.strip().stripIndent())
+						.forEach(query::append);
+				try (Statement stmt = c.createStatement()) {
+					stmt.executeUpdate(query.toString());
+				}
 			}
 		}
 		log.info("Successfully initialized H2 database.");
