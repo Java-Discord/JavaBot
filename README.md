@@ -1,6 +1,6 @@
-# JavaBot
+# JavaBot — General Utility Bot for the [JavaDiscord Community](https://join.javadiscord.net/)
 
-General utility bot for the [Java Community on Discord.](https://join.javadiscord.net/)
+![Banner](https://user-images.githubusercontent.com/48297101/174893242-c8fc553a-e36b-4c5f-91d3-9c3bc659a7c9.png)
 
 # Usage 
 
