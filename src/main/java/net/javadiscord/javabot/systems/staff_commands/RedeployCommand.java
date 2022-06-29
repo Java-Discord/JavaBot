@@ -3,7 +3,7 @@ package net.javadiscord.javabot.systems.staff_commands;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ public class RedeployCommand extends SlashCommand {
 	 */
 	public RedeployCommand() {
 		setSlashCommandData(Commands.slash("redeploy", "(ADMIN-ONLY) Makes the bot redeploy.")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		requireUsers(Bot.config.getSystems().getAdminUsers());

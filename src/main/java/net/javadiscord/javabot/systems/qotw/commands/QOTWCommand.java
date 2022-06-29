@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.javadiscord.javabot.systems.qotw.commands.qotw_points.IncrementPointsSubcommand;
@@ -24,7 +24,7 @@ public class QOTWCommand extends SlashCommand {
 	 */
 	public QOTWCommand() {
 		setSlashCommandData(Commands.slash("qotw", "Administrative tools for managing the Question of the Week.")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommandGroups(Map.of(

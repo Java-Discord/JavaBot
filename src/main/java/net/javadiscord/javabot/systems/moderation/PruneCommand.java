@@ -2,7 +2,7 @@ package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -33,7 +33,7 @@ public class PruneCommand extends ModerateCommand {
 				.addOption(OptionType.STRING, "after", "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
 				.addOption(OptionType.STRING, "reason", "The reason for issuing the prune command. This will be provided as the reason for each ban.", false)
 				.addOption(OptionType.INTEGER, "delete-days-of-history", "The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.", false)
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 	}

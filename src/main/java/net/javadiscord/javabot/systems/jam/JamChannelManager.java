@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.jam;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.javadiscord.javabot.data.config.guild.JamConfig;
 import net.javadiscord.javabot.systems.jam.model.Jam;
@@ -56,7 +57,7 @@ public class JamChannelManager {
 		Message themeVotingMessage = this.config.getVotingChannel().retrieveMessageById(messageId).complete();
 		Map<JamTheme, List<Long>> votes = new HashMap<>();
 		for (int i = 0; i < themes.size(); i++) {
-			List<User> users = themeVotingMessage.retrieveReactionUsers(JamPhaseManager.REACTION_NUMBERS[i]).complete();
+			List<User> users = themeVotingMessage.retrieveReactionUsers(Emoji.fromUnicode(JamPhaseManager.REACTION_NUMBERS[i])).complete();
 			votes.put(
 					themes.get(i),
 					users.stream()
@@ -87,7 +88,7 @@ public class JamChannelManager {
 		}
 		Message themeVoteMessage = this.config.getVotingChannel().sendMessageEmbeds(voteEmbedBuilder.build()).complete();
 		for (int i = 0; i < themes.size(); i++) {
-			themeVoteMessage.addReaction(JamPhaseManager.REACTION_NUMBERS[i]).queue();
+			themeVoteMessage.addReaction(Emoji.fromUnicode(JamPhaseManager.REACTION_NUMBERS[i])).queue();
 		}
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle(String.format("%s Theme Voting Has Started!", jam.getFullName()))
@@ -152,7 +153,7 @@ public class JamChannelManager {
 					.setTimestamp(submission.getCreatedAt())
 					.addField("Description", submission.getDescription(), false);
 			Message message = this.config.getVotingChannel().sendMessageEmbeds(embedBuilder.build()).complete();
-			message.addReaction(JamPhaseManager.SUBMISSION_VOTE_UNICODE).complete();
+			message.addReaction(Emoji.fromUnicode(JamPhaseManager.SUBMISSION_VOTE_UNICODE)).complete();
 			messageIds.put(submission, message.getIdLong());
 		}
 
@@ -180,7 +181,7 @@ public class JamChannelManager {
 		for (var entry : submissionMessageMap.entrySet()) {
 			Message message = this.config.getVotingChannel().retrieveMessageById(entry.getValue()).complete();
 			Guild guild = message.getGuild();
-			List<User> users = message.retrieveReactionUsers(JamPhaseManager.SUBMISSION_VOTE_UNICODE).complete();
+			List<User> users = message.retrieveReactionUsers(Emoji.fromUnicode(JamPhaseManager.SUBMISSION_VOTE_UNICODE)).complete();
 			votesMap.put(
 					entry.getKey(),
 					users.stream()

@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.starboard;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
@@ -27,22 +28,22 @@ public class StarboardManager extends ListenerAdapter {
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
 		if (!validUser(event.getUser())) return;
 		if (!isValidChannel(event.getChannel())) return;
-		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getChannel(), event.getMessageIdLong());
+		handleReactionEvent(event.getGuild(), event.getEmoji(), event.getChannel(), event.getMessageIdLong());
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
 		if (!validUser(event.getUser())) return;
 		if (!isValidChannel(event.getGuildChannel())) return;
-		handleReactionEvent(event.getGuild(), event.getReactionEmote(), event.getChannel(), event.getMessageIdLong());
+		handleReactionEvent(event.getGuild(), event.getEmoji(), event.getChannel(), event.getMessageIdLong());
 	}
 
-	private void handleReactionEvent(Guild guild, MessageReaction.ReactionEmote reactionEmote, MessageChannel channel, long messageId) {
+	private void handleReactionEvent(Guild guild, Emoji emoji, MessageChannel channel, long messageId) {
 		Bot.asyncPool.submit(() -> {
 			var config = Bot.config.get(guild).getStarBoard();
 			if (config.getStarboardChannel().equals(channel)) return;
-			var starEmote = config.getEmotes().get(0);
-			if (!reactionEmote.getName().equals(starEmote)) return;
+			Emoji starEmote = config.getEmojis().get(0);
+			if (!emoji.equals(starEmote)) return;
 			channel.retrieveMessageById(messageId).queue(
 					message -> {
 						int stars = getReactionCountForEmote(starEmote, message);
@@ -66,7 +67,7 @@ public class StarboardManager extends ListenerAdapter {
 		});
 	}
 
-	private boolean isValidChannel(MessageChannel channel) {
+	private boolean isValidChannel(@NotNull MessageChannel channel) {
 		var type = channel.getType();
 		return type == ChannelType.TEXT || type == ChannelType.GUILD_PUBLIC_THREAD;
 	}
@@ -100,13 +101,13 @@ public class StarboardManager extends ListenerAdapter {
 	/**
 	 * Attemps to get the amount of reactions for the given emote.
 	 *
-	 * @param emote   The emote.
+	 * @param emoji   The emote.
 	 * @param message The message.
 	 * @return The amount of reactions.
 	 */
-	private int getReactionCountForEmote(String emote, Message message) {
+	private int getReactionCountForEmote(Emoji emoji, Message message) {
 		return message.getReactions().stream()
-				.filter(r -> r.getReactionEmote().getName().equals(emote))
+				.filter(r -> r.getEmoji().equals(emoji))
 				.findFirst()
 				.map(MessageReaction::getCount)
 				.orElse(0);
@@ -116,7 +117,7 @@ public class StarboardManager extends ListenerAdapter {
 		if (stars < config.getReactionThreshold()) return;
 		var embed = buildStarboardEmbed(message);
 		var action = config.getStarboardChannel()
-				.sendMessage(String.format("%s %s | %s", config.getEmotes().get(0), stars, message.getChannel().getAsMention()))
+				.sendMessage(String.format("%s %s | %s", config.getEmojis().get(0), stars, message.getChannel().getAsMention()))
 				.setEmbeds(embed);
 		for (var a : message.getAttachments()) {
 			try {
@@ -157,9 +158,9 @@ public class StarboardManager extends ListenerAdapter {
 							ExceptionLogger.capture(e, getClass().getSimpleName());
 						}
 					} else {
-						var starEmote = config.getEmotes().get(0);
-						if (stars > 10) starEmote = config.getEmotes().get(1);
-						if (stars > 25) starEmote = config.getEmotes().get(2);
+						var starEmote = config.getEmojis().get(0);
+						if (stars > 10) starEmote = config.getEmojis().get(1);
+						if (stars > 25) starEmote = config.getEmojis().get(2);
 						starboardMessage.editMessage(
 										String.format("%s %s | %s", starEmote, stars, message.getChannel().getAsMention()))
 								.queue();
@@ -201,7 +202,7 @@ public class StarboardManager extends ListenerAdapter {
 			var repo = new StarboardRepository(con);
 			var entries = repo.getAllStarboardEntries(guild.getIdLong());
 			var config = Bot.config.get(guild).getStarBoard();
-			var starEmote = config.getEmotes().get(0);
+			var starEmote = config.getEmojis().get(0);
 			for (var entry : entries) {
 				var channel = guild.getTextChannelById(entry.getChannelId());
 				if (channel == null) {

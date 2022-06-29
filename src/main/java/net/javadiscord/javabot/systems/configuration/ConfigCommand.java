@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.configuration;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.systems.configuration.subcommands.GetConfigSubcommand;
 import net.javadiscord.javabot.systems.configuration.subcommands.ListConfigSubcommand;
@@ -17,7 +17,7 @@ public class ConfigCommand extends SlashCommand {
 	 */
 	public ConfigCommand() {
 		setSlashCommandData(Commands.slash("config", "Administrative Commands for managing the bot's configuration.")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommands(new ListConfigSubcommand(), new GetConfigSubcommand(), new SetConfigSubcommand());

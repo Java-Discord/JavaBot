@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -14,7 +14,7 @@ public class EmbedCommand extends SlashCommand {
 	 */
 	public EmbedCommand() {
 		setSlashCommandData(Commands.slash("embed", "Administrative commands for creating and editing embed messages.")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommands(new CreateEmbedSubcommand(), new EditEmbedSubcommand());

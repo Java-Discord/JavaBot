@@ -3,7 +3,7 @@ package net.javadiscord.javabot.data.h2db.commands;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.javadiscord.javabot.Bot;
@@ -22,7 +22,7 @@ public class DbAdminCommand extends SlashCommand {
 	public DbAdminCommand() {
 		setRegistrationType(RegistrationType.GUILD);
 		setSlashCommandData(Commands.slash("db-admin", "(ADMIN ONLY) Administrative Commands for managing the bot's database.")
-				.setDefaultPermissions(CommandPermissions.enabledFor(Permission.MANAGE_SERVER))
+				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
 				.setGuildOnly(true)
 		);
 		addSubcommands(new ExportSchemaSubcommand(), new ExportTableSubcommand(), new MigrationsListSubcommand(), new MigrateSubcommand(), new QuickMigrateSubcommand());

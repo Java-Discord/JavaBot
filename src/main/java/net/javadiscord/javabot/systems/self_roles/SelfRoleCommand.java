@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.self_roles;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -14,7 +14,7 @@ public class SelfRoleCommand extends SlashCommand {
 	 */
 	public SelfRoleCommand() {
 		setSlashCommandData(Commands.slash("self-role", "Administrative Commands for managing Self Roles.")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommands(new CreateSelfRoleSubcommand(), new ChangeSelfRoleStatusSubcommand());

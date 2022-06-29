@@ -23,10 +23,10 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
     // JDA & DIH4JDA (Interaction Framework)
-    implementation("com.github.Xirado:JDA:b54a2a95c0") {
+    implementation("net.dv8tion:JDA:5.0.0-alpha.13") {
         exclude(module = "opus-java")
     }
-    implementation("com.github.DynxstyGIT:DIH4JDA:53481c7608")
+    implementation("com.github.DynxstyGIT:DIH4JDA:1.5.5")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")

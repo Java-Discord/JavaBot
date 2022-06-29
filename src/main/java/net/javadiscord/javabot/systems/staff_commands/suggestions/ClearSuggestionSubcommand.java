@@ -7,7 +7,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,10 +31,11 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		message.clearReactions().queue();
 		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed, config);
+		SystemsConfig.EmojiConfig emojiConfig = Bot.config.getSystems().getEmojiConfig();
 		message.editMessageEmbeds(clearEmbed).queue(
 				edit -> {
-					edit.addReaction(config.getEmote().getUpvoteEmote()).queue();
-					edit.addReaction(config.getEmote().getDownvoteEmote()).queue();
+					edit.addReaction(emojiConfig.getUpvoteEmote(event.getJDA())).queue();
+					edit.addReaction(emojiConfig.getDownvoteEmote(event.getJDA())).queue();
 				},
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Cleared", String.format("Successfully cleared suggestion with id `%s`", message.getId()))

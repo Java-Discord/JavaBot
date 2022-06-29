@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +34,7 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 		message.clearReactions().queue();
 		MessageEmbed declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, reason, config);
 		message.editMessageEmbeds(declineEmbed).queue(
-				edit -> edit.addReaction(config.getEmote().getFailureEmote()).queue(),
+				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getFailureEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Declined", String.format("Successfully declined suggestion with id `%s`", message.getId()))
 				.addActionRows(getJumpButton(message));

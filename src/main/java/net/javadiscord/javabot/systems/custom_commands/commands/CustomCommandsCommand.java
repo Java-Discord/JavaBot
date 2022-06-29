@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.custom_commands.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -14,7 +14,7 @@ public class CustomCommandsCommand extends SlashCommand {
 	 */
 	public CustomCommandsCommand() {
 		setSlashCommandData(Commands.slash("customcommands-admin", "Administrative commands for managing \"Custom Commands\".")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommands(new CreateCustomCommandSubcommand(), new DeleteCustomCommandSubcommand(), new EditCustomCommandSubcommand());

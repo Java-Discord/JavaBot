@@ -1,7 +1,11 @@
 package net.javadiscord.javabot.util;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.utils.MarkdownSanitizer;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -163,4 +167,18 @@ public class StringUtils {
 				uptimeDAYS, uptimeHRS, uptimeMIN, uptimeSEC);
 	}
 
+	/**
+	 * Counts the amount of reactions on a single message.
+	 *
+	 * @param msg The {@link Message}.
+	 * @param emoji The {@link Emoji} which should be counted.
+	 * @return The amount of reactions.
+	 */
+	public static int countReactions(@NotNull Message msg, Emoji emoji) {
+		MessageReaction reaction = msg.getReaction(emoji);
+		if (reaction == null) return 0;
+		return (int) reaction.retrieveUsers().stream()
+				.filter(user -> !user.isBot() && !user.isSystem())
+				.count();
+	}
 }

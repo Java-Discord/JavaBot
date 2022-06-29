@@ -14,6 +14,7 @@ import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -90,21 +91,21 @@ public final class QOTWNotificationService extends NotificationService {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(submissionThread.getIdLong());
 			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
-				new GuildNotificationService(guild).sendLogChannelNotification(this.buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons));
+				new GuildNotificationService(guild).sendLogChannelNotification(buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons));
 				log.info("{} {} {}'s QOTW Submission{}", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag(), reasons != null ? " for: " + String.join(", ", reasons) : ".");
 			}));
 		});
 	}
 
-	private EmbedBuilder buildQOTWNotificationEmbed() {
+	private @NotNull EmbedBuilder buildQOTWNotificationEmbed() {
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
 				.setTimestamp(Instant.now());
 	}
 
-	private MessageEmbed buildBestAnswerEmbed(long points) {
-		return this.buildQOTWNotificationEmbed()
+	private @NotNull MessageEmbed buildBestAnswerEmbed(long points) {
+		return buildQOTWNotificationEmbed()
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.setDescription(String.format(
 						"""
@@ -113,18 +114,18 @@ public final class QOTWNotificationService extends NotificationService {
 				.build();
 	}
 
-	private MessageEmbed buildAccountIncrementEmbed(long points) {
-		return this.buildQOTWNotificationEmbed()
+	private @NotNull MessageEmbed buildAccountIncrementEmbed(long points) {
+		return buildQOTWNotificationEmbed()
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.setDescription(String.format(
 						"""
 								Your submission was accepted! %s
 								You've been granted **`1 QOTW-Point`**! (total: %s)""",
-						Bot.config.get(guild).getEmote().getSuccessEmote().getAsMention(), points))
+						Bot.config.getSystems().getEmojiConfig().getSuccessEmote(guild.getJDA()), points))
 				.build();
 	}
 
-	private MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
+	private @NotNull MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
 		return this.buildQOTWNotificationEmbed()
 				.setColor(Responses.Type.ERROR.getColor())
 				.setDescription(String.format("""
@@ -137,7 +138,7 @@ public final class QOTWNotificationService extends NotificationService {
 				.build();
 	}
 
-	private MessageEmbed buildSubmissionActionEmbed(User author, ThreadChannel thread, User reviewedBy, SubmissionStatus status, String... reasons) {
+	private @NotNull MessageEmbed buildSubmissionActionEmbed(@NotNull User author, ThreadChannel thread, @NotNull User reviewedBy, @NotNull SubmissionStatus status, String... reasons) {
 		EmbedBuilder builder = new EmbedBuilder()
 				.setAuthor(reviewedBy.getAsTag(), null, reviewedBy.getEffectiveAvatarUrl())
 				.setTitle(String.format("%s %s %s's QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag()))

@@ -136,7 +136,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 								String messageContent = m.getContentRaw();
 								if (messageContent.trim().length() == 0) messageContent = "[attachment]";
 								MessageActionUtils.addAttachmentsAndSend(m, thread.sendMessage(messageContent)
-										.allowedMentions(EnumSet.of(Message.MentionType.EMOTE, Message.MentionType.CHANNEL)));
+										.allowedMentions(EnumSet.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL)));
 							});
 							Responses.success(hook, "Best Answer", String.format("Successfully marked %s as the best answer", submissionThread.getAsMention())).queue();
 						}

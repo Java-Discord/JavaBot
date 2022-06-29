@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.systems.jam;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.interactions.commands.CommandPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.systems.jam.subcommands.admin.*;
 
@@ -14,7 +15,7 @@ public class JamAdminCommand extends SlashCommand {
 	 */
 	public JamAdminCommand() {
 		setSlashCommandData(Commands.slash("jam-admin", "Administrator actions for configuring the Java Jam.")
-				.setDefaultPermissions(CommandPermissions.DISABLED)
+				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommands(new PlanNewJamSubcommand(), new EditJamSubcommand(), new NextPhaseSubcommand(),

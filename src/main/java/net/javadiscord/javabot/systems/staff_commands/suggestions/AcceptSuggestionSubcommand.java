@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 		message.clearReactions().queue();
 		MessageEmbed declineEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
 		message.editMessageEmbeds(declineEmbed).queue(
-				edit -> edit.addReaction(config.getEmote().getSuccessEmote()).queue(),
+				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getSuccessEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Accepted", String.format("Successfully accepted suggestion with id `%s`", message.getId()))
 				.addActionRows(getJumpButton(message));

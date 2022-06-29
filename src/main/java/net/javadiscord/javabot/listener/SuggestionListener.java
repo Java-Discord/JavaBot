@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -60,10 +61,10 @@ public class SuggestionListener extends ListenerAdapter {
 	 * @return A {@link RestAction}.
 	 */
 	private RestAction<?> addReactions(Message message) {
-		var config = Bot.config.get(message.getGuild()).getEmote();
+		SystemsConfig.EmojiConfig config = Bot.config.getSystems().getEmojiConfig();
 		return RestAction.allOf(
-				message.addReaction(config.getUpvoteEmote()),
-				message.addReaction(config.getDownvoteEmote())
+				message.addReaction(config.getUpvoteEmote(message.getJDA())),
+				message.addReaction(config.getDownvoteEmote(message.getJDA()))
 		);
 	}
 
