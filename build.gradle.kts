@@ -36,7 +36,7 @@ dependencies {
     implementation("com.mashape.unirest:unirest-java:1.4.9")
 
     // H2 Database
-    implementation("com.h2database:h2:1.4.200")
+    implementation("com.h2database:h2:2.1.212")
     implementation("com.zaxxer:HikariCP:5.0.1")
 
     // Quartz scheduler
