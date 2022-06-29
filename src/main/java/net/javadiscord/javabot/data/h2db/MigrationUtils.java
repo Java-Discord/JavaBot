@@ -26,7 +26,7 @@ public class MigrationUtils {
 	 * @throws IOException        If an error occurs.
 	 */
 	public static Path getMigrationsDirectory() throws URISyntaxException, IOException {
-		var resource = MigrationsListSubcommand.class.getResource("/migrations/");
+		var resource = MigrationsListSubcommand.class.getResource("/database/migrations/");
 		if (resource == null) throw new IOException("Missing resource /migrations/");
 		var uri = resource.toURI();
 		Path dirPath;
@@ -34,7 +34,7 @@ public class MigrationUtils {
 			dirPath = Paths.get(uri);
 		} catch (FileSystemNotFoundException e) {
 			var env = new HashMap<String, String>();
-			dirPath = FileSystems.newFileSystem(uri, env).getPath("/migrations/");
+			dirPath = FileSystems.newFileSystem(uri, env).getPath("/database/migrations/");
 		}
 		return dirPath;
 	}

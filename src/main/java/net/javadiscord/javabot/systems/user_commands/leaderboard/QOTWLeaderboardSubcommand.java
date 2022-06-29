@@ -104,14 +104,14 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @throws IOException If an error occurs.
 	 */
 	private void drawUserCard(Graphics2D g2d, Member member, QOTWPointsService service, int y, boolean left) throws IOException {
-		BufferedImage card = ImageGenerationUtils.getResourceImage("images/leaderboard/LBCard.png");
+		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 		int x = left ? MARGIN * 5 : WIDTH - (MARGIN * 5) - card.getWidth();
 		g2d.drawImage(ImageGenerationUtils.getImageFromUrl(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
 		String displayName = member.getUser().getAsTag();
 		// draw card
 		g2d.drawImage(card, x, y, null);
 		g2d.setColor(PRIMARY_COLOR);
-		g2d.setFont(ImageGenerationUtils.getResourceFont("fonts/Uni-Sans-Heavy.ttf", 65).orElseThrow());
+		g2d.setFont(ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", 65).orElseThrow());
 
 		int stringWidth = g2d.getFontMetrics().stringWidth(displayName);
 		while (stringWidth > 750) {
@@ -122,7 +122,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		}
 		g2d.drawString(displayName, x + 430, y + 130);
 		g2d.setColor(SECONDARY_COLOR);
-		g2d.setFont(ImageGenerationUtils.getResourceFont("fonts/Uni-Sans-Heavy.ttf", 72).orElseThrow());
+		g2d.setFont(ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", 72).orElseThrow());
 
 		var points = service.getPoints(member.getIdLong());
 		String text = points + (points > 1 ? " points" : " point");
@@ -142,12 +142,12 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @throws IOException If an error occurs.
 	 */
 	private ByteArrayOutputStream generateLeaderboard(Guild guild, QOTWPointsService service) throws IOException {
-		BufferedImage logo = ImageGenerationUtils.getResourceImage("images/leaderboard/Logo.png");
-		BufferedImage card = ImageGenerationUtils.getResourceImage("images/leaderboard/LBCard.png");
+		BufferedImage logo = ImageGenerationUtils.getResourceImage("assets/images/QuestionOfTheWeekHeader.png");
+		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 
 		List<Member> topMembers = service.getTopMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
-				(ImageGenerationUtils.getResourceImage("images/leaderboard/LBCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
+				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = image.createGraphics();
 

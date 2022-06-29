@@ -27,7 +27,7 @@ public class JamSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<JamSubmission> getSubmissions(Jam jam) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement(StringResourceCache.load("/jam/sql/find_latest_submissions.sql"));
+		PreparedStatement stmt = con.prepareStatement(StringResourceCache.load("/database/sql/find_latest_submissions.sql"));
 		stmt.setLong(1, jam.getId());
 		ResultSet rs = stmt.executeQuery();
 		List<JamSubmission> submissions = new ArrayList<>();

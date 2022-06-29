@@ -43,7 +43,7 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 				if (!success) {
 					event.getHook().sendMessage("Exporting the schema was not successful.").queue();
 				} else {
-					event.getHook().sendMessage("The export was successful.").addFile(SCHEMA_FILE.toFile(), "schema.sql").queue(msg -> {
+					event.getHook().sendMessage("The export was successful.").addFile(SCHEMA_FILE.toFile(), "database/schema.sql").queue(msg -> {
 						try {
 							Files.delete(SCHEMA_FILE);
 						} catch (IOException e) {
