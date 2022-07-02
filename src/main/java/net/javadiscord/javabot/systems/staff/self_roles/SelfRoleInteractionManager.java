@@ -18,6 +18,7 @@ import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import org.apache.commons.validator.routines.EmailValidator;
 
 import java.time.Instant;
 
@@ -26,8 +27,6 @@ import java.time.Instant;
  */
 @Slf4j
 public class SelfRoleInteractionManager {
-
-	private final String EMAIL_PATTERN = "[\\w-]+@([\\w-]+\\.)+[\\w-]+";
 
 	/**
 	 * Handles all Button Interactions regarding the Self Role System.
@@ -170,7 +169,7 @@ public class SelfRoleInteractionManager {
 		var emailOption = event.getValue("email");
 		var timezoneOption = event.getValue("timezone");
 		var extraRemarksOption = event.getValue("extra-remarks");
-		if(!emailOption.getAsString().matches(EMAIL_PATTERN)) {
+		if(!EmailValidator.getInstance().isValid(emailOption.getAsString())) {
 			return Responses.error(event.getHook(), String.format("`%s` is not a valid Email-Address. Please try again.", emailOption.getAsString()));
 		}
 		Role role = event.getGuild().getRoleById(roleId);

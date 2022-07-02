@@ -26,6 +26,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.google.re2j:re2j:1.6")
+    implementation("commons-validator:commons-validator:1.7")
 
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.mashape.unirest:unirest-java:1.4.9")
