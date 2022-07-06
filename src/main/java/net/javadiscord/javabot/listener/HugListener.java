@@ -32,6 +32,9 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
+		if (event.getChannel().getIdLong()==Bot.config.get(event.getGuild()).getModeration().getSuggestionChannelId()) {
+			return;
+		}
 		TextChannel tc = null;
 		if (event.isFromType(ChannelType.TEXT)) {
 			tc = event.getTextChannel();
