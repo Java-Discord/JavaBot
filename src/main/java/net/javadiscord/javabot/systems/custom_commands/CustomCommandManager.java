@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class CustomCommandManager extends ListenerAdapter {
-
 	private static final Map<String, CustomCommand> loadedCommands;
 
 	static {
@@ -75,10 +73,9 @@ public class CustomCommandManager extends ListenerAdapter {
 	/**
 	 * Replies with all available custom commands.
 	 *
-	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static @NotNull List<Command.Choice> replyCustomCommands(@NotNull CommandAutoCompleteInteractionEvent event) {
+	public static @NotNull List<Command.Choice> replyCustomCommands() {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		for (CustomCommand command : loadedCommands.values()) {
 			choices.add(new Command.Choice("/" + command.getName(), command.getName()));
@@ -87,7 +84,7 @@ public class CustomCommandManager extends ListenerAdapter {
 	}
 
 	/**
-	 * Iterates through all guilds and load their corresponding {@link CustomCommand}s.
+	 * Iterates through all guilds and loads their corresponding {@link CustomCommand}s.
 	 *
 	 * @throws SQLException If an error occurs.
 	 */

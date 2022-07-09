@@ -114,6 +114,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED) {
 			return false;
 		}
+		if (getChannel(event.getGuild()) == null) return false;
 		return event.getChannel().getId().equals(getChannel(event.getGuild()).getId()) &&
 				isMessageEligibleForVoting(event.getMessage());
 	}

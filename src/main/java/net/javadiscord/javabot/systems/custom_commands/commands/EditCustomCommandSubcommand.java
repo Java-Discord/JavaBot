@@ -89,6 +89,6 @@ public class EditCustomCommandSubcommand extends CustomCommandsSubcommand implem
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(CustomCommandManager.replyCustomCommands(event)).queue();
+		event.replyChoices(CustomCommandManager.replyCustomCommands()).queue();
 	}
 }

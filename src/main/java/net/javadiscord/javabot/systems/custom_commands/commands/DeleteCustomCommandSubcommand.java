@@ -67,6 +67,6 @@ public class DeleteCustomCommandSubcommand extends CustomCommandsSubcommand impl
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(CustomCommandManager.replyCustomCommands(event)).queue();
+		event.replyChoices(CustomCommandManager.replyCustomCommands()).queue();
 	}
 }
