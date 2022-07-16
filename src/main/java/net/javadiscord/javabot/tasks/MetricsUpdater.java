@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 @Slf4j
-public class StatsUpdater extends ListenerAdapter {
+public class MetricsUpdater extends ListenerAdapter {
 	@Override
 	public void onReady(ReadyEvent event) {
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {

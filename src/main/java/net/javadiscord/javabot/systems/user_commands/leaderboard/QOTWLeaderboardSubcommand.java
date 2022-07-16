@@ -14,6 +14,7 @@ import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.ImageCache;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
 
 import javax.imageio.ImageIO;
@@ -25,8 +26,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
-
-import static net.javadiscord.javabot.Bot.imageCache;
 
 /**
  * Command for QOTW Leaderboard.
@@ -55,9 +54,9 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 				QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
 				WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember(), service));
 				// check whether the image may already been cached
-				byte[] array = imageCache.isCached(getCacheName()) ?
+				byte[] array = ImageCache.isCached(getCacheName()) ?
 						// retrieve the image from the cache
-						getOutputStreamFromImage(imageCache.getCachedImage(getCacheName())).toByteArray() :
+						getOutputStreamFromImage(ImageCache.getCachedImage(getCacheName())).toByteArray() :
 						// generate an entirely new image
 						generateLeaderboard(event.getGuild(), service).toByteArray();
 				action.addFile(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png").queue();
@@ -165,8 +164,8 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 			if (left) y = y + card.getHeight() + MARGIN;
 		}
 		g2d.dispose();
-		imageCache.removeCachedImagesByKeyword("qotw_leaderboard");
-		imageCache.cacheImage(getCacheName(), image);
+		ImageCache.removeCachedImagesByKeyword("qotw_leaderboard");
+		ImageCache.cacheImage(getCacheName(), image);
 		return getOutputStreamFromImage(image);
 	}
 

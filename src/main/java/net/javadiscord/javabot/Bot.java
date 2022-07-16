@@ -2,6 +2,7 @@ package net.javadiscord.javabot;
 
 import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
+import com.dynxsty.dih4jda.DIH4JDALogger;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.zaxxer.hikari.HikariDataSource;
 import io.sentry.Sentry;
@@ -27,9 +28,8 @@ import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockManager;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
-import net.javadiscord.javabot.tasks.StatsUpdater;
+import net.javadiscord.javabot.tasks.MetricsUpdater;
 import net.javadiscord.javabot.util.ExceptionLogger;
-import net.javadiscord.javabot.util.ImageCache;
 import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
@@ -64,11 +64,6 @@ public class Bot {
 	 * The Bots {@link MessageCache}, which handles logging of deleted and edited messages.
 	 */
 	public static MessageCache messageCache;
-
-	/**
-	 * A reference to the Bot's {@link ImageCache}.
-	 */
-	public static ImageCache imageCache;
 
 	/**
 	 * A reference to the Bot's {@link ServerLockManager}.
@@ -113,9 +108,6 @@ public class Bot {
 		TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 		config = new BotConfig(Path.of("config"));
 		dataSource = DbHelper.initDataSource(config);
-		messageCache = new MessageCache();
-		autoMod = new AutoMod();
-		imageCache = new ImageCache();
 		asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
 		JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
 				.setStatus(OnlineStatus.DO_NOT_DISTURB)
@@ -129,7 +121,10 @@ public class Bot {
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
+				.disableLogging(DIH4JDALogger.Type.SLASH_COMMAND_SKIPPED)
 				.build();
+		messageCache = new MessageCache();
+		autoMod = new AutoMod();
 		serverLockManager = new ServerLockManager(jda);
 		customCommandManager = new CustomCommandManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
@@ -167,7 +162,7 @@ public class Bot {
 				new GuildJoinListener(),
 				new UserLeaveListener(),
 				new StateListener(),
-				new StatsUpdater(),
+				new MetricsUpdater(),
 				new SuggestionListener(),
 				new StarboardManager(),
 				new HelpChannelListener(),
