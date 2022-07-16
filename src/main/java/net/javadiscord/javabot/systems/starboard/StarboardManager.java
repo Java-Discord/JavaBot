@@ -8,14 +8,17 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 
@@ -115,32 +118,26 @@ public class StarboardManager extends ListenerAdapter {
 
 	private void addMessageToStarboard(Message message, int stars, StarboardConfig config) throws SQLException {
 		if (stars < config.getReactionThreshold()) return;
-		var embed = buildStarboardEmbed(message);
-		var action = config.getStarboardChannel()
+		MessageEmbed embed = buildStarboardEmbed(message);
+		MessageAction action = config.getStarboardChannel()
 				.sendMessage(String.format("%s %s | %s", config.getEmojis().get(0), stars, message.getChannel().getAsMention()))
 				.setEmbeds(embed);
-		for (var a : message.getAttachments()) {
+		for (Message.Attachment a : message.getAttachments()) {
 			try {
-				action.addFile(a.retrieveInputStream().get(), a.getFileName());
+				action.addFile(a.getProxy().download().get(), a.getFileName());
 			} catch (InterruptedException | ExecutionException e) {
 				action.append("Could not add Attachment: ").append(a.getFileName());
 			}
 		}
-		action.queue(
-				starboardMessage -> {
-					StarboardEntry entry = new StarboardEntry();
-					entry.setOriginalMessageId(message.getIdLong());
-					entry.setGuildId(message.getGuild().getIdLong());
-					entry.setChannelId(message.getChannel().getIdLong());
-					entry.setAuthorId(message.getAuthor().getIdLong());
-					entry.setStarboardMessageId(starboardMessage.getIdLong());
-					try (var con = Bot.dataSource.getConnection()) {
-						var repo = new StarboardRepository(con);
-						repo.insert(entry);
-					} catch (SQLException e) {
-						log.error("Could not insert Starboard Entry", e);
-					}
-				}, e -> log.error("Could not send Message to Starboard", e)
+		action.queue(starboardMessage -> {
+			StarboardEntry entry = new StarboardEntry();
+			entry.setOriginalMessageId(message.getIdLong());
+			entry.setGuildId(message.getGuild().getIdLong());
+			entry.setChannelId(message.getChannel().getIdLong());
+			entry.setAuthorId(message.getAuthor().getIdLong());
+			entry.setStarboardMessageId(starboardMessage.getIdLong());
+			DbHelper.doDaoAction(StarboardRepository::new, dao -> dao.insert(entry));
+			}, e -> log.error("Could not send Message to Starboard", e)
 		);
 	}
 
