@@ -1,62 +1,71 @@
-package net.javadiscord.javabot.systems.staff.self_roles;
+package net.javadiscord.javabot.systems.self_roles;
 
+import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
+import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.Constants;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.util.Responses;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Handles all Interactions related to the Self Role System.
  */
 @Slf4j
-public class SelfRoleInteractionManager {
-
+public class SelfRoleInteractionManager extends ComponentHandler {
 	/**
-	 * Handles all Button Interactions regarding the Self Role System.
-	 *
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon clicking a button.
-	 * @param args  The button's id, split by ":".
+	 * The constructor of this class, which sets all the ids which should be handled.
 	 */
-	public static void handleButton(ButtonInteractionEvent event, String[] args) {
+	public SelfRoleInteractionManager() {
+		handleButtonIds("self-role");
+		handleModalIds("self-role");
+	}
+
+	@Override
+	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
+		Member member = event.getMember();
+		if (event.getGuild() == null || !event.isFromGuild() || member == null) {
+			Responses.error(event.getHook(), "This may only be used inside a server.").queue();
+			return;
+		}
+		String[] args = ComponentIdBuilder.split(event.getComponentId());
 		Role role = event.getGuild().getRoleById(args[2]);
-		if(role == null) return;
+		if (role == null) return;
 		boolean permanent = Boolean.parseBoolean(args[3]);
-		SelfRoleInteractionManager manager = new SelfRoleInteractionManager();
-		switch(args[1]) {
-			case "default" -> manager.handleSelfRole(event, role, permanent);
-			case "staff" -> manager.buildStaffApplication(event, role, event.getUser());
-			case "expert" -> manager.buildExpertApplication(event, event.getUser());
+		switch (args[1]) {
+			case "default" -> handleSelfRole(event, role, event.getGuild(), permanent);
+			case "staff" -> buildStaffApplication(event, role, member);
+			case "expert" -> buildExpertApplication(event, member);
+			default -> event.deferReply().queue(h -> Responses.error(h, "Unknown Interaction.").queue());
 		}
 	}
 
-	/**
-	 * Handles all Modal Submit Interactions regarding the Self Role System.
-	 *
-	 * @param event The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
-	 * @param args  The modal's id, split by ":".
-	 */
-	public static void handleModalSubmit(ModalInteractionEvent event, String[] args) {
+	@Override
+	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
+		String[] args = ComponentIdBuilder.split(event.getModalId());
 		event.deferReply(true).queue();
-		var config = Bot.config.get(event.getGuild());
-		SelfRoleInteractionManager manager = new SelfRoleInteractionManager();
-		switch(args[1]) {
-			case "staff" -> manager.sendStaffSubmission(event, config, args[2], args[3]).queue();
-			case "expert" -> manager.sendExpertSubmission(event, config.getModeration(), args[2]).queue();
+		GuildConfig config = Bot.config.get(event.getGuild());
+		switch (args[1]) {
+			case "staff" -> sendStaffSubmission(event, config, args[2], args[3]).queue();
+			case "expert" -> sendExpertSubmission(event, config.getModeration(), args[2]).queue();
+			default -> event.deferReply().queue(h -> Responses.error(h, "Unknown Interaction.").queue());
 		}
 	}
 
@@ -67,8 +76,8 @@ public class SelfRoleInteractionManager {
 	 * @param role      The corresponding {@link Role}.
 	 * @param applicant The Applicant.
 	 */
-	private void buildStaffApplication(ButtonInteractionEvent event, Role role, User applicant) {
-		if(event.getMember().getRoles().contains(role)) {
+	private void buildStaffApplication(@NotNull ButtonInteractionEvent event, Role role, @NotNull Member applicant) {
+		if (applicant.getRoles().contains(role)) {
 			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
 		}
@@ -101,10 +110,10 @@ public class SelfRoleInteractionManager {
 	 * @param event     The {@link ButtonInteractionEvent} that is fired upon clicking a button.
 	 * @param applicant The Applicant.
 	 */
-	private void buildExpertApplication(ButtonInteractionEvent event, User applicant) {
+	private void buildExpertApplication(@NotNull ButtonInteractionEvent event, @NotNull Member applicant) {
 		Role role = Bot.config.get(event.getGuild()).getModeration().getExpertRole();
-		if(event.getMember().getRoles().contains(role)) {
-			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
+		if (applicant.getRoles().contains(role)) {
+			event.reply("You already have the Expert Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
 		}
 		TextInput experience = TextInput.create("java-experience", "How much Java experience do you have?", TextInputStyle.PARAGRAPH)
@@ -133,20 +142,21 @@ public class SelfRoleInteractionManager {
 	 *
 	 * @param event     The {@link ButtonInteractionEvent} that is fired upon clicking a button.
 	 * @param role      The Role that should be assigned/removed
+	 * @param guild     The current {@link Guild}.
 	 * @param permanent Whether the user is able to remove the role again.
 	 */
-	private void handleSelfRole(ButtonInteractionEvent event, Role role, boolean permanent) {
+	private void handleSelfRole(@NotNull ButtonInteractionEvent event, Role role, @NotNull Guild guild, boolean permanent) {
 		event.deferEdit().queue();
-		event.getGuild().retrieveMemberById(event.getUser().getId()).queue(member -> {
-			if(member.getRoles().contains(role)) {
-				if(!permanent) {
-					event.getGuild().removeRoleFromMember(member, role).queue();
+		guild.retrieveMemberById(event.getUser().getId()).queue(member -> {
+			if (member.getRoles().contains(role)) {
+				if (!permanent) {
+					guild.removeRoleFromMember(member, role).queue();
 					event.getHook().sendMessage("Removed Role: " + role.getAsMention()).setEphemeral(true).queue();
 				} else {
 					event.getHook().sendMessage("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
 				}
 			} else {
-				event.getGuild().addRoleToMember(member, role).queue();
+				guild.addRoleToMember(member, role).queue();
 				event.getHook().sendMessage("Added Role: " + role.getAsMention()).setEphemeral(true).queue();
 			}
 		}, e -> log.error("Could not retrieve Member with Id: " + event.getUser().getIdLong()));
@@ -161,26 +171,29 @@ public class SelfRoleInteractionManager {
 	 * @param userId The applicant's id.
 	 * @return The {@link WebhookMessageAction}.
 	 */
-	private WebhookMessageAction<Message> sendStaffSubmission(ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
-		var nameOption = event.getValue("name");
-		var ageOption = event.getValue("age");
-		var emailOption = event.getValue("email");
-		var timezoneOption = event.getValue("timezone");
-		var extraRemarksOption = event.getValue("extra-remarks");
+	private WebhookMessageAction<Message> sendStaffSubmission(@NotNull ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
+		ModalMapping nameOption = event.getValue("name");
+		ModalMapping ageOption = event.getValue("age");
+		ModalMapping emailOption = event.getValue("email");
+		ModalMapping timezoneOption = event.getValue("timezone");
+		ModalMapping extraRemarksOption = event.getValue("extra-remarks");
+		if (nameOption == null || ageOption == null || emailOption == null || timezoneOption == null || extraRemarksOption == null) {
+			return Responses.error(event.getHook(), "Missing required arguments.");
+		}
 		if (!EmailValidator.getInstance().isValid(emailOption.getAsString())) {
 			return Responses.error(event.getHook(), String.format("`%s` is not a valid Email-Address. Please try again.", emailOption.getAsString()));
 		}
-		Role role = event.getGuild().getRoleById(roleId);
-		if(role == null) {
+		Role role = config.getGuild().getRoleById(roleId);
+		if (role == null) {
 			return Responses.error(event.getHook(), "Unknown Role. Please contact an Administrator if this issue persists");
 		}
-		event.getGuild().retrieveMemberById(userId).queue(
+		config.getGuild().retrieveMemberById(userId).queue(
 				member -> {
 					User user = member.getUser();
 					MessageEmbed embed = new EmbedBuilder()
 							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 							.setTitle(String.format("%s applied for %s", user.getAsTag(), role.getName()))
-							.setColor(config.getSlashCommand().getSuccessColor())
+							.setColor(Responses.Type.SUCCESS.getColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
 							.addField("Email", String.format("`%s`", emailOption.getAsString()), true)
@@ -205,11 +218,17 @@ public class SelfRoleInteractionManager {
 	 * @param userId The applicant's id.
 	 * @return The {@link WebhookMessageAction}.
 	 */
-	private WebhookMessageAction<Message> sendExpertSubmission(ModalInteractionEvent event, ModerationConfig config, String userId) {
-		var experienceOption = event.getValue("java-experience");
-		var projectInfoOption = event.getValue("project-info");
-		var projectLinksOption = event.getValue("project-links");
-		var reasonOption = event.getValue("reason");
+	private @NotNull WebhookMessageAction<Message> sendExpertSubmission(@NotNull ModalInteractionEvent event, ModerationConfig config, String userId) {
+		if (event.getGuild() == null || !event.isFromGuild()) {
+			return Responses.error(event.getHook(), "This may only be used inside a server.");
+		}
+		ModalMapping experienceOption = event.getValue("java-experience");
+		ModalMapping projectInfoOption = event.getValue("project-info");
+		ModalMapping projectLinksOption = event.getValue("project-links");
+		ModalMapping reasonOption = event.getValue("reason");
+		if (experienceOption == null || projectInfoOption == null || projectLinksOption == null || reasonOption == null) {
+			return Responses.error(event.getHook(), "Missing required arguments.");
+		}
 		event.getGuild().retrieveMemberById(userId).queue(
 				member -> {
 					User user = member.getUser();
