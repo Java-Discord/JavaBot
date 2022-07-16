@@ -26,7 +26,7 @@ dependencies {
     implementation("net.dv8tion:JDA:5.0.0-alpha.13") {
         exclude(module = "opus-java")
     }
-    implementation("com.github.DynxstyGIT:DIH4JDA:d3722893f5")
+    implementation("com.github.DynxstyGIT:DIH4JDA:e72d1ef44a")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
