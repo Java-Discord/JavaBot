@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -28,7 +29,7 @@ import java.util.List;
 /**
  * <h3>This class represents the /leaderboard help-experience command.</h3>
  */
-public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
+public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 	private static final int PAGE_SIZE = 5;
 
 	/**
@@ -38,7 +39,6 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand {
 		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
 		);
-		handleButtonIds("experience-leaderboard");
 	}
 
 	@Override

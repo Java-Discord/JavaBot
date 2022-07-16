@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.systems.moderation.report;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
+import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -30,11 +31,7 @@ import java.util.List;
  * Manages all interactions regarding the report-system.
  */
 @Slf4j
-public class ReportManager extends ComponentHandler {
-	public ReportManager() {
-		handleButtonIds("resolve-report");
-		handleModalIds("report");
-	}
+public class ReportManager implements ButtonHandler, ModalHandler {
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {

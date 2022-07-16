@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
+import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -14,6 +15,7 @@ import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.util.List;
@@ -21,10 +23,9 @@ import java.util.List;
 /**
  * Subcommand that allows staff-members to add question to the QOTW-Queue.
  */
-public class AddQuestionSubcommand extends QOTWSubcommand {
+public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandler {
 	public AddQuestionSubcommand() {
 		setSubcommandData(new SubcommandData("add", "Add a question to the queue."));
-		handleModalIds("qotw-add-question");
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand {
 	}
 
 	@Override
-	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
 			event.deferReply(true).queue();
 			// Create question
 			QOTWQuestion question = new QOTWQuestion();

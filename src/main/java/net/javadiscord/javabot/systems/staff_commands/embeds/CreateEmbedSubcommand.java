@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * This class represents the `/embed create` command.
  */
-public class CreateEmbedSubcommand extends SlashCommand.Subcommand {
+public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */
@@ -38,7 +39,6 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand {
 								.setChannelTypes(ChannelType.TEXT)
 				)
 		);
-		handleModalIds("embed-create");
 	}
 
 	@Override

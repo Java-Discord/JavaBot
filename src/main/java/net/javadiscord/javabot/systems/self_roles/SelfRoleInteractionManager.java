@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.systems.self_roles;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
+import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -29,14 +30,7 @@ import java.util.List;
  * Handles all Interactions related to the Self Role System.
  */
 @Slf4j
-public class SelfRoleInteractionManager extends ComponentHandler {
-	/**
-	 * The constructor of this class, which sets all the ids which should be handled.
-	 */
-	public SelfRoleInteractionManager() {
-		handleButtonIds("self-role");
-		handleModalIds("self-role");
-	}
+public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {

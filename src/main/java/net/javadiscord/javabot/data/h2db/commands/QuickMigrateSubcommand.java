@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -25,7 +26,7 @@ import java.util.List;
  * This subcommand is responsible for executing quick SQL migrations on the bot's
  * schema.
  */
-public class QuickMigrateSubcommand extends SlashCommand.Subcommand {
+public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */
@@ -33,7 +34,6 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand {
 		setSubcommandData(new SubcommandData("quick-migrate", "(ADMIN ONLY) Run a single quick database migration"));
 		requireUsers(Bot.config.getSystems().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
-		handleModalIds("quick-migrate");
 	}
 
 	@Override

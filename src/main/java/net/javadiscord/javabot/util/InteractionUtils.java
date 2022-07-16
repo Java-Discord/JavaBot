@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.util;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
+import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -11,11 +11,12 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Utility class that contains several methods for managing utility interactions, such as ban, kick, warn, etc.
  */
-public class InteractionUtils extends ComponentHandler {
+public class InteractionUtils implements ButtonHandler {
 	/**
 	 * Template Interaction ID for deleting the original Message.
 	 */
@@ -37,17 +38,13 @@ public class InteractionUtils extends ComponentHandler {
 	 */
 	public static final String WARN_TEMPLATE = "utils:warn:%s";
 
-	public InteractionUtils() {
-		handleButtonIds("utils");
-	}
-
 	/**
 	 * Deletes a message, only if the person deleting the message is the author
 	 * of the message, a staff member, or the owner.
 	 *
 	 * @param interaction The button interaction.
 	 */
-	private static void delete(ButtonInteraction interaction) {
+	private static void delete(@NotNull ButtonInteraction interaction) {
 		Member member = interaction.getMember();
 		if (member == null) {
 			Responses.warning(interaction.getHook(), "Could not get member.").queue();
@@ -66,7 +63,7 @@ public class InteractionUtils extends ComponentHandler {
 		}
 	}
 
-	private static void kick(ButtonInteraction interaction, Guild guild, String memberId) {
+	private static void kick(ButtonInteraction interaction, @NotNull Guild guild, String memberId) {
 		ModerationService service = new ModerationService(interaction);
 		guild.retrieveMemberById(memberId).queue(
 				member -> {
@@ -76,7 +73,7 @@ public class InteractionUtils extends ComponentHandler {
 		);
 	}
 
-	private static void ban(ButtonInteraction interaction, Guild guild, String memberId) {
+	private static void ban(ButtonInteraction interaction, @NotNull Guild guild, String memberId) {
 		ModerationService service = new ModerationService(interaction);
 		guild.getJDA().retrieveUserById(memberId).queue(
 				user -> {
@@ -93,7 +90,7 @@ public class InteractionUtils extends ComponentHandler {
 	}
 
 	@Override
-	public void handleButton(ButtonInteractionEvent event, Button button) {
+	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		event.deferEdit().queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		if (event.getGuild() == null) {

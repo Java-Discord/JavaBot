@@ -18,24 +18,35 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.data.h2db.commands.QuickMigrateSubcommand;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
 import net.javadiscord.javabot.systems.custom_commands.CustomCommandManager;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
+import net.javadiscord.javabot.systems.moderation.report.ReportManager;
 import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockManager;
+import net.javadiscord.javabot.systems.qotw.commands.questions_queue.AddQuestionSubcommand;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
+import net.javadiscord.javabot.systems.self_roles.SelfRoleInteractionManager;
+import net.javadiscord.javabot.systems.staff_commands.embeds.CreateEmbedSubcommand;
+import net.javadiscord.javabot.systems.staff_commands.embeds.EditEmbedSubcommand;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
+import net.javadiscord.javabot.systems.user_commands.leaderboard.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
 import net.javadiscord.javabot.tasks.MetricsUpdater;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.InteractionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -124,12 +135,14 @@ public class Bot {
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
 				.disableUnknownCommandDeletion()
+				.disableUnregisteredCommandException()
 				.disableLogging(DIH4JDALogger.Type.SLASH_COMMAND_SKIPPED)
 				.build();
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
 		customCommandManager = new CustomCommandManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
+		addComponentHandler(dih4jda);
 		// initialize Sentry
 		Sentry.init(options -> {
 			options.setDsn(config.getSystems().getSentryDsn());
@@ -173,6 +186,27 @@ public class Bot {
 				new PingableNameListener()
 		);
 		dih4jda.addListener(new DIH4JDAListener());
+	}
+
+	private static void addComponentHandler(@NotNull DIH4JDA dih4jda) {
+		dih4jda.addButtonHandlers(Map.of(
+				List.of("experience-leaderboard"), new ExperienceLeaderboardSubcommand(),
+				List.of("utils"), new InteractionUtils(),
+				List.of("resolve-report"), new ReportManager(),
+				List.of("self-role"), new SelfRoleInteractionManager(),
+				List.of("qotw-submission"), new SubmissionInteractionManager()
+		));
+		dih4jda.addModalHandlers(Map.of(
+				List.of("qotw-add-question"), new AddQuestionSubcommand(),
+				List.of("embed-create"), new CreateEmbedSubcommand(),
+				List.of("embed-edit"), new EditEmbedSubcommand(),
+				List.of("quick-migrate"), new QuickMigrateSubcommand(),
+				List.of("report"), new ReportManager(),
+				List.of("self-role"), new SelfRoleInteractionManager()
+		));
+		dih4jda.addSelectMenuHandlers(Map.of(
+				List.of("qotw-submission-select"), new SubmissionInteractionManager()
+		));
 	}
 }
 

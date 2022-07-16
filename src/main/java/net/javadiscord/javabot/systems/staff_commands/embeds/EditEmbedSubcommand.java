@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -25,7 +26,7 @@ import java.util.List;
 /**
  * <h3>This class represents the /embed edit command.</h3>
  */
-public class EditEmbedSubcommand extends SlashCommand.Subcommand {
+public class EditEmbedSubcommand extends SlashCommand.Subcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */
@@ -42,7 +43,6 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand {
 								.setChannelTypes(ChannelType.TEXT)
 				)
 		);
-		handleModalIds("embed-edit");
 	}
 
 	@Override

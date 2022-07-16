@@ -1,7 +1,8 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.ComponentHandler;
+import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import com.dynxsty.dih4jda.interactions.components.SelectMenuHandler;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -12,21 +13,17 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 /**
  * Handles all interactions regarding the QOTW Submission System.
  */
-public class SubmissionInteractionManager extends ComponentHandler {
-
-	public SubmissionInteractionManager() {
-		handleButtonIds("qotw-submission");
-		handleSelectMenuIds("qotw-submission-select");
-	}
+public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHandler {
 
 	@Override
-	public void handleButton(ButtonInteractionEvent event, Button button) {
+	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		SubmissionManager manager = new SubmissionManager(Bot.config.get(event.getGuild()).getQotw());
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
@@ -37,7 +34,7 @@ public class SubmissionInteractionManager extends ComponentHandler {
 	}
 
 	@Override
-	public void handleSelectMenu(SelectMenuInteractionEvent event, List<String> values) {
+	public void handleSelectMenu(@NotNull SelectMenuInteractionEvent event, List<String> values) {
 		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
@@ -62,7 +59,7 @@ public class SubmissionInteractionManager extends ComponentHandler {
 	 * @param id    The button's id, split by ":".
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
-	public static void handleControlButtons(String[] id, ButtonInteractionEvent event) {
+	public static void handleControlButtons(String[] id, @NotNull ButtonInteractionEvent event) {
 		event.deferReply(true).queue();
 		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
 		if (!hasPermissions(event.getMember())) {
@@ -82,12 +79,12 @@ public class SubmissionInteractionManager extends ComponentHandler {
 		}
 	}
 
-	private static boolean hasPermissions(Member member) {
+	private static boolean hasPermissions(@NotNull Member member) {
 		QOTWConfig config = Bot.config.get(member.getGuild()).getQotw();
 		return !member.getRoles().isEmpty() && member.getRoles().contains(config.getQOTWReviewRole());
 	}
 
-	private static SelectMenu buildDeclineMenu() {
+	private static @NotNull SelectMenu buildDeclineMenu() {
 		return SelectMenu.create("qotw-submission-select:decline")
 				.setPlaceholder("Select a reason for declining this submission.")
 				.setRequiredRange(1, 3)
