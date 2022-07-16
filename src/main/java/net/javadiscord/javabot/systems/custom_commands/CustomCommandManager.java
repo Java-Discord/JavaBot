@@ -94,19 +94,12 @@ public class CustomCommandManager extends ListenerAdapter {
 			int initialSize = commands.size();
 			guild.retrieveCommands().queue(retrieved -> {
 				existingCommands.put(guild.getIdLong(), retrieved);
-				commands.forEach(c -> {
-					if (doesSlashCommandExist(existingCommands.get(guild.getIdLong()), c.getName())) {
-						log.error("Could not load \"{}\" in guild \"{}\", because it would've overwritten another command.",
-								c.getName(), guild.getName());
-						return;
-					}
-					guild.upsertCommand(c.toSlashCommandData()).queue(
-							s -> {
-								loadedCommands.put(c.getName(), c);
-								commands.remove(c);
-							},
-							err -> log.error("Could not upsert \"/{}\": ", c.getName()));
-				});
+				commands.forEach(c ->
+						guild.upsertCommand(c.toSlashCommandData()).queue(
+								s -> {
+									loadedCommands.put(c.getName(), c);
+									commands.remove(c);
+								}, err -> log.error("Could not upsert \"/{}\": ", c.getName())));
 				log.info("Loaded {} Custom Commands for Guild \"{}\": {}", initialSize - commands.size(), guild.getName(),
 						commands.stream().map(CustomCommand::getName).collect(Collectors.joining(", ")));
 			}, err -> log.error("Could not retrieve Commands in guild \"{}\"", guild.getName()));
@@ -151,13 +144,15 @@ public class CustomCommandManager extends ListenerAdapter {
 	 */
 	public boolean addCommand(@NotNull Guild guild, @NotNull CustomCommand command) throws SQLException {
 		if (doesSlashCommandExist(existingCommands.get(guild.getIdLong()), command.getName())) {
+			System.out.println("exists");
 			return false;
 		}
 		try (Connection con = dataSource.getConnection()) {
 			CustomCommandRepository repo = new CustomCommandRepository(con);
 			guild.upsertCommand(command.toSlashCommandData()).queue();
 			log.info("Created Custom Command in guild \"{}\": /{}", guild.getName(), command.getName());
-			return repo.insert(command) != null && loadedCommands.put(command.getName(), command) != null;
+			loadedCommands.put(command.getName(), command);
+			return repo.insert(command) != null;
 		}
 	}
 

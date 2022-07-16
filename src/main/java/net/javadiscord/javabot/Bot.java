@@ -123,6 +123,7 @@ public class Bot {
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
+				.disableUnknownCommandDeletion()
 				.disableLogging(DIH4JDALogger.Type.SLASH_COMMAND_SKIPPED)
 				.build();
 		messageCache = new MessageCache();
