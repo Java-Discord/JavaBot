@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StateListener extends ListenerAdapter {
 	@Override
-	public void onReady(ReadyEvent event) {
+	public void onReady(@NotNull ReadyEvent event) {
 		// Initialize all guild-specific configuration.
 		Bot.config.loadGuilds(event.getJDA().getGuilds());
 		Bot.config.flush();
@@ -68,7 +68,7 @@ public class StateListener extends ListenerAdapter {
 		Bot.config.flush();
 	}
 
-	private MessageEmbed buildBootedUpEmbed() {
+	private @NotNull MessageEmbed buildBootedUpEmbed() {
 		return new EmbedBuilder()
 				.setTitle("I've just been booted up!")
 				.addField("Operating System", StringUtils.getOperatingSystem(), true)

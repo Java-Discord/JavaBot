@@ -17,6 +17,6 @@ public class SuggestionCommand extends SlashCommand {
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
-		addSubcommands(new AcceptSuggestionSubcommand(), new DeclineSuggestionSubcommand(), new ClearSuggestionSubcommand());
+		addSubcommands(new AcceptSuggestionSubcommand(), new DeclineSuggestionSubcommand(), new ClearSuggestionSubcommand(), new OnHoldSuggestionSubcommand());
 	}
 }

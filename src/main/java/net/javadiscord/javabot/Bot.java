@@ -30,6 +30,7 @@ import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
 import net.javadiscord.javabot.tasks.MetricsUpdater;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.SchedulerException;
 
 import java.nio.file.Path;
@@ -109,6 +110,7 @@ public class Bot {
 		config = new BotConfig(Path.of("config"));
 		dataSource = DbHelper.initDataSource(config);
 		asyncPool = Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
+		autoMod = new AutoMod();
 		JDA jda = JDABuilder.createDefault(config.getSystems().getJdaBotToken())
 				.setStatus(OnlineStatus.DO_NOT_DISTURB)
 				.setChunkingFilter(ChunkingFilter.ALL)
@@ -124,7 +126,6 @@ public class Bot {
 				.disableLogging(DIH4JDALogger.Type.SLASH_COMMAND_SKIPPED)
 				.build();
 		messageCache = new MessageCache();
-		autoMod = new AutoMod();
 		serverLockManager = new ServerLockManager(jda);
 		customCommandManager = new CustomCommandManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
@@ -151,8 +152,9 @@ public class Bot {
 	 * @param jda     The JDA bot instance to add listeners to.
 	 * @param dih4jda The {@link DIH4JDA} instance.
 	 */
-	private static void addEventListeners(JDA jda, DIH4JDA dih4jda) {
+	private static void addEventListeners(@NotNull JDA jda, @NotNull DIH4JDA dih4jda) {
 		jda.addEventListener(
+				new StateListener(),
 				customCommandManager,
 				serverLockManager,
 				PresenceUpdater.standardActivities(),
@@ -161,7 +163,6 @@ public class Bot {
 				new MessageLinkListener(),
 				new GuildJoinListener(),
 				new UserLeaveListener(),
-				new StateListener(),
 				new MetricsUpdater(),
 				new SuggestionListener(),
 				new StarboardManager(),
