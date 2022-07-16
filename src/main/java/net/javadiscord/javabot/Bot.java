@@ -129,7 +129,7 @@ public class Bot {
 				.setMemberCachePolicy(MemberCachePolicy.ALL)
 				.enableCache(CacheFlag.ACTIVITY)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-				.addEventListeners(autoMod)
+				.addEventListeners(autoMod, new StateListener())
 				.build();
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOJI));
 		dih4jda = DIH4JDABuilder.setJDA(jda)
@@ -169,7 +169,6 @@ public class Bot {
 	 */
 	private static void addEventListeners(@NotNull JDA jda, @NotNull DIH4JDA dih4jda) {
 		jda.addEventListener(
-				new StateListener(),
 				customCommandManager,
 				serverLockManager,
 				PresenceUpdater.standardActivities(),

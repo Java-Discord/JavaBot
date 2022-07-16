@@ -226,9 +226,9 @@ public class CustomCommandManager extends ListenerAdapter {
 			}
 		} else {
 			if (command.isReply()) {
-				actions.add(event.reply(command.getResponse()));
+				actions.add(event.reply(command.getResponse()).allowedMentions(List.of()));
 			} else {
-				actions.add(event.getChannel().sendMessage(command.getResponse()));
+				actions.add(event.getChannel().sendMessage(command.getResponse()).allowedMentions(List.of()));
 			}
 		}
 		if (!command.isReply()) {

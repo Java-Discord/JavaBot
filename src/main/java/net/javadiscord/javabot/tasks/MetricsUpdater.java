@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MetricsUpdater extends ListenerAdapter {
 	@Override
-	public void onReady(ReadyEvent event) {
+	public void onReady(@NotNull ReadyEvent event) {
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
 			for (var guild : event.getJDA().getGuilds()) {
 				var config = Bot.config.get(guild).getStats();
