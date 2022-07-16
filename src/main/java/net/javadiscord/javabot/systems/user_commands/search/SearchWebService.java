@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
+import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -59,9 +60,11 @@ public final class SearchWebService {
 	 * @throws IOException If an error occurs.
 	 */
 	public @NotNull MessageEmbed buildSearchWebEmbed(@NotNull String query) throws IOException {
+		query = query.replaceAll("\\r|\\n", "");
 		EmbedBuilder embed = new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.setTitle("Search Results");
+				.setTitle("Search Results")
+				.setFooter("Query: " + (query.length() >= 1000 ? query.substring(0, 1000) + "..." : query));
 		SearchResult result = searchWeb(query);
 		JsonObject json = JsonParser.parseString(result.jsonResponse).getAsJsonObject();
 		JsonArray urls = json.get("webPages").getAsJsonObject().get("value").getAsJsonArray();
