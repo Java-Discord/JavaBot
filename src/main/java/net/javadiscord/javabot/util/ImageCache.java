@@ -17,6 +17,9 @@ public class ImageCache {
 		cache = new HashMap<>();
 	}
 
+	private ImageCache() {
+	}
+
 	/**
 	 * Caches an image by saving it in a {@link Map}.
 	 *
