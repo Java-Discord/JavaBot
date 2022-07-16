@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
@@ -43,7 +44,7 @@ public class PollCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping titleOption = event.getOption("title");
 		event.deferReply().queue();
 		if (titleOption == null) {

@@ -27,7 +27,7 @@ public class WarnsListContext extends ContextCommand.User {
 
 	@Override
 	public void execute(UserContextInteractionEvent event) {
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}

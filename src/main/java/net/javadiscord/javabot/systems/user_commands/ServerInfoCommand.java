@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
@@ -26,7 +27,7 @@ public class ServerInfoCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
 			Responses.warning(event, "This command may only be used inside servers.").queue();
 			return;
@@ -35,7 +36,7 @@ public class ServerInfoCommand extends SlashCommand {
 				.addActionRow(Button.link(Constants.WEBSITE_LINK, "Website")).queue();
 	}
 
-	private MessageEmbed buildServerInfoEmbed(Guild guild) {
+	private @NotNull MessageEmbed buildServerInfoEmbed(@NotNull Guild guild) {
 		long categories = guild.getCategories().size();
 		long channels = guild.getChannels().size() - categories;
 		return new EmbedBuilder()

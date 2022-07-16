@@ -50,7 +50,7 @@ public class RegexCommand extends SlashCommand {
 				.queue();
 	}
 
-	private EmbedBuilder buildRegexEmbed(boolean matches, Pattern pattern, String string) {
+	private @NotNull EmbedBuilder buildRegexEmbed(boolean matches, @NotNull Pattern pattern, String string) {
 		EmbedBuilder eb = new EmbedBuilder()
 				.addField("Regex:", String.format("```%s```", pattern.toString()), true)
 				.addField("String:", String.format("```%s```", string), true);

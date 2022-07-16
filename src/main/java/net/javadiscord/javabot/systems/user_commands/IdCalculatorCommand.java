@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
@@ -33,7 +34,7 @@ public class IdCalculatorCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("id");
 		if (idMapping == null) {
 			Responses.error(event, "Missing required arguments").queue();
@@ -47,7 +48,7 @@ public class IdCalculatorCommand extends SlashCommand {
 		event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id))).queue();
 	}
 
-	private MessageEmbed buildIdCalcEmbed(User author, long id, long unixTimestamp) {
+	private @NotNull MessageEmbed buildIdCalcEmbed(@NotNull User author, long id, long unixTimestamp) {
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("ID Calculator")

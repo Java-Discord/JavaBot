@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.net.URLEncoder;
@@ -42,7 +43,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		String encodedSearchTerm = URLEncoder.encode(Objects.requireNonNull(event.getOption("text")).getAsString(), StandardCharsets.UTF_8);
 		if (encodedSearchTerm.length() > MAX_SEARCH_TERM_LENGTH) {
 			event.reply("The text you provided is too long. It may not be more than " + MAX_SEARCH_TERM_LENGTH + " characters.").queue();
@@ -53,10 +54,11 @@ public class ChangeMyMindCommand extends SlashCommand {
 			@Override
 			public void completed(HttpResponse<JsonNode> hr) {
 				try {
+					String imageUrl = hr.getBody().getObject().getString("message");
 					event.getHook().sendMessageEmbeds(new EmbedBuilder()
+							.setAuthor(event.getUser().getAsTag(), imageUrl, event.getUser().getEffectiveAvatarUrl())
 							.setColor(Responses.Type.DEFAULT.getColor())
-							.setImage(hr.getBody().getObject().getString("message"))
-							.setFooter(event.getUser().getAsTag(), event.getUser().getEffectiveAvatarUrl())
+							.setImage(imageUrl)
 							.setTimestamp(Instant.now())
 							.build()
 					).queue();
