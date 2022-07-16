@@ -30,7 +30,6 @@ public class GuildConfig {
 	private QOTWConfig qotw;
 	private StatsConfig stats;
 	private StarboardConfig starBoard;
-	private JamConfig jam;
 	private MessageCacheConfig messageCache;
 	private ServerLockConfig serverLock;
 
@@ -48,7 +47,6 @@ public class GuildConfig {
 		this.qotw = new QOTWConfig();
 		this.stats = new StatsConfig();
 		this.starBoard = new StarboardConfig();
-		this.jam = new JamConfig();
 		this.messageCache = new MessageCacheConfig();
 		this.serverLock = new ServerLockConfig();
 		this.setGuild(guild);
@@ -100,8 +98,6 @@ public class GuildConfig {
 		this.stats.setGuildConfig(this);
 		if (this.starBoard == null) this.starBoard = new StarboardConfig();
 		this.starBoard.setGuildConfig(this);
-		if (this.jam == null) this.jam = new JamConfig();
-		this.jam.setGuildConfig(this);
 		if (this.messageCache == null) this.messageCache = new MessageCacheConfig();
 		this.messageCache.setGuildConfig(this);
 		if (this.serverLock == null) this.serverLock = new ServerLockConfig();
@@ -124,11 +120,11 @@ public class GuildConfig {
 
 	/**
 	 * Attempts to resolve a configuration property value by its name, using a
-	 * '.' to concatenate property names. For example, the {@link JamConfig} has
-	 * a property called <code>pingRoleId</code>. We can resolve it via the
-	 * full name <code>jam.pingRoleId</code>, using the <code>jam</code> field
+	 * '.' to concatenate property names. For example, the {@link ModerationConfig} has
+	 * a property called <code>adminRoleId</code>. We can resolve it via the
+	 * full name <code>moderation.adminRoleId</code>, using the <code>jam</code> field
 	 * of {@link GuildConfig} followed by the <code>pingRoleId</code> field from
-	 * {@link JamConfig}.
+	 * {@link ModerationConfig}.
 	 *
 	 * @param propertyName The name of the property.
 	 * @return The value of the property, if found, or null otherwise.
