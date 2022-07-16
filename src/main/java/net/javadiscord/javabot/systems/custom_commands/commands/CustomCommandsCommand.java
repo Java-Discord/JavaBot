@@ -13,7 +13,7 @@ public class CustomCommandsCommand extends SlashCommand {
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.Subcommand}s.
 	 */
 	public CustomCommandsCommand() {
-		setSlashCommandData(Commands.slash("customcommands-admin", "Administrative commands for managing \"Custom Commands\".")
+		setSlashCommandData(Commands.slash("customcmds-admin", "Administrative commands for managing \"Custom Commands\".")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
