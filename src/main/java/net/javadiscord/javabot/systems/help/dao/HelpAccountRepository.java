@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.help.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -78,7 +79,7 @@ public class HelpAccountRepository {
 	 */
 	public List<HelpAccount> getAccounts(int page, int size) throws SQLException {
 		String sql = "SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT %d OFFSET %d";
-		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, (page * size) - size))) {
+		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, Math.max(0, (page * size) - size)))) {
 			ResultSet rs = stmt.executeQuery();
 			List<HelpAccount> accounts = new ArrayList<>(size);
 			while (rs.next()) {
@@ -121,7 +122,7 @@ public class HelpAccountRepository {
 		}
 	}
 
-	private HelpAccount read(ResultSet rs) throws SQLException {
+	private @NotNull HelpAccount read(@NotNull ResultSet rs) throws SQLException {
 		HelpAccount account = new HelpAccount();
 		account.setUserId(rs.getLong("user_id"));
 		account.setExperience(rs.getDouble("experience"));
