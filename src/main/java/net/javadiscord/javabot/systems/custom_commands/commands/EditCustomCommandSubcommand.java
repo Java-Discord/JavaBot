@@ -66,6 +66,7 @@ public class EditCustomCommandSubcommand extends CustomCommandsSubcommand implem
 			}
 			if (Bot.customCommandManager.editCommand(event.getGuild(), commandOptional.get(), update)) {
 				event.getHook().sendMessageEmbeds(buildEditCommandEmbed(event.getMember(), update)).queue();
+				return;
 			}
 			Responses.error(event.getHook(), "Could not edit Custom Command. Please try again.").queue();
 		});

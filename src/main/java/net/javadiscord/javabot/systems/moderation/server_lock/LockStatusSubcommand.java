@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.moderation.server_lock.subcommands;
+package net.javadiscord.javabot.systems.moderation.server_lock;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -40,9 +40,9 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 			boolean locked = lockedMapping.getAsBoolean();
 			config.set("serverLock.locked", String.valueOf(locked));
 			if (locked) {
-				Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList());
+				Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
 			} else {
-				Bot.serverLockManager.unlockServer(event.getGuild());
+				Bot.serverLockManager.unlockServer(event.getGuild(), event.getUser());
 			}
 			Responses.info(event, "Server Lock Status", String.format("Successfully %slocked the current server!", locked ? "" : "un")).queue();
 		} catch (UnknownPropertyException e) {

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
@@ -15,6 +16,7 @@ import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -61,7 +63,7 @@ public class ServerLockManager extends ListenerAdapter {
 					if (!members.isEmpty()) {
 						checkForEndOfRaid(guild);
 					} else {
-						unlockServer(guild);
+						unlockServer(guild, null);
 					}
 				}
 			}
@@ -160,7 +162,7 @@ public class ServerLockManager extends ListenerAdapter {
 		var potentialRaiders = getPotentialRaiders(guild);
 		var config = Bot.config.get(guild).getServerLock();
 		if (potentialRaiders.size() >= config.getLockThreshold()) {
-			lockServer(guild, potentialRaiders);
+			lockServer(guild, potentialRaiders, null);
 		}
 	}
 
@@ -175,7 +177,7 @@ public class ServerLockManager extends ListenerAdapter {
 		var potentialRaiders = getPotentialRaiders(guild);
 		log.info("Found {} potential raiders while checking for end of raid.", potentialRaiders.size());
 		if (potentialRaiders.size() < config.getLockThreshold()) {
-			unlockServer(guild);
+			unlockServer(guild, null);
 		}
 	}
 
@@ -199,13 +201,15 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param guild            The guild to lock.
 	 * @param potentialRaiders The list of members that we think are starting
 	 *                         the raid.
+	 * @param lockedBy         The user which locked the server.
 	 */
-	public void lockServer(Guild guild, @NotNull Collection<Member> potentialRaiders) {
+	public void lockServer(Guild guild, @NotNull Collection<Member> potentialRaiders, @Nullable User lockedBy) {
 		for (var member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
 				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
-							success -> {},
+							success -> {
+							},
 							error -> new GuildNotificationService(guild).sendLogChannelNotification("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()));
 				});
 			});
@@ -224,27 +228,38 @@ public class ServerLockManager extends ListenerAdapter {
 		var config = Bot.config.get(guild);
 		config.getServerLock().setLocked("true");
 		Bot.config.get(guild).flush();
-		new GuildNotificationService(guild).sendLogChannelNotification("""
-						**Server Locked** %s
-						The automated locking system has detected that the following %d users may be part of a raid:
-						%s
-						""",
-				config.getModeration().getStaffRole().getAsMention(),
-				potentialRaiders.size(),
-				membersString
-		);
+		GuildNotificationService notification = new GuildNotificationService(guild);
+		if (lockedBy == null) {
+			notification.sendLogChannelNotification("""
+							**Server Locked** %s
+							The automated locking system has detected that the following %d users may be part of a raid:
+							%s
+							""",
+					config.getModeration().getStaffRole().getAsMention(),
+					potentialRaiders.size(),
+					membersString
+			);
+		} else {
+			notification.sendLogChannelNotification("Server locked by " + lockedBy.getAsMention());
+		}
 	}
 
 	/**
 	 * Unlocks the server after it has been deemed that we're no longer in a raid.
 	 *
-	 * @param guild The guild to unlock.
+	 * @param guild      The guild to unlock.
+	 * @param unlockedby The user which unlocked the server.
 	 */
-	public void unlockServer(Guild guild) {
+	public void unlockServer(Guild guild, @Nullable User unlockedby) {
 		ServerLockConfig config = Bot.config.get(guild).getServerLock();
 		config.setLocked("false");
 		Bot.config.get(guild).flush();
 		guildMemberQueues.clear();
-		new GuildNotificationService(guild).sendLogChannelNotification("Server unlocked automatically.");
+		GuildNotificationService notification = new GuildNotificationService(guild);
+		if (unlockedby == null) {
+			notification.sendLogChannelNotification("Server unlocked automatically.");
+		} else {
+			notification.sendLogChannelNotification("Server unlocked by " + unlockedby.getAsMention());
+		}
 	}
 }

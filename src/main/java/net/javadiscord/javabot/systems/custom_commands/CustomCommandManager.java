@@ -192,7 +192,7 @@ public class CustomCommandManager extends ListenerAdapter {
 	 * @throws SQLException If an error occurs.
 	 */
 	public boolean editCommand(@NotNull Guild guild, @NotNull CustomCommand old, @NotNull CustomCommand update) throws SQLException {
-		if (doesSlashCommandExist(existingCommands.get(guild.getIdLong()), old.getName())) {
+		if (!doesSlashCommandExist(existingCommands.get(guild.getIdLong()), old.getName())) {
 			return false;
 		}
 		try (Connection con = dataSource.getConnection()) {
