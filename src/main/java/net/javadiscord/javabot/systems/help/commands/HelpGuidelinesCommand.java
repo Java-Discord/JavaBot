@@ -6,7 +6,10 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringResourceCache;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Collectors;
 
@@ -24,16 +27,21 @@ public class HelpGuidelinesCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
-		String channels = Bot.config.get(event.getGuild()).getHelp().getOpenChannelCategory().getChannels()
-				.stream()
-				.map(GuildChannel::getAsMention)
-				.collect(Collectors.joining("\n"));
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
+		String channels = "N/A";
+		if (config.getOpenChannelCategory() != null) {
+			channels = config.getOpenChannelCategory().getChannels()
+					.stream()
+					.map(GuildChannel::getAsMention)
+					.collect(Collectors.joining("\n"));
+		}
 		event.replyEmbeds(new EmbedBuilder()
 				.setTitle("Help Guidelines")
-				.setDescription(StringResourceCache.load("/help-guidelines.txt"))
+				.setColor(Responses.Type.DEFAULT.getColor())
+				.setDescription(StringResourceCache.load("/help_guidelines/guidelines_text.txt"))
 				.addField("Available Help Channels", channels, false)
-				.setImage("https://cdn.discordapp.com/attachments/744899463591624815/895244046027608074/unknown.png")
+				.setImage(StringResourceCache.load("/help_guidelines/guidelines_image_url.txt"))
 				.build()
 		).queue();
 	}

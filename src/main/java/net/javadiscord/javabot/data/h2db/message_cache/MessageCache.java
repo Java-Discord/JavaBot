@@ -91,12 +91,14 @@ public class MessageCache {
 	 * @param before  The {@link CachedMessage}.
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
+		MessageCacheConfig config = Bot.config.get(updated.getGuild()).getMessageCache();
+		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
-		MessageAction action = Bot.config.get(updated.getGuild()).getMessageCache().getMessageCacheLogChannel()
-				.sendMessageEmbeds(this.buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
+		MessageAction action = config.getMessageCacheLogChannel()
+				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
 				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-			action.addFile(this.buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt");
+			action.addFile(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt");
 		}
 		action.queue();
 	}
@@ -109,11 +111,12 @@ public class MessageCache {
 	 * @param message The {@link CachedMessage}.
 	 */
 	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
+		MessageCacheConfig config = Bot.config.get(guild).getMessageCache();
+		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-			MessageAction action = Bot.config.get(guild).getMessageCache().getMessageCacheLogChannel()
-					.sendMessageEmbeds(this.buildMessageDeleteEmbed(guild, author, channel, message));
+			MessageAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
+				action.addFile(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
 			}
 			action.queue();
 		});
