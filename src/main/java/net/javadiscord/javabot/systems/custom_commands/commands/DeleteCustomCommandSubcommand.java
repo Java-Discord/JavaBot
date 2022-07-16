@@ -44,6 +44,7 @@ public class DeleteCustomCommandSubcommand extends CustomCommandsSubcommand impl
 			}
 			if (Bot.customCommandManager.removeCommand(event.getGuild(), commandOptional.get())) {
 				event.getHook().sendMessageEmbeds(buildDeleteCommandEmbed(event.getMember(), commandOptional.get())).queue();
+				return;
 			}
 			Responses.error(event.getHook(), "Could not delete Custom Command. Please try again.").queue();
 		});

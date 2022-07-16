@@ -91,7 +91,6 @@ public class CustomCommandManager extends ListenerAdapter {
 	public void init() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			List<CustomCommand> commands = getCustomCommands(guild);
-			int initialSize = commands.size();
 			guild.retrieveCommands().queue(retrieved -> {
 				existingCommands.put(guild.getIdLong(), retrieved);
 				commands.forEach(c ->
@@ -100,7 +99,7 @@ public class CustomCommandManager extends ListenerAdapter {
 									loadedCommands.put(c.getName(), c);
 									commands.remove(c);
 								}, err -> log.error("Could not upsert \"/{}\": ", c.getName())));
-				log.info("Loaded {} Custom Commands for Guild \"{}\": {}", initialSize - commands.size(), guild.getName(),
+				log.info("Loaded {} Custom Commands for Guild \"{}\": {}", commands.size(), guild.getName(),
 						commands.stream().map(CustomCommand::getName).collect(Collectors.joining(", ")));
 			}, err -> log.error("Could not retrieve Commands in guild \"{}\"", guild.getName()));
 		}
