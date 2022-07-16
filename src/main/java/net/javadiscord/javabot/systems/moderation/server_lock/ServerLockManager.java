@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * Server lock functionality that automatically locks the server if a raid is detected.
  */
 @Slf4j
-public class ServerLock extends ListenerAdapter {
+public class ServerLockManager extends ListenerAdapter {
 	/**
 	 * Every time we clean the guild member queues, we leave this many members
 	 * in the queue, at least.
@@ -48,7 +48,7 @@ public class ServerLock extends ListenerAdapter {
 	 *
 	 * @param jda The {@link JDA} instance.
 	 */
-	public ServerLock(JDA jda) {
+	public ServerLockManager(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
 			for (var guild : jda.getGuilds()) {
@@ -74,7 +74,7 @@ public class ServerLock extends ListenerAdapter {
 	 * @param guild The current guild.
 	 * @return The {@link MessageEmbed} object.
 	 */
-	public static MessageEmbed buildServerLockEmbed(Guild guild) {
+	public static @NotNull MessageEmbed buildServerLockEmbed(@NotNull Guild guild) {
 		return new EmbedBuilder()
 				.setAuthor(guild.getName() + " | Server locked \uD83D\uDD12", Constants.WEBSITE_LINK, guild.getIconUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
@@ -99,7 +99,7 @@ public class ServerLock extends ListenerAdapter {
 		return Bot.config.get(guild).getServerLock().isLocked();
 	}
 
-	private Deque<Member> getMemberQueue(Guild guild) {
+	private Deque<Member> getMemberQueue(@NotNull Guild guild) {
 		return guildMemberQueues.computeIfAbsent(guild.getIdLong(), n -> new ConcurrentLinkedDeque<>());
 	}
 
@@ -116,7 +116,7 @@ public class ServerLock extends ListenerAdapter {
 	 * @param guild The guild to check.
 	 * @return The collection of members who we think could be raiding the server.
 	 */
-	private Collection<Member> getPotentialRaiders(Guild guild) {
+	private @NotNull Collection<Member> getPotentialRaiders(Guild guild) {
 		Deque<Member> recentJoins = new LinkedList<>(getMemberQueue(guild));
 		if (recentJoins.isEmpty()) return new HashSet<>();
 		var config = Bot.config.get(guild).getServerLock();
@@ -185,12 +185,10 @@ public class ServerLock extends ListenerAdapter {
 	 *
 	 * @param event The user who joined.
 	 */
-	private void rejectUserDuringRaid(GuildMemberJoinEvent event) {
-		event.getUser().openPrivateChannel().queue(c -> {
-			c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg -> {
-				event.getMember().kick().queue();
-			});
-		});
+	private void rejectUserDuringRaid(@NotNull GuildMemberJoinEvent event) {
+		event.getUser().openPrivateChannel().queue(c ->
+				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg ->
+						event.getMember().kick().queue()));
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
 		new GuildNotificationService(event.getGuild()).sendLogChannelNotification("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff);
 	}
@@ -202,7 +200,7 @@ public class ServerLock extends ListenerAdapter {
 	 * @param potentialRaiders The list of members that we think are starting
 	 *                         the raid.
 	 */
-	public void lockServer(Guild guild, Collection<Member> potentialRaiders) {
+	public void lockServer(Guild guild, @NotNull Collection<Member> potentialRaiders) {
 		for (var member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
 				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {

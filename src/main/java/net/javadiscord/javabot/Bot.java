@@ -23,7 +23,7 @@ import net.javadiscord.javabot.listener.*;
 import net.javadiscord.javabot.systems.custom_commands.CustomCommandManager;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
-import net.javadiscord.javabot.systems.moderation.server_lock.ServerLock;
+import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockManager;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
@@ -71,9 +71,9 @@ public class Bot {
 	public static ImageCache imageCache;
 
 	/**
-	 * A reference to the bot's serverlock.
+	 * A reference to the Bot's {@link ServerLockManager}.
 	 */
-	public static ServerLock serverLock;
+	public static ServerLockManager serverLockManager;
 
 	/**
 	 * A static reference to the {@link CustomCommandManager} which handles and loads all registered Custom Commands.
@@ -130,7 +130,7 @@ public class Bot {
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
 				.build();
-		serverLock = new ServerLock(jda);
+		serverLockManager = new ServerLockManager(jda);
 		customCommandManager = new CustomCommandManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
 		// initialize Sentry
@@ -159,7 +159,7 @@ public class Bot {
 	private static void addEventListeners(JDA jda, DIH4JDA dih4jda) {
 		jda.addEventListener(
 				customCommandManager,
-				serverLock,
+				serverLockManager,
 				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),
 				new GitHubLinkListener(),

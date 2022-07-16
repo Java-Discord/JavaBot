@@ -40,9 +40,9 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 			boolean locked = lockedMapping.getAsBoolean();
 			config.set("serverLock.locked", String.valueOf(locked));
 			if (locked) {
-				Bot.serverLock.lockServer(event.getGuild(), Collections.emptyList());
+				Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList());
 			} else {
-				Bot.serverLock.unlockServer(event.getGuild());
+				Bot.serverLockManager.unlockServer(event.getGuild());
 			}
 			Responses.info(event, "Server Lock Status", String.format("Successfully %slocked the current server!", locked ? "" : "un")).queue();
 		} catch (UnknownPropertyException e) {
