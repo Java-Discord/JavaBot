@@ -44,6 +44,7 @@ public class FormatCodeCommand extends SlashCommand {
 								.addChoice("Python", "python")
 								.addChoice("Ruby", "ruby")
 								.addChoice("Rust", "rust")
+								.addChoice("SQL", "sql")
 								.addChoice("Swift", "swift")
 								.addChoice("TypeScript", "typescript")
 								.addChoice("XML", "xml")
