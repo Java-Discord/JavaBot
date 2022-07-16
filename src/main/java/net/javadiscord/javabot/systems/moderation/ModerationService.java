@@ -16,6 +16,7 @@ import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.notification.UserNotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.sql.Connection;
@@ -42,7 +43,7 @@ public class ModerationService {
 	 *
 	 * @param config The {@link GuildConfig} to use.
 	 */
-	public ModerationService(GuildConfig config) {
+	public ModerationService(@NotNull GuildConfig config) {
 		this.moderationConfig = config.getModeration();
 	}
 
@@ -51,7 +52,7 @@ public class ModerationService {
 	 *
 	 * @param interaction The interaction to use.
 	 */
-	public ModerationService(Interaction interaction) {
+	public ModerationService(@NotNull Interaction interaction) {
 		this(
 				Bot.config.get(interaction.getGuild())
 		);
@@ -211,7 +212,7 @@ public class ModerationService {
 		return isBanned;
 	}
 
-	private boolean isBanned(Guild guild, long userId) {
+	private boolean isBanned(@NotNull Guild guild, long userId) {
 		return guild.retrieveBanList().complete()
 				.stream().map(Guild.Ban::getUser)
 				.map(User::getIdLong).toList().contains(userId);
@@ -220,21 +221,21 @@ public class ModerationService {
 	/**
 	 * Kicks a member.
 	 *
-	 * @param member   The member to kick.
+	 * @param user   The user to kick.
 	 * @param reason   The reason for kicking the member.
 	 * @param kickedBy The member who is responsible for kicking this member.
 	 * @param channel  The channel in which the kick was issued.
 	 * @param quiet    If true, don't send a message in the channel.
 	 */
-	public void kick(Member member, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
-		MessageEmbed kickEmbed = this.buildKickEmbed(member, kickedBy, reason);
-		member.getGuild().kick(member).queue();
-		new UserNotificationService(member.getUser()).sendDirectMessageNotification(kickEmbed);
-		new GuildNotificationService(member.getGuild()).sendLogChannelNotification(kickEmbed);
+	public void kick(User user, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
+		MessageEmbed kickEmbed = buildKickEmbed(user, kickedBy, reason);
+		kickedBy.getGuild().kick(user).queue();
+		new UserNotificationService(user).sendDirectMessageNotification(kickEmbed);
+		new GuildNotificationService(kickedBy.getGuild()).sendLogChannelNotification(kickEmbed);
 		if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 	}
 
-	private EmbedBuilder buildModerationEmbed(User user, Member moderator, String reason) {
+	private @NotNull EmbedBuilder buildModerationEmbed(@NotNull User user, @NotNull Member moderator, String reason) {
 		return new EmbedBuilder()
 				.setAuthor(moderator.getUser().getAsTag(), null, moderator.getEffectiveAvatarUrl())
 				.addField("Member", user.getAsMention(), true)
@@ -244,21 +245,21 @@ public class ModerationService {
 				.setFooter(user.getAsTag(), user.getEffectiveAvatarUrl());
 	}
 
-	private MessageEmbed buildBanEmbed(User user, Member bannedBy, String reason) {
+	private @NotNull MessageEmbed buildBanEmbed(User user, Member bannedBy, String reason) {
 		return buildModerationEmbed(user, bannedBy, reason)
 				.setTitle("Ban")
 				.setColor(Responses.Type.ERROR.getColor())
 				.build();
 	}
 
-	private MessageEmbed buildKickEmbed(Member member, Member kickedBy, String reason) {
-		return buildModerationEmbed(member.getUser(), kickedBy, reason)
+	private @NotNull MessageEmbed buildKickEmbed(User user, Member kickedBy, String reason) {
+		return buildModerationEmbed(user, kickedBy, reason)
 				.setTitle("Kick")
 				.setColor(Responses.Type.ERROR.getColor())
 				.build();
 	}
 
-	private MessageEmbed buildUnbanEmbed(long userId, Member unbannedBy) {
+	private @NotNull MessageEmbed buildUnbanEmbed(long userId, @NotNull Member unbannedBy) {
 		return new EmbedBuilder()
 				.setAuthor(unbannedBy.getUser().getAsTag(), null, unbannedBy.getEffectiveAvatarUrl())
 				.setTitle("Ban Revoked")
@@ -269,7 +270,7 @@ public class ModerationService {
 				.build();
 	}
 
-	private MessageEmbed buildWarnEmbed(User user, Member warnedBy, WarnSeverity severity, int totalSeverity, String reason) {
+	private @NotNull MessageEmbed buildWarnEmbed(User user, Member warnedBy, @NotNull WarnSeverity severity, int totalSeverity, String reason) {
 		return buildModerationEmbed(user, warnedBy, reason)
 				.setTitle(String.format("Warn Added (%d/%d)", totalSeverity, moderationConfig.getMaxWarnSeverity()))
 				.setColor(Responses.Type.WARN.getColor())
@@ -277,7 +278,7 @@ public class ModerationService {
 				.build();
 	}
 
-	private MessageEmbed buildClearWarnsEmbed(User user, User clearedBy) {
+	private @NotNull MessageEmbed buildClearWarnsEmbed(@NotNull User user, @NotNull User clearedBy) {
 		return new EmbedBuilder()
 				.setAuthor(clearedBy.getAsTag(), null, clearedBy.getEffectiveAvatarUrl())
 				.setTitle("Warns Cleared")
@@ -288,7 +289,7 @@ public class ModerationService {
 				.build();
 	}
 
-	private MessageEmbed buildClearWarnsByIdEmbed(Warn w, User clearedBy) {
+	private @NotNull MessageEmbed buildClearWarnsByIdEmbed(@NotNull Warn w, @NotNull User clearedBy) {
 		return new EmbedBuilder()
 				.setAuthor(clearedBy.getAsTag(), null, clearedBy.getEffectiveAvatarUrl())
 				.setTitle("Warn Cleared")
@@ -306,7 +307,7 @@ public class ModerationService {
 				.build();
 	}
 
-	private MessageEmbed buildTimeoutEmbed(Member member, Member timedOutBy, String reason, Duration duration) {
+	private @NotNull MessageEmbed buildTimeoutEmbed(@NotNull Member member, Member timedOutBy, String reason, Duration duration) {
 		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
 				.setTitle("Timeout")
 				.setColor(Responses.Type.ERROR.getColor())
@@ -314,7 +315,7 @@ public class ModerationService {
 				.build();
 	}
 
-	private MessageEmbed buildTimeoutRemovedEmbed(Member member, Member timedOutBy, String reason) {
+	private @NotNull MessageEmbed buildTimeoutRemovedEmbed(@NotNull Member member, Member timedOutBy, String reason) {
 		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
 				.setTitle("Timeout Removed")
 				.setColor(Responses.Type.SUCCESS.getColor())

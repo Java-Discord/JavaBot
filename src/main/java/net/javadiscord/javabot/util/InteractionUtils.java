@@ -67,7 +67,7 @@ public class InteractionUtils implements ButtonHandler {
 		ModerationService service = new ModerationService(interaction);
 		guild.retrieveMemberById(memberId).queue(
 				member -> {
-					service.kick(member, "None", interaction.getMember(), interaction.getMessageChannel(), false);
+					service.kick(member.getUser(), "None", interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.editButton(interaction.getButton().withLabel("Kicked by " + interaction.getUser().getAsTag()).asDisabled()).queue();
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
