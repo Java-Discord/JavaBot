@@ -36,7 +36,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 	 */
 	public ChangeMyMindCommand() {
 		setSlashCommandData(Commands.slash("change-my-mind", "Generates the \"Change My Mind\" meme from your given input.")
-				.addOption(OptionType.STRING, "text", "The text which should be used on the template.", false)
+				.addOption(OptionType.STRING, "text", "The text which should be used on the template.", true)
 				.setGuildOnly(true)
 		);
 	}
