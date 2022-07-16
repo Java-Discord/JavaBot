@@ -4,18 +4,16 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,12 +30,10 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 		setSubcommandData(new SubcommandData("create", "Creates a reaction role")
 				.addOptions(
 						new OptionData(OptionType.STRING, "type", "The self-role's type.", true)
-								.addChoices(
-										new Command.Choice("None (Just creates the embed)", "NONE"),
-										new Command.Choice("Default", "DEFAULT"),
-										new Command.Choice("Staff Application", "STAFF"),
-										new Command.Choice("Expert Application", "EXPERT")
-								),
+								.addChoice("None (Just creates the embed)", "NONE")
+								.addChoice("Default", "DEFAULT")
+								.addChoice("Staff Application", "STAFF")
+								.addChoice("Expert Application", "EXPERT"),
 						new OptionData(OptionType.ROLE, "role", "The role the button should add upon use.", true),
 						new OptionData(OptionType.STRING, "description", "The embed's description. This should not be longer than 4096 characters.", true),
 						new OptionData(OptionType.BOOLEAN, "permanent", "Whether the user should be able to remove the role again. This defaults to 'false'.", false),
@@ -47,7 +43,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping typeMapping = event.getOption("type");
 		OptionMapping roleMapping = event.getOption("role");
 		OptionMapping descriptionMapping = event.getOption("description");
@@ -64,15 +60,14 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 			default -> String.format("Get \"%s\"", role.getName());
 		};
 		String description = descriptionMapping.getAsString();
-		GuildConfig config = Bot.config.get(event.getGuild());
 		event.deferReply(true).queue();
 		if (messageIdOption == null || type.equals("NONE")) {
 			event.getChannel().sendMessageEmbeds(buildSelfRoleEmbed(role, description)).queue(
-					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
+					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel),
 					e -> Responses.error(event.getHook(), e.getMessage()));
 		} else {
 			event.getChannel().retrieveMessageById(messageIdOption.getAsString()).queue(
-					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel, config),
+					message -> addSelfRoleButton(event, message, type, role, permanent, buttonLabel),
 					e -> Responses.error(event.getHook(), e.getMessage()));
 		}
 	}
@@ -86,9 +81,8 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 	 * @param role      The role.
 	 * @param permanent Whether the user should be able to remove the role again.
 	 * @param label     The button's label.
-	 * @param config    The {@link GuildConfig} of the current Guild.
 	 */
-	private void addSelfRoleButton(SlashCommandInteractionEvent event, Message message, String type, Role role, boolean permanent, String label, GuildConfig config) {
+	private void addSelfRoleButton(SlashCommandInteractionEvent event, Message message, @NotNull String type, Role role, boolean permanent, String label) {
 		if (!type.equals("NONE")) {
 			List<Button> buttons = new ArrayList<>();
 			for (ActionRow actionRow : message.getActionRows()) {
@@ -110,18 +104,18 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 	 * @param permanent Whether the user should be able to remove the role again.
 	 * @return The complete button id.
 	 */
-	private String buildButtonId(String type, Role role, boolean permanent) {
+	private String buildButtonId(@NotNull String type, @NotNull Role role, boolean permanent) {
 		return String.format("self-role:%s:%s:%s", type.toLowerCase(), role.getId(), permanent);
 	}
 
-	private MessageEmbed buildSelfRoleEmbed(Role role, String description) {
+	private @NotNull MessageEmbed buildSelfRoleEmbed(@NotNull Role role, String description) {
 		return new EmbedBuilder()
 				.setDescription(String.format("%s\n%s", role.getAsMention(), description))
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.build();
 	}
 
-	private MessageEmbed buildSelfRoleCreateEmbed(User createdBy, Role role, Channel channel, String jumpUrl, String type) {
+	private @NotNull MessageEmbed buildSelfRoleCreateEmbed(@NotNull User createdBy, @NotNull Role role, @NotNull Channel channel, String jumpUrl, String type) {
 		return new EmbedBuilder()
 				.setAuthor(createdBy.getAsTag(), jumpUrl, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Self Role created")
