@@ -32,7 +32,8 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
-		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModeration().getSuggestionChannelId()) {
+		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModeration()
+				.getSuggestionChannelId()) {
 			return;
 		}
 		TextChannel tc = null;
@@ -58,14 +59,34 @@ public class HugListener extends ListenerAdapter {
 			int indexBkp = index;
 			while ((index = lowerCaseContent.indexOf("fuck", index)) != -1) {
 				sb.append(content.substring(indexBkp, index));
-				sb.append("hug");
+				sb.append(loadHug(content, index));
 				indexBkp = index++ + 4;
+				if (content.length() >= indexBkp + 3 && "ing".equals(lowerCaseContent.substring(indexBkp, indexBkp + 3))) {
+					sb.append(copyCase(content, indexBkp-1, 'g'));
+					sb.append(content.substring(indexBkp, indexBkp + 3));
+					index+=3;
+					indexBkp+=3;
+				}
 			}
 
 			sb.append(content.substring(indexBkp, content.length()));
 			WebhookUtil.ensureWebhookExists(textChannel,
 					wh -> sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId),
 					e -> log.error("Webhook lookup/creation failed", e));
+		}
+	}
+
+	private String loadHug(String originalText, int startIndex) {
+		return copyCase(originalText, startIndex, 'h') + ""
+				+ copyCase(originalText, startIndex + 1, 'u') + ""
+				+ copyCase(originalText, startIndex + 3, 'g');
+	}
+
+	private char copyCase(String original, int index, char newChar) {
+		if (Character.isUpperCase(original.charAt(index))) {
+			return Character.toUpperCase(newChar);
+		} else {
+			return newChar;
 		}
 	}
 
