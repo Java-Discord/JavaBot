@@ -8,8 +8,6 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-import java.time.Instant;
-
 /**
  * A data class that represents a single Custom Command.
  */

@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Responses;
-import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

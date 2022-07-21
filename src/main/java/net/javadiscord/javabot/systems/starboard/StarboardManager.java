@@ -18,7 +18,6 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 
