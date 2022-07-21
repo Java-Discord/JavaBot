@@ -38,10 +38,10 @@ public class HugListener extends ListenerAdapter {
 		}
 		TextChannel tc = null;
 		if (event.isFromType(ChannelType.TEXT)) {
-			tc = event.getTextChannel();
+			tc = event.getChannel().asTextChannel();
 		}
 		if (event.isFromThread()) {
-			GuildMessageChannel parentChannel = event.getThreadChannel().getParentMessageChannel();
+			GuildMessageChannel parentChannel = event.getChannel().asThreadChannel().getParentMessageChannel();
 			if (parentChannel instanceof TextChannel textChannel) {
 				tc = textChannel;
 			}
@@ -53,7 +53,7 @@ public class HugListener extends ListenerAdapter {
 		String content = event.getMessage().getContentRaw();
 		String lowerCaseContent = content.toLowerCase();
 		if (lowerCaseContent.contains("fuck")) {
-			long threadId = event.isFromThread() ? event.getThreadChannel().getIdLong() : 0;
+			long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
 			StringBuilder sb = new StringBuilder(content.length());
 			int index = 0;
 			int indexBkp = index;
