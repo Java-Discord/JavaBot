@@ -3,10 +3,10 @@ package net.javadiscord.javabot.systems.custom_commands;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.systems.custom_commands.dao.CustomCommandRepository;
 import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
@@ -100,7 +100,7 @@ public class CustomCommandManager extends ListenerAdapter {
 									commands.remove(c);
 								}, err -> log.error("Could not upsert \"/{}\": ", c.getName())));
 				log.info("Loaded {} Custom Commands for Guild \"{}\": {}", commands.size(), guild.getName(),
-						commands.stream().map(CustomCommand::getName).collect(Collectors.joining(", ")));
+						commands.stream().map(c -> "/" + c.getName()).collect(Collectors.joining(", ")));
 			}, err -> log.error("Could not retrieve Commands in guild \"{}\"", guild.getName()));
 		}
 	}
@@ -143,7 +143,6 @@ public class CustomCommandManager extends ListenerAdapter {
 	 */
 	public boolean addCommand(@NotNull Guild guild, @NotNull CustomCommand command) throws SQLException {
 		if (doesSlashCommandExist(existingCommands.get(guild.getIdLong()), command.getName())) {
-			System.out.println("exists");
 			return false;
 		}
 		try (Connection con = dataSource.getConnection()) {
@@ -216,21 +215,22 @@ public class CustomCommandManager extends ListenerAdapter {
 	@Contract(pure = true)
 	private @NotNull RestAction<?> handleCustomCommand(@NotNull SlashCommandInteractionEvent event, @NotNull CustomCommand command) {
 		Set<RestAction<?>> actions = new HashSet<>();
-		if (command.isEmbed()) {
-			MessageEmbed embed = command.toEmbed();
-			if (command.isReply()) {
-				actions.add(event.replyEmbeds(embed));
+		boolean reply = event.getOption("reply", command.isReply(), OptionMapping::getAsBoolean);
+		boolean embed = event.getOption("embed", command.isEmbed(), OptionMapping::getAsBoolean);
+		if (embed) {
+			if (reply) {
+				actions.add(event.replyEmbeds(command.toEmbed()));
 			} else {
-				actions.add(event.getChannel().sendMessageEmbeds(embed));
+				actions.add(event.getChannel().sendMessageEmbeds(command.toEmbed()));
 			}
 		} else {
-			if (command.isReply()) {
+			if (reply) {
 				actions.add(event.reply(command.getResponse()).allowedMentions(List.of()));
 			} else {
 				actions.add(event.getChannel().sendMessage(command.getResponse()).allowedMentions(List.of()));
 			}
 		}
-		if (!command.isReply()) {
+		if (!reply) {
 			actions.add(event.reply("Done!").setEphemeral(true));
 		}
 		return RestAction.allOf(actions);
