@@ -44,7 +44,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}
@@ -54,7 +54,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 	@Override
 	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event.getHook(), "This command may only be used inside of a server.").queue();
 			return;
 		}

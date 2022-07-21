@@ -29,12 +29,12 @@ public final class Checks {
 	 * @param mapping The {@link OptionMapping} to check.
 	 * @return Whether the {@link OptionMapping} is parsable to a {@link Long}.
 	 */
-	public static boolean checkLongInput(@NotNull OptionMapping mapping) {
+	public static boolean isInvalidLongInput(@NotNull OptionMapping mapping) {
 		try {
 			mapping.getAsLong();
-			return true;
-		} catch (IllegalStateException | NumberFormatException e) {
 			return false;
+		} catch (IllegalStateException | NumberFormatException e) {
+			return true;
 		}
 	}
 

@@ -52,7 +52,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("thread-id");
-		if (idMapping == null || !Checks.checkLongInput(idMapping)) {
+		if (idMapping == null || Checks.isInvalidLongInput(idMapping)) {
 			Responses.error(event, "Please provide a valid thread id-").queue();
 			return;
 		}

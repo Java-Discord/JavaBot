@@ -49,11 +49,11 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("message-id");
 		OptionMapping typeMapping = event.getOption("type");
-		if (idMapping == null || typeMapping == null || !Checks.checkLongInput(idMapping)) {
+		if (idMapping == null || typeMapping == null || Checks.isInvalidLongInput(idMapping)) {
 			Responses.error(event, "Missing required arguments.").queue();
 			return;
 		}
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}
@@ -83,7 +83,7 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 	@Override
 	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event.getHook(), "This command may only be used inside of a server.").queue();
 			return;
 		}

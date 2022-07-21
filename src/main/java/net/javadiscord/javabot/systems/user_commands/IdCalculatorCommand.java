@@ -40,7 +40,7 @@ public class IdCalculatorCommand extends SlashCommand {
 			Responses.error(event, "Missing required arguments").queue();
 			return;
 		}
-		if (!Checks.checkLongInput(idMapping)) {
+		if (Checks.isInvalidLongInput(idMapping)) {
 			Responses.error(event, "Please provide a valid Discord Snowflake!").queue();
 			return;
 		}

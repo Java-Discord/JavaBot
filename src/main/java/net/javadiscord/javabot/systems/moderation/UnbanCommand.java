@@ -29,7 +29,7 @@ public class UnbanCommand extends ModerateCommand {
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping idOption = event.getOption("id");
-		if (idOption == null || !Checks.checkLongInput(idOption)) {
+		if (idOption == null || Checks.isInvalidLongInput(idOption)) {
 			return Responses.error(event, "Missing required arguments.");
 		}
 		long id = idOption.getAsLong();

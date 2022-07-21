@@ -39,7 +39,7 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 			Responses.error(event, "Missing required arguments.").queue();
 			return;
 		}
-		if (!Checks.checkLongInput(messageIdMapping)) {
+		if (Checks.isInvalidLongInput(messageIdMapping)) {
 			Responses.error(event, "Please provide a valid message id.").queue();
 			return;
 		}
