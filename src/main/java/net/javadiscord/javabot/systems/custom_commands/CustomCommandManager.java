@@ -99,8 +99,10 @@ public class CustomCommandManager extends ListenerAdapter {
 									loadedCommands.put(c.getName(), c);
 									commands.remove(c);
 								}, err -> log.error("Could not upsert \"/{}\": ", c.getName())));
-				log.info("Loaded {} Custom Commands for Guild \"{}\": {}", commands.size(), guild.getName(),
-						commands.stream().map(c -> "/" + c.getName()).collect(Collectors.joining(", ")));
+				if (!commands.isEmpty()) {
+					log.info("Loaded {} Custom Commands for Guild \"{}\": {}", commands.size(), guild.getName(),
+							commands.stream().map(c -> "/" + c.getName()).collect(Collectors.joining(", ")));
+				}
 			}, err -> log.error("Could not retrieve Commands in guild \"{}\"", guild.getName()));
 		}
 	}

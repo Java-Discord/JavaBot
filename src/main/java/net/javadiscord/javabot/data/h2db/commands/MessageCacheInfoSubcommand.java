@@ -2,6 +2,7 @@ package net.javadiscord.javabot.data.h2db.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -15,8 +16,13 @@ import net.javadiscord.javabot.util.Responses;
  * Allows staff members to get more detailed information about the message cache.
  */
 public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
 	public MessageCacheInfoSubcommand() {
 		setSubcommandData(new SubcommandData("info", "Displays some info about the Message Cache."));
+		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
 	@Override
