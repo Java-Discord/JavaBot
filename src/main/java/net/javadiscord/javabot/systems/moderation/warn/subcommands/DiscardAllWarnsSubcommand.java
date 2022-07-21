@@ -31,7 +31,7 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 			Responses.error(event, "Please provide a valid user.").queue();
 			return;
 		}
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}

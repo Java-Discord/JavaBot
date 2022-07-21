@@ -44,14 +44,14 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			Responses.error(event, "Missing required arguments.").queue();
 			return;
 		}
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}
 		User target = userMapping.getAsUser();
 		WarnSeverity severity = WarnSeverity.valueOf(severityMapping.getAsString().trim().toUpperCase());
 		if (target.isBot()) {
-			Responses.warning(event, "Cannot warn Bots.").queue();
+			Responses.warning(event, "You cannot warn bots.").queue();
 			return;
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);

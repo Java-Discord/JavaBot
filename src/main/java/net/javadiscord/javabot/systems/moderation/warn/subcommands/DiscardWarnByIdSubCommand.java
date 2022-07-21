@@ -30,7 +30,7 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 			Responses.error(event, "Missing required arguments.").queue();
 			return;
 		}
-		if (Checks.checkGuild(event)) {
+		if (!Checks.checkGuild(event)) {
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}
