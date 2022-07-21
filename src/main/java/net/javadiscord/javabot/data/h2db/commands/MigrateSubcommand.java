@@ -14,15 +14,19 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * <h3>This class represents the /db-admin migrate command.</h3>
@@ -52,10 +56,10 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static List<Command.Choice> replyMigrations(CommandAutoCompleteInteractionEvent event) {
+	public static @NotNull List<Command.Choice> replyMigrations(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
-			var paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
+		try (Stream<Path> s = Files.list(MigrationUtils.getMigrationsDirectory())) {
+			List<Path> paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
 			paths.forEach(path -> choices.add(new Command.Choice(path.getFileName().toString(), path.getFileName().toString())));
 		} catch (IOException | URISyntaxException e) {
 			ExceptionLogger.capture(e, MigrateSubcommand.class.getSimpleName());
@@ -64,7 +68,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		String migrationName = Objects.requireNonNull(event.getOption("name")).getAsString();
 		if (!migrationName.endsWith(".sql")) {
 			migrationName = migrationName + ".sql";
@@ -83,13 +87,13 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 				return;
 			}
 			Bot.asyncPool.submit(() -> {
-				try (var con = Bot.dataSource.getConnection()) {
+				try (Connection con = Bot.dataSource.getConnection()) {
 					for (int i = 0; i < statements.length; i++) {
 						if (statements[i].isBlank()) {
 							event.getChannel().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();
 							continue;
 						}
-						try (var stmt = con.createStatement()) {
+						try (Statement stmt = con.createStatement()) {
 							int rowsUpdated = stmt.executeUpdate(statements[i]);
 							event.getChannel().sendMessageFormat(
 									"Executed statement %d of %d:\n```sql\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
@@ -114,7 +118,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	}
 
 	@Override
-	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.filterChoices(event, replyMigrations(event))).queue();
+	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
+		event.replyChoices(AutoCompleteUtils.handleChoices(event, MigrateSubcommand::replyMigrations)).queue();
 	}
 }

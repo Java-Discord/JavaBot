@@ -135,7 +135,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
 			GuildConfig config = Bot.config.get(event.getGuild());
-			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), event.getUser(), reason, event.getTextChannel());
+			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), event.getUser(), reason, event.getChannel());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
 			MessageChannel reportChannel = config.getModeration().getReportChannel();

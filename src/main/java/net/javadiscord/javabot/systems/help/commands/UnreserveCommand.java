@@ -29,7 +29,7 @@ public class UnreserveCommand extends SlashCommand {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		TextChannel channel = event.getTextChannel();
+		TextChannel channel = event.getChannel().asTextChannel();
 		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
 		User owner = channelManager.getReservedChannelOwner(channel);

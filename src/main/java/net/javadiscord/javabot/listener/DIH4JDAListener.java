@@ -1,9 +1,8 @@
 package net.javadiscord.javabot.listener;
 
-import com.dynxsty.dih4jda.events.DIH4JDAListenerAdapter;
+import com.dynxsty.dih4jda.events.DIH4JDAEventListener;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.ModalInteraction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
@@ -11,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.Set;
@@ -19,38 +19,38 @@ import java.util.stream.Collectors;
 /**
  * Listener class for various events provided by {@link com.dynxsty.dih4jda.DIH4JDA}.
  */
-public class DIH4JDAListener extends DIH4JDAListenerAdapter {
+public class DIH4JDAListener implements DIH4JDAEventListener {
 	@Override
 	public void onCommandException(CommandInteraction interaction, Exception e) {
 		ExceptionLogger.capture(e, getClass().getSimpleName());
-		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
+		handleReply(interaction, buildExceptionEmbed(e));
 	}
 
 	@Override
 	public void onComponentException(ComponentInteraction interaction, Exception e) {
 		ExceptionLogger.capture(e, getClass().getSimpleName());
-		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
+		handleReply(interaction, buildExceptionEmbed(e));
 	}
 
 	@Override
 	public void onModalException(ModalInteraction interaction, Exception e) {
 		ExceptionLogger.capture(e, getClass().getSimpleName());
-		handleReply(interaction, buildExceptionEmbed(interaction.getGuild(), e));
+		handleReply(interaction, buildExceptionEmbed(e));
 	}
 
 	@Override
 	public void onInvalidUser(CommandInteraction interaction, Set<Long> userIds) {
-		handleReply(interaction, buildNoAccessEmbed(interaction.getGuild()));
+		handleReply(interaction, buildNoAccessEmbed());
 	}
 
 	@Override
 	public void onInvalidRole(CommandInteraction interaction, Set<Long> userIds) {
-		handleReply(interaction, buildNoAccessEmbed(interaction.getGuild()));
+		handleReply(interaction, buildNoAccessEmbed());
 	}
 
 	@Override
 	public void onInsufficientPermissions(CommandInteraction interaction, Set<Permission> permissions) {
-		handleReply(interaction, buildInsufficientPermissionsEmbed(interaction.getGuild(), permissions));
+		handleReply(interaction, buildInsufficientPermissionsEmbed(permissions));
 	}
 
 	/**
@@ -59,38 +59,38 @@ public class DIH4JDAListener extends DIH4JDAListenerAdapter {
 	 * @param callback The {@link IReplyCallback} to reply to.
 	 * @param embed The {@link MessageEmbed} to send.
 	 */
-	private void handleReply(IReplyCallback callback, MessageEmbed embed) {
+	private void handleReply(@NotNull IReplyCallback callback, MessageEmbed embed) {
 		if (!callback.isAcknowledged()) {
 			callback.deferReply(true).queue();
 		}
 		callback.getHook().sendMessageEmbeds(embed).queue();
 	}
 
-	private EmbedBuilder buildErrorEmbed(Guild guild) {
+	private @NotNull EmbedBuilder buildErrorEmbed() {
 		return new EmbedBuilder()
 				.setTitle("An Error occurred!")
 				.setColor(Responses.Type.ERROR.getColor())
 				.setTimestamp(Instant.now());
 	}
 
-	private MessageEmbed buildExceptionEmbed(Guild guild, Exception e) {
-		return buildErrorEmbed(guild)
+	private @NotNull MessageEmbed buildExceptionEmbed(@NotNull Exception e) {
+		return buildErrorEmbed()
 				.setDescription("An unexpected Error occurred!")
 				.setFooter(e.getClass().getSimpleName())
 				.build();
 	}
 
-	private MessageEmbed buildInsufficientPermissionsEmbed(Guild guild, Set<Permission> permissions) {
+	private @NotNull MessageEmbed buildInsufficientPermissionsEmbed(@NotNull Set<Permission> permissions) {
 		String perms = permissions.stream().map(Permission::getName).collect(Collectors.joining(", "));
-		return buildErrorEmbed(guild)
+		return buildErrorEmbed()
 				.setDescription(String.format(
 						"You're not allowed to use this command. " +
 								"In order to execute this command, you'll need the following permissions: `%s`", perms))
 				.build();
 	}
 
-	private MessageEmbed buildNoAccessEmbed(Guild guild) {
-		return buildErrorEmbed(guild)
+	private @NotNull MessageEmbed buildNoAccessEmbed() {
+		return buildErrorEmbed()
 				.setDescription("You're not allowed to use this command.")
 				.build();
 	}

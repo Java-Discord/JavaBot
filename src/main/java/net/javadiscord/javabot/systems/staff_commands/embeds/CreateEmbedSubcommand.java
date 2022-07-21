@@ -4,6 +4,7 @@ import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -47,7 +48,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			Responses.error(event, "This command may only be used inside of a server.").queue();
 			return;
 		}
-		event.replyModal(buildBasicEmbedCreateModal(event.getOption("channel", event.getTextChannel(), OptionMapping::getAsTextChannel))).queue();
+		event.replyModal(buildBasicEmbedCreateModal(event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel))).queue();
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 		event.getHook().sendMessage("Done!").queue();
 	}
 
-	private @NotNull Modal buildBasicEmbedCreateModal(@NotNull TextChannel channel) {
+	private @NotNull Modal buildBasicEmbedCreateModal(@NotNull Channel channel) {
 		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
 				.setPlaceholder(String.format("Choose a fitting Title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.TITLE_MAX_LENGTH)

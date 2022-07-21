@@ -45,7 +45,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 			return;
 		}
 		var reservation = optionalReservation.get();
-		TextChannel channel = event.getTextChannel();
+		TextChannel channel = event.getChannel().asTextChannel();
 		if (!event.isAcknowledged()) {
 			event.deferReply(true).queue();
 		}
@@ -157,7 +157,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 			return;
 		}
 		var reservation = optionalReservation.get();
-		TextChannel channel = event.getTextChannel();
+		TextChannel channel = event.getChannel().asTextChannel();
 		if (!event.isAcknowledged()) {
 			event.deferReply(true).queue();
 		}

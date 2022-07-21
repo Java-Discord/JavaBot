@@ -12,6 +12,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -95,7 +96,7 @@ public class AutoMod extends ListenerAdapter {
 							WarnSeverity.MEDIUM,
 							"Automod: Mention Spam",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getTextChannel(),
+							message.getChannel(),
 							false
 					);
 		}
@@ -129,8 +130,8 @@ public class AutoMod extends ListenerAdapter {
 							WarnSeverity.MEDIUM,
 							"Automod: Advertising",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getTextChannel(),
-							isSuggestionsChannel(message.getTextChannel())
+							message.getChannel(),
+							isSuggestionsChannel(message.getChannel().asTextChannel())
 					);
 			message.delete().queue(success -> {
 			}, error -> log.info("Message was deleted before Automod was able to handle it."));
@@ -147,8 +148,8 @@ public class AutoMod extends ListenerAdapter {
 							WarnSeverity.MEDIUM,
 							"Automod: Suspicious Link",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getTextChannel(),
-							isSuggestionsChannel(message.getTextChannel())
+							message.getChannel(),
+							isSuggestionsChannel(message.getChannel().asTextChannel())
 					);
 			message.delete().queue(success -> {
 			}, error -> log.info("Message was deleted before Automod was able to handle it."));
@@ -172,7 +173,7 @@ public class AutoMod extends ListenerAdapter {
 						"Automod: Spam",
 						msg.getGuild().getSelfMember(),
 						Duration.of(6, ChronoUnit.HOURS),
-						msg.getTextChannel(),
+						msg.getChannel(),
 						false
 				);
 	}
@@ -183,7 +184,7 @@ public class AutoMod extends ListenerAdapter {
 	 * @param input the input String.
 	 * @return the cleaned-up String.
 	 */
-	private String cleanString(String input) {
+	private @NotNull String cleanString(String input) {
 		input = input.replaceAll("\\p{C}", "");
 		input = input.replace(" ", "");
 		return input;
@@ -222,7 +223,7 @@ public class AutoMod extends ListenerAdapter {
 	 * @param message The Message to check.
 	 * @return True if an invite is found and False if not.
 	 */
-	public boolean hasAdvertisingLink(Message message) {
+	public boolean hasAdvertisingLink(@NotNull Message message) {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
@@ -231,7 +232,7 @@ public class AutoMod extends ListenerAdapter {
 		return false;
 	}
 
-	private boolean isSuggestionsChannel(TextChannel channel) {
+	private boolean isSuggestionsChannel(@NotNull TextChannel channel) {
 		return channel.equals(Bot.config.get(channel.getGuild()).getModeration().getSuggestionChannel());
 	}
 }

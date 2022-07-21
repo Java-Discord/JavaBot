@@ -3,6 +3,7 @@ package net.javadiscord.javabot.data.h2db.commands;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -61,26 +62,27 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 			return;
 		}
 		Bot.asyncPool.submit(() -> {
+			TextChannel channel = event.getChannel().asTextChannel();
 			try (Connection con = Bot.dataSource.getConnection()) {
 				for (int i = 0; i < statements.length; i++) {
 					if (statements[i].isBlank()) {
-						event.getTextChannel().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();
+						channel.sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();
 						continue;
 					}
 					try (Statement stmt = con.createStatement()) {
 						int rowsUpdated = stmt.executeUpdate(statements[i]);
-						event.getTextChannel().sendMessageFormat(
+						channel.sendMessageFormat(
 								"Executed statement %d of %d:\n```sql\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
 						).queue();
 					} catch (SQLException e) {
 						ExceptionLogger.capture(e, getClass().getSimpleName());
-						event.getTextChannel().sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
+						channel.sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
 						return;
 					}
 				}
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
-				event.getTextChannel().sendMessage("Could not obtain a connection to the database.").queue();
+				channel.sendMessage("Could not obtain a connection to the database.").queue();
 			}
 		});
 		Responses.info(event.getHook(), "Quick Migration Started",

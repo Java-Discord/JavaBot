@@ -22,11 +22,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
-    // JDA & DIH4JDA (Interaction Framework)
-    implementation("net.dv8tion:JDA:5.0.0-alpha.13") {
-        exclude(module = "opus-java")
-    }
-    implementation("com.github.DynxstyGIT:DIH4JDA:e72d1ef44a")
+    // DIH4JDA (Interaction Framework) (includes JDA)
+    implementation("com.github.DynxstyGIT:DIH4JDA:eeeb13c26c")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
@@ -40,7 +37,7 @@ dependencies {
     implementation("com.h2database:h2:2.1.212")
     implementation("com.zaxxer:HikariCP:5.0.1")
 
-    // Quartz scheduler
+    // Quartz Scheduler
     implementation("org.quartz-scheduler:quartz:2.3.2")
 
     // Lombok Annotations

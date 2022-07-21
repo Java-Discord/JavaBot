@@ -33,8 +33,8 @@ public class KickCommand extends ModerateUserCommand {
 	@Override
 	protected ReplyCallbackAction handleModerationActionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nullable String reason) {
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService moderationService = new ModerationService(event.getInteraction());
-		moderationService.kick(target, reason, event.getMember(), event.getTextChannel(), quiet);
+		ModerationService service = new ModerationService(event.getInteraction());
+		service.kick(target, reason, event.getMember(), event.getChannel(), quiet);
 		return Responses.success(event, "User Kicked", String.format("%s has been kicked.", target.getAsMention()));
 	}
 }

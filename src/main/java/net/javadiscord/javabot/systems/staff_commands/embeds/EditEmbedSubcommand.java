@@ -59,7 +59,7 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 		}
 		long messageId = idMapping.getAsLong();
 		String type = typeMapping.getAsString();
-		TextChannel channel = event.getOption("channel", event.getTextChannel(), OptionMapping::getAsTextChannel);
+		TextChannel channel = event.getOption("channel", event.getChannel().asTextChannel(), m -> m.getAsChannel().asTextChannel());
 		channel.retrieveMessageById(messageId).queue(
 				message -> {
 					// just get the first embed

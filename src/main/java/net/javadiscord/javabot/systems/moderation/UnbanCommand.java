@@ -35,7 +35,7 @@ public class UnbanCommand extends ModerateCommand {
 		long id = idOption.getAsLong();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		ModerationService moderationService = new ModerationService(event.getInteraction());
-		if (moderationService.unban(id, event.getMember(), event.getTextChannel(), quiet)) {
+		if (moderationService.unban(id, event.getMember(), event.getChannel(), quiet)) {
 			return Responses.success(event, "User Unbanned", String.format("User with id `%s` has been unbanned.", id));
 		} else {
 			return Responses.warning(event, String.format("Could not find banned User with id `%s`", id));

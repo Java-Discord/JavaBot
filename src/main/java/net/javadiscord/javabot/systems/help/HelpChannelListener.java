@@ -34,13 +34,13 @@ public class HelpChannelListener extends ListenerAdapter {
 			return;
 		}
 		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
-		TextChannel channel = event.getTextChannel();
+		TextChannel channel = event.getChannel().asTextChannel();
 		HelpChannelManager manager = new HelpChannelManager(config);
 
 		// If a message was sent in an open text channel, reserve it.
 		Category openChannelCategory = config.getOpenChannelCategory();
 		if (openChannelCategory == null) {
-			log.error("Could not find Open Help Category for Guild {}", event.getGuild().getName());
+			log.debug("Could not find Open Help Category for Guild {}", event.getGuild().getName());
 			return;
 		}
 		if (openChannelCategory.equals(channel.getParentCategory())) {

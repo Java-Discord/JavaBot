@@ -137,7 +137,7 @@ public class Bot {
 				.setDefaultCommandType(RegistrationType.GUILD)
 				.disableUnknownCommandDeletion()
 				.disableUnregisteredCommandException()
-				.disableLogging(DIH4JDALogger.Type.SLASH_COMMAND_SKIPPED)
+				.disableLogging(DIH4JDALogger.Type.SMART_QUEUE)
 				.build();
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);

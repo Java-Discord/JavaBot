@@ -58,7 +58,7 @@ public class PurgeCommand extends ModerateCommand {
 		if (amount == null || amount < 1 || amount > maxAmount) {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getTextChannel(), config.getLogChannel()));
+		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
 		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {

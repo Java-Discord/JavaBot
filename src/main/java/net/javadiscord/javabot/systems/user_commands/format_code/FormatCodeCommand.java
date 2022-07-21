@@ -81,7 +81,7 @@ public class FormatCodeCommand extends SlashCommand {
 					});
 		} else {
 			long messageId = idOption.getAsLong();
-			event.getTextChannel().retrieveMessageById(messageId).queue(
+			event.getChannel().retrieveMessageById(messageId).queue(
 					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
 							.allowedMentions(List.of())
 							.addActionRows(buildActionRow(target))

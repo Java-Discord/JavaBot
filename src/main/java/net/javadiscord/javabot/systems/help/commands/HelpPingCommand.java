@@ -46,8 +46,8 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 		}
 		GuildConfig config = Bot.config.get(guild);
 		HelpChannelManager channelManager = new HelpChannelManager(config.getHelp());
-		if (channelManager.isReserved(event.getTextChannel())) {
-			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getTextChannel().getIdLong());
+		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
+			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
 			if (optionalReservation.isEmpty()) {
 				Responses.warning(event, "Could not fetch the channel reservation.").queue();
 				return;
