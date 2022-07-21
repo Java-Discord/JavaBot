@@ -59,6 +59,7 @@ public class SystemsConfig {
 	public static class HikariConfig {
 		private String jdbcUrl = "jdbc:h2:tcp://localhost:9122/./java_bot";
 		private int maximumPoolSize = 5;
+		private long leakDetectionThreshold = 10000;
 	}
 
 	/**

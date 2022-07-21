@@ -54,6 +54,7 @@ public class DbHelper {
 		var hikariConfigSource = config.getSystems().getHikariConfig();
 		hikariConfig.setJdbcUrl(hikariConfigSource.getJdbcUrl());
 		hikariConfig.setMaximumPoolSize(hikariConfigSource.getMaximumPoolSize());
+		hikariConfig.setLeakDetectionThreshold(hikariConfigSource.getLeakDetectionThreshold());
 		var ds = new HikariDataSource(hikariConfig);
 		// Add a shutdown hook to close down the datasource and server when the JVM terminates.
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
