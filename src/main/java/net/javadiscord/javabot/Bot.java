@@ -183,7 +183,8 @@ public class Bot {
 				new HelpChannelListener(),
 				new ShareKnowledgeVoteListener(),
 				new JobChannelVoteListener(),
-				new PingableNameListener()
+				new PingableNameListener(),
+				new HugListener()
 		);
 		dih4jda.addListener(new DIH4JDAListener());
 	}
