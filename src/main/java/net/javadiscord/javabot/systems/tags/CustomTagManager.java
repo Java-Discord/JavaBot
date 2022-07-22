@@ -1,13 +1,16 @@
 package net.javadiscord.javabot.systems.tags;
 
+import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 import net.javadiscord.javabot.systems.tags.dao.CustomTagRepository;
 import net.javadiscord.javabot.systems.tags.model.CustomTag;
 import org.jetbrains.annotations.Contract;
@@ -64,14 +67,48 @@ public class CustomTagManager extends ListenerAdapter {
 	 * @param guild The current {@link Guild}.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static @NotNull List<Command.Choice> replyTags(@NotNull Guild guild) {
+	public static @NotNull List<Command.Choice> replyTags(CommandAutoCompleteInteractionEvent event, @NotNull Guild guild) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		for (CustomTag command : LOADED_TAGS.get(guild.getIdLong())) {
 			if (choices.size() < 26) {
-				choices.add(new Command.Choice("/" + command.getName(), command.getName()));
+				choices.add(new Command.Choice(command.getName(), command.getName()));
 			}
 		}
 		return choices;
+	}
+
+	public static @NotNull AutoCompleteCallbackAction handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
+		return event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> replyTags(e, e.getGuild())));
+	}
+
+	/**
+	 * Handles a single {@link CustomTag}.
+	 *
+	 * @param event The {@link SlashCommandInteractionEvent} which was fired.
+	 * @param tag   The corresponding {@link CustomTag}.
+	 * @return A {@link RestAction}.
+	 */
+	public static @NotNull RestAction<?> handleCustomTag(@NotNull SlashCommandInteractionEvent event, @NotNull CustomTag tag) {
+		Set<RestAction<?>> actions = new HashSet<>();
+		boolean reply = event.getOption("reply", tag.isReply(), OptionMapping::getAsBoolean);
+		boolean embed = event.getOption("embed", tag.isEmbed(), OptionMapping::getAsBoolean);
+		if (embed) {
+			if (reply) {
+				actions.add(event.replyEmbeds(tag.toEmbed()));
+			} else {
+				actions.add(event.getChannel().sendMessageEmbeds(tag.toEmbed()));
+			}
+		} else {
+			if (reply) {
+				actions.add(event.reply(tag.getResponse()).allowedMentions(List.of()));
+			} else {
+				actions.add(event.getChannel().sendMessage(tag.getResponse()).allowedMentions(List.of()));
+			}
+		}
+		if (!reply) {
+			actions.add(event.reply("Done!").setEphemeral(true));
+		}
+		return RestAction.allOf(actions);
 	}
 
 	/**
@@ -115,6 +152,19 @@ public class CustomTagManager extends ListenerAdapter {
 	}
 
 	/**
+	 * Attempts to get a {@link CustomTag}, based on the specified name.
+	 *
+	 * @param guildId The guilds' id.
+	 * @param name    The tag's name.
+	 * @return An {@link Optional} which may contains the desired {@link CustomTag}.
+	 */
+	public Optional<CustomTag> getByName(long guildId, String name) {
+		return getLoadedCommands(guildId).stream()
+				.filter(c -> c.getName().equalsIgnoreCase(name))
+				.findFirst();
+	}
+
+	/**
 	 * Creates a new {@link CustomTag} for the specified guild.
 	 *
 	 * @param guild The {@link Guild}.
@@ -131,7 +181,7 @@ public class CustomTagManager extends ListenerAdapter {
 			Set<CustomTag> tags = new HashSet<>(LOADED_TAGS.get(guild.getIdLong()));
 			tags.add(tag);
 			LOADED_TAGS.put(guild.getIdLong(), tags);
-			log.info("Created Custom Tag in guild \"{}\": /{}", guild.getName(), tag.getName());
+			log.info("Created Custom Tag in guild \"{}\": {}", guild.getName(), tag.getName());
 			return repo.insert(tag) != null;
 		}
 	}
@@ -189,39 +239,5 @@ public class CustomTagManager extends ListenerAdapter {
 	private boolean doesTagExist(long guildId, String tagName) {
 		Set<CustomTag> tags = LOADED_TAGS.get(guildId);
 		return tags != null && tags.stream().anyMatch(c -> c.getName().equalsIgnoreCase(tagName));
-	}
-
-	@Override
-	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-		if (event.getGuild() != null && LOADED_TAGS.containsKey(event.getGuild().getIdLong())) {
-			Set<CustomTag> tags = LOADED_TAGS.get(event.getGuild().getIdLong());
-			tags.stream().filter(c -> event.getName().contains(c.getName()))
-					.findFirst()
-					.ifPresent(c -> handleCustomTag(event, c).queue());
-		}
-	}
-
-	@Contract(pure = true)
-	private @NotNull RestAction<?> handleCustomTag(@NotNull SlashCommandInteractionEvent event, @NotNull CustomTag command) {
-		Set<RestAction<?>> actions = new HashSet<>();
-		boolean reply = event.getOption("reply", command.isReply(), OptionMapping::getAsBoolean);
-		boolean embed = event.getOption("embed", command.isEmbed(), OptionMapping::getAsBoolean);
-		if (embed) {
-			if (reply) {
-				actions.add(event.replyEmbeds(command.toEmbed()));
-			} else {
-				actions.add(event.getChannel().sendMessageEmbeds(command.toEmbed()));
-			}
-		} else {
-			if (reply) {
-				actions.add(event.reply(command.getResponse()).allowedMentions(List.of()));
-			} else {
-				actions.add(event.getChannel().sendMessage(command.getResponse()).allowedMentions(List.of()));
-			}
-		}
-		if (!reply) {
-			actions.add(event.reply("Done!").setEphemeral(true));
-		}
-		return RestAction.allOf(actions);
 	}
 }

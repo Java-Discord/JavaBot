@@ -50,7 +50,7 @@ public class StateListener extends ListenerAdapter {
 			new GuildNotificationService(guild).sendLogChannelNotification(buildBootedUpEmbed());
 		}
 		try {
-			Bot.customCommandManager.init();
+			Bot.customTagManager.init();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not initialize CustomCommandManager: ", e);

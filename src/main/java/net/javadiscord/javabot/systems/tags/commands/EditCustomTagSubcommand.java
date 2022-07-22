@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * <h3>This class represents the /customcommands-admin command.</h3>
+ * <h3>This class represents the /tag-admin edit command.</h3>
  */
 public class EditCustomTagSubcommand extends CustomTagsSubcommand implements AutoCompletable, ModalHandler {
 	/**
@@ -57,7 +57,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 		if (!Checks.checkGuild(event)) {
 			return Responses.error(event, "This command may only be used inside a server.");
 		}
-		Set<CustomTag> tags = Bot.customCommandManager.getLoadedCommands(event.getGuild().getIdLong());
+		Set<CustomTag> tags = Bot.customTagManager.getLoadedCommands(event.getGuild().getIdLong());
 		Optional<CustomTag> tagOptional = tags.stream()
 				.filter(t -> t.getName().equalsIgnoreCase(nameMapping.getAsString()))
 				.findFirst();
@@ -103,7 +103,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 				.setAuthor(createdBy.getUser().getAsTag(), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Custom Tag Edited")
 				.addField("Id", String.format("`%s`", command.getId()), true)
-				.addField("Name", String.format("`/%s`", command.getName()), true)
+				.addField("Name", String.format("`%s`", command.getName()), true)
 				.addField("Created by", createdBy.getAsMention(), true)
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
@@ -115,20 +115,21 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> CustomTagManager.replyTags(Objects.requireNonNull(e.getGuild())))).queue();
+		CustomTagManager.handleAutoComplete(event).queue();
 	}
 
 	@Override
 	public void handleModal(@NotNull ModalInteractionEvent event, @NotNull List<ModalMapping> values) {
+		event.deferReply().queue();
 		String[] id = ComponentIdBuilder.split(event.getModalId());
-		ModalMapping responseMapping = event.getValue("customcmd-response");
-		ModalMapping replyMapping = event.getValue("customcmd-reply");
-		ModalMapping embedMapping = event.getValue("customcmd-embed");
+		ModalMapping responseMapping = event.getValue("tag-response");
+		ModalMapping replyMapping = event.getValue("tag-reply");
+		ModalMapping embedMapping = event.getValue("tag-embed");
 		if (responseMapping == null || replyMapping == null || embedMapping == null) {
 			Responses.error(event.getHook(), "Missing required arguments.").queue();
 			return;
 		}
-		if (!event.isFromGuild() || event.getGuild() == null || event.getMember() != null) {
+		if (!event.isFromGuild() || event.getGuild() == null || event.getMember() == null) {
 			Responses.error(event.getHook(), "This may only be used inside servers.").queue();
 			return;
 		}
@@ -136,7 +137,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 		CustomTag update = new CustomTag();
 		update.setGuildId(event.getGuild().getIdLong());
 		update.setCreatedBy(event.getUser().getIdLong());
-		update.setName(id[0]);
+		update.setName(id[1]);
 		update.setResponse(responseMapping.getAsString());
 		update.setReply(Boolean.parseBoolean(replyMapping.getAsString()));
 		update.setEmbed(Boolean.parseBoolean(embedMapping.getAsString()));
@@ -148,7 +149,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 				Responses.error(event.getHook(), String.format("Could not find Custom Tag with name `/%s`.", update.getName())).queue();
 				return;
 			}
-			if (Bot.customCommandManager.editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {
+			if (Bot.customTagManager.editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {
 				event.getHook().sendMessageEmbeds(buildEditTagEmbed(event.getMember(), update)).queue();
 				return;
 			}

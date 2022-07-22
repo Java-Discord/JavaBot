@@ -77,9 +77,9 @@ public class CreateCustomTagSubcommand extends CustomTagsSubcommand implements M
 	private @NotNull MessageEmbed buildCreateCommandEmbed(@NotNull User createdBy, @NotNull CustomTag command) {
 		return new EmbedBuilder()
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
-				.setTitle("Custom Command created")
+				.setTitle("Custom Tag Created")
 				.addField("Id", String.format("`%s`", command.getId()), true)
-				.addField("Name", String.format("`/%s`", command.getName()), true)
+				.addField("Name", String.format("`%s`", command.getName()), true)
 				.addField("Created by", createdBy.getAsMention(), true)
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
@@ -92,10 +92,10 @@ public class CreateCustomTagSubcommand extends CustomTagsSubcommand implements M
 	@Override
 	public void handleModal(@NotNull ModalInteractionEvent event, @NotNull List<ModalMapping> values) {
 		event.deferReply().queue();
-		ModalMapping nameMapping = event.getValue("customcmd-name");
-		ModalMapping responseMapping = event.getValue("customcmd-response");
-		ModalMapping replyMapping = event.getValue("customcmd-reply");
-		ModalMapping embedMapping = event.getValue("customcmd-embed");
+		ModalMapping nameMapping = event.getValue("tag-name");
+		ModalMapping responseMapping = event.getValue("tag-response");
+		ModalMapping replyMapping = event.getValue("tag-reply");
+		ModalMapping embedMapping = event.getValue("tag-embed");
 		if (nameMapping == null || responseMapping == null || replyMapping == null || embedMapping == null) {
 			Responses.error(event.getHook(), "Missing required arguments.").queue();
 			return;
@@ -109,8 +109,8 @@ public class CreateCustomTagSubcommand extends CustomTagsSubcommand implements M
 		command.setReply(Boolean.parseBoolean(replyMapping.getAsString()));
 		command.setEmbed(Boolean.parseBoolean(embedMapping.getAsString()));
 		try {
-			if (Bot.customCommandManager.addCommand(event.getGuild(), command)) {
-				event.replyEmbeds(buildCreateCommandEmbed(event.getUser(), command)).queue();
+			if (Bot.customTagManager.addCommand(event.getGuild(), command)) {
+				event.getHook().sendMessageEmbeds(buildCreateCommandEmbed(event.getUser(), command)).queue();
 			} else {
 				Responses.error(event.getHook(), "Could not create Custom Tag. Please try again.").queue();
 			}

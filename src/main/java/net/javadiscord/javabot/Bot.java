@@ -87,7 +87,7 @@ public class Bot {
 	/**
 	 * A static reference to the {@link CustomTagManager} which handles and loads all registered Custom Commands.
 	 */
-	public static CustomTagManager customCommandManager;
+	public static CustomTagManager customTagManager;
 
 	/**
 	 * A reference to the data source that provides access to the relational
@@ -139,7 +139,7 @@ public class Bot {
 				.build();
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
-		customCommandManager = new CustomTagManager(jda, dataSource);
+		customTagManager = new CustomTagManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
 		addComponentHandler(dih4jda);
 		// initialize Sentry
@@ -167,7 +167,7 @@ public class Bot {
 	 */
 	private static void addEventListeners(@NotNull JDA jda, @NotNull DIH4JDA dih4jda) {
 		jda.addEventListener(
-				customCommandManager,
+				customTagManager,
 				serverLockManager,
 				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),

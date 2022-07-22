@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * <h3>This class represents the /customcommand-admin delete command.</h3>
+ * <h3>This class represents the /tag-admin delete command.</h3>
  */
 public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements AutoCompletable {
 	/**
@@ -47,10 +47,10 @@ public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements A
 		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {
 			Optional<CustomTag> tagOptional = dao.findByName(event.getGuild().getIdLong(), tagName);
 			if (tagOptional.isEmpty()) {
-				Responses.error(event.getHook(), String.format("Could not find Custom Tag with name `/%s`.", tagOptional)).queue();
+				Responses.error(event.getHook(), String.format("Could not find Custom Tag with name `%s`.", tagName)).queue();
 				return;
 			}
-			if (Bot.customCommandManager.removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {
+			if (Bot.customTagManager.removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {
 				event.getHook().sendMessageEmbeds(buildDeleteCommandEmbed(event.getMember(), tagOptional.get())).queue();
 				return;
 			}
@@ -64,7 +64,7 @@ public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements A
 				.setAuthor(deletedBy.getUser().getAsTag(), null, deletedBy.getEffectiveAvatarUrl())
 				.setTitle("Custom Tag Deleted")
 				.addField("Id", String.format("`%s`", command.getId()), true)
-				.addField("Name", String.format("`/%s`", command.getName()), true)
+				.addField("Name", String.format("`%s`", command.getName()), true)
 				.addField("Created by", deletedBy.getAsMention(), true)
 				.addField("Response", String.format("```\n%s\n```", command.getResponse()), false)
 				.addField("Reply?", String.format("`%s`", command.isReply()), true)
@@ -76,6 +76,6 @@ public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements A
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> CustomTagManager.replyTags(Objects.requireNonNull(e.getGuild())))).queue();
+		CustomTagManager.handleAutoComplete(event).queue();
 	}
 }

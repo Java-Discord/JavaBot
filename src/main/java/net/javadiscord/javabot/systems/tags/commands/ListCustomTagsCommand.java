@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.tags.commands;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.tags.dao.CustomTagRepository;
 import net.javadiscord.javabot.systems.tags.model.CustomTag;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * <h3>This class represents the /customcommands command.</h3>
+ * <h3>This class represents the /tags command.</h3>
  */
 public class ListCustomTagsCommand extends SlashCommand {
 	/**
@@ -30,9 +31,9 @@ public class ListCustomTagsCommand extends SlashCommand {
 		event.deferReply(false).queue();
 		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {
 			List<CustomTag> tags = dao.getCustomTagsByGuildId(event.getGuild().getIdLong());
-			String tagList = tags.stream().map(CustomTag::getName).collect(Collectors.joining("\n"));
-			Responses.success(event.getHook(), "Custom Tag List",
-							String.format("```\n%s\n```", tagList.length() > 0 ? tagList : "No Custom Tags created yet.")).queue();
+			String tagList = tags.stream().map(CustomTag::getName).map(MarkdownUtil::monospace).collect(Collectors.joining(", "));
+			Responses.info(event.getHook(), "Custom Tag List",
+							String.format(tagList.length() > 0 ? tagList : "No Custom Tags created yet.")).queue();
 		});
 	}
 }
