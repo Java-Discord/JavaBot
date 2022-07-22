@@ -22,7 +22,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
-    // DIH4JDA (Interaction Framework) (includes JDA)
+    // DIH4JDA (Interaction Framework) (includes JDA (jda5.0.0-alpha.17))
     implementation("com.github.DynxstyGIT:DIH4JDA:f87f54eb42")
 
     implementation("com.google.code.gson:gson:2.9.0")
