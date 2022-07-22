@@ -50,7 +50,7 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
 
     // Sentry
-    implementation("io.sentry:sentry:6.0.0")
+    implementation("io.sentry:sentry:6.3.0")
 }
 
 tasks.withType<Jar> {
