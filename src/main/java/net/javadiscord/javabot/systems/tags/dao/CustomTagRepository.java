@@ -1,7 +1,7 @@
-package net.javadiscord.javabot.systems.custom_commands.dao;
+package net.javadiscord.javabot.systems.tags.dao;
 
 import lombok.RequiredArgsConstructor;
-import net.javadiscord.javabot.systems.custom_commands.model.CustomCommand;
+import net.javadiscord.javabot.systems.tags.model.CustomTag;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ import java.util.Optional;
  * Dao class that represents the CUSTOM_COMMANDS SQL Table.
  */
 @RequiredArgsConstructor
-public class CustomCommandRepository {
+public class CustomTagRepository {
 	private final Connection con;
 
 	/**
@@ -27,12 +27,12 @@ public class CustomCommandRepository {
 	 * @return The custom command that was saved.
 	 * @throws SQLException If an error occurs.
 	 */
-	public CustomCommand insert(CustomCommand command) throws SQLException, IllegalArgumentException {
+	public CustomTag insert(CustomTag command) throws SQLException, IllegalArgumentException {
 		if (findByName(command.getGuildId(), command.getName()).isPresent()) {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s already exists.", command.getGuildId(), command.getName()));
 		}
 		try (var s = con.prepareStatement(
-				"INSERT INTO custom_commands (guild_id, created_by, name, response, reply, embed) VALUES (?, ?, ?, ?, ?, ?)",
+				"INSERT INTO custom_tags (guild_id, created_by, name, response, reply, embed) VALUES (?, ?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
 			s.setLong(1, command.getGuildId());
@@ -54,15 +54,15 @@ public class CustomCommandRepository {
 	 *
 	 * @param old    The old custom command.
 	 * @param update The new custom command.
-	 * @return The updated {@link CustomCommand} object.
+	 * @return The updated {@link CustomTag} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public CustomCommand edit(@NotNull CustomCommand old, CustomCommand update) throws SQLException {
+	public CustomTag edit(@NotNull CustomTag old, CustomTag update) throws SQLException {
 		if (findByName(old.getGuildId(), old.getName()).isEmpty()) {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s does not exist.", old.getGuildId(), old.getName()));
 		}
 		try (var s = con.prepareStatement(
-				"UPDATE custom_commands SET response = ?, reply = ?, embed = ? WHERE id = ?",
+				"UPDATE custom_tags SET response = ?, reply = ?, embed = ? WHERE id = ?",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
 			s.setString(1, update.getResponse());
@@ -83,8 +83,8 @@ public class CustomCommandRepository {
 	 * @param command The custom command to delete.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void delete(@NotNull CustomCommand command) throws SQLException {
-		try (var s = con.prepareStatement("DELETE FROM custom_commands WHERE id = ?")) {
+	public void delete(@NotNull CustomTag command) throws SQLException {
+		try (var s = con.prepareStatement("DELETE FROM custom_tags WHERE id = ?")) {
 			s.setLong(1, command.getId());
 			s.executeUpdate();
 		}
@@ -98,9 +98,9 @@ public class CustomCommandRepository {
 	 * @return The custom command, if it was found.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<CustomCommand> findByName(long guildId, String name) throws SQLException {
-		CustomCommand command = null;
-		try (var s = con.prepareStatement("SELECT * FROM custom_commands WHERE guild_id = ? AND name = ?")) {
+	public Optional<CustomTag> findByName(long guildId, String name) throws SQLException {
+		CustomTag command = null;
+		try (var s = con.prepareStatement("SELECT * FROM custom_tags WHERE guild_id = ? AND name = ?")) {
 			s.setLong(1, guildId);
 			s.setString(2, name);
 			var rs = s.executeQuery();
@@ -119,9 +119,9 @@ public class CustomCommandRepository {
 	 * @return The custom command, if it was found.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<CustomCommand> findById(long id) throws SQLException {
-		CustomCommand command = null;
-		try (var s = con.prepareStatement("SELECT * FROM custom_commands WHERE id = ?")) {
+	public Optional<CustomTag> findById(long id) throws SQLException {
+		CustomTag command = null;
+		try (var s = con.prepareStatement("SELECT * FROM custom_tags WHERE id = ?")) {
 			s.setLong(1, id);
 			var rs = s.executeQuery();
 			if (rs.next()) {
@@ -138,9 +138,9 @@ public class CustomCommandRepository {
 	 * @param guildId The id of the guild.
 	 * @return A List with all custom commands.
 	 */
-	public List<CustomCommand> getCustomCommandsByGuildId(long guildId) {
-		List<CustomCommand> commands = new ArrayList<>();
-		try (var s = con.prepareStatement("SELECT * FROM custom_commands WHERE guild_id = ?")) {
+	public List<CustomTag> getCustomTagsByGuildId(long guildId) {
+		List<CustomTag> commands = new ArrayList<>();
+		try (var s = con.prepareStatement("SELECT * FROM custom_tags WHERE guild_id = ?")) {
 			s.setLong(1, guildId);
 			var rs = s.executeQuery();
 			while (rs.next()) commands.add(read(rs));
@@ -153,21 +153,21 @@ public class CustomCommandRepository {
 	}
 
 	/**
-	 * Reads the given {@link ResultSet} and constructs a new {@link CustomCommand} object.
+	 * Reads the given {@link ResultSet} and constructs a new {@link CustomTag} object.
 	 *
 	 * @param rs The ResultSet.
-	 * @return The {@link CustomCommand} object.
+	 * @return The {@link CustomTag} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	private @NotNull CustomCommand read(@NotNull ResultSet rs) throws SQLException {
-		CustomCommand command = new CustomCommand();
-		command.setId(rs.getLong("id"));
-		command.setGuildId(rs.getLong("guild_id"));
-		command.setCreatedBy(rs.getLong("created_by"));
-		command.setName(rs.getString("name"));
-		command.setResponse(rs.getString("response"));
-		command.setReply(rs.getBoolean("reply"));
-		command.setEmbed(rs.getBoolean("embed"));
-		return command;
+	private @NotNull CustomTag read(@NotNull ResultSet rs) throws SQLException {
+		CustomTag tag = new CustomTag();
+		tag.setId(rs.getLong("id"));
+		tag.setGuildId(rs.getLong("guild_id"));
+		tag.setCreatedBy(rs.getLong("created_by"));
+		tag.setName(rs.getString("name"));
+		tag.setResponse(rs.getString("response"));
+		tag.setReply(rs.getBoolean("reply"));
+		tag.setEmbed(rs.getBoolean("embed"));
+		return tag;
 	}
 }

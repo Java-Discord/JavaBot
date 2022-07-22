@@ -18,7 +18,7 @@ public final class Checks {
 	/**
 	 * A {@link Pattern} that matches with a hex string (#FFFFFF).
 	 */
-	public static final Pattern HEX_PATERN = Pattern.compile("^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
+	public static final Pattern HEX_PATTERN = Pattern.compile("^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
 
 	private Checks() {
 	}
@@ -58,6 +58,6 @@ public final class Checks {
 	}
 
 	public static boolean checkHexColor(String hex) {
-		return HEX_PATERN.matcher(hex).matches();
+		return HEX_PATTERN.matcher(hex).matches();
 	}
 }

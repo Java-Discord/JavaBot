@@ -22,7 +22,8 @@ import net.javadiscord.javabot.data.h2db.commands.QuickMigrateSubcommand;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
-import net.javadiscord.javabot.systems.custom_commands.CustomCommandManager;
+import net.javadiscord.javabot.systems.tags.CustomTagManager;
+import net.javadiscord.javabot.systems.tags.commands.CreateCustomTagSubcommand;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
@@ -34,6 +35,7 @@ import net.javadiscord.javabot.systems.self_roles.SelfRoleInteractionManager;
 import net.javadiscord.javabot.systems.staff_commands.embeds.CreateEmbedSubcommand;
 import net.javadiscord.javabot.systems.staff_commands.embeds.EditEmbedSubcommand;
 import net.javadiscord.javabot.systems.starboard.StarboardManager;
+import net.javadiscord.javabot.systems.tags.commands.EditCustomTagSubcommand;
 import net.javadiscord.javabot.systems.user_commands.leaderboard.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.tasks.ScheduledTasks;
@@ -84,9 +86,9 @@ public class Bot {
 	public static ServerLockManager serverLockManager;
 
 	/**
-	 * A static reference to the {@link CustomCommandManager} which handles and loads all registered Custom Commands.
+	 * A static reference to the {@link CustomTagManager} which handles and loads all registered Custom Commands.
 	 */
-	public static CustomCommandManager customCommandManager;
+	public static CustomTagManager customCommandManager;
 
 	/**
 	 * A reference to the data source that provides access to the relational
@@ -135,13 +137,10 @@ public class Bot {
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
-				.disableUnknownCommandDeletion()
-				.disableUnregisteredCommandException()
-				.disableLogging(DIH4JDALogger.Type.SMART_QUEUE)
 				.build();
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
-		customCommandManager = new CustomCommandManager(jda, dataSource);
+		customCommandManager = new CustomTagManager(jda, dataSource);
 		addEventListeners(jda, dih4jda);
 		addComponentHandler(dih4jda);
 		// initialize Sentry
@@ -204,7 +203,9 @@ public class Bot {
 				List.of("embed-edit"), new EditEmbedSubcommand(),
 				List.of("quick-migrate"), new QuickMigrateSubcommand(),
 				List.of("report"), new ReportManager(),
-				List.of("self-role"), new SelfRoleInteractionManager()
+				List.of("self-role"), new SelfRoleInteractionManager(),
+				List.of("tag-create"), new CreateCustomTagSubcommand(),
+				List.of("tag-edit"), new EditCustomTagSubcommand()
 		));
 		dih4jda.addSelectMenuHandlers(Map.of(
 				List.of("qotw-submission-select"), new SubmissionInteractionManager()

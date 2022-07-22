@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.custom_commands.model;
+package net.javadiscord.javabot.systems.tags.model;
 
 import lombok.Data;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -7,12 +7,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.javadiscord.javabot.systems.tags.CustomTagManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A data class that represents a single Custom Command.
  */
 @Data
-public class CustomCommand {
+public class CustomTag {
 	private long id;
 	private long guildId;
 	private long createdBy;
@@ -21,20 +23,12 @@ public class CustomCommand {
 	private boolean reply;
 	private boolean embed;
 
-	/**
-	 * Converts this {@link CustomCommand} into its {@link SlashCommandData}.
-	 *
-	 * @return The built {@link SlashCommandData}.
-	 */
-	public SlashCommandData toSlashCommandData() {
-		return Commands.slash(name, response.length() > CommandData.MAX_DESCRIPTION_LENGTH ? response.substring(0, CommandData.MAX_DESCRIPTION_LENGTH - 3) + "..." : response)
-				.addOption(OptionType.BOOLEAN, "reply", "Should the command reply to you?", false)
-				.addOption(OptionType.BOOLEAN, "embed", "Should the response be embedded?", false)
-				.setGuildOnly(true);
+	public void setName(@NotNull String name) {
+		this.name = CustomTagManager.cleanString(name);
 	}
 
 	/**
-	 * Converts this {@link CustomCommand}'s response into a {@link MessageEmbed}.
+	 * Converts this {@link CustomTag}'s response into a {@link MessageEmbed}.
 	 *
 	 * @return The built {@link MessageEmbed}.
 	 */

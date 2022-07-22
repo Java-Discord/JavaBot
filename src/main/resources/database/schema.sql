@@ -75,8 +75,8 @@ CREATE TABLE warn
 	discarded       BOOL          NOT NULL DEFAULT FALSE
 );
 
-// Custom Commands
-CREATE TABLE custom_commands
+// Custom Tags
+CREATE TABLE custom_tags
 (
 	id         BIGINT PRIMARY KEY AUTO_INCREMENT,
 	guild_id   BIGINT        NOT NULL,
