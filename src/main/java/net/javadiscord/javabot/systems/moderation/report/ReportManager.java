@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -53,7 +54,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	}
 
 	@Override
-	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getModalId());
 		switch (id[1]) {
@@ -69,7 +70,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	 * @param event The {@link UserContextInteractionEvent} fired when reporting the user
 	 * @return the built {@link Modal}
 	 */
-	protected Modal buildUserReportModal(UserContextInteractionEvent event) {
+	protected Modal buildUserReportModal(@NotNull UserContextInteractionEvent event) {
 		TextInput messageInput = TextInput.create("reason", "Report Description", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
@@ -86,7 +87,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	 * @param event The {@link MessageContextInteractionEvent} fired when reporting the message
 	 * @return the built {@link Modal}
 	 */
-	protected Modal buildMessageReportModal(MessageContextInteractionEvent event) {
+	protected Modal buildMessageReportModal(@NotNull MessageContextInteractionEvent event) {
 		String title = "Report message";
 		Member targetMember = event.getTarget().getMember();
 		if (targetMember != null) {
@@ -106,11 +107,11 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	 * @param hook The {@link InteractionHook} to respond to.
 	 * @param reason The reason for reporting this user.
 	 * @param targetId The targeted user's id.
+	 * @return The {@link WebhookMessageAction}.
 	 */
-	protected void handleUserReport(InteractionHook hook, String reason, String targetId) {
+	protected WebhookMessageAction<Message> handleUserReport(InteractionHook hook, @NotNull String reason, String targetId) {
 		if (reason.isBlank()) {
-			Responses.error(hook, "No report reason was provided.").queue();
-			return;
+			return Responses.error(hook, "No report reason was provided.");
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
 			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
@@ -125,6 +126,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			Responses.error(hook, "The user to report seems not to exist any more.").queue();
 			log.warn("Cannot retrieve user {} when reporting them", targetId, failure);
 		});
+		return null;
 	}
 
 	private void handleMessageReport(ModalInteractionEvent event, String messageId) {

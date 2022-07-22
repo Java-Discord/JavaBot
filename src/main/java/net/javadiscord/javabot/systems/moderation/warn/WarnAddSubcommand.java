@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.moderation.warn.subcommands;
+package net.javadiscord.javabot.systems.moderation.warn;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.User;

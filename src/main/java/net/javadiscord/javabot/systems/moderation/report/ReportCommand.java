@@ -2,11 +2,12 @@ package net.javadiscord.javabot.systems.moderation.report;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.systems.moderation.ModerateUserCommand;
 
 import javax.annotation.Nonnull;
@@ -28,9 +29,8 @@ public class ReportCommand extends ModerateUserCommand {
 	}
 
 	@Override
-	protected ReplyCallbackAction handleModerationActionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nonnull String reason) {
-		new ReportManager().handleUserReport(event.getHook(), reason, target.getId());
-		return event.deferReply(true);
+	protected WebhookMessageAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nonnull String reason) {
+		return new ReportManager().handleUserReport(event.getHook(), reason, target.getId());
 	}
 }
 

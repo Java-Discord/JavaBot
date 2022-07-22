@@ -6,13 +6,12 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Abstract class, that represents a single moderation command.
+ * Abstract class that represents a single moderation command.
  */
 public abstract class ModerateCommand extends SlashCommand {
-	private boolean allowThreads = true;
-
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
@@ -20,23 +19,16 @@ public abstract class ModerateCommand extends SlashCommand {
 			return;
 		}
 		Member member = event.getMember();
-		if (allowThreads) {
-			if (event.getChannelType() != ChannelType.TEXT && !event.getChannelType().isThread()) {
-				Responses.error(event, "This command can only be performed in a server text channel or thread.").queue();
-				return;
-			}
-		} else {
-			if (event.getChannelType() != ChannelType.TEXT) {
-				Responses.error(event, "This command can only be performed in a server text channel.").queue();
-				return;
-			}
+		if (member == null) {
+			Responses.replyMissingMember(event).queue();
+			return;
+		}
+		if (event.getChannelType() != ChannelType.TEXT && !event.getChannelType().isThread()) {
+			Responses.error(event, "This command can only be performed in a server text channel or thread.").queue();
+			return;
 		}
 		handleModerationCommand(event, member).queue();
 	}
 
-	protected void setAllowThreads(boolean allowThreads) {
-		this.allowThreads = allowThreads;
-	}
-
-	protected abstract ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser);
+	protected abstract ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator);
 }

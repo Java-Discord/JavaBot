@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <h3>This class represents the /unban command.</h3>
@@ -27,7 +28,7 @@ public class UnbanCommand extends ModerateCommand {
 	}
 
 	@Override
-	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
+	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null || Checks.isInvalidLongInput(idOption)) {
 			return Responses.replyMissingArguments(event);
