@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 import javax.annotation.Nonnull;
@@ -33,6 +35,9 @@ public class KickCommand extends ModerateUserCommand {
 
 	@Override
 	protected WebhookMessageAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nullable String reason) {
+		if (!Checks.hasPermission(event.getGuild(), Permission.KICK_MEMBERS)) {
+			return Responses.replyInsufficientPermissions(event.getHook(), Permission.KICK_MEMBERS);
+		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		ModerationService service = new ModerationService(event.getInteraction());
 		service.kick(target, reason, event.getMember(), event.getChannel(), quiet);

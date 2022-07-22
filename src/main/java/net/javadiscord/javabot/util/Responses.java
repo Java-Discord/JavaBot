@@ -90,6 +90,11 @@ public final class Responses {
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
 
+	public static @NotNull WebhookMessageAction<Message> replyInsufficientPermissions(InteractionHook hook, Permission... permissions) {
+		return error(hook, "I am missing one or more permissions in order to execute this action. (%s)",
+				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
+	}
+
 	public static @NotNull ReplyCallbackAction replyMissingMember(CommandInteraction event) {
 		return error(event, "The provided user **must** be a member of this server. Please try again.");
 	}

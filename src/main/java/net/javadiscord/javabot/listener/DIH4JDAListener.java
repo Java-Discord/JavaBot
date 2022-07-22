@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.ModalInteraction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
+import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,7 @@ public class DIH4JDAListener implements DIH4JDAEventListener {
 
 	private @NotNull MessageEmbed buildExceptionEmbed(@NotNull Exception e) {
 		return buildErrorEmbed()
-				.setDescription("An unexpected Error occurred!")
+				.setDescription(MarkdownUtil.codeblock(e.getMessage()))
 				.setFooter(e.getClass().getSimpleName())
 				.build();
 	}
