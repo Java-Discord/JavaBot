@@ -18,8 +18,9 @@ import javax.annotation.Nonnull;
 public abstract class ConfigSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (!event.isFromGuild()) {
-			Responses.error(event, "This command may only be used inside servers.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
+			return;
 		}
 		try {
 			handleConfigSubcommand(event, Bot.config.get(event.getGuild())).queue();

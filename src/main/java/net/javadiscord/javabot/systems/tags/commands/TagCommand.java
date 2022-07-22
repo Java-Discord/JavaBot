@@ -33,14 +33,14 @@ public class TagCommand extends SlashCommand implements AutoCompletable {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
-			Responses.error(event, "Missing required arguments.").queue();
+			Responses.missingArguments(event);
 			return;
 		}
 		Optional<CustomTag> tagOptional = Bot.customTagManager.getByName(event.getGuild().getIdLong(), nameMapping.getAsString());
 		if (tagOptional.isPresent()) {
 			CustomTagManager.handleCustomTag(event, tagOptional.get()).queue();
 		} else {
-			Responses.error(event.getHook(), String.format("Could not find Custom Tag with name `%s`.", nameMapping.getAsString())).queue();
+			Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", nameMapping.getAsString()).queue();
 		}
 	}
 

@@ -50,7 +50,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 		boolean permanent = event.getOption("permanent", false, OptionMapping::getAsBoolean);
 		OptionMapping messageIdOption = event.getOption("message-id");
 		if (typeMapping == null || roleMapping == null || descriptionMapping == null) {
-			Responses.error(event, "Missing required arguments").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		String type = typeMapping.getAsString();

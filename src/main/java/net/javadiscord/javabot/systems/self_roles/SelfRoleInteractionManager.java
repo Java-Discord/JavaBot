@@ -172,10 +172,10 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 		ModalMapping timezoneOption = event.getValue("timezone");
 		ModalMapping extraRemarksOption = event.getValue("extra-remarks");
 		if (nameOption == null || ageOption == null || emailOption == null || timezoneOption == null || extraRemarksOption == null) {
-			return Responses.error(event.getHook(), "Missing required arguments.");
+			return Responses.missingArguments(event.getHook());
 		}
 		if (!EmailValidator.getInstance().isValid(emailOption.getAsString())) {
-			return Responses.error(event.getHook(), String.format("`%s` is not a valid Email-Address. Please try again.", emailOption.getAsString()));
+			return Responses.error(event.getHook(), "`%s` is not a valid email-address. Please try again.", emailOption.getAsString());
 		}
 		Role role = config.getGuild().getRoleById(roleId);
 		if (role == null) {
@@ -221,7 +221,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 		ModalMapping projectLinksOption = event.getValue("project-links");
 		ModalMapping reasonOption = event.getValue("reason");
 		if (experienceOption == null || projectInfoOption == null || projectLinksOption == null || reasonOption == null) {
-			return Responses.error(event.getHook(), "Missing required arguments.");
+			return Responses.missingArguments(event.getHook());
 		}
 		event.getGuild().retrieveMemberById(userId).queue(
 				member -> {

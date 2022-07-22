@@ -60,14 +60,14 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 		GuildConfig config = Bot.config.get(event.getGuild());
 		ThreadChannel submissionThread = event.getGuild().getThreadChannelById(threadId);
 		if (submissionThread == null) {
-			Responses.error(event, String.format("Could not find thread with id: `%s`", threadId)).queue();
+			Responses.error(event, "Could not find thread with id: `%s`", threadId).queue();
 			return;
 		}
 		event.deferReply(true).queue();
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(threadId);
 			if (submissionOptional.isEmpty()) {
-				Responses.error(event.getHook(), String.format("Could not find submission with thread id: `%s`", threadId)).queue();
+				Responses.error(event.getHook(), "Could not find submission with thread id: `%s`", threadId).queue();
 				return;
 			}
 			QOTWSubmission submission = submissionOptional.get();
@@ -83,7 +83,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
 					member -> {
 						if (member == null) {
-							Responses.error(event.getHook(), String.format("Could not find member with id: `%s`", submission.getAuthorId())).queue();
+							Responses.error(event.getHook(), "Could not find member with id: `%s`", submission.getAuthorId()).queue();
 							return;
 						}
 						QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
@@ -138,7 +138,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 								MessageActionUtils.addAttachmentsAndSend(m, thread.sendMessage(messageContent)
 										.allowedMentions(EnumSet.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL)));
 							});
-							Responses.success(hook, "Best Answer", String.format("Successfully marked %s as the best answer", submissionThread.getAsMention())).queue();
+							Responses.success(hook, "Best Answer", "Successfully marked %s as the best answer", submissionThread.getAsMention()).queue();
 						}
 				));
 	}

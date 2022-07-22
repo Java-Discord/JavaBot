@@ -152,10 +152,11 @@ public class ModerationService {
 	 */
 	public void timeout(@Nonnull Member member, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
 		MessageEmbed timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
-		member.getGuild().timeoutFor(member, duration).queue();
-		new UserNotificationService(member.getUser()).sendDirectMessageNotification(timeoutEmbed);
-		new GuildNotificationService(member.getGuild()).sendLogChannelNotification(timeoutEmbed);
-		if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
+		member.getGuild().timeoutFor(member, duration).queue(s -> {
+			new UserNotificationService(member.getUser()).sendDirectMessageNotification(timeoutEmbed);
+			new GuildNotificationService(member.getGuild()).sendLogChannelNotification(timeoutEmbed);
+			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
+		}, ExceptionLogger::capture);
 	}
 
 	/**
@@ -169,10 +170,11 @@ public class ModerationService {
 	 */
 	public void removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
-		removedBy.getGuild().removeTimeout(member).queue();
-		new UserNotificationService(member.getUser()).sendDirectMessageNotification(removeTimeoutEmbed);
-		new GuildNotificationService(member.getGuild()).sendLogChannelNotification(removeTimeoutEmbed);
-		if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
+		removedBy.getGuild().removeTimeout(member).queue(s -> {
+			new UserNotificationService(member.getUser()).sendDirectMessageNotification(removeTimeoutEmbed);
+			new GuildNotificationService(member.getGuild()).sendLogChannelNotification(removeTimeoutEmbed);
+			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
+		}, ExceptionLogger::capture);
 	}
 
 	/**
@@ -186,10 +188,11 @@ public class ModerationService {
 	 */
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
-		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, reason).queue();
-		new UserNotificationService(user).sendDirectMessageNotification(banEmbed);
-		new GuildNotificationService(bannedBy.getGuild()).sendLogChannelNotification(banEmbed);
-		if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
+		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, reason).queue(s -> {
+			new UserNotificationService(user).sendDirectMessageNotification(banEmbed);
+			new GuildNotificationService(bannedBy.getGuild()).sendLogChannelNotification(banEmbed);
+			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
+		}, ExceptionLogger::capture);
 	}
 
 	/**
@@ -205,9 +208,10 @@ public class ModerationService {
 		MessageEmbed unbanEmbed = this.buildUnbanEmbed(userId, bannedBy);
 		boolean isBanned = isBanned(bannedBy.getGuild(), userId);
 		if (isBanned) {
-			bannedBy.getGuild().unban(User.fromId(userId)).queue();
-			moderationConfig.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
-			if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
+			bannedBy.getGuild().unban(User.fromId(userId)).queue(s -> {
+				moderationConfig.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
+				if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
+			}, ExceptionLogger::capture);
 		}
 		return isBanned;
 	}
@@ -229,10 +233,11 @@ public class ModerationService {
 	 */
 	public void kick(User user, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed kickEmbed = buildKickEmbed(user, kickedBy, reason);
-		kickedBy.getGuild().kick(user).queue();
-		new UserNotificationService(user).sendDirectMessageNotification(kickEmbed);
-		new GuildNotificationService(kickedBy.getGuild()).sendLogChannelNotification(kickEmbed);
-		if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
+		kickedBy.getGuild().kick(user).queue(s -> {
+			new UserNotificationService(user).sendDirectMessageNotification(kickEmbed);
+			new GuildNotificationService(kickedBy.getGuild()).sendLogChannelNotification(kickEmbed);
+			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
+		}, ExceptionLogger::capture);
 	}
 
 	private @NotNull EmbedBuilder buildModerationEmbed(@NotNull User user, @NotNull Member moderator, String reason) {

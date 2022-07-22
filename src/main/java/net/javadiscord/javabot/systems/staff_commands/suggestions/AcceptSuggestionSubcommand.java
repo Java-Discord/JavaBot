@@ -34,7 +34,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 		message.editMessageEmbeds(declineEmbed).queue(
 				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getSuccessEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
-		return Responses.success(event.getHook(), "Suggestion Accepted", String.format("Successfully accepted suggestion with id `%s`", message.getId()))
+		return Responses.success(event.getHook(), "Suggestion Accepted", "Successfully accepted suggestion with id `%s`", message.getId())
 				.addActionRows(getJumpButton(message));
 	}
 

@@ -50,10 +50,10 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 	public InteractionCallbackAction<?> handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
-			return Responses.error(event, "Missing required arguments.");
+			return Responses.missingArguments(event);
 		}
-		if (!Checks.checkGuild(event)) {
-			return Responses.error(event, "This command may only be used inside a server.");
+		if (event.getGuild() == null) {
+			return Responses.guildOnly(event);
 		}
 		Set<CustomTag> tags = Bot.customTagManager.getLoadedCommands(event.getGuild().getIdLong());
 		Optional<CustomTag> tagOptional = tags.stream()
@@ -62,7 +62,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 		if (tagOptional.isPresent()) {
 			return event.replyModal(buildEditTagModal(tagOptional.get()));
 		}
-		return Responses.error(event, String.format("Could not find tag with name: `%s`", nameMapping.getAsString()));
+		return Responses.error(event, "Could not find tag with name: `%s`", nameMapping.getAsString());
 	}
 
 	private @NotNull Modal buildEditTagModal(@NotNull CustomTag tag) {
@@ -124,7 +124,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 		ModalMapping replyMapping = event.getValue("tag-reply");
 		ModalMapping embedMapping = event.getValue("tag-embed");
 		if (responseMapping == null || replyMapping == null || embedMapping == null) {
-			Responses.error(event.getHook(), "Missing required arguments.").queue();
+			Responses.missingArguments(event.getHook()).queue();
 			return;
 		}
 		if (!event.isFromGuild() || event.getGuild() == null || event.getMember() == null) {
@@ -144,7 +144,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {
 			Optional<CustomTag> tagOptional = dao.findByName(event.getGuild().getIdLong(), update.getName());
 			if (tagOptional.isEmpty()) {
-				Responses.error(event.getHook(), String.format("Could not find Custom Tag with name `/%s`.", update.getName())).queue();
+				Responses.error(event.getHook(), "Could not find Custom Tag with name `/%s`.", update.getName()).queue();
 				return;
 			}
 			if (Bot.customTagManager.editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {

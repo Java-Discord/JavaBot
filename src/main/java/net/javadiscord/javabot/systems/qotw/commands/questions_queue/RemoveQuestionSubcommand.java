@@ -38,7 +38,7 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null) {
-			return Responses.warning(event, "Missing required arguments.");
+			return Responses.missingArguments(event);
 		}
 		long id = idOption.getAsLong();
 		boolean removed = new QuestionQueueRepository(con).removeQuestion(guildId, id);

@@ -20,7 +20,7 @@ public abstract class QOTWSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
-			Responses.warning(event, "This command can only be used in the context of a guild.").queue();
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		try (Connection con = Bot.dataSource.getConnection()) {

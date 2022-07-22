@@ -31,7 +31,7 @@ public class AvatarCommand extends SlashCommand {
 		event.deferReply().queue();
 		event.getJDA().retrieveUserById(userId).queue(
 				user -> event.getHook().sendMessageEmbeds(buildAvatarEmbed(user)).queue(),
-				err -> Responses.error(event.getHook(), String.format("Could not retrieve user with id: `%s`", userId)).queue()
+				err -> Responses.error(event.getHook(), "Could not retrieve user with id: `%s`", userId).queue()
 		);
 	}
 

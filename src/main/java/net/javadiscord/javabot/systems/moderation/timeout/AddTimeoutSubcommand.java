@@ -1,7 +1,8 @@
-package net.javadiscord.javabot.systems.moderation.timeout.subcommands;
+package net.javadiscord.javabot.systems.moderation.timeout;
 
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -11,10 +12,13 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
 
 /**
  * Subcommand that allows staff-members to add timeouts to a single users.
@@ -41,13 +45,13 @@ public class AddTimeoutSubcommand extends SlashCommand.Subcommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping userOption = event.getOption("user");
-		OptionMapping reasonOption = event.getOption("reason");
 		OptionMapping durationAmountOption = event.getOption("duration-amount");
-		OptionMapping durationTimeUnitOption = event.getOption("duration-timeunit");
-		if (userOption == null || reasonOption == null || durationAmountOption == null || durationTimeUnitOption == null) {
-			Responses.error(event, "Missing required arguments.").queue();
+		OptionMapping durationTimeUnitOption = event.getOption("duration-unit");
+		OptionMapping reasonOption = event.getOption("reason");
+		if (userOption == null || durationAmountOption == null || durationTimeUnitOption == null || reasonOption == null) {
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		Member member = userOption.getAsMember();
@@ -55,10 +59,14 @@ public class AddTimeoutSubcommand extends SlashCommand.Subcommand {
 			Responses.error(event, "Cannot timeout a user who is not a member of this server").queue();
 			return;
 		}
+		if (!Checks.hasPermission(event.getGuild(), Permission.MODERATE_MEMBERS) || !event.getGuild().getSelfMember().canInteract(member)) {
+			Responses.error(event, "Insufficient Permissions").queue();
+			return;
+		}
 		String reason = reasonOption.getAsString();
 		Duration duration = Duration.of(durationAmountOption.getAsLong(), ChronoUnit.valueOf(durationTimeUnitOption.getAsString()));
 		if (duration.toSeconds() > (Member.MAX_TIME_OUT_LENGTH * 24 * 60 * 60)) {
-			Responses.error(event, String.format("You cannot add a Timeout longer than %s days.", Member.MAX_TIME_OUT_LENGTH)).queue();
+			Responses.error(event, "You cannot add a Timeout longer than %s days.", Member.MAX_TIME_OUT_LENGTH).queue();
 			return;
 		}
 		MessageChannel channel = event.getMessageChannel();
@@ -68,11 +76,11 @@ public class AddTimeoutSubcommand extends SlashCommand.Subcommand {
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		if (member.isTimedOut()) {
-			Responses.error(event, String.format("Could not timeout %s; they are already timed out.", member.getAsMention())).queue();
+			Responses.error(event, "Could not timeout %s; they are already timed out.", member.getAsMention()).queue();
 			return;
 		}
 		ModerationService moderationService = new ModerationService(event.getInteraction());
 		moderationService.timeout(member, reason, event.getMember(), duration, channel, quiet);
-		Responses.success(event, "User Timed Out", String.format("%s has been timed out.", member.getAsMention())).queue();
+		Responses.success(event, "User Timed Out", "%s has been timed out.", member.getAsMention()).queue();
 	}
 }

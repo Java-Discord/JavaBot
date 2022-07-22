@@ -36,6 +36,6 @@ public class BanCommand extends ModerateUserCommand {
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		ModerationService service = new ModerationService(event.getInteraction());
 		service.ban(target, reason, commandUser, event.getChannel(), quiet);
-		return Responses.success(event, "User Banned", String.format("%s has been banned.", target.getAsMention()));
+		return Responses.success(event, "User Banned", "%s has been banned.", target.getAsMention());
 	}
 }

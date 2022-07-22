@@ -41,11 +41,11 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 		OptionMapping reasonMapping = event.getOption("reason");
 		OptionMapping severityMapping = event.getOption("severity");
 		if (userMapping == null || reasonMapping == null || severityMapping == null) {
-			Responses.error(event, "Missing required arguments.").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
-		if (!Checks.checkGuild(event)) {
-			Responses.error(event, "This command may only be used inside of a server.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		User target = userMapping.getAsUser();
@@ -57,7 +57,7 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		ModerationService service = new ModerationService(event);
 		service.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
-		Responses.success(event, "User Warned", String.format("%s has been successfully warned.", target.getAsMention())).queue();
+		Responses.success(event, "User Warned", "%s has been successfully warned.", target.getAsMention()).queue();
 	}
 }
 

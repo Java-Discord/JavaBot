@@ -48,7 +48,7 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 		ModalMapping confirmMapping = event.getValue("confirmation");
 		event.deferReply(false).queue();
 		if (statementMapping == null || confirmMapping == null) {
-			Responses.error(event.getHook(), "Missing required arguments").queue();
+			Responses.missingArguments(event.getHook()).queue();
 			return;
 		}
 		if (!confirmMapping.getAsString().equals("CONFIRM")) {

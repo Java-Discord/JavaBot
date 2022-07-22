@@ -35,7 +35,7 @@ public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
 		OptionMapping idMapping = event.getOption("message-id");
 		OptionMapping disabledMapping = event.getOption("disable");
 		if (idMapping == null || disabledMapping == null) {
-			Responses.error(event, "Missing required arguments").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		boolean disabled = disabledMapping.getAsBoolean();

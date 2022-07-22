@@ -34,7 +34,7 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 		message.editMessageEmbeds(onHoldEmbed).queue(
 				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getClockEmoji()).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
-		return Responses.success(event.getHook(), "Suggestion On Hold", String.format("Successfully marked suggestion with id `%s` as On Hold", message.getId()))
+		return Responses.success(event.getHook(), "Suggestion On Hold", "Successfully marked suggestion with id `%s` as On Hold", message.getId())
 				.addActionRows(getJumpButton(message));
 	}
 

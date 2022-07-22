@@ -37,7 +37,7 @@ public class IdCalculatorCommand extends SlashCommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("id");
 		if (idMapping == null) {
-			Responses.error(event, "Missing required arguments").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		if (Checks.isInvalidLongInput(idMapping)) {

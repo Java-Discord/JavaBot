@@ -38,7 +38,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 					edit.addReaction(emojiConfig.getDownvoteEmote(event.getJDA())).queue();
 				},
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
-		return Responses.success(event.getHook(), "Suggestion Cleared", String.format("Successfully cleared suggestion with id `%s`", message.getId()))
+		return Responses.success(event.getHook(), "Suggestion Cleared", "Successfully cleared suggestion with id `%s`", message.getId())
 				.addActionRows(getJumpButton(message));
 	}
 

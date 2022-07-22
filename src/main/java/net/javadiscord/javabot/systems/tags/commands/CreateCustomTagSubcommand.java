@@ -97,7 +97,7 @@ public class CreateCustomTagSubcommand extends CustomTagsSubcommand implements M
 		ModalMapping replyMapping = event.getValue("tag-reply");
 		ModalMapping embedMapping = event.getValue("tag-embed");
 		if (nameMapping == null || responseMapping == null || replyMapping == null || embedMapping == null) {
-			Responses.error(event.getHook(), "Missing required arguments.").queue();
+			Responses.missingArguments(event.getHook()).queue();
 			return;
 		}
 		// build the CustomCommand object

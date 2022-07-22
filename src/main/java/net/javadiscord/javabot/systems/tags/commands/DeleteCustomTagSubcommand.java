@@ -39,13 +39,13 @@ public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements A
 	public ReplyCallbackAction handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
-			return Responses.error(event, "Missing required arguments.");
+			return Responses.missingArguments(event);
 		}
 		String tagName = CustomTagManager.cleanString(nameMapping.getAsString());
 		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {
 			Optional<CustomTag> tagOptional = dao.findByName(event.getGuild().getIdLong(), tagName);
 			if (tagOptional.isEmpty()) {
-				Responses.error(event.getHook(), String.format("Could not find Custom Tag with name `%s`.", tagName)).queue();
+				Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", tagName).queue();
 				return;
 			}
 			if (Bot.customTagManager.removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {

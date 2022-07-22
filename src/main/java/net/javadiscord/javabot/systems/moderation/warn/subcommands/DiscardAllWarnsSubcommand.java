@@ -31,13 +31,13 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 			Responses.error(event, "Please provide a valid user.").queue();
 			return;
 		}
-		if (!Checks.checkGuild(event)) {
-			Responses.error(event, "This command may only be used inside of a server.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		User target = userMapping.getAsUser();
 		new ModerationService(event.getInteraction()).discardAllWarns(target, event.getUser());
-		Responses.success(event, "Warns Discarded", String.format("Successfully discarded all warns from **%s**.", target.getAsTag())).queue();
+		Responses.success(event, "Warns Discarded", "Successfully discarded all warns from **%s**.", target.getAsTag()).queue();
 	}
 }
 

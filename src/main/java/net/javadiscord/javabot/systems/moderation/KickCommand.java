@@ -35,6 +35,6 @@ public class KickCommand extends ModerateUserCommand {
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		ModerationService service = new ModerationService(event.getInteraction());
 		service.kick(target, reason, event.getMember(), event.getChannel(), quiet);
-		return Responses.success(event, "User Kicked", String.format("%s has been kicked.", target.getAsMention()));
+		return Responses.success(event, "User Kicked", "%s has been kicked.", target.getAsMention());
 	}
 }

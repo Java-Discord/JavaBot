@@ -1,6 +1,7 @@
-package net.javadiscord.javabot.systems.moderation.timeout.subcommands;
+package net.javadiscord.javabot.systems.moderation.timeout;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 /**
@@ -34,12 +36,16 @@ public class RemoveTimeoutSubcommand extends SlashCommand.Subcommand {
 		OptionMapping userOption = event.getOption("user");
 		OptionMapping reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {
-			Responses.error(event, "Missing required arguments.").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		Member member = userOption.getAsMember();
 		if (member == null) {
 			Responses.error(event, "Cannot remove a timeout of a user who is not a member of this server").queue();
+			return;
+		}
+		if (!Checks.hasPermission(event.getGuild(), Permission.MODERATE_MEMBERS) || !event.getGuild().getSelfMember().canInteract(member)) {
+			Responses.error(event, "Insufficient Permissions").queue();
 			return;
 		}
 		String reason = reasonOption.getAsString();
@@ -52,11 +58,11 @@ public class RemoveTimeoutSubcommand extends SlashCommand.Subcommand {
 		boolean quiet = quietOption != null && quietOption.getAsBoolean();
 
 		if (!member.isTimedOut()) {
-			Responses.error(event, String.format("Could not remove Timeout from member %s; they are not timed out.", member.getAsMention())).queue();
+			Responses.error(event, "Could not remove Timeout from member %s; they are not timed out.", member.getAsMention()).queue();
 			return;
 		}
 		ModerationService service = new ModerationService(event);
 		service.removeTimeout(member, reason, event.getMember(), channel, quiet);
-		Responses.success(event, "Timeout Removed", String.format("%s's Timeout has been removed.", member.getAsMention())).queue();
+		Responses.success(event, "Timeout Removed", "%s's Timeout has been removed.", member.getAsMention()).queue();
 	}
 }

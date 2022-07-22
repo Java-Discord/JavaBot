@@ -29,11 +29,12 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping lockedMapping = event.getOption("locked");
 		if (lockedMapping == null) {
-			Responses.error(event, "Missing required arguments");
+			Responses.missingArguments(event).queue();
 			return;
 		}
-		if (!event.isFromGuild()) {
-			Responses.error(event, "This command may only be used inside servers.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
+			return;
 		}
 		try {
 			GuildConfig config = Bot.config.get(event.getGuild());
@@ -44,7 +45,7 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 			} else {
 				Bot.serverLockManager.unlockServer(event.getGuild(), event.getUser());
 			}
-			Responses.info(event, "Server Lock Status", String.format("Successfully %slocked the current server!", locked ? "" : "un")).queue();
+			Responses.info(event, "Server Lock Status", "Successfully %slocked the current server!", locked ? "" : "un").queue();
 		} catch (UnknownPropertyException e) {
 			Responses.warning(event, "Unknown Property", "Could not lock/unlock the ")
 					.queue();

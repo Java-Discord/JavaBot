@@ -27,19 +27,19 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("id");
 		if (idMapping == null) {
-			Responses.error(event, "Missing required arguments.").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
-		if (!Checks.checkGuild(event)) {
-			Responses.error(event, "This command may only be used inside of a server.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		int id = idMapping.getAsInt();
 		ModerationService service = new ModerationService(event);
 		if (service.discardWarnById(id, event.getUser())) {
-			Responses.success(event, "Warn Discarded", String.format("Successfully discarded the specified warn with id `%s`", id)).queue();
+			Responses.success(event, "Warn Discarded", "Successfully discarded the specified warn with id `%s`", id).queue();
 		} else {
-			Responses.error(event, String.format("Could not find and/or discard warn with id `%s`", id)).queue();
+			Responses.error(event, "Could not find and/or discard warn with id `%s`", id).queue();
 		}
 	}
 }

@@ -28,10 +28,10 @@ public class GetConfigSubcommand extends ConfigSubcommand {
 	public ReplyCallbackAction handleConfigSubcommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull GuildConfig config) throws UnknownPropertyException {
 		OptionMapping propertyOption = event.getOption("property");
 		if (propertyOption == null) {
-			return Responses.warning(event, "Missing required property argument.");
+			return Responses.missingArguments(event);
 		}
 		String property = propertyOption.getAsString().trim();
 		Object value = config.resolve(property);
-		return Responses.info(event, "Configuration Property", String.format("The value of the property `%s` is:\n```\n%s\n```", property, value));
+		return Responses.info(event, "Configuration Property", "The value of the property `%s` is:\n```\n%s\n```", property, value);
 	}
 }

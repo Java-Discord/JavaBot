@@ -16,8 +16,8 @@ public abstract class ModerateCommand extends SlashCommand {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		if (!Checks.checkGuild(event)) {
-			Responses.error(event, "This command can only be used inside servers.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		Member member = event.getMember();

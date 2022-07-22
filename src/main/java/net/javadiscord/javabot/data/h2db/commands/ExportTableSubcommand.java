@@ -51,7 +51,7 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 		OptionMapping tableOption = event.getOption("table");
 		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		if (tableOption == null) {
-			Responses.error(event, "Missing required arguments").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		event.deferReply(false).queue();

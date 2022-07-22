@@ -35,7 +35,7 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		var userOption = event.getOption("user");
 		if (userOption == null) {
-			Responses.error(event, "Missing required arguments.").queue();
+			Responses.missingArguments(event).queue();
 			return;
 		}
 		Member member = userOption.getAsMember();

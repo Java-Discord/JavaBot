@@ -45,8 +45,8 @@ public class ProfileCommand extends SlashCommand {
 			Responses.error(event, "The user must be a part of this server!").queue();
 			return;
 		}
-		if (!Checks.checkGuild(event)) {
-			Responses.error(event, "This command may only be used inside a server.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		try {

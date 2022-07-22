@@ -31,11 +31,11 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 		OptionMapping propertyOption = event.getOption("property");
 		OptionMapping valueOption = event.getOption("value");
 		if (propertyOption == null || valueOption == null) {
-			return Responses.warning(event, "Missing required arguments.");
+			return Responses.missingArguments(event);
 		}
 		String property = propertyOption.getAsString().trim();
 		String valueString = valueOption.getAsString().trim();
 		Bot.config.get(event.getGuild()).set(property, valueString);
-		return Responses.success(event, "Configuration Updated", String.format("The property `%s` has been set to `%s`.", property, valueString));
+		return Responses.success(event, "Configuration Updated", "The property `%s` has been set to `%s`.", property, valueString);
 	}
 }

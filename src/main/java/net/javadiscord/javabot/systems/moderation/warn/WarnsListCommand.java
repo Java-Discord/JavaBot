@@ -62,8 +62,8 @@ public class WarnsListCommand extends SlashCommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
-		if (!Checks.checkGuild(event)) {
-			Responses.error(event, "This command may only be used inside of a server.").queue();
+		if (event.getGuild() == null) {
+			Responses.guildOnly(event).queue();
 			return;
 		}
 		event.deferReply(false).queue();

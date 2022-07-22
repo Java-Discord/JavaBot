@@ -30,15 +30,15 @@ public class UnbanCommand extends ModerateCommand {
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null || Checks.isInvalidLongInput(idOption)) {
-			return Responses.error(event, "Missing required arguments.");
+			return Responses.missingArguments(event);
 		}
 		long id = idOption.getAsLong();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		ModerationService moderationService = new ModerationService(event.getInteraction());
 		if (moderationService.unban(id, event.getMember(), event.getChannel(), quiet)) {
-			return Responses.success(event, "User Unbanned", String.format("User with id `%s` has been unbanned.", id));
+			return Responses.success(event, "User Unbanned", "User with id `%s` has been unbanned.", id);
 		} else {
-			return Responses.warning(event, String.format("Could not find banned User with id `%s`", id));
+			return Responses.warning(event, "Could not find banned User with id `%s`", id);
 		}
 	}
 }
