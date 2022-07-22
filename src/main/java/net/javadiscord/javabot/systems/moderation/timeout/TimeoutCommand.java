@@ -12,7 +12,7 @@ public class TimeoutCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public TimeoutCommand() {
-		setSlashCommandData(Commands.slash("timeout", "Commands for managing User Timeouts.")
+		setSlashCommandData(Commands.slash("timeout", "Commands for managing member timeouts.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);

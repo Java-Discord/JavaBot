@@ -1,17 +1,22 @@
 package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.utils.MarkdownUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Utility class that provides standardized formatting for responses the bot
@@ -78,12 +83,17 @@ public final class Responses {
 		return error(hook, "This command may only be used inside servers.");
 	}
 
-	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(CommandInteraction event) {
-		return error(event, "I am missing one or more permissions in order to execute this action.");
+	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(CommandInteraction event, Permission... permissions) {
+		return error(event, "I am missing one or more permissions in order to execute this action. (%s)",
+				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
 
 	public static @NotNull ReplyCallbackAction replyMissingMember(CommandInteraction event) {
 		return error(event, "The provided user **must** be a member of this server. Please try again.");
+	}
+
+	public static @NotNull ReplyCallbackAction replyCannotInteract(CommandInteraction event, @NotNull IMentionable mentionable) {
+		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
 	}
 
 	/**
