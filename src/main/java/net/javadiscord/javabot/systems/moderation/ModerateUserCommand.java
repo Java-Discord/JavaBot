@@ -40,7 +40,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 			WebhookMessageAction<Message> action = handleModerationUserCommand(event, moderator, target, reasonOption.getAsString());
 			if (action != null) action.queue();
 		});
-		return event.deferReply();
+		return event.deferReply(true);
 	}
 
 	protected abstract WebhookMessageAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nullable String reason);

@@ -33,7 +33,7 @@ public class RedeployCommand extends SlashCommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
-		event.reply("Redeploying... this can take up to 2 Minutes.").queue();
+		event.reply("**Redeploying...** This may take some time.").queue();
 		Bot.messageCache.synchronize();
 		System.exit(0);
 	}

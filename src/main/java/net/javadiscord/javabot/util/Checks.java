@@ -2,7 +2,9 @@ package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -23,6 +25,10 @@ public final class Checks {
 	public static final Pattern HEX_PATTERN = Pattern.compile("^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
 
 	private Checks() {
+	}
+
+	public static boolean hasStaffRole(Guild guild, @NotNull Member member) {
+		return member.getRoles().contains(Bot.config.get(guild).getModeration().getStaffRole());
 	}
 
 	public static boolean hasPermissions(Guild guild, @NotNull Set<Permission> perms) {

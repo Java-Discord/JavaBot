@@ -13,23 +13,23 @@ import net.dv8tion.jda.api.entities.User;
 public abstract class NotificationService {
 	void sendDirectMessageNotification(User user, MessageEmbed message) {
 		user.openPrivateChannel().queue(
-				channel -> channel.sendMessageEmbeds(message).queue(),
+				channel -> sendMessageChannelNotification(channel, message),
 				error -> log.warn("Could not send private Notification to User " + user.getAsTag())
 		);
 	}
 
 	void sendDirectMessageNotification(User user, String s, Object... args) {
 		user.openPrivateChannel().queue(
-				channel -> channel.sendMessageFormat(s, args).queue(),
+				channel -> sendMessageChannelNotification(channel, s, args),
 				error -> log.warn("Could not send private Notification to User " + user.getAsTag())
 		);
 	}
 
 	void sendMessageChannelNotification(MessageChannel channel, MessageEmbed message) {
-		channel.sendMessageEmbeds(message).queue();
+		channel.sendMessageEmbeds(message).queue(s -> {}, e -> log.warn("Could not send embed to channel " + channel.getName()));
 	}
 
 	void sendMessageChannelNotification(MessageChannel channel, String s, Object... args) {
-		channel.sendMessageFormat(s, args).queue();
+		channel.sendMessageFormat(s, args).queue(success -> {}, e -> log.warn("Could not send message to channel " + channel.getName()));
 	}
 }

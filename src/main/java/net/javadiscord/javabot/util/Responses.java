@@ -2,6 +2,7 @@ package net.javadiscord.javabot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
+import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -94,6 +96,10 @@ public final class Responses {
 
 	public static @NotNull ReplyCallbackAction replyCannotInteract(CommandInteraction event, @NotNull IMentionable mentionable) {
 		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
+	}
+
+	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, Guild guild) {
+		return error(event, "This command may only be used by staff members. (%s)", Bot.config.get(guild).getModeration().getStaffRole().getAsMention());
 	}
 
 	/**

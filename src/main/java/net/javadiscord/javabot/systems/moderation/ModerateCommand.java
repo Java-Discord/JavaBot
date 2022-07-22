@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,8 +13,10 @@ import org.jetbrains.annotations.NotNull;
  * Abstract class that represents a single moderation command.
  */
 public abstract class ModerateCommand extends SlashCommand {
+	private boolean requireStaff = true;
+
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
 			Responses.replyGuildOnly(event).queue();
 			return;
@@ -23,11 +26,19 @@ public abstract class ModerateCommand extends SlashCommand {
 			Responses.replyMissingMember(event).queue();
 			return;
 		}
+		if (requireStaff && !Checks.hasStaffRole(event.getGuild(), member)) {
+			Responses.replyStaffOnly(event, event.getGuild()).queue();
+			return;
+		}
 		if (event.getChannelType() != ChannelType.TEXT && !event.getChannelType().isThread()) {
 			Responses.error(event, "This command can only be performed in a server text channel or thread.").queue();
 			return;
 		}
 		handleModerationCommand(event, member).queue();
+	}
+
+	public void setRequireStaff(boolean requireStaff) {
+		this.requireStaff = requireStaff;
 	}
 
 	protected abstract ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator);

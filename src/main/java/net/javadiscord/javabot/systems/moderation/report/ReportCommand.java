@@ -26,6 +26,7 @@ public class ReportCommand extends ModerateUserCommand {
 				.addOption(OptionType.STRING, "reason", "The reason", true)
 				.setGuildOnly(true)
 		);
+		setRequireStaff(false);
 	}
 
 	@Override
