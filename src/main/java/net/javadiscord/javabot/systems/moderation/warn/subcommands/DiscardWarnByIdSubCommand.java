@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 

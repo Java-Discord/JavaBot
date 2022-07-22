@@ -13,7 +13,6 @@ import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;

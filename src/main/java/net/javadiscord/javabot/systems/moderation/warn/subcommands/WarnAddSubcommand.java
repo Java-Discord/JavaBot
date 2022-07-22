@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 

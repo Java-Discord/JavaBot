@@ -24,7 +24,6 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.tags.dao.CustomTagRepository;
 import net.javadiscord.javabot.systems.tags.model.CustomTag;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 

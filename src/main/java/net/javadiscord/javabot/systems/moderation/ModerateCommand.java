@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 /**

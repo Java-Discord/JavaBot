@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 import java.time.LocalDateTime;

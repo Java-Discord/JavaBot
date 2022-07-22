@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Set;
 
 /**
  * Subcommand that allows staff-members to add timeouts to a single users.
