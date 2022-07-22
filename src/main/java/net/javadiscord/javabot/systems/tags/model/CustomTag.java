@@ -3,10 +3,6 @@ package net.javadiscord.javabot.systems.tags.model;
 import lombok.Data;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.javadiscord.javabot.systems.tags.CustomTagManager;
 import org.jetbrains.annotations.NotNull;
 

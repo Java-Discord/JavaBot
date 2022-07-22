@@ -2,7 +2,6 @@ package net.javadiscord.javabot;
 
 import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
-import com.dynxsty.dih4jda.DIH4JDALogger;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.zaxxer.hikari.HikariDataSource;
 import io.sentry.Sentry;
