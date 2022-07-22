@@ -31,7 +31,7 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 		OptionMapping propertyOption = event.getOption("property");
 		OptionMapping valueOption = event.getOption("value");
 		if (propertyOption == null || valueOption == null) {
-			return Responses.missingArguments(event);
+			return Responses.replyMissingArguments(event);
 		}
 		String property = propertyOption.getAsString().trim();
 		String valueString = valueOption.getAsString().trim();

@@ -36,7 +36,7 @@ public class RemoveTimeoutSubcommand extends SlashCommand.Subcommand {
 		OptionMapping userOption = event.getOption("user");
 		OptionMapping reasonOption = event.getOption("reason");
 		if (userOption == null || reasonOption == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		Member member = userOption.getAsMember();

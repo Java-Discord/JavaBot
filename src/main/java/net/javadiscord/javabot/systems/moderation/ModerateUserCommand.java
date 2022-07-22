@@ -35,7 +35,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 		OptionMapping targetOption = event.getOption("user");
 		OptionMapping reasonOption = event.getOption("reason");
 		if (targetOption == null || reasonOption == null && requireReason) {
-			return Responses.missingArguments(event);
+			return Responses.replyMissingArguments(event);
 		}
 		User target = targetOption.getAsUser();
 		String reason = reasonOption == null ? null : reasonOption.getAsString();

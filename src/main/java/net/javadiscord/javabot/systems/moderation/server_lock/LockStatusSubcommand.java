@@ -29,11 +29,11 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping lockedMapping = event.getOption("locked");
 		if (lockedMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		try {

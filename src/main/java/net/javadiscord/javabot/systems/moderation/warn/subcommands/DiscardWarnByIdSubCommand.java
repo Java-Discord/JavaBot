@@ -26,11 +26,11 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("id");
 		if (idMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		int id = idMapping.getAsInt();

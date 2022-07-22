@@ -45,7 +45,7 @@ public class ProfileCommand extends SlashCommand {
 			return;
 		}
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		try {

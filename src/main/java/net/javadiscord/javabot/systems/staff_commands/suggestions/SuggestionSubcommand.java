@@ -25,7 +25,7 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		GuildConfig config = Bot.config.get(event.getGuild());
@@ -36,7 +36,7 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 		}
 		OptionMapping messageIdMapping = event.getOption("message-id");
 		if (messageIdMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		if (Checks.isInvalidLongInput(messageIdMapping)) {

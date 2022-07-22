@@ -39,7 +39,7 @@ public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements A
 	public ReplyCallbackAction handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
-			return Responses.missingArguments(event);
+			return Responses.replyMissingArguments(event);
 		}
 		String tagName = CustomTagManager.cleanString(nameMapping.getAsString());
 		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {

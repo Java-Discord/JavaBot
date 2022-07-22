@@ -28,7 +28,7 @@ public class GetConfigSubcommand extends ConfigSubcommand {
 	public ReplyCallbackAction handleConfigSubcommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull GuildConfig config) throws UnknownPropertyException {
 		OptionMapping propertyOption = event.getOption("property");
 		if (propertyOption == null) {
-			return Responses.missingArguments(event);
+			return Responses.replyMissingArguments(event);
 		}
 		String property = propertyOption.getAsString().trim();
 		Object value = config.resolve(property);

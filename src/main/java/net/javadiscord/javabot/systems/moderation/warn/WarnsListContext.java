@@ -27,7 +27,7 @@ public class WarnsListContext extends ContextCommand.User {
 	@Override
 	public void execute(UserContextInteractionEvent event) {
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		event.deferReply(false).queue();

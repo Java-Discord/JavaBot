@@ -62,24 +62,28 @@ public final class Responses {
 		return reply(hook, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
-	public static @NotNull ReplyCallbackAction missingArguments(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyMissingArguments(CommandInteraction event) {
 		return error(event, "Missing required arguments.");
 	}
 
-	public static @NotNull WebhookMessageAction<Message> missingArguments(InteractionHook hook) {
+	public static @NotNull WebhookMessageAction<Message> replyMissingArguments(InteractionHook hook) {
 		return error(hook, "Missing required arguments.");
 	}
 
-	public static @NotNull ReplyCallbackAction guildOnly(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyGuildOnly(CommandInteraction event) {
 		return error(event, "This command may only be used inside servers.");
 	}
 
-	public static @NotNull WebhookMessageAction<Message> guildOnly(InteractionHook hook) {
+	public static @NotNull WebhookMessageAction<Message> replyGuildOnly(InteractionHook hook) {
 		return error(hook, "This command may only be used inside servers.");
 	}
 
-	public static @NotNull ReplyCallbackAction insufficientPermissions(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(CommandInteraction event) {
 		return error(event, "I am missing one or more permissions in order to execute this action.");
+	}
+
+	public static @NotNull ReplyCallbackAction replyMissingMember(CommandInteraction event) {
+		return error(event, "The provided user **must** be a member of this server. Please try again.");
 	}
 
 	/**

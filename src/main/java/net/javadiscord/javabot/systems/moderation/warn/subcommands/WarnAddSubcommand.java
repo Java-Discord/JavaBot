@@ -40,11 +40,11 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 		OptionMapping reasonMapping = event.getOption("reason");
 		OptionMapping severityMapping = event.getOption("severity");
 		if (userMapping == null || reasonMapping == null || severityMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		User target = userMapping.getAsUser();

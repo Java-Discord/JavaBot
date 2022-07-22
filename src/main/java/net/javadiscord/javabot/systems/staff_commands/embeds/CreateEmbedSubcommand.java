@@ -45,7 +45,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		event.replyModal(buildBasicEmbedCreateModal(event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel))).queue();
@@ -55,7 +55,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event.getHook()).queue();
+			Responses.replyGuildOnly(event.getHook()).queue();
 			return;
 		}
 		String[] id = ComponentIdBuilder.split(event.getModalId());

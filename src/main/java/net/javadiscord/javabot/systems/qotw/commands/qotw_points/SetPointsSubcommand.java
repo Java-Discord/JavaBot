@@ -37,7 +37,7 @@ public class SetPointsSubcommand extends SlashCommand.Subcommand {
 		OptionMapping memberMapping = event.getOption("user");
 		OptionMapping pointsMapping = event.getOption("points");
 		if (memberMapping == null || pointsMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		Member member = memberMapping.getAsMember();

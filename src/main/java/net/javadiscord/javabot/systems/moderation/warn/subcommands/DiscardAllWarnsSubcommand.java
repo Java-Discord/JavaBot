@@ -31,7 +31,7 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		User target = userMapping.getAsUser();

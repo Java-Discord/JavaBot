@@ -48,7 +48,7 @@ public class PollCommand extends SlashCommand {
 		OptionMapping titleOption = event.getOption("title");
 		event.deferReply().queue();
 		if (titleOption == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		EmbedBuilder embed = new EmbedBuilder()

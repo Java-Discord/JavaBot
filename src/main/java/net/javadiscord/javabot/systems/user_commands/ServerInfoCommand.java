@@ -29,7 +29,7 @@ public class ServerInfoCommand extends SlashCommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
-			Responses.guildOnly(event).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		event.replyEmbeds(buildServerInfoEmbed(event.getGuild()))

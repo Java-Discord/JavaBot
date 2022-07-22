@@ -49,10 +49,10 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 	public InteractionCallbackAction<?> handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
-			return Responses.missingArguments(event);
+			return Responses.replyMissingArguments(event);
 		}
 		if (event.getGuild() == null) {
-			return Responses.guildOnly(event);
+			return Responses.replyGuildOnly(event);
 		}
 		Set<CustomTag> tags = Bot.customTagManager.getLoadedCommands(event.getGuild().getIdLong());
 		Optional<CustomTag> tagOptional = tags.stream()
@@ -123,7 +123,7 @@ public class EditCustomTagSubcommand extends CustomTagsSubcommand implements Aut
 		ModalMapping replyMapping = event.getValue("tag-reply");
 		ModalMapping embedMapping = event.getValue("tag-embed");
 		if (responseMapping == null || replyMapping == null || embedMapping == null) {
-			Responses.missingArguments(event.getHook()).queue();
+			Responses.replyMissingArguments(event.getHook()).queue();
 			return;
 		}
 		if (!event.isFromGuild() || event.getGuild() == null || event.getMember() == null) {

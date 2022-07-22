@@ -32,7 +32,7 @@ public class SayCommand extends SlashCommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping textMapping = event.getOption("text");
 		if (textMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		String text = textMapping.getAsString();

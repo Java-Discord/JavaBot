@@ -31,7 +31,7 @@ public class RegexCommand extends SlashCommand {
 		OptionMapping patternOption = event.getOption("regex");
 		OptionMapping stringOption = event.getOption("string");
 		if (patternOption == null || stringOption == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		Pattern pattern;

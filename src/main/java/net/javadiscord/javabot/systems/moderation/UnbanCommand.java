@@ -30,7 +30,7 @@ public class UnbanCommand extends ModerateCommand {
 	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null || Checks.isInvalidLongInput(idOption)) {
-			return Responses.missingArguments(event);
+			return Responses.replyMissingArguments(event);
 		}
 		long id = idOption.getAsLong();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);

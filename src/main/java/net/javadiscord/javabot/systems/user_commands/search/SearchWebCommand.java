@@ -30,7 +30,7 @@ public class SearchWebCommand extends SlashCommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping queryMapping = event.getOption("query");
 		if (queryMapping == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		event.deferReply().queue();

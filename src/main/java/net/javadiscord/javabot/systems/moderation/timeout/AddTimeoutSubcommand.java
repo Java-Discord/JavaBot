@@ -50,7 +50,7 @@ public class AddTimeoutSubcommand extends SlashCommand.Subcommand {
 		OptionMapping durationTimeUnitOption = event.getOption("duration-unit");
 		OptionMapping reasonOption = event.getOption("reason");
 		if (userOption == null || durationAmountOption == null || durationTimeUnitOption == null || reasonOption == null) {
-			Responses.missingArguments(event).queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		Member member = userOption.getAsMember();
