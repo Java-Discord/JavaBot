@@ -1,7 +1,5 @@
 package net.javadiscord.javabot.systems.moderation.timeout;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -11,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
