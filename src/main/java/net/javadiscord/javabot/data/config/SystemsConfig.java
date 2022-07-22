@@ -31,11 +31,6 @@ public class SystemsConfig {
 	private String sentryDsn = "";
 
 	/**
-	 * An array of user-Ids only which can manage some of the bot's systems.
-	 */
-	private Long[] adminUsers = new Long[]{};
-
-	/**
 	 * The number of threads to allocate to the bot's general purpose async
 	 * thread pool.
 	 */
@@ -46,6 +41,12 @@ public class SystemsConfig {
 	 * SQL data source.
 	 */
 	private HikariConfig hikariConfig = new HikariConfig();
+
+	/**
+	 * Configuration settings for certain commands which need an extra layer of
+	 * security.
+	 */
+	private AdminConfig adminConfig = new AdminConfig();
 
 	/**
 	 * Configuration settings for all the different emojis the bot uses.
@@ -60,6 +61,18 @@ public class SystemsConfig {
 		private String jdbcUrl = "jdbc:h2:tcp://localhost:9122/./java_bot";
 		private int maximumPoolSize = 5;
 		private long leakDetectionThreshold = 10000;
+	}
+
+	/**
+	 * Configuration settings for certain commands which need an extra layer of
+	 * security.
+	 */
+	@Data
+	public static class AdminConfig {
+		/**
+		 * An array of user-Ids only which can manage some of the bot's systems.
+		 */
+		private Long[] adminUsers = new Long[]{};
 	}
 
 	/**

@@ -42,7 +42,7 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 								.addChoice("Starboard", "STARBOARD")
 								.addChoice("Warns", "WARN"),
 						new OptionData(OptionType.BOOLEAN, "include-data", "Should data be included in the export?")));
-		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

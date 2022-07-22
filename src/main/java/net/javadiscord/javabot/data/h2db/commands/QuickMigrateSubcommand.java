@@ -33,7 +33,7 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 	 */
 	public QuickMigrateSubcommand() {
 		setSubcommandData(new SubcommandData("quick-migrate", "(ADMIN ONLY) Run a single quick database migration"));
-		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

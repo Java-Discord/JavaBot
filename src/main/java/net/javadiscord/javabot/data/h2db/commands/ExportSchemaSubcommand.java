@@ -28,7 +28,7 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 	public ExportSchemaSubcommand() {
 		setSubcommandData(new SubcommandData("export-schema", "(ADMIN ONLY) Exports the bot's schema.")
 				.addOption(OptionType.BOOLEAN, "include-data", "Should data be included in the export?"));
-		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

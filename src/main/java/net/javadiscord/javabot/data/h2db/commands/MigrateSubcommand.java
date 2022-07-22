@@ -46,7 +46,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	public MigrateSubcommand() {
 		setSubcommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
 				.addOption(OptionType.STRING, "name", "The migration's filename", true, true));
-		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

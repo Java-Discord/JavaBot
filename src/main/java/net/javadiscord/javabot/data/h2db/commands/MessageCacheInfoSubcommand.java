@@ -21,7 +21,7 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 	 */
 	public MessageCacheInfoSubcommand() {
 		setSubcommandData(new SubcommandData("info", "Displays some info about the Message Cache."));
-		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

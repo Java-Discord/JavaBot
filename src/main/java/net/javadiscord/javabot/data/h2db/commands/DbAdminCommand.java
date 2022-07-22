@@ -29,6 +29,6 @@ public class DbAdminCommand extends SlashCommand {
 		addSubcommandGroups(Map.of(
 				new SubcommandGroupData("message-cache", "Administrative tools for managing the Message Cache."), Set.of(new MessageCacheInfoSubcommand())
 		));
-		requireUsers(Bot.config.getSystems().getAdminUsers());
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 	}
 }
