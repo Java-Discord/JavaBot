@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -21,7 +20,6 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 
 /**

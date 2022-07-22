@@ -67,7 +67,7 @@ public class CustomTagManager extends ListenerAdapter {
 	 * @param guild The current {@link Guild}.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static @NotNull List<Command.Choice> replyTags(CommandAutoCompleteInteractionEvent event, @NotNull Guild guild) {
+	public static @NotNull List<Command.Choice> replyTags(@NotNull Guild guild) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		for (CustomTag command : LOADED_TAGS.get(guild.getIdLong())) {
 			if (choices.size() < 26) {
@@ -78,7 +78,7 @@ public class CustomTagManager extends ListenerAdapter {
 	}
 
 	public static @NotNull AutoCompleteCallbackAction handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
-		return event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> replyTags(e, e.getGuild())));
+		return event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> replyTags(e.getGuild())));
 	}
 
 	/**
