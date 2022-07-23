@@ -38,7 +38,7 @@ public class StateListener extends ListenerAdapter {
 		log.info("Guilds: " + event.getJDA().getGuilds().stream().map(Guild::getName).collect(Collectors.joining(", ")));
 		for (Guild guild : event.getJDA().getGuilds()) {
 			// Schedule the help channel updater to run periodically for each guild.
-			HelpConfig helpConfig = Bot.config.get(guild).getHelp();
+			HelpConfig helpConfig = Bot.config.get(guild).getHelpConfig();
 			Bot.asyncPool.scheduleAtFixedRate(
 					new HelpChannelUpdater(event.getJDA(), helpConfig, List.of(
 							new SimpleGreetingCheck()

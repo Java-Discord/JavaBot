@@ -32,7 +32,7 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
-		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModeration()
+		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModerationConfig()
 				.getSuggestionChannelId()) {
 			return;
 		}

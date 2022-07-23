@@ -30,7 +30,7 @@ public class UnreserveCommand extends SlashCommand {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		TextChannel channel = event.getChannel().asTextChannel();
-		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
 		User owner = channelManager.getReservedChannelOwner(channel);
 		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
@@ -57,11 +57,11 @@ public class UnreserveCommand extends SlashCommand {
 
 	private boolean memberHasStaffRole(SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
-				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole());
+				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModerationConfig().getStaffRole());
 	}
 
 	private boolean memberHasHelperRole(SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
-				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getHelp().getHelperRole());
+				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getHelpConfig().getHelperRole());
 	}
 }

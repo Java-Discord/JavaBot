@@ -27,11 +27,11 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 		for (var guild : jda.getGuilds()) {
 			// Disable 'Submit your Answer' button on latest QOTW
 			var config = Bot.config.get(guild);
-			var qotwConfig = config.getQotw();
+			var qotwConfig = config.getQotwConfig();
 			qotwConfig.getSubmissionChannel().getManager()
 					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS))
 					.queue();
-			if (config.getModeration().getLogChannel() == null) continue;
+			if (config.getModerationConfig().getLogChannel() == null) continue;
 			if (qotwConfig.getSubmissionChannel() == null || qotwConfig.getQuestionChannel() == null) continue;
 			var message = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
 			if (message == null) continue;

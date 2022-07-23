@@ -45,7 +45,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 			return;
 		}
 		GuildConfig config = Bot.config.get(guild);
-		HelpChannelManager channelManager = new HelpChannelManager(config.getHelp());
+		HelpChannelManager channelManager = new HelpChannelManager(config.getHelpConfig());
 		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
 			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
 			if (optionalReservation.isEmpty()) {
@@ -94,7 +94,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	 * @return True if the user is forbidden from sending the command.
 	 */
 	private boolean isHelpPingForbiddenForMember(ChannelReservation reservation, Member member, GuildConfig config) {
-		Set<Role> allowedRoles = Set.of(config.getModeration().getStaffRole(), config.getHelp().getHelperRole());
+		Set<Role> allowedRoles = Set.of(config.getModerationConfig().getStaffRole(), config.getHelpConfig().getHelperRole());
 		return !(
 				reservation.getUserId() == member.getUser().getIdLong() ||
 				member.getRoles().stream().anyMatch(allowedRoles::contains) ||
@@ -113,7 +113,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	private boolean isHelpPingTimeoutElapsed(Member member, GuildConfig config) {
 		Long lastPing = lastPingTimes.get(member);
 		return lastPing == null ||
-				lastPing + config.getHelp().getHelpPingTimeoutSeconds() * 1000L < System.currentTimeMillis();
+				lastPing + config.getHelpConfig().getHelpPingTimeoutSeconds() * 1000L < System.currentTimeMillis();
 	}
 
 	/**
@@ -123,7 +123,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	private void cleanTimeoutCache() {
 		// Find the list of members whose last ping time was old enough that they should be removed from the cache.
 		var membersToRemove = lastPingTimes.entrySet().stream().filter(entry -> {
-			var config = Bot.config.get(entry.getKey().getGuild()).getHelp();
+			var config = Bot.config.get(entry.getKey().getGuild()).getHelpConfig();
 			long timeoutMillis = config.getHelpPingTimeoutSeconds() * 1000L;
 			return entry.getValue() + timeoutMillis < System.currentTimeMillis();
 		}).map(Map.Entry::getKey).toList();

@@ -54,7 +54,7 @@ public class InteractionUtils implements ButtonHandler {
 		Message msg = interaction.getMessage();
 		if (
 				member.getUser().getIdLong() == msg.getAuthor().getIdLong() ||
-						member.getRoles().contains(config.getModeration().getStaffRole()) ||
+						member.getRoles().contains(config.getModerationConfig().getStaffRole()) ||
 						member.isOwner()
 		) {
 			msg.delete().queue();

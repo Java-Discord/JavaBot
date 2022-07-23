@@ -28,7 +28,7 @@ public final class Checks {
 	}
 
 	public static boolean hasStaffRole(Guild guild, @NotNull Member member) {
-		return member.getRoles().contains(Bot.config.get(guild).getModeration().getStaffRole());
+		return member.getRoles().contains(Bot.config.get(guild).getModerationConfig().getStaffRole());
 	}
 
 	public static boolean hasPermissions(Guild guild, @NotNull Set<Permission> perms) {

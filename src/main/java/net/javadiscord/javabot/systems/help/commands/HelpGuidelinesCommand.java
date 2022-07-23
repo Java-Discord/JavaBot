@@ -28,7 +28,7 @@ public class HelpGuidelinesCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 		String channels = "N/A";
 		if (config.getOpenChannelCategory() != null) {
 			channels = config.getOpenChannelCategory().getChannels()

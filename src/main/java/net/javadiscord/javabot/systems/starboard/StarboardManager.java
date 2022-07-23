@@ -42,7 +42,7 @@ public class StarboardManager extends ListenerAdapter {
 
 	private void handleReactionEvent(Guild guild, Emoji emoji, MessageChannel channel, long messageId) {
 		Bot.asyncPool.submit(() -> {
-			var config = Bot.config.get(guild).getStarBoard();
+			var config = Bot.config.get(guild).getStarboardConfig();
 			if (config.getStarboardChannel().equals(channel)) return;
 			Emoji starEmote = config.getEmojis().get(0);
 			if (!emoji.equals(starEmote)) return;
@@ -79,7 +79,7 @@ public class StarboardManager extends ListenerAdapter {
 		if (!isValidChannel(event.getChannel())) return;
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new StarboardRepository(con);
-			var config = Bot.config.get(event.getGuild()).getStarBoard();
+			var config = Bot.config.get(event.getGuild()).getStarboardConfig();
 			StarboardEntry entry;
 			if (event.getChannel().equals(config.getStarboardChannel())) {
 				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
@@ -197,7 +197,7 @@ public class StarboardManager extends ListenerAdapter {
 		try (var con = Bot.dataSource.getConnection()) {
 			var repo = new StarboardRepository(con);
 			var entries = repo.getAllStarboardEntries(guild.getIdLong());
-			var config = Bot.config.get(guild).getStarBoard();
+			var config = Bot.config.get(guild).getStarboardConfig();
 			var starEmote = config.getEmojis().get(0);
 			for (var entry : entries) {
 				var channel = guild.getTextChannelById(entry.getChannelId());

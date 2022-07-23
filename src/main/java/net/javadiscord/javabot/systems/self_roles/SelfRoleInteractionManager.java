@@ -58,7 +58,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 		GuildConfig config = Bot.config.get(event.getGuild());
 		switch (args[1]) {
 			case "staff" -> sendStaffSubmission(event, config, args[2], args[3]).queue();
-			case "expert" -> sendExpertSubmission(event, config.getModeration(), args[2]).queue();
+			case "expert" -> sendExpertSubmission(event, config.getModerationConfig(), args[2]).queue();
 			default -> event.deferReply().queue(h -> Responses.error(h, "Unknown Interaction.").queue());
 		}
 	}
@@ -105,7 +105,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 	 * @param applicant The Applicant.
 	 */
 	private void buildExpertApplication(@NotNull ButtonInteractionEvent event, @NotNull Member applicant) {
-		Role role = Bot.config.get(event.getGuild()).getModeration().getExpertRole();
+		Role role = Bot.config.get(event.getGuild()).getModerationConfig().getExpertRole();
 		if (applicant.getRoles().contains(role)) {
 			event.reply("You already have the Expert Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
@@ -197,7 +197,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 							.addField("Extra Remarks", extraRemarksOption.getAsString().isEmpty() ? "N/A" : extraRemarksOption.getAsString(), false)
 							.setTimestamp(Instant.now())
 							.build();
-					config.getModeration().getApplicationChannel().sendMessageEmbeds(embed).queue();
+					config.getModerationConfig().getApplicationChannel().sendMessageEmbeds(embed).queue();
 				}
 		);
 		return Responses.info(event.getHook(), "Submission sent!",

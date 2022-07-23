@@ -32,7 +32,7 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 
 	private MessageEmbed buildInfoEmbed(GuildConfig config, User author) {
 		long messages = DbActions.count("SELECT count(*) FROM message_cache");
-		int maxMessages = config.getMessageCache().getMaxCachedMessages();
+		int maxMessages = config.getMessageCacheConfig().getMaxCachedMessages();
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
 				.setTitle("Message Cache Info")

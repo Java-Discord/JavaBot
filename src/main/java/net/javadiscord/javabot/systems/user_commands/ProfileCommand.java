@@ -78,7 +78,7 @@ public class ProfileCommand extends SlashCommand {
 		embed.addField("Warns", String.format("`%s (%s/%s)`",
 						warns.size(),
 						warns.stream().mapToLong(Warn::getSeverityWeight).sum(),
-						config.getModeration().getMaxWarnSeverity()), true)
+						config.getModerationConfig().getMaxWarnSeverity()), true)
 				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points, points == 1 ? "" : "s",
 						service.getQOTWRank(member.getIdLong())), true)

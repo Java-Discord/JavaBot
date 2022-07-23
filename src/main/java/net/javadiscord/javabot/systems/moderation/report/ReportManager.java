@@ -117,13 +117,13 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
 			EmbedBuilder embed = buildReportEmbed(target, hook.getInteraction().getUser(), reason, hook.getInteraction().getChannel());
 			embed.setTitle(String.format("%s reported %s", hook.getInteraction().getUser().getName(), target.getName()));
-			MessageChannel reportChannel = config.getModeration().getReportChannel();
+			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
 			if (reportChannel == null) {
 				Responses.error(hook, "I could not find the report channel. Please ask the administrators of this server to set one!").queue();
 				return;
 			}
 			reportChannel.sendMessageEmbeds(embed.build())
-					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModeration()));
+					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModerationConfig()));
 			embed.setDescription("Successfully reported " + "`" + target.getAsTag() + "`!\nYour report has been send to our Moderators");
 			hook.sendMessageEmbeds(embed.build()).queue();
 		}, failure -> {
@@ -144,8 +144,8 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), event.getUser(), reason, event.getChannel());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
-			MessageChannel reportChannel = config.getModeration().getReportChannel();
-			reportChannel.sendMessageEmbeds(embed.build()).queue(m -> createReportThread(m, target.getAuthor().getIdLong(), config.getModeration()));
+			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
+			reportChannel.sendMessageEmbeds(embed.build()).queue(m -> createReportThread(m, target.getAuthor().getIdLong(), config.getModerationConfig()));
 			embed.setDescription("Successfully reported " + "`" + target.getAuthor().getAsTag() + "`!\nYour report has been send to our Moderators");
 			event.getHook().sendMessageEmbeds(embed.build()).queue();
 		}, failure -> {

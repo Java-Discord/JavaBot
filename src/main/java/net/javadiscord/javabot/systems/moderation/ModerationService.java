@@ -44,7 +44,7 @@ public class ModerationService {
 	 * @param config The {@link GuildConfig} to use.
 	 */
 	public ModerationService(@NotNull GuildConfig config) {
-		this.moderationConfig = config.getModeration();
+		this.moderationConfig = config.getModerationConfig();
 	}
 
 	/**

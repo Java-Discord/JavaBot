@@ -29,7 +29,7 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		GuildConfig config = Bot.config.get(event.getGuild());
-		TextChannel suggestionChannel = config.getModeration().getSuggestionChannel();
+		TextChannel suggestionChannel = config.getModerationConfig().getSuggestionChannel();
 		if (event.getChannelType() != ChannelType.TEXT || !event.getChannel().asTextChannel().equals(suggestionChannel)) {
 			Responses.warning(event, "This command can only be used in " + suggestionChannel.getAsMention()).queue();
 			return;

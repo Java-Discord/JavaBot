@@ -41,7 +41,7 @@ public class PruneCommand extends ModerateCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
-		var config = Bot.config.get(event.getGuild()).getModeration();
+		var config = Bot.config.get(event.getGuild()).getModerationConfig();
 
 		OptionMapping patternOption = event.getOption("pattern");
 		OptionMapping beforeOption = event.getOption("before");

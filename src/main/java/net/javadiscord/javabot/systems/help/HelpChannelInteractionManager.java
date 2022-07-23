@@ -35,7 +35,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 	 */
 	private void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
-		var config = Bot.config.get(event.getGuild()).getHelp();
+		var config = Bot.config.get(event.getGuild()).getHelpConfig();
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
@@ -110,14 +110,14 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 							helper.getIdLong()
 					);
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", helper.getAsTag()).setEphemeral(true).queue();
-					HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
+					HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 					HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
 					// Perform experience transactions
 					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
 					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 				} catch (SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
-					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
+					Bot.config.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
 							"Could not record user %s thanking %s for help in channel %s: %s",
 							owner.getAsTag(),
 							helper.getAsTag(),
@@ -147,7 +147,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		String reservationId = id[2];
 		String action = id[3];
 		event.deferEdit().queue();
-		var config = Bot.config.get(event.getGuild()).getHelp();
+		var config = Bot.config.get(event.getGuild()).getHelpConfig();
 		var channelManager = new HelpChannelManager(config);
 		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
@@ -181,7 +181,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		// Check that the user is allowed to do the interaction.
 		if (
 				event.getUser().equals(owner) ||
-						event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole())
+						event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModerationConfig().getStaffRole())
 		) {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();

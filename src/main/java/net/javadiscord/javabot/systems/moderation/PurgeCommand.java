@@ -51,7 +51,7 @@ public class PurgeCommand extends ModerateCommand {
 		OptionMapping userOption = event.getOption("user");
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
-		ModerationConfig config = Bot.config.get(event.getGuild()).getModeration();
+		ModerationConfig config = Bot.config.get(event.getGuild()).getModerationConfig();
 		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
 		int maxAmount = config.getPurgeMaxMessageCount();

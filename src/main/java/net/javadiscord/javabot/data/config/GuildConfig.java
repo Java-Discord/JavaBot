@@ -25,13 +25,13 @@ public class GuildConfig {
 	private transient Guild guild;
 	private transient Path file;
 
-	private HelpConfig help;
-	private ModerationConfig moderation;
-	private QOTWConfig qotw;
-	private StatsConfig stats;
-	private StarboardConfig starBoard;
-	private MessageCacheConfig messageCache;
-	private ServerLockConfig serverLock;
+	private HelpConfig helpConfig;
+	private ModerationConfig moderationConfig;
+	private QOTWConfig qotwConfig;
+	private MetricsConfig metricsConfig;
+	private StarboardConfig starboardConfig;
+	private MessageCacheConfig messageCacheConfig;
+	private ServerLockConfig serverLockConfig;
 
 	/**
 	 * Constructor that initializes all Config classes.
@@ -42,13 +42,13 @@ public class GuildConfig {
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;
 		// Initialize all config items.
-		this.help = new HelpConfig();
-		this.moderation = new ModerationConfig();
-		this.qotw = new QOTWConfig();
-		this.stats = new StatsConfig();
-		this.starBoard = new StarboardConfig();
-		this.messageCache = new MessageCacheConfig();
-		this.serverLock = new ServerLockConfig();
+		this.helpConfig = new HelpConfig();
+		this.moderationConfig = new ModerationConfig();
+		this.qotwConfig = new QOTWConfig();
+		this.metricsConfig = new MetricsConfig();
+		this.starboardConfig = new StarboardConfig();
+		this.messageCacheConfig = new MessageCacheConfig();
+		this.serverLockConfig = new ServerLockConfig();
 		this.setGuild(guild);
 	}
 
@@ -88,20 +88,20 @@ public class GuildConfig {
 
 	private void setGuild(Guild guild) {
 		this.guild = guild;
-		if (this.help == null) this.help = new HelpConfig();
-		this.help.setGuildConfig(this);
-		if (this.moderation == null) this.moderation = new ModerationConfig();
-		this.moderation.setGuildConfig(this);
-		if (this.qotw == null) this.qotw = new QOTWConfig();
-		this.qotw.setGuildConfig(this);
-		if (this.stats == null) this.stats = new StatsConfig();
-		this.stats.setGuildConfig(this);
-		if (this.starBoard == null) this.starBoard = new StarboardConfig();
-		this.starBoard.setGuildConfig(this);
-		if (this.messageCache == null) this.messageCache = new MessageCacheConfig();
-		this.messageCache.setGuildConfig(this);
-		if (this.serverLock == null) this.serverLock = new ServerLockConfig();
-		this.serverLock.setGuildConfig(this);
+		if (this.helpConfig == null) this.helpConfig = new HelpConfig();
+		this.helpConfig.setGuildConfig(this);
+		if (this.moderationConfig == null) this.moderationConfig = new ModerationConfig();
+		this.moderationConfig.setGuildConfig(this);
+		if (this.qotwConfig == null) this.qotwConfig = new QOTWConfig();
+		this.qotwConfig.setGuildConfig(this);
+		if (this.metricsConfig == null) this.metricsConfig = new MetricsConfig();
+		this.metricsConfig.setGuildConfig(this);
+		if (this.starboardConfig == null) this.starboardConfig = new StarboardConfig();
+		this.starboardConfig.setGuildConfig(this);
+		if (this.messageCacheConfig == null) this.messageCacheConfig = new MessageCacheConfig();
+		this.messageCacheConfig.setGuildConfig(this);
+		if (this.serverLockConfig == null) this.serverLockConfig = new ServerLockConfig();
+		this.serverLockConfig.setGuildConfig(this);
 	}
 
 	/**

@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.StatsConfig;
+import net.javadiscord.javabot.data.config.guild.MetricsConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,15 +31,15 @@ public class MetricsUpdater extends ListenerAdapter {
 	public void onReady(@NotNull ReadyEvent event) {
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
 			for (Guild guild : event.getJDA().getGuilds()) {
-				StatsConfig config = Bot.config.get(guild).getStats();
-				if (config.getCategoryId() == 0 || config.getMemberCountMessageTemplate() == null) {
+				MetricsConfig config = Bot.config.get(guild).getMetricsConfig();
+				if (config.getMetricsCategory() == null || config.getMetricsMessageTemplate().isEmpty()) {
 					continue;
 				}
-				String text = config.getMemberCountMessageTemplate();
+				String text = config.getMetricsMessageTemplate();
 				for (Map.Entry<String, Function<Guild, String>> entry : TEXT_VARIABLES.entrySet()) {
 					text = text.replace(entry.getKey(), entry.getValue().apply(guild));
 				}
-				config.getCategory().getManager().setName(text).queue(s -> log.info("Successfully updated Metrics"), ExceptionLogger::capture);
+				config.getMetricsCategory().getManager().setName(text).queue(s -> log.info("Successfully updated Metrics"), ExceptionLogger::capture);
 			}
 		}, 0, 20, TimeUnit.MINUTES);
 	}

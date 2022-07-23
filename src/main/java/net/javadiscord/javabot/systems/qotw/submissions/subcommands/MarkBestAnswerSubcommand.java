@@ -75,7 +75,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 				Responses.error(event.getHook(), "The Submission must be reviewed and accepted!").queue();
 				return;
 			}
-			if (config.getQotw().getQuestionChannel().getThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()))) {
+			if (config.getQotwConfig().getQuestionChannel().getThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()))) {
 				Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
 				return;
 			}
@@ -129,7 +129,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 * @param submissionThread The submission's thread.
 	 */
 	private void sendBestAnswer(InteractionHook hook, List<Message> messages, Member member, ThreadChannel submissionThread) {
-		Bot.config.get(member.getGuild()).getQotw().getQuestionChannel().sendMessageEmbeds(this.buildBestAnswerEmbed(member)).queue(
+		Bot.config.get(member.getGuild()).getQotwConfig().getQuestionChannel().sendMessageEmbeds(this.buildBestAnswerEmbed(member)).queue(
 				message -> message.createThreadChannel(submissionThread.getName()).queue(
 						thread -> {
 							messages.forEach(m -> {
@@ -153,7 +153,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.dataSource.getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			QOTWConfig config = Bot.config.get(event.getGuild()).getQotw();
+			QOTWConfig config = Bot.config.get(event.getGuild()).getQotwConfig();
 			List<QOTWSubmission> submissions = repo.getSubmissionByQuestionNumber(repo.getCurrentQuestionNumber())
 					.stream()
 					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)

@@ -10,11 +10,11 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StatsConfig extends GuildConfigItem {
-	private long categoryId;
-	private String memberCountMessageTemplate;
+public class MetricsConfig extends GuildConfigItem {
+	private long metricsCategoryId = 0;
+	private String metricsMessageTemplate = "";
 
-	public Category getCategory() {
-		return getGuild().getCategoryById(this.categoryId);
+	public Category getMetricsCategory() {
+		return getGuild().getCategoryById(this.metricsCategoryId);
 	}
 }

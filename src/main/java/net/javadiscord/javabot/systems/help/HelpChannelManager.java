@@ -50,7 +50,7 @@ public class HelpChannelManager {
 
 	public HelpChannelManager(HelpConfig config) {
 		this.config = config;
-		this.logChannel = Bot.config.get(config.getGuild()).getModeration().getLogChannel();
+		this.logChannel = Bot.config.get(config.getGuild()).getModerationConfig().getLogChannel();
 	}
 
 	public boolean isOpen(TextChannel channel) {

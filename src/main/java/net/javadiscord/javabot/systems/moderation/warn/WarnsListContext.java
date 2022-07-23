@@ -31,7 +31,7 @@ public class WarnsListContext extends ContextCommand.User {
 			return;
 		}
 		event.deferReply(false).queue();
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModeration().getWarnTimeoutDays());
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
 		DbHelper.doDaoAction(WarnRepository::new, dao ->
 				event.getHook().sendMessageEmbeds(WarnsListCommand.buildWarnsEmbed(dao.getWarnsByUserId(event.getTarget().getIdLong(), cutoff), event.getTarget())).queue());
 	}

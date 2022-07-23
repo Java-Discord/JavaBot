@@ -38,15 +38,15 @@ public class QOTWJob extends DiscordApiJob {
 				return;
 			}
 			GuildConfig config = Bot.config.get(guild);
-			if (config.getModeration().getLogChannel() == null) continue;
+			if (config.getModerationConfig().getLogChannel() == null) continue;
 			try (var c = Bot.dataSource.getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
-					new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s No available next question for QOTW!", config.getQotw().getQOTWReviewRole().getAsMention());
+					new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention());
 				} else {
 					QOTWQuestion question = nextQuestion.get();
-					QOTWConfig qotw = config.getQotw();
+					QOTWConfig qotw = config.getQotwConfig();
 					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setLocked(true).setArchived(true).queue());
 					qotw.getSubmissionChannel().getManager()
 							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
@@ -64,7 +64,7 @@ public class QOTWJob extends DiscordApiJob {
 				}
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
-				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotw().getQOTWReviewRole().getAsMention(), e.getMessage());
+				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotwConfig().getQOTWReviewRole().getAsMention(), e.getMessage());
 				throw new JobExecutionException(e);
 			}
 		}

@@ -104,7 +104,7 @@ public final class Responses {
 	}
 
 	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, Guild guild) {
-		return error(event, "This command may only be used by staff members. (%s)", Bot.config.get(guild).getModeration().getStaffRole().getAsMention());
+		return error(event, "This command may only be used by staff members. (%s)", Bot.config.get(guild).getModerationConfig().getStaffRole().getAsMention());
 	}
 
 	/**

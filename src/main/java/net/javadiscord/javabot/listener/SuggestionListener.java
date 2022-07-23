@@ -51,7 +51,7 @@ public class SuggestionListener extends ListenerAdapter {
 		if (event.getChannelType() == ChannelType.PRIVATE) return false;
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && !event.getMember().isTimedOut() &&
 				event.getMessage().getType() != MessageType.THREAD_CREATED &&
-				event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
+				event.getChannel().equals(Bot.config.get(event.getGuild()).getModerationConfig().getSuggestionChannel());
 	}
 
 	/**

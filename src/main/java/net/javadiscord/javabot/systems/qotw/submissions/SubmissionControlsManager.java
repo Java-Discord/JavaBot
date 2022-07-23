@@ -47,7 +47,7 @@ public class SubmissionControlsManager {
 	public SubmissionControlsManager(Guild guild, QOTWSubmission submission) {
 		this.guild = guild;
 		this.submission = submission;
-		this.config = Bot.config.get(guild).getQotw();
+		this.config = Bot.config.get(guild).getQotwConfig();
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class SubmissionControlsManager {
 		}
 		this.guild = guild;
 		this.submission = submission;
-		this.config = Bot.config.get(guild).getQotw();
+		this.config = Bot.config.get(guild).getQotwConfig();
 	}
 
 	/**

@@ -73,7 +73,7 @@ public class MessageCache {
 	 * @param message The message to cache.
 	 */
 	public void cache(Message message) {
-		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
+		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCacheConfig();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
@@ -91,7 +91,7 @@ public class MessageCache {
 	 * @param before  The {@link CachedMessage}.
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
-		MessageCacheConfig config = Bot.config.get(updated.getGuild()).getMessageCache();
+		MessageCacheConfig config = Bot.config.get(updated.getGuild()).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
 		MessageAction action = config.getMessageCacheLogChannel()
@@ -111,7 +111,7 @@ public class MessageCache {
 	 * @param message The {@link CachedMessage}.
 	 */
 	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
-		MessageCacheConfig config = Bot.config.get(guild).getMessageCache();
+		MessageCacheConfig config = Bot.config.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
 			MessageAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
