@@ -193,7 +193,7 @@ public class StarboardManager extends ListenerAdapter {
 				.setAuthor(author.getAsTag(), message.getJumpUrl(), author.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(message.getContentRaw())
-				.setFooter("from: #" + message.getChannel().getName())
+				.setFooter("#" + message.getChannel().getName())
 				.build();
 	}
 }
