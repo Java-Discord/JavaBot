@@ -21,7 +21,7 @@ public class MessageCacheConfig extends GuildConfigItem {
 	/**
 	 * ID of the Message Cache log channel.
 	 */
-	private long messageCacheLogChannelId;
+	private long messageCacheLogChannelId = 0;
 
 	/**
 	 * The amount of messages after which the DB is synchronized with the local cache.

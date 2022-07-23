@@ -8,12 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.data.config.guild.*;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Pair;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * A collection of guild-specific configuration items, each of which represents
@@ -66,7 +71,7 @@ public class GuildConfig {
 		Gson gson = new GsonBuilder().create();
 		GuildConfig config;
 		if (Files.exists(file)) {
-			try (var reader = Files.newBufferedReader(file)) {
+			try (BufferedReader reader = Files.newBufferedReader(file)) {
 				config = gson.fromJson(reader, GuildConfig.class);
 				config.setFile(file);
 				config.setGuild(guild);
@@ -109,7 +114,7 @@ public class GuildConfig {
 	 */
 	public synchronized void flush() {
 		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
-		try (var writer = Files.newBufferedWriter(this.file)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(this.file)) {
 			gson.toJson(this, writer);
 			writer.flush();
 		} catch (IOException e) {
@@ -150,7 +155,7 @@ public class GuildConfig {
 	 * @param value        The value to set.
 	 */
 	public void set(String propertyName, String value) throws UnknownPropertyException {
-		var result = ReflectionUtils.resolveField(propertyName, this);
+		Optional<Pair<Field, Object>> result = ReflectionUtils.resolveField(propertyName, this);
 		result.ifPresent(pair -> {
 			try {
 				ReflectionUtils.set(pair.first(), pair.second(), value);
