@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
@@ -18,6 +20,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 
@@ -28,76 +31,69 @@ import java.util.concurrent.ExecutionException;
 public class StarboardManager extends ListenerAdapter {
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-		if (!validUser(event.getUser())) return;
-		if (!isValidChannel(event.getChannel())) return;
+		if (isInvalidUser(event.getUser())) return;
+		if (isInvalidChannel(event.getChannel())) return;
 		handleReactionEvent(event.getGuild(), event.getEmoji(), event.getChannel(), event.getMessageIdLong());
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
-		if (!validUser(event.getUser())) return;
-		if (!isValidChannel(event.getGuildChannel())) return;
+		if (isInvalidUser(event.getUser())) return;
+		if (isInvalidChannel(event.getGuildChannel())) return;
 		handleReactionEvent(event.getGuild(), event.getEmoji(), event.getChannel(), event.getMessageIdLong());
 	}
 
 	private void handleReactionEvent(Guild guild, Emoji emoji, MessageChannel channel, long messageId) {
 		Bot.asyncPool.submit(() -> {
-			var config = Bot.config.get(guild).getStarboardConfig();
+			StarboardConfig config = Bot.config.get(guild).getStarboardConfig();
 			if (config.getStarboardChannel().equals(channel)) return;
 			Emoji starEmote = config.getEmojis().get(0);
 			if (!emoji.equals(starEmote)) return;
 			channel.retrieveMessageById(messageId).queue(
 					message -> {
 						int stars = getReactionCountForEmote(starEmote, message);
-						try (var con = Bot.dataSource.getConnection()) {
-							var repo = new StarboardRepository(con);
-							var entry = repo.getEntryByMessageId(message.getIdLong());
+						DbHelper.doDaoAction(StarboardRepository::new, dao -> {
+							StarboardEntry entry = dao.getEntryByMessageId(message.getIdLong());
 							if (entry != null) {
 								updateStarboardMessage(message, stars, config);
 							} else if (stars >= config.getReactionThreshold()) {
 								addMessageToStarboard(message, stars, config);
-							} else if (stars < 1) {
-								if (!removeMessageFromStarboard(message.getIdLong(), channel, config)) {
-									log.error("Could not remove Message from Starboard");
-								}
+							} else if (stars < 1 && !removeMessageFromStarboard(message.getIdLong(), channel, config)) {
+								log.error("Could not remove Message from Starboard");
 							}
-						} catch (SQLException e) {
-							ExceptionLogger.capture(e, getClass().getSimpleName());
-						}
+						});
 					}, e -> log.error("Could not add Message to Starboard", e)
 			);
 		});
 	}
 
-	private boolean isValidChannel(@NotNull MessageChannel channel) {
-		var type = channel.getType();
-		return type == ChannelType.TEXT || type == ChannelType.GUILD_PUBLIC_THREAD;
+	private boolean isInvalidChannel(@NotNull MessageChannel channel) {
+		ChannelType type = channel.getType();
+		return type != ChannelType.TEXT && type != ChannelType.GUILD_PUBLIC_THREAD;
 	}
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		if (!isValidChannel(event.getChannel())) return;
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new StarboardRepository(con);
-			var config = Bot.config.get(event.getGuild()).getStarboardConfig();
+		if (isInvalidChannel(event.getChannel())) return;
+		try (Connection con = Bot.dataSource.getConnection()) {
+			StarboardRepository repo = new StarboardRepository(con);
+			StarboardConfig config = Bot.config.get(event.getGuild()).getStarboardConfig();
 			StarboardEntry entry;
 			if (event.getChannel().equals(config.getStarboardChannel())) {
 				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
 			} else {
 				entry = repo.getEntryByMessageId(event.getMessageIdLong());
 			}
-			if (entry != null) {
-				if (!removeMessageFromStarboard(entry.getOriginalMessageId(), event.getChannel(), config)) {
-					log.error("Could not remove Message from Starboard");
-				}
+			if (entry != null && !removeMessageFromStarboard(entry.getOriginalMessageId(), event.getChannel(), config)) {
+				log.error("Could not remove Message from Starboard");
 			}
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
 
-	private boolean validUser(User user) {
-		return user != null && !user.isBot() && !user.isSystem();
+	private boolean isInvalidUser(User user) {
+		return user == null || user.isBot() || user.isSystem();
 	}
 
 	/**
@@ -107,7 +103,7 @@ public class StarboardManager extends ListenerAdapter {
 	 * @param message The message.
 	 * @return The amount of reactions.
 	 */
-	private int getReactionCountForEmote(Emoji emoji, Message message) {
+	private int getReactionCountForEmote(Emoji emoji, @NotNull Message message) {
 		return message.getReactions().stream()
 				.filter(r -> r.getEmoji().equals(emoji))
 				.findFirst()
@@ -115,11 +111,12 @@ public class StarboardManager extends ListenerAdapter {
 				.orElse(0);
 	}
 
-	private void addMessageToStarboard(Message message, int stars, StarboardConfig config) throws SQLException {
+	private void addMessageToStarboard(Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
 		if (stars < config.getReactionThreshold()) return;
 		MessageEmbed embed = buildStarboardEmbed(message);
 		MessageAction action = config.getStarboardChannel()
-				.sendMessage(String.format("%s %s | %s", config.getEmojis().get(0), stars, message.getChannel().getAsMention()))
+				.sendMessage(String.format("%s %s", config.getEmojis().get(0), stars))
+				.setActionRow(Button.link(message.getJumpUrl(), "Jump to Message"))
 				.setEmbeds(embed);
 		for (Message.Attachment a : message.getAttachments()) {
 			try {
@@ -140,100 +137,63 @@ public class StarboardManager extends ListenerAdapter {
 		);
 	}
 
-	private void updateStarboardMessage(Message message, int stars, StarboardConfig config) throws SQLException {
-		var repo = new StarboardRepository(Bot.dataSource.getConnection());
-		var starboardId = repo.getEntryByMessageId(message.getIdLong()).getStarboardMessageId();
-		config.getStarboardChannel().retrieveMessageById(starboardId).queue(
-				starboardMessage -> {
-					if (stars < 1) {
-						try {
-							if (!removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config)) {
-								log.error("Could not remove Message from Starboard");
+	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
+		try (Connection con = Bot.dataSource.getConnection()) {
+			StarboardRepository repo = new StarboardRepository(con);
+			long starboardId = repo.getEntryByMessageId(message.getIdLong()).getStarboardMessageId();
+			config.getStarboardChannel().retrieveMessageById(starboardId).queue(
+					starboardMessage -> {
+						if (stars < 1) {
+							try {
+								if (!removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config)) {
+									log.error("Could not remove Message from Starboard");
+								}
+							} catch (SQLException e) {
+								ExceptionLogger.capture(e, getClass().getSimpleName());
 							}
-						} catch (SQLException e) {
-							ExceptionLogger.capture(e, getClass().getSimpleName());
+						} else {
+							UnicodeEmoji starEmote = config.getEmojis().get(0);
+							if (stars > 10) starEmote = config.getEmojis().get(1);
+							if (stars > 25) starEmote = config.getEmojis().get(2);
+							starboardMessage.editMessage(
+											String.format("%s %s | %s", starEmote, stars, message.getChannel().getAsMention()))
+									.queue();
 						}
-					} else {
-						var starEmote = config.getEmojis().get(0);
-						if (stars > 10) starEmote = config.getEmojis().get(1);
-						if (stars > 25) starEmote = config.getEmojis().get(2);
-						starboardMessage.editMessage(
-										String.format("%s %s | %s", starEmote, stars, message.getChannel().getAsMention()))
-								.queue();
+					}, e -> {
+						log.error("Could not retrieve original Message. Deleting corresponding Starboard Entry...");
+						try {
+							removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config);
+						} catch (SQLException ex) {
+							ex.printStackTrace();
+						}
 					}
-				}, e -> {
-					log.error("Could not retrieve original Message. Deleting corresponding Starboard Entry...");
-					try {
-						removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config);
-					} catch (SQLException ex) {
-						ex.printStackTrace();
-					}
-				}
-		);
+			);
+		}
 	}
 
 	private boolean removeMessageFromStarboard(long messageId, MessageChannel channel, StarboardConfig config) throws SQLException {
-		var repo = new StarboardRepository(Bot.dataSource.getConnection());
-		var entry = repo.getEntryByMessageId(messageId);
-		if (entry == null) return false;
-		if (!channel.equals(config.getStarboardChannel())) {
-			config.getStarboardChannel().retrieveMessageById(entry.getStarboardMessageId()).queue(
-					starboardMessage -> starboardMessage.delete().queue(),
-					Throwable::printStackTrace
-			);
-		}
-		repo.delete(messageId);
-		log.info("Removed Starboard Entry with message Id {}", messageId);
-		return true;
-	}
-
-	/**
-	 * Updates all Starboard Entries in the current guild.
-	 *
-	 * @param guild The current guild.
-	 */
-	public void updateAllStarboardEntries(Guild guild) {
-		log.info("Updating all Starboard Entries");
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new StarboardRepository(con);
-			var entries = repo.getAllStarboardEntries(guild.getIdLong());
-			var config = Bot.config.get(guild).getStarboardConfig();
-			var starEmote = config.getEmojis().get(0);
-			for (var entry : entries) {
-				var channel = guild.getTextChannelById(entry.getChannelId());
-				if (channel == null) {
-					removeMessageFromStarboard(entry.getOriginalMessageId(), channel, config);
-					return;
-				}
-				channel.retrieveMessageById(entry.getOriginalMessageId()).queue(
-						message -> {
-							try {
-								updateStarboardMessage(message, getReactionCountForEmote(starEmote, message), config);
-							} catch (SQLException ex) {
-								ex.printStackTrace();
-							}
-						},
-						e -> {
-							try {
-								removeMessageFromStarboard(entry.getOriginalMessageId(), channel, config);
-							} catch (SQLException ex) {
-								ex.printStackTrace();
-							}
-						}
+		try (Connection con = Bot.dataSource.getConnection()) {
+			StarboardRepository repo = new StarboardRepository(con);
+			StarboardEntry entry = repo.getEntryByMessageId(messageId);
+			if (entry == null) return false;
+			if (!channel.equals(config.getStarboardChannel())) {
+				config.getStarboardChannel().retrieveMessageById(entry.getStarboardMessageId()).queue(
+						starboardMessage -> starboardMessage.delete().queue(), ExceptionLogger::capture
 				);
 			}
-		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
+			repo.delete(messageId);
+			log.info("Removed Starboard Entry with message Id {}", messageId);
+			return true;
 		}
 	}
 
-	private MessageEmbed buildStarboardEmbed(Message message) {
+	private @NotNull MessageEmbed buildStarboardEmbed(@NotNull Message message) {
 		var author = message.getAuthor();
 		return new EmbedBuilder()
-				.setAuthor("Jump to Message", message.getJumpUrl())
-				.setFooter(author.getAsTag(), author.getEffectiveAvatarUrl())
+				.setAuthor(author.getAsTag(), message.getJumpUrl(), author.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(message.getContentRaw())
+				.setFooter("from: #" + message.getChannel().getName())
 				.build();
 	}
 }

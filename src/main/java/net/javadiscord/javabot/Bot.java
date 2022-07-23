@@ -137,11 +137,11 @@ public class Bot {
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
 				.build();
-		addEventListeners(jda, dih4jda);
-		addComponentHandler(dih4jda);
+		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
-		customTagManager = new CustomTagManager(jda, dataSource);
+		addEventListeners(jda, dih4jda);
+		addComponentHandler(dih4jda);
 		// initialize Sentry
 		Sentry.init(options -> {
 			options.setDsn(config.getSystems().getSentryDsn());
