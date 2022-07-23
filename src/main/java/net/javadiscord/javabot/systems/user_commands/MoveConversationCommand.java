@@ -27,10 +27,6 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private static final String MOVED_FROM_MESSAGE = "\uD83D\uDCE5 Conversation moved **here** from %s by %s\n%s";
 
-	private static final Permission[] REQUIRED_PERMISSIONS = new Permission[]{
-			Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL
-	};
-
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
@@ -83,7 +79,7 @@ public class MoveConversationCommand extends SlashCommand {
 	 */
 	private boolean isInvalidChannel(@NotNull Member member, GuildMessageChannel channel) {
 		ModerationConfig config = Bot.config.get(member.getGuild()).getModerationConfig();
-		return !member.hasPermission(channel, REQUIRED_PERMISSIONS) ||
+		return !member.hasPermission(channel, Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL) ||
 				// check thread permissions
 				channel.getType().isThread() && !member.hasPermission(channel, Permission.MESSAGE_SEND_IN_THREADS) ||
 				// check for suggestion channel                                 check for share knowledge channel
