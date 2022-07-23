@@ -45,8 +45,7 @@ public class WebhookUtil {
 	 * @param failureCallback an action that is executed if the webhook
 	 *                        lookup/creation failed
 	 */
-	public static void ensureWebhookExists(@NotNull TextChannel channel, Consumer<? super Webhook> callback,
-	                                       Consumer<? super Throwable> failureCallback) {
+	public static void ensureWebhookExists(@NotNull TextChannel channel, Consumer<? super Webhook> callback, Consumer<? super Throwable> failureCallback) {
 
 		channel.retrieveWebhooks().queue(webhooks -> {
 			Optional<Webhook> hook = webhooks.stream()
@@ -71,8 +70,7 @@ public class WebhookUtil {
 	 * @return a {@link CompletableFuture} representing the action of sending
 	 * the message
 	 */
-	public static CompletableFuture<Void> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage,
-	                                                             String newMessageContent, long threadId) {
+	public static CompletableFuture<Void> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId) {
 		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
 				.setThreadId(threadId).buildJDA();
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
