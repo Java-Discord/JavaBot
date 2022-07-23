@@ -69,7 +69,7 @@ public class HugListener extends ListenerAdapter {
 				}
 			}
 
-			sb.append(content.substring(indexBkp, content.length()));
+			sb.append(content.substring(indexBkp));
 			WebhookUtil.ensureWebhookExists(textChannel,
 					wh -> sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId),
 					e -> log.error("Webhook lookup/creation failed", e));

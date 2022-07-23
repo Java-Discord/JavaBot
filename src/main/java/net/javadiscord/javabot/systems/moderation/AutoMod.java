@@ -204,6 +204,7 @@ public class AutoMod extends ListenerAdapter {
 			while (urlMatcher.find()) {
 				String url = urlMatcher.group(0).trim();
 				try {
+					// TODO: Fix URISyntaxException
 					URI uri = new URI(url);
 					if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
 						return true;

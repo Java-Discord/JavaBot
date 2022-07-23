@@ -6,7 +6,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +25,7 @@ public class SayCommand extends SlashCommand {
 	 */
 	public SayCommand() {
 		setSlashCommandData(Commands.slash("say", "Let the bot say everything you want!")
+				.addOption(OptionType.STRING, "text", "The text that should be mirrored.", true)
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
@@ -30,6 +33,10 @@ public class SayCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
+			Responses.replyStaffOnly(event, event.getGuild()).queue();
+			return;
+		}
 		OptionMapping textMapping = event.getOption("text");
 		if (textMapping == null) {
 			Responses.replyMissingArguments(event).queue();
@@ -38,11 +45,9 @@ public class SayCommand extends SlashCommand {
 		String text = textMapping.getAsString();
 		log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), event.getUser().getAsTag());
 		event.deferReply(true).queue();
-		// TODO: Replace with Webhook
 		event.getChannel().sendMessage(text)
 				.allowedMentions(Set.of(Message.MentionType.EMOJI))
-				.queue(
-						m -> event.getHook().sendMessage("Done! " + m.getJumpUrl()).queue(),
+				.queue(m -> event.getHook().sendMessage("Done! " + m.getJumpUrl()).queue(),
 						err -> event.getHook().sendMessage("An error occurred. Please try again.").queue()
 				);
 	}

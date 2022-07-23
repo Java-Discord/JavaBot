@@ -115,9 +115,13 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
 			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
-			var embed = buildReportEmbed(target, hook.getInteraction().getUser(), reason, hook.getInteraction().getChannel());
+			EmbedBuilder embed = buildReportEmbed(target, hook.getInteraction().getUser(), reason, hook.getInteraction().getChannel());
 			embed.setTitle(String.format("%s reported %s", hook.getInteraction().getUser().getName(), target.getName()));
 			MessageChannel reportChannel = config.getModeration().getReportChannel();
+			if (reportChannel == null) {
+				Responses.error(hook, "I could not find the report channel. Please ask the administrators of this server to set one!").queue();
+				return;
+			}
 			reportChannel.sendMessageEmbeds(embed.build())
 					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModeration()));
 			embed.setDescription("Successfully reported " + "`" + target.getAsTag() + "`!\nYour report has been send to our Moderators");

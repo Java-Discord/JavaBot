@@ -31,7 +31,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
 		Matcher matcher = GITHUB_LINK_PATTERN.matcher(event.getMessage().getContentRaw());
 		if (matcher.find()) {
-			Pair<String, String> content = this.parseGithubUrl(matcher.group());
+			Pair<String, String> content = parseGithubUrl(matcher.group());
 			if (!content.getFirst().isBlank() && !content.getSecond().isBlank()) {
 				event.getMessage().reply(String.format("```%s\n%s\n```", content.getSecond(), StringUtils.standardSanitizer().compute(content.getFirst())))
 						.allowedMentions(List.of())
@@ -57,6 +57,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 				.map(line -> line.replace("-", ""))
 				.filter(line -> line.matches("-?\\d+")) // check if the given link is a number
 				.map(Integer::valueOf).sorted().toArray(Integer[]::new);
+		// TODO: Fix possible NPE?
 		int to = lines.length != 2 ? lines[0] : lines[1];
 		String reqUrl = String.format("https://raw.githubusercontent.com/%s/%s/%s/%s",
 				segments[0], segments[1],
