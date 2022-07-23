@@ -24,7 +24,9 @@ import java.util.Collections;
  */
 public class MoveConversationCommand extends SlashCommand {
 	private static final String MOVE_TO_MESSAGE = "``` ```\n\uD83D\uDCE4 %s has requested to move **this conversation** over to %s\n%s\n\n``` ```";
+
 	private static final String MOVED_FROM_MESSAGE = "\uD83D\uDCE5 Conversation moved **here** from %s by %s\n%s";
+
 	private static final Permission[] REQUIRED_PERMISSIONS = new Permission[]{
 			Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL
 	};
