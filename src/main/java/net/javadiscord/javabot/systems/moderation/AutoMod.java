@@ -21,8 +21,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,7 +164,7 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void handleSpam(@Nonnull Message msg, Member member) {
 		// java files -> not spam
-		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> a.getFileExtension().equals("java"))) {
+		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
 			return;
 		}
 		new ModerationService(Bot.config.get(member.getGuild()))
@@ -196,7 +196,7 @@ public class AutoMod extends ListenerAdapter {
 	 * @param message The message to check.
 	 * @return True if a link is found and False if not.
 	 */
-	public boolean hasSuspiciousLink(Message message) {
+	public boolean hasSuspiciousLink(@NotNull Message message) {
 		final String messageRaw = message.getContentRaw();
 		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
@@ -204,13 +204,11 @@ public class AutoMod extends ListenerAdapter {
 			while (urlMatcher.find()) {
 				String url = urlMatcher.group(0).trim();
 				try {
-					// TODO: Fix URISyntaxException
 					URI uri = new URI(url);
 					if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
 						return true;
 					}
 				} catch (URISyntaxException e) {
-					ExceptionLogger.capture(e, getClass().getSimpleName());
 					log.error("Error while parsing URL: " + url, e);
 				}
 			}
