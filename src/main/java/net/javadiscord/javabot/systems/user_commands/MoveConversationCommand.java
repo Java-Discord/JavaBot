@@ -23,7 +23,7 @@ import java.util.Collections;
  * <h3>This class represents the /move-conversation command.</h3>
  */
 public class MoveConversationCommand extends SlashCommand {
-	private static final String MOVE_TO_MESSAGE = "``` ```\n\uD83D\uDCE4 %s has requested to move **this conversation** over to %s\n%s\n\n``` ```";
+	private static final String MOVE_TO_MESSAGE = "``` ```\n\uD83D\uDCE4 %s has suggested to move **this conversation** over to %s\n%s\n\n``` ```";
 
 	private static final String MOVED_FROM_MESSAGE = "\uD83D\uDCE5 Conversation moved **here** from %s by %s\n%s";
 
