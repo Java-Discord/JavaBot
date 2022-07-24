@@ -59,13 +59,17 @@ public class MoveConversationCommand extends SlashCommand {
 			Responses.warning(event, "Invalid Channel", "You're not allowed to move the conversation to %s", channel.getAsMention()).queue();
 			return;
 		}
+		if (isInvalidChannel(event.getGuild().getSelfMember(), channel)) {
+			Responses.error(event, "Insufficient Permissions", "I'm not allowed to sent messages to %s", channel.getAsMention()).queue();
+			return;
+		}
 		event.deferReply(true).queue();
 		sendMovedFromChannelMessage(event, channel).queue(movedTo ->
 				sendMoveToChannelMessage(event, channel, movedTo).queue(movedFrom ->
 						editMovedFromChannelMessage(event, movedFrom, movedTo).queue(s ->
 								event.getHook().sendMessage("Done!").queue()
 						)
-				)
+				), err -> Responses.error(event, "Could not move conversation: " + err.getMessage()).queue()
 		);
 	}
 
@@ -73,7 +77,7 @@ public class MoveConversationCommand extends SlashCommand {
 	 * Checks if the specified {@link Member} does have the required permissions in order
 	 * to move the conversation to the specified channel.
 	 *
-	 * @param member  The {@link Member} which executed the command.
+	 * @param member  The {@link Member} to check for.
 	 * @param channel The {@link GuildMessageChannel} the conversation should be moved to.
 	 * @return Whether the {@link GuildMessageChannel} provided by the {@link Member} is invalid.
 	 */
