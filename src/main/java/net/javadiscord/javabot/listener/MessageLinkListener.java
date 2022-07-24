@@ -1,18 +1,19 @@
 package net.javadiscord.javabot.listener;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import club.minnced.discord.webhook.send.component.ActionRow;
+import club.minnced.discord.webhook.send.component.Button;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.util.ExceptionLogger;
-import net.javadiscord.javabot.util.InteractionUtils;
-import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -33,9 +34,17 @@ public class MessageLinkListener extends ListenerAdapter {
 			Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
 			optional.ifPresent(action -> action.queue(
 					m -> WebhookUtil.ensureWebhookExists(event.getChannel().asTextChannel(),
-							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw() + "\n\n" + m.getJumpUrl(), 0)
+							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, ActionRow.of(Button.link(toURL(m.getJumpUrl()), "Jump to Message")))
 					), ExceptionLogger::capture
 			));
+		}
+	}
+
+	private @Nullable URL toURL(String url) {
+		try {
+			return new URL(url);
+		} catch (MalformedURLException e) {
+			return null;
 		}
 	}
 
