@@ -31,7 +31,7 @@ public class MoveConversationCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public MoveConversationCommand() {
-		setSlashCommandData(Commands.slash("move-conversation", "Allows to move the current conversation into another channel!")
+		setSlashCommandData(Commands.slash("move-conversation", "Suggest to move the current conversation into another channel!")
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "Where should the current conversation be continued?", true)
 								.setChannelTypes(ChannelType.TEXT, ChannelType.GUILD_NEWS_THREAD, ChannelType.GUILD_PRIVATE_THREAD, ChannelType.GUILD_PUBLIC_THREAD, ChannelType.VOICE, ChannelType.STAGE)
