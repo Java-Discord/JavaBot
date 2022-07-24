@@ -16,6 +16,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.ImageCache;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -140,7 +141,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The finished image as a {@link ByteArrayInputStream}.
 	 * @throws IOException If an error occurs.
 	 */
-	private ByteArrayOutputStream generateLeaderboard(Guild guild, QOTWPointsService service) throws IOException {
+	private @NotNull ByteArrayOutputStream generateLeaderboard(Guild guild, @NotNull QOTWPointsService service) throws IOException {
 		BufferedImage logo = ImageGenerationUtils.getResourceImage("assets/images/QuestionOfTheWeekHeader.png");
 		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 
