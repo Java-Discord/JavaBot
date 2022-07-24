@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -96,6 +97,7 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private @NotNull MessageAction sendMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel, @NotNull Message movedTo) {
 		return event.getChannel().sendMessageFormat(MOVE_TO_MESSAGE, event.getUser().getAsMention(), channel.getAsMention(), movedTo.getJumpUrl())
+				.setActionRow(Button.link(movedTo.getJumpUrl(), "Jump to Message"))
 				.allowedMentions(Collections.emptySet());
 	}
 
@@ -106,6 +108,7 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private @NotNull MessageAction editMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
 		return movedTo.editMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), movedFrom.getJumpUrl())
+				.setActionRow(Button.link(movedFrom.getJumpUrl(), "Jump to Message"))
 				.allowedMentions(Collections.emptySet());
 	}
 }
