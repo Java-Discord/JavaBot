@@ -17,7 +17,6 @@ public class HelpExperienceJob extends DiscordApiJob {
 	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> dao.removeExperienceFromAllAccounts(
 				// just get the config for the first guild the bot is in, as it's not designed to work in multiple guilds anyway
-				// TODO: remove those placeholder values
 				Bot.config.get(jda.getGuilds().get(0)).getHelpConfig().getDailyExperienceSubtraction(), 100, 100)
 		);
 	}
