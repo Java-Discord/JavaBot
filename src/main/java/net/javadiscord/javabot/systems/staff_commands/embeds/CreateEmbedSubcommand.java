@@ -90,11 +90,11 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
 				.setPlaceholder(String.format("Choose a fitting title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.TITLE_MAX_LENGTH)
-				.setRequired(false)
+				.setRequired(true)
 				.build();
 		TextInput descriptionInput = TextInput.create("description", "Description", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("Choose a description for your embed.")
-				.setRequired(false)
+				.setRequired(true)
 				.build();
 		TextInput colorInput = TextInput.create("color", "Hex Color (optional)", TextInputStyle.SHORT)
 				.setPlaceholder("#FFFFFF")

@@ -39,7 +39,7 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 								.addChoice("Title / Description / Color", "TITLE_DESC_COLOR")
 								.addChoice("Image / Thumbnail", "IMG_THUMB")
 								.addChoice("Footer / Timestamp", "FOOTER_TIMESTAMP"),
-						new OptionData(OptionType.CHANNEL, "channel", "What channel is your embed in? If left empty, this defaults to the current one.", true)
+						new OptionData(OptionType.CHANNEL, "channel", "What channel is your embed in? If left empty, this defaults to the current one.", false)
 								.setChannelTypes(ChannelType.TEXT)
 				)
 		);
@@ -53,8 +53,12 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 			Responses.replyMissingArguments(event).queue();
 			return;
 		}
-		if (event.getGuild() == null) {
+		if (event.getGuild() == null || event.getMember() == null) {
 			Responses.replyGuildOnly(event).queue();
+			return;
+		}
+		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
+			Responses.replyStaffOnly(event, event.getGuild()).queue();
 			return;
 		}
 		long messageId = idMapping.getAsLong();
@@ -68,13 +72,18 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 						return;
 					}
 					MessageEmbed embed = message.getEmbeds().get(0);
-					// TODO: add missing types
 					Modal modal = switch (type) {
+						case "AUTHOR" -> buildAuthorModal(embed, messageId);
 						case "TITLE_DESC_COLOR" -> buildTitleDescColorModal(embed, messageId);
-						// temp
-						default ->  buildTitleDescColorModal(embed, messageId);
+						case "IMG_THUMB" -> buildImageThumbnailModal(embed, messageId);
+						case "FOOTER_TIMESTAMP" -> buildFooterTimestampModal(embed, messageId);
+						default -> null;
 					};
-					event.replyModal(modal).queue();
+					if (modal == null) {
+						Responses.error(event, "Please select a valid edit-type!").queue();
+					} else {
+						event.replyModal(modal).queue();
+					}
 				},
 				err -> event.reply("Could not edit Embed Message. Please try again.").queue()
 		);
@@ -89,33 +98,100 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 		}
 	}
 
-	private @NotNull Modal buildTitleDescColorModal(@NotNull MessageEmbed embed, long messageId) {
-		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
-				.setPlaceholder(String.format("Choose a fitting Title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
-				.setValue(embed.getTitle())
-				.setMaxLength(MessageEmbed.TEXT_MAX_LENGTH)
+	private @NotNull Modal buildAuthorModal(@NotNull MessageEmbed embed, long messageId) {
+		MessageEmbed.AuthorInfo info = embed.getAuthor();
+		TextInput authorNameInput = TextInput.create("author-name", "Author Name (optional)", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("Choose the author's name. (max. %s chars)", MessageEmbed.AUTHOR_MAX_LENGTH))
+				.setValue(info == null ? null : info.getName())
+				.setMaxLength(MessageEmbed.AUTHOR_MAX_LENGTH)
 				.setRequired(false)
 				.build();
-		TextInput titleUrlInput = TextInput.create("title-url", "Title URL", TextInputStyle.SHORT)
-				.setPlaceholder(String.format("The Title's URL. (max. %s chars)", MessageEmbed.URL_MAX_LENGTH))
+		TextInput authorUrlInput = TextInput.create("author-url", "Author URL (optional)", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("The author's url. (max. %s chars)", MessageEmbed.URL_MAX_LENGTH))
+				.setValue(info == null ? null : info.getUrl())
+				.setMaxLength(MessageEmbed.URL_MAX_LENGTH)
+				.setRequired(false)
+				.build();
+		TextInput authorIconUrlInput = TextInput.create("author-iconurl", "Author Icon URL (optional)", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("The author's icon url. (max. %s chars)", MessageEmbed.URL_MAX_LENGTH))
+				.setValue(info == null ? null : info.getIconUrl())
+				.setMaxLength(MessageEmbed.URL_MAX_LENGTH)
+				.setRequired(false)
+				.build();
+		return Modal.create(ComponentIdBuilder.build("embed-edit", "AUTHOR", messageId), "Edit Author")
+				.addActionRows(ActionRow.of(authorNameInput), ActionRow.of(authorUrlInput), ActionRow.of(authorIconUrlInput))
+				.build();
+	}
+
+	private @NotNull Modal buildTitleDescColorModal(@NotNull MessageEmbed embed, long messageId) {
+		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("Choose a fitting title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
+				.setValue(embed.getTitle())
+				.setMaxLength(MessageEmbed.TEXT_MAX_LENGTH)
+				.setRequired(true)
+				.build();
+		TextInput titleUrlInput = TextInput.create("title-url", "Title URL (optional)", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("The title's url. (max. %s chars)", MessageEmbed.URL_MAX_LENGTH))
 				.setValue(embed.getUrl())
 				.setMaxLength(MessageEmbed.URL_MAX_LENGTH)
 				.setRequired(false)
 				.build();
 		TextInput descriptionInput = TextInput.create("description", "Description", TextInputStyle.PARAGRAPH)
-				.setPlaceholder(String.format("Choose a Description for your Embed Message. (max. %s chars)", MessageEmbed.DESCRIPTION_MAX_LENGTH))
+				.setPlaceholder("Choose a description for your embed.")
 				.setValue(embed.getDescription())
-				.setMaxLength(MessageEmbed.DESCRIPTION_MAX_LENGTH)
-				.setRequired(false)
+				.setRequired(true)
 				.build();
 		TextInput colorInput = TextInput.create("color", "Hex Color (optional)", TextInputStyle.SHORT)
 				.setPlaceholder("#FFFFFF")
-				.setValue("#" + Integer.toHexString(embed.getColor().getRGB()).toUpperCase())
+				.setValue(embed.getColor() == null ? null : "#" + Integer.toHexString(embed.getColor().getRGB()).toUpperCase())
 				.setMaxLength(7)
 				.setRequired(false)
 				.build();
-		return Modal.create(ComponentIdBuilder.build("embed-edit", "TITLE_DESC_COLOR", messageId), "Edit Title, Description & Color")
+		return Modal.create(ComponentIdBuilder.build("embed-edit", "TITLE_DESC_COLOR", messageId), "Edit Title, Title URL, Description & Color")
 				.addActionRows(ActionRow.of(titleInput), ActionRow.of(titleUrlInput), ActionRow.of(descriptionInput), ActionRow.of(colorInput))
+				.build();
+	}
+
+	private @NotNull Modal buildImageThumbnailModal(@NotNull MessageEmbed embed, long messageId) {
+		TextInput imageUrlInput = TextInput.create("image-url", "Image URL (optional)", TextInputStyle.SHORT)
+				.setPlaceholder("https://example.com/example.png")
+				.setValue(embed.getImage() == null ? null : embed.getImage().getUrl())
+				.setMaxLength(MessageEmbed.URL_MAX_LENGTH)
+				.setRequired(false)
+				.build();
+		TextInput thumbnailUrlInput = TextInput.create("thumb-url", "Thumbnail URL (optional)", TextInputStyle.SHORT)
+				.setPlaceholder("https://example.com/example.png")
+				.setValue(embed.getThumbnail() == null ? null : embed.getThumbnail().getUrl())
+				.setMaxLength(MessageEmbed.URL_MAX_LENGTH)
+				.setRequired(false)
+				.build();
+		return Modal.create(ComponentIdBuilder.build("embed-edit", "IMG_THUMB", messageId), "Edit Image & Thumbnail")
+				.addActionRows(ActionRow.of(imageUrlInput), ActionRow.of(thumbnailUrlInput))
+				.build();
+	}
+
+	private @NotNull Modal buildFooterTimestampModal(@NotNull MessageEmbed embed, long messageId) {
+		MessageEmbed.Footer footer = embed.getFooter();
+		TextInput imageUrlInput = TextInput.create("footer-text", "Footer Text (optional)", TextInputStyle.SHORT)
+				// TODO: check real length
+				.setPlaceholder(String.format("The footer's text. (max. %s chars)", MessageEmbed.AUTHOR_MAX_LENGTH))
+				.setValue(footer == null ? null : footer.getText())
+				.setMaxLength(MessageEmbed.AUTHOR_MAX_LENGTH)
+				.setRequired(false)
+				.build();
+		TextInput footerIconUrlInput = TextInput.create("footer-iconurl", "Footer Icon URL (optional)", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("The footer's icon url. (max. %s chars)", MessageEmbed.URL_MAX_LENGTH))
+				.setValue(footer == null ? null : footer.getIconUrl())
+				.setMaxLength(MessageEmbed.URL_MAX_LENGTH)
+				.setRequired(false)
+				.build();
+		TextInput timestampInput = TextInput.create("timestamp", "Timestamp (optional)", TextInputStyle.SHORT)
+				.setPlaceholder(String.format("The embed's timestamp."))
+				.setValue(embed.getTimestamp() == null ? null : String.valueOf(embed.getTimestamp().toEpochSecond()))
+				.setRequired(false)
+				.build();
+		return Modal.create(ComponentIdBuilder.build("embed-edit", "FOOTER_TIMESTAMP", messageId), "Edit Footer & Timestamp")
+				.addActionRows(ActionRow.of(imageUrlInput), ActionRow.of(footerIconUrlInput), ActionRow.of(timestampInput))
 				.build();
 	}
 }
