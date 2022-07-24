@@ -17,6 +17,7 @@ To start up, run the bot once, and it will generate a `config` directory. Stop t
 Note that this is just what is required for the bot to start. Certain features may require other values to be set.
 
 # Configuration
+
 The bot's configuration consists of a collection of simple JSON files:
 - `systems.json` contains global settings for the bot's core systems.
 - For every guild, a `{guildId}.json` file exists, which contains any guild-specific configuration settings.
@@ -24,4 +25,12 @@ The bot's configuration consists of a collection of simple JSON files:
 At startup, the bot will initially start by loading just the global settings, and then when the Discord ready event is received, the bot will add configuration for each guild it's in, loading it from the matching JSON file, or creating a new file if needed.
 
 # Commands
+
 _Work in Progress_
+
+# Credits
+
+Inspiration we took from other communities:
+
+- We designed our [Help Channel System](https://github.com/Java-Discord/JavaBot/tree/main/src/main/java/net/javadiscord/javabot/systems/help) similar to the one on the [Python Discord](https://discord.gg/python).
+- [`/move-conversation`](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/javadiscord/javabot/systems/user_commands/MoveConversationCommand.java) is heavily inspired by the [Rust Programming Language Community Server](https://discord.gg/rust-lang-community)
