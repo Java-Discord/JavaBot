@@ -60,9 +60,9 @@ public class MoveConversationCommand extends SlashCommand {
 			return;
 		}
 		event.deferReply(true).queue();
-		sendMoveToChannelMessage(event, channel).queue(movedFrom ->
-				sendMovedFromChannelMessage(event, channel, movedFrom).queue(movedTo ->
-						editMoveToChannelMessage(event, movedFrom, movedTo).queue(s ->
+		sendMovedFromChannelMessage(event, channel).queue(movedTo ->
+				sendMoveToChannelMessage(event, channel, movedTo).queue(movedFrom ->
+						editMovedFromChannelMessage(event, movedFrom, movedTo).queue(s ->
 								event.getHook().sendMessage("Done!").queue()
 						)
 				)
@@ -90,18 +90,18 @@ public class MoveConversationCommand extends SlashCommand {
 				channel.getIdLong() == config.getLogChannelId();
 	}
 
-	private @NotNull MessageAction sendMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel) {
-		return event.getChannel().sendMessageFormat(MOVE_TO_MESSAGE, event.getUser().getAsMention(), channel.getAsMention(), "Awaiting Link...")
+	private @NotNull MessageAction sendMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel, @NotNull Message movedTo) {
+		return event.getChannel().sendMessageFormat(MOVE_TO_MESSAGE, event.getUser().getAsMention(), channel.getAsMention(), movedTo.getJumpUrl())
 				.allowedMentions(Collections.emptySet());
 	}
 
-	private @NotNull MessageAction sendMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel, @NotNull Message movedFrom) {
-		return channel.sendMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), movedFrom.getJumpUrl())
+	private @NotNull MessageAction sendMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel) {
+		return channel.sendMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), "Waiting for Link...")
 				.allowedMentions(Collections.emptySet());
 	}
 
-	private @NotNull MessageAction editMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
-		return movedFrom.editMessageFormat(MOVE_TO_MESSAGE, event.getUser().getAsMention(), movedTo.getChannel().getAsMention(), movedTo.getJumpUrl())
+	private @NotNull MessageAction editMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
+		return movedTo.editMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), movedFrom.getJumpUrl())
 				.allowedMentions(Collections.emptySet());
 	}
 }
