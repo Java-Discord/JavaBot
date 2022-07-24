@@ -4,10 +4,11 @@ import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
+import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -37,22 +39,31 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 		setSubcommandData(new SubcommandData("create", "Creates a new basic embed message.")
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "What channel should the embed be sent to?", false)
-								.setChannelTypes(ChannelType.TEXT)
+								.setChannelTypes(ChannelType.TEXT, ChannelType.VOICE, ChannelType.GUILD_PRIVATE_THREAD, ChannelType.GUILD_PUBLIC_THREAD, ChannelType.GUILD_NEWS_THREAD)
 				)
 		);
 	}
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (event.getGuild() == null) {
+		if (event.getGuild() == null || event.getMember() == null) {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		event.replyModal(buildBasicEmbedCreateModal(event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel))).queue();
+		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
+			Responses.replyStaffOnly(event, event.getGuild()).queue();
+			return;
+		}
+		GuildMessageChannel channel = event.getOption("channel", event.getChannel().asGuildMessageChannel(), m -> m.getAsChannel().asGuildMessageChannel());
+		if (!event.getGuild().getSelfMember().hasPermission(channel, Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL)) {
+			Responses.replyInsufficientPermissions(event, Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL).queue();
+			return;
+		}
+		event.replyModal(buildBasicEmbedCreateModal(channel)).queue();
 	}
 
 	@Override
-	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
 		event.deferReply(true).queue();
 		if (event.getGuild() == null) {
 			Responses.replyGuildOnly(event.getHook()).queue();
@@ -69,19 +80,20 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			Responses.error(event.getHook(), "You've provided an invalid embed!").queue();
 			return;
 		}
-		channel.sendMessageEmbeds(builder.build()).queue();
-		event.getHook().sendMessage("Done!").queue();
+		channel.sendMessageEmbeds(builder.build()).queue(
+				s -> event.getHook().sendMessage("Done!").addActionRow(Button.link(s.getJumpUrl(), "Jump to Embed")).queue(),
+				e -> Responses.error(event.getHook(), "Could not send embed: %s", e.getMessage()).queue()
+		);
 	}
 
 	private @NotNull Modal buildBasicEmbedCreateModal(@NotNull Channel channel) {
 		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
-				.setPlaceholder(String.format("Choose a fitting Title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
+				.setPlaceholder(String.format("Choose a fitting title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.TITLE_MAX_LENGTH)
 				.setRequired(false)
 				.build();
 		TextInput descriptionInput = TextInput.create("description", "Description", TextInputStyle.PARAGRAPH)
-				.setPlaceholder(String.format("Choose a Description for your Embed Message. (max. %s chars)", MessageEmbed.DESCRIPTION_MAX_LENGTH))
-				.setMaxLength(MessageEmbed.DESCRIPTION_MAX_LENGTH)
+				.setPlaceholder("Choose a description for your embed.")
 				.setRequired(false)
 				.build();
 		TextInput colorInput = TextInput.create("color", "Hex Color (optional)", TextInputStyle.SHORT)
@@ -98,7 +110,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 				.build();
 	}
 
-	private EmbedBuilder buildBasicEmbed(ModalInteractionEvent event) {
+	private @NotNull EmbedBuilder buildBasicEmbed(@NotNull ModalInteractionEvent event) {
 		EmbedBuilder builder = new EmbedBuilder();
 		ModalMapping titleMapping = event.getValue("title");
 		ModalMapping descriptionMapping = event.getValue("description");
