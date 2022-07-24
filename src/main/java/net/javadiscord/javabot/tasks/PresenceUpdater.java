@@ -75,9 +75,9 @@ public class PresenceUpdater extends ListenerAdapter {
 	 * has all the necessary properties defined to reasonable defaults.
 	 */
 	public static PresenceUpdater standardActivities() {
-		var format = "%s members";
 		return new PresenceUpdater(List.of(
-				jda -> Activity.watching(String.format(format, jda.getGuilds().stream().mapToLong(Guild::getMemberCount).sum()))
+				jda -> Activity.watching(String.format("%s members", jda.getGuilds().stream().mapToLong(Guild::getMemberCount).sum())),
+				jda -> Activity.watching("Use /report, 'Report User' or 'Report Message' to report disruptive behaviour!")
 		), 35, TimeUnit.SECONDS);
 	}
 
