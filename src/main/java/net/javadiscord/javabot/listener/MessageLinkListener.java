@@ -34,17 +34,9 @@ public class MessageLinkListener extends ListenerAdapter {
 			Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
 			optional.ifPresent(action -> action.queue(
 					m -> WebhookUtil.ensureWebhookExists(event.getChannel().asTextChannel(),
-							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, ActionRow.of(Button.link(toURL(m.getJumpUrl()), "Jump to Message")))
+							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message")))
 					), ExceptionLogger::capture
 			));
-		}
-	}
-
-	private @Nullable URL toURL(String url) {
-		try {
-			return new URL(url);
-		} catch (MalformedURLException e) {
-			return null;
 		}
 	}
 
