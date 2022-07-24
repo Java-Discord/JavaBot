@@ -97,7 +97,6 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private @NotNull MessageAction sendMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel, @NotNull Message movedTo) {
 		return event.getChannel().sendMessageFormat(MOVE_TO_MESSAGE, event.getUser().getAsMention(), channel.getAsMention(), movedTo.getJumpUrl())
-				.setActionRow(Button.link(movedTo.getJumpUrl(), "Jump to Message"))
 				.allowedMentions(Collections.emptySet());
 	}
 
