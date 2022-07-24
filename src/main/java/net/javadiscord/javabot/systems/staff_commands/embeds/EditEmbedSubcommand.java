@@ -1,13 +1,12 @@
 package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -36,18 +35,19 @@ import java.util.Map;
 /**
  * <h3>This class represents the /embed edit command.</h3>
  */
-public class EditEmbedSubcommand extends SlashCommand.Subcommand implements ModalHandler {
+public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler {
 	/**
 	 * The {@link Modal}s id for editing an embed.
 	 */
 	public static final String EDIT_EMBED_ID = "edit-embed";
-
+	/**
+	 * A static cache of {@link MessageEmbed}s.
+	 */
+	protected static final Map<Long, Pair<Message, MessageEmbed>> EMBED_MESSAGE_CACHE;
 	private static final String AUTHOR_ID = "AUTHOR";
 	private static final String TITLE_DESC_COLOR_ID = "TITLE_DESC_COLOR";
 	private static final String IMG_THUMB_ID = "IMG_THUMB";
 	private static final String FOOTER_TIMESTAMP_ID = "FOOTER_TIMESTAMP";
-
-	private static final Map<Long, Pair<Message, MessageEmbed>> EMBED_MESSAGE_CACHE;
 
 	static {
 		EMBED_MESSAGE_CACHE = new HashMap<>();
@@ -71,25 +71,18 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 		);
 	}
 
+	protected static @Nullable String getValue(@NotNull String s) {
+		return s.trim().isEmpty() ? null : s.trim();
+	}
+
 	@Override
-	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		OptionMapping idMapping = event.getOption("message-id");
+	protected void handleEmbedSubcommand(SlashCommandInteractionEvent event, long messageId, GuildMessageChannel channel) {
 		OptionMapping typeMapping = event.getOption("type");
-		if (idMapping == null || typeMapping == null || Checks.isInvalidLongInput(idMapping)) {
+		if (typeMapping == null) {
 			Responses.replyMissingArguments(event).queue();
 			return;
 		}
-		if (event.getGuild() == null || event.getMember() == null) {
-			Responses.replyGuildOnly(event).queue();
-			return;
-		}
-		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
-			Responses.replyStaffOnly(event, event.getGuild()).queue();
-			return;
-		}
-		long messageId = idMapping.getAsLong();
 		String type = typeMapping.getAsString();
-		TextChannel channel = event.getOption("channel", event.getChannel().asTextChannel(), m -> m.getAsChannel().asTextChannel());
 		channel.retrieveMessageById(messageId).queue(
 				message -> {
 					// just get the first embed
@@ -345,9 +338,5 @@ public class EditEmbedSubcommand extends SlashCommand.Subcommand implements Moda
 				.setFooter(getValue(footerText), getValue(footerIconUrl))
 				.setTimestamp(getValue(timestamp) == null ? null : Instant.ofEpochMilli(Long.parseLong(timestamp)));
 		return new Pair<>("", message.editMessageEmbeds(builder.build()));
-	}
-
-	private static @Nullable String getValue(@NotNull String s) {
-		return s.trim().isEmpty() ? null : s.trim();
 	}
 }

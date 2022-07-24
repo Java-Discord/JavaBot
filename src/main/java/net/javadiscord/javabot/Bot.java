@@ -21,6 +21,7 @@ import net.javadiscord.javabot.data.h2db.commands.QuickMigrateSubcommand;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
+import net.javadiscord.javabot.systems.staff_commands.embeds.AddEmbedFieldSubcommand;
 import net.javadiscord.javabot.systems.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.tags.commands.CreateCustomTagSubcommand;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
@@ -200,6 +201,7 @@ public class Bot {
 				List.of("qotw-add-question"), new AddQuestionSubcommand(),
 				List.of("embed-create"), new CreateEmbedSubcommand(),
 				List.of(EditEmbedSubcommand.EDIT_EMBED_ID), new EditEmbedSubcommand(),
+				List.of("embed-addfield"), new AddEmbedFieldSubcommand(),
 				List.of("quick-migrate"), new QuickMigrateSubcommand(),
 				List.of("report"), new ReportManager(),
 				List.of("self-role"), new SelfRoleInteractionManager(),

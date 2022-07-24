@@ -6,12 +6,8 @@ import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
-import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -22,6 +18,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.javadiscord.javabot.util.Checks;
+import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,12 +72,12 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			Responses.error(event.getHook(), "Please provide a valid text channel.").queue();
 			return;
 		}
-		EmbedBuilder builder = buildBasicEmbed(event);
-		if (builder.isEmpty() || !builder.isValidLength()) {
-			Responses.error(event.getHook(), "You've provided an invalid embed!").queue();
+		Pair<String, EmbedBuilder> pair = buildBasicEmbed(event);
+		if (pair.second() == null) {
+			Responses.error(event.getHook(), pair.first()).queue();
 			return;
 		}
-		channel.sendMessageEmbeds(builder.build()).queue(
+		channel.sendMessageEmbeds(pair.second().build()).queue(
 				s -> event.getHook().sendMessage("Done!").addActionRow(Button.link(s.getJumpUrl(), "Jump to Embed")).queue(),
 				e -> Responses.error(event.getHook(), "Could not send embed: %s", e.getMessage()).queue()
 		);
@@ -110,24 +107,32 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 				.build();
 	}
 
-	private @NotNull EmbedBuilder buildBasicEmbed(@NotNull ModalInteractionEvent event) {
-		EmbedBuilder builder = new EmbedBuilder();
+	private @NotNull Pair<String, EmbedBuilder> buildBasicEmbed(@NotNull ModalInteractionEvent event) {
 		ModalMapping titleMapping = event.getValue("title");
 		ModalMapping descriptionMapping = event.getValue("description");
 		ModalMapping colorMapping = event.getValue("color");
 		ModalMapping imageMapping = event.getValue("image");
-		if (titleMapping != null) {
-			builder.setTitle(titleMapping.getAsString());
+		if (titleMapping == null || descriptionMapping == null || colorMapping == null || imageMapping == null) {
+			return new Pair<>("Missing required arguments.", null);
 		}
-		if (descriptionMapping != null) {
-			builder.setDescription(descriptionMapping.getAsString());
+		String title = titleMapping.getAsString();
+		String description = descriptionMapping.getAsString();
+		String color = colorMapping.getAsString();
+		String imageUrl = imageMapping.getAsString();
+		if (title.isEmpty() && description.isEmpty()) {
+			return new Pair<>("You need to either set a title or a description!", null);
 		}
-		if (colorMapping != null && Checks.checkHexColor(colorMapping.getAsString())) {
-			builder.setColor(Color.decode(colorMapping.getAsString()));
+		if (!color.isEmpty() && !Checks.checkHexColor(colorMapping.getAsString())) {
+			return new Pair<>("Please provide a valid hex color!", null);
 		}
-		if (imageMapping != null && Checks.checkImageUrl(imageMapping.getAsString())) {
-			builder.setImage(imageMapping.getAsString());
+		if (!imageUrl.isEmpty() && !Checks.checkImageUrl(imageMapping.getAsString())) {
+			return new Pair<>("Please provide a valid image url!", null);
 		}
-		return builder;
+		EmbedBuilder builder = new EmbedBuilder()
+				.setTitle(EditEmbedSubcommand.getValue(title))
+				.setDescription(EditEmbedSubcommand.getValue(description))
+				.setColor(color.isEmpty() ? null : Color.decode(color))
+				.setImage(EditEmbedSubcommand.getValue(imageUrl));
+		return new Pair<>("", builder);
 	}
 }
