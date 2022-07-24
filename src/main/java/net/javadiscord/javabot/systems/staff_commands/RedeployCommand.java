@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.Checks;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -32,6 +34,10 @@ public class RedeployCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		if (!Checks.hasAdminRole(event.getGuild(), event.getMember())) {
+			Responses.replyAdminOnly(event, event.getGuild()).queue();
+			return;
+		}
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
 		event.reply("**Redeploying...** This may take some time.").queue();
 		Bot.messageCache.synchronize();

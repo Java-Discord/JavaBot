@@ -107,6 +107,10 @@ public final class Responses {
 		return error(event, "This command may only be used by staff members. (%s)", Bot.config.get(guild).getModerationConfig().getStaffRole().getAsMention());
 	}
 
+	public static @NotNull ReplyCallbackAction replyAdminOnly(CommandInteraction event, Guild guild) {
+		return error(event, "This command may only be used by admins. (%s)", Bot.config.get(guild).getModerationConfig().getAdminRole().getAsMention());
+	}
+
 	/**
 	 * Sends a reply to a slash command event.
 	 *

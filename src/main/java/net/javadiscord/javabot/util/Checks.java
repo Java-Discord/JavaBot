@@ -31,6 +31,10 @@ public final class Checks {
 		return member.getRoles().contains(Bot.config.get(guild).getModerationConfig().getStaffRole());
 	}
 
+	public static boolean hasAdminRole(Guild guild, @NotNull Member member) {
+		return member.getRoles().contains(Bot.config.get(guild).getModerationConfig().getAdminRole());
+	}
+
 	public static boolean hasPermissions(Guild guild, @NotNull Set<Permission> perms) {
 		return perms.stream().allMatch(p -> hasPermission(guild, p));
 	}

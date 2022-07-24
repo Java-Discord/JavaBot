@@ -33,8 +33,8 @@ public class SayCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
-			Responses.replyStaffOnly(event, event.getGuild()).queue();
+		if (!Checks.hasAdminRole(event.getGuild(), event.getMember())) {
+			Responses.replyAdminOnly(event, event.getGuild()).queue();
 			return;
 		}
 		OptionMapping textMapping = event.getOption("text");
