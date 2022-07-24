@@ -8,6 +8,7 @@ import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -69,6 +70,35 @@ public final class Checks {
 			BufferedImage image = ImageIO.read(new URL(url));
 			return image != null;
 		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if the specified string url is a valid {@link URL}.
+	 *
+	 * @param url The provided URL.
+	 * @return Whether the specified url is a valid {@link URL}.
+	 */
+	public static boolean checkUrl(String url) {
+		try {
+			return new URL(url) != null;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if the specified string is a valid {@link java.awt.Color}.
+	 *
+	 * @param nm The provided color, as a string.
+	 * @return Whether the specified string is a valid {@link java.awt.Color}.
+	 */
+	public static boolean checkColor(String nm) {
+		try {
+			Color color = Color.decode(nm);
+			return color != null;
+		} catch (NumberFormatException e) {
 			return false;
 		}
 	}

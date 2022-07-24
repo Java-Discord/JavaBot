@@ -199,7 +199,7 @@ public class Bot {
 		dih4jda.addModalHandlers(Map.of(
 				List.of("qotw-add-question"), new AddQuestionSubcommand(),
 				List.of("embed-create"), new CreateEmbedSubcommand(),
-				List.of("embed-edit"), new EditEmbedSubcommand(),
+				List.of(EditEmbedSubcommand.EDIT_EMBED_ID), new EditEmbedSubcommand(),
 				List.of("quick-migrate"), new QuickMigrateSubcommand(),
 				List.of("report"), new ReportManager(),
 				List.of("self-role"), new SelfRoleInteractionManager(),

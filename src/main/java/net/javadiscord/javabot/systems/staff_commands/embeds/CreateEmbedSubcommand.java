@@ -63,7 +63,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 	}
 
 	@Override
-	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
+	public void handleModal(@NotNull ModalInteractionEvent event, @NotNull List<ModalMapping> values) {
 		event.deferReply(true).queue();
 		if (event.getGuild() == null) {
 			Responses.replyGuildOnly(event.getHook()).queue();
@@ -90,11 +90,11 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
 				.setPlaceholder(String.format("Choose a fitting title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.TITLE_MAX_LENGTH)
-				.setRequired(true)
+				.setRequired(false)
 				.build();
 		TextInput descriptionInput = TextInput.create("description", "Description", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("Choose a description for your embed.")
-				.setRequired(true)
+				.setRequired(false)
 				.build();
 		TextInput colorInput = TextInput.create("color", "Hex Color (optional)", TextInputStyle.SHORT)
 				.setPlaceholder("#FFFFFF")
