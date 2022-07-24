@@ -56,6 +56,10 @@ public class MoveConversationCommand extends SlashCommand {
 			Responses.warning(event, "Invalid Channel", "You cannot move the conversation to the same channel!").queue();
 			return;
 		}
+		if (channelMapping.getAsChannel().getType() == ChannelType.TEXT && channelMapping.getAsChannel().asTextChannel().getSlowmode() > 0) {
+			Responses.warning(event, "Invalid Channel", "You cannot move the conversation to a channel that has slowmode enabled!").queue();
+			return;
+		}
 		if (isInvalidChannel(event.getMember(), channel)) {
 			Responses.warning(event, "Invalid Channel", "You're not allowed to move the conversation to %s", channel.getAsMention()).queue();
 			return;
