@@ -41,7 +41,7 @@ dependencies {
     implementation("org.quartz-scheduler:quartz:2.3.2")
     
     // Webhooks
-    implementation("club.minnced:discord-webhooks:0.8.0")
+    implementation("com.github.DynxstyGIT:discord-webhooks:74301a46a0")
 
     // Lombok Annotations
     compileOnly("org.projectlombok:lombok:1.18.24")

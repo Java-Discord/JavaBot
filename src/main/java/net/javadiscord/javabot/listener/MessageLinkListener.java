@@ -1,14 +1,17 @@
 package net.javadiscord.javabot.listener;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import club.minnced.discord.webhook.send.component.ActionRow;
+import club.minnced.discord.webhook.send.component.Button;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
-import net.javadiscord.javabot.util.InteractionUtils;
-import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -28,25 +31,13 @@ public class MessageLinkListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
 		Matcher matcher = MESSAGE_URL_PATTERN.matcher(event.getMessage().getContentRaw());
 		if (matcher.find()) {
-			Optional<RestAction<Message>> optional = this.parseMessageUrl(matcher.group(), event.getJDA());
+			Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
 			optional.ifPresent(action -> action.queue(
-					m -> event.getMessage().replyEmbeds(this.buildUrlEmbed(m))
-							.setActionRow(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"), Button.link(m.getJumpUrl(), "View Original"))
-							.queue(),
-					e -> {}
+					m -> WebhookUtil.ensureWebhookExists(event.getChannel().asTextChannel(),
+							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message")))
+					), ExceptionLogger::capture
 			));
 		}
-	}
-
-	private MessageEmbed buildUrlEmbed(Message m) {
-		User author = m.getAuthor();
-		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), m.getJumpUrl(), author.getEffectiveAvatarUrl())
-				.setColor(Responses.Type.DEFAULT.getColor())
-				.setDescription(m.getContentRaw())
-				.setTimestamp(m.getTimeCreated())
-				.setFooter("#" + m.getChannel().getName())
-				.build();
 	}
 
 	/**
@@ -56,7 +47,7 @@ public class MessageLinkListener extends ListenerAdapter {
 	 * @param jda The {@link JDA} instance.
 	 * @return An {@link Optional} containing the {@link RestAction} which retrieves the corresponding Message.
 	 */
-	private Optional<RestAction<Message>> parseMessageUrl(String url, JDA jda) {
+	private Optional<RestAction<Message>> parseMessageUrl(@NotNull String url, @NotNull JDA jda) {
 		RestAction<Message> optional = null;
 		String[] arr = url.split("/");
 		String[] segments = Arrays.copyOfRange(arr, 4, arr.length);

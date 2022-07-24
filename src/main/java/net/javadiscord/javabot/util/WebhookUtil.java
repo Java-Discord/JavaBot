@@ -4,6 +4,8 @@ import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import club.minnced.discord.webhook.send.component.Button;
+import club.minnced.discord.webhook.send.component.LayoutComponent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -70,14 +72,16 @@ public class WebhookUtil {
 	 * @return a {@link CompletableFuture} representing the action of sending
 	 * the message
 	 */
-	public static CompletableFuture<Void> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId) {
+	public static CompletableFuture<Void> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, LayoutComponent... components) {
 		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
 				.setThreadId(threadId).buildJDA();
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
 				.setAllowedMentions(AllowedMentions.none())
 				.setAvatarUrl(originalMessage.getMember().getEffectiveAvatarUrl())
 				.setUsername(originalMessage.getMember().getEffectiveName());
-
+		if (components.length > 0) {
+			message.addComponents(components);
+		}
 		List<Attachment> attachments = originalMessage.getAttachments();
 		@SuppressWarnings("unchecked")
 		CompletableFuture<?>[] futures = new CompletableFuture<?>[attachments.size()];
