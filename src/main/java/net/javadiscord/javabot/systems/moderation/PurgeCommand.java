@@ -36,12 +36,10 @@ public class PurgeCommand extends ModerateCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public PurgeCommand() {
-		setSlashCommandData(Commands.slash("purge", "Deletes messages from a channel.")
+		setModerationSlashCommandData(Commands.slash("purge", "Deletes messages from a channel.")
 				.addOption(OptionType.INTEGER, "amount", "Number of messages to remove.", true)
 				.addOption(OptionType.USER, "user", "The user whose messages to remove. If left blank, messages from any user are removed.", false)
 				.addOption(OptionType.BOOLEAN, "archive", "Whether the removed messages should be saved in an archive. This defaults to true, if left blank.", false)
-				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
 		);
 	}
 

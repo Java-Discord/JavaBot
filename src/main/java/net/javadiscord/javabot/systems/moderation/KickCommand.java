@@ -24,12 +24,10 @@ public class KickCommand extends ModerateUserCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public KickCommand() {
-		setSlashCommandData(Commands.slash("kick", "Kicks a member")
+		setModerationSlashCommandData(Commands.slash("kick", "Kicks a member")
 				.addOption(OptionType.USER, "user", "The user to kick.", true)
 				.addOption(OptionType.STRING, "reason", "The reason for kicking this user.", true)
 				.addOption(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the kick is issued.", false)
-				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
 		);
 	}
 

@@ -24,12 +24,10 @@ public class BanCommand extends ModerateUserCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public BanCommand() {
-		setSlashCommandData(Commands.slash("ban", "Ban a user.")
+		setModerationSlashCommandData(Commands.slash("ban", "Ban a user.")
 						.addOption(OptionType.USER, "user", "The user to ban.", true)
 						.addOption(OptionType.STRING, "reason", "The reason for banning this user.", true)
 						.addOption(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the ban is issued.", false)
-				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
 		);
 	}
 

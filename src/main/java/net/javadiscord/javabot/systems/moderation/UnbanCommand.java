@@ -20,10 +20,8 @@ public class UnbanCommand extends ModerateCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public UnbanCommand() {
-		setSlashCommandData(Commands.slash("unban", "Unbans a member")
+		setModerationSlashCommandData(Commands.slash("unban", "Unbans a member")
 				.addOption(OptionType.STRING, "id", "The ID of the user you want to unban", true)
-				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
 		);
 	}
 

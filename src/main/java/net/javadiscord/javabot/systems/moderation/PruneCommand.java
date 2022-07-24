@@ -28,14 +28,12 @@ public class PruneCommand extends ModerateCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public PruneCommand() {
-		setSlashCommandData(Commands.slash("prune", "Removes members from the server.")
+		setModerationSlashCommandData(Commands.slash("prune", "Removes members from the server.")
 				.addOption(OptionType.STRING, "pattern", "A regular expression pattern to use, to remove members whose contains a match with the pattern.", false)
 				.addOption(OptionType.STRING, "before", "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
 				.addOption(OptionType.STRING, "after", "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
 				.addOption(OptionType.STRING, "reason", "The reason for issuing the prune command. This will be provided as the reason for each ban.", false)
 				.addOption(OptionType.INTEGER, "delete-days-of-history", "The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.", false)
-				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
 		);
 	}
 

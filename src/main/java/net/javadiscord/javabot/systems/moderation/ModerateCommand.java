@@ -1,9 +1,12 @@
 package net.javadiscord.javabot.systems.moderation;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
@@ -39,6 +42,12 @@ public abstract class ModerateCommand extends SlashCommand {
 
 	public void setRequireStaff(boolean requireStaff) {
 		this.requireStaff = requireStaff;
+	}
+
+	protected void setModerationSlashCommandData(@NotNull SlashCommandData data) {
+		setSlashCommandData(data.setGuildOnly(true)
+				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
+		);
 	}
 
 	protected abstract ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator);
