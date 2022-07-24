@@ -11,6 +11,13 @@ import org.jetbrains.annotations.NotNull;
  * permission.
  */
 public interface CommandModerationPermissions {
+	/**
+	 * Takes the given {@link SlashCommandData} and forces it to be
+	 * guild only enabled for users with the {@link Permission#MODERATE_MEMBERS}
+	 * permission.
+	 *
+	 * @param data The {@link SlashCommandData}.
+	 */
 	default void setModerationSlashCommandData(@NotNull SlashCommandData data) {
 		setSlashCommandData(data.setGuildOnly(true)
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
