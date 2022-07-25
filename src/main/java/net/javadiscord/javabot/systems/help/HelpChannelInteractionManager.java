@@ -187,7 +187,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		) {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();
-				if (event.getUser().equals(owner)) {// If the owner is unreserving their own channel, handle it separately.
+				if (event.getUser().equals(owner)) { // If the owner is unreserving their own channel, handle it separately.
 					channelManager.unreserveChannelByOwner(channel, owner, null, event);
 				} else {
 					channelManager.unreserveChannel(channel).queue();

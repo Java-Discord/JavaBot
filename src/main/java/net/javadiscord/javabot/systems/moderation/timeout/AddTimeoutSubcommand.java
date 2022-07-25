@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.timeout;
 
 
-import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

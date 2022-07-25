@@ -30,7 +30,7 @@ public abstract class ModerateCommand extends SlashCommand implements CommandMod
 			Responses.replyStaffOnly(event, event.getGuild()).queue();
 			return;
 		}
-		if (event.getChannelType() != ChannelType.TEXT && !event.getChannelType().isThread()) {
+		if (event.getChannelType() != ChannelType.TEXT && event.getChannelType() != ChannelType.VOICE && !event.getChannelType().isThread()) {
 			Responses.error(event, "This command can only be performed in a server text channel or thread.").queue();
 			return;
 		}
