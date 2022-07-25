@@ -124,21 +124,22 @@ public class DbHelper {
 	}
 
 	private static void initializeSchema(HikariDataSource dataSource) throws IOException, SQLException {
-		InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("database/schema.sql");
-		if (is == null) throw new IOException("Could not load schema.sql.");
-		List<String> queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
-				.filter(s -> !s.isBlank()).toList();
-		try (Connection c = dataSource.getConnection()) {
-			for (String rawQuery : queries) {
-				StringBuilder query = new StringBuilder();
-				rawQuery.lines()
-						.map(s -> s.strip().stripIndent())
-						.forEach(query::append);
-				try (Statement stmt = c.createStatement()) {
-					stmt.executeUpdate(query.toString());
+		try (InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("database/schema.sql")) {
+			if (is == null) throw new IOException("Could not load schema.sql.");
+			List<String> queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
+					.filter(s -> !s.isBlank()).toList();
+			try (Connection c = dataSource.getConnection()) {
+				for (String rawQuery : queries) {
+					StringBuilder query = new StringBuilder();
+					rawQuery.lines()
+							.map(s -> s.strip().stripIndent())
+							.forEach(query::append);
+					try (Statement stmt = c.createStatement()) {
+						stmt.executeUpdate(query.toString());
+					}
 				}
 			}
+			log.info("Successfully initialized H2 database.");
 		}
-		log.info("Successfully initialized H2 database.");
 	}
 }
