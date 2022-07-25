@@ -79,11 +79,7 @@ public class SubmissionControlsManager {
 		if (thread == null) return;
 		// The Thread's starting message
 		if (thread.getMessageCount() <= 1) {
-			new QOTWNotificationService(guild)
-					.sendSubmissionActionNotification(guild.getJDA().getSelfUser(), thread, SubmissionStatus.DELETED, "Empty Submission");
-			DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
-			thread.delete().queue();
-			return;
+			thread.sendMessage("This submission would've been deleted as no messages were detected.").queue();
 		}
 		thread.getManager().setName(String.format("%s %s", SUBMISSION_PENDING, thread.getName())).queue();
 		thread.sendMessage(config.getQOTWReviewRole().getAsMention())
