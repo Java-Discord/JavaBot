@@ -63,7 +63,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 							.build()
 					).queue();
 				} catch (JSONException jsonException) {
-					jsonException.printStackTrace();
+					ExceptionLogger.capture(jsonException, getClass().getSimpleName());
 					event.getHook().sendMessage("The response from the ChangeMyMind API was not properly formatted.").queue();
 				}
 			}
