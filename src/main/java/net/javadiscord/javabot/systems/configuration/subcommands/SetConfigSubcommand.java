@@ -24,6 +24,7 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 				.addOption(OptionType.STRING, "property", "The name of a property.", true)
 				.addOption(OptionType.STRING, "value", "The value to set for the property.", true)
 		);
+		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override
