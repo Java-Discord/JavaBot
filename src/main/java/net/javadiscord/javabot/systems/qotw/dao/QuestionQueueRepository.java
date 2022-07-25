@@ -116,7 +116,6 @@ public class QuestionQueueRepository {
 			while (rs.next()) {
 				questions.add(this.read(rs));
 			}
-			stmt.close();
 			return questions;
 		}
 	}

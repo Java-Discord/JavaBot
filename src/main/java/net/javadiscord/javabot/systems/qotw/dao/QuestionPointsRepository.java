@@ -32,7 +32,6 @@ public class QuestionPointsRepository {
 			stmt.setLong(2, account.getPoints());
 			int rows = stmt.executeUpdate();
 			if (rows == 0) throw new SQLException("User was not inserted.");
-			stmt.close();
 			log.info("Inserted new QOTW-Account: {}", account);
 		}
 	}

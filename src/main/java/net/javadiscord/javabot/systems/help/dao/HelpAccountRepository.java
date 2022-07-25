@@ -85,7 +85,6 @@ public class HelpAccountRepository {
 			while (rs.next()) {
 				accounts.add(this.read(rs));
 			}
-			stmt.close();
 			return accounts;
 		}
 	}

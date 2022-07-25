@@ -34,7 +34,6 @@ public class StarboardRepository {
 			stmt.setLong(5, entry.getStarboardMessageId());
 			int rows = stmt.executeUpdate();
 			if (rows == 0) throw new SQLException("Starboard Entry was not inserted.");
-			stmt.close();
 			log.info("Inserted new Starboard-Entry: {}", entry);
 		}
 	}

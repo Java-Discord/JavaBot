@@ -65,7 +65,6 @@ public class HelpExperienceService {
 			con.setReadOnly(true);
 			HelpTransactionRepository repo = new HelpTransactionRepository(con);
 			List<HelpTransaction> transactions = repo.getTransactions(userId, count);
-			con.close();
 			return transactions;
 		}
 	}
