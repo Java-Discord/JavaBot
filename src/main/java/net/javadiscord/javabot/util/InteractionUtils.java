@@ -85,7 +85,7 @@ public class InteractionUtils implements ButtonHandler {
 
 	private static void unban(ButtonInteraction interaction, long memberId) {
 		ModerationService service = new ModerationService(interaction);
-		service.unban(memberId, interaction.getMember(), interaction.getMessageChannel(), false);
+		service.unban(memberId, "None", interaction.getMember(), interaction.getMessageChannel(), false);
 		interaction.editButton(interaction.getButton().withLabel("Unbanned by " + interaction.getUser().getAsTag()).asDisabled()).queue();
 	}
 
