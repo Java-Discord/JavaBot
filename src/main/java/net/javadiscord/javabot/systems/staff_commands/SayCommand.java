@@ -46,7 +46,7 @@ public class SayCommand extends SlashCommand {
 		log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), event.getUser().getAsTag());
 		event.deferReply(true).queue();
 		event.getChannel().sendMessage(text)
-				.allowedMentions(Set.of(Message.MentionType.EMOJI))
+				.allowedMentions(Set.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL))
 				.queue(m -> event.getHook().sendMessage("Done! " + m.getJumpUrl()).queue(),
 						err -> event.getHook().sendMessage("An error occurred. Please try again.").queue()
 				);
