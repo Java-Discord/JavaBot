@@ -45,7 +45,7 @@ public class IdCalculatorCommand extends SlashCommand {
 			return;
 		}
 		long id = idMapping.getAsLong();
-		event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, IdCalculatorCommand.getTimestampFromId(id))).queue();
+		event.replyEmbeds(buildIdCalcEmbed(event.getUser(), id, getTimestampFromId(id))).queue();
 	}
 
 	private @NotNull MessageEmbed buildIdCalcEmbed(@NotNull User author, long id, long unixTimestamp) {

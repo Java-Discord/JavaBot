@@ -75,11 +75,13 @@ public class ProfileCommand extends SlashCommand {
 		if (!roles.isEmpty()) {
 			embed.addField(String.format("Roles (+%s other)", roles.size() - 1), roles.get(0).getAsMention(), true);
 		}
-		embed.addField("Warns", String.format("`%s (%s/%s)`",
-						warns.size(),
-						warns.stream().mapToLong(Warn::getSeverityWeight).sum(),
-						config.getModerationConfig().getMaxWarnSeverity()), true)
-				.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
+		if (!warns.isEmpty()) {
+			embed.addField("Warns", String.format("`%s (%s/%s)`",
+					warns.size(),
+					warns.stream().mapToLong(Warn::getSeverityWeight).sum(),
+					config.getModerationConfig().getMaxWarnSeverity()), true);
+		}
+		embed.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points, points == 1 ? "" : "s",
 						service.getQOTWRank(member.getIdLong())), true)
 				.addField("Total Help XP", String.format("`%.2f XP`", helpXP), true)
