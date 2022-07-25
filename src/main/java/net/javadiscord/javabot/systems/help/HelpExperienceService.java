@@ -86,7 +86,7 @@ public class HelpExperienceService {
 		}
 		HelpTransaction transaction = new HelpTransaction();
 		transaction.setRecipient(recipient);
-		transaction.setValue(value);
+		transaction.setWeight(value);
 		transaction.setMessageType(message.ordinal());
 		try (Connection con = dataSource.getConnection()) {
 			con.setAutoCommit(false);

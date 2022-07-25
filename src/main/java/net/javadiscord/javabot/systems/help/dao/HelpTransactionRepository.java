@@ -28,9 +28,9 @@ public class HelpTransactionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public HelpTransaction save(HelpTransaction transaction) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_transaction (recipient, value, messageType) VALUES ( ?, ?, ? )")) {
+		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_transaction (recipient, weight, messageType) VALUES ( ?, ?, ? )")) {
 			s.setLong(1, transaction.getRecipient());
-			s.setDouble(2, transaction.getValue());
+			s.setDouble(2, transaction.getWeight());
 			if (transaction.getMessage() != null) {
 				s.setInt(3, transaction.getMessageType());
 			}
@@ -89,7 +89,7 @@ public class HelpTransactionRepository {
 		transaction.setId(rs.getLong("id"));
 		transaction.setRecipient(rs.getLong("recipient"));
 		transaction.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-		transaction.setValue(rs.getDouble("value"));
+		transaction.setWeight(rs.getDouble("value"));
 		transaction.setMessageType(rs.getInt("messageType"));
 		return transaction;
 	}

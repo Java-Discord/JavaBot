@@ -13,7 +13,7 @@ public class HelpTransaction {
 	private long id;
 	private long recipient;
 	private LocalDateTime createdAt;
-	private double value;
+	private double weight;
 	private int messageType;
 
 	public String getMessage() {
@@ -27,6 +27,6 @@ public class HelpTransaction {
 	}
 
 	public String format() {
-		return String.format("%s%s XP (%s UTC)\n%s", value > 0 ? "+" : "-", value, createdAt.format(TimeUtils.STANDARD_FORMATTER), this.getMessage());
+		return String.format("%s%s XP (%s UTC)\n%s", weight > 0 ? "+" : "-", weight, createdAt.format(TimeUtils.STANDARD_FORMATTER), this.getMessage());
 	}
 }
