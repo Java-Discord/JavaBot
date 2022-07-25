@@ -67,7 +67,7 @@ public class ProfileCommand extends SlashCommand {
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
 				.setDescription(getDescription(member))
 				.setColor(member.getColor())
-				.setThumbnail(member.getUser().getEffectiveAvatarUrl() + "?size=4096")
+				.setThumbnail(member.getEffectiveAvatarUrl() + "?size=4096")
 				.setTimestamp(Instant.now())
 				.addField("User", member.getAsMention(), true)
 				.addField("Status", StringUtils.capitalize(status.toLowerCase()).replace("_", " "), true)

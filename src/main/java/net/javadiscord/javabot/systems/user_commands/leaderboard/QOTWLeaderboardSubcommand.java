@@ -104,10 +104,10 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @param left    Whether the card should be drawn left or right.
 	 * @throws IOException If an error occurs.
 	 */
-	private void drawUserCard(Graphics2D g2d, Member member, QOTWPointsService service, int y, boolean left) throws IOException {
+	private void drawUserCard(@NotNull Graphics2D g2d, @NotNull Member member, QOTWPointsService service, int y, boolean left) throws IOException {
 		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 		int x = left ? MARGIN * 5 : WIDTH - (MARGIN * 5) - card.getWidth();
-		g2d.drawImage(ImageGenerationUtils.getImageFromUrl(member.getUser().getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
+		g2d.drawImage(ImageGenerationUtils.getImageFromUrl(member.getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
 		String displayName = member.getUser().getAsTag();
 		// draw card
 		g2d.drawImage(card, x, y, null);
