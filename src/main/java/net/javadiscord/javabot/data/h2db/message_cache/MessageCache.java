@@ -10,7 +10,9 @@ import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
-import net.javadiscord.javabot.systems.commands.IdCalculatorCommand;
+import net.javadiscord.javabot.systems.user_commands.IdCalculatorCommand;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 
 import java.io.ByteArrayInputStream;
@@ -48,6 +50,7 @@ public class MessageCache {
 		try (Connection con = Bot.dataSource.getConnection()) {
 			cache = new MessageCacheRepository(con).getAll();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
 	}
@@ -70,7 +73,7 @@ public class MessageCache {
 	 * @param message The message to cache.
 	 */
 	public void cache(Message message) {
-		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
+		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCacheConfig();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
@@ -88,12 +91,14 @@ public class MessageCache {
 	 * @param before  The {@link CachedMessage}.
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
+		MessageCacheConfig config = Bot.config.get(updated.getGuild()).getMessageCacheConfig();
+		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
-		MessageAction action = Bot.config.get(updated.getGuild()).getMessageCache().getMessageCacheLogChannel()
-				.sendMessageEmbeds(this.buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
+		MessageAction action = config.getMessageCacheLogChannel()
+				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
 				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-			action.addFile(this.buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt");
+			action.addFile(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt");
 		}
 		action.queue();
 	}
@@ -106,11 +111,12 @@ public class MessageCache {
 	 * @param message The {@link CachedMessage}.
 	 */
 	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
+		MessageCacheConfig config = Bot.config.get(guild).getMessageCacheConfig();
+		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-			MessageAction action = Bot.config.get(guild).getMessageCache().getMessageCacheLogChannel()
-					.sendMessageEmbeds(this.buildMessageDeleteEmbed(guild, author, channel, message));
+			MessageAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-				action.addFile(this.buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
+				action.addFile(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
 			}
 			action.queue();
 		});
@@ -129,7 +135,7 @@ public class MessageCache {
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
 		return buildMessageCacheEmbed(channel, author, before)
 				.setTitle("Message Edited")
-				.setColor(Bot.config.get(guild).getSlashCommand().getWarningColor())
+				.setColor(Responses.Type.WARN.getColor())
 				.addField("Before", before.getMessageContent().substring(0, Math.min(
 						before.getMessageContent().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
@@ -142,7 +148,7 @@ public class MessageCache {
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
 		return buildMessageCacheEmbed(channel, author, message)
 				.setTitle("Message Deleted")
-				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Message Content",
 						message.getMessageContent().substring(0, Math.min(
 								message.getMessageContent().length(),

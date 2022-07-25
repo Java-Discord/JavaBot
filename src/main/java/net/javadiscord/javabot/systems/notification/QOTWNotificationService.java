@@ -8,15 +8,16 @@ import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
+import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Optional;
@@ -42,9 +43,9 @@ public final class QOTWNotificationService extends NotificationService {
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;
-		try (Connection connection = Bot.dataSource.getConnection()) {
-			QuestionPointsRepository dao = new QuestionPointsRepository(connection);
-			account = dao.getAccountByUserId(user.getIdLong());
+		try {
+			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+			account = service.getOrCreateAccount(user.getIdLong());
 		} catch (SQLException e) {
 			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
 			account = null;
@@ -90,22 +91,22 @@ public final class QOTWNotificationService extends NotificationService {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(submissionThread.getIdLong());
 			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
-				new GuildNotificationService(guild).sendLogChannelNotification(this.buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons));
+				new GuildNotificationService(guild).sendLogChannelNotification(buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons));
 				log.info("{} {} {}'s QOTW Submission{}", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag(), reasons != null ? " for: " + String.join(", ", reasons) : ".");
 			}));
 		});
 	}
 
-	private EmbedBuilder buildQOTWNotificationEmbed() {
+	private @NotNull EmbedBuilder buildQOTWNotificationEmbed() {
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
 				.setTimestamp(Instant.now());
 	}
 
-	private MessageEmbed buildBestAnswerEmbed(long points) {
-		return this.buildQOTWNotificationEmbed()
-				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
+	private @NotNull MessageEmbed buildBestAnswerEmbed(long points) {
+		return buildQOTWNotificationEmbed()
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.setDescription(String.format(
 						"""
 								Your submission was marked as the best answer!
@@ -113,20 +114,20 @@ public final class QOTWNotificationService extends NotificationService {
 				.build();
 	}
 
-	private MessageEmbed buildAccountIncrementEmbed(long points) {
-		return this.buildQOTWNotificationEmbed()
-				.setColor(Bot.config.get(guild).getSlashCommand().getSuccessColor())
+	private @NotNull MessageEmbed buildAccountIncrementEmbed(long points) {
+		return buildQOTWNotificationEmbed()
+				.setColor(Responses.Type.SUCCESS.getColor())
 				.setDescription(String.format(
 						"""
 								Your submission was accepted! %s
 								You've been granted **`1 QOTW-Point`**! (total: %s)""",
-						Bot.config.get(guild).getEmote().getSuccessEmote().getAsMention(), points))
+						Bot.config.getSystems().getEmojiConfig().getSuccessEmote(guild.getJDA()), points))
 				.build();
 	}
 
-	private MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
+	private @NotNull MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
 		return this.buildQOTWNotificationEmbed()
-				.setColor(Bot.config.get(guild).getSlashCommand().getErrorColor())
+				.setColor(Responses.Type.ERROR.getColor())
 				.setDescription(String.format("""
 								Hey %s,
 								Your QOTW-Submission was **declined** for the following reasons:
@@ -137,7 +138,7 @@ public final class QOTWNotificationService extends NotificationService {
 				.build();
 	}
 
-	private MessageEmbed buildSubmissionActionEmbed(User author, ThreadChannel thread, User reviewedBy, SubmissionStatus status, String... reasons) {
+	private @NotNull MessageEmbed buildSubmissionActionEmbed(@NotNull User author, ThreadChannel thread, @NotNull User reviewedBy, @NotNull SubmissionStatus status, String... reasons) {
 		EmbedBuilder builder = new EmbedBuilder()
 				.setAuthor(reviewedBy.getAsTag(), null, reviewedBy.getEffectiveAvatarUrl())
 				.setTitle(String.format("%s %s %s's QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag()))

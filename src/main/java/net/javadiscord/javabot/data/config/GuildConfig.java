@@ -7,12 +7,18 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.data.config.guild.*;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Pair;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * A collection of guild-specific configuration items, each of which represents
@@ -24,16 +30,13 @@ public class GuildConfig {
 	private transient Guild guild;
 	private transient Path file;
 
-	private SlashCommandConfig slashCommand;
-	private HelpConfig help;
-	private ModerationConfig moderation;
-	private QOTWConfig qotw;
-	private StatsConfig stats;
-	private StarboardConfig starBoard;
-	private JamConfig jam;
-	private MessageCacheConfig messageCache;
-	private EmoteConfig emote;
-	private ServerLockConfig serverLock;
+	private HelpConfig helpConfig;
+	private ModerationConfig moderationConfig;
+	private QOTWConfig qotwConfig;
+	private MetricsConfig metricsConfig;
+	private StarboardConfig starboardConfig;
+	private MessageCacheConfig messageCacheConfig;
+	private ServerLockConfig serverLockConfig;
 
 	/**
 	 * Constructor that initializes all Config classes.
@@ -44,16 +47,13 @@ public class GuildConfig {
 	public GuildConfig(Guild guild, Path file) {
 		this.file = file;
 		// Initialize all config items.
-		this.slashCommand = new SlashCommandConfig();
-		this.help = new HelpConfig();
-		this.moderation = new ModerationConfig();
-		this.qotw = new QOTWConfig();
-		this.stats = new StatsConfig();
-		this.starBoard = new StarboardConfig();
-		this.jam = new JamConfig();
-		this.messageCache = new MessageCacheConfig();
-		this.emote = new EmoteConfig();
-		this.serverLock = new ServerLockConfig();
+		this.helpConfig = new HelpConfig();
+		this.moderationConfig = new ModerationConfig();
+		this.qotwConfig = new QOTWConfig();
+		this.metricsConfig = new MetricsConfig();
+		this.starboardConfig = new StarboardConfig();
+		this.messageCacheConfig = new MessageCacheConfig();
+		this.serverLockConfig = new ServerLockConfig();
 		this.setGuild(guild);
 	}
 
@@ -71,7 +71,7 @@ public class GuildConfig {
 		Gson gson = new GsonBuilder().create();
 		GuildConfig config;
 		if (Files.exists(file)) {
-			try (var reader = Files.newBufferedReader(file)) {
+			try (BufferedReader reader = Files.newBufferedReader(file)) {
 				config = gson.fromJson(reader, GuildConfig.class);
 				config.setFile(file);
 				config.setGuild(guild);
@@ -93,26 +93,20 @@ public class GuildConfig {
 
 	private void setGuild(Guild guild) {
 		this.guild = guild;
-		if (this.slashCommand == null) this.slashCommand = new SlashCommandConfig();
-		this.slashCommand.setGuildConfig(this);
-		if (this.help == null) this.help = new HelpConfig();
-		this.help.setGuildConfig(this);
-		if (this.moderation == null) this.moderation = new ModerationConfig();
-		this.moderation.setGuildConfig(this);
-		if (this.qotw == null) this.qotw = new QOTWConfig();
-		this.qotw.setGuildConfig(this);
-		if (this.stats == null) this.stats = new StatsConfig();
-		this.stats.setGuildConfig(this);
-		if (this.starBoard == null) this.starBoard = new StarboardConfig();
-		this.starBoard.setGuildConfig(this);
-		if (this.jam == null) this.jam = new JamConfig();
-		this.jam.setGuildConfig(this);
-		if (this.messageCache == null) this.messageCache = new MessageCacheConfig();
-		this.messageCache.setGuildConfig(this);
-		if (this.emote == null) this.emote = new EmoteConfig();
-		this.emote.setGuildConfig(this);
-		if (this.serverLock == null) this.serverLock = new ServerLockConfig();
-		this.serverLock.setGuildConfig(this);
+		if (this.helpConfig == null) this.helpConfig = new HelpConfig();
+		this.helpConfig.setGuildConfig(this);
+		if (this.moderationConfig == null) this.moderationConfig = new ModerationConfig();
+		this.moderationConfig.setGuildConfig(this);
+		if (this.qotwConfig == null) this.qotwConfig = new QOTWConfig();
+		this.qotwConfig.setGuildConfig(this);
+		if (this.metricsConfig == null) this.metricsConfig = new MetricsConfig();
+		this.metricsConfig.setGuildConfig(this);
+		if (this.starboardConfig == null) this.starboardConfig = new StarboardConfig();
+		this.starboardConfig.setGuildConfig(this);
+		if (this.messageCacheConfig == null) this.messageCacheConfig = new MessageCacheConfig();
+		this.messageCacheConfig.setGuildConfig(this);
+		if (this.serverLockConfig == null) this.serverLockConfig = new ServerLockConfig();
+		this.serverLockConfig.setGuildConfig(this);
 	}
 
 	/**
@@ -120,33 +114,34 @@ public class GuildConfig {
 	 */
 	public synchronized void flush() {
 		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
-		try (var writer = Files.newBufferedWriter(this.file)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(this.file)) {
 			gson.toJson(this, writer);
 			writer.flush();
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not flush config.", e);
 		}
 	}
 
 	/**
 	 * Attempts to resolve a configuration property value by its name, using a
-	 * '.' to concatenate property names. For example, the {@link JamConfig} has
-	 * a property called <code>pingRoleId</code>. We can resolve it via the
-	 * full name <code>jam.pingRoleId</code>, using the <code>jam</code> field
+	 * '.' to concatenate property names. For example, the {@link ModerationConfig} has
+	 * a property called <code>adminRoleId</code>. We can resolve it via the
+	 * full name <code>moderation.adminRoleId</code>, using the <code>jam</code> field
 	 * of {@link GuildConfig} followed by the <code>pingRoleId</code> field from
-	 * {@link JamConfig}.
+	 * {@link ModerationConfig}.
 	 *
 	 * @param propertyName The name of the property.
 	 * @return The value of the property, if found, or null otherwise.
 	 */
 	@Nullable
 	public Object resolve(String propertyName) throws UnknownPropertyException {
-		var result = ReflectionUtils.resolveField(propertyName, this);
+		Optional<Pair<Field, Object>> result = ReflectionUtils.resolveField(propertyName, this);
 		return result.map(pair -> {
 			try {
 				return pair.first().get(pair.second());
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return null;
 			}
 		}).orElse(null);
@@ -160,13 +155,13 @@ public class GuildConfig {
 	 * @param value        The value to set.
 	 */
 	public void set(String propertyName, String value) throws UnknownPropertyException {
-		var result = ReflectionUtils.resolveField(propertyName, this);
+		Optional<Pair<Field, Object>> result = ReflectionUtils.resolveField(propertyName, this);
 		result.ifPresent(pair -> {
 			try {
 				ReflectionUtils.set(pair.first(), pair.second(), value);
 				this.flush();
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				ExceptionLogger.capture(e, getClass().getSimpleName());
 			}
 		});
 	}

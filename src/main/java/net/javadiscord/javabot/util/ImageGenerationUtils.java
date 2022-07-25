@@ -14,7 +14,8 @@ import java.util.Optional;
  * Utility class for generating images.
  */
 @Slf4j
-public abstract class ImageGenerationUtils {
+public class ImageGenerationUtils {
+	private ImageGenerationUtils() {}
 
 	/**
 	 * Gets an Image from the specified URL.
@@ -23,7 +24,7 @@ public abstract class ImageGenerationUtils {
 	 * @return The image as a {@link BufferedImage}
 	 * @throws IOException If an error occurs.
 	 */
-	protected BufferedImage getImageFromUrl(String url) throws IOException {
+	public static BufferedImage getImageFromUrl(String url) throws IOException {
 		return ImageIO.read(new URL(url));
 	}
 
@@ -34,8 +35,8 @@ public abstract class ImageGenerationUtils {
 	 * @return The image as a {@link BufferedImage}
 	 * @throws IOException If an error occurs.
 	 */
-	protected BufferedImage getResourceImage(String path) throws IOException {
-		return ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path)));
+	public static BufferedImage getResourceImage(String path) throws IOException {
+		return ImageIO.read(Objects.requireNonNull(ImageGenerationUtils.class.getClassLoader().getResourceAsStream(path)));
 	}
 
 	/**
@@ -45,12 +46,13 @@ public abstract class ImageGenerationUtils {
 	 * @param size The font's size.
 	 * @return The font as an {@link Optional}
 	 */
-	protected Optional<Font> getResourceFont(String path, float size) {
+	public static Optional<Font> getResourceFont(String path, float size) {
 		Font font = null;
 		try {
-			font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path))).deriveFont(size);
+			font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ImageGenerationUtils.class.getClassLoader().getResourceAsStream(path))).deriveFont(size);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
 		} catch (IOException | FontFormatException e) {
+			ExceptionLogger.capture(e, ImageGenerationUtils.class.getSimpleName());
 			log.warn("Could not load Font from path " + path);
 		}
 		return Optional.ofNullable(font);

@@ -3,13 +3,16 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.moderation.ModerateCommand;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -22,27 +25,37 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
+ * <h3>This class represents the /purge command.</h3>
  * Moderation command that deletes multiple messages from a single channel.
  */
 public class PurgeCommand extends ModerateCommand {
+	private static final Path ARCHIVE_DIR = Path.of("purgeArchives");
 
-	private final Path ARCHIVE_DIR = Path.of("purgeArchives");
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
+	public PurgeCommand() {
+		setModerationSlashCommandData(Commands.slash("purge", "Deletes messages from a channel.")
+				.addOption(OptionType.INTEGER, "amount", "Number of messages to remove.", true)
+				.addOption(OptionType.USER, "user", "The user whose messages to remove. If left blank, messages from any user are removed.", false)
+				.addOption(OptionType.BOOLEAN, "archive", "Whether the removed messages should be saved in an archive. This defaults to true, if left blank.", false)
+		);
+	}
 
 	@Override
-	protected ReplyCallbackAction handleModerationCommand(SlashCommandInteractionEvent event, Member commandUser) {
-		this.setAllowThreads(true);
+	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
 		OptionMapping amountOption = event.getOption("amount");
 		OptionMapping userOption = event.getOption("user");
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
-		ModerationConfig config = Bot.config.get(event.getGuild()).getModeration();
+		ModerationConfig config = Bot.config.get(event.getGuild()).getModerationConfig();
 		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
 		int maxAmount = config.getPurgeMaxMessageCount();
 		if (amount == null || amount < 1 || amount > maxAmount) {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getTextChannel(), config.getLogChannel()));
+		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
 		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {
@@ -132,15 +145,16 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param file       The archive's filename.
 	 * @return The print writer to use.
 	 */
-	private PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
+	private @Nullable PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
 		try {
 			if (Files.notExists(ARCHIVE_DIR)) Files.createDirectory(ARCHIVE_DIR);
 			Path archiveFile = ARCHIVE_DIR.resolve(file);
-			var archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
+			PrintWriter archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
 			logChannel.sendMessageFormat("Created archive of purge of channel %s at `%s`", channel.getAsMention(), archiveFile).queue();
 			archiveWriter.println("Purge of channel " + channel.getName());
 			return archiveWriter;
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			logChannel.sendMessage("Could not create archive file for purge of channel " + channel.getAsMention() + ".").queue();
 			return null;
 		}

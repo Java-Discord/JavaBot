@@ -1,17 +1,13 @@
 package net.javadiscord.javabot.listener;
 
-import javax.annotation.Nonnull;
-
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.WebhookUtil;
+
+import javax.annotation.Nonnull;
 
 /**
  * Replaces all occurences of 'fuck' in incoming messages with 'hug'.
@@ -32,16 +28,16 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
-		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModeration()
+		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModerationConfig()
 				.getSuggestionChannelId()) {
 			return;
 		}
 		TextChannel tc = null;
 		if (event.isFromType(ChannelType.TEXT)) {
-			tc = event.getTextChannel();
+			tc = event.getChannel().asTextChannel();
 		}
 		if (event.isFromThread()) {
-			GuildMessageChannel parentChannel = event.getThreadChannel().getParentMessageChannel();
+			GuildMessageChannel parentChannel = event.getChannel().asThreadChannel().getParentMessageChannel();
 			if (parentChannel instanceof TextChannel textChannel) {
 				tc = textChannel;
 			}
@@ -53,7 +49,7 @@ public class HugListener extends ListenerAdapter {
 		String content = event.getMessage().getContentRaw();
 		String lowerCaseContent = content.toLowerCase();
 		if (lowerCaseContent.contains("fuck")) {
-			long threadId = event.isFromThread() ? event.getThreadChannel().getIdLong() : 0;
+			long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
 			StringBuilder sb = new StringBuilder(content.length());
 			int index = 0;
 			int indexBkp = index;
@@ -69,7 +65,7 @@ public class HugListener extends ListenerAdapter {
 				}
 			}
 
-			sb.append(content.substring(indexBkp, content.length()));
+			sb.append(content.substring(indexBkp));
 			WebhookUtil.ensureWebhookExists(textChannel,
 					wh -> sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId),
 					e -> log.error("Webhook lookup/creation failed", e));

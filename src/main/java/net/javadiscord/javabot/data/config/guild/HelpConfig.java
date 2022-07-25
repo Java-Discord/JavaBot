@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Configuration for the guild's help system.
+ * Configuration for the guilds' help system.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -153,7 +153,7 @@ public class HelpConfig extends GuildConfigItem {
 	private double perCharacterExperience = 1;
 
 	/**
-	 * The message's minimum length.
+	 * The messages' minimum length.
 	 */
 	private int minimumMessageLength = 10;
 

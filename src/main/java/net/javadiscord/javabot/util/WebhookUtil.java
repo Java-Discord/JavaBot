@@ -1,18 +1,20 @@
 package net.javadiscord.javabot.util;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
 import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import club.minnced.discord.webhook.send.component.LayoutComponent;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
-import net.dv8tion.jda.api.entities.Message.Attachment;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * Contains utility methods for dealing with Discord Webhooks.
@@ -24,10 +26,10 @@ public class WebhookUtil {
 	/**
 	 * Makes sure that a writable webhook exists in a specific channel. if no
 	 * suitable webhook is found, one is created.
-	 * 
-	 * @param channel the {@link TextChannel} the webhook should exist in
+	 *
+	 * @param channel  the {@link TextChannel} the webhook should exist in
 	 * @param callback an action that is executed once a webhook is
-	 * found/created
+	 *                 found/created
 	 */
 	public static void ensureWebhookExists(TextChannel channel, Consumer<? super Webhook> callback) {
 		ensureWebhookExists(channel, callback, err -> {
@@ -37,15 +39,14 @@ public class WebhookUtil {
 	/**
 	 * Makes sure that a writable webhook exists in a specific channel. if no
 	 * suitable webhook is found, one is created.
-	 * 
-	 * @param channel the {@link TextChannel} the webhook should exist in
-	 * @param callback an action that is executed once a webhook is
-	 * found/created
+	 *
+	 * @param channel         the {@link TextChannel} the webhook should exist in
+	 * @param callback        an action that is executed once a webhook is
+	 *                        found/created
 	 * @param failureCallback an action that is executed if the webhook
-	 * lookup/creation failed
+	 *                        lookup/creation failed
 	 */
-	public static void ensureWebhookExists(TextChannel channel, Consumer<? super Webhook> callback,
-			Consumer<? super Throwable> failureCallback) {
+	public static void ensureWebhookExists(@NotNull TextChannel channel, Consumer<? super Webhook> callback, Consumer<? super Throwable> failureCallback) {
 
 		channel.retrieveWebhooks().queue(webhooks -> {
 			Optional<Webhook> hook = webhooks.stream()
@@ -61,24 +62,26 @@ public class WebhookUtil {
 
 	/**
 	 * Resends a specific message using a webhook with a custom content.
-	 * 
-	 * @param webhook the webhook used for sending the message
-	 * @param originalMessage the message to copy
+	 *
+	 * @param webhook           the webhook used for sending the message
+	 * @param originalMessage   the message to copy
 	 * @param newMessageContent the new (custom) content
-	 * @param threadId the thread to send the message in or {@code 0} if the
-	 * message should be sent directly
+	 * @param threadId          the thread to send the message in or {@code 0} if the
+	 *                          message should be sent directly
+	 * @param components        An optional array of {@link LayoutComponent}s.
 	 * @return a {@link CompletableFuture} representing the action of sending
 	 * the message
 	 */
-	public static CompletableFuture<Void> mirrorMessageToWebhook(Webhook webhook, Message originalMessage,
-			String newMessageContent, long threadId) {
+	public static CompletableFuture<Void> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, LayoutComponent @NotNull ... components) {
 		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
 				.setThreadId(threadId).buildJDA();
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
 				.setAllowedMentions(AllowedMentions.none())
 				.setAvatarUrl(originalMessage.getMember().getEffectiveAvatarUrl())
 				.setUsername(originalMessage.getMember().getEffectiveName());
-
+		if (components.length > 0) {
+			message.addComponents(components);
+		}
 		List<Attachment> attachments = originalMessage.getAttachments();
 		@SuppressWarnings("unchecked")
 		CompletableFuture<?>[] futures = new CompletableFuture<?>[attachments.size()];

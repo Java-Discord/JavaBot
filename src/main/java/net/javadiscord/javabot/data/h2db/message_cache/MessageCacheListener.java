@@ -68,7 +68,7 @@ public class MessageCacheListener extends ListenerAdapter {
 	 */
 	private boolean ignoreMessageCache(Message message) {
 		if (!message.isFromGuild()) return true;
-		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCache();
+		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCacheConfig();
 		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
 				config.getExcludedUsers().contains(message.getAuthor().getIdLong()) ||
 				config.getExcludedChannels().contains(message.getChannel().getIdLong());

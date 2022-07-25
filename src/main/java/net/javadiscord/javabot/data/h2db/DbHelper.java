@@ -5,7 +5,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.config.SystemsConfig;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.h2.tools.Server;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,9 +16,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Class that provides helper methods for dealing with the database.
@@ -34,22 +41,24 @@ public class DbHelper {
 	 * @throws IllegalStateException If an error occurs and we're unable to
 	 *                               start the database.
 	 */
-	public static HikariDataSource initDataSource(BotConfig config) {
+	public static @NotNull HikariDataSource initDataSource(@NotNull BotConfig config) {
 		// Determine if we need to initialize the schema, before starting up the server.
 		boolean shouldInitSchema = shouldInitSchema(config.getSystems().getHikariConfig().getJdbcUrl());
 
 		// Now that we have remembered whether we need to initialize the schema, start up the server.
 		Server server;
 		try {
-			server = Server.createTcpServer("-tcpPort", "9123", "-ifNotExists").start();
+			server = Server.createTcpServer("-tcpPort", "9122", "-ifNotExists").start();
 		} catch (SQLException e) {
+			ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			throw new IllegalStateException("Cannot start database server.", e);
 		}
-		var hikariConfig = new HikariConfig();
-		var hikariConfigSource = config.getSystems().getHikariConfig();
+		HikariConfig hikariConfig = new HikariConfig();
+		SystemsConfig.HikariConfig hikariConfigSource = config.getSystems().getHikariConfig();
 		hikariConfig.setJdbcUrl(hikariConfigSource.getJdbcUrl());
 		hikariConfig.setMaximumPoolSize(hikariConfigSource.getMaximumPoolSize());
-		var ds = new HikariDataSource(hikariConfig);
+		hikariConfig.setLeakDetectionThreshold(hikariConfigSource.getLeakDetectionThreshold());
+		HikariDataSource ds = new HikariDataSource(hikariConfig);
 		// Add a shutdown hook to close down the datasource and server when the JVM terminates.
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			ds.close();
@@ -59,7 +68,7 @@ public class DbHelper {
 			try {
 				initializeSchema(ds);
 			} catch (IOException | SQLException e) {
-				e.printStackTrace();
+				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 				throw new IllegalStateException("Cannot initialize database schema.", e);
 			}
 		}
@@ -73,10 +82,10 @@ public class DbHelper {
 	 */
 	public static void doDbAction(ConnectionConsumer consumer) {
 		Bot.asyncPool.submit(() -> {
-			try (var c = Bot.dataSource.getConnection()) {
+			try (Connection c = Bot.dataSource.getConnection()) {
 				consumer.consume(c);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			}
 		});
 	}
@@ -92,18 +101,18 @@ public class DbHelper {
 	 */
 	public static <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		Bot.asyncPool.submit(() -> {
-			try (var c = Bot.dataSource.getConnection()) {
-				var dao = daoConstructor.apply(c);
+			try (Connection c = Bot.dataSource.getConnection()) {
+				T dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			}
 		});
 	}
 
 	private static boolean shouldInitSchema(String jdbcUrl) {
-		var p = Pattern.compile("jdbc:h2:tcp://localhost:\\d+/(.*)");
-		var m = p.matcher(jdbcUrl);
+		Pattern p = Pattern.compile("jdbc:h2:tcp://localhost:\\d+/(.*)");
+		Matcher m = p.matcher(jdbcUrl);
 		boolean shouldInitSchema = false;
 		if (m.find()) {
 			String dbFilePath = m.group(1) + ".mv.db";
@@ -118,17 +127,21 @@ public class DbHelper {
 	}
 
 	private static void initializeSchema(HikariDataSource dataSource) throws IOException, SQLException {
-		InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("schema.sql");
-		if (is == null) throw new IOException("Could not load schema.sql.");
-		var queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
-				.filter(s -> !s.isBlank()).toList();
-		try (var c = dataSource.getConnection()) {
-			for (var query : queries) {
-				var stmt = c.createStatement();
-				stmt.executeUpdate(query);
-				stmt.close();
+		try (InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("database/schema.sql")) {
+			if (is == null) throw new IOException("Could not load schema.sql.");
+			List<String> queries = Arrays.stream(new String(is.readAllBytes()).split(";"))
+					.filter(s -> !s.isBlank()).toList();
+			try (Connection c = dataSource.getConnection()) {
+				for (String rawQuery : queries) {
+					String query = rawQuery.lines()
+							.map(s -> s.strip().stripIndent())
+							.collect(Collectors.joining(""));
+					try (Statement stmt = c.createStatement()) {
+						stmt.executeUpdate(query);
+					}
+				}
 			}
+			log.info("Successfully initialized H2 database.");
 		}
-		log.info("Successfully initialized H2 database.");
 	}
 }

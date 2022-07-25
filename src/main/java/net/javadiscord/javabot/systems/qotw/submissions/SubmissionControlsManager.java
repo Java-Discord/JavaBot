@@ -2,19 +2,22 @@ package net.javadiscord.javabot.systems.qotw.submissions;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
-import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,7 +47,7 @@ public class SubmissionControlsManager {
 	public SubmissionControlsManager(Guild guild, QOTWSubmission submission) {
 		this.guild = guild;
 		this.submission = submission;
-		this.config = Bot.config.get(guild).getQotw();
+		this.config = Bot.config.get(guild).getQotwConfig();
 	}
 
 	/**
@@ -64,11 +67,11 @@ public class SubmissionControlsManager {
 				submission = submissionOptional.get();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		this.guild = guild;
 		this.submission = submission;
-		this.config = Bot.config.get(guild).getQotw();
+		this.config = Bot.config.get(guild).getQotwConfig();
 	}
 
 	/**
@@ -106,11 +109,12 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-				DbHelper.doDaoAction(QuestionPointsRepository::new, repo -> repo.increment(user.getIdLong()));
-				new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
-				Responses.success(event.getHook(), "Submission Accepted",
-						"Successfully accepted submission by " + user.getAsMention()).queue();
-				}
+			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+			service.increment(user.getIdLong());
+			new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
+			Responses.success(event.getHook(), "Submission Accepted",
+					"Successfully accepted submission by " + user.getAsMention()).queue();
+			}
 		);
 		this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
 		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);

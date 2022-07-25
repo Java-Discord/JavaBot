@@ -45,7 +45,7 @@ public enum WarnSeverity {
 	 * no matching severity could be found.
 	 */
 	public static int getWeightOrDefault(String name) {
-		for (var v : values()) {
+		for (WarnSeverity v : values()) {
 			if (v.name().equalsIgnoreCase(name)) {
 				return v.weight;
 			}

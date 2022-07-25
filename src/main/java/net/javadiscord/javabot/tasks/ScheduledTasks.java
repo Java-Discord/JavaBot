@@ -6,6 +6,7 @@ import net.javadiscord.javabot.systems.qotw.QOTWCloseSubmissionsJob;
 import net.javadiscord.javabot.systems.qotw.QOTWJob;
 import net.javadiscord.javabot.systems.qotw.QOTWReminderJob;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -36,7 +37,7 @@ public class ScheduledTasks {
 			try {
 				scheduler.shutdown();
 			} catch (SchedulerException e) {
-				e.printStackTrace();
+				ExceptionLogger.capture(e, ScheduledTasks.class.getSimpleName());
 			}
 		}));
 	}

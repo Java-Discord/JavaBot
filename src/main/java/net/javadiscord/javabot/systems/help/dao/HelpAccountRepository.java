@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.help.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -78,14 +79,14 @@ public class HelpAccountRepository {
 	 */
 	public List<HelpAccount> getAccounts(int page, int size) throws SQLException {
 		String sql = "SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT %d OFFSET %d";
-		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, (page * size) - size));
-		ResultSet rs = stmt.executeQuery();
-		List<HelpAccount> accounts = new ArrayList<>(size);
-		while (rs.next()) {
-			accounts.add(this.read(rs));
+		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, Math.max(0, (page * size) - size)))) {
+			ResultSet rs = stmt.executeQuery();
+			List<HelpAccount> accounts = new ArrayList<>(size);
+			while (rs.next()) {
+				accounts.add(this.read(rs));
+			}
+			return accounts;
 		}
-		stmt.close();
-		return accounts;
 	}
 
 	/**
@@ -106,17 +107,21 @@ public class HelpAccountRepository {
 	 * Removes the specified amount of experience from all {@link HelpAccount}s.
 	 *
 	 * @param change The amount to subtract.
+	 * @param min The minimum amount to subtract.
+	 * @param max The maximum amount to subtract.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void removeExperienceFromAllAccounts(double change) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = GREATEST(experience - ?, 0)")) {
+	public void removeExperienceFromAllAccounts(double change, int min, int max) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (1 - ? / 100), ?), ?), 0)")) {
 			s.setDouble(1, change);
+			s.setInt(2, min);
+			s.setInt(3, max);
 			long rows = s.executeLargeUpdate();
 			log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
 		}
 	}
 
-	private HelpAccount read(ResultSet rs) throws SQLException {
+	private @NotNull HelpAccount read(@NotNull ResultSet rs) throws SQLException {
 		HelpAccount account = new HelpAccount();
 		account.setUserId(rs.getLong("user_id"));
 		account.setExperience(rs.getDouble("experience"));

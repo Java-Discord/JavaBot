@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
@@ -32,14 +33,14 @@ public class HelpChannelListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) {
 			return;
 		}
-		HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
-		TextChannel channel = event.getTextChannel();
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		TextChannel channel = event.getChannel().asTextChannel();
 		HelpChannelManager manager = new HelpChannelManager(config);
 
 		// If a message was sent in an open text channel, reserve it.
 		Category openChannelCategory = config.getOpenChannelCategory();
 		if (openChannelCategory == null) {
-			log.error("Could not find Open Help Category for Guild {}", event.getGuild().getName());
+			log.debug("Could not find Open Help Category for Guild {}", event.getGuild().getName());
 			return;
 		}
 		if (openChannelCategory.equals(channel.getParentCategory())) {
@@ -47,7 +48,7 @@ public class HelpChannelListener extends ListenerAdapter {
 				try {
 					manager.reserve(channel, event.getAuthor(), event.getMessage());
 				} catch (SQLException e) {
-					e.printStackTrace();
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					channel.sendMessage("An error occurred and this channel could not be reserved.").queue();
 				}
 			} else {

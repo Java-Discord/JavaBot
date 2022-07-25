@@ -22,7 +22,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
-    implementation("net.dv8tion:JDA:5.0.0-alpha.12")
+    // DIH4JDA (Interaction Framework) (includes JDA (jda5.0.0-alpha.17))
+    implementation("com.github.DynxstyGIT:DIH4JDA:f87f54eb42")
+
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.google.re2j:re2j:1.6")
@@ -32,20 +34,23 @@ dependencies {
     implementation("com.mashape.unirest:unirest-java:1.4.9")
 
     // H2 Database
-    implementation("com.h2database:h2:1.4.200")
+    implementation("com.h2database:h2:2.1.212")
     implementation("com.zaxxer:HikariCP:5.0.1")
 
-    // Quartz scheduler
+    // Quartz Scheduler
     implementation("org.quartz-scheduler:quartz:2.3.2")
     
     // Webhooks
-    implementation("club.minnced:discord-webhooks:0.8.0")
+    implementation("com.github.DynxstyGIT:discord-webhooks:74301a46a0")
 
     // Lombok Annotations
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
+
+    // Sentry
+    implementation("io.sentry:sentry:6.3.0")
 }
 
 tasks.withType<Jar> {

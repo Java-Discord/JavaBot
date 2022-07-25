@@ -12,16 +12,20 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -37,15 +41,15 @@ public class QOTWJob extends DiscordApiJob {
 				return;
 			}
 			GuildConfig config = Bot.config.get(guild);
-			if (config.getModeration().getLogChannel() == null) continue;
-			try (var c = Bot.dataSource.getConnection()) {
+			if (config.getModerationConfig().getLogChannel() == null) continue;
+			try (Connection c = Bot.dataSource.getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
-				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
+				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
-					new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s No available next question for QOTW!", config.getQotw().getQOTWReviewRole().getAsMention());
+					new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention());
 				} else {
 					QOTWQuestion question = nextQuestion.get();
-					QOTWConfig qotw = config.getQotw();
+					QOTWConfig qotw = config.getQotwConfig();
 					qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setLocked(true).setArchived(true).queue());
 					qotw.getSubmissionChannel().getManager()
 							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
@@ -62,15 +66,15 @@ public class QOTWJob extends DiscordApiJob {
 					repo.markUsed(question);
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
-				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotw().getQOTWReviewRole().getAsMention(), e.getMessage());
+				ExceptionLogger.capture(e, getClass().getSimpleName());
+				new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotwConfig().getQOTWReviewRole().getAsMention(), e.getMessage());
 				throw new JobExecutionException(e);
 			}
 		}
 	}
 
-	private MessageEmbed buildQuestionEmbed(QOTWQuestion question) {
-		var checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
+	private @NotNull MessageEmbed buildQuestionEmbed(@NotNull QOTWQuestion question) {
+		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
 				.setDescription(String.format("%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",

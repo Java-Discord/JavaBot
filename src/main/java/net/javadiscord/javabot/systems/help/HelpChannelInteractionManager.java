@@ -1,95 +1,30 @@
 package net.javadiscord.javabot.systems.help;
 
+import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
+import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.Responses;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Handles various interactions regarding the help channel system.
  */
 @Slf4j
-public class HelpChannelInteractionManager {
-
-	/**
-	 * Handles button interactions for help channel activity checks.
-	 *
-	 * @param event         The button event.
-	 * @param reservationId The help channel's reservation id.
-	 * @param action        The data extracted from the button id.
-	 */
-	public void handleHelpChannel(ButtonInteractionEvent event, String reservationId, String action) {
-		event.deferEdit().queue();
-		var config = Bot.config.get(event.getGuild()).getHelp();
-		var channelManager = new HelpChannelManager(config);
-		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
-		if (optionalReservation.isEmpty()) {
-			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
-					.setEphemeral(true).queue();
-			event.getMessage().delete().queue();
-			return;
-		}
-		var reservation = optionalReservation.get();
-		TextChannel channel = event.getTextChannel();
-		if (!event.isAcknowledged()) {
-			event.deferReply(true).queue();
-		}
-		var owner = channelManager.getReservedChannelOwner(channel);
-		// If a reserved channel doesn't have an owner, it's in an invalid state, but the system will handle it later automatically.
-		if (owner == null) {
-			// Remove the original message, just to make sure no more interactions are sent.
-			event.getInteraction().getHook().sendMessage("Uh oh! It looks like this channel is no longer reserved, so these buttons can't be used.")
-					.setEphemeral(true).queue();
-			event.getMessage().delete().queue();
-			return;
-		}
-
-		if (owner.getIdLong() != reservation.getUserId() || channel.getIdLong() != reservation.getChannelId()) {
-			event.getInteraction().getHook().sendMessage("The reservation data for this channel doesn't match up with Discord's information.")
-					.setEphemeral(true).queue();
-			event.getMessage().delete().queue();
-			return;
-		}
-
-		// Check that the user is allowed to do the interaction.
-		if (
-				event.getUser().equals(owner) ||
-						event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole())
-		) {
-			if (action.equals("done")) {
-				event.getMessage().delete().queue();
-				if (event.getUser().equals(owner)) {// If the owner is unreserving their own channel, handle it separately.
-					channelManager.unreserveChannelByUser(channel, owner, null, event);
-				} else {
-					channelManager.unreserveChannel(channel).queue();
-				}
-			} else if (action.equals("not-done")) {
-				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
-				event.getMessage().delete().queue();
-				try {
-					int nextTimeout = channelManager.getNextTimeout(channel);
-					channelManager.setTimeout(channel, nextTimeout);
-					channel.sendMessage(String.format(
-							"Okay, we'll keep this channel reserved for you, and check again in **%d** minutes.",
-							nextTimeout
-					)).queue();
-				} catch (SQLException e) {
-					Responses.error(event.getHook(), "An error occurred while managing this help channel.").queue();
-				}
-			}
-		} else {
-			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel or moderators are allowed to use these buttons.")
-					.setEphemeral(true).queue();
-		}
-	}
+public class HelpChannelInteractionManager implements ButtonHandler {
 
 	/**
 	 * Handles button interactions pertaining to the interaction provided to
@@ -100,23 +35,23 @@ public class HelpChannelInteractionManager {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button's id.
 	 */
-	public void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
+	private void handleHelpThankButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
-		var config = Bot.config.get(event.getGuild()).getHelp();
-		var channelManager = new HelpChannelManager(config);
-		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpChannelManager channelManager = new HelpChannelManager(config);
+		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
 			event.getInteraction().getHook().sendMessage("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
 					.setEphemeral(true).queue();
 			event.getMessage().delete().queue();
 			return;
 		}
-		var reservation = optionalReservation.get();
-		TextChannel channel = event.getTextChannel();
+		ChannelReservation reservation = optionalReservation.get();
+		TextChannel channel = event.getChannel().asTextChannel();
 		if (!event.isAcknowledged()) {
 			event.deferReply(true).queue();
 		}
-		var owner = channelManager.getReservedChannelOwner(channel);
+		User owner = channelManager.getReservedChannelOwner(channel);
 		if (owner == null) {
 			event.getInteraction().getHook().sendMessage("Sorry, but this channel is currently unreserved.").setEphemeral(true).queue();
 			event.getMessage().delete().queue();
@@ -140,7 +75,7 @@ public class HelpChannelInteractionManager {
 				try {
 					channelManager.setTimeout(channel, config.getInactivityTimeouts().get(0));
 				} catch (SQLException e) {
-					e.printStackTrace();
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 				}
 			} else {
 				long helperId = Long.parseLong(action);
@@ -151,8 +86,8 @@ public class HelpChannelInteractionManager {
 		}
 	}
 
-	private void thankHelper(ButtonInteractionEvent event, TextChannel channel, User owner, long helperId, ChannelReservation reservation, HelpChannelManager channelManager) {
-		var btn = event.getButton();
+	private void thankHelper(@NotNull ButtonInteractionEvent event, TextChannel channel, User owner, long helperId, ChannelReservation reservation, HelpChannelManager channelManager) {
+		Button btn = event.getButton();
 		long thankCount = DbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE reservation_id = ? AND helper_id = ?",
 				s -> {
@@ -177,14 +112,14 @@ public class HelpChannelInteractionManager {
 							helper.getIdLong()
 					);
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", helper.getAsTag()).setEphemeral(true).queue();
-					HelpConfig config = Bot.config.get(event.getGuild()).getHelp();
+					HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 					HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
 					// Perform experience transactions
 					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
 					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 				} catch (SQLException e) {
-					e.printStackTrace();
-					Bot.config.get(event.getGuild()).getModeration().getLogChannel().sendMessageFormat(
+					ExceptionLogger.capture(e, getClass().getSimpleName());
+					Bot.config.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
 							"Could not record user %s thanking %s for help in channel %s: %s",
 							owner.getAsTag(),
 							helper.getAsTag(),
@@ -194,7 +129,7 @@ public class HelpChannelInteractionManager {
 				}
 				// Then disable the button, or unreserve the channel if there's nobody else to thank.
 				if (btn != null) {
-					var activeButtons = event.getMessage().getButtons().stream()
+					List<Button> activeButtons = event.getMessage().getButtons().stream()
 							.filter(b -> !b.isDisabled() && !b.getLabel().equals("Unreserve") && !b.getLabel().equals("Cancel") && !b.equals(btn))
 							.toList();
 					if (activeButtons.isEmpty()) {// If there are no more people to thank, automatically unreserve the channel.
@@ -205,6 +140,82 @@ public class HelpChannelInteractionManager {
 					}
 				}
 			});
+		}
+	}
+
+	private void handleHelpChannelButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
+		event.deferEdit().queue();
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpChannelManager channelManager = new HelpChannelManager(config);
+		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
+		if (optionalReservation.isEmpty()) {
+			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
+					.setEphemeral(true).queue();
+			event.getMessage().delete().queue();
+			return;
+		}
+		ChannelReservation reservation = optionalReservation.get();
+		TextChannel channel = event.getChannel().asTextChannel();
+		if (!event.isAcknowledged()) {
+			event.deferReply(true).queue();
+		}
+		User owner = channelManager.getReservedChannelOwner(channel);
+		// If a reserved channel doesn't have an owner, it's in an invalid state, but the system will handle it later automatically.
+		if (owner == null) {
+			// Remove the original message, just to make sure no more interactions are sent.
+			event.getInteraction().getHook().sendMessage("Uh oh! It looks like this channel is no longer reserved, so these buttons can't be used.")
+					.setEphemeral(true).queue();
+			event.getMessage().delete().queue();
+			return;
+		}
+
+		if (owner.getIdLong() != reservation.getUserId() || channel.getIdLong() != reservation.getChannelId()) {
+			event.getInteraction().getHook().sendMessage("The reservation data for this channel doesn't match up with Discord's information.")
+					.setEphemeral(true).queue();
+			event.getMessage().delete().queue();
+			return;
+		}
+
+		// Check that the user is allowed to do the interaction.
+		if (
+				event.getUser().equals(owner) ||
+						event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModerationConfig().getStaffRole())
+		) {
+			if (action.equals("done")) {
+				event.getMessage().delete().queue();
+				if (event.getUser().equals(owner)) { // If the owner is unreserving their own channel, handle it separately.
+					channelManager.unreserveChannelByOwner(channel, owner, null, event);
+				} else {
+					channelManager.unreserveChannel(channel).queue();
+				}
+			} else if (action.equals("not-done")) {
+				log.info("Removing timeout check message in {} because it was marked as not-done.", channel.getAsMention());
+				event.getMessage().delete().queue();
+				try {
+					int nextTimeout = channelManager.getNextTimeout(channel);
+					channelManager.setTimeout(channel, nextTimeout);
+					channel.sendMessage(String.format(
+							"Okay, we'll keep this channel reserved for you, and check again in **%d** minutes.",
+							nextTimeout
+					)).queue();
+				} catch (SQLException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
+					Responses.error(event.getHook(), "An error occurred while managing this help channel.").queue();
+				}
+			}
+		} else {
+			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel or moderators are allowed to use these buttons.")
+					.setEphemeral(true).queue();
+		}
+	}
+
+	@Override
+	public void handleButton(@NotNull ButtonInteractionEvent event, @NotNull Button button) {
+		if (event.getUser().isBot()) return;
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		switch (id[0]) {
+			case "help-channel" -> handleHelpChannelButton(event, id[1], id[2]);
+			case "help-thank" -> handleHelpThankButton(event, id[1], id[2]);
 		}
 	}
 }

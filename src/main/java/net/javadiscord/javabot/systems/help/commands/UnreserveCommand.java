@@ -1,33 +1,44 @@
 package net.javadiscord.javabot.systems.help.commands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
+import net.javadiscord.javabot.util.Responses;
 
 /**
  * A simple command that can be used inside reserved help channels to
  * immediately unreserve them, instead of waiting for a timeout.
  */
-public class UnreserveCommand implements SlashCommand {
+public class UnreserveCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
+	public UnreserveCommand() {
+		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
+				.setGuildOnly(true)
+				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
+		);
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		var channel = event.getTextChannel();
-		var config = Bot.config.get(event.getGuild()).getHelp();
-		var channelManager = new HelpChannelManager(config);
-		var owner = channelManager.getReservedChannelOwner(channel);
+	public void execute(SlashCommandInteractionEvent event) {
+		TextChannel channel = event.getChannel().asTextChannel();
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpChannelManager channelManager = new HelpChannelManager(config);
+		User owner = channelManager.getReservedChannelOwner(channel);
 		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
 			String reason = event.getOption("reason", null, OptionMapping::getAsString);
-			channelManager.unreserveChannelByUser(channel, owner, reason, event);
-			return event.deferReply(true);
+			event.deferReply(true).queue();
+			channelManager.unreserveChannelByOwner(channel, owner, reason, event);
 		} else {
-			return Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.");
+			Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.").queue();
 		}
 	}
 
@@ -46,11 +57,11 @@ public class UnreserveCommand implements SlashCommand {
 
 	private boolean memberHasStaffRole(SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
-				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModeration().getStaffRole());
+				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModerationConfig().getStaffRole());
 	}
 
 	private boolean memberHasHelperRole(SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
-				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getHelp().getHelperRole());
+				event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getHelpConfig().getHelperRole());
 	}
 }

@@ -1,11 +1,13 @@
 package net.javadiscord.javabot.listener;
 
+import com.dynxsty.dih4jda.util.Pair;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
-import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -30,9 +32,9 @@ public class GitHubLinkListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
 		Matcher matcher = GITHUB_LINK_PATTERN.matcher(event.getMessage().getContentRaw());
 		if (matcher.find()) {
-			Pair<String, String> content = this.parseGithubUrl(matcher.group());
-			if (!content.first().isBlank() && !content.second().isBlank()) {
-				event.getMessage().reply(String.format("```%s\n%s\n```", content.second(), StringUtils.standardSanitizer().compute(content.first())))
+			Pair<String, String> content = parseGithubUrl(matcher.group());
+			if (!content.getFirst().isBlank() && !content.getSecond().isBlank()) {
+				event.getMessage().reply(String.format("```%s\n%s\n```", content.getSecond(), StringUtils.standardSanitizer().compute(content.getFirst())))
 						.allowedMentions(List.of())
 						.setActionRow(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"), Button.link(matcher.group(), "View on GitHub"))
 						.queue();
@@ -46,7 +48,8 @@ public class GitHubLinkListener extends ListenerAdapter {
 	 * @param link The initial input url.
 	 * @return A {@link Pair} containing the files content & extension.
 	 */
-	private Pair<String, String> parseGithubUrl(String link) {
+	@Contract("_ -> new")
+	private @NotNull Pair<String, String> parseGithubUrl(@NotNull String link) {
 		String[] arr = link.split("/");
 		// Removes all unnecessary elements
 		String[] segments = Arrays.copyOfRange(arr, 3, arr.length);
@@ -56,6 +59,9 @@ public class GitHubLinkListener extends ListenerAdapter {
 				.map(line -> line.replace("-", ""))
 				.filter(line -> line.matches("-?\\d+")) // check if the given link is a number
 				.map(Integer::valueOf).sorted().toArray(Integer[]::new);
+		if (lines.length == 0) {
+			return new Pair<>("", "");
+		}
 		int to = lines.length != 2 ? lines[0] : lines[1];
 		String reqUrl = String.format("https://raw.githubusercontent.com/%s/%s/%s/%s",
 				segments[0], segments[1],
@@ -65,6 +71,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 		try {
 			content = this.getContentFromRawGitHubUrl(reqUrl, lines[0], to);
 		} catch (IOException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			content = e.getMessage();
 		}
 		if (content.equals(reqUrl)) content = "Unable to fetch content.";

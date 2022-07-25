@@ -6,25 +6,27 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
+import java.util.List;
+
 /**
  * Configuration for the guild's moderation system.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ModerationConfig extends GuildConfigItem {
-	private long reportChannelId;
-	private long applicationChannelId;
-	private long logChannelId;
-	private long suggestionChannelId;
-	private long jobChannelId;
-	private long staffRoleId;
-	private long adminRoleId;
-	private long expertRoleId;
+	private long reportChannelId = 0;
+	private long applicationChannelId = 0;
+	private long logChannelId = 0;
+	private long suggestionChannelId = 0;
+	private long jobChannelId = 0;
+	private long staffRoleId = 0;
+	private long adminRoleId = 0;
+	private long expertRoleId = 0;
 
 	/**
 	 * ID of the share-knowledge channel.
 	 */
-	private long shareKnowledgeChannelId;
+	private long shareKnowledgeChannelId = 0;
 
 	/**
 	 * The threshold for deleting a message in #share-knowledge. Note that this should be strictly < 0.
@@ -52,9 +54,9 @@ public class ModerationConfig extends GuildConfigItem {
 	private int maxWarnSeverity = 100;
 
 	/**
-	 * Invite liks AutoMod should exclude.
+	 * Invite links AutoMod should exclude.
 	 */
-	private String[] automodInviteExcludes;
+	private List<String> automodInviteExcludes = List.of();
 
 	/**
 	 * Text that is sent to users when they're banned.

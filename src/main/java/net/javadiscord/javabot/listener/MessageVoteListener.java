@@ -1,12 +1,15 @@
 package net.javadiscord.javabot.listener;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -29,8 +32,8 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * downvotes there are than upvotes. If this value is higher than or equal
 	 * to the threshold value returned by this method, the message is deleted.
 	 * <p>
-	 *     Note that usually, you want to return a positive value, to indicate
-	 *     that the message should have <em>more</em> downvotes than upvotes.
+	 * Note that usually, you want to return a positive value, to indicate
+	 * that the message should have <em>more</em> downvotes than upvotes.
 	 * </p>
 	 *
 	 * @param guild The guild to get the threshold for.
@@ -54,21 +57,21 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	/**
 	 * Gets the emote that's used for casting upvotes.
 	 *
-	 * @param guild The guild to get the emote for.
+	 * @param jda The {@link JDA} instance to get the emoji for.
 	 * @return The emote.
 	 */
-	protected Emote getUpvoteEmote(Guild guild) {
-		return Bot.config.get(guild).getEmote().getUpvoteEmote();
+	protected Emoji getUpvoteEmote(JDA jda) {
+		return Bot.config.getSystems().getEmojiConfig().getUpvoteEmote(jda);
 	}
 
 	/**
 	 * Gets the emote that's used for casting downvotes.
 	 *
-	 * @param guild The guild to get the emote for.
+	 * @param jda The {@link JDA} instance to get the emoji for.
 	 * @return The emote.
 	 */
-	protected Emote getDownvoteEmote(Guild guild) {
-		return Bot.config.get(guild).getEmote().getDownvoteEmote();
+	protected Emoji getDownvoteEmote(JDA jda) {
+		return Bot.config.getSystems().getEmojiConfig().getDownvoteEmote(jda);
 	}
 
 	/**
@@ -85,8 +88,8 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (isMessageReceivedEventValid(event) && shouldAddInitialEmotes(event.getGuild())) {
-			event.getMessage().addReaction(getUpvoteEmote(event.getGuild())).queue();
-			event.getMessage().addReaction(getDownvoteEmote(event.getGuild())).queue();
+			event.getMessage().addReaction(getUpvoteEmote(event.getJDA())).queue();
+			event.getMessage().addReaction(getDownvoteEmote(event.getJDA())).queue();
 		}
 	}
 
@@ -107,10 +110,11 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @return True if the event is valid, meaning that it is relevant for this
 	 * vote listener to add the voting emotes to it.
 	 */
-	private boolean isMessageReceivedEventValid(MessageReceivedEvent event) {
+	private boolean isMessageReceivedEventValid(@NotNull MessageReceivedEvent event) {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED) {
 			return false;
 		}
+		if (getChannel(event.getGuild()) == null) return false;
 		return event.getChannel().getId().equals(getChannel(event.getGuild()).getId()) &&
 				isMessageEligibleForVoting(event.getMessage());
 	}
@@ -124,12 +128,12 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @return True if the event is valid, meaning that this listener should
 	 * proceed to check the votes on the message.
 	 */
-	private boolean isReactionEventValid(GenericMessageReactionEvent event) {
+	private boolean isReactionEventValid(@NotNull GenericMessageReactionEvent event) {
 		if (!event.getChannel().getId().equals(getChannel(event.getGuild()).getId())) return false;
-		String reactionId = event.getReactionEmote().getId();
+		Emoji reaction = event.getEmoji();
 		if (
-				!reactionId.equals(getUpvoteEmote(event.getGuild()).getId()) &&
-				!reactionId.equals(getDownvoteEmote(event.getGuild()).getId())
+				!reaction.equals(getUpvoteEmote(event.getJDA())) &&
+						!reaction.equals(getDownvoteEmote(event.getJDA()))
 		) {
 			return false;
 		}
@@ -153,32 +157,21 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 		}
 	}
 
-	private void checkVotes(Message msg, Guild guild) {
-		String upvoteId = getUpvoteEmote(guild).getId();
-		String downvoteId = getDownvoteEmote(guild).getId();
+	private void checkVotes(Message msg, @NotNull Guild guild) {
+		Emoji upvoteId = getUpvoteEmote(guild.getJDA());
+		Emoji downvoteId = getDownvoteEmote(guild.getJDA());
 
-		int upvotes = countReactions(msg, upvoteId);
-		int downvotes = countReactions(msg, downvoteId);
+		int upvotes = StringUtils.countReactions(msg, upvoteId);
+		int downvotes = StringUtils.countReactions(msg, downvoteId);
 		int downvoteDifference = downvotes - upvotes;
 
 		if (downvoteDifference >= getMessageDeleteVoteThreshold(guild)) {
 			msg.delete().queue();
 			msg.getAuthor().openPrivateChannel()
 					.queue(
-							s -> s.sendMessageFormat(
-									"Your message in %s has been removed due to community feedback.",
-									getChannel(guild).getAsMention()
-							).queue(),
+							s -> s.sendMessageFormat("Your message in %s has been removed due to community feedback.", getChannel(guild).getAsMention()).queue(),
 							e -> {}
 					);
 		}
-	}
-
-	private int countReactions(Message msg, String id) {
-		MessageReaction reaction = msg.getReactionById(id);
-		if (reaction == null) return 0;
-		return (int) reaction.retrieveUsers().stream()
-				.filter(user -> !user.isBot() && !user.isSystem())
-				.count();
 	}
 }

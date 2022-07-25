@@ -31,6 +31,7 @@ public class StringResourceCache {
 			try {
 				sql = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 			} catch (IOException e) {
+				ExceptionLogger.capture(e, StringResourceCache.class.getSimpleName());
 				throw new UncheckedIOException(e);
 			}
 			CACHE.put(resourceName, sql);

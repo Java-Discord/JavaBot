@@ -7,8 +7,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.SlashCommandConfig;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.MessageActionUtils;
+import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -26,10 +27,9 @@ public class SuggestionListener extends ListenerAdapter {
 			event.getMessage().delete().queue();
 			return;
 		}
-		var config = Bot.config.get(event.getGuild());
-		MessageEmbed embed = this.buildSuggestionEmbed(event.getMessage(), config.getSlashCommand());
+		MessageEmbed embed = buildSuggestionEmbed(event.getMessage());
 		MessageActionUtils.addAttachmentsAndSend(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).thenAccept(message -> {
-					this.addReactions(message).queue();
+					addReactions(message).queue();
 					event.getMessage().delete().queue();
 					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName()))
 							.flatMap(thread -> thread.addThreadMember(event.getAuthor()))
@@ -47,11 +47,11 @@ public class SuggestionListener extends ListenerAdapter {
 	 * @param event The {@link MessageReceivedEvent} that is fired upon sending a message.
 	 * @return Whether the message author is eligible to create new suggestions.
 	 */
-	private boolean canCreateSuggestion(MessageReceivedEvent event) {
+	private boolean canCreateSuggestion(@NotNull MessageReceivedEvent event) {
 		if (event.getChannelType() == ChannelType.PRIVATE) return false;
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && !event.getMember().isTimedOut() &&
 				event.getMessage().getType() != MessageType.THREAD_CREATED &&
-				event.getChannel().equals(Bot.config.get(event.getGuild()).getModeration().getSuggestionChannel());
+				event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModerationConfig().getSuggestionChannelId();
 	}
 
 	/**
@@ -61,23 +61,23 @@ public class SuggestionListener extends ListenerAdapter {
 	 * @return A {@link RestAction}.
 	 */
 	private RestAction<?> addReactions(Message message) {
-		var config = Bot.config.get(message.getGuild()).getEmote();
+		SystemsConfig.EmojiConfig config = Bot.config.getSystems().getEmojiConfig();
 		return RestAction.allOf(
-				message.addReaction(config.getUpvoteEmote()),
-				message.addReaction(config.getDownvoteEmote())
+				message.addReaction(config.getUpvoteEmote(message.getJDA())),
+				message.addReaction(config.getDownvoteEmote(message.getJDA()))
 		);
 	}
 
 
 
-	private MessageEmbed buildSuggestionEmbed(Message message, SlashCommandConfig config) {
+	private MessageEmbed buildSuggestionEmbed(Message message) {
 		Member member = message.getMember();
 		// Note: member will never be null in practice. This is to satisfy code analysis tools.
 		if (member == null) throw new IllegalStateException("Member was null when building suggestion embed.");
 		return new EmbedBuilder()
 				.setTitle("Suggestion")
 				.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
-				.setColor(config.getDefaultColor())
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
 				.setDescription(message.getContentRaw())
 				.build();

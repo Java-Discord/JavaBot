@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help.commands.subcommands;
 
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -7,28 +8,41 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.command.ResponseException;
-import net.javadiscord.javabot.command.Responses;
-import net.javadiscord.javabot.command.interfaces.SlashCommand;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
+import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 
 /**
+ * <h3>This class represents the /help account command.</h3>
  * Handles commands to show information about how a user has been thanked for
  * their help.
  */
-public class HelpAccountSubcommand implements SlashCommand {
+public class HelpAccountSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 */
+	public HelpAccountSubcommand() {
+		setSubcommandData(new SubcommandData("account", "Shows an overview of your Help Account.")
+				.addOption(OptionType.USER, "user", "If set, show the Help Account of the specified user instead.", false)
+				.addOption(OptionType.BOOLEAN, "show-transactions", "Should the recent transactions be shown?", false)
+		);
+	}
+
 	@Override
-	public ReplyCallbackAction handleSlashCommandInteraction(SlashCommandInteractionEvent event) throws ResponseException {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
+		boolean showTransactions = event.getOption("show-transactions", false, OptionMapping::getAsBoolean);
 		long totalThanks = DbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ?",
 				s -> s.setLong(1, user.getIdLong())
@@ -39,27 +53,28 @@ public class HelpAccountSubcommand implements SlashCommand {
 		);
 		try {
 			HelpAccount account = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(user.getIdLong());
-			return event.replyEmbeds(this.buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks));
+			event.replyEmbeds(buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks, showTransactions)).queue();
 		} catch (SQLException e) {
-			return Responses.error(event, e.getMessage());
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			Responses.error(event, e.getMessage()).queue();
 		}
 	}
 
-	private MessageEmbed buildHelpAccountEmbed(HelpAccount account, User user, Guild guild, long totalThanks, long weekThanks) {
-		return new EmbedBuilder()
+	private @NotNull MessageEmbed buildHelpAccountEmbed(HelpAccount account, @NotNull User user, Guild guild, long totalThanks, long weekThanks, boolean showTransactions) {
+		return  new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
-				.addField("Experience (BETA)", String.format("%s\n\n**Recent Transactions**\n```diff\n%s```",
-						this.formatExperience(guild, account),
-						this.formatTransactionHistory(user.getIdLong())), false)
+				.addField("Experience (BETA)", String.format("%s%s",
+					formatExperience(guild, account),
+					showTransactions ? String.format("\n\n**Recent Transactions**\n```diff\n%s```", formatTransactionHistory(user.getIdLong())) : ""), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
 				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true)
 				.build();
 	}
 
-	private String formatTransactionHistory(long userId) {
+	private @NotNull String formatTransactionHistory(long userId) {
 		StringBuilder sb = new StringBuilder();
 		try {
 			HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
@@ -67,7 +82,7 @@ public class HelpAccountSubcommand implements SlashCommand {
 				sb.append(t.format()).append("\n\n");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		return sb.toString().length() > 0 ? sb.toString() : "No recent transactions";
 	}

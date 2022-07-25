@@ -5,6 +5,7 @@ build/
 /config.json
 /config
 /purgeArchives
+/logs
 
 # Eclipse settings
 .classpath

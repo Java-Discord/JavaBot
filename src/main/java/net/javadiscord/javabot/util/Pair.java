@@ -1,12 +1,12 @@
 package net.javadiscord.javabot.util;
 
 /**
- * Utility class that stores to variables.
+ * A simple pair that contains to values.
  *
- * @param <F>    First generic.
- * @param <S>    Second generic.
- * @param first  First variable.
- * @param second Second variable.
+ * @param first  The first value.
+ * @param second The second value.
+ * @param <F>    The type of the first value.
+ * @param <S>    The type of the second value.
  */
 public record Pair<F, S>(F first, S second) {
 }

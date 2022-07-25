@@ -29,7 +29,7 @@ public class HelpAccount {
 	 * @return A {@link Pair} with both the Role, and the experience needed.
 	 */
 	public Pair<Role, Double> getCurrentExperienceGoal(Guild guild) {
-		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
+		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelpConfig().getExperienceRoles();
 		Map.Entry<Long, Double> highestExperience = Map.entry(0L, 0.0);
 		for (Map.Entry<Long, Double> entry : experienceRoles.entrySet()) {
 			if (experience > entry.getValue() && entry.getValue() > highestExperience.getValue()) {
@@ -46,7 +46,7 @@ public class HelpAccount {
 	 * @return The experience needed for the last role, as a {@link Double}.
 	 */
 	public double getLastExperienceGoal(Guild guild) {
-		Optional<Double> experienceOptional = Bot.config.get(guild).getHelp().getExperienceRoles()
+		Optional<Double> experienceOptional = Bot.config.get(guild).getHelpConfig().getExperienceRoles()
 				.values().stream()
 				.filter(r -> r <= experience)
 				.max(Comparator.naturalOrder());
@@ -60,7 +60,7 @@ public class HelpAccount {
 	 * @return A {@link Pair} with both the Role, and the experience needed.
 	 */
 	public Pair<Role, Double> getNextExperienceGoal(Guild guild) {
-		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelp().getExperienceRoles();
+		Map<Long, Double> experienceRoles = Bot.config.get(guild).getHelpConfig().getExperienceRoles();
 		Map.Entry<Long, Double> entry = experienceRoles.entrySet()
 				.stream()
 				.filter(r -> r.getValue() > experience)

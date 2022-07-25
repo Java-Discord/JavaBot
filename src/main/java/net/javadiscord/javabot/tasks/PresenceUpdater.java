@@ -3,9 +3,9 @@ package net.javadiscord.javabot.tasks;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.listener.StartupListener;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -75,9 +75,9 @@ public class PresenceUpdater extends ListenerAdapter {
 	 * has all the necessary properties defined to reasonable defaults.
 	 */
 	public static PresenceUpdater standardActivities() {
-		var format = "%s members";
 		return new PresenceUpdater(List.of(
-				jda -> Activity.watching(String.format(format, StartupListener.defaultGuild.getMemberCount()))
+				jda -> Activity.watching(String.format("%s members", jda.getGuilds().stream().mapToLong(Guild::getMemberCount).sum())),
+				jda -> Activity.watching("Use /report, 'Report User' or 'Report Message' to report disruptive behaviour!")
 		), 35, TimeUnit.SECONDS);
 	}
 

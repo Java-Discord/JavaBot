@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -19,8 +21,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,10 +31,11 @@ import java.util.regex.Pattern;
  * This class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
 @Slf4j
+// TODO: Refactor this to be more efficient. Especially AutoMod#checkNewMessageAutomod
 public class AutoMod extends ListenerAdapter {
 
-	private final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
-	private final Pattern URL_PATTERN = Pattern.compile(
+	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private static final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
 					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
@@ -47,7 +50,7 @@ public class AutoMod extends ListenerAdapter {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			ExceptionLogger.capture(e, getClass().getSimpleName());
 			spamUrls = List.of();
 		}
 		log.info("Loaded {} spam URLs!", spamUrls.size());
@@ -86,14 +89,14 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
-		if (message.getMentions().getUsersBag().size() >= 5) {
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
+		if (message.getMentions().getUsers().size() >= 5) {
+			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
-							message.getMember(),
+							message.getAuthor(),
 							WarnSeverity.MEDIUM,
 							"Automod: Mention Spam",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getTextChannel(),
+							message.getChannel(),
 							false
 					);
 		}
@@ -121,14 +124,14 @@ public class AutoMod extends ListenerAdapter {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Message: `" + message.getContentRaw() + "`");
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
-							message.getMember(),
+							message.getAuthor(),
 							WarnSeverity.MEDIUM,
 							"Automod: Advertising",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getTextChannel(),
-							isSuggestionsChannel(message.getTextChannel())
+							message.getChannel(),
+							isSuggestionsChannel(message.getChannel().asTextChannel())
 					);
 			message.delete().queue(success -> {
 			}, error -> log.info("Message was deleted before Automod was able to handle it."));
@@ -139,14 +142,14 @@ public class AutoMod extends ListenerAdapter {
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message);
-			new ModerationService(message.getJDA(), Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.config.get(message.getGuild()))
 					.warn(
-							message.getMember(),
+							message.getAuthor(),
 							WarnSeverity.MEDIUM,
 							"Automod: Suspicious Link",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getTextChannel(),
-							isSuggestionsChannel(message.getTextChannel())
+							message.getChannel(),
+							isSuggestionsChannel(message.getChannel().asTextChannel())
 					);
 			message.delete().queue(success -> {
 			}, error -> log.info("Message was deleted before Automod was able to handle it."));
@@ -161,16 +164,16 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void handleSpam(@Nonnull Message msg, Member member) {
 		// java files -> not spam
-		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> a.getFileExtension().equals("java"))) {
+		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
 			return;
 		}
-		new ModerationService(member.getJDA(), Bot.config.get(member.getGuild()))
+		new ModerationService(Bot.config.get(member.getGuild()))
 				.timeout(
 						member,
 						"Automod: Spam",
 						msg.getGuild().getSelfMember(),
 						Duration.of(6, ChronoUnit.HOURS),
-						msg.getTextChannel(),
+						msg.getChannel(),
 						false
 				);
 	}
@@ -181,7 +184,7 @@ public class AutoMod extends ListenerAdapter {
 	 * @param input the input String.
 	 * @return the cleaned-up String.
 	 */
-	private String cleanString(String input) {
+	private @NotNull String cleanString(String input) {
 		input = input.replaceAll("\\p{C}", "");
 		input = input.replace(" ", "");
 		return input;
@@ -193,20 +196,22 @@ public class AutoMod extends ListenerAdapter {
 	 * @param message The message to check.
 	 * @return True if a link is found and False if not.
 	 */
-	public boolean hasSuspiciousLink(Message message) {
+	public boolean hasSuspiciousLink(@NotNull Message message) {
 		final String messageRaw = message.getContentRaw();
 		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
 			while (urlMatcher.find()) {
 				String url = urlMatcher.group(0).trim();
-				try {
-					URI uri = new URI(url);
-					if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
-						return true;
+				if (url.startsWith("http://") || url.startsWith("https://")) {
+					try {
+						URI uri = new URI(url);
+						if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
+							return true;
+						}
+					} catch (URISyntaxException e) {
+						ExceptionLogger.capture(e, getClass().getSimpleName());
 					}
-				} catch (URISyntaxException e) {
-					log.error("Error while parsing URL: " + url, e);
 				}
 			}
 		}
@@ -219,16 +224,16 @@ public class AutoMod extends ListenerAdapter {
 	 * @param message The Message to check.
 	 * @return True if an invite is found and False if not.
 	 */
-	public boolean hasAdvertisingLink(Message message) {
+	public boolean hasAdvertisingLink(@NotNull Message message) {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
-			return Arrays.stream(Bot.config.get(message.getGuild()).getModeration().getAutomodInviteExcludes()).noneMatch(message.getContentRaw()::contains);
+			return Bot.config.get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(message.getContentRaw()::contains);
 		}
 		return false;
 	}
 
-	private boolean isSuggestionsChannel(TextChannel channel) {
-		return channel.equals(Bot.config.get(channel.getGuild()).getModeration().getSuggestionChannel());
+	private boolean isSuggestionsChannel(@NotNull TextChannel channel) {
+		return channel.equals(Bot.config.get(channel.getGuild()).getModerationConfig().getSuggestionChannel());
 	}
 }

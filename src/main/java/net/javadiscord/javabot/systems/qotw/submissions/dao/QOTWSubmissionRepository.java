@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -60,8 +61,8 @@ public class QOTWSubmissionRepository {
 	 * @param status The new {@link SubmissionStatus}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void updateStatus(long threadId, SubmissionStatus status) throws SQLException {
-		try (var stmt = con.prepareStatement(" UPDATE qotw_submissions SET status = ? WHERE thread_id = ?")) {
+	public void updateStatus(long threadId, @NotNull SubmissionStatus status) throws SQLException {
+		try (PreparedStatement stmt = con.prepareStatement("UPDATE qotw_submissions SET status = ? WHERE thread_id = ?")) {
 			stmt.setInt(1, status.ordinal());
 			stmt.setLong(2, threadId);
 			stmt.executeUpdate();
@@ -78,7 +79,7 @@ public class QOTWSubmissionRepository {
 	public List<QOTWSubmission> getUnreviewedSubmissions(long authorId) throws SQLException {
 		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE author_id = ? AND status = 0")) {
 			s.setLong(1, authorId);
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			List<QOTWSubmission> submissions = new ArrayList<>();
 			while (rs.next()) {
 				submissions.add(read(rs));
@@ -97,7 +98,7 @@ public class QOTWSubmissionRepository {
 	public Optional<QOTWSubmission> getSubmissionByThreadId(long threadId) throws SQLException {
 		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE thread_id = ?")) {
 			s.setLong(1, threadId);
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			QOTWSubmission submission = null;
 			if (rs.next()) {
 				submission = read(rs);
@@ -113,12 +114,13 @@ public class QOTWSubmissionRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getCurrentQuestionNumber() throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT MAX(question_number) FROM qotw_submissions");
-		ResultSet rs = s.executeQuery();
-		if (rs.next()) {
-			return rs.getInt(1);
+		try (PreparedStatement s = con.prepareStatement("SELECT MAX(question_number) FROM qotw_submissions")) {
+			ResultSet rs = s.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+			return 0;
 		}
-		return 0;
 	}
 
 	/**

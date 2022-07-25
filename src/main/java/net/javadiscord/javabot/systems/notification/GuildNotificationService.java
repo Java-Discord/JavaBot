@@ -26,11 +26,11 @@ public final class GuildNotificationService extends NotificationService {
 	 * @param embed The {@link MessageEmbed} to send.
 	 */
 	public void sendLogChannelNotification(MessageEmbed embed) {
-		if (config.getModeration().getLogChannel() == null) {
+		if (config.getModerationConfig().getLogChannel() == null) {
 			log.warn("Could not find Log Channel for Guild {}", guild.getName());
 			return;
 		}
-		this.sendMessageChannelNotification(config.getModeration().getLogChannel(), embed);
+		this.sendMessageChannelNotification(config.getModerationConfig().getLogChannel(), embed);
 	}
 
 	/**
@@ -40,11 +40,11 @@ public final class GuildNotificationService extends NotificationService {
 	 * @param args Optional args for formatting.
 	 */
 	public void sendLogChannelNotification(String string, Object... args) {
-		if (config.getModeration().getLogChannel() == null) {
+		if (config.getModerationConfig().getLogChannel() == null) {
 			log.warn("Could not find Log Channel for Guild {}", guild.getName());
 			return;
 		}
-		this.sendMessageChannelNotification(config.getModeration().getLogChannel(), string, args);
+		this.sendMessageChannelNotification(config.getModerationConfig().getLogChannel(), string, args);
 	}
 
 	/**
@@ -53,10 +53,10 @@ public final class GuildNotificationService extends NotificationService {
 	 * @param embed The {@link MessageEmbed} to send.
 	 */
 	public void sendMessageLogChannelNotification(MessageEmbed embed) {
-		if (config.getMessageCache().getMessageCacheLogChannel() == null) {
+		if (config.getMessageCacheConfig().getMessageCacheLogChannel() == null) {
 			log.warn("Could not find Message Log Channel for Guild {}", guild.getName());
 			return;
 		}
-		this.sendMessageChannelNotification(config.getMessageCache().getMessageCacheLogChannel(), embed);
+		this.sendMessageChannelNotification(config.getMessageCacheConfig().getMessageCacheLogChannel(), embed);
 	}
 }
