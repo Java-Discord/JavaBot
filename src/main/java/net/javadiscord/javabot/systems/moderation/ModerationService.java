@@ -199,13 +199,14 @@ public class ModerationService {
 	 * Unbans a user.
 	 *
 	 * @param userId   The user's id.
+	 * @param reason The reason for unbanning this user.
 	 * @param bannedBy The member who is responsible for unbanning this member.
 	 * @param channel  The channel in which the unban was issued.
 	 * @param quiet    If true, don't send a message in the channel.
 	 * @return Whether the member is banned or not.
 	 */
-	public boolean unban(long userId, Member bannedBy, MessageChannel channel, boolean quiet) {
-		MessageEmbed unbanEmbed = this.buildUnbanEmbed(userId, bannedBy);
+	public boolean unban(long userId, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
+		MessageEmbed unbanEmbed = this.buildUnbanEmbed(userId, reason, bannedBy);
 		boolean isBanned = isBanned(bannedBy.getGuild(), userId);
 		if (isBanned) {
 			bannedBy.getGuild().unban(User.fromId(userId)).queue(s -> {
@@ -264,12 +265,13 @@ public class ModerationService {
 				.build();
 	}
 
-	private @NotNull MessageEmbed buildUnbanEmbed(long userId, @NotNull Member unbannedBy) {
+	private @NotNull MessageEmbed buildUnbanEmbed(long userId, String reason, @NotNull Member unbannedBy) {
 		return new EmbedBuilder()
 				.setAuthor(unbannedBy.getUser().getAsTag(), null, unbannedBy.getEffectiveAvatarUrl())
 				.setTitle("Ban Revoked")
 				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Moderator", unbannedBy.getAsMention(), true)
+				.addField("Reason", reason, true)
 				.addField("User Id", MarkdownUtil.codeblock(String.valueOf(userId)), false)
 				.setTimestamp(Instant.now())
 				.build();

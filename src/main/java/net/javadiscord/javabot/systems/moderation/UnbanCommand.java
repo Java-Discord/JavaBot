@@ -20,20 +20,22 @@ public class UnbanCommand extends ModerateCommand {
 	 */
 	public UnbanCommand() {
 		setModerationSlashCommandData(Commands.slash("unban", "Unbans a member")
-				.addOption(OptionType.STRING, "id", "The ID of the user you want to unban", true)
+				.addOption(OptionType.STRING, "id", "The id of the user you want to unban", true)
+				.addOption(OptionType.STRING, "reason", "The reason for unbanning this user", true)
 		);
 	}
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
 		OptionMapping idOption = event.getOption("id");
-		if (idOption == null || Checks.isInvalidLongInput(idOption)) {
+		OptionMapping reasonOption = event.getOption("reason");
+		if (idOption == null || Checks.isInvalidLongInput(idOption) || reasonOption == null) {
 			return Responses.replyMissingArguments(event);
 		}
 		long id = idOption.getAsLong();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService moderationService = new ModerationService(event.getInteraction());
-		if (moderationService.unban(id, event.getMember(), event.getChannel(), quiet)) {
+		ModerationService service = new ModerationService(event.getInteraction());
+		if (service.unban(id, reasonOption.getAsString(), event.getMember(), event.getChannel(), quiet)) {
 			return Responses.success(event, "User Unbanned", "User with id `%s` has been unbanned.", id);
 		} else {
 			return Responses.warning(event, "Could not find banned User with id `%s`", id);
