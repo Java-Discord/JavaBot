@@ -168,7 +168,6 @@ public class Bot {
 	 */
 	private static void addEventListeners(@NotNull JDA jda, @NotNull DIH4JDA dih4jda) {
 		jda.addEventListener(
-				customTagManager,
 				serverLockManager,
 				PresenceUpdater.standardActivities(),
 				new MessageCacheListener(),

@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
  * basically customizable Slash Commands.
  */
 @Slf4j
-public class CustomTagManager extends ListenerAdapter {
+public class CustomTagManager {
 	private static final Map<Long, Set<CustomTag>> LOADED_TAGS;
 
 	static {
