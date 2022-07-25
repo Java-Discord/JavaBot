@@ -89,8 +89,8 @@ public class CustomTagManager {
 	 */
 	public static @NotNull RestAction<?> handleCustomTag(@NotNull SlashCommandInteractionEvent event, @NotNull CustomTag tag) {
 		Set<RestAction<?>> actions = new HashSet<>();
-		boolean reply = event.getOption("reply", tag.isReply(), OptionMapping::getAsBoolean);
-		boolean embed = event.getOption("embed", tag.isEmbed(), OptionMapping::getAsBoolean);
+		boolean reply = tag.isReply();
+		boolean embed = tag.isEmbed();
 		if (embed) {
 			if (reply) {
 				actions.add(event.replyEmbeds(tag.toEmbed()));

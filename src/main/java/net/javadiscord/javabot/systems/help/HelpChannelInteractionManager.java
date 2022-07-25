@@ -35,7 +35,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button's id.
 	 */
-	private void handleHelpThank(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
+	private void handleHelpThankButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
 		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
@@ -143,11 +143,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		}
 	}
 
-	@Override
-	public void handleButton(@NotNull ButtonInteractionEvent event, @NotNull Button button) {
-		String[] id = ComponentIdBuilder.split(event.getComponentId());
-		String reservationId = id[2];
-		String action = id[3];
+	private void handleHelpChannelButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
 		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
@@ -210,6 +206,16 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		} else {
 			event.getInteraction().getHook().sendMessage("Sorry, only the person who reserved this channel or moderators are allowed to use these buttons.")
 					.setEphemeral(true).queue();
+		}
+	}
+
+	@Override
+	public void handleButton(@NotNull ButtonInteractionEvent event, @NotNull Button button) {
+		if (event.getUser().isBot()) return;
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		switch (id[0]) {
+			case "help-channel" -> handleHelpChannelButton(event, id[1], id[2]);
+			case "help-thank" -> handleHelpThankButton(event, id[1], id[2]);
 		}
 	}
 }
