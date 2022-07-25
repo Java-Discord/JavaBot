@@ -88,22 +88,20 @@ public class CustomTagManager {
 	 */
 	public static @NotNull RestAction<?> handleCustomTag(@NotNull SlashCommandInteractionEvent event, @NotNull CustomTag tag) {
 		Set<RestAction<?>> actions = new HashSet<>();
-		boolean reply = tag.isReply();
-		boolean embed = tag.isEmbed();
-		if (embed) {
-			if (reply) {
+		if (tag.isEmbed()) {
+			if (tag.isReply()) {
 				actions.add(event.getHook().sendMessageEmbeds(tag.toEmbed()));
 			} else {
 				actions.add(event.getChannel().sendMessageEmbeds(tag.toEmbed()));
 			}
 		} else {
-			if (reply) {
+			if (tag.isReply()) {
 				actions.add(event.getHook().sendMessage(tag.getResponse()).allowedMentions(List.of()));
 			} else {
 				actions.add(event.getChannel().sendMessage(tag.getResponse()).allowedMentions(List.of()));
 			}
 		}
-		if (!reply) {
+		if (!tag.isReply()) {
 			actions.add(event.reply("Done!").setEphemeral(true));
 		}
 		return RestAction.allOf(actions);
