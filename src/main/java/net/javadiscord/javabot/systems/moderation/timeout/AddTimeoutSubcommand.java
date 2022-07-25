@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.moderation.timeout;
 
 
+import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -53,10 +54,10 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 		if (duration.toSeconds() > (Member.MAX_TIME_OUT_LENGTH * 24 * 60 * 60)) {
 			return Responses.error(event, "You cannot add a timeout longer than %s days.", Member.MAX_TIME_OUT_LENGTH);
 		}
-		MessageChannel channel = event.getMessageChannel();
-		if (!channel.getType().isMessage()) {
+		if (!event.getChannelType().isMessage()) {
 			return Responses.error(event, "This command can only be performed in a server message channel.");
 		}
+		MessageChannel channel = event.getMessageChannel();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
 		if (member.isTimedOut()) {
 			return Responses.error(event, "Could not timeout %s; they're already timed out.", member.getAsMention());
