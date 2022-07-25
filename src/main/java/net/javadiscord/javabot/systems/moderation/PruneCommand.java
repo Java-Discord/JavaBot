@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +41,9 @@ public class PruneCommand extends ModerateCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
+		if (!Checks.hasAdminRole(event.getGuild(), moderator)) {
+			return Responses.replyAdminOnly(event, event.getGuild());
+		}
 		ModerationConfig config = Bot.config.get(event.getGuild()).getModerationConfig();
 
 		OptionMapping patternOption = event.getOption("pattern");

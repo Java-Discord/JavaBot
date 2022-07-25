@@ -37,7 +37,7 @@ public abstract class ModerateCommand extends SlashCommand implements CommandMod
 		handleModerationCommand(event, member).queue();
 	}
 
-	public void setRequireStaff(boolean requireStaff) {
+	protected void setRequireStaff(boolean requireStaff) {
 		this.requireStaff = requireStaff;
 	}
 
