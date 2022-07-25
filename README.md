@@ -26,7 +26,35 @@ At startup, the bot will initially start by loading just the global settings, an
 
 # Commands
 
-_Work in Progress_
+We're using [DIH4JDA](https://github.com/DynxstyGIT/DIH4JDA) as our Command/Interaction framework, which makes it quite easy to add new commands.
+
+[PingCommand.java](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/javadiscord/javabot/systems/commands/PingCommand.java)
+```java
+/**
+ * <h3>This class represents the /ping command.</h3>
+ */
+public class PingCommand extends SlashCommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 */
+	public PingCommand() {
+		setSlashCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
+				.setGuildOnly(true)
+		);
+	}
+
+	@Override
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		event.replyEmbeds(new EmbedBuilder()
+				.setAuthor(event.getJDA().getGatewayPing() + "ms", null, event.getJDA().getSelfUser().getAvatarUrl())
+				.setColor(Responses.Type.DEFAULT.getColor())
+				.build()
+		).queue();
+	}
+}
+```
+
+For more information on how this works, visit the [DIH4JDA Wiki!](https://github.com/DynxstyGIT/DIH4JDA/wiki)
 
 # Credits
 
