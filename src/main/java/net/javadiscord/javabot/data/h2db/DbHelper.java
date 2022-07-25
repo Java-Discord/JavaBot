@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Class that provides helper methods for dealing with the database.
@@ -130,12 +131,11 @@ public class DbHelper {
 					.filter(s -> !s.isBlank()).toList();
 			try (Connection c = dataSource.getConnection()) {
 				for (String rawQuery : queries) {
-					StringBuilder query = new StringBuilder();
-					rawQuery.lines()
+					String query = rawQuery.lines()
 							.map(s -> s.strip().stripIndent())
-							.forEach(query::append);
+							.collect(Collectors.joining(""));
 					try (Statement stmt = c.createStatement()) {
-						stmt.executeUpdate(query.toString());
+						stmt.executeUpdate(query);
 					}
 				}
 			}
