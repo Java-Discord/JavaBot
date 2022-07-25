@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 /**
- * <h3>This class represents the /prune export-schema command.</h3>
+ * <h3>This class represents the /prune command.</h3>
  * This command will systematically ban users from the server if they match
  * certain criteria.
  */
