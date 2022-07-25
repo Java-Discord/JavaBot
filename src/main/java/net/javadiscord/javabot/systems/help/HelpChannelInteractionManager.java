@@ -35,7 +35,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 	 * @param reservationId The help channel's reservation id.
 	 * @param action        The data extracted from the button's id.
 	 */
-	private void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
+	private void handleHelpThank(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
 		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
@@ -188,7 +188,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();
 				if (event.getUser().equals(owner)) {// If the owner is unreserving their own channel, handle it separately.
-					channelManager.unreserveChannelByUser(channel, owner, null, event);
+					channelManager.unreserveChannelByOwner(channel, owner, null, event);
 				} else {
 					channelManager.unreserveChannel(channel).queue();
 				}

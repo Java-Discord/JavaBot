@@ -36,7 +36,7 @@ public class UnreserveCommand extends SlashCommand {
 		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
 			String reason = event.getOption("reason", null, OptionMapping::getAsString);
 			event.deferReply(true).queue();
-			channelManager.unreserveChannelByUser(channel, owner, reason, event);
+			channelManager.unreserveChannelByOwner(channel, owner, reason, event);
 		} else {
 			Responses.warning(event, "Could not unreserve this channel. This command only works in help channels you've reserved.").queue();
 		}

@@ -224,7 +224,7 @@ public class HelpChannelManager {
 	 * @param reason      The user-supplied reason for unreserving the channel.
 	 * @param interaction The interaction the user did to unreserve the channel.
 	 */
-	public void unreserveChannelByUser(TextChannel channel, User owner, @Nullable String reason, Interaction interaction) {
+	public void unreserveChannelByOwner(TextChannel channel, @NotNull User owner, @Nullable String reason, @NotNull Interaction interaction) {
 		if (owner.equals(interaction.getUser())) {// The user is unreserving their own channel.
 			unreserveChannelByOwner(channel, owner, interaction);
 		} else {// The channel was unreserved by someone other than the owner.
@@ -435,7 +435,7 @@ public class HelpChannelManager {
 	 * @param timeout The timeout.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void setTimeout(TextChannel channel, int timeout) throws SQLException {
+	public void setTimeout(@NotNull TextChannel channel, int timeout) throws SQLException {
 		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
 			stmt.setInt(1, timeout);
 			stmt.setLong(2, channel.getIdLong());
