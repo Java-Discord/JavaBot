@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.tags.commands;
+package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.tags.model.CustomTag;
+import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;

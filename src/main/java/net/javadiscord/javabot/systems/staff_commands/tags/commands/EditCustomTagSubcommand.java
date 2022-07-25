@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.tags.commands;
+package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
@@ -21,9 +21,9 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.tags.CustomTagManager;
-import net.javadiscord.javabot.systems.tags.dao.CustomTagRepository;
-import net.javadiscord.javabot.systems.tags.model.CustomTag;
+import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
+import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagRepository;
+import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 

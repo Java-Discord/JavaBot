@@ -1,12 +1,12 @@
-package net.javadiscord.javabot.systems.tags.commands;
+package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.tags.dao.CustomTagRepository;
-import net.javadiscord.javabot.systems.tags.model.CustomTag;
+import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagRepository;
+import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 

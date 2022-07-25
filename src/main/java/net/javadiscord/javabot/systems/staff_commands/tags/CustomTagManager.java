@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.tags;
+package net.javadiscord.javabot.systems.staff_commands.tags;
 
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
-import net.javadiscord.javabot.systems.tags.dao.CustomTagRepository;
-import net.javadiscord.javabot.systems.tags.model.CustomTag;
+import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagRepository;
+import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

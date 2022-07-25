@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.tags.commands;
+package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import lombok.extern.slf4j.Slf4j;

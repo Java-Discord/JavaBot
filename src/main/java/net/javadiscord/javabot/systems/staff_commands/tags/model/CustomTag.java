@@ -1,9 +1,9 @@
-package net.javadiscord.javabot.systems.tags.model;
+package net.javadiscord.javabot.systems.staff_commands.tags.model;
 
 import lombok.Data;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.javadiscord.javabot.systems.tags.CustomTagManager;
+import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import org.jetbrains.annotations.NotNull;
 
 /**

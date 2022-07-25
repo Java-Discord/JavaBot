@@ -1,7 +1,7 @@
-package net.javadiscord.javabot.systems.tags.dao;
+package net.javadiscord.javabot.systems.staff_commands.tags.dao;
 
 import lombok.RequiredArgsConstructor;
-import net.javadiscord.javabot.systems.tags.model.CustomTag;
+import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 

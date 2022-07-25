@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.self_roles;
+package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.components.ButtonHandler;

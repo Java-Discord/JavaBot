@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.tags.commands;
+package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
@@ -9,8 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.tags.CustomTagManager;
-import net.javadiscord.javabot.systems.tags.model.CustomTag;
+import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
+import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
