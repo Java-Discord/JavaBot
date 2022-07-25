@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Administrative Subcommand that allows to create {@link CustomTag}s.
  */
-public class CreateCustomTagSubcommand extends CustomTagsSubcommand implements ModalHandler {
+public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */

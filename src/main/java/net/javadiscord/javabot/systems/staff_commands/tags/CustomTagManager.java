@@ -92,13 +92,13 @@ public class CustomTagManager {
 		boolean embed = tag.isEmbed();
 		if (embed) {
 			if (reply) {
-				actions.add(event.replyEmbeds(tag.toEmbed()));
+				actions.add(event.getHook().sendMessageEmbeds(tag.toEmbed()));
 			} else {
 				actions.add(event.getChannel().sendMessageEmbeds(tag.toEmbed()));
 			}
 		} else {
 			if (reply) {
-				actions.add(event.reply(tag.getResponse()).allowedMentions(List.of()));
+				actions.add(event.getHook().sendMessage(tag.getResponse()).allowedMentions(List.of()));
 			} else {
 				actions.add(event.getChannel().sendMessage(tag.getResponse()).allowedMentions(List.of()));
 			}

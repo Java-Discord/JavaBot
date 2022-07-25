@@ -35,7 +35,7 @@ import java.util.Set;
 /**
  * <h3>This class represents the /tag-admin edit command.</h3>
  */
-public class EditCustomTagSubcommand extends CustomTagsSubcommand implements AutoCompletable, ModalHandler {
+public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompletable, ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */

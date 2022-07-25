@@ -25,7 +25,7 @@ import java.util.Optional;
 /**
  * <h3>This class represents the /tag-admin delete command.</h3>
  */
-public class DeleteCustomTagSubcommand extends CustomTagsSubcommand implements AutoCompletable {
+public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCompletable {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */
