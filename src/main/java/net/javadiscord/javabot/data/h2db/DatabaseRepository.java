@@ -148,17 +148,6 @@ public abstract class DatabaseRepository<T> {
 		return con;
 	}
 
-	/**
-	 * Closes the {@link Connection}, if not already done.
-	 *
-	 * @throws SQLException If an error occurs.
-	 */
-	public void close() throws SQLException {
-		if (!con.isClosed()) {
-			con.close();
-		}
-	}
-
 	private Object readResultSetValue(@NotNull TableProperty<T> property, @NotNull ResultSet rs) throws SQLException {
 		Object object = rs.getObject(property.getPropertyName());
 		// some exceptions for convenience
