@@ -11,7 +11,6 @@ import org.quartz.JobExecutionException;
 /**
  * Removes a specified amount of experience from everyone's help account.
  */
-// TODO: Exponentially remove experience
 public class HelpExperienceJob extends DiscordApiJob {
 	@Override
 	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {

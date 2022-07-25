@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
+import com.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -15,6 +16,7 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -68,7 +70,7 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	}
 
 	@Override
-	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		//TODO: add
+	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
+		event.replyChoices(AutoCompleteUtils.handleChoices(event, RemoveQuestionSubcommand::replyQuestions)).queue();
 	}
 }
