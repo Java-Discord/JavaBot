@@ -14,6 +14,6 @@ public class ServerLockCommand extends SlashCommand implements CommandModeration
 	 */
 	public ServerLockCommand() {
 		setModerationSlashCommandData(Commands.slash("serverlock-admin", "Administrative commands for managing the server lock functionality."));
-		addSubcommands(new SetLockStatusSubcommand());
+		addSubcommands(new SetLockStatusSubcommand(), new CheckLockStatusSubcommand());
 	}
 }
