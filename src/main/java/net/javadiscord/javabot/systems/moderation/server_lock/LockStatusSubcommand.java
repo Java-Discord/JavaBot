@@ -9,6 +9,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
 import net.javadiscord.javabot.util.Checks;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,8 +53,8 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 			}
 			Responses.info(event, "Server Lock Status", "Successfully %slocked the current server!", locked ? "" : "un").queue();
 		} catch (UnknownPropertyException e) {
-			Responses.warning(event, "Unknown Property", "Could not lock/unlock the ")
-					.queue();
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			Responses.warning(event, "Unknown Property", "Could not lock/unlock the server.").queue();
 		}
 	}
 }
