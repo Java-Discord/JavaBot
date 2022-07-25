@@ -76,7 +76,7 @@ public class DIH4JDAListener implements DIH4JDAEventListener {
 
 	private @NotNull MessageEmbed buildExceptionEmbed(@NotNull Exception e) {
 		return buildErrorEmbed()
-				.setDescription(MarkdownUtil.codeblock(e.getMessage()))
+				.setDescription(e.getMessage() == null ? "An error occurred." : MarkdownUtil.codeblock(e.getMessage()))
 				.setFooter(e.getClass().getSimpleName())
 				.build();
 	}
