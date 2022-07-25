@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * <h3>This class represents the /db-admin export-table command.</h3>

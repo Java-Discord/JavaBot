@@ -35,7 +35,7 @@ public class MessageLinkListener extends ListenerAdapter {
 			optional.ifPresent(action -> action.queue(
 					m -> WebhookUtil.ensureWebhookExists(event.getChannel().asTextChannel(),
 							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message")))
-					), ExceptionLogger::capture
+					), e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			));
 		}
 	}
