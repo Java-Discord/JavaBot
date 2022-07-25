@@ -29,7 +29,6 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 	@Override
 	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
-		message.clearReactions().queue();
 		MessageEmbed declineEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
 		message.editMessageEmbeds(declineEmbed).queue(
 				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getSuccessEmote(event.getJDA())).queue(),

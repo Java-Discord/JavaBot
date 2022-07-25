@@ -31,7 +31,6 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		String reason = event.getOption("reason", null, OptionMapping::getAsString);
 		MessageEmbed embed = message.getEmbeds().get(0);
-		message.clearReactions().queue();
 		MessageEmbed declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, reason, config);
 		message.editMessageEmbeds(declineEmbed).queue(
 				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getFailureEmote(event.getJDA())).queue(),

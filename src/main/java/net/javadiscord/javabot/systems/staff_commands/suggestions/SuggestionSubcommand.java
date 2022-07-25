@@ -46,7 +46,7 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 		long messageId = messageIdMapping.getAsLong();
 		event.deferReply(true).queue();
 		event.getMessageChannel().retrieveMessageById(messageId).queue(
-				message -> handleSuggestionCommand(event, message, config).queue(),
+				message -> message.clearReactions().queue(s -> handleSuggestionCommand(event, message, config).queue()),
 				e -> Responses.error(event.getHook(), "Could not find suggestion message with id " + messageId));
 
 	}

@@ -29,7 +29,6 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	@Override
 	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
-		message.clearReactions().queue();
 		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed, config);
 		SystemsConfig.EmojiConfig emojiConfig = Bot.config.getSystems().getEmojiConfig();
 		message.editMessageEmbeds(clearEmbed).queue(

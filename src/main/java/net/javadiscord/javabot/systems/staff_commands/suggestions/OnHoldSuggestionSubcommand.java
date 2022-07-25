@@ -29,7 +29,6 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 	@Override
 	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
-		message.clearReactions().queue();
 		MessageEmbed onHoldEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
 		message.editMessageEmbeds(onHoldEmbed).queue(
 				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getClockEmoji()).queue(),
