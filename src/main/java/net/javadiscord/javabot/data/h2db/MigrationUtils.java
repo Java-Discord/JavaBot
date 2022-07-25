@@ -30,7 +30,7 @@ public class MigrationUtils {
 		if (resource == null) throw new IOException("Missing resource /migrations/");
 		URI uri = resource.toURI();
 		try {
-			return Paths.get(uri);
+			return Path.of(uri);
 		} catch (FileSystemNotFoundException e) {
 			Map<String, String> env = new HashMap<>();
 			try (FileSystem dir = FileSystems.newFileSystem(uri, env)) {
