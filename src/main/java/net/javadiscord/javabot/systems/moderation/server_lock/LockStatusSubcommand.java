@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,8 +33,12 @@ public class LockStatusSubcommand extends SlashCommand.Subcommand {
 			Responses.replyMissingArguments(event).queue();
 			return;
 		}
-		if (event.getGuild() == null) {
+		if (event.getGuild() == null || event.getMember() == null) {
 			Responses.replyGuildOnly(event).queue();
+			return;
+		}
+		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
+			Responses.replyStaffOnly(event, event.getGuild()).queue();
 			return;
 		}
 		try {
