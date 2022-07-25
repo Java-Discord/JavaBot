@@ -95,21 +95,17 @@ public class ProfileCommand extends SlashCommand {
 
 	private @NotNull String getDescription(Member member) {
 		StringBuilder sb = new StringBuilder();
-		getCustomActivity(member).ifPresent(activity -> sb.append("\n`").append(activity.getName()).append("`"));
-		getGameActivity(member).ifPresent(activity -> sb.append(String.format("\n%s %s",
+		getActivity(member, true).ifPresent(activity -> sb.append("\n`").append(activity.getName()).append("`"));
+		getActivity(member, false).ifPresent(activity -> sb.append(String.format("\n%s %s",
 				getGameActivityType(activity),
 				getGameActivityDetails(activity))));
 		return sb.toString();
 	}
 
-	private @NotNull Optional<Activity> getCustomActivity(@NotNull Member member) {
+	private @NotNull Optional<Activity> getActivity(@NotNull Member member, boolean customActivity) {
 		return member.getActivities().stream()
-				.filter(a -> a.getType() == Activity.ActivityType.CUSTOM_STATUS).findFirst();
-	}
-
-	private @NotNull Optional<Activity> getGameActivity(@NotNull Member member) {
-		return member.getActivities().stream()
-				.filter(a -> a.getType() != Activity.ActivityType.CUSTOM_STATUS).findFirst();
+				.filter(a -> customActivity == (a.getType() == Activity.ActivityType.CUSTOM_STATUS))
+				.findFirst();
 	}
 
 	private @NotNull String getGameActivityType(@NotNull Activity activity) {
