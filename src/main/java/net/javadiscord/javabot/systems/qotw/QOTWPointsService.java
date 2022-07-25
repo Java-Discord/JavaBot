@@ -55,7 +55,7 @@ public class QOTWPointsService {
 	 * @return The QOTW-Rank as an integer.
 	 */
 	public int getQOTWRank(long userId) {
-		try (var con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints();
 			return accounts.stream()
@@ -91,7 +91,7 @@ public class QOTWPointsService {
 	 * @return A {@link List} with the top member ids.
 	 */
 	public List<Member> getTopMembers(int n, Guild guild) {
-		try (var con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints();
 			return accounts.stream()

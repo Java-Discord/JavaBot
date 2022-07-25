@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
@@ -115,8 +116,8 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 		int stringWidth = g2d.getFontMetrics().stringWidth(displayName);
 		while (stringWidth > 750) {
-			var currentFont = g2d.getFont();
-			var newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
+			Font currentFont = g2d.getFont();
+			Font newFont = currentFont.deriveFont(currentFont.getSize() - 1F);
 			g2d.setFont(newFont);
 			stringWidth = g2d.getFontMetrics().stringWidth(displayName);
 		}
@@ -124,7 +125,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		g2d.setColor(SECONDARY_COLOR);
 		g2d.setFont(ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", 72).orElseThrow());
 
-		var points = service.getPoints(member.getIdLong());
+		long points = service.getPoints(member.getIdLong());
 		String text = points + (points > 1 ? " points" : " point");
 		String rank = "#" + service.getQOTWRank(member.getIdLong());
 		g2d.drawString(text, x + 430, y + 210);
@@ -178,8 +179,8 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 *
 	 * @return The image's cache name.
 	 */
-	private String getCacheName() {
-		try (var con = Bot.dataSource.getConnection()) {
+	private @NotNull String getCacheName() {
+		try (Connection con = Bot.dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints()
 					.stream()

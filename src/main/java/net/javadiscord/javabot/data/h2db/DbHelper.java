@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.h2.tools.Server;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,12 +53,12 @@ public class DbHelper {
 			ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			throw new IllegalStateException("Cannot start database server.", e);
 		}
-		var hikariConfig = new HikariConfig();
-		var hikariConfigSource = config.getSystems().getHikariConfig();
+		HikariConfig hikariConfig = new HikariConfig();
+		SystemsConfig.HikariConfig hikariConfigSource = config.getSystems().getHikariConfig();
 		hikariConfig.setJdbcUrl(hikariConfigSource.getJdbcUrl());
 		hikariConfig.setMaximumPoolSize(hikariConfigSource.getMaximumPoolSize());
 		hikariConfig.setLeakDetectionThreshold(hikariConfigSource.getLeakDetectionThreshold());
-		var ds = new HikariDataSource(hikariConfig);
+		HikariDataSource ds = new HikariDataSource(hikariConfig);
 		// Add a shutdown hook to close down the datasource and server when the JVM terminates.
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			ds.close();
@@ -80,7 +82,7 @@ public class DbHelper {
 	 */
 	public static void doDbAction(ConnectionConsumer consumer) {
 		Bot.asyncPool.submit(() -> {
-			try (var c = Bot.dataSource.getConnection()) {
+			try (Connection c = Bot.dataSource.getConnection()) {
 				consumer.consume(c);
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
@@ -99,8 +101,8 @@ public class DbHelper {
 	 */
 	public static <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		Bot.asyncPool.submit(() -> {
-			try (var c = Bot.dataSource.getConnection()) {
-				var dao = daoConstructor.apply(c);
+			try (Connection c = Bot.dataSource.getConnection()) {
+				T dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
@@ -109,8 +111,8 @@ public class DbHelper {
 	}
 
 	private static boolean shouldInitSchema(String jdbcUrl) {
-		var p = Pattern.compile("jdbc:h2:tcp://localhost:\\d+/(.*)");
-		var m = p.matcher(jdbcUrl);
+		Pattern p = Pattern.compile("jdbc:h2:tcp://localhost:\\d+/(.*)");
+		Matcher m = p.matcher(jdbcUrl);
 		boolean shouldInitSchema = false;
 		if (m.find()) {
 			String dbFilePath = m.group(1) + ".mv.db";

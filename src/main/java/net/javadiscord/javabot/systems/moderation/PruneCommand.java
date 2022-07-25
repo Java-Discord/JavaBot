@@ -7,10 +7,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -38,7 +40,7 @@ public class PruneCommand extends ModerateCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
-		var config = Bot.config.get(event.getGuild()).getModerationConfig();
+		ModerationConfig config = Bot.config.get(event.getGuild()).getModerationConfig();
 
 		OptionMapping patternOption = event.getOption("pattern");
 		OptionMapping beforeOption = event.getOption("before");
@@ -46,11 +48,11 @@ public class PruneCommand extends ModerateCommand {
 		OptionMapping reasonOption = event.getOption("reason");
 		OptionMapping delDaysOption = event.getOption("delete-days-of-history");
 
-		final var pattern = patternOption == null ? null : Pattern.compile(patternOption.getAsString());
-		final var before = beforeOption == null ? null : LocalDateTime.parse(beforeOption.getAsString(), TIMESTAMP_FORMATTER).atOffset(ZoneOffset.UTC);
-		final var after = afterOption == null ? null : LocalDateTime.parse(afterOption.getAsString(), TIMESTAMP_FORMATTER).atOffset(ZoneOffset.UTC);
-		final var delDays = delDaysOption == null ? 0 : (int) delDaysOption.getAsLong();
-		final var reason = reasonOption == null ? null : reasonOption.getAsString();
+		final Pattern pattern = patternOption == null ? null : Pattern.compile(patternOption.getAsString());
+		final OffsetDateTime before = beforeOption == null ? null : LocalDateTime.parse(beforeOption.getAsString(), TIMESTAMP_FORMATTER).atOffset(ZoneOffset.UTC);
+		final OffsetDateTime after = afterOption == null ? null : LocalDateTime.parse(afterOption.getAsString(), TIMESTAMP_FORMATTER).atOffset(ZoneOffset.UTC);
+		final int delDays = delDaysOption == null ? 0 : (int) delDaysOption.getAsLong();
+		final String reason = reasonOption == null ? null : reasonOption.getAsString();
 
 		if (pattern == null && before == null && after == null) {
 			return Responses.warning(event, "At least one filter parameter must be given; cannot remove every user from the server.");

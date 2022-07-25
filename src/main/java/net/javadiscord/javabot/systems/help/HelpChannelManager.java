@@ -23,10 +23,12 @@ import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -72,14 +74,14 @@ public class HelpChannelManager {
 	 * @return True if the user can reserve it, or false if not.
 	 */
 	public boolean mayUserReserveChannel(User user) {
-		var member = this.config.getGuild().getMember(user);
+		Member member = this.config.getGuild().getMember(user);
 		// Only allow guild members.
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
 		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
-			var rs = stmt.executeQuery();
+			ResultSet rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -92,7 +94,7 @@ public class HelpChannelManager {
 	 * Opens a text channel so that it is ready for a new question.
 	 */
 	public void openNew() {
-		var category = config.getOpenChannelCategory();
+		Category category = config.getOpenChannelCategory();
 		if (category == null) {
 			throw new IllegalStateException("Missing help channel category. Cannot open a new help channel.");
 		}
@@ -113,7 +115,7 @@ public class HelpChannelManager {
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
 		if (!isOpen(channel)) throw new IllegalArgumentException("Can only reserve open channels!");
 		// Check if the database still has this channel marked as reserved (which can happen if an admin manually moves a channel.)
-		var alreadyReservedCount = DbActions.count(
+		long alreadyReservedCount = DbActions.count(
 				"SELECT COUNT(id) FROM reserved_help_channels WHERE channel_id = ?",
 				s -> s.setLong(1, channel.getIdLong())
 		);
@@ -126,11 +128,11 @@ public class HelpChannelManager {
 				"INSERT INTO reserved_help_channels (channel_id, user_id, timeout) VALUES (?, ?, ?)",
 				channel.getIdLong(), reservingUser.getIdLong(), timeout
 		);
-		var target = config.getReservedChannelCategory();
+		Category target = config.getReservedChannelCategory();
 		channel.getManager().setParent(target).sync(target).queue();
 		// Pin the message, then immediately try and delete the annoying "message has been pinned" message.
 		message.pin().queue(unused -> channel.getHistory().retrievePast(10).queue(messages -> {
-			for (var msg : messages) {
+			for (Message msg : messages) {
 				if (msg.getType() == MessageType.CHANNEL_PINNED_ADD) {
 					msg.delete().queue();
 				}
@@ -143,10 +145,10 @@ public class HelpChannelManager {
 
 		// Now that an open channel has been reserved, try and compensate by creating a new one or pulling one from storage.
 		if (this.config.isRecycleChannels()) {
-			var dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
+			List<TextChannel> dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
 			if (!dormantChannels.isEmpty()) {
-				var targetCategory = this.config.getOpenChannelCategory();
-				var targetChannel = dormantChannels.get(0);
+				Category targetCategory = this.config.getOpenChannelCategory();
+				TextChannel targetChannel = dormantChannels.get(0);
 				targetChannel.getManager().setParent(targetCategory).sync(targetCategory).queue();
 				targetChannel.sendMessage(config.getReopenedChannelMessage()).queue();
 			} else {
@@ -186,23 +188,23 @@ public class HelpChannelManager {
 	 * @param channel The channel to get participants for.
 	 * @return The list of users.
 	 */
-	public CompletableFuture<Map<Member, List<Message>>> getParticipantsSinceReserved(TextChannel channel) {
+	public CompletableFuture<Map<Member, List<Message>>> getParticipantsSinceReserved(@NotNull TextChannel channel) {
 		int limit = 300;
-		var history = channel.getHistory();
+		MessageHistory history = channel.getHistory();
 		final CompletableFuture<Map<Member, List<Message>>> cf = new CompletableFuture<>();
 		Bot.asyncPool.execute(() -> {
 			final Map<Member, List<Message>> userMessages = new HashMap<>();
 			boolean endFound = false;
 			while (!endFound && history.size() < limit) {
-				var messages = history.retrievePast(50).complete();
+				List<Message> messages = history.retrievePast(50).complete();
 				for (Message msg : messages) {
 					if (msg.getContentRaw().contains(config.getReservedChannelMessage()) || msg.isPinned()) {
 						endFound = true;
 						break;
 					}
-					var user = msg.getAuthor();
+					User user = msg.getAuthor();
 					if (!user.isBot() && !user.isSystem()) {
-						var member = channel.getGuild().retrieveMember(user).complete();
+						Member member = channel.getGuild().retrieveMember(user).complete();
 						List<Message> um = userMessages.computeIfAbsent(member, u -> new ArrayList<>());
 						um.add(msg);
 					}
@@ -230,18 +232,18 @@ public class HelpChannelManager {
 		}
 	}
 
-	private void unreserveChannelByOwner(TextChannel channel, User owner, Interaction interaction) {
-		var optionalReservation = getReservationForChannel(channel.getIdLong());
+	private void unreserveChannelByOwner(@NotNull TextChannel channel, User owner, Interaction interaction) {
+		Optional<ChannelReservation> optionalReservation = getReservationForChannel(channel.getIdLong());
 		if (optionalReservation.isEmpty()) {
 			log.warn("Could not find current reservation data for channel {}. Unreserving the channel without thanks.", channel.getAsMention());
 			unreserveChannel(channel);
 			return;
 		}
-		var reservation = optionalReservation.get();
+		ChannelReservation reservation = optionalReservation.get();
 		// Ask the user for some feedback about the help channel, if possible.
 		getParticipantsSinceReserved(channel).thenAcceptAsync(participants -> {
 			List<Member> potentialHelpers = new ArrayList<>(participants.size());
-			for (var entry : participants.entrySet()) {
+			for (Map.Entry<Member, List<Message>> entry : participants.entrySet()) {
 				if (!entry.getKey().getUser().equals(owner)) potentialHelpers.add(entry.getKey());
 			}
 			if (potentialHelpers.isEmpty()) {
@@ -271,9 +273,9 @@ public class HelpChannelManager {
 		});
 	}
 
-	private void sendThanksButtonsMessage(List<Member> potentialHelpers, ChannelReservation reservation, Interaction interaction, TextChannel channel) {
+	private void sendThanksButtonsMessage(@NotNull List<Member> potentialHelpers, ChannelReservation reservation, Interaction interaction, TextChannel channel) {
 		List<ItemComponent> thanksButtons = new ArrayList<>(25);
-		for (var helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 20))) {
+		for (Member helper : potentialHelpers.subList(0, Math.min(potentialHelpers.size(), 20))) {
 			thanksButtons.add(new ButtonImpl("help-thank:" + reservation.getId() + ":" + helper.getId(), helper.getEffectiveName(), ButtonStyle.SUCCESS, false, Emoji.fromUnicode("❤")));
 		}
 		ActionRow controlsRow = ActionRow.of(
@@ -323,7 +325,7 @@ public class HelpChannelManager {
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			try (var con = Bot.dataSource.getConnection()) {
+			try (Connection con = Bot.dataSource.getConnection()) {
 				HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
@@ -333,24 +335,27 @@ public class HelpChannelManager {
 						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
 					}
 				}
-				var stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?");
-				stmt.setLong(1, channel.getIdLong());
-				stmt.executeUpdate();
-				var dormantCategory = config.getDormantChannelCategory();
-				var openCategory = config.getOpenChannelCategory();
-				return RestAction.allOf(
-						channel.retrievePinnedMessages()
-								.flatMap(messages -> {
-									if (messages.isEmpty()) return new CompletedRestAction<>(channel.getJDA(), null);
-									return RestAction.allOf(messages.stream().map(Message::unpin).toList());
-								}),
-						getOpenChannelCount() >= config.getPreferredOpenChannelCount()
-								? RestAction.allOf(channel.getManager().setParent(dormantCategory).sync(dormantCategory),
-								channel.sendMessage(config.getDormantChannelMessage()))
+				try (PreparedStatement stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
+					stmt.setLong(1, channel.getIdLong());
+					stmt.executeUpdate();
+					Category dormantCategory = config.getDormantChannelCategory();
+					Category openCategory = config.getOpenChannelCategory();
+					return RestAction.allOf(
+							channel.retrievePinnedMessages()
+									.flatMap(messages -> {
+										if (messages.isEmpty()) {
+											return new CompletedRestAction<>(channel.getJDA(), null);
+										}
+										return RestAction.allOf(messages.stream().map(Message::unpin).toList());
+									}),
+							getOpenChannelCount() >= config.getPreferredOpenChannelCount()
+									? RestAction.allOf(channel.getManager().setParent(dormantCategory).sync(dormantCategory),
+									channel.sendMessage(config.getDormantChannelMessage()))
 
-								: RestAction.allOf(channel.getManager().setParent(openCategory).sync(openCategory),
-								channel.sendMessage(config.getReopenedChannelMessage()))
-				);
+									: RestAction.allOf(channel.getManager().setParent(openCategory).sync(openCategory),
+									channel.sendMessage(config.getReopenedChannelMessage()))
+					);
+				}
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage());
@@ -367,7 +372,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void unreserveAllOwnedChannels(User user) throws SQLException {
-		var channels = DbActions.mapQuery(
+		List<TextChannel> channels = DbActions.mapQuery(
 				"SELECT channel_id FROM reserved_help_channels WHERE user_id = ?",
 				s -> s.setLong(1, user.getIdLong()),
 				rs -> {
@@ -378,7 +383,7 @@ public class HelpChannelManager {
 					return c;
 				}
 		);
-		for (var channel : channels) {
+		for (TextChannel channel : channels) {
 			unreserveChannel(channel);
 		}
 	}
@@ -448,7 +453,7 @@ public class HelpChannelManager {
 	public int getTimeout(TextChannel channel) throws SQLException {
 		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
 			stmt.setLong(1, channel.getIdLong());
-			var rs = stmt.executeQuery();
+			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1);
 			} else {
@@ -489,7 +494,7 @@ public class HelpChannelManager {
 		}
 		int currentTimeout = getTimeout(channel);
 		int maxTimeout = config.getInactivityTimeouts().get(0);
-		for (var t : config.getInactivityTimeouts()) {
+		for (Integer t : config.getInactivityTimeouts()) {
 			if (t > currentTimeout) {
 				return t;
 			}

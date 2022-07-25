@@ -11,10 +11,12 @@ import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
+import java.util.List;
 
 /**
  * Subcommand that allows staff-members to list QOTW Questions.
@@ -30,8 +32,8 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 	}
 
 	@Override
-	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
-		var repository = new QuestionQueueRepository(con);
+	protected InteractionCallbackAction<?> handleCommand(@NotNull SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
+		QuestionQueueRepository repository = new QuestionQueueRepository(con);
 		OptionMapping pageOption = event.getOption("page");
 		int page = 0;
 		if (pageOption != null) {
@@ -41,7 +43,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 			}
 			page = userPage;
 		}
-		var questions = repository.getQuestions(guildId, page, 10);
+		List<QOTWQuestion> questions = repository.getQuestions(guildId, page, 10);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
 				.setTitle("QOTW Questions Queue")

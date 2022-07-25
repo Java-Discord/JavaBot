@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.moderation.warn.dao;
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -24,8 +25,8 @@ public class WarnRepository {
 	 * @return The warn that was saved.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Warn insert(Warn warn) throws SQLException {
-		try (var s = con.prepareStatement(
+	public Warn insert(@NotNull Warn warn) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement(
 				"INSERT INTO warn (user_id, warned_by, severity, severity_weight, reason) VALUES (?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
@@ -35,7 +36,7 @@ public class WarnRepository {
 			s.setInt(4, warn.getSeverityWeight());
 			s.setString(5, warn.getReason());
 			s.executeUpdate();
-			var rs = s.getGeneratedKeys();
+			ResultSet rs = s.getGeneratedKeys();
 			if (!rs.next()) throw new SQLException("No generated keys returned.");
 			long id = rs.getLong(1);
 			return findById(id).orElseThrow();
@@ -51,9 +52,9 @@ public class WarnRepository {
 	 */
 	public Optional<Warn> findById(long id) throws SQLException {
 		Warn warn = null;
-		try (var s = con.prepareStatement("SELECT * FROM warn WHERE id = ?")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM warn WHERE id = ?")) {
 			s.setLong(1, id);
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			if (rs.next()) {
 				warn = read(rs);
 			}
@@ -72,10 +73,10 @@ public class WarnRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getTotalSeverityWeight(long userId, LocalDateTime cutoff) throws SQLException {
-		try (var s = con.prepareStatement("SELECT SUM(severity_weight) FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT SUM(severity_weight) FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?")) {
 			s.setLong(1, userId);
 			s.setTimestamp(2, Timestamp.valueOf(cutoff));
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			int sum = 0;
 			if (rs.next()) {
 				sum = rs.getInt(1);
@@ -92,7 +93,7 @@ public class WarnRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void discardAll(long userId) throws SQLException {
-		try (var s = con.prepareStatement("""
+		try (PreparedStatement s = con.prepareStatement("""
 				UPDATE warn SET discarded = TRUE
 				WHERE user_id = ?""")) {
 			s.setLong(1, userId);
@@ -107,7 +108,7 @@ public class WarnRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void discardById(long id) throws SQLException {
-		try (var s = con.prepareStatement("""
+		try (PreparedStatement s = con.prepareStatement("""
 				UPDATE warn SET discarded = TRUE
 				WHERE id = ?""")) {
 			s.setLong(1, id);
@@ -145,10 +146,10 @@ public class WarnRepository {
 	 */
 	public List<Warn> getWarnsByUserId(long userId, LocalDateTime cutoff) {
 		List<Warn> warns = new ArrayList<>();
-		try (var s = con.prepareStatement("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?")) {
 			s.setLong(1, userId);
 			s.setTimestamp(2, Timestamp.valueOf(cutoff));
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			while (rs.next()) warns.add(read(rs));
 			rs.close();
 			return warns;

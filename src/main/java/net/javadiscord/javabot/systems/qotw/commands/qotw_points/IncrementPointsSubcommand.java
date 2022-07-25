@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
@@ -33,7 +34,7 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		var userOption = event.getOption("user");
+		OptionMapping userOption = event.getOption("user");
 		if (userOption == null) {
 			Responses.replyMissingArguments(event).queue();
 			return;

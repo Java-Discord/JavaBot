@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * <h3>This class represents the /db-admin migrations-list command.</h3>
@@ -33,7 +34,7 @@ public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		try (var s = Files.list(MigrationUtils.getMigrationsDirectory())) {
+		try (Stream<Path> s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 					.setTitle("List of Runnable Migrations");
 			List<Path> paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();

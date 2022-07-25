@@ -89,7 +89,7 @@ public class ReflectionUtils {
 	 */
 	public static @NotNull Map<String, Class<?>> getFields(@NotNull String parentPropertyName, @NotNull Class<?> parentClass) throws IllegalAccessException {
 		Map<String, Class<?>> fieldsMap = new HashMap<>();
-		for (var field : parentClass.getDeclaredFields()) {
+		for (Field field : parentClass.getDeclaredFields()) {
 			// Skip transient fields.
 			if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 			field.setAccessible(true);
@@ -98,7 +98,7 @@ public class ReflectionUtils {
 			if (propertyTypeParsers.containsKey(field.getType())) {
 				fieldsMap.put(fieldPropertyName, field.getType());
 			} else {
-				var childFieldsMap = getFields(fieldPropertyName, field.getType());
+				Map<String, Class<?>> childFieldsMap = getFields(fieldPropertyName, field.getType());
 				fieldsMap.putAll(childFieldsMap);
 			}
 		}
@@ -115,7 +115,7 @@ public class ReflectionUtils {
 	 * @throws IllegalAccessException If the field cannot be set.
 	 */
 	public static void set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
-		var parser = propertyTypeParsers.get(field.getType());
+		Function<String, Object> parser = propertyTypeParsers.get(field.getType());
 		if (parser == null) {
 			throw new IllegalArgumentException("No supported property type parser for the type " + field.getType().getSimpleName());
 		}

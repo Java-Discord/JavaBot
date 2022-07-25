@@ -5,10 +5,7 @@ import net.javadiscord.javabot.systems.tags.model.CustomTag;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +28,7 @@ public class CustomTagRepository {
 		if (findByName(command.getGuildId(), command.getName()).isPresent()) {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s already exists.", command.getGuildId(), command.getName()));
 		}
-		try (var s = con.prepareStatement(
+		try (PreparedStatement s = con.prepareStatement(
 				"INSERT INTO custom_tags (guild_id, created_by, name, response, reply, embed) VALUES (?, ?, ?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
@@ -42,7 +39,7 @@ public class CustomTagRepository {
 			s.setBoolean(5, command.isReply());
 			s.setBoolean(6, command.isEmbed());
 			s.executeUpdate();
-			var rs = s.getGeneratedKeys();
+			ResultSet rs = s.getGeneratedKeys();
 			if (!rs.next()) throw new SQLException("No generated keys returned.");
 			long id = rs.getLong(1);
 			return findById(id).orElseThrow();
@@ -61,7 +58,7 @@ public class CustomTagRepository {
 		if (findByName(old.getGuildId(), old.getName()).isEmpty()) {
 			throw new IllegalArgumentException(String.format("A Custom Command in Guild %s called %s does not exist.", old.getGuildId(), old.getName()));
 		}
-		try (var s = con.prepareStatement(
+		try (PreparedStatement s = con.prepareStatement(
 				"UPDATE custom_tags SET response = ?, reply = ?, embed = ? WHERE id = ?",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
@@ -70,7 +67,7 @@ public class CustomTagRepository {
 			s.setBoolean(3, update.isEmbed());
 			s.setLong(4, old.getId());
 			s.executeUpdate();
-			var rs = s.getGeneratedKeys();
+			ResultSet rs = s.getGeneratedKeys();
 			if (!rs.next()) throw new SQLException("No generated keys returned.");
 			long id = rs.getLong(1);
 			return findById(id).orElseThrow();
@@ -84,7 +81,7 @@ public class CustomTagRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void delete(@NotNull CustomTag command) throws SQLException {
-		try (var s = con.prepareStatement("DELETE FROM custom_tags WHERE id = ?")) {
+		try (PreparedStatement s = con.prepareStatement("DELETE FROM custom_tags WHERE id = ?")) {
 			s.setLong(1, command.getId());
 			s.executeUpdate();
 		}
@@ -100,10 +97,10 @@ public class CustomTagRepository {
 	 */
 	public Optional<CustomTag> findByName(long guildId, String name) throws SQLException {
 		CustomTag command = null;
-		try (var s = con.prepareStatement("SELECT * FROM custom_tags WHERE guild_id = ? AND name = ?")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM custom_tags WHERE guild_id = ? AND name = ?")) {
 			s.setLong(1, guildId);
 			s.setString(2, name);
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			if (rs.next()) {
 				command = read(rs);
 			}
@@ -121,9 +118,9 @@ public class CustomTagRepository {
 	 */
 	public Optional<CustomTag> findById(long id) throws SQLException {
 		CustomTag command = null;
-		try (var s = con.prepareStatement("SELECT * FROM custom_tags WHERE id = ?")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM custom_tags WHERE id = ?")) {
 			s.setLong(1, id);
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			if (rs.next()) {
 				command = read(rs);
 			}
@@ -140,9 +137,9 @@ public class CustomTagRepository {
 	 */
 	public List<CustomTag> getCustomTagsByGuildId(long guildId) {
 		List<CustomTag> commands = new ArrayList<>();
-		try (var s = con.prepareStatement("SELECT * FROM custom_tags WHERE guild_id = ?")) {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM custom_tags WHERE guild_id = ?")) {
 			s.setLong(1, guildId);
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			while (rs.next()) commands.add(read(rs));
 			rs.close();
 			return commands;

@@ -136,7 +136,7 @@ public class GuildConfig {
 	 */
 	@Nullable
 	public Object resolve(String propertyName) throws UnknownPropertyException {
-		var result = ReflectionUtils.resolveField(propertyName, this);
+		Optional<Pair<Field, Object>> result = ReflectionUtils.resolveField(propertyName, this);
 		return result.map(pair -> {
 			try {
 				return pair.first().get(pair.second());

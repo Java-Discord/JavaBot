@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.systems.help.ChannelSemanticCheck;
 import net.javadiscord.javabot.systems.help.ChannelSemanticData;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -20,12 +21,12 @@ public class SimpleGreetingCheck implements ChannelSemanticCheck {
 	private static final String MESSAGE = "Hi there! It would be helpful if you could provide a detailed description of your problem.";
 
 	@Override
-	public RestAction<?> doCheck(TextChannel channel, User owner, List<Message> messages, ChannelSemanticData semanticData) {
+	public RestAction<?> doCheck(TextChannel channel, User owner, List<Message> messages, @NotNull ChannelSemanticData semanticData) {
 		if (semanticData.initialMessage() != null && messages.size() == 1 && !semanticData.containsBotMessageContent(MESSAGE)) {
-			var m = semanticData.initialMessage();
+			Message m = semanticData.initialMessage();
 			String content = m.getContentStripped().toLowerCase();
 			if (content.length() < 25) {
-				for (var g : GREETINGS) {
+				for (String g : GREETINGS) {
 					if (content.contains(g)) {
 						return m.reply(MESSAGE);
 					}

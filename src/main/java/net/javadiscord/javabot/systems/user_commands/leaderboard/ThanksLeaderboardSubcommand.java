@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -29,17 +30,17 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		event.deferReply(false).queue();
-		var collector = Collectors.joining("\n");
-		var format = "**%d** %s";
+		Collector<CharSequence, ?, String> collector = Collectors.joining("\n");
+		String format = "**%d** %s";
 		Bot.asyncPool.submit(() -> {
-			var totalHelpers = getCounts("""
+			String totalHelpers = getCounts("""
 					SELECT COUNT(id), helper_id
 					FROM help_channel_thanks
 					GROUP BY helper_id""", event.getGuild()).stream()
 					.limit(3)
 					.map(p -> String.format(format, p.getSecond(), p.getFirst().getUser().getAsMention()))
 					.collect(collector);
-			var helpersThisWeek = getCounts("""
+			String helpersThisWeek = getCounts("""
 					SELECT COUNT(id), helper_id
 					FROM help_channel_thanks
 					WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
@@ -47,14 +48,14 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 					.limit(3)
 					.map(p -> String.format(format, p.getSecond(), p.getFirst().getUser().getAsMention()))
 					.collect(collector);
-			var totalHelped = getCounts("""
+			String totalHelped = getCounts("""
 					SELECT COUNT(id) AS count, user_id
 					FROM help_channel_thanks
 					GROUP BY user_id""", event.getGuild()).stream()
 					.limit(3)
 					.map(p -> String.format(format, p.getSecond(), p.getFirst().getUser().getAsMention()))
 					.collect(collector);
-			var helpedThisWeek = getCounts("""
+			String helpedThisWeek = getCounts("""
 					SELECT COUNT(id) AS count, user_id
 					FROM help_channel_thanks
 					WHERE thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))
@@ -84,7 +85,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 						while (rs.next()) {
 							long count = rs.getLong(1);
 							long userId = rs.getLong(2);
-							var member = guild.getMemberById(userId);
+							Member member = guild.getMemberById(userId);
 							if (member == null) continue;
 							memberData.add(new Pair<>(member, count));
 						}

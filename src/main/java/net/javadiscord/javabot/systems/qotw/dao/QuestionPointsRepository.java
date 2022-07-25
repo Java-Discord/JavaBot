@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.qotw.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,15 +25,16 @@ public class QuestionPointsRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void insert(QOTWAccount account) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
+		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
 				Statement.RETURN_GENERATED_KEYS
-		);
-		stmt.setLong(1, account.getUserId());
-		stmt.setLong(2, account.getPoints());
-		int rows = stmt.executeUpdate();
-		if (rows == 0) throw new SQLException("User was not inserted.");
-		stmt.close();
-		log.info("Inserted new QOTW-Account: {}", account);
+		)) {
+			stmt.setLong(1, account.getUserId());
+			stmt.setLong(2, account.getPoints());
+			int rows = stmt.executeUpdate();
+			if (rows == 0) throw new SQLException("User was not inserted.");
+			stmt.close();
+			log.info("Inserted new QOTW-Account: {}", account);
+		}
 	}
 
 	/**
@@ -43,14 +45,15 @@ public class QuestionPointsRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public Optional<QOTWAccount> getByUserId(long userId) throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points WHERE user_id = ?");
-		s.setLong(1, userId);
-		QOTWAccount account = null;
-		ResultSet rs = s.executeQuery();
-		if (rs.next()) {
-			account = read(rs);
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points WHERE user_id = ?")) {
+			s.setLong(1, userId);
+			QOTWAccount account = null;
+			ResultSet rs = s.executeQuery();
+			if (rs.next()) {
+				account = read(rs);
+			}
+			return Optional.ofNullable(account);
 		}
-		return Optional.ofNullable(account);
 	}
 
 	/**
@@ -60,11 +63,12 @@ public class QuestionPointsRepository {
 	 * @return Whether the update affected rows.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean update(QOTWAccount account) throws SQLException {
-		PreparedStatement s = con.prepareStatement("UPDATE qotw_points SET points = ? WHERE user_id = ?");
-		s.setLong(1, account.getPoints());
-		s.setLong(2, account.getUserId());
-		return s.executeUpdate() > 0;
+	public boolean update(@NotNull QOTWAccount account) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("UPDATE qotw_points SET points = ? WHERE user_id = ?")) {
+			s.setLong(1, account.getPoints());
+			s.setLong(2, account.getUserId());
+			return s.executeUpdate() > 0;
+		}
 	}
 
 	/**
@@ -74,13 +78,14 @@ public class QuestionPointsRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWAccount> sortByPoints() throws SQLException {
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points ORDER BY points DESC");
-		var rs = s.executeQuery();
-		List<QOTWAccount> accounts = new ArrayList<>();
-		while (rs.next()) {
-			accounts.add(read(rs));
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points ORDER BY points DESC")) {
+			ResultSet rs = s.executeQuery();
+			List<QOTWAccount> accounts = new ArrayList<>();
+			while (rs.next()) {
+				accounts.add(read(rs));
+			}
+			return accounts;
 		}
-		return accounts;
 	}
 
 	/**

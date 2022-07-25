@@ -20,7 +20,9 @@ import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionReposi
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Optional;
@@ -44,9 +46,9 @@ public class SubmissionManager {
 	 * @param questionNumber The current qotw-week number.
 	 * @return A {@link WebhookMessageAction}.
 	 */
-	public WebhookMessageAction<?> handleSubmission(ButtonInteractionEvent event, int questionNumber) {
+	public WebhookMessageAction<?> handleSubmission(@NotNull ButtonInteractionEvent event, int questionNumber) {
 		event.deferEdit().queue();
-		var member = event.getMember();
+		Member member = event.getMember();
 		if (!this.canCreateSubmissions(member)) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
@@ -54,8 +56,8 @@ public class SubmissionManager {
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					try (var con = Bot.dataSource.getConnection()) {
-						var repo = new QOTWSubmissionRepository(con);
+					try (Connection con = Bot.dataSource.getConnection()) {
+						QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 						QOTWSubmission submission = new QOTWSubmission();
 						submission.setThreadId(thread.getIdLong());
 						submission.setQuestionNumber(questionNumber);
@@ -63,7 +65,7 @@ public class SubmissionManager {
 						submission.setAuthorId(member.getIdLong());
 						repo.insert(submission);
 						DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> {
-							var questionOptional = dao.findByQuestionNumber(questionNumber);
+							Optional<QOTWQuestion> questionOptional = dao.findByQuestionNumber(questionNumber);
 							if (questionOptional.isPresent()) {
 								thread.sendMessage(member.getAsMention())
 										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
@@ -118,16 +120,16 @@ public class SubmissionManager {
 	 * @return Whether the user hat unreviewed submissions or not.
 	 */
 	public boolean hasActiveSubmissionThreads(long authorId) {
-		try (var con = Bot.dataSource.getConnection()) {
-			var repo = new QOTWSubmissionRepository(con);
-			return repo.getUnreviewedSubmissions(authorId).size() > 0;
+		try (Connection con = Bot.dataSource.getConnection()) {
+			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
+			return !repo.getUnreviewedSubmissions(authorId).isEmpty();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return false;
 		}
 	}
 
-	private MessageEmbed buildSubmissionThreadEmbed(User createdBy, QOTWQuestion question, QOTWConfig config) {
+	private @NotNull MessageEmbed buildSubmissionThreadEmbed(@NotNull User createdBy, @NotNull QOTWQuestion question, @NotNull QOTWConfig config) {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())

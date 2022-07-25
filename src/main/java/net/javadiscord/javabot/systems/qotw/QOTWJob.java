@@ -17,12 +17,15 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -39,9 +42,9 @@ public class QOTWJob extends DiscordApiJob {
 			}
 			GuildConfig config = Bot.config.get(guild);
 			if (config.getModerationConfig().getLogChannel() == null) continue;
-			try (var c = Bot.dataSource.getConnection()) {
+			try (Connection c = Bot.dataSource.getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
-				var nextQuestion = repo.getNextQuestion(guild.getIdLong());
+				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
 					new GuildNotificationService(guild).sendLogChannelNotification("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention());
 				} else {
@@ -70,8 +73,8 @@ public class QOTWJob extends DiscordApiJob {
 		}
 	}
 
-	private MessageEmbed buildQuestionEmbed(QOTWQuestion question) {
-		var checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
+	private @NotNull MessageEmbed buildQuestionEmbed(@NotNull QOTWQuestion question) {
+		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
 				.setDescription(String.format("%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",

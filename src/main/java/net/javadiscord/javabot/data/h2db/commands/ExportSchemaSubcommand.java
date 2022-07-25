@@ -12,6 +12,8 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
@@ -37,9 +39,9 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		event.deferReply(false).queue();
 		Bot.asyncPool.submit(() -> {
-			try (var con = Bot.dataSource.getConnection()) {
-				var stmt = con.createStatement();
-				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
+			try (Connection con = Bot.dataSource.getConnection()) {
+				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
+				boolean success = stmt.execute();
 				if (!success) {
 					event.getHook().sendMessage("Exporting the schema was not successful.").queue();
 				} else {

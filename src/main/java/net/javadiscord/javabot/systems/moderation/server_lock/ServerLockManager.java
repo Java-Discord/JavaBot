@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ServerLockConfig;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.Constants;
@@ -53,8 +54,8 @@ public class ServerLockManager extends ListenerAdapter {
 	public ServerLockManager(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
 		Bot.asyncPool.scheduleWithFixedDelay(() -> {
-			for (var guild : jda.getGuilds()) {
-				var members = getMemberQueue(guild);
+			for (Guild guild : jda.getGuilds()) {
+				Deque<Member> members = getMemberQueue(guild);
 				while (members.size() > GUILD_MEMBER_QUEUE_CUTOFF) {
 					members.removeLast();
 				}
@@ -121,21 +122,21 @@ public class ServerLockManager extends ListenerAdapter {
 	private @NotNull Collection<Member> getPotentialRaiders(Guild guild) {
 		Deque<Member> recentJoins = new LinkedList<>(getMemberQueue(guild));
 		if (recentJoins.isEmpty()) return new HashSet<>();
-		var config = Bot.config.get(guild).getServerLockConfig();
-		final var accountCreationCutoff = OffsetDateTime.now().minusDays(config.getMinimumAccountAgeInDays());
-		final var memberJoinCutoff = OffsetDateTime.now().minusMinutes(10);
+		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
+		final OffsetDateTime accountCreationCutoff = OffsetDateTime.now().minusDays(config.getMinimumAccountAgeInDays());
+		final OffsetDateTime memberJoinCutoff = OffsetDateTime.now().minusMinutes(10);
 
 		Set<Member> potentialRaiders = new HashSet<>();
-		var it = recentJoins.iterator();
+		Iterator<Member> it = recentJoins.iterator();
 		Member previousJoin = it.next();
 		// Do account join check for first member, so that we can do the rest during the time delta check loop.
 		if (previousJoin.getTimeCreated().isAfter(accountCreationCutoff)) {
 			potentialRaiders.add(previousJoin);
 		}
 		while (it.hasNext()) {
-			var member = it.next();
+			Member member = it.next();
 			// Check the time between when the previous member joined, and when this one joined.
-			var delta = Math.abs(Duration.between(previousJoin.getTimeJoined(), member.getTimeJoined()).toMillis() / 1000.0f);
+			float delta = Math.abs(Duration.between(previousJoin.getTimeJoined(), member.getTimeJoined()).toMillis() / 1000.0f);
 			if (delta < config.getMinimumSecondsBetweenJoins()) {
 				potentialRaiders.add(previousJoin);
 				potentialRaiders.add(member);
@@ -159,8 +160,8 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param guild The guild to check.
 	 */
 	private void checkForRaid(Guild guild) {
-		var potentialRaiders = getPotentialRaiders(guild);
-		var config = Bot.config.get(guild).getServerLockConfig();
+		Collection<Member> potentialRaiders = getPotentialRaiders(guild);
+		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
 		if (potentialRaiders.size() >= config.getLockThreshold()) {
 			lockServer(guild, potentialRaiders, null);
 		}
@@ -172,9 +173,9 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param guild The guild to check.
 	 */
 	private void checkForEndOfRaid(Guild guild) {
-		var config = Bot.config.get(guild).getServerLockConfig();
+		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
 		if (!config.isLocked()) return;
-		var potentialRaiders = getPotentialRaiders(guild);
+		Collection<Member> potentialRaiders = getPotentialRaiders(guild);
 		log.info("Found {} potential raiders while checking for end of raid.", potentialRaiders.size());
 		if (potentialRaiders.size() < config.getLockThreshold()) {
 			unlockServer(guild, null);
@@ -204,12 +205,11 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param lockedBy         The user which locked the server.
 	 */
 	public void lockServer(Guild guild, @NotNull Collection<Member> potentialRaiders, @Nullable User lockedBy) {
-		for (var member : potentialRaiders) {
+		for (Member member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
 				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
-							success -> {
-							},
+							success -> {},
 							error -> new GuildNotificationService(guild).sendLogChannelNotification("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()));
 				});
 			});
@@ -225,7 +225,7 @@ public class ServerLockManager extends ListenerAdapter {
 				))
 				.collect(Collectors.joining("\n"));
 
-		var config = Bot.config.get(guild);
+		GuildConfig config = Bot.config.get(guild);
 		config.getServerLockConfig().setLocked("true");
 		Bot.config.get(guild).flush();
 		GuildNotificationService notification = new GuildNotificationService(guild);

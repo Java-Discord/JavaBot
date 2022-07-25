@@ -7,14 +7,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.Responses;
 
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -122,13 +120,13 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	 */
 	private void cleanTimeoutCache() {
 		// Find the list of members whose last ping time was old enough that they should be removed from the cache.
-		var membersToRemove = lastPingTimes.entrySet().stream().filter(entry -> {
-			var config = Bot.config.get(entry.getKey().getGuild()).getHelpConfig();
+		List<Member> membersToRemove = lastPingTimes.entrySet().stream().filter(entry -> {
+			HelpConfig config = Bot.config.get(entry.getKey().getGuild()).getHelpConfig();
 			long timeoutMillis = config.getHelpPingTimeoutSeconds() * 1000L;
 			return entry.getValue() + timeoutMillis < System.currentTimeMillis();
 		}).map(Map.Entry::getKey).toList();
 		// Remove each member from the map.
-		for (var member : membersToRemove) {
+		for (Member member : membersToRemove) {
 			lastPingTimes.remove(member);
 		}
 	}

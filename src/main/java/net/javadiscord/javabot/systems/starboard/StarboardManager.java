@@ -188,7 +188,7 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	private @NotNull MessageEmbed buildStarboardEmbed(@NotNull Message message) {
-		var author = message.getAuthor();
+		User author = message.getAuthor();
 		return new EmbedBuilder()
 				.setAuthor(author.getAsTag(), message.getJumpUrl(), author.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())

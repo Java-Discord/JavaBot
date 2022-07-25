@@ -7,12 +7,14 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.time.Duration;
@@ -21,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -51,10 +54,10 @@ public class HelpChannelUpdater implements Runnable {
 
 	@Override
 	public void run() {
-		for (var channel : config.getReservedChannelCategory().getTextChannels()) {
+		for (TextChannel channel : config.getReservedChannelCategory().getTextChannels()) {
 			this.checkReservedChannel(channel).queue();
 		}
-		for (var channel : config.getOpenChannelCategory().getTextChannels()) {
+		for (TextChannel channel : config.getOpenChannelCategory().getTextChannels()) {
 			this.checkOpenChannel(channel).queue();
 		}
 		this.balanceChannels();
@@ -71,13 +74,13 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes when the check is done.
 	 */
 	@SuppressWarnings("unchecked")
-	private RestAction<?> checkReservedChannel(TextChannel channel) {
-		var optionalReservation = channelManager.getReservationForChannel(channel.getIdLong());
+	private RestAction<?> checkReservedChannel(@NotNull TextChannel channel) {
+		Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(channel.getIdLong());
 		if (optionalReservation.isEmpty()) {
 			log.info("Unreserving channel {} because no reservation information about it could be found.", channel.getName());
 			return channelManager.unreserveChannel(channel);
 		} else {
-			var reservation = optionalReservation.get();
+			ChannelReservation reservation = optionalReservation.get();
 			return channel.getJDA().retrieveUserById(reservation.getUserId()).flatMap(owner -> {
 				if (owner == null) {
 					log.info("Unreserving channel {} because no owner could be found.", channel.getName());
@@ -145,10 +148,10 @@ public class HelpChannelUpdater implements Runnable {
 	 * @param channel The channel to check.
 	 * @return A rest action that completes when the check is done.
 	 */
-	private RestAction<?> checkOpenChannel(TextChannel channel) {
+	private @NotNull RestAction<?> checkOpenChannel(TextChannel channel) {
 		if (!this.config.isRecycleChannels()) {
 			return channel.getHistory().retrievePast(1).map(messages -> {
-				var lastMessage = messages.isEmpty() ? null : messages.get(0);
+				Message lastMessage = messages.isEmpty() ? null : messages.get(0);
 				if (lastMessage != null) {
 					// If we're not recycling channels, we want to keep all open channels fresh.
 					// Any open channel with a message in it should be immediately become reserved.
@@ -171,9 +174,9 @@ public class HelpChannelUpdater implements Runnable {
 		int openChannelCount = this.channelManager.getOpenChannelCount();
 		while (openChannelCount < this.config.getPreferredOpenChannelCount()) {
 			if (this.config.isRecycleChannels()) {
-				var dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
+				List<TextChannel> dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
 				if (!dormantChannels.isEmpty()) {
-					var target = this.config.getOpenChannelCategory();
+					Category target = this.config.getOpenChannelCategory();
 					dormantChannels.get(0).getManager().setParent(target).sync(target).queue();
 					openChannelCount++;
 				} else {
@@ -186,9 +189,9 @@ public class HelpChannelUpdater implements Runnable {
 			}
 		}
 		while (openChannelCount > this.config.getPreferredOpenChannelCount()) {
-			var channel = this.config.getOpenChannelCategory().getTextChannels().get(0);
+			TextChannel channel = this.config.getOpenChannelCategory().getTextChannels().get(0);
 			if (this.config.isRecycleChannels()) {
-				var target = this.config.getDormantChannelCategory();
+				Category target = this.config.getDormantChannelCategory();
 				channel.getManager().setParent(target).sync(target).queue();
 			} else {
 				channel.delete().queue();
@@ -297,8 +300,8 @@ public class HelpChannelUpdater implements Runnable {
 	 * @param messages The list of messages to search through.
 	 * @return A rest action that completes once all thank messages are deleted.
 	 */
-	private RestAction<?> deleteThankMessages(List<Message> messages) {
-		var deleteActions = messages.stream()
+	private @NotNull RestAction<?> deleteThankMessages(@NotNull List<Message> messages) {
+		List<AuditableRestAction<Void>> deleteActions = messages.stream()
 				.filter(this::isThankMessage)
 				.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) return RestAction.allOf(deleteActions);
@@ -312,7 +315,7 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes when all activity checks are removed.
 	 */
 	private RestAction<?> deleteOldBotMessages(List<Message> messages) {
-		var deleteActions = messages.stream()
+		List<AuditableRestAction<Void>> deleteActions = messages.stream()
 				.filter(m -> isActivityCheck(m))
 				.map(Message::delete).toList();
 		if (!deleteActions.isEmpty()) {
@@ -343,7 +346,7 @@ public class HelpChannelUpdater implements Runnable {
 				.collect(Collectors.toCollection(ArrayList::new));
 		// Trim away messages from before the owner's first message.
 		if (firstMessage != null) {
-			final var fm = firstMessage;
+			final Message fm = firstMessage;
 			messages.removeIf(m -> m.getTimeCreated().isBefore(fm.getTimeCreated()));
 			botMessages.removeIf(m -> m.getTimeCreated().isBefore(fm.getTimeCreated()));
 		}
@@ -354,7 +357,7 @@ public class HelpChannelUpdater implements Runnable {
 		if (firstMessage != null) {
 			timeSinceFirstMessage = Duration.between(firstMessage.getTimeCreated(), OffsetDateTime.now());
 		}
-		var data = new ChannelSemanticData(firstMessage, timeSinceFirstMessage, nonOwnerParticipants, botMessages);
+		ChannelSemanticData data = new ChannelSemanticData(firstMessage, timeSinceFirstMessage, nonOwnerParticipants, botMessages);
 		List<RestAction<?>> checkActions = semanticChecks.stream()
 				.map(c -> c.doCheck(channel, owner, messages, data))
 				.collect(Collectors.toList());
@@ -363,11 +366,11 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	private void updateHelpOverview() {
-		var channel = config.getHelpOverviewChannel();
-		var history = channel.getHistory();
+		TextChannel channel = config.getHelpOverviewChannel();
+		MessageHistory history = channel.getHistory();
 		history.retrievePast(100).queue(
 				messages -> {
-					var latestMessage = messages.stream().filter(m -> m.getAuthor().equals(jda.getSelfUser())).findFirst();
+					Optional<Message> latestMessage = messages.stream().filter(m -> m.getAuthor().equals(jda.getSelfUser())).findFirst();
 					if (latestMessage.isPresent()) {
 						latestMessage.get().editMessageEmbeds(buildHelpOverviewEmbed()).queue();
 					} else {
@@ -383,10 +386,10 @@ public class HelpChannelUpdater implements Runnable {
 				.map(TextChannel::getAsMention)
 				.collect(Collectors.joining("\n"));
 		StringBuilder reservedHelpChannels = new StringBuilder();
-		for (var channel : config.getReservedChannelCategory().getTextChannels()) {
-			var optional = channelManager.getReservationForChannel(channel.getIdLong());
+		for (TextChannel channel : config.getReservedChannelCategory().getTextChannels()) {
+			Optional<ChannelReservation> optional = channelManager.getReservationForChannel(channel.getIdLong());
 			if (optional.isEmpty()) continue;
-			var reservation = optional.get();
+			ChannelReservation reservation = optional.get();
 			jda.retrieveUserById(reservation.getUserId()).queue(
 					u -> reservedHelpChannels.append(String.format("""
 									%s

@@ -95,7 +95,7 @@ public class MessageCacheRepository {
 	 */
 	public List<CachedMessage> getAll() throws SQLException {
 		try (PreparedStatement s = con.prepareStatement("SELECT * FROM message_cache")) {
-			var rs = s.executeQuery();
+			ResultSet rs = s.executeQuery();
 			List<CachedMessage> cachedMessages = new ArrayList<>();
 			while (rs.next()) {
 				cachedMessages.add(this.read(rs));

@@ -9,6 +9,8 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -64,7 +66,7 @@ public class BotConfig {
 		Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 		Path systemsFile = dir.resolve(SYSTEMS_FILE);
 		if (Files.exists(systemsFile)) {
-			try (var reader = Files.newBufferedReader(systemsFile)) {
+			try (BufferedReader reader = Files.newBufferedReader(systemsFile)) {
 				this.systemsConfig = gson.fromJson(reader, SystemsConfig.class);
 				log.info("Loaded systems config from {}", systemsFile);
 			} catch (JsonSyntaxException e) {
@@ -88,8 +90,8 @@ public class BotConfig {
 	 */
 	public void loadGuilds(@NotNull List<Guild> guilds) {
 		for (Guild guild : guilds) {
-			var file = dir.resolve(guild.getId() + ".json");
-			var config = GuildConfig.loadOrCreate(guild, file);
+			Path file = dir.resolve(guild.getId() + ".json");
+			GuildConfig config = GuildConfig.loadOrCreate(guild, file);
 			this.guilds.put(guild.getIdLong(), config);
 			log.info("Loaded guild config for guild {} ({}).", guild.getName(), guild.getId());
 		}
@@ -103,7 +105,7 @@ public class BotConfig {
 	 * @param guild The guild to add configuration for.
 	 */
 	public void addGuild(@NotNull Guild guild) {
-		var file = dir.resolve(guild.getId() + ".json");
+		Path file = dir.resolve(guild.getId() + ".json");
 		this.guilds.put(guild.getIdLong(), GuildConfig.loadOrCreate(guild, file));
 		log.info("Added guild config for guild {} ({}).", guild.getName(), guild.getId());
 	}
@@ -132,14 +134,14 @@ public class BotConfig {
 	public void flush() {
 		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 		Path systemsFile = this.dir.resolve(SYSTEMS_FILE);
-		try (var writer = Files.newBufferedWriter(systemsFile)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(systemsFile)) {
 			gson.toJson(this.systemsConfig, writer);
 			writer.flush();
 		} catch (IOException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not save systems config.", e);
 		}
-		for (var config : this.guilds.values()) {
+		for (GuildConfig config : this.guilds.values()) {
 			config.flush();
 		}
 	}

@@ -22,21 +22,21 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void save(QOTWQuestion question) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement(
+		try (PreparedStatement stmt = con.prepareStatement(
 				"INSERT INTO qotw_question (guild_id, created_by, text, priority) VALUES (?, ?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
-		);
-		stmt.setLong(1, question.getGuildId());
-		stmt.setLong(2, question.getCreatedBy());
-		stmt.setString(3, question.getText());
-		stmt.setInt(4, question.getPriority());
-		int rows = stmt.executeUpdate();
-		if (rows == 0) throw new SQLException("New question was not inserted.");
-		ResultSet rs = stmt.getGeneratedKeys();
-		if (rs.next()) {
-			question.setId(rs.getLong(1));
+		)) {
+			stmt.setLong(1, question.getGuildId());
+			stmt.setLong(2, question.getCreatedBy());
+			stmt.setString(3, question.getText());
+			stmt.setInt(4, question.getPriority());
+			int rows = stmt.executeUpdate();
+			if (rows == 0) throw new SQLException("New question was not inserted.");
+			ResultSet rs = stmt.getGeneratedKeys();
+			if (rs.next()) {
+				question.setId(rs.getLong(1));
+			}
 		}
-		stmt.close();
 	}
 
 	/**
@@ -47,14 +47,15 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public Optional<QOTWQuestion> findByQuestionNumber(int questionNumber) throws SQLException {
-		QOTWQuestion question = null;
-		PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_question WHERE question_number = ?");
-		s.setInt(1, questionNumber);
-		var rs = s.executeQuery();
-		if (rs.next()) {
-			question = read(rs);
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_question WHERE question_number = ?")) {
+			QOTWQuestion question = null;
+			s.setInt(1, questionNumber);
+			ResultSet rs = s.executeQuery();
+			if (rs.next()) {
+				question = read(rs);
+			}
+			return Optional.ofNullable(question);
 		}
-		return Optional.ofNullable(question);
 	}
 
 	/**
@@ -64,12 +65,12 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getNextQuestionNumber() throws SQLException {
-		try (var stmt = con.prepareStatement("""
+		try (PreparedStatement stmt = con.prepareStatement("""
 				SELECT question_number + 1
 				FROM qotw_question
 				WHERE used = TRUE AND question_number IS NOT NULL
 				ORDER BY created_at DESC LIMIT 1""")) {
-			var rs = stmt.executeQuery();
+			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1);
 			}
@@ -87,7 +88,7 @@ public class QuestionQueueRepository {
 		if (question.getQuestionNumber() == null) {
 			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
 		}
-		try (var stmt = con.prepareStatement("""
+		try (PreparedStatement stmt = con.prepareStatement("""
 				UPDATE qotw_question
 				SET used = TRUE, question_number = ?
 				WHERE id = ?""")) {
@@ -108,15 +109,16 @@ public class QuestionQueueRepository {
 	 */
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws SQLException {
 		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT %d OFFSET %d";
-		PreparedStatement stmt = con.prepareStatement(String.format(sql, size, page));
-		stmt.setLong(1, guildId);
-		ResultSet rs = stmt.executeQuery();
-		List<QOTWQuestion> questions = new ArrayList<>(size);
-		while (rs.next()) {
-			questions.add(this.read(rs));
+		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, page))) {
+			stmt.setLong(1, guildId);
+			ResultSet rs = stmt.executeQuery();
+			List<QOTWQuestion> questions = new ArrayList<>(size);
+			while (rs.next()) {
+				questions.add(this.read(rs));
+			}
+			stmt.close();
+			return questions;
 		}
-		stmt.close();
-		return questions;
 	}
 
 	/**
@@ -127,7 +129,7 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws SQLException {
-		try (var stmt = con.prepareStatement("""
+		try (PreparedStatement stmt = con.prepareStatement("""
 				SELECT *
 				FROM qotw_question
 				WHERE guild_id = ? AND used = FALSE
@@ -154,12 +156,12 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public boolean removeQuestion(long guildId, long id) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_question WHERE guild_id = ? AND id = ?");
-		stmt.setLong(1, guildId);
-		stmt.setLong(2, id);
-		int rows = stmt.executeUpdate();
-		stmt.close();
-		return rows > 0;
+		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_question WHERE guild_id = ? AND id = ?")) {
+			stmt.setLong(1, guildId);
+			stmt.setLong(2, id);
+			int rows = stmt.executeUpdate();
+			return rows > 0;
+		}
 	}
 
 	private QOTWQuestion read(ResultSet rs) throws SQLException {

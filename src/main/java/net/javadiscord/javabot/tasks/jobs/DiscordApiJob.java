@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.tasks.jobs;
 
 import net.dv8tion.jda.api.JDA;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
 
 import java.util.Map;
@@ -26,8 +27,8 @@ public abstract class DiscordApiJob implements Job {
 	}
 
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		var jda = (JDA) context.getJobDetail().getJobDataMap().get("jda");
+	public void execute(@NotNull JobExecutionContext context) throws JobExecutionException {
+		JDA jda = (JDA) context.getJobDetail().getJobDataMap().get("jda");
 		execute(context, jda);
 	}
 

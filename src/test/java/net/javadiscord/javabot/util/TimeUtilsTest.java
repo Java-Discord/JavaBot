@@ -47,7 +47,7 @@ public class TimeUtilsTest {
 		cases.put(Duration.ofDays(731), "2 years, 1 day");
 		cases.put(Duration.ofDays(732), "2 years, 2 days");
 
-		for (var c : cases.entrySet()) {
+		for (Map.Entry<Duration, String> c : cases.entrySet()) {
 			String actual = TimeUtils.formatDuration(c.getKey());
 			assertEquals(c.getValue(), actual);
 		}

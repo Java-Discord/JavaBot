@@ -1,17 +1,13 @@
 package net.javadiscord.javabot.listener;
 
-import javax.annotation.Nonnull;
-
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.WebhookUtil;
+
+import javax.annotation.Nonnull;
 
 /**
  * Replaces all occurences of 'fuck' in incoming messages with 'hug'.

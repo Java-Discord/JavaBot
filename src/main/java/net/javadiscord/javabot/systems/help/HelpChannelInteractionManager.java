@@ -17,6 +17,8 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Handles various interactions regarding the help channel system.
@@ -35,21 +37,21 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 	 */
 	private void handleHelpThank(ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
-		var config = Bot.config.get(event.getGuild()).getHelpConfig();
-		var channelManager = new HelpChannelManager(config);
-		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpChannelManager channelManager = new HelpChannelManager(config);
+		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
 			event.getInteraction().getHook().sendMessage("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
 					.setEphemeral(true).queue();
 			event.getMessage().delete().queue();
 			return;
 		}
-		var reservation = optionalReservation.get();
+		ChannelReservation reservation = optionalReservation.get();
 		TextChannel channel = event.getChannel().asTextChannel();
 		if (!event.isAcknowledged()) {
 			event.deferReply(true).queue();
 		}
-		var owner = channelManager.getReservedChannelOwner(channel);
+		User owner = channelManager.getReservedChannelOwner(channel);
 		if (owner == null) {
 			event.getInteraction().getHook().sendMessage("Sorry, but this channel is currently unreserved.").setEphemeral(true).queue();
 			event.getMessage().delete().queue();
@@ -84,8 +86,8 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		}
 	}
 
-	private void thankHelper(ButtonInteractionEvent event, TextChannel channel, User owner, long helperId, ChannelReservation reservation, HelpChannelManager channelManager) {
-		var btn = event.getButton();
+	private void thankHelper(@NotNull ButtonInteractionEvent event, TextChannel channel, User owner, long helperId, ChannelReservation reservation, HelpChannelManager channelManager) {
+		Button btn = event.getButton();
 		long thankCount = DbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE reservation_id = ? AND helper_id = ?",
 				s -> {
@@ -127,7 +129,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 				}
 				// Then disable the button, or unreserve the channel if there's nobody else to thank.
 				if (btn != null) {
-					var activeButtons = event.getMessage().getButtons().stream()
+					List<Button> activeButtons = event.getMessage().getButtons().stream()
 							.filter(b -> !b.isDisabled() && !b.getLabel().equals("Unreserve") && !b.getLabel().equals("Cancel") && !b.equals(btn))
 							.toList();
 					if (activeButtons.isEmpty()) {// If there are no more people to thank, automatically unreserve the channel.
@@ -147,21 +149,21 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		String reservationId = id[2];
 		String action = id[3];
 		event.deferEdit().queue();
-		var config = Bot.config.get(event.getGuild()).getHelpConfig();
-		var channelManager = new HelpChannelManager(config);
-		var optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
+		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpChannelManager channelManager = new HelpChannelManager(config);
+		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
 			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
 					.setEphemeral(true).queue();
 			event.getMessage().delete().queue();
 			return;
 		}
-		var reservation = optionalReservation.get();
+		ChannelReservation reservation = optionalReservation.get();
 		TextChannel channel = event.getChannel().asTextChannel();
 		if (!event.isAcknowledged()) {
 			event.deferReply(true).queue();
 		}
-		var owner = channelManager.getReservedChannelOwner(channel);
+		User owner = channelManager.getReservedChannelOwner(channel);
 		// If a reserved channel doesn't have an owner, it's in an invalid state, but the system will handle it later automatically.
 		if (owner == null) {
 			// Remove the original message, just to make sure no more interactions are sent.

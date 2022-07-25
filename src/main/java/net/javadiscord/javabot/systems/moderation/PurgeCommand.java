@@ -145,11 +145,11 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param file       The archive's filename.
 	 * @return The print writer to use.
 	 */
-	private PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
+	private @Nullable PrintWriter createArchiveWriter(MessageChannel channel, TextChannel logChannel, String file) {
 		try {
 			if (Files.notExists(ARCHIVE_DIR)) Files.createDirectory(ARCHIVE_DIR);
 			Path archiveFile = ARCHIVE_DIR.resolve(file);
-			var archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
+			PrintWriter archiveWriter = new PrintWriter(Files.newBufferedWriter(archiveFile), true);
 			logChannel.sendMessageFormat("Created archive of purge of channel %s at `%s`", channel.getAsMention(), archiveFile).queue();
 			archiveWriter.println("Purge of channel " + channel.getName());
 			return archiveWriter;

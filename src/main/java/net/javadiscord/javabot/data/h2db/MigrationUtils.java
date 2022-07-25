@@ -3,12 +3,12 @@ package net.javadiscord.javabot.data.h2db;
 import net.javadiscord.javabot.data.h2db.commands.MigrationsListSubcommand;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URL;
+import java.nio.file.*;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Utility class that handles SQL Migrations.
@@ -26,16 +26,16 @@ public class MigrationUtils {
 	 * @throws IOException        If an error occurs.
 	 */
 	public static Path getMigrationsDirectory() throws URISyntaxException, IOException {
-		var resource = MigrationsListSubcommand.class.getResource("/database/migrations/");
+		URL resource = MigrationsListSubcommand.class.getResource("/database/migrations/");
 		if (resource == null) throw new IOException("Missing resource /migrations/");
-		var uri = resource.toURI();
-		Path dirPath;
+		URI uri = resource.toURI();
 		try {
-			dirPath = Paths.get(uri);
+			return Paths.get(uri);
 		} catch (FileSystemNotFoundException e) {
-			var env = new HashMap<String, String>();
-			dirPath = FileSystems.newFileSystem(uri, env).getPath("/database/migrations/");
+			Map<String, String> env = new HashMap<>();
+			try (FileSystem dir = FileSystems.newFileSystem(uri, env)) {
+				return dir.getPath("/database/migrations/");
+			}
 		}
-		return dirPath;
 	}
 }
