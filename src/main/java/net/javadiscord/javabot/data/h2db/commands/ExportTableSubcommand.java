@@ -14,7 +14,10 @@ import net.javadiscord.javabot.util.Responses;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * <h3>This class represents the /db-admin export-table command.</h3>
@@ -30,7 +33,7 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 	public ExportTableSubcommand() {
 		setSubcommandData(new SubcommandData("export-table", "(ADMIN ONLY) Export a single database table")
 				.addOptions(new OptionData(OptionType.STRING, "table", "What table should be exported", true)
-								.addChoice("Custom Commands (Deprecated)", "CUSTOM_COMMANDS")
+								.addChoice("Custom Tags", "CUSTOM_TAGS")
 								.addChoice("Help Account", "HELP_ACCOUNT")
 								.addChoice("Help Channel Thanks", "HELP_CHANNEL_THANKS")
 								.addChoice("Help Transactions", "HELP_TRANSACTION")
@@ -56,9 +59,9 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 		}
 		event.deferReply(false).queue();
 		Bot.asyncPool.submit(() -> {
-			try (var con = Bot.dataSource.getConnection()) {
-				var stmt = con.createStatement();
-				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s' TABLE %s;", includeData ? "COLUMNS" : "NODATA", TABLE_FILE, tableOption.getAsString()));
+			try (Connection con = Bot.dataSource.getConnection()) {
+				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s' TABLE %s;", includeData ? "COLUMNS" : "NODATA", TABLE_FILE, tableOption.getAsString()));
+				boolean success = stmt.execute();
 				if (!success) {
 					event.getHook().sendMessage("Exporting the table was not successful.").queue();
 				} else {
