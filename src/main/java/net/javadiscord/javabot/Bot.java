@@ -137,7 +137,6 @@ public class Bot {
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GUILD)
-				.disableUnknownCommandDeletion()
 				.build();
 		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
