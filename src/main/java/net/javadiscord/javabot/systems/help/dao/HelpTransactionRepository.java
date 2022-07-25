@@ -89,7 +89,7 @@ public class HelpTransactionRepository {
 		transaction.setId(rs.getLong("id"));
 		transaction.setRecipient(rs.getLong("recipient"));
 		transaction.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-		transaction.setWeight(rs.getDouble("value"));
+		transaction.setWeight(rs.getDouble("weight"));
 		transaction.setMessageType(rs.getInt("messageType"));
 		return transaction;
 	}
