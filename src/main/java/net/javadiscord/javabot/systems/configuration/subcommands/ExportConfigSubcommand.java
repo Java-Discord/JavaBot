@@ -13,9 +13,9 @@ import java.io.File;
  * Shows a list of all known configuration properties, their type, and their
  * current value.
  */
-public class ListConfigSubcommand extends ConfigSubcommand {
-	public ListConfigSubcommand() {
-		setSubcommandData(new SubcommandData("list", "Get a list of all configuration properties, and their current values."));
+public class ExportConfigSubcommand extends ConfigSubcommand {
+	public ExportConfigSubcommand() {
+		setSubcommandData(new SubcommandData("export", "Exports a list of all configuration properties, and their current values."));
 		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
 	}
 
