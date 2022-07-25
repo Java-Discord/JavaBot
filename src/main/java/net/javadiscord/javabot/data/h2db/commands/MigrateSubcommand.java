@@ -86,34 +86,35 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 				Responses.error(event, "The migration `" + migrationName + "` does not contain any statements. Please remove or edit it before running again.").queue();
 				return;
 			}
+			event.deferReply().queue();
 			Bot.asyncPool.submit(() -> {
 				try (Connection con = Bot.dataSource.getConnection()) {
 					for (int i = 0; i < statements.length; i++) {
 						if (statements[i].isBlank()) {
-							event.getChannel().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();
+							event.getHook().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();
 							continue;
 						}
 						try (Statement stmt = con.createStatement()) {
 							int rowsUpdated = stmt.executeUpdate(statements[i]);
-							event.getChannel().sendMessageFormat(
+							event.getHook().sendMessageFormat(
 									"Executed statement %d of %d:\n```sql\n%s\n```\nRows Updated: `%d`", i + 1, statements.length, statements[i], rowsUpdated
 							).queue();
 						} catch (SQLException e) {
 							ExceptionLogger.capture(e, getClass().getSimpleName());
-							event.getChannel().sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
+							event.getHook().sendMessage("Error while executing statement " + (i + 1) + ": " + e.getMessage()).queue();
 							return;
 						}
 					}
 				} catch (SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
-					event.getChannel().sendMessage("Could not obtain a connection to the database.").queue();
+					event.getHook().sendMessage("Could not obtain a connection to the database.").queue();
 				}
 			});
-			Responses.info(event, "Migration Started",
+			Responses.info(event.getHook(), "Migration Started",
 					"Execution of the migration `" + migrationName + "` has been started. " + statements.length + " statements will be executed.").queue();
 		} catch (IOException | URISyntaxException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
-			Responses.error(event, e.getMessage()).queue();
+			Responses.error(event.getHook(), e.getMessage()).queue();
 		}
 	}
 
