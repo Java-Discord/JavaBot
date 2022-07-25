@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.configuration.subcommands;
+package net.javadiscord.javabot.systems.configuration;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
