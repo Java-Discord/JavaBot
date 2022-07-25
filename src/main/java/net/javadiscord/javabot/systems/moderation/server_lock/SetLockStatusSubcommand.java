@@ -45,7 +45,7 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 		try {
 			GuildConfig config = Bot.config.get(event.getGuild());
 			boolean locked = lockedMapping.getAsBoolean();
-			config.set("serverLock.locked", String.valueOf(locked));
+			config.set("serverLockConfig.locked", String.valueOf(locked));
 			if (locked) {
 				Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
 			} else {
