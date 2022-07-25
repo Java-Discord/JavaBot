@@ -150,24 +150,27 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = image.createGraphics();
+		try {
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+			g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+			g2d.setPaint(BACKGROUND_COLOR);
+			g2d.fillRect(0, 0, WIDTH, height);
+			g2d.drawImage(logo, WIDTH / 2 - logo.getWidth() / 2, MARGIN, null);
 
-		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-		g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		g2d.setPaint(BACKGROUND_COLOR);
-		g2d.fillRect(0, 0, WIDTH, height);
-		g2d.drawImage(logo, WIDTH / 2 - logo.getWidth() / 2, MARGIN, null);
+			boolean left = true;
+			int y = logo.getHeight() + 3 * MARGIN;
+			for (Member m : topMembers) {
+				drawUserCard(g2d, m, service, y, left);
+				left = !left;
+				if (left) y = y + card.getHeight() + MARGIN;
+			}
 
-		boolean left = true;
-		int y = logo.getHeight() + 3 * MARGIN;
-		for (Member m : topMembers) {
-			drawUserCard(g2d, m, service, y, left);
-			left = !left;
-			if (left) y = y + card.getHeight() + MARGIN;
+			ImageCache.removeCachedImagesByKeyword("qotw_leaderboard");
+			ImageCache.cacheImage(getCacheName(), image);
+			return getOutputStreamFromImage(image);
+		} finally {
+			g2d.dispose();
 		}
-		g2d.dispose();
-		ImageCache.removeCachedImagesByKeyword("qotw_leaderboard");
-		ImageCache.cacheImage(getCacheName(), image);
-		return getOutputStreamFromImage(image);
 	}
 
 	/**
