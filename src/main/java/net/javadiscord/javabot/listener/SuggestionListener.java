@@ -47,11 +47,11 @@ public class SuggestionListener extends ListenerAdapter {
 	 * @param event The {@link MessageReceivedEvent} that is fired upon sending a message.
 	 * @return Whether the message author is eligible to create new suggestions.
 	 */
-	private boolean canCreateSuggestion(MessageReceivedEvent event) {
+	private boolean canCreateSuggestion(@NotNull MessageReceivedEvent event) {
 		if (event.getChannelType() == ChannelType.PRIVATE) return false;
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && !event.getMember().isTimedOut() &&
 				event.getMessage().getType() != MessageType.THREAD_CREATED &&
-				event.getChannel().equals(Bot.config.get(event.getGuild()).getModerationConfig().getSuggestionChannel());
+				event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModerationConfig().getSuggestionChannelId();
 	}
 
 	/**

@@ -16,12 +16,12 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class StarboardConfig extends GuildConfigItem {
-	private long channelId;
+	private long starboardChannelId;
 	private int reactionThreshold;
 	private List<String> emojiUnicodes = new ArrayList<>();
 
 	public TextChannel getStarboardChannel() {
-		return this.getGuild().getTextChannelById(this.channelId);
+		return this.getGuild().getTextChannelById(this.starboardChannelId);
 	}
 
 	public List<UnicodeEmoji> getEmojis() {

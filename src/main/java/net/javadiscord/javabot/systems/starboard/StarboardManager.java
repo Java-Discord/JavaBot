@@ -79,7 +79,7 @@ public class StarboardManager extends ListenerAdapter {
 			StarboardRepository repo = new StarboardRepository(con);
 			StarboardConfig config = Bot.config.get(event.getGuild()).getStarboardConfig();
 			StarboardEntry entry;
-			if (event.getChannel().equals(config.getStarboardChannel())) {
+			if (event.getChannel().getIdLong() == config.getStarboardChannelId()) {
 				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
 			} else {
 				entry = repo.getEntryByMessageId(event.getMessageIdLong());
