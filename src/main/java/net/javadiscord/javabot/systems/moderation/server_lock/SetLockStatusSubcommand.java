@@ -42,19 +42,20 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 			Responses.replyStaffOnly(event, event.getGuild()).queue();
 			return;
 		}
-		try {
-			GuildConfig config = Bot.config.get(event.getGuild());
-			boolean locked = lockedMapping.getAsBoolean();
-			config.set("serverLockConfig.locked", String.valueOf(locked));
-			if (locked) {
-				Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
-			} else {
-				Bot.serverLockManager.unlockServer(event.getGuild(), event.getUser());
-			}
-			Responses.info(event, "Server Lock Status", "Successfully %slocked the current server!", locked ? "" : "un").queue();
-		} catch (UnknownPropertyException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-			Responses.warning(event, "Unknown Property", "Could not lock/unlock the server.").queue();
+		GuildConfig config = Bot.config.get(event.getGuild());
+		boolean locked = lockedMapping.getAsBoolean();
+		if (locked == config.getServerLockConfig().isLocked()) {
+			Responses.info(event, String.format("Server already %slocked", locked ? "" : "un"),
+					"The server is already %slocked!", locked ? "" : "un").queue();
+			return;
 		}
+		config.getServerLockConfig().setLocked(String.valueOf(locked));
+		Bot.config.flush();
+		if (locked) {
+			Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
+		} else {
+			Bot.serverLockManager.unlockServer(event.getGuild(), event.getUser());
+		}
+		Responses.info(event, "Server Lock Status", "Successfully %slocked the current server!", locked ? "" : "un").queue();
 	}
 }
