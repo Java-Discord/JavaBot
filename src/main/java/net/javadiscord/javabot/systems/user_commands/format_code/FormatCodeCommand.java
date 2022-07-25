@@ -54,7 +54,7 @@ public class FormatCodeCommand extends SlashCommand {
 	}
 
 	@Contract("_ -> new")
-	protected static @NotNull ActionRow buildActionRow(@NotNull Message target) {
+	static @NotNull ActionRow buildActionRow(@NotNull Message target) {
 		return ActionRow.of(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"),
 				Button.link(target.getJumpUrl(), "View Original"));
 	}
