@@ -203,13 +203,15 @@ public class AutoMod extends ListenerAdapter {
 			// only do it for a links, so it won't iterate for each message
 			while (urlMatcher.find()) {
 				String url = urlMatcher.group(0).trim();
-				try {
-					URI uri = new URI(url);
-					if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
-						return true;
+				if (url.startsWith("http://") || url.startsWith("https://")) {
+					try {
+						URI uri = new URI(url);
+						if (uri.getHost() != null && spamUrls.contains(uri.getHost())) {
+							return true;
+						}
+					} catch (URISyntaxException e) {
+						ExceptionLogger.capture(e, getClass().getSimpleName());
 					}
-				} catch (URISyntaxException e) {
-					ExceptionLogger.capture(e, getClass().getSimpleName());
 				}
 			}
 		}
