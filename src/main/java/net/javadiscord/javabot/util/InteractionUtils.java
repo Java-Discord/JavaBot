@@ -90,7 +90,7 @@ public class InteractionUtils implements ButtonHandler {
 	}
 
 	@Override
-	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
+	public void handleButton(@NotNull ButtonInteractionEvent event, @NotNull Button button) {
 		event.deferEdit().queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		if (event.getGuild() == null) {

@@ -10,10 +10,10 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ServerLockConfig;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
-import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;
@@ -190,7 +190,7 @@ public class ServerLockManager extends ListenerAdapter {
 	 */
 	private void rejectUserDuringRaid(@NotNull GuildMemberJoinEvent event) {
 		event.getUser().openPrivateChannel().queue(c ->
-				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg ->
+				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg ->
 						event.getMember().kick().queue()));
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
 		new GuildNotificationService(event.getGuild()).sendLogChannelNotification("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff);
@@ -207,7 +207,7 @@ public class ServerLockManager extends ListenerAdapter {
 	public void lockServer(Guild guild, @NotNull Collection<Member> potentialRaiders, @Nullable User lockedBy) {
 		for (Member member : potentialRaiders) {
 			member.getUser().openPrivateChannel().queue(c -> {
-				c.sendMessage("https://discord.gg/java").setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
+				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
 							success -> {},
 							error -> new GuildNotificationService(guild).sendLogChannelNotification("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()));
