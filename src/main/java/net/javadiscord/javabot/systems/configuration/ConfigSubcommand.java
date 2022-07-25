@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +19,12 @@ import javax.annotation.Nonnull;
 public abstract class ConfigSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (event.getGuild() == null) {
+		if (event.getGuild() == null || event.getMember() == null) {
 			Responses.replyGuildOnly(event).queue();
+			return;
+		}
+		if (!Checks.hasAdminRole(event.getGuild(), event.getMember())) {
+			Responses.replyAdminOnly(event, event.getGuild()).queue();
 			return;
 		}
 		try {
