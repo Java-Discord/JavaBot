@@ -41,5 +41,9 @@ public abstract class ModerateCommand extends SlashCommand implements CommandMod
 		this.requireStaff = requireStaff;
 	}
 
+	protected boolean isRequireStaff() {
+		return requireStaff;
+	}
+
 	protected abstract ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator);
 }

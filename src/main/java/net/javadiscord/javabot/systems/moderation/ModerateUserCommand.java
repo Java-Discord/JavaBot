@@ -30,7 +30,7 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 			return Responses.error(event, "You cannot perform this action on yourself.");
 		}
 		Objects.requireNonNull(event.getGuild()).retrieveMemberById(target.getIdLong()).queue(targetMember -> {
-			if (targetMember.isOwner() || !moderator.canInteract(targetMember)) {
+			if (isRequireStaff() && targetMember.isOwner() || !moderator.canInteract(targetMember)) {
 				Responses.error(event.getHook(), "You cannot perform actions on a higher member staff member.").queue();
 				return;
 			}
