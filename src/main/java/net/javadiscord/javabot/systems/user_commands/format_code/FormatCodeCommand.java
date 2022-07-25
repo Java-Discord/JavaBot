@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -52,7 +53,8 @@ public class FormatCodeCommand extends SlashCommand {
 		);
 	}
 
-	protected static ActionRow buildActionRow(Message target) {
+	@Contract("_ -> new")
+	protected static @NotNull ActionRow buildActionRow(@NotNull Message target) {
 		return ActionRow.of(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"),
 				Button.link(target.getJumpUrl(), "View Original"));
 	}

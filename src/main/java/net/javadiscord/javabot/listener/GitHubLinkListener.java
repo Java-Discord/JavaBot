@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -47,7 +48,8 @@ public class GitHubLinkListener extends ListenerAdapter {
 	 * @param link The initial input url.
 	 * @return A {@link Pair} containing the files content & extension.
 	 */
-	private Pair<String, String> parseGithubUrl(String link) {
+	@Contract("_ -> new")
+	private @NotNull Pair<String, String> parseGithubUrl(@NotNull String link) {
 		String[] arr = link.split("/");
 		// Removes all unnecessary elements
 		String[] segments = Arrays.copyOfRange(arr, 3, arr.length);
@@ -57,7 +59,9 @@ public class GitHubLinkListener extends ListenerAdapter {
 				.map(line -> line.replace("-", ""))
 				.filter(line -> line.matches("-?\\d+")) // check if the given link is a number
 				.map(Integer::valueOf).sorted().toArray(Integer[]::new);
-		// TODO: Fix possible NPE?
+		if (lines.length == 0) {
+			return new Pair<>("", "");
+		}
 		int to = lines.length != 2 ? lines[0] : lines[1];
 		String reqUrl = String.format("https://raw.githubusercontent.com/%s/%s/%s/%s",
 				segments[0], segments[1],
