@@ -64,6 +64,10 @@ public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHan
 		}
 		String[] id = ComponentIdBuilder.split(event.getModalId());
 		Pair<Message, MessageEmbed> pair = EditEmbedSubcommand.EMBED_MESSAGE_CACHE.get(Long.parseLong(id[1]));
+		if (pair == null) {
+			Responses.error(event.getHook(), "An unexpected error occurred. Please try again.").queue();
+			return;
+		}
 		Pair<String, MessageAction> action = handleAddField(event, pair.first(), pair.second());
 		if (action.second() != null) {
 			action.second().queue(

@@ -118,6 +118,10 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 		}
 		String[] id = ComponentIdBuilder.split(event.getModalId());
 		Pair<Message, MessageEmbed> pair = EMBED_MESSAGE_CACHE.get(Long.parseLong(id[2]));
+		if (pair == null) {
+			Responses.error(event.getHook(), "An unexpected error occurred. Please try again.").queue();
+			return;
+		}
 		Pair<String, MessageAction> action = switch (id[1]) {
 			case AUTHOR_ID -> handleAuthorModal(event, pair.first(), pair.second());
 			case TITLE_DESC_COLOR_ID -> handleTitleDescColorModal(event, pair.first(), pair.second());
