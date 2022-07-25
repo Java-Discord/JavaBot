@@ -209,7 +209,7 @@ public class AutoMod extends ListenerAdapter {
 						return true;
 					}
 				} catch (URISyntaxException e) {
-					log.error("Error while parsing URL: " + url, e);
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 				}
 			}
 		}
