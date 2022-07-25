@@ -140,9 +140,14 @@ public class StarboardManager extends ListenerAdapter {
 	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
 		try (Connection con = Bot.dataSource.getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
-			long starboardId = repo.getEntryByMessageId(message.getIdLong()).getStarboardMessageId();
+			StarboardEntry starboardEntry = repo.getEntryByMessageId(message.getIdLong());
+			long starboardId = starboardEntry.getStarboardMessageId();
 			config.getStarboardChannel().retrieveMessageById(starboardId).queue(
 					starboardMessage -> {
+						if (starboardMessage.getAuthor().getIdLong() != message.getJDA().getSelfUser().getIdLong()) {
+							log.error("Could not update/edit Starboard entry ({}), as it was created by another account.", starboardEntry);
+							return;
+						}
 						if (stars < 1) {
 							try {
 								if (!removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config)) {
