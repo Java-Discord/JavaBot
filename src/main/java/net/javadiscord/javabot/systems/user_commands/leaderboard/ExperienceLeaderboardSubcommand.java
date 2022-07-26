@@ -46,14 +46,14 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		event.deferEdit().queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> {
-			int page = Integer.parseInt(id[2]);
+			long page = Long.parseLong(id[2]);
 			// increment/decrement page
 			if (id[1].equals("left")) {
 				page--;
 			} else {
 				page++;
 			}
-			int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
+			long maxPage = dao.countAccounts() / PAGE_SIZE;
 			if (page <= 0) page = maxPage;
 			if (page > maxPage) page = 1;
 			event.getHook().editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
@@ -62,8 +62,8 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		});
 	}
 
-	private static @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, @NotNull HelpAccountRepository dao, int page) throws SQLException {
-		int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
+	private static @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, @NotNull HelpAccountRepository dao, long page) throws SQLException {
+		long maxPage = dao.countAccounts() / PAGE_SIZE;
 		List<HelpAccount> accounts = dao.getAccounts(Math.min(page, maxPage), PAGE_SIZE);
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Experience Leaderboard")
@@ -81,7 +81,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	}
 
 	@Contract("_ -> new")
-	private static @NotNull ActionRow buildPageControls(int currentPage) {
+	private static @NotNull ActionRow buildPageControls(long currentPage) {
 		return ActionRow.of(
 				Button.primary(ComponentIdBuilder.build("experience-leaderboard", "left", currentPage), "Prev"),
 				Button.primary(ComponentIdBuilder.build("experience-leaderboard", "right", currentPage), "Next")

@@ -17,6 +17,7 @@ import java.util.Optional;
  */
 @Slf4j
 @RequiredArgsConstructor
+// TODO: Implement DatabaseRepository
 public class HelpTransactionRepository {
 	private final Connection con;
 

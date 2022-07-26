@@ -20,7 +20,7 @@ public final class TableProperty<T> {
 	private final H2Type h2Type;
 	private final BiConsumer<T, Object> consumer;
 	private final Function<T, Object> function;
-	private final boolean key;
+	private final boolean generatedKey;
 
 	@Contract("_, _, _, _ -> new")
 	public static <T> @NotNull TableProperty<T> of(String propertyName, H2Type h2Type, BiConsumer<T, Object> consumer, Function<T, Object> function) {
@@ -28,7 +28,7 @@ public final class TableProperty<T> {
 	}
 
 	@Contract("_, _, _, _, _ -> new")
-	public static <T> @NotNull TableProperty<T> of(String propertyName, H2Type h2Type, BiConsumer<T, Object> consumer, Function<T, Object> function, boolean isKey) {
-		return new TableProperty<>(propertyName, h2Type, consumer, function, isKey);
+	public static <T> @NotNull TableProperty<T> of(String propertyName, H2Type h2Type, BiConsumer<T, Object> consumer, Function<T, Object> function, boolean isGeneratedKey) {
+		return new TableProperty<>(propertyName, h2Type, consumer, function, isGeneratedKey);
 	}
 }

@@ -37,7 +37,7 @@ public abstract class DatabaseRepository<T> {
 	 * @throws SQLException If an error occurs.
 	 */
 	public final T insert(T instance, boolean returnGeneratedKeys) throws SQLException {
-		List<TableProperty<T>> filteredProperties = this.properties.stream().filter(p -> !p.isKey()).toList();
+		List<TableProperty<T>> filteredProperties = this.properties.stream().filter(p -> !p.isGeneratedKey()).toList();
 		try (PreparedStatement stmt = con.prepareStatement(String.format("INSERT INTO %s (%s) VALUES (%s)",
 				tableName, filteredProperties.stream().map(TableProperty::getPropertyName).collect(Collectors.joining(",")),
 				",?".repeat(filteredProperties.size()).substring(1)
@@ -50,7 +50,7 @@ public abstract class DatabaseRepository<T> {
 			if (stmt.executeUpdate() > 0) {
 				// get generated keys
 				if (returnGeneratedKeys) {
-					List<TableProperty<T>> keyProperties = this.properties.stream().filter(TableProperty::isKey).toList();
+					List<TableProperty<T>> keyProperties = this.properties.stream().filter(TableProperty::isGeneratedKey).toList();
 					ResultSet rs = stmt.getGeneratedKeys();
 					for (TableProperty<T> prop : keyProperties) {
 						if (rs.next()) {
