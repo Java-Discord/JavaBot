@@ -2,6 +2,8 @@ package net.javadiscord.javabot.systems.staff_commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -20,7 +22,7 @@ import java.io.IOException;
  * This only works if the way the bot is hosted is set up correctly with a bash script that handles
  * compilation and a service set up that automatically restarts the Bot..
  * <p>
- * I have explained how we do it in https://github.com/Java-Discord/JavaBot/pull/195
+ * I have explained how we do it in <a href="https://github.com/Java-Discord/JavaBot/pull/330">PR #330</a>.
  */
 @Slf4j
 public class RedeployCommand extends SlashCommand {
