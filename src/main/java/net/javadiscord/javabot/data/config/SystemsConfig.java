@@ -39,6 +39,7 @@ public class SystemsConfig {
 
 	/**
 	 * The location of some sort of bash script that re-compiles a new version of the Bot.
+	 * Example in <a href="https://github.com/Java-Discord/JavaBot/pull/330">Pull Request #330</a>.
 	 */
 	private String redeployScriptLocation = "";
 
