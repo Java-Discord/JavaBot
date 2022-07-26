@@ -47,7 +47,7 @@ public class SubmissionControlsManager {
 	public SubmissionControlsManager(Guild guild, QOTWSubmission submission) {
 		this.guild = guild;
 		this.submission = submission;
-		this.config = Bot.config.get(guild).getQotwConfig();
+		this.config = Bot.getConfig().get(guild).getQotwConfig();
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class SubmissionControlsManager {
 	 */
 	public SubmissionControlsManager(Guild guild, ThreadChannel channel) {
 		QOTWSubmission submission = null;
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 			Optional<QOTWSubmission> submissionOptional = repo.getSubmissionByThreadId(channel.getIdLong());
 			if (submissionOptional.isEmpty()) {
@@ -71,7 +71,7 @@ public class SubmissionControlsManager {
 		}
 		this.guild = guild;
 		this.submission = submission;
-		this.config = Bot.config.get(guild).getQotwConfig();
+		this.config = Bot.getConfig().get(guild).getQotwConfig();
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 			service.increment(user.getIdLong());
 			new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
 			Responses.success(event.getHook(), "Submission Accepted",

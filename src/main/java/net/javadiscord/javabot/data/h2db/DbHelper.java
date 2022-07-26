@@ -81,8 +81,8 @@ public class DbHelper {
 	 * @param consumer The consumer that will use a connection.
 	 */
 	public static void doDbAction(ConnectionConsumer consumer) {
-		Bot.asyncPool.submit(() -> {
-			try (Connection c = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				consumer.consume(c);
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
@@ -100,8 +100,8 @@ public class DbHelper {
 	 * @param <T>            The type of data access object. Usually some kind of repository.
 	 */
 	public static <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
-		Bot.asyncPool.submit(() -> {
-			try (Connection c = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				T dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 			} catch (SQLException e) {

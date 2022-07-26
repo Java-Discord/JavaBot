@@ -32,7 +32,7 @@ public final class SearchWebService {
 		URL url = new URL(HOST + PATH + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=en-US&safeSearch=Strict");
 		// Open the connection.
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.config.getSystems().getAzureSubscriptionKey());
+		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.getConfig().getSystems().getAzureSubscriptionKey());
 		// Receive the JSON response body.
 		String response;
 		try (Scanner scan = new Scanner(connection.getInputStream()).useDelimiter("\\A")) {

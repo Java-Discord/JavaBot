@@ -42,8 +42,8 @@ public class SetPointsSubcommand extends SlashCommand.Subcommand {
 		}
 		Member member = memberMapping.getAsMember();
 		long points = pointsMapping.getAsLong();
-		try (Connection con = Bot.dataSource.getConnection()) {
-			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+		try (Connection con = Bot.getDataSource().getConnection()) {
+			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 			QOTWAccount account = service.getOrCreateAccount(member.getIdLong());
 			account.setPoints(points);
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);

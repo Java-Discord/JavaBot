@@ -54,7 +54,7 @@ public class ModerationService {
 	 */
 	public ModerationService(@NotNull Interaction interaction) {
 		this(
-				Bot.config.get(interaction.getGuild())
+				Bot.getConfig().get(interaction.getGuild())
 		);
 	}
 
@@ -107,7 +107,7 @@ public class ModerationService {
 	 * @return Whether the Warn was discarded or not.
 	 */
 	public boolean discardWarnById(long id, User clearedBy) {
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			WarnRepository repo = new WarnRepository(con);
 			Optional<Warn> warnOptional = repo.findById(id);
 			if (warnOptional.isPresent()) {
@@ -130,7 +130,7 @@ public class ModerationService {
 	 * @return A {@link List} with all warns.
 	 */
 	public List<Warn> getWarns(long userId) {
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			WarnRepository repo = new WarnRepository(con);
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays());
 			return repo.getWarnsByUserId(userId, cutoff);

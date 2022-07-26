@@ -17,7 +17,7 @@ public final class GuildNotificationService extends NotificationService {
 
 	public GuildNotificationService(Guild guild) {
 		this.guild = guild;
-		this.config = Bot.config.get(guild);
+		this.config = Bot.getConfig().get(guild);
 	}
 
 	/**

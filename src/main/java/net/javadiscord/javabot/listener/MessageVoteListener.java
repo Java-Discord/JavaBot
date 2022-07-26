@@ -61,7 +61,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @return The emote.
 	 */
 	protected Emoji getUpvoteEmote(JDA jda) {
-		return Bot.config.getSystems().getEmojiConfig().getUpvoteEmote(jda);
+		return Bot.getConfig().getSystems().getEmojiConfig().getUpvoteEmote(jda);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @return The emote.
 	 */
 	protected Emoji getDownvoteEmote(JDA jda) {
-		return Bot.config.getSystems().getEmojiConfig().getDownvoteEmote(jda);
+		return Bot.getConfig().getSystems().getEmojiConfig().getDownvoteEmote(jda);
 	}
 
 	/**
@@ -95,12 +95,12 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-		Bot.asyncPool.submit(() -> handleReactionEvent(event));
+		Bot.getAsyncPool().submit(() -> handleReactionEvent(event));
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
-		Bot.asyncPool.submit(() -> handleReactionEvent(event));
+		Bot.getAsyncPool().submit(() -> handleReactionEvent(event));
 	}
 
 	/**

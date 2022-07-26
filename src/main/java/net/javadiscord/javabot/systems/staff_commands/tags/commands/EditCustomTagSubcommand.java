@@ -54,7 +54,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 		if (event.getGuild() == null) {
 			return Responses.replyGuildOnly(event);
 		}
-		Set<CustomTag> tags = Bot.customTagManager.getLoadedCommands(event.getGuild().getIdLong());
+		Set<CustomTag> tags = Bot.getCustomTagManager().getLoadedCommands(event.getGuild().getIdLong());
 		Optional<CustomTag> tagOptional = tags.stream()
 				.filter(t -> t.getName().equalsIgnoreCase(nameMapping.getAsString()))
 				.findFirst();
@@ -146,7 +146,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				Responses.error(event.getHook(), "Could not find Custom Tag with name `/%s`.", update.getName()).queue();
 				return;
 			}
-			if (Bot.customTagManager.editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {
+			if (Bot.getCustomTagManager().editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {
 				event.getHook().sendMessageEmbeds(buildEditTagEmbed(event.getMember(), update)).queue();
 				return;
 			}

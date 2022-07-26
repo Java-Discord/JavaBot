@@ -66,7 +66,7 @@ public class WarnsListCommand extends SlashCommand {
 			return;
 		}
 		event.deferReply(false).queue();
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.config.get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.getConfig().get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
 		DbHelper.doDaoAction(WarnRepository::new, dao ->
 				event.getHook().sendMessageEmbeds(buildWarnsEmbed(dao.getWarnsByUserId(user.getIdLong(), cutoff), user)).queue());
 	}

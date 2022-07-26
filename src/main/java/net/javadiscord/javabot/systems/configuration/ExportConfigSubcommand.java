@@ -16,7 +16,7 @@ import java.io.File;
 public class ExportConfigSubcommand extends ConfigSubcommand {
 	public ExportConfigSubcommand() {
 		setSubcommandData(new SubcommandData("export", "Exports a list of all configuration properties, and their current values."));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

@@ -37,7 +37,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 	 */
 	private void handleHelpThankButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
-		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
 		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
@@ -112,14 +112,14 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 							helper.getIdLong()
 					);
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", helper.getAsTag()).setEphemeral(true).queue();
-					HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
-					HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+					HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
+					HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
 					// Perform experience transactions
 					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
 					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 				} catch (SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
-					Bot.config.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
+					Bot.getConfig().get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
 							"Could not record user %s thanking %s for help in channel %s: %s",
 							owner.getAsTag(),
 							helper.getAsTag(),
@@ -145,7 +145,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 
 	private void handleHelpChannelButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
-		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
 		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
@@ -179,7 +179,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 		// Check that the user is allowed to do the interaction.
 		if (
 				event.getUser().equals(owner) ||
-						event.getMember() != null && event.getMember().getRoles().contains(Bot.config.get(event.getGuild()).getModerationConfig().getStaffRole())
+						event.getMember() != null && event.getMember().getRoles().contains(Bot.getConfig().get(event.getGuild()).getModerationConfig().getStaffRole())
 		) {
 			if (action.equals("done")) {
 				event.getMessage().delete().queue();

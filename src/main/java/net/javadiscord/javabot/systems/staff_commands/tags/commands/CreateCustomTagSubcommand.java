@@ -109,7 +109,7 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 		command.setReply(Boolean.parseBoolean(replyMapping.getAsString()));
 		command.setEmbed(Boolean.parseBoolean(embedMapping.getAsString()));
 		try {
-			if (Bot.customTagManager.addCommand(event.getGuild(), command)) {
+			if (Bot.getCustomTagManager().addCommand(event.getGuild(), command)) {
 				event.getHook().sendMessageEmbeds(buildCreateCommandEmbed(event.getUser(), command)).queue();
 			} else {
 				Responses.error(event.getHook(), "Could not create Custom Tag. Please try again.").queue();

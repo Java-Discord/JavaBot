@@ -33,7 +33,7 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 	 */
 	public QuickMigrateSubcommand() {
 		setSubcommandData(new SubcommandData("quick-migrate", "(ADMIN ONLY) Run a single quick database migration"));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -61,9 +61,9 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 			Responses.error(event.getHook(), "The provided migration does not contain any statements. Please remove or edit it before running again.").queue();
 			return;
 		}
-		Bot.asyncPool.submit(() -> {
+		Bot.getAsyncPool().submit(() -> {
 			TextChannel channel = event.getChannel().asTextChannel();
-			try (Connection con = Bot.dataSource.getConnection()) {
+			try (Connection con = Bot.getDataSource().getConnection()) {
 				for (int i = 0; i < statements.length; i++) {
 					if (statements[i].isBlank()) {
 						channel.sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();

@@ -50,7 +50,7 @@ public class InteractionUtils implements ButtonHandler {
 			Responses.warning(interaction.getHook(), "Could not get member.").queue();
 			return;
 		}
-		GuildConfig config = Bot.config.get(interaction.getGuild());
+		GuildConfig config = Bot.getConfig().get(interaction.getGuild());
 		Message msg = interaction.getMessage();
 		if (
 				member.getUser().getIdLong() == msg.getAuthor().getIdLong() ||

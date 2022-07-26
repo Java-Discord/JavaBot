@@ -11,9 +11,9 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 public class GuildJoinListener extends ListenerAdapter {
 	@Override
 	public void onGuildJoin(GuildJoinEvent event) {
-		Bot.config.addGuild(event.getGuild());
+		Bot.getConfig().addGuild(event.getGuild());
 		try {
-			Bot.dih4jda.registerInteractions();
+			Bot.getDIH4JDA().registerInteractions();
 		} catch (ReflectiveOperationException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}

@@ -52,7 +52,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 			embedBuilder.setDescription("There are no questions in the queue.");
 			return event.replyEmbeds(embedBuilder.build());
 		}
-		Bot.asyncPool.submit(() -> {
+		Bot.getAsyncPool().submit(() -> {
 			for (QOTWQuestion question : questions) {
 				embedBuilder.addField(
 						String.valueOf(question.getId()),

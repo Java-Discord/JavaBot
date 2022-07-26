@@ -23,7 +23,7 @@ public abstract class QOTWSubcommand extends SlashCommand.Subcommand {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			con.setAutoCommit(false);
 			InteractionCallbackAction<?> reply = handleCommand(event, con, event.getGuild().getIdLong());
 			con.commit();

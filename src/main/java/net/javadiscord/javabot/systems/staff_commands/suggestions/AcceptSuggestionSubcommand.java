@@ -31,7 +31,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed declineEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
 		message.editMessageEmbeds(declineEmbed).queue(
-				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getSuccessEmote(event.getJDA())).queue(),
+				edit -> edit.addReaction(Bot.getConfig().getSystems().getEmojiConfig().getSuccessEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Accepted", "Successfully accepted suggestion with id `%s`", message.getId())
 				.addActionRows(getJumpButton(message));

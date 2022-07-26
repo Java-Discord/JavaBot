@@ -44,8 +44,8 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	private void handleReactionEvent(Guild guild, Emoji emoji, MessageChannel channel, long messageId) {
-		Bot.asyncPool.submit(() -> {
-			StarboardConfig config = Bot.config.get(guild).getStarboardConfig();
+		Bot.getAsyncPool().submit(() -> {
+			StarboardConfig config = Bot.getConfig().get(guild).getStarboardConfig();
 			if (config.getStarboardChannel().equals(channel)) return;
 			Emoji starEmote = config.getEmojis().get(0);
 			if (!emoji.equals(starEmote)) return;
@@ -75,9 +75,9 @@ public class StarboardManager extends ListenerAdapter {
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
 		if (isInvalidChannel(event.getChannel())) return;
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
-			StarboardConfig config = Bot.config.get(event.getGuild()).getStarboardConfig();
+			StarboardConfig config = Bot.getConfig().get(event.getGuild()).getStarboardConfig();
 			StarboardEntry entry;
 			if (event.getChannel().getIdLong() == config.getStarboardChannelId()) {
 				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
@@ -138,7 +138,7 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
 			StarboardEntry starboardEntry = repo.getEntryByMessageId(message.getIdLong());
 			long starboardId = starboardEntry.getStarboardMessageId();
@@ -177,7 +177,7 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	private boolean removeMessageFromStarboard(long messageId, MessageChannel channel, StarboardConfig config) throws SQLException {
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
 			StarboardEntry entry = repo.getEntryByMessageId(messageId);
 			if (entry == null) return false;

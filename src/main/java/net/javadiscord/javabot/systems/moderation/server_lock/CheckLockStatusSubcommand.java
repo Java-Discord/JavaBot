@@ -30,7 +30,7 @@ public class CheckLockStatusSubcommand extends SlashCommand.Subcommand {
 			Responses.replyStaffOnly(event, event.getGuild()).queue();
 			return;
 		}
-		ServerLockConfig config = Bot.config.get(event.getGuild()).getServerLockConfig();
+		ServerLockConfig config = Bot.getConfig().get(event.getGuild()).getServerLockConfig();
 		Responses.info(event, "Server Lock Status", "The Server Lock is currently **%s**", config.isLocked() ? "ENABLED" : "DISABLED").queue();
 	}
 }

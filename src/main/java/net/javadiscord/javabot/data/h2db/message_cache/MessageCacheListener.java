@@ -21,13 +21,13 @@ public class MessageCacheListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
-		Bot.messageCache.cache(event.getMessage());
+		Bot.getMessageCache().cache(event.getMessage());
 	}
 
 	@Override
 	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
-		List<CachedMessage> cache = Bot.messageCache.cache;
+		List<CachedMessage> cache = Bot.getMessageCache().cache;
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		CachedMessage before;
 		if (optional.isPresent()) {
@@ -37,17 +37,17 @@ public class MessageCacheListener extends ListenerAdapter {
 			before = new CachedMessage();
 			before.setMessageId(event.getMessageIdLong());
 			before.setMessageContent("[unknown content]");
-			Bot.messageCache.cache(event.getMessage());
+			Bot.getMessageCache().cache(event.getMessage());
 		}
-		Bot.messageCache.sendUpdatedMessageToLog(event.getMessage(), before);
+		Bot.getMessageCache().sendUpdatedMessageToLog(event.getMessage(), before);
 	}
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		Optional<CachedMessage> optional = Bot.messageCache.cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
+		Optional<CachedMessage> optional = Bot.getMessageCache().cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		optional.ifPresent(message -> {
-			Bot.messageCache.sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
-			Bot.messageCache.cache.remove(message);
+			Bot.getMessageCache().sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
+			Bot.getMessageCache().cache.remove(message);
 		});
 	}
 
@@ -68,7 +68,7 @@ public class MessageCacheListener extends ListenerAdapter {
 	 */
 	private boolean ignoreMessageCache(Message message) {
 		if (!message.isFromGuild()) return true;
-		MessageCacheConfig config = Bot.config.get(message.getGuild()).getMessageCacheConfig();
+		MessageCacheConfig config = Bot.getConfig().get(message.getGuild()).getMessageCacheConfig();
 		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
 				config.getExcludedUsers().contains(message.getAuthor().getIdLong()) ||
 				config.getExcludedChannels().contains(message.getChannel().getIdLong());

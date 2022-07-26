@@ -104,7 +104,7 @@ public class HelpExperienceService {
 
 	private void checkExperienceRoles(Guild guild, HelpAccount account) {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
-				Bot.config.get(guild).getHelpConfig().getExperienceRoles().forEach((key, value) -> {
+				Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles().forEach((key, value) -> {
 					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
 					if (role.first() == null) return;
 					if (key.equals(role.first().getIdLong())) {

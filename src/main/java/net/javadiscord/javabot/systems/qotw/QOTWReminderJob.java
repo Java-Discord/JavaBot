@@ -24,8 +24,8 @@ public class QOTWReminderJob extends DiscordApiJob {
 	@Override
 	protected void execute(JobExecutionContext context, @NotNull JDA jda) throws JobExecutionException {
 		for (Guild guild : jda.getGuilds()) {
-			ModerationConfig config = Bot.config.get(guild).getModerationConfig();
-			try (Connection c = Bot.dataSource.getConnection()) {
+			ModerationConfig config = Bot.getConfig().get(guild).getModerationConfig();
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				Optional<QOTWQuestion> q = repo.getNextQuestion(guild.getIdLong());
 				if (q.isEmpty()) {

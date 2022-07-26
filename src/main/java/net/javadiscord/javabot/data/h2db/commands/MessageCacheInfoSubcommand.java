@@ -21,13 +21,13 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 	 */
 	public MessageCacheInfoSubcommand() {
 		setSubcommandData(new SubcommandData("info", "Displays some info about the Message Cache."));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		event.replyEmbeds(buildInfoEmbed(Bot.config.get(event.getGuild()), event.getUser())).queue();
+		event.replyEmbeds(buildInfoEmbed(Bot.getConfig().get(event.getGuild()), event.getUser())).queue();
 	}
 
 	private MessageEmbed buildInfoEmbed(GuildConfig config, User author) {
@@ -38,8 +38,8 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 				.setTitle("Message Cache Info")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Table Size", DbActions.getLogicalSize("message_cache") + " bytes", false)
-				.addField("Message Count", String.valueOf(Bot.messageCache.messageCount), true)
-				.addField("Cached (Memory)", String.format("%s/%s (%.2f%%)", Bot.messageCache.cache.size(), maxMessages, ((float) Bot.messageCache.cache.size() / maxMessages) * 100), true)
+				.addField("Message Count", String.valueOf(Bot.getMessageCache().messageCount), true)
+				.addField("Cached (Memory)", String.format("%s/%s (%.2f%%)", Bot.getMessageCache().cache.size(), maxMessages, ((float) Bot.getMessageCache().cache.size() / maxMessages) * 100), true)
 				.addField("Cached (Database)", String.format("%s/%s (%.2f%%)", messages, maxMessages, ((float) messages / maxMessages) * 100), true)
 				.build();
 	}

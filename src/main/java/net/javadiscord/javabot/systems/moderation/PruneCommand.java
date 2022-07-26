@@ -44,7 +44,7 @@ public class PruneCommand extends ModerateCommand {
 		if (!Checks.hasAdminRole(event.getGuild(), moderator)) {
 			return Responses.replyAdminOnly(event, event.getGuild());
 		}
-		ModerationConfig config = Bot.config.get(event.getGuild()).getModerationConfig();
+		ModerationConfig config = Bot.getConfig().get(event.getGuild()).getModerationConfig();
 
 		OptionMapping patternOption = event.getOption("pattern");
 		OptionMapping beforeOption = event.getOption("before");

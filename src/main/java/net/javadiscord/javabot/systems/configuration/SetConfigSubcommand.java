@@ -24,7 +24,7 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 				.addOption(OptionType.STRING, "property", "The name of a property.", true)
 				.addOption(OptionType.STRING, "value", "The value to set for the property.", true)
 		);
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 		}
 		String property = propertyOption.getAsString().trim();
 		String valueString = valueOption.getAsString().trim();
-		Bot.config.get(event.getGuild()).set(property, valueString);
+		Bot.getConfig().get(event.getGuild()).set(property, valueString);
 		return Responses.success(event, "Configuration Updated", "The property `%s` has been set to `%s`.", property, valueString);
 	}
 }

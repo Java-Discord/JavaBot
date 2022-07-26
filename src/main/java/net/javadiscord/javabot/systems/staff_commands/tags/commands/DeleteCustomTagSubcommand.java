@@ -48,7 +48,7 @@ public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCom
 				Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", tagName).queue();
 				return;
 			}
-			if (Bot.customTagManager.removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {
+			if (Bot.getCustomTagManager().removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {
 				event.getHook().sendMessageEmbeds(buildDeleteCommandEmbed(event.getMember(), tagOptional.get())).queue();
 				return;
 			}

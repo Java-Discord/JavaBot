@@ -52,7 +52,7 @@ public class HelpChannelManager {
 
 	public HelpChannelManager(HelpConfig config) {
 		this.config = config;
-		this.logChannel = Bot.config.get(config.getGuild()).getModerationConfig().getLogChannel();
+		this.logChannel = Bot.getConfig().get(config.getGuild()).getModerationConfig().getLogChannel();
 	}
 
 	public boolean isOpen(TextChannel channel) {
@@ -79,7 +79,7 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
-		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
+		try (Connection con = Bot.getDataSource().getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -192,7 +192,7 @@ public class HelpChannelManager {
 		int limit = 300;
 		MessageHistory history = channel.getHistory();
 		final CompletableFuture<Map<Member, List<Message>>> cf = new CompletableFuture<>();
-		Bot.asyncPool.execute(() -> {
+		Bot.getAsyncPool().execute(() -> {
 			final Map<Member, List<Message>> userMessages = new HashMap<>();
 			boolean endFound = false;
 			while (!endFound && history.size() < limit) {
@@ -325,8 +325,8 @@ public class HelpChannelManager {
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			try (Connection con = Bot.dataSource.getConnection()) {
-				HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+			try (Connection con = Bot.getDataSource().getConnection()) {
+				HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
 					ChannelReservation reservation = reservationOptional.get();
@@ -436,7 +436,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void setTimeout(@NotNull TextChannel channel, int timeout) throws SQLException {
-		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
+		try (Connection con = Bot.getDataSource().getConnection(); PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
 			stmt.setInt(1, timeout);
 			stmt.setLong(2, channel.getIdLong());
 			stmt.executeUpdate();
@@ -451,7 +451,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getTimeout(TextChannel channel) throws SQLException {
-		try (Connection con = Bot.dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
+		try (Connection con = Bot.getDataSource().getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
 			stmt.setLong(1, channel.getIdLong());
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {

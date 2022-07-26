@@ -90,7 +90,7 @@ public class AutoMod extends ListenerAdapter {
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
 		if (message.getMentions().getUsers().size() >= 5) {
-			new ModerationService(Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -124,7 +124,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Message: `" + message.getContentRaw() + "`");
-			new ModerationService(Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -142,7 +142,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
 			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message);
-			new ModerationService(Bot.config.get(message.getGuild()))
+			new ModerationService(Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -167,7 +167,7 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
 			return;
 		}
-		new ModerationService(Bot.config.get(member.getGuild()))
+		new ModerationService(Bot.getConfig().get(member.getGuild()))
 				.timeout(
 						member,
 						"Automod: Spam",
@@ -228,12 +228,12 @@ public class AutoMod extends ListenerAdapter {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
 		if (matcher.find()) {
-			return Bot.config.get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(message.getContentRaw()::contains);
+			return Bot.getConfig().get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(message.getContentRaw()::contains);
 		}
 		return false;
 	}
 
 	private boolean isSuggestionsChannel(@NotNull TextChannel channel) {
-		return channel.equals(Bot.config.get(channel.getGuild()).getModerationConfig().getSuggestionChannel());
+		return channel.equals(Bot.getConfig().get(channel.getGuild()).getModerationConfig().getSuggestionChannel());
 	}
 }

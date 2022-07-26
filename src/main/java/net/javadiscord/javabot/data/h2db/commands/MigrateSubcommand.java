@@ -46,7 +46,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	public MigrateSubcommand() {
 		setSubcommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
 				.addOption(OptionType.STRING, "name", "The migration's filename", true, true));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -87,8 +87,8 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 				return;
 			}
 			event.deferReply().queue();
-			Bot.asyncPool.submit(() -> {
-				try (Connection con = Bot.dataSource.getConnection()) {
+			Bot.getAsyncPool().submit(() -> {
+				try (Connection con = Bot.getDataSource().getConnection()) {
 					for (int i = 0; i < statements.length; i++) {
 						if (statements[i].isBlank()) {
 							event.getHook().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();

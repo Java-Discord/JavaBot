@@ -33,7 +33,7 @@ public class HelpChannelListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) {
 			return;
 		}
-		HelpConfig config = Bot.config.get(event.getGuild()).getHelpConfig();
+		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		TextChannel channel = event.getChannel().asTextChannel();
 		HelpChannelManager manager = new HelpChannelManager(config);
 

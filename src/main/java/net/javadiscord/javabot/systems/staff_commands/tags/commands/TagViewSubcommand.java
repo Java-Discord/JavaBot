@@ -35,7 +35,7 @@ public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable
 		if (nameMapping == null) {
 			return Responses.replyMissingArguments(event);
 		}
-		Optional<CustomTag> tagOptional = Bot.customTagManager.getByName(event.getGuild().getIdLong(), nameMapping.getAsString());
+		Optional<CustomTag> tagOptional = Bot.getCustomTagManager().getByName(event.getGuild().getIdLong(), nameMapping.getAsString());
 		if (tagOptional.isPresent()) {
 			CustomTagManager.handleCustomTag(event, tagOptional.get()).queue();
 		} else {

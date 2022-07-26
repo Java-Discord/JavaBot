@@ -32,14 +32,14 @@ public class StateListener extends ListenerAdapter {
 	@Override
 	public void onReady(@NotNull ReadyEvent event) {
 		// Initialize all guild-specific configuration.
-		Bot.config.loadGuilds(event.getJDA().getGuilds());
-		Bot.config.flush();
+		Bot.getConfig().loadGuilds(event.getJDA().getGuilds());
+		Bot.getConfig().flush();
 		log.info("Logged in as " + event.getJDA().getSelfUser().getAsTag());
 		log.info("Guilds: " + event.getJDA().getGuilds().stream().map(Guild::getName).collect(Collectors.joining(", ")));
 		for (Guild guild : event.getJDA().getGuilds()) {
 			// Schedule the help channel updater to run periodically for each guild.
-			HelpConfig helpConfig = Bot.config.get(guild).getHelpConfig();
-			Bot.asyncPool.scheduleAtFixedRate(
+			HelpConfig helpConfig = Bot.getConfig().get(guild).getHelpConfig();
+			Bot.getAsyncPool().scheduleAtFixedRate(
 					new HelpChannelUpdater(event.getJDA(), helpConfig, List.of(
 							new SimpleGreetingCheck()
 					)),
@@ -50,7 +50,7 @@ public class StateListener extends ListenerAdapter {
 			new GuildNotificationService(guild).sendLogChannelNotification(buildBootedUpEmbed());
 		}
 		try {
-			Bot.customTagManager.init();
+			Bot.getCustomTagManager().init();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Could not initialize CustomCommandManager: ", e);
@@ -59,13 +59,13 @@ public class StateListener extends ListenerAdapter {
 
 	@Override
 	public void onReconnected(@NotNull ReconnectedEvent event) {
-		Bot.config.loadGuilds(event.getJDA().getGuilds());
-		Bot.config.flush();
+		Bot.getConfig().loadGuilds(event.getJDA().getGuilds());
+		Bot.getConfig().flush();
 	}
 
 	@Override
 	public void onShutdown(@NotNull ShutdownEvent event) {
-		Bot.config.flush();
+		Bot.getConfig().flush();
 	}
 
 	private @NotNull MessageEmbed buildBootedUpEmbed() {

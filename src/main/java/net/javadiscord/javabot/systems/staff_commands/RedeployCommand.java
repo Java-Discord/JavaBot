@@ -29,7 +29,7 @@ public class RedeployCommand extends SlashCommand {
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class RedeployCommand extends SlashCommand {
 		}
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
 		event.reply("**Redeploying...** This may take some time.").queue();
-		Bot.messageCache.synchronize();
+		Bot.getMessageCache().synchronize();
 		System.exit(0);
 	}
 }

@@ -32,7 +32,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 		event.deferReply(false).queue();
 		Collector<CharSequence, ?, String> collector = Collectors.joining("\n");
 		String format = "**%d** %s";
-		Bot.asyncPool.submit(() -> {
+		Bot.getAsyncPool().submit(() -> {
 			String totalHelpers = getCounts("""
 					SELECT COUNT(id), helper_id
 					FROM help_channel_thanks
