@@ -36,6 +36,12 @@ public class SystemsConfig {
 	 */
 	private int asyncPoolSize = 4;
 
+
+	/**
+	 * The location of some sort of bash script that re-compiles a new version of the Bot.
+	 */
+	private String redeployScriptLocation = "";
+
 	/**
 	 * Configuration for the Hikari connection pool that's used for the bot's
 	 * SQL data source.
