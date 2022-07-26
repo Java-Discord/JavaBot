@@ -52,7 +52,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 				s -> s.setLong(1, user.getIdLong())
 		);
 		try {
-			HelpAccount account = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(user.getIdLong());
+			HelpAccount account = new HelpExperienceService(Bot.getDataSource()).getOrCreateAccount(user.getIdLong());
 			event.replyEmbeds(buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks, showTransactions)).queue();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -77,7 +77,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	private @NotNull String formatTransactionHistory(long userId) {
 		StringBuilder sb = new StringBuilder();
 		try {
-			HelpExperienceService service = new HelpExperienceService(Bot.dataSource);
+			HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
 			for (HelpTransaction t :service.getRecentTransactions(userId, 3)) {
 				sb.append(t.format()).append("\n\n");
 			}

@@ -30,7 +30,7 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 	public ExportSchemaSubcommand() {
 		setSubcommandData(new SubcommandData("export-schema", "(ADMIN ONLY) Exports the bot's schema.")
 				.addOption(OptionType.BOOLEAN, "include-data", "Should data be included in the export?"));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -38,8 +38,8 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 	public void execute(SlashCommandInteractionEvent event) {
 		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		event.deferReply(false).queue();
-		Bot.asyncPool.submit(() -> {
-			try (Connection con = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection con = Bot.getDataSource().getConnection()) {
 				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
 				boolean success = stmt.execute();
 				if (!success) {

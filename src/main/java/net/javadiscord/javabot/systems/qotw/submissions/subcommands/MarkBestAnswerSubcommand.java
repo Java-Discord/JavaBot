@@ -57,7 +57,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		long threadId = Long.parseLong(idMapping.getAsString());
-		GuildConfig config = Bot.config.get(event.getGuild());
+		GuildConfig config = Bot.getConfig().get(event.getGuild());
 		ThreadChannel submissionThread = event.getGuild().getThreadChannelById(threadId);
 		if (submissionThread == null) {
 			Responses.error(event, "Could not find thread with id: `%s`", threadId).queue();
@@ -86,7 +86,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 							Responses.error(event.getHook(), "Could not find member with id: `%s`", submission.getAuthorId()).queue();
 							return;
 						}
-						QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+						QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 						service.increment(member.getIdLong());
 						new QOTWNotificationService(member.getUser(), event.getGuild()).sendBestAnswerNotification();
 						sendBestAnswer(event.getHook(), messages, member, submissionThread);
@@ -129,7 +129,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 * @param submissionThread The submission's thread.
 	 */
 	private void sendBestAnswer(InteractionHook hook, List<Message> messages, Member member, ThreadChannel submissionThread) {
-		Bot.config.get(member.getGuild()).getQotwConfig().getQuestionChannel().sendMessageEmbeds(this.buildBestAnswerEmbed(member)).queue(
+		Bot.getConfig().get(member.getGuild()).getQotwConfig().getQuestionChannel().sendMessageEmbeds(this.buildBestAnswerEmbed(member)).queue(
 				message -> message.createThreadChannel(submissionThread.getName()).queue(
 						thread -> {
 							messages.forEach(m -> {
@@ -151,9 +151,9 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 */
 	public static List<Command.Choice> replyAcceptedSubmissions(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			QOTWConfig config = Bot.config.get(event.getGuild()).getQotwConfig();
+			QOTWConfig config = Bot.getConfig().get(event.getGuild()).getQotwConfig();
 			List<QOTWSubmission> submissions = repo.getSubmissionByQuestionNumber(repo.getCurrentQuestionNumber())
 					.stream()
 					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)

@@ -31,7 +31,7 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 	protected void execute(JobExecutionContext context, @NotNull JDA jda) throws JobExecutionException {
 		for (Guild guild : jda.getGuilds()) {
 			// Disable 'Submit your Answer' button on latest QOTW
-			GuildConfig config = Bot.config.get(guild);
+			GuildConfig config = Bot.getConfig().get(guild);
 			QOTWConfig qotwConfig = config.getQotwConfig();
 			qotwConfig.getSubmissionChannel().getManager()
 					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS))
@@ -42,7 +42,7 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 			if (message == null) continue;
 			message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
 			for (ThreadChannel thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				try (Connection con = Bot.dataSource.getConnection()) {
+				try (Connection con = Bot.getDataSource().getConnection()) {
 					QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 					Optional<QOTWSubmission> optionalSubmission = repo.getSubmissionByThreadId(thread.getIdLong());
 					if (optionalSubmission.isEmpty()) continue;

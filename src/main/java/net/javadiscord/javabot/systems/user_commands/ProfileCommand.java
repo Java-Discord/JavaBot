@@ -49,19 +49,19 @@ public class ProfileCommand extends SlashCommand {
 			return;
 		}
 		try {
-			event.replyEmbeds(buildProfileEmbed(member, new QOTWPointsService(Bot.dataSource))).queue();
+			event.replyEmbeds(buildProfileEmbed(member, new QOTWPointsService(Bot.getDataSource()))).queue();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
 
 	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member, @NotNull QOTWPointsService service) throws SQLException {
-		GuildConfig config = Bot.config.get(member.getGuild());
+		GuildConfig config = Bot.getConfig().get(member.getGuild());
 		List<Warn> warns = new ModerationService(config).getWarns(member.getIdLong());
 		long points = service.getPoints(member.getIdLong());
 		List<Role> roles = member.getRoles();
 		String status = member.getOnlineStatus().name();
-		double helpXP = new HelpExperienceService(Bot.dataSource).getOrCreateAccount(member.getIdLong()).getExperience();
+		double helpXP = new HelpExperienceService(Bot.getDataSource()).getOrCreateAccount(member.getIdLong()).getExperience();
 		EmbedBuilder embed = new EmbedBuilder()
 				.setTitle("Profile")
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())

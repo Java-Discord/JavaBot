@@ -60,48 +60,21 @@ import java.util.concurrent.ScheduledExecutorService;
 @Slf4j
 public class Bot {
 
-	/**
-	 * The set of configuration properties that this bot uses.
-	 */
-	public static BotConfig config;
+	private static BotConfig config;
 
-	/**
-	 * An instance of {@link AutoMod}.
-	 */
-	public static AutoMod autoMod;
+	private static AutoMod autoMod;
 
-	/**
-	 * A reference to the Bot's {@link DIH4JDA}.
-	 */
-	public static DIH4JDA dih4jda;
+	private static DIH4JDA dih4jda;
 
-	/**
-	 * The Bots {@link MessageCache}, which handles logging of deleted and edited messages.
-	 */
-	public static MessageCache messageCache;
+	private static MessageCache messageCache;
 
-	/**
-	 * A reference to the Bot's {@link ServerLockManager}.
-	 */
-	public static ServerLockManager serverLockManager;
+	private static ServerLockManager serverLockManager;
 
-	/**
-	 * A static reference to the {@link CustomTagManager} which handles and loads all registered Custom Commands.
-	 */
-	public static CustomTagManager customTagManager;
+	private static CustomTagManager customTagManager;
 
-	/**
-	 * A reference to the data source that provides access to the relational
-	 * database that this bot users for certain parts of the application. Use
-	 * this to obtain a connection and perform transactions.
-	 */
-	public static HikariDataSource dataSource;
+	private static HikariDataSource dataSource;
 
-	/**
-	 * A general-purpose thread pool that can be used by the bot to execute
-	 * tasks outside the main event processing thread.
-	 */
-	public static ScheduledExecutorService asyncPool;
+	private static ScheduledExecutorService asyncPool;
 
 	private Bot() {
 	}
@@ -210,6 +183,81 @@ public class Bot {
 		dih4jda.addSelectMenuHandlers(Map.of(
 				List.of("qotw-submission-select"), new SubmissionInteractionManager()
 		));
+	}
+
+	/**
+	 * The set of configuration properties that this bot uses.
+	 *
+	 * @return The {@link BotConfig} which was set in {@link Bot#main(String[])}.
+	 */
+	public static BotConfig getConfig() {
+		return config;
+	}
+
+	/**
+	 * A static reference to the bots' {@link AutoMod} instance.
+	 *
+	 * @return The {@link AutoMod} instance which was created in {@link Bot#main(String[])}.
+	 */
+	public static AutoMod getAutoMod() {
+		return autoMod;
+	}
+
+	/**
+	 * A static reference to the bots' {@link DIH4JDA} instance.
+	 *
+	 * @return The {@link DIH4JDA} instance which was set in {@link Bot#main(String[])}.
+	 */
+	public static DIH4JDA getDIH4JDA() {
+		return dih4jda;
+	}
+
+	/**
+	 * The bots' {@link MessageCache}, which handles logging of deleted and edited messages.
+	 *
+	 * @return The {@link MessageCache} which was initialized in {@link Bot#main(String[])}.
+	 */
+	public static MessageCache getMessageCache() {
+		return messageCache;
+	}
+
+	/**
+	 * A reference to the bots' {@link ServerLockManager}.
+	 *
+	 * @return The {@link ServerLockManager} which was created in {@link Bot#main(String[])}.
+	 */
+	public static ServerLockManager getServerLockManager() {
+		return serverLockManager;
+	}
+
+	/**
+	 * A static reference to the {@link CustomTagManager} which handles and loads all registered Custom Commands.
+	 *
+	 * @return The {@link CustomTagManager} which was created in {@link Bot#main(String[])}.
+	 */
+	public static CustomTagManager getCustomTagManager() {
+		return customTagManager;
+	}
+
+	/**
+	 * A reference to the data source that provides access to the relational
+	 * database that this bot users for certain parts of the application. Use
+	 * this to obtain a connection and perform transactions.
+	 *
+	 * @return The {@link HikariDataSource} which was initialized in {@link Bot#main(String[])}.
+	 */
+	public static HikariDataSource getDataSource() {
+		return dataSource;
+	}
+
+	/**
+	 * A general-purpose thread pool that can be used by the bot to execute
+	 * tasks outside the main event processing thread.
+	 *
+	 * @return The {@link ScheduledExecutorService} which was set in {@link Bot#main(String[])}.
+	 */
+	public static ScheduledExecutorService getAsyncPool() {
+		return asyncPool;
 	}
 }
 

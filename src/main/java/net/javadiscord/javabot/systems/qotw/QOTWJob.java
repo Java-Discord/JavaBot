@@ -40,9 +40,9 @@ public class QOTWJob extends DiscordApiJob {
 				log.error("Guild {} does not have access to private threads. ({})", guild.getName(), guild.getBoostTier().name());
 				return;
 			}
-			GuildConfig config = Bot.config.get(guild);
+			GuildConfig config = Bot.getConfig().get(guild);
 			if (config.getModerationConfig().getLogChannel() == null) continue;
-			try (Connection c = Bot.dataSource.getConnection()) {
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {

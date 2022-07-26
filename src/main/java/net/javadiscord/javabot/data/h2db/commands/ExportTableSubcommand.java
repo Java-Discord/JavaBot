@@ -44,7 +44,7 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 								.addChoice("Starboard", "STARBOARD")
 								.addChoice("Warns", "WARN"),
 						new OptionData(OptionType.BOOLEAN, "include-data", "Should data be included in the export?")));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -57,8 +57,8 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply(false).queue();
-		Bot.asyncPool.submit(() -> {
-			try (Connection con = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection con = Bot.getDataSource().getConnection()) {
 				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s' TABLE %s;", includeData ? "COLUMNS" : "NODATA", TABLE_FILE, tableOption.getAsString()));
 				boolean success = stmt.execute();
 				if (!success) {

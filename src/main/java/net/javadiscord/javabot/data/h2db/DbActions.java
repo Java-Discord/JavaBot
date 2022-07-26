@@ -25,7 +25,7 @@ public class DbActions {
 	 * @throws SQLException If an error occurs.
 	 */
 	public static void doAction(@NotNull ConnectionConsumer consumer) throws SQLException {
-		try (Connection c = Bot.dataSource.getConnection()) {
+		try (Connection c = Bot.getDataSource().getConnection()) {
 			consumer.consume(c);
 		}
 	}
@@ -39,7 +39,7 @@ public class DbActions {
 	 * @throws SQLException If an error occurs.
 	 */
 	public static <T> T map(@NotNull ConnectionFunction<T> function) throws SQLException {
-		try (Connection c = Bot.dataSource.getConnection()) {
+		try (Connection c = Bot.getDataSource().getConnection()) {
 			return function.apply(c);
 		}
 	}
@@ -55,7 +55,7 @@ public class DbActions {
 	 * @throws SQLException If an error occurs.
 	 */
 	public static <T> T mapQuery(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) throws SQLException {
-		try (Connection c = Bot.dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
+		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			ResultSet rs = stmt.executeQuery();
 			return mapper.map(rs);
@@ -73,7 +73,7 @@ public class DbActions {
 	 */
 	public static <T> @NotNull CompletableFuture<T> mapQueryAsync(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) {
 		CompletableFuture<T> cf = new CompletableFuture<>();
-		Bot.asyncPool.submit(() -> {
+		Bot.getAsyncPool().submit(() -> {
 			try {
 				cf.complete(mapQuery(query, modifier, mapper));
 			} catch (SQLException e) {
@@ -93,7 +93,7 @@ public class DbActions {
 	 * @return The column value.
 	 */
 	public static long count(@NotNull String query, @NotNull StatementModifier modifier) {
-		try (Connection c = Bot.dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
+		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			ResultSet rs = stmt.executeQuery();
 			if (!rs.next()) return 0;
@@ -113,7 +113,7 @@ public class DbActions {
 	 */
 	public static long count(@NotNull String query) {
 		try (
-				Connection conn = Bot.dataSource.getConnection();
+				Connection conn = Bot.getDataSource().getConnection();
 				Statement stmt = conn.createStatement()
 		) {
 			ResultSet rs = stmt.executeQuery(query);
@@ -151,7 +151,7 @@ public class DbActions {
 	 * @throws SQLException If an error occurs.
 	 */
 	public static int update(@NotNull String query, Object @NotNull ... params) throws SQLException {
-		try (Connection c = Bot.dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
+		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
 			int i = 1;
 			for (Object param : params) {
 				stmt.setObject(i++, param);
@@ -168,8 +168,8 @@ public class DbActions {
 	 */
 	public static @NotNull CompletableFuture<Void> doAsyncAction(ConnectionConsumer consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		Bot.asyncPool.submit(() -> {
-			try (Connection c = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				consumer.consume(c);
 				future.complete(null);
 			} catch (SQLException e) {
@@ -192,8 +192,8 @@ public class DbActions {
 	 */
 	public static <T> @NotNull CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		Bot.asyncPool.submit(() -> {
-			try (Connection c = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				T dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 				future.complete(null);
@@ -214,8 +214,8 @@ public class DbActions {
 	 */
 	public static <T> @NotNull CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {
 		CompletableFuture<T> future = new CompletableFuture<>();
-		Bot.asyncPool.submit(() -> {
-			try (Connection c = Bot.dataSource.getConnection()) {
+		Bot.getAsyncPool().submit(() -> {
+			try (Connection c = Bot.getDataSource().getConnection()) {
 				future.complete(function.apply(c));
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbActions.class.getSimpleName());
@@ -254,7 +254,7 @@ public class DbActions {
 	 * @return The logical size, in bytes.
 	 */
 	public static int getLogicalSize(String table) {
-		try (Connection c = Bot.dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement("CALL DISK_SPACE_USED(?)")) {
+		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement("CALL DISK_SPACE_USED(?)")) {
 			stmt.setString(1, table);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {

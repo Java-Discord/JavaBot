@@ -29,11 +29,11 @@ public final class Checks {
 	}
 
 	public static boolean hasStaffRole(Guild guild, @NotNull Member member) {
-		return member.getRoles().contains(Bot.config.get(guild).getModerationConfig().getStaffRole());
+		return member.getRoles().contains(Bot.getConfig().get(guild).getModerationConfig().getStaffRole());
 	}
 
 	public static boolean hasAdminRole(Guild guild, @NotNull Member member) {
-		return member.getRoles().contains(Bot.config.get(guild).getModerationConfig().getAdminRole());
+		return member.getRoles().contains(Bot.getConfig().get(guild).getModerationConfig().getAdminRole());
 	}
 
 	public static boolean hasPermissions(Guild guild, @NotNull Set<Permission> perms) {

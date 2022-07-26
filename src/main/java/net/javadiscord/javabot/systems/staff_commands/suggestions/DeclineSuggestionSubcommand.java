@@ -33,7 +33,7 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, reason, config);
 		message.editMessageEmbeds(declineEmbed).queue(
-				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getFailureEmote(event.getJDA())).queue(),
+				edit -> edit.addReaction(Bot.getConfig().getSystems().getEmojiConfig().getFailureEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Declined", "Successfully declined suggestion with id `%s`", message.getId())
 				.addActionRows(getJumpButton(message));

@@ -28,7 +28,7 @@ public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 	 */
 	public MigrationsListSubcommand() {
 		setSubcommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

@@ -51,9 +51,9 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		event.deferReply().queue();
-		Bot.asyncPool.submit(() -> {
+		Bot.getAsyncPool().submit(() -> {
 			try {
-				QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+				QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 				WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember(), service));
 				// check whether the image may already been cached
 				byte[] array = ImageCache.isCached(getCacheName()) ?
@@ -180,7 +180,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The image's cache name.
 	 */
 	private @NotNull String getCacheName() {
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints()
 					.stream()

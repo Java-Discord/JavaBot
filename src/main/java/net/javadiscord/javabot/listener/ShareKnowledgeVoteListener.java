@@ -11,11 +11,11 @@ import net.javadiscord.javabot.Bot;
 public class ShareKnowledgeVoteListener extends MessageVoteListener {
 	@Override
 	protected TextChannel getChannel(Guild guild) {
-		return Bot.config.get(guild).getModerationConfig().getShareKnowledgeChannel();
+		return Bot.getConfig().get(guild).getModerationConfig().getShareKnowledgeChannel();
 	}
 
 	@Override
 	protected int getMessageDeleteVoteThreshold(Guild guild) {
-		return Bot.config.get(guild).getModerationConfig().getShareKnowledgeMessageDeleteThreshold();
+		return Bot.getConfig().get(guild).getModerationConfig().getShareKnowledgeMessageDeleteThreshold();
 	}
 }

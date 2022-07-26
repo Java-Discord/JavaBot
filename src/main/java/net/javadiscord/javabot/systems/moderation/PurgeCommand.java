@@ -48,14 +48,14 @@ public class PurgeCommand extends ModerateCommand {
 		OptionMapping userOption = event.getOption("user");
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
-		ModerationConfig config = Bot.config.get(event.getGuild()).getModerationConfig();
+		ModerationConfig config = Bot.getConfig().get(event.getGuild()).getModerationConfig();
 		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
 		int maxAmount = config.getPurgeMaxMessageCount();
 		if (amount == null || amount < 1 || amount > maxAmount) {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-		Bot.asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel()));
+		Bot.getAsyncPool().submit(() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
 		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {

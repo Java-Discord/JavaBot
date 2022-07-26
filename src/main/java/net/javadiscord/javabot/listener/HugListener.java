@@ -19,7 +19,7 @@ public class HugListener extends ListenerAdapter {
 		if (!event.isFromGuild()) {
 			return;
 		}
-		if (Bot.autoMod.hasSuspiciousLink(event.getMessage()) || Bot.autoMod.hasAdvertisingLink(event.getMessage())) {
+		if (Bot.getAutoMod().hasSuspiciousLink(event.getMessage()) || Bot.getAutoMod().hasAdvertisingLink(event.getMessage())) {
 			return;
 		}
 		if (!event.getMessage().getMentions().getUsers().isEmpty()) {
@@ -28,7 +28,7 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
-		if (event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModerationConfig()
+		if (event.getChannel().getIdLong() == Bot.getConfig().get(event.getGuild()).getModerationConfig()
 				.getSuggestionChannelId()) {
 			return;
 		}

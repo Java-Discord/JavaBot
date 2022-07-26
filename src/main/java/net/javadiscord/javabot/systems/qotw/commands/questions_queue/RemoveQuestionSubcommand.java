@@ -59,7 +59,7 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	 */
 	public static List<Command.Choice> replyQuestions(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			QuestionQueueRepository repo = new QuestionQueueRepository(con);
 			List<QOTWQuestion> questions = repo.getQuestions(event.getGuild().getIdLong(), 0, 25);
 			questions.forEach(question -> choices.add(new Command.Choice(String.format("(Priority: %s) %s", question.getPriority(), question.getText()), question.getId())));

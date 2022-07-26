@@ -34,7 +34,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	public HelpPingCommand() {
 		setSubcommandData(new SubcommandData("help-ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
-		Bot.asyncPool.scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
+		Bot.getAsyncPool().scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 			Responses.warning(event, WRONG_CHANNEL_MSG).queue();
 			return;
 		}
-		GuildConfig config = Bot.config.get(guild);
+		GuildConfig config = Bot.getConfig().get(guild);
 		HelpChannelManager channelManager = new HelpChannelManager(config.getHelpConfig());
 		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
 			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
@@ -123,7 +123,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	private void cleanTimeoutCache() {
 		// Find the list of members whose last ping time was old enough that they should be removed from the cache.
 		List<Long> memberIdsToRemove = lastPingTimes.entrySet().stream().filter(entry -> {
-			HelpConfig config = Bot.config.get(entry.getValue().second()).getHelpConfig();
+			HelpConfig config = Bot.getConfig().get(entry.getValue().second()).getHelpConfig();
 			long timeoutMillis = config.getHelpPingTimeoutSeconds() * 1000L;
 			return entry.getValue().first() + timeoutMillis < System.currentTimeMillis();
 		}).map(Map.Entry::getKey).toList();

@@ -31,7 +31,7 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed onHoldEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
 		message.editMessageEmbeds(onHoldEmbed).queue(
-				edit -> edit.addReaction(Bot.config.getSystems().getEmojiConfig().getClockEmoji()).queue(),
+				edit -> edit.addReaction(Bot.getConfig().getSystems().getEmojiConfig().getClockEmoji()).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion On Hold", "Successfully marked suggestion with id `%s` as On Hold", message.getId())
 				.addActionRows(getJumpButton(message));

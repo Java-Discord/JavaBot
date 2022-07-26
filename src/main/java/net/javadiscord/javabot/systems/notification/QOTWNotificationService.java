@@ -44,7 +44,7 @@ public final class QOTWNotificationService extends NotificationService {
 		this.guild = guild;
 		QOTWAccount account;
 		try {
-			QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 			account = service.getOrCreateAccount(user.getIdLong());
 		} catch (SQLException e) {
 			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
@@ -121,7 +121,7 @@ public final class QOTWNotificationService extends NotificationService {
 						"""
 								Your submission was accepted! %s
 								You've been granted **`1 QOTW-Point`**! (total: %s)""",
-						Bot.config.getSystems().getEmojiConfig().getSuccessEmote(guild.getJDA()), points))
+						Bot.getConfig().getSystems().getEmojiConfig().getSuccessEmote(guild.getJDA()), points))
 				.build();
 	}
 

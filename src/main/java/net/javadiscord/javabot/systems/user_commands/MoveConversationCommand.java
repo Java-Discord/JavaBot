@@ -87,7 +87,7 @@ public class MoveConversationCommand extends SlashCommand {
 	 * @return Whether the {@link GuildMessageChannel} provided by the {@link Member} is invalid.
 	 */
 	private boolean isInvalidChannel(@NotNull Member member, GuildMessageChannel channel) {
-		ModerationConfig config = Bot.config.get(member.getGuild()).getModerationConfig();
+		ModerationConfig config = Bot.getConfig().get(member.getGuild()).getModerationConfig();
 		return !member.hasPermission(channel, Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL) ||
 				// check thread permissions
 				channel.getType().isThread() && !member.hasPermission(channel, Permission.MESSAGE_SEND_IN_THREADS) ||

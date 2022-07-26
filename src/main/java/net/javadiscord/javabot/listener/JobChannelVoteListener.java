@@ -11,12 +11,12 @@ import net.javadiscord.javabot.Bot;
 public class JobChannelVoteListener extends MessageVoteListener {
 	@Override
 	protected TextChannel getChannel(Guild guild) {
-		return Bot.config.get(guild).getModerationConfig().getJobChannel();
+		return Bot.getConfig().get(guild).getModerationConfig().getJobChannel();
 	}
 
 	@Override
 	protected int getMessageDeleteVoteThreshold(Guild guild) {
-		return Bot.config.get(guild).getModerationConfig().getJobChannelMessageDeleteThreshold();
+		return Bot.getConfig().get(guild).getModerationConfig().getJobChannelMessageDeleteThreshold();
 	}
 
 	@Override

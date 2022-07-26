@@ -114,7 +114,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			return Responses.error(hook, "No report reason was provided.");
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
-			GuildConfig config = Bot.config.get(hook.getInteraction().getGuild());
+			GuildConfig config = Bot.getConfig().get(hook.getInteraction().getGuild());
 			EmbedBuilder embed = buildReportEmbed(target, hook.getInteraction().getUser(), reason, hook.getInteraction().getChannel());
 			embed.setTitle(String.format("%s reported %s", hook.getInteraction().getUser().getName(), target.getName()));
 			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
@@ -140,7 +140,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
-			GuildConfig config = Bot.config.get(event.getGuild());
+			GuildConfig config = Bot.getConfig().get(event.getGuild());
 			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), event.getUser(), reason, event.getChannel());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);

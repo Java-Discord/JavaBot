@@ -18,7 +18,7 @@ public class UserLeaveListener extends ListenerAdapter {
 	@Override
 	public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
 		if (event.getUser().isBot() || event.getUser().isSystem()) return;
-		if (!Bot.config.get(event.getGuild()).getServerLockConfig().isLocked()) {
+		if (!Bot.getConfig().get(event.getGuild()).getServerLockConfig().isLocked()) {
 			unreserveAllChannels(event.getUser(), event.getGuild());
 		}
 	}
@@ -31,11 +31,11 @@ public class UserLeaveListener extends ListenerAdapter {
 	 */
 	private void unreserveAllChannels(User user, Guild guild) {
 		try {
-			HelpChannelManager manager = new HelpChannelManager(Bot.config.get(guild).getHelpConfig());
+			HelpChannelManager manager = new HelpChannelManager(Bot.getConfig().get(guild).getHelpConfig());
 			manager.unreserveAllOwnedChannels(user);
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
-			TextChannel logChannel = Bot.config.get(guild).getModerationConfig().getLogChannel();
+			TextChannel logChannel = Bot.getConfig().get(guild).getModerationConfig().getLogChannel();
 			logChannel.sendMessage("Database error while unreserving channels for a user who left: " + e.getMessage()).queue();
 		}
 	}

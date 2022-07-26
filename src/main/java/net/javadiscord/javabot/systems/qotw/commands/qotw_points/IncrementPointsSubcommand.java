@@ -45,7 +45,7 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply().queue();
-		QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		long points = service.increment(member.getIdLong());
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
 		new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
@@ -54,7 +54,7 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 	}
 
 	private @NotNull MessageEmbed buildIncrementEmbed(@NotNull User user, long points) {
-		QOTWPointsService service = new QOTWPointsService(Bot.dataSource);
+		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Account Incremented")

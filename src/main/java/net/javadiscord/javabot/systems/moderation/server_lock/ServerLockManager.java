@@ -53,7 +53,7 @@ public class ServerLockManager extends ListenerAdapter {
 	 */
 	public ServerLockManager(JDA jda) {
 		this.guildMemberQueues = new ConcurrentHashMap<>();
-		Bot.asyncPool.scheduleWithFixedDelay(() -> {
+		Bot.getAsyncPool().scheduleWithFixedDelay(() -> {
 			for (Guild guild : jda.getGuilds()) {
 				Deque<Member> members = getMemberQueue(guild);
 				while (members.size() > GUILD_MEMBER_QUEUE_CUTOFF) {
@@ -99,7 +99,7 @@ public class ServerLockManager extends ListenerAdapter {
 	}
 
 	private boolean isLocked(Guild guild) {
-		return Bot.config.get(guild).getServerLockConfig().isLocked();
+		return Bot.getConfig().get(guild).getServerLockConfig().isLocked();
 	}
 
 	private Deque<Member> getMemberQueue(@NotNull Guild guild) {
@@ -122,7 +122,7 @@ public class ServerLockManager extends ListenerAdapter {
 	private @NotNull Collection<Member> getPotentialRaiders(Guild guild) {
 		Deque<Member> recentJoins = new LinkedList<>(getMemberQueue(guild));
 		if (recentJoins.isEmpty()) return new HashSet<>();
-		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
+		ServerLockConfig config = Bot.getConfig().get(guild).getServerLockConfig();
 		final OffsetDateTime accountCreationCutoff = OffsetDateTime.now().minusDays(config.getMinimumAccountAgeInDays());
 		final OffsetDateTime memberJoinCutoff = OffsetDateTime.now().minusMinutes(10);
 
@@ -161,7 +161,7 @@ public class ServerLockManager extends ListenerAdapter {
 	 */
 	private void checkForRaid(Guild guild) {
 		Collection<Member> potentialRaiders = getPotentialRaiders(guild);
-		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
+		ServerLockConfig config = Bot.getConfig().get(guild).getServerLockConfig();
 		if (potentialRaiders.size() >= config.getLockThreshold()) {
 			lockServer(guild, potentialRaiders, null);
 		}
@@ -173,7 +173,7 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param guild The guild to check.
 	 */
 	private void checkForEndOfRaid(Guild guild) {
-		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
+		ServerLockConfig config = Bot.getConfig().get(guild).getServerLockConfig();
 		if (!config.isLocked()) return;
 		Collection<Member> potentialRaiders = getPotentialRaiders(guild);
 		log.info("Found {} potential raiders while checking for end of raid.", potentialRaiders.size());
@@ -225,9 +225,9 @@ public class ServerLockManager extends ListenerAdapter {
 				))
 				.collect(Collectors.joining("\n"));
 
-		GuildConfig config = Bot.config.get(guild);
+		GuildConfig config = Bot.getConfig().get(guild);
 		config.getServerLockConfig().setLocked("true");
-		Bot.config.get(guild).flush();
+		Bot.getConfig().get(guild).flush();
 		GuildNotificationService notification = new GuildNotificationService(guild);
 		if (lockedBy == null) {
 			notification.sendLogChannelNotification("""
@@ -251,9 +251,9 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param unlockedby The user which unlocked the server.
 	 */
 	public void unlockServer(Guild guild, @Nullable User unlockedby) {
-		ServerLockConfig config = Bot.config.get(guild).getServerLockConfig();
+		ServerLockConfig config = Bot.getConfig().get(guild).getServerLockConfig();
 		config.setLocked("false");
-		Bot.config.get(guild).flush();
+		Bot.getConfig().get(guild).flush();
 		guildMemberQueues.clear();
 		GuildNotificationService notification = new GuildNotificationService(guild);
 		if (unlockedby == null) {

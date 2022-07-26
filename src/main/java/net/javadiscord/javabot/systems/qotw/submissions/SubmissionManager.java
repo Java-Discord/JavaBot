@@ -56,7 +56,7 @@ public class SubmissionManager {
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					try (Connection con = Bot.dataSource.getConnection()) {
+					try (Connection con = Bot.getDataSource().getConnection()) {
 						QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 						QOTWSubmission submission = new QOTWSubmission();
 						submission.setThreadId(thread.getIdLong());
@@ -120,7 +120,7 @@ public class SubmissionManager {
 	 * @return Whether the user hat unreviewed submissions or not.
 	 */
 	public boolean hasActiveSubmissionThreads(long authorId) {
-		try (Connection con = Bot.dataSource.getConnection()) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 			return !repo.getUnreviewedSubmissions(authorId).isEmpty();
 		} catch (SQLException e) {

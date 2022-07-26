@@ -23,7 +23,7 @@ public class SuggestionListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
-		if (Bot.autoMod.hasSuspiciousLink(event.getMessage()) || Bot.autoMod.hasAdvertisingLink(event.getMessage())) {
+		if (Bot.getAutoMod().hasSuspiciousLink(event.getMessage()) || Bot.getAutoMod().hasAdvertisingLink(event.getMessage())) {
 			event.getMessage().delete().queue();
 			return;
 		}
@@ -51,7 +51,7 @@ public class SuggestionListener extends ListenerAdapter {
 		if (event.getChannelType() == ChannelType.PRIVATE) return false;
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && !event.getMember().isTimedOut() &&
 				event.getMessage().getType() != MessageType.THREAD_CREATED &&
-				event.getChannel().getIdLong() == Bot.config.get(event.getGuild()).getModerationConfig().getSuggestionChannelId();
+				event.getChannel().getIdLong() == Bot.getConfig().get(event.getGuild()).getModerationConfig().getSuggestionChannelId();
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class SuggestionListener extends ListenerAdapter {
 	 * @return A {@link RestAction}.
 	 */
 	private RestAction<?> addReactions(Message message) {
-		SystemsConfig.EmojiConfig config = Bot.config.getSystems().getEmojiConfig();
+		SystemsConfig.EmojiConfig config = Bot.getConfig().getSystems().getEmojiConfig();
 		return RestAction.allOf(
 				message.addReaction(config.getUpvoteEmote(message.getJDA())),
 				message.addReaction(config.getDownvoteEmote(message.getJDA()))

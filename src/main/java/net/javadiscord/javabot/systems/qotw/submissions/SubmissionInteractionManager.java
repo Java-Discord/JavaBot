@@ -24,7 +24,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
-		SubmissionManager manager = new SubmissionManager(Bot.config.get(event.getGuild()).getQotwConfig());
+		SubmissionManager manager = new SubmissionManager(Bot.getConfig().get(event.getGuild()).getQotwConfig());
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
 			case "controls" -> SubmissionInteractionManager.handleControlButtons(id, event);
@@ -80,7 +80,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	}
 
 	private static boolean hasPermissions(@NotNull Member member) {
-		QOTWConfig config = Bot.config.get(member.getGuild()).getQotwConfig();
+		QOTWConfig config = Bot.getConfig().get(member.getGuild()).getQotwConfig();
 		return !member.getRoles().isEmpty() && member.getRoles().contains(config.getQOTWReviewRole());
 	}
 

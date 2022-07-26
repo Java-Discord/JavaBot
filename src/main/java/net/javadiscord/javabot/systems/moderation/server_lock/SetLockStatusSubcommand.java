@@ -40,7 +40,7 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 			Responses.replyStaffOnly(event, event.getGuild()).queue();
 			return;
 		}
-		GuildConfig config = Bot.config.get(event.getGuild());
+		GuildConfig config = Bot.getConfig().get(event.getGuild());
 		boolean locked = lockedMapping.getAsBoolean();
 		if (locked == config.getServerLockConfig().isLocked()) {
 			Responses.info(event, String.format("Server already %slocked", locked ? "" : "un"),
@@ -48,11 +48,11 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		config.getServerLockConfig().setLocked(String.valueOf(locked));
-		Bot.config.flush();
+		Bot.getConfig().flush();
 		if (locked) {
-			Bot.serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
+			Bot.getServerLockManager().lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
 		} else {
-			Bot.serverLockManager.unlockServer(event.getGuild(), event.getUser());
+			Bot.getServerLockManager().unlockServer(event.getGuild(), event.getUser());
 		}
 		Responses.info(event, "Server Lock Status", "Successfully %slocked the current server!", locked ? "" : "un").queue();
 	}
