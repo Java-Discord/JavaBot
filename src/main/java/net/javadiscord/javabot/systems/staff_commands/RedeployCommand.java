@@ -18,7 +18,7 @@ import java.io.IOException;
  * Command that lets staff-members redeploy the bot.
  * <p>
  * This only works if the way the bot is hosted is set up correctly with a bash script that handles
- * compilation and a service set up that automatically restarts the Bot..
+ * compilation and a service set up that automatically restarts the Bot.
  * <p>
  * I have explained how we do it in <a href="https://github.com/Java-Discord/JavaBot/pull/330">PR #330</a>.
  */
