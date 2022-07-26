@@ -11,6 +11,8 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+
 /**
  * <h3>This class represents the /redeploy command.</h3>
  * Command that lets staff-members redeploy the bot.
@@ -52,7 +54,7 @@ public class RedeployCommand extends SlashCommand {
 			} else {
 				event.getHook().sendMessage("Compilation successful, restarting...").queue();
 			}
-		} catch (Exception e) {
+		} catch (InterruptedException | IOException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		Bot.getMessageCache().synchronize();
