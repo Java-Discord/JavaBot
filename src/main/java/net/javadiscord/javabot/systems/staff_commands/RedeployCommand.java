@@ -58,6 +58,7 @@ public class RedeployCommand extends SlashCommand {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		Bot.getMessageCache().synchronize();
+		event.getJDA().shutdown();
 		System.exit(0);
 	}
 }
