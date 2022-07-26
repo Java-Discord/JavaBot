@@ -30,7 +30,7 @@ public class RedeployCommand extends SlashCommand {
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
-		requireUsers(Bot.config.getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class RedeployCommand extends SlashCommand {
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
 		event.reply("Redeploying, this may take a few minutes.").queue();
 		try {
-			Process p = new ProcessBuilder("/bin/sh", Bot.config.getSystems().getRedeployScriptLocation()).start();
+			Process p = new ProcessBuilder("/bin/sh", Bot.getConfig().getSystems().getRedeployScriptLocation()).start();
 			p.waitFor();
 			String result = new String(p.getInputStream().readAllBytes());
 			if (result.contains("COMPILATION FAILED")) {
@@ -55,7 +55,7 @@ public class RedeployCommand extends SlashCommand {
 		} catch (Exception e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
-		Bot.messageCache.synchronize();
+		Bot.getMessageCache().synchronize();
 		System.exit(0);
 	}
 }
