@@ -27,6 +27,7 @@ public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable
 		setSubcommandData(new SubcommandData("view", "Allows to view a tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
+		setRequiredStaff(false);
 	}
 
 	@Override

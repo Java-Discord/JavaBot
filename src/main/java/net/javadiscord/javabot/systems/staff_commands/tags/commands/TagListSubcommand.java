@@ -22,6 +22,7 @@ public class TagListSubcommand extends TagsSubcommand {
 	 */
 	public TagListSubcommand() {
 		setSubcommandData(new SubcommandData("list", "Lists all custom tags"));
+		setRequiredStaff(false);
 	}
 
 	@Override
