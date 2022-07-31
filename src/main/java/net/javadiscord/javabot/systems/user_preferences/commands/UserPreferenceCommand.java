@@ -44,23 +44,24 @@ public class UserPreferenceCommand extends SlashCommand implements AutoCompletab
 		Preference preference = Preference.values()[preferenceMapping.getAsInt()];
 		boolean state = stateMapping.getAsBoolean();
 		UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
-		if (manager.set(event.getUser().getIdLong(), preference, state)) {
+		if (manager.setOrCreate(event.getUser().getIdLong(), preference, state)) {
 			Responses.info(event, "Preference Updated", "Successfully set `%s` to `%s`!", preference, state).queue();
 		} else {
 			Responses.error(event, "Could not update `%s` to `%s`.", preference, state).queue();
 		}
 	}
 
-	private @NotNull List<Command.Choice> getPreferenceChoices() {
+	private @NotNull List<Command.Choice> getPreferenceChoices(long userId) {
 		List<Command.Choice> choices = new ArrayList<>(Preference.values().length);
+		UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
 		for (Preference p : Preference.values()) {
-			choices.add(new Command.Choice(p.toString(), p.ordinal()));
+			choices.add(new Command.Choice(String.format("%s (%s)", p, manager.getOrCreate(userId, p).isEnabled() ? "Enabled" : "Disabled"), p.ordinal()));
 		}
 		return choices;
 	}
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> getPreferenceChoices())).queue();
+		event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> getPreferenceChoices(e.getUser().getIdLong()))).queue();
 	}
 }

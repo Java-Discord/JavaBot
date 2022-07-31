@@ -27,7 +27,7 @@ public class UserPreferenceManager {
 	 * @param enabled    The preferences' state.
 	 * @return Whether the operation was successful.
 	 */
-	public boolean set(long userId, Preference preference, boolean enabled) {
+	public boolean setOrCreate(long userId, Preference preference, boolean enabled) {
 		try (Connection con = dataSource.getConnection()) {
 			UserPreferenceRepository repo = new UserPreferenceRepository(con);
 			Optional<UserPreference> preferenceOptional = repo.getById(userId, preference);
@@ -44,6 +44,33 @@ public class UserPreferenceManager {
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return false;
+		}
+	}
+
+	/**
+	 * Gets a single {@link UserPreference} (or creates a new one if it doesn't exist yet).
+	 *
+	 * @param userId The users' id.
+	 * @param preference The {@link Preference} to get.
+	 * @return The {@link UserPreference}.
+	 */
+	public UserPreference getOrCreate(long userId, Preference preference) {
+		try (Connection con = dataSource.getConnection()) {
+			UserPreferenceRepository repo = new UserPreferenceRepository(con);
+			Optional<UserPreference> preferenceOptional = repo.getById(userId, preference);
+			if (preferenceOptional.isPresent()) {
+				return preferenceOptional.get();
+			} else {
+				UserPreference userPreference = new UserPreference();
+				userPreference.setUserId(userId);
+				userPreference.setOrdinal(preference.ordinal());
+				userPreference.setEnabled(true);
+				repo.insert(userPreference, false);
+				return userPreference;
+			}
+		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			return null;
 		}
 	}
 }
