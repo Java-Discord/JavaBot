@@ -104,3 +104,12 @@ CREATE TABLE message_cache
 	author_id       BIGINT        NOT NULL,
 	message_content VARCHAR(4000) NOT NULL
 );
+
+// User Preferences
+CREATE TABLE user_preferences
+(
+	user_id BIGINT  NOT NULL,
+	ordinal INTEGER NOT NULL,
+	enabled BOOLEAN NOT NULL DEFAULT TRUE,
+	PRIMARY KEY (user_id, ordinal)
+)
