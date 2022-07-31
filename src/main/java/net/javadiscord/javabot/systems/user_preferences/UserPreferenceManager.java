@@ -64,7 +64,7 @@ public class UserPreferenceManager {
 				UserPreference userPreference = new UserPreference();
 				userPreference.setUserId(userId);
 				userPreference.setOrdinal(preference.ordinal());
-				userPreference.setEnabled(false);
+				userPreference.setEnabled(true);
 				repo.insert(userPreference, false);
 				return userPreference;
 			}
