@@ -1,8 +1,8 @@
-
 package net.javadiscord.javabot.systems.user_preferences.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -26,7 +26,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand {
 		setSubcommandData(new SubcommandData("set", "Allows you to set your preferences!")
 				.addOptions(
 						new OptionData(OptionType.INTEGER, "preference", "The preference to set.", true)
-								.addChoices(Arrays.stream(Preference.values()).map(Preference::toChoice).toList()),
+								.addChoices(Arrays.stream(Preference.values()).map(this::toChoice).toList()),
 						new OptionData(OptionType.BOOLEAN, "state", "The state of the specified preference.", true)
 				)
 		);
@@ -48,5 +48,10 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand {
 		} else {
 			Responses.error(event, "Could not %s `%s`.", state ? "enable" : "disable", preference).queue();
 		}
+	}
+
+
+	public Command.Choice toChoice(@NotNull Preference preference) {
+		return new Command.Choice(preference.toString(), String.valueOf(preference.ordinal()));
 	}
 }

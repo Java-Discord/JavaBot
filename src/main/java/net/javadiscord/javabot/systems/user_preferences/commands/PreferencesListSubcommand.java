@@ -1,4 +1,3 @@
-
 package net.javadiscord.javabot.systems.user_preferences.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;

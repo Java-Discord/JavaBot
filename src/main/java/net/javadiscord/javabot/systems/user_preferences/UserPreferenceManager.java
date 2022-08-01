@@ -50,7 +50,7 @@ public class UserPreferenceManager {
 	/**
 	 * Gets a single {@link UserPreference} (or creates a new one if it doesn't exist yet).
 	 *
-	 * @param userId The users' id.
+	 * @param userId     The users' id.
 	 * @param preference The {@link Preference} to get.
 	 * @return The {@link UserPreference}.
 	 */
