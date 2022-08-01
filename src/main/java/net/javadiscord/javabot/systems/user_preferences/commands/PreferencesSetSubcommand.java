@@ -11,6 +11,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceManager;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -50,7 +51,8 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand {
 		}
 	}
 
-	private Command.Choice toChoice(@NotNull Preference preference) {
+	@Contract("_ -> new")
+	private Command.@NotNull Choice toChoice(@NotNull Preference preference) {
 		return new Command.Choice(preference.toString(), String.valueOf(preference.ordinal()));
 	}
 }
