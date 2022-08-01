@@ -28,7 +28,7 @@ public class PreferencesListSubcommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
 		String preferences = Arrays.stream(Preference.values())
-				.map(p -> String.format("%s (%s)", p, manager.getOrCreate(event.getUser().getIdLong(), p).isEnabled() ? "Enabled" : "Disabled"))
+				.map(p -> String.format("`%s` %s", manager.getOrCreate(event.getUser().getIdLong(), p).isEnabled() ? "\uD83D\uDFE2" : "\uD83D\uDD34", p))
 				.collect(Collectors.joining("\n"));
 		Responses.info(event, String.format("%s's Preferences", event.getUser().getName()), preferences).queue();
 	}

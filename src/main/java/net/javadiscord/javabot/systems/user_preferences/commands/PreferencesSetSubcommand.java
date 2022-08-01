@@ -1,15 +1,11 @@
 
 package net.javadiscord.javabot.systems.user_preferences.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceManager;
@@ -17,20 +13,22 @@ import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * <h3>This class represents the /preferences set command.</h3>
  */
-public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements AutoCompletable {
+public class PreferencesSetSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public PreferencesSetSubcommand() {
 		setSubcommandData(new SubcommandData("set", "Allows you to set your preferences!")
-				.addOption(OptionType.INTEGER, "preference", "The preference to set.", true, true)
-				.addOption(OptionType.BOOLEAN, "state", "The state of the specified preference.", true)
+				.addOptions(
+						new OptionData(OptionType.INTEGER, "preference", "The preference to set.", true)
+								.addChoices(Arrays.stream(Preference.values()).map(Preference::toChoice).toList()),
+						new OptionData(OptionType.BOOLEAN, "state", "The state of the specified preference.", true)
+				)
 		);
 	}
 
@@ -50,19 +48,5 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements
 		} else {
 			Responses.error(event, "Could not %s `%s`.", state ? "enable" : "disable", preference).queue();
 		}
-	}
-
-	private @NotNull List<Command.Choice> getPreferenceChoices(long userId) {
-		List<Command.Choice> choices = new ArrayList<>(Preference.values().length);
-		UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
-		for (Preference p : Preference.values()) {
-			choices.add(new Command.Choice(String.format("%s (%s)", p, manager.getOrCreate(userId, p).isEnabled() ? "Enabled" : "Disabled"), p.ordinal()));
-		}
-		return choices;
-	}
-
-	@Override
-	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> getPreferenceChoices(e.getUser().getIdLong()))).queue();
 	}
 }

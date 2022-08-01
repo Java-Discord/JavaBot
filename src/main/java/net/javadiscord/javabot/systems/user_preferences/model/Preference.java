@@ -1,5 +1,7 @@
 package net.javadiscord.javabot.systems.user_preferences.model;
 
+import net.dv8tion.jda.api.interactions.commands.Command;
+
 /**
  * Contains all preferences users can set.
  */
@@ -24,5 +26,9 @@ public enum Preference {
 
 	public boolean getDefaultState() {
 		return defaultState;
+	}
+
+	public Command.Choice toChoice() {
+		return new Command.Choice(name, String.valueOf(ordinal()));
 	}
 }
