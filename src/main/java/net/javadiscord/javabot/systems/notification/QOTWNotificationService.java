@@ -26,7 +26,7 @@ import java.util.Optional;
  * Sends Notifications regarding QOTW.
  */
 @Slf4j
-public final class QOTWNotificationService extends NotificationService {
+public final class QOTWNotificationService extends NotificationServiceDEPRECATED {
 
 	@Nullable
 	private final User user;

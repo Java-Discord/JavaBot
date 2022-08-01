@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.User;
  */
 @Slf4j
 @RequiredArgsConstructor
-public final class UserNotificationService extends NotificationService {
+public final class UserNotificationService extends NotificationServiceDEPRECATED {
 	private final User user;
 
 	/**

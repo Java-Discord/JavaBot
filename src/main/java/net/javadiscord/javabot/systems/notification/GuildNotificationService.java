@@ -10,7 +10,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
  * Sends notifications within a single {@link Guild}.
  */
 @Slf4j
-public final class GuildNotificationService extends NotificationService {
+public final class GuildNotificationService extends NotificationServiceDEPRECATED {
 
 	private final Guild guild;
 	private final GuildConfig config;
