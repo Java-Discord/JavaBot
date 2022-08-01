@@ -24,9 +24,9 @@ public class UserPreferenceRepository extends DatabaseRepository<UserPreference>
 	 */
 	public UserPreferenceRepository(Connection con) {
 		super(con, UserPreference.class, "USER_PREFERENCES", List.of(
-				TableProperty.of("user_id", H2Type.BIGINT,  (x, y) -> x.setUserId((Long) y),        UserPreference::getUserId),
-				TableProperty.of("ordinal", H2Type.INTEGER, (x, y) -> x.setOrdinal((Integer) y),    UserPreference::getOrdinal),
-				TableProperty.of("enabled", H2Type.BOOLEAN, (x, y) -> x.setEnabled((Boolean) y),    UserPreference::isEnabled)
+				TableProperty.of("user_id", H2Type.BIGINT,  (x, y) -> x.setUserId((Long) y),                                UserPreference::getUserId),
+				TableProperty.of("ordinal", H2Type.INTEGER, (x, y) -> x.setPreference(Preference.values()[(Integer) y]),    p -> p.getPreference().ordinal()),
+				TableProperty.of("enabled", H2Type.BOOLEAN, (x, y) -> x.setEnabled((Boolean) y),                            UserPreference::isEnabled)
 		));
 	}
 

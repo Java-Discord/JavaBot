@@ -36,7 +36,7 @@ public class UserPreferenceManager {
 			} else {
 				UserPreference userPreference = new UserPreference();
 				userPreference.setUserId(userId);
-				userPreference.setOrdinal(preference.ordinal());
+				userPreference.setPreference(preference);
 				userPreference.setEnabled(enabled);
 				repo.insert(userPreference, false);
 				return true;
@@ -63,7 +63,7 @@ public class UserPreferenceManager {
 			} else {
 				UserPreference userPreference = new UserPreference();
 				userPreference.setUserId(userId);
-				userPreference.setOrdinal(preference.ordinal());
+				userPreference.setPreference(preference);
 				userPreference.setEnabled(true);
 				repo.insert(userPreference, false);
 				return userPreference;

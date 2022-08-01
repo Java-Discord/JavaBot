@@ -8,10 +8,6 @@ import lombok.Data;
 @Data
 public class UserPreference {
 	private long userId;
-	private int ordinal;
+	private Preference preference;
 	private boolean enabled;
-
-	public Preference getPreference() {
-		return Preference.values()[ordinal];
-	}
 }
