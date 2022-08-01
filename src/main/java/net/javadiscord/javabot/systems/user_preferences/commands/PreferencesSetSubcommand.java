@@ -1,3 +1,4 @@
+
 package net.javadiscord.javabot.systems.user_preferences.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
@@ -9,7 +10,7 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceManager;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
@@ -20,14 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <h3>This class represents the /preferences command.</h3>
+ * <h3>This class represents the /preferences set command.</h3>
  */
-public class UserPreferenceCommand extends SlashCommand implements AutoCompletable {
+public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements AutoCompletable {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
-	public UserPreferenceCommand() {
-		setSlashCommandData(Commands.slash("preferences", "Allows you to set some preferences!")
+	public PreferencesSetSubcommand() {
+		setSubcommandData(new SubcommandData("set", "Allows you to set your preferences!")
 				.addOption(OptionType.INTEGER, "preference", "The preference to set.", true, true)
 				.addOption(OptionType.BOOLEAN, "state", "The state of the specified preference.", true)
 		);
@@ -45,9 +46,9 @@ public class UserPreferenceCommand extends SlashCommand implements AutoCompletab
 		boolean state = stateMapping.getAsBoolean();
 		UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
 		if (manager.setOrCreate(event.getUser().getIdLong(), preference, state)) {
-			Responses.info(event, "Preference Updated", "Successfully set `%s` to `%s`!", preference, state).queue();
+			Responses.info(event, "Preference Updated", "Successfully %s `%s`!", state ? "enabled" : "disabled", preference).queue();
 		} else {
-			Responses.error(event, "Could not update `%s` to `%s`.", preference, state).queue();
+			Responses.error(event, "Could not %s `%s`.", state ? "enable" : "disable", preference).queue();
 		}
 	}
 
