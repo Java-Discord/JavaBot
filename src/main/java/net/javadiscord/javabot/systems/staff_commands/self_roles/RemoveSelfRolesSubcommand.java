@@ -44,7 +44,7 @@ public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
 	private @NotNull MessageEmbed buildSelfRoleDeletedEmbed(@NotNull User changedBy, @NotNull Message message) {
 		return new EmbedBuilder()
 				.setAuthor(changedBy.getAsTag(), message.getJumpUrl(), changedBy.getEffectiveAvatarUrl())
-				.setTitle("Self Roles removed")
+				.setTitle("Self Roles Removed")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", message.getChannel().getAsMention(), true)
 				.addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)
