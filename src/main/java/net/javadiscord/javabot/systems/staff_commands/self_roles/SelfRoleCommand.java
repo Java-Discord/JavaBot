@@ -17,7 +17,7 @@ public class SelfRoleCommand extends SlashCommand {
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
-		addSubcommands(new CreateSelfRoleSubcommand(), new ChangeSelfRoleStatusSubcommand());
+		addSubcommands(new CreateSelfRoleSubcommand(), new ChangeSelfRoleStatusSubcommand(), new RemoveSelfRolesSubcommand());
 	}
 }
 
