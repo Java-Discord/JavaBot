@@ -15,15 +15,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Represents the `/qotw` command. This holds administrative commands for managing the Question of the Week.
+ * Represents the `/qotw-admin` command. This holds administrative commands for managing the Question of the Week.
  */
-public class QOTWCommand extends SlashCommand {
+public class QOTWAdminCommand extends SlashCommand {
 	/**
 	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.SubcommandGroup}s.
 	 */
-	public QOTWCommand() {
-		setSlashCommandData(Commands.slash("qotw", "Administrative tools for managing the Question of the Week.")
+	public QOTWAdminCommand() {
+		setSlashCommandData(Commands.slash("qotw-admin", "Administrative tools for managing the Question of the Week.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
