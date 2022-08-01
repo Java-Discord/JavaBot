@@ -10,51 +10,41 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.notification.GuildNotificationService;
-import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
 /**
- * Subcommand that disables all Elements on all ActionRows.
+ * Subcommands that removes all Elements on all ActionRows.
  */
-public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
-	/**
-	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
-	 */
-	public ChangeSelfRoleStatusSubcommand() {
-		setSubcommandData(new SubcommandData("status", "Either enables or disables all message components (thus, the self role) on a single message.")
-				.addOption(OptionType.STRING, "message-id", "The message's id.", true)
-				.addOption(OptionType.BOOLEAN, "disable", "Should all action rows be disabled?", true)
-		);
+public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
+
+	public RemoveSelfRolesSubcommand() {
+		setSubcommandData(new SubcommandData("remove-all", "Removes all Self-Roles from a specified message.")
+				.addOption(OptionType.STRING, "message-id", "Id of the message.", true));
 	}
 
 	@Override
-	public void execute(@NotNull SlashCommandInteractionEvent event) {
+	public void execute(SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("message-id");
-		OptionMapping disabledMapping = event.getOption("disable");
-		if (idMapping == null || disabledMapping == null) {
+		if (idMapping == null) {
 			Responses.replyMissingArguments(event).queue();
 			return;
 		}
-		boolean disabled = disabledMapping.getAsBoolean();
 		event.deferReply(true).queue();
-		event.getChannel().retrieveMessageById(idMapping.getAsString()).queue(message -> {
-			message.editMessageComponents(disabled ?
-					MessageActionUtils.disableActionRows(message.getActionRows()) :
-					MessageActionUtils.enableActionRows(message.getActionRows())
-			).queue();
-			MessageEmbed embed = buildSelfRoleStatusEmbed(event.getUser(), message, disabled);
+		event.getChannel().retrieveMessageById(idMapping.getAsLong()).queue(message -> {
+			message.editMessageComponents().queue();
+			MessageEmbed embed = buildSelfRoleDeletedEmbed(event.getUser(), message);
 			new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
 			event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
 		}, e -> Responses.error(event.getHook(), e.getMessage()));
 	}
 
-	private @NotNull MessageEmbed buildSelfRoleStatusEmbed(@NotNull User changedBy, @NotNull Message message, boolean disabled) {
+	private @NotNull MessageEmbed buildSelfRoleDeletedEmbed(@NotNull User changedBy, @NotNull Message message) {
 		return new EmbedBuilder()
 				.setAuthor(changedBy.getAsTag(), message.getJumpUrl(), changedBy.getEffectiveAvatarUrl())
-				.setTitle("Self Role " + (disabled ? "disabled" : "enabled"))
+				.setTitle("Self Roles Removed")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", message.getChannel().getAsMention(), true)
 				.addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)
