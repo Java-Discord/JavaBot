@@ -21,7 +21,7 @@ import java.time.Instant;
 public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
 
 	public RemoveSelfRolesSubcommand() {
-		setSubcommandData(new SubcommandData("remove", "Removes all Self-Roles from a specified message.")
+		setSubcommandData(new SubcommandData("remove-all", "Removes all Self-Roles from a specified message.")
 				.addOption(OptionType.STRING, "message-id", "Id of the message.", true));
 	}
 
@@ -29,7 +29,7 @@ public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
 	public void execute(SlashCommandInteractionEvent event) {
 		OptionMapping idMapping = event.getOption("message-id");
 		if (idMapping == null) {
-			Responses.error(event, "ID is required.").queue();
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		event.deferReply(true).queue();
