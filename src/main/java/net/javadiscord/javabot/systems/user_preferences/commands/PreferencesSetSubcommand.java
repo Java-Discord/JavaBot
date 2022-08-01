@@ -50,7 +50,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand {
 		}
 	}
 
-	public Command.Choice toChoice(@NotNull Preference preference) {
+	private Command.Choice toChoice(@NotNull Preference preference) {
 		return new Command.Choice(preference.toString(), String.valueOf(preference.ordinal()));
 	}
 }
