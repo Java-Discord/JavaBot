@@ -15,37 +15,40 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
+/**
+ * Subcommands that removes all Elements on an ActionRow.
+ */
 public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
 
-    public RemoveSelfRolesSubcommand() {
-        setSubcommandData(new SubcommandData("remove", "Removes all Self-Roles from a specified message.")
-                .addOption(OptionType.STRING, "message-id", "Id of the message.", true));
-    }
+	public RemoveSelfRolesSubcommand() {
+		setSubcommandData(new SubcommandData("remove", "Removes all Self-Roles from a specified message.")
+				.addOption(OptionType.STRING, "message-id", "Id of the message.", true));
+	}
 
-    @Override
-    public void execute(SlashCommandInteractionEvent event) {
-        OptionMapping idMapping = event.getOption("message-id");
-        if (idMapping == null) {
-            Responses.error(event, "ID is required.").queue();
-            return;
-        }
-        event.deferReply(true).queue();
-        event.getChannel().retrieveMessageById(idMapping.getAsLong()).queue(message -> {
-            message.editMessageComponents().queue();
-            MessageEmbed embed = buildSelfRoleDeletedEmbed(event.getUser(), message);
-            new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
-            event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
-        }, e -> Responses.error(event.getHook(), e.getMessage()));
-    }
+	@Override
+	public void execute(SlashCommandInteractionEvent event) {
+		OptionMapping idMapping = event.getOption("message-id");
+		if (idMapping == null) {
+			Responses.error(event, "ID is required.").queue();
+			return;
+		}
+		event.deferReply(true).queue();
+		event.getChannel().retrieveMessageById(idMapping.getAsLong()).queue(message -> {
+			message.editMessageComponents().queue();
+			MessageEmbed embed = buildSelfRoleDeletedEmbed(event.getUser(), message);
+			new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
+			event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
+		}, e -> Responses.error(event.getHook(), e.getMessage()));
+	}
 
-    private @NotNull MessageEmbed buildSelfRoleDeletedEmbed(@NotNull User changedBy, @NotNull Message message) {
-        return new EmbedBuilder()
-                .setAuthor(changedBy.getAsTag(), message.getJumpUrl(), changedBy.getEffectiveAvatarUrl())
-                .setTitle("Self Roles removed")
-                .setColor(Responses.Type.DEFAULT.getColor())
-                .addField("Channel", message.getChannel().getAsMention(), true)
-                .addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)
-                .setTimestamp(Instant.now())
-                .build();
-    }
+	private @NotNull MessageEmbed buildSelfRoleDeletedEmbed(@NotNull User changedBy, @NotNull Message message) {
+		return new EmbedBuilder()
+				.setAuthor(changedBy.getAsTag(), message.getJumpUrl(), changedBy.getEffectiveAvatarUrl())
+				.setTitle("Self Roles removed")
+				.setColor(Responses.Type.DEFAULT.getColor())
+				.addField("Channel", message.getChannel().getAsMention(), true)
+				.addField("Message", String.format("[Jump to Message](%s)", message.getJumpUrl()), true)
+				.setTimestamp(Instant.now())
+				.build();
+	}
 }
