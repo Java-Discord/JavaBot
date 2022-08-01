@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -126,6 +127,21 @@ public class SubmissionManager {
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return false;
+		}
+	}
+
+	/**
+	 * Gets all active submission threads.
+	 *
+	 * @return An immutable {@link List} of {@link QOTWSubmission}s.
+	 */
+	public List<QOTWSubmission> getActiveSubmissionThreads() {
+		try (Connection con = Bot.getDataSource().getConnection()) {
+			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
+			return repo.getSubmissionByQuestionNumber(repo.getCurrentQuestionNumber());
+		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			return List.of();
 		}
 	}
 

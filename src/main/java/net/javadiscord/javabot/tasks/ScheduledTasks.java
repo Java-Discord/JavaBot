@@ -5,6 +5,7 @@ import net.javadiscord.javabot.systems.help.HelpExperienceJob;
 import net.javadiscord.javabot.systems.qotw.QOTWCloseSubmissionsJob;
 import net.javadiscord.javabot.systems.qotw.QOTWJob;
 import net.javadiscord.javabot.systems.qotw.QOTWReminderJob;
+import net.javadiscord.javabot.systems.qotw.QOTWUserReminderJob;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.quartz.*;
@@ -53,6 +54,9 @@ public class ScheduledTasks {
 	private static void scheduleAllTasks(Scheduler scheduler, JDA jda) throws SchedulerException {
 		// Schedule posting a new QOTW every Monday at 9am.
 		scheduleApiJob(scheduler, jda, QOTWJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.MONDAY, 9, 0));
+
+		// Schedule QOTW Reminder (if no answer was yet submitted)
+		scheduleApiJob(scheduler, jda, QOTWUserReminderJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.FRIDAY, 16, 0));
 
 		// Schedule closing submissions every Sunday at 9pm.
 		scheduleApiJob(scheduler, jda, QOTWCloseSubmissionsJob.class, CronScheduleBuilder.weeklyOnDayAndHourAndMinute(DateBuilder.SUNDAY, 21, 0));
