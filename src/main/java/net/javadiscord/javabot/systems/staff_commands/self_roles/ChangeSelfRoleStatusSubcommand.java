@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 
 /**
- * Subcommand that disables all Elements on an ActionRow.
+ * Subcommand that disables all Elements on all ActionRows.
  */
 public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
 	/**

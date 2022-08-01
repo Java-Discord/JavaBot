@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 
 /**
- * Subcommands that removes all Elements on an ActionRow.
+ * Subcommands that removes all Elements on all ActionRows.
  */
 public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
 
