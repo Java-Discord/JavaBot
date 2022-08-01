@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +46,7 @@ public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
 					MessageActionUtils.enableActionRows(message.getActionRows())
 			).queue();
 			MessageEmbed embed = buildSelfRoleStatusEmbed(event.getUser(), message, disabled);
-			new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
+			NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 			event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
 		}, e -> Responses.error(event.getHook(), e.getMessage()));
 	}

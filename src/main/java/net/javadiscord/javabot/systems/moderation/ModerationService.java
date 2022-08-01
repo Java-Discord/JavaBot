@@ -12,8 +12,7 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
-import net.javadiscord.javabot.systems.notification.UserNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -73,8 +72,8 @@ public class ModerationService {
 			dao.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
 			int totalSeverity = dao.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
 			MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
-			new UserNotificationService(user).sendDirectMessageNotification(warnEmbed);
-			new GuildNotificationService(moderationConfig.getGuild()).sendLogChannelNotification(warnEmbed);
+			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
+			NotificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
 			if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
 				channel.sendMessageEmbeds(warnEmbed).queue();
 			}
@@ -94,8 +93,8 @@ public class ModerationService {
 		DbHelper.doDaoAction(WarnRepository::new, dao -> {
 			dao.discardAll(user.getIdLong());
 			MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
-			new UserNotificationService(user).sendDirectMessageNotification(embed);
-			new GuildNotificationService(moderationConfig.getGuild()).sendLogChannelNotification(embed);
+			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
+			NotificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 		});
 	}
 
@@ -113,8 +112,7 @@ public class ModerationService {
 			if (warnOptional.isPresent()) {
 				Warn warn = warnOptional.get();
 				repo.discardById(warn.getId());
-				new GuildNotificationService(moderationConfig.getGuild())
-						.sendLogChannelNotification(buildClearWarnsByIdEmbed(warn, clearedBy));
+				NotificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(buildClearWarnsByIdEmbed(warn, clearedBy)));
 				return true;
 			}
 		} catch (SQLException e) {
@@ -153,8 +151,8 @@ public class ModerationService {
 	public void timeout(@Nonnull Member member, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
 		MessageEmbed timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
 		member.getGuild().timeoutFor(member, duration).queue(s -> {
-			new UserNotificationService(member.getUser()).sendDirectMessageNotification(timeoutEmbed);
-			new GuildNotificationService(member.getGuild()).sendLogChannelNotification(timeoutEmbed);
+			NotificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
+			NotificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -171,8 +169,8 @@ public class ModerationService {
 	public void removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
 		removedBy.getGuild().removeTimeout(member).queue(s -> {
-			new UserNotificationService(member.getUser()).sendDirectMessageNotification(removeTimeoutEmbed);
-			new GuildNotificationService(member.getGuild()).sendLogChannelNotification(removeTimeoutEmbed);
+			NotificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
+			NotificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -189,8 +187,8 @@ public class ModerationService {
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
 		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, reason).queue(s -> {
-			new UserNotificationService(user).sendDirectMessageNotification(banEmbed);
-			new GuildNotificationService(bannedBy.getGuild()).sendLogChannelNotification(banEmbed);
+			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(banEmbed));
+			NotificationService.withGuild(bannedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(banEmbed));
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -235,8 +233,8 @@ public class ModerationService {
 	public void kick(User user, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed kickEmbed = buildKickEmbed(user, kickedBy, reason);
 		kickedBy.getGuild().kick(user).queue(s -> {
-			new UserNotificationService(user).sendDirectMessageNotification(kickEmbed);
-			new GuildNotificationService(kickedBy.getGuild()).sendLogChannelNotification(kickEmbed);
+			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(kickEmbed));
+			NotificationService.withGuild(kickedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(kickEmbed));
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 		}, ExceptionLogger::capture);
 	}

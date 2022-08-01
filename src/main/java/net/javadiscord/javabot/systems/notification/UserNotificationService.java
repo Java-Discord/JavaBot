@@ -1,34 +1,32 @@
 package net.javadiscord.javabot.systems.notification;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
 
 /**
- * Sends notifications within a single {@link net.dv8tion.jda.api.entities.Guild}.
+ * Handles all sorts of user notifications.
  */
 @Slf4j
-@RequiredArgsConstructor
-public final class UserNotificationService extends NotificationServiceDEPRECATED {
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+public final class UserNotificationService extends NotificationService.MessageChannelNotification {
 	private final User user;
 
 	/**
-	 * Sends a {@link MessageEmbed} to the users {@link net.dv8tion.jda.api.entities.PrivateChannel}.
+	 * Sends a notification to a {@link User}s' {@link net.dv8tion.jda.api.entities.PrivateChannel}.
 	 *
-	 * @param embed The {@link MessageEmbed} to send.
+	 * @param function The {@link Function} to use which MUST return a {@link MessageAction}.
 	 */
-	public void sendDirectMessageNotification(MessageEmbed embed) {
-		sendDirectMessageNotification(user, embed);
-	}
-
-	/**
-	 * Sends a simple Message to the users {@link net.dv8tion.jda.api.entities.PrivateChannel}.
-	 *
-	 * @param string The message that should be sent.
-	 * @param args Optional args for formatting.
-	 */
-	public void sendDirectMessageNotification(String string, Object... args) {
-		this.sendDirectMessageNotification(user, string, args);
+	public void sendDirectMessage(@NotNull Function<MessageChannel, MessageAction> function) {
+		user.openPrivateChannel().queue(
+				channel -> send(channel, function),
+				error -> log.error("Could not open PrivateChannel with user " + user.getAsTag(), error)
+		);
 	}
 }

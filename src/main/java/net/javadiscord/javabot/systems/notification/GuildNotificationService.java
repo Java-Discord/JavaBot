@@ -1,62 +1,50 @@
 package net.javadiscord.javabot.systems.notification;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.GuildConfig;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
 
 /**
- * Sends notifications within a single {@link Guild}.
+ * Handles all sorts of guild notifications.
  */
 @Slf4j
-public final class GuildNotificationService extends NotificationServiceDEPRECATED {
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+public final class GuildNotificationService extends NotificationService.MessageChannelNotification {
 
 	private final Guild guild;
-	private final GuildConfig config;
 
-	public GuildNotificationService(Guild guild) {
-		this.guild = guild;
-		this.config = Bot.getConfig().get(guild);
+	/**
+	 * Sends a notification to the log channel.
+	 *
+	 * @param function The {@link Function} to use which MUST return a {@link MessageAction}.
+	 */
+	public void sendToModerationLog(@NotNull Function<MessageChannel, MessageAction> function) {
+		MessageChannel channel = Bot.getConfig().get(guild).getModerationConfig().getLogChannel();
+		if (channel == null) {
+			log.error("Could not send message to LogChannel in guild " + guild.getId());
+			return;
+		}
+		send(channel, function);
 	}
 
 	/**
-	 * Sends a {@link MessageEmbed} to the Guild's log channel.
+	 * Sends a notification to the message cache log channel.
 	 *
-	 * @param embed The {@link MessageEmbed} to send.
+	 * @param function The {@link Function} to use which MUST return a {@link MessageAction}.
 	 */
-	public void sendLogChannelNotification(MessageEmbed embed) {
-		if (config.getModerationConfig().getLogChannel() == null) {
-			log.warn("Could not find Log Channel for Guild {}", guild.getName());
+	public void sendToMessageLog(@NotNull Function<MessageChannel, MessageAction> function) {
+		MessageChannel channel = Bot.getConfig().get(guild).getMessageCacheConfig().getMessageCacheLogChannel();
+		if (channel == null) {
+			log.error("Could not find MessageCacheLogChannel in guild " + guild.getId());
 			return;
 		}
-		this.sendMessageChannelNotification(config.getModerationConfig().getLogChannel(), embed);
-	}
-
-	/**
-	 * Sends a simple Message to the Guild's log channel.
-	 *
-	 * @param string The message that should be sent.
-	 * @param args Optional args for formatting.
-	 */
-	public void sendLogChannelNotification(String string, Object... args) {
-		if (config.getModerationConfig().getLogChannel() == null) {
-			log.warn("Could not find Log Channel for Guild {}", guild.getName());
-			return;
-		}
-		this.sendMessageChannelNotification(config.getModerationConfig().getLogChannel(), string, args);
-	}
-
-	/**
-	 * Sends a {@link MessageEmbed} to the Guild's message log channel.
-	 *
-	 * @param embed The {@link MessageEmbed} to send.
-	 */
-	public void sendMessageLogChannelNotification(MessageEmbed embed) {
-		if (config.getMessageCacheConfig().getMessageCacheLogChannel() == null) {
-			log.warn("Could not find Message Log Channel for Guild {}", guild.getName());
-			return;
-		}
-		this.sendMessageChannelNotification(config.getMessageCacheConfig().getMessageCacheLogChannel(), embed);
+		send(channel, function);
 	}
 }

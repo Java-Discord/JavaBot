@@ -18,7 +18,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
@@ -88,7 +88,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 						}
 						QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 						service.increment(member.getIdLong());
-						new QOTWNotificationService(member.getUser(), event.getGuild()).sendBestAnswerNotification();
+						NotificationService.withQOTW(event.getGuild(), member.getUser()).sendBestAnswerNotification();
 						sendBestAnswer(event.getHook(), messages, member, submissionThread);
 					}
 			);

@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
@@ -111,13 +111,13 @@ public class SubmissionControlsManager {
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
 			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 			service.increment(user.getIdLong());
-			new QOTWNotificationService(user, event.getGuild()).sendAccountIncrementedNotification();
+			NotificationService.withQOTW(event.getGuild(), user).sendAccountIncrementedNotification();
 			Responses.success(event.getHook(), "Submission Accepted",
 					"Successfully accepted submission by " + user.getAsMention()).queue();
 			}
 		);
 		this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
-		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);
+		NotificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);
 	}
 
 	/**
@@ -130,13 +130,13 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-				new QOTWNotificationService(user, event.getGuild()).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
+			NotificationService.withQOTW(event.getGuild(), user).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
 				Responses.success(event.getHook(), "Submission Declined",
 						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
 				}
 		);
 		this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
-		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DECLINED, event.getValues().toArray(new String[0]));
+		NotificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DECLINED, event.getValues().toArray(new String[0]));
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
 		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
-		new QOTWNotificationService(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DELETED);
+		NotificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DELETED);
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 	}
 

@@ -10,8 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
-import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -48,8 +47,8 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		long points = service.increment(member.getIdLong());
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
-		new GuildNotificationService(event.getGuild()).sendLogChannelNotification(embed);
-		new QOTWNotificationService(member.getUser(), event.getGuild()).sendAccountIncrementedNotification();
+		NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+		NotificationService.withQOTW(event.getGuild(), member.getUser()).sendAccountIncrementedNotification();
 		event.getHook().sendMessageEmbeds(embed).queue();
 	}
 
