@@ -31,7 +31,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (!event.isFromGuild()) {
 			Responses.replyGuildOnly(event).setEphemeral(true).queue();
 			return;
@@ -69,7 +69,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 		});
 	}
 
-	private @NotNull MessageEmbed buildQOTWInfoEmbed(QOTWSubmission submission, String requester) {
+	private @NotNull MessageEmbed buildQOTWInfoEmbed(@NotNull QOTWSubmission submission, String requester) {
 		return new EmbedBuilder()
 				.setTitle("Answer to Question of the Week #" + submission.getQuestionNumber())
 				.setDescription("Answer by <@" + submission.getAuthorId() + ">")

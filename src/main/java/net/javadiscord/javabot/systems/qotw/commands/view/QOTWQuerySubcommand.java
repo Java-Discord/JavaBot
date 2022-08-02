@@ -98,10 +98,11 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 
 	private @NotNull MessageEmbed buildListQuestionsEmbed(@NotNull QuestionQueueRepository repo, long guildId, String query, int page) throws SQLException {
 		List<QOTWQuestion> questions = repo.getUsedQuestionsWithQuery(guildId, query, page * PAGE_LIMIT, PAGE_LIMIT);
-		EmbedBuilder eb = new EmbedBuilder();
-		eb.setDescription("**Questions of the Week" + (query.isEmpty() ? "" : " matching '" + query + "'") + "**");
-		questions
-				.stream()
+		EmbedBuilder eb = new EmbedBuilder()
+				.setDescription("**Questions of the Week" + (query.isEmpty() ? "" : " matching '" + query + "'") + "**")
+				.setColor(Responses.Type.DEFAULT.getColor())
+				.setFooter("Page " + (page + 1));
+		questions.stream()
 				.sorted(Comparator.comparingInt(QOTWQuestion::getQuestionNumber))
 				.map(q -> new MessageEmbed.Field("Question #" + q.getQuestionNumber(), q.getText(), true))
 				.forEach(eb::addField);
@@ -111,10 +112,6 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 				eb.appendDescription(" on this page");
 			}
 		}
-		eb.setFooter("Page " + (page + 1));
-		eb.setColor(Responses.Type.DEFAULT.getColor());
 		return eb.build();
 	}
-
-
 }

@@ -46,7 +46,7 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (!event.isFromGuild()) {
-			Responses.replyGuildOnly(event).setEphemeral(true).queue();
+			Responses.replyGuildOnly(event).queue();
 			return;
 		}
 		OptionMapping questionNumOption = event.getOption("question");

@@ -16,7 +16,8 @@ public class QOTWViewCommand extends SlashCommand {
 	public QOTWViewCommand() {
 		setSlashCommandData(Commands.slash("qotw-view", "Query 'Questions of the Week' and their answers")
 				.setDefaultPermissions(DefaultMemberPermissions.ENABLED)
-				.setGuildOnly(true));
+				.setGuildOnly(true)
+		);
 		addSubcommands(new QOTWQuerySubcommand(), new QOTWListAnswersSubcommand(), new QOTWViewAnswerSubcommand());
 
 	}
