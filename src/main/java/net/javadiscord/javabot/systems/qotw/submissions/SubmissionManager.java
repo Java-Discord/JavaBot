@@ -153,7 +153,7 @@ public class SubmissionManager {
 				.setTitle(String.format("Question of the Week #%s", question.getQuestionNumber()))
 				.setDescription(String.format("""
 								%s
-
+								
 								Hey, %s! Please submit your answer into this private thread.
 								The %s will review your submission once a new question appears.""",
 						question.getText(), createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
@@ -162,7 +162,7 @@ public class SubmissionManager {
 								To maximize your chances of getting this week's QOTW Point make sure to:
 								— Provide a **Code example** (if possible)
 								— Try to answer the question as detailed as possible.
-
+								
 								Staff usually won't reply in here.""", false)
 				.setTimestamp(Instant.now())
 				.build();
