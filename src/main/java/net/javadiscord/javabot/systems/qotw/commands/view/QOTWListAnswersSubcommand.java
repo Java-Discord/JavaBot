@@ -45,15 +45,15 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand{
 		DbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
 			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), questionNum);
 			EmbedBuilder eb = new EmbedBuilder();
-			eb.setDescription("**answers of Question of the week #"+questionNum+"**\n");
+			eb.setDescription("**Answers of Question of the Week #" + questionNum + "**\n");
 			TextChannel submissionChannel = Bot.getConfig().get(event.getGuild()).getQotwConfig().getSubmissionChannel();
 			String allAnswers = submissions
 				.stream()
 				.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
 				.filter(submission -> submission.getQuestionNumber() == questionNum)
 				.map(s -> (isBestAnswer(submissionChannel,s) ?
-						"best " : s.getStatus() == SubmissionStatus.ACCEPTED?"accepted ":"")+
-					"Answer by <@"+s.getAuthorId()+">")
+						"best " : s.getStatus() == SubmissionStatus.ACCEPTED ? "accepted " : "")+
+					"Answer by <@" + s.getAuthorId() + ">")
 				.collect(Collectors.joining("\n"));
 			if (allAnswers.isEmpty()) {
 				allAnswers = "No accepted answers found.";

@@ -41,7 +41,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 	public QOTWQuerySubcommand() {
 		setSubcommandData(new SubcommandData("list-questions", "Lists previous questions of the week")
 				.addOption(OptionType.STRING, "query", "Only queries questions that contain a specific query", false)
-				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1"));
+				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false));
 	}
 
 	@Override
@@ -50,14 +50,14 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			Responses.replyGuildOnly(event).setEphemeral(true).queue();
 			return;
 		}
-		String query = event.getOption("query", ()->"", OptionMapping::getAsString);
-		int page = event.getOption("page",() -> 1, OptionMapping::getAsInt)-1;
+		String query = event.getOption("query", "", OptionMapping::getAsString);
+		int page = event.getOption("page", 1, OptionMapping::getAsInt) -1;
 		if (page < 0) {
 			Responses.error(event, "Invalid page - must be >= 1").queue();
 			return;
 		}
 		event.deferReply(true).queue();
-		DbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo->{
+		DbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo-> {
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
 				.sendMessageEmbeds(embed)
@@ -91,9 +91,9 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			query = query.substring(0,MAX_BUTTON_QUERY_LENGTH);
 		}
 		return ActionRow.of(
-			Button.primary(ComponentIdBuilder.build("qotw-list-questions", page-1+"", query), "Previous Page")
+			Button.primary(ComponentIdBuilder.build("qotw-list-questions", page - 1 + "", query), "Previous Page")
 				.withDisabled(page <= 0),
-			Button.primary(ComponentIdBuilder.build("qotw-list-questions", page+1+"", query), "Next Page")
+			Button.primary(ComponentIdBuilder.build("qotw-list-questions", page + 1 + "", query), "Next Page")
 				.withDisabled(embed.getFields().size() < PAGE_LIMIT)
 		);
 	}
@@ -113,7 +113,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 				eb.appendDescription(" on this page");
 			}
 		}
-		eb.setFooter("Page "+(page+1));
+		eb.setFooter("Page " + (page+1));
 		eb.setColor(Responses.Type.DEFAULT.getColor());
 		return eb.build();
 	}

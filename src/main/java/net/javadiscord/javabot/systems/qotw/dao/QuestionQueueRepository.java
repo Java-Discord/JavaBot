@@ -135,7 +135,7 @@ public class QuestionQueueRepository {
 		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND \"text\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?";
 		try (PreparedStatement stmt = con.prepareStatement(sql)) {
 			stmt.setLong(1, guildId);
-			stmt.setString(2, "%"+query.toLowerCase()+"%");
+			stmt.setString(2, "%" + query.toLowerCase() + "%");
 			stmt.setInt(3, size);
 			stmt.setInt(4, page);
 			ResultSet rs = stmt.executeQuery();
