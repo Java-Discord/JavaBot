@@ -81,6 +81,7 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 				return;
 			}
 			String sql = Files.readString(migrationFile);
+			migrationsDir.getFileSystem().close();
 			String[] statements = sql.split("\\s*;\\s*");
 			if (statements.length == 0) {
 				Responses.error(event, "The migration `" + migrationName + "` does not contain any statements. Please remove or edit it before running again.").queue();

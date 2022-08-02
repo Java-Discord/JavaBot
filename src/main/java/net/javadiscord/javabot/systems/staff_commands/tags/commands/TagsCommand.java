@@ -12,7 +12,9 @@ public class TagsCommand extends SlashCommand {
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.Subcommand}s.
 	 */
 	public TagsCommand() {
-		setSlashCommandData(Commands.slash("tag", "Commands for interacting with Custom Tags."));
+		setSlashCommandData(Commands.slash("tag", "Commands for interacting with Custom Tags.")
+				.setGuildOnly(true)
+		);
 		addSubcommands(new TagViewSubcommand(), new TagListSubcommand());
 	}
 }

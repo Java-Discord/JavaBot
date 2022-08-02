@@ -110,7 +110,7 @@ public class Bot {
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOJI));
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
-				.setDefaultCommandType(RegistrationType.GUILD)
+				.setDefaultCommandType(RegistrationType.GLOBAL)
 				.build();
 		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
