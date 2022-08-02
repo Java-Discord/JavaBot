@@ -3,7 +3,6 @@ package net.javadiscord.javabot.systems.qotw.commands.view;
 import org.jetbrains.annotations.NotNull;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -39,7 +38,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand{
 		}
 		OptionMapping questionOption = event.getOption("question");
 		if (questionOption == null) {
-			Responses.error(event, "The question option is missing.").queue();
+			Responses.replyMissingArguments(event);
 			return;
 		}
 		OptionMapping answerOwnerOption = event.getOption("answerer");
@@ -77,6 +76,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand{
 				.setTitle("Answer to Question of the Week #"+submission.getQuestionNumber())
 				.setDescription("Answer by <@"+submission.getAuthorId()+">")
 				.setFooter("Requested by "+requester)
+				.setColor(Responses.Type.DEFAULT.getColor())
 				.build();
 	}
 

@@ -22,7 +22,7 @@ import net.javadiscord.javabot.util.Responses;
 /**
  * Represents the `/qotw-view list-answers` subcommand. It allows for listing answers to a specific QOTW.
  */
-public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
+public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand{
 	public QOTWListAnswersSubcommand() {
 		setSubcommandData(new SubcommandData("list-answers", "Lists answers to (previous) questions of the week")
 				.addOption(OptionType.INTEGER, "question", "The question number",true));
@@ -36,7 +36,7 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 		}
 		OptionMapping questionNumOption = event.getOption("question");
 		if (questionNumOption==null) {
-			Responses.error(event, "Missing question number").setEphemeral(true).queue();
+			Responses.replyMissingArguments(event);
 			return;
 		}
 		int questionNum = questionNumOption.getAsInt();
@@ -51,8 +51,8 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 				.stream()
 				.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
 				.filter(submission -> submission.getQuestionNumber() == questionNum)
-				.map(s -> (isBestAnswer(submissionChannel,s)?
-						"best ":s.getStatus() == SubmissionStatus.ACCEPTED?"accepted ":"")+
+				.map(s -> (isBestAnswer(submissionChannel,s) ?
+						"best " : s.getStatus() == SubmissionStatus.ACCEPTED?"accepted ":"")+
 					"Answer by <@"+s.getAuthorId()+">")
 				.collect(Collectors.joining("\n"));
 			if (allAnswers.isEmpty()) {
