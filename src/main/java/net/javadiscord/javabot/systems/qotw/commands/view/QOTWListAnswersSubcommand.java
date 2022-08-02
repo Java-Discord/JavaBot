@@ -35,7 +35,7 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand{
 			return;
 		}
 		OptionMapping questionNumOption = event.getOption("question");
-		if (questionNumOption==null) {
+		if (questionNumOption == null) {
 			Responses.replyMissingArguments(event);
 			return;
 		}
