@@ -27,6 +27,7 @@ import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.moderation.report.ReportManager;
 import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockManager;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.AddQuestionSubcommand;
+import net.javadiscord.javabot.systems.qotw.commands.view.QOTWQuerySubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
 import net.javadiscord.javabot.systems.staff_commands.self_roles.SelfRoleInteractionManager;
 import net.javadiscord.javabot.systems.staff_commands.embeds.AddEmbedFieldSubcommand;
@@ -167,7 +168,8 @@ public class Bot {
 				List.of("resolve-report"), new ReportManager(),
 				List.of("self-role"), new SelfRoleInteractionManager(),
 				List.of("qotw-submission"), new SubmissionInteractionManager(),
-				List.of("help-channel", "help-thank"), new HelpChannelInteractionManager()
+				List.of("help-channel", "help-thank"), new HelpChannelInteractionManager(),
+				List.of("qotw-list-questions"),new QOTWQuerySubcommand()
 		));
 		dih4jda.addModalHandlers(Map.of(
 				List.of("qotw-add-question"), new AddQuestionSubcommand(),

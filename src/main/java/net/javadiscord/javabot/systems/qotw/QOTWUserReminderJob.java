@@ -25,7 +25,7 @@ public class QOTWUserReminderJob extends DiscordApiJob {
 	protected void execute(JobExecutionContext context, @NotNull JDA jda) throws JobExecutionException {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = Bot.getConfig().get(guild).getQotwConfig();
-			List<QOTWSubmission> submissions = new SubmissionManager(config).getActiveSubmissionThreads();
+			List<QOTWSubmission> submissions = new SubmissionManager(config).getActiveSubmissionThreads(guild.getIdLong());
 			for (QOTWSubmission submission : submissions) {
 				UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
 				UserPreference preference = manager.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);

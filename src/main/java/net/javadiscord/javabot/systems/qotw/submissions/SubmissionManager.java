@@ -133,12 +133,13 @@ public class SubmissionManager {
 	/**
 	 * Gets all active submission threads.
 	 *
+	 * @param guildId The ID of the guild to get the submission threads from
 	 * @return An immutable {@link List} of {@link QOTWSubmission}s.
 	 */
-	public List<QOTWSubmission> getActiveSubmissionThreads() {
+	public List<QOTWSubmission> getActiveSubmissionThreads(long guildId) {
 		try (Connection con = Bot.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			return repo.getSubmissionByQuestionNumber(repo.getCurrentQuestionNumber());
+			return repo.getSubmissionsByQuestionNumber(guildId, repo.getCurrentQuestionNumber());
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
@@ -152,7 +153,7 @@ public class SubmissionManager {
 				.setTitle(String.format("Question of the Week #%s", question.getQuestionNumber()))
 				.setDescription(String.format("""
 								%s
-								                        
+								
 								Hey, %s! Please submit your answer into this private thread.
 								The %s will review your submission once a new question appears.""",
 						question.getText(), createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
