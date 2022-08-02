@@ -68,7 +68,6 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 					.stream()
 					.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
 					.filter(submission -> submission.getQuestionNumber() == questionNum)
-					.sorted((s1, s2) -> Boolean.compare(isBestAnswer(submissionChannel, s1), isBestAnswer(submissionChannel, s2)))
 					.map(s -> (isBestAnswer(submissionChannel,s) ?
 							"**Best** " : s.getStatus() == SubmissionStatus.ACCEPTED ? "Accepted " : "") +
 							"Answer by <@" + s.getAuthorId() + ">")
