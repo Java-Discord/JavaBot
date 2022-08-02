@@ -44,8 +44,10 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand{
 		event.deferReply(true).queue();
 		DbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
 			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), questionNum);
-			EmbedBuilder eb = new EmbedBuilder();
-			eb.setDescription("**Answers of Question of the Week #" + questionNum + "**\n");
+			EmbedBuilder eb = new EmbedBuilder()
+				.setDescription("**Answers of Question of the week #" + questionNum + "**\n")
+				.setColor(Responses.Type.DEFAULT.getColor())
+				.setFooter("Results may not be accurate due to historic data.");
 			TextChannel submissionChannel = Bot.getConfig().get(event.getGuild()).getQotwConfig().getSubmissionChannel();
 			String allAnswers = submissions
 				.stream()
@@ -59,8 +61,6 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand{
 				allAnswers = "No accepted answers found.";
 			}
 			eb.appendDescription(allAnswers);
-			eb.setFooter("Results may not be accurate due to historic data.");
-			eb.setColor(Responses.Type.DEFAULT.getColor());
 			event.getHook().sendMessageEmbeds(eb.build()).queue();
 		});
 	}
