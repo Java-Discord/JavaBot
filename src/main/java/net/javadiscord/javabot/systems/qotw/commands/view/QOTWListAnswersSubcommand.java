@@ -60,7 +60,7 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 		DbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
 			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), questionNum);
 			EmbedBuilder eb = new EmbedBuilder()
-					.setDescription("Answers of **Question of the Week #" + questionNum + "**\n")
+					.setTitle("Answers of Question of the Week #" + questionNum)
 					.setColor(Responses.Type.DEFAULT.getColor())
 					.setFooter("Results may not be accurate due to historic data.");
 			TextChannel submissionChannel = Bot.getConfig().get(event.getGuild()).getQotwConfig().getSubmissionChannel();
