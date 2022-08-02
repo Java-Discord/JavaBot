@@ -14,7 +14,7 @@ import java.util.function.Function;
 /**
  * Handles all types of guild & user notifications.
  */
-public class NotificationService {
+public final class NotificationService {
 	private NotificationService() {
 	}
 
@@ -40,7 +40,7 @@ public class NotificationService {
 	 * Abstract class which streamlines the logic of sending messages to a {@link MessageChannel}.
 	 */
 	@Slf4j
-	protected abstract static class MessageChannelNotification {
+	abstract static class MessageChannelNotification {
 		/**
 		 * Sends a single message to the specified {@link MessageChannel} using the
 		 * specified {@link Function}.
