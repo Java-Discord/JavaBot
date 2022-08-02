@@ -1,17 +1,8 @@
 package net.javadiscord.javabot.systems.qotw.commands.view;
 
-import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -26,11 +17,17 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
+import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Represents the `/qotw-view query` subcommand. It allows for listing filtering QOTWs.
  */
-public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements ButtonHandler{
+public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 
 	private static final int MAX_BUTTON_QUERY_LENGTH = 10;
 	private static final int PAGE_LIMIT = 20;
@@ -39,30 +36,31 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 */
 	public QOTWQuerySubcommand() {
-		setSubcommandData(new SubcommandData("list-questions", "Lists previous questions of the week")
+		setSubcommandData(new SubcommandData("list-questions", "Lists previous 'Questions of the Week'")
 				.addOption(OptionType.STRING, "query", "Only queries questions that contain a specific query", false)
-				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false));
+				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false)
+		);
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		if(!event.isFromGuild()) {
+		if (!event.isFromGuild()) {
 			Responses.replyGuildOnly(event).setEphemeral(true).queue();
 			return;
 		}
 		String query = event.getOption("query", "", OptionMapping::getAsString);
-		int page = event.getOption("page", 1, OptionMapping::getAsInt) -1;
+		int page = event.getOption("page", 1, OptionMapping::getAsInt) - 1;
 		if (page < 0) {
-			Responses.error(event, "Invalid page - must be >= 1").queue();
+			Responses.error(event, "The page must be equal to or greater than 1!").queue();
 			return;
 		}
 		event.deferReply(true).queue();
-		DbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo-> {
+		DbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo -> {
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
-				.sendMessageEmbeds(embed)
-				.addActionRows(buildPageControls(query, page, embed))
-				.queue();
+					.sendMessageEmbeds(embed)
+					.addActionRows(buildPageControls(query, page, embed))
+					.queue();
 		});
 	}
 
@@ -73,47 +71,47 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 		int page = Integer.parseInt(id[1]);
 		String query = id.length == 2 ? "" : id[2];
 		if (page < 0) {
-			Responses.error(event.getHook(), "Invalid page - must be >= 1").queue();
+			Responses.error(event.getHook(), "The page must be equal to or greater than 1!").queue();
 			return;
 		}
 		DbHelper.doDaoAction(QuestionQueueRepository::new, repo -> {
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
-				.editOriginalEmbeds(embed)
-				.setActionRows(buildPageControls(query, page, embed))
-				.queue();
+					.editOriginalEmbeds(embed)
+					.setActionRows(buildPageControls(query, page, embed))
+					.queue();
 		});
 	}
 
 	@NotNull
-	private ActionRow buildPageControls(String query, int page, MessageEmbed embed) {
+	private ActionRow buildPageControls(@NotNull String query, int page, MessageEmbed embed) {
 		if (query.length() > MAX_BUTTON_QUERY_LENGTH) {
-			query = query.substring(0,MAX_BUTTON_QUERY_LENGTH);
+			query = query.substring(0, MAX_BUTTON_QUERY_LENGTH);
 		}
 		return ActionRow.of(
-			Button.primary(ComponentIdBuilder.build("qotw-list-questions", page - 1 + "", query), "Previous Page")
-				.withDisabled(page <= 0),
-			Button.primary(ComponentIdBuilder.build("qotw-list-questions", page + 1 + "", query), "Next Page")
-				.withDisabled(embed.getFields().size() < PAGE_LIMIT)
+				Button.primary(ComponentIdBuilder.build("qotw-list-questions", page - 1 + "", query), "Previous Page")
+						.withDisabled(page <= 0),
+				Button.primary(ComponentIdBuilder.build("qotw-list-questions", page + 1 + "", query), "Next Page")
+						.withDisabled(embed.getFields().size() < PAGE_LIMIT)
 		);
 	}
 
-	private MessageEmbed buildListQuestionsEmbed(QuestionQueueRepository repo, long guildId, String query, int page) throws SQLException {
-		List<QOTWQuestion> questions = repo.getUsedQuestionsWithQuery(guildId, query, page*PAGE_LIMIT, PAGE_LIMIT);
+	private @NotNull MessageEmbed buildListQuestionsEmbed(@NotNull QuestionQueueRepository repo, long guildId, String query, int page) throws SQLException {
+		List<QOTWQuestion> questions = repo.getUsedQuestionsWithQuery(guildId, query, page * PAGE_LIMIT, PAGE_LIMIT);
 		EmbedBuilder eb = new EmbedBuilder();
-		eb.setDescription("**Questions of the week"+(query.isEmpty()?"":" matching '"+query+"'")+"**");
+		eb.setDescription("**Questions of the Week" + (query.isEmpty() ? "" : " matching '" + query + "'") + "**");
 		questions
-			.stream()
-			.sorted(Comparator.comparingInt(QOTWQuestion::getQuestionNumber))
-			.map(q -> new MessageEmbed.Field("Question #" + q.getQuestionNumber(), q.getText(), true))
-			.forEach(eb::addField);
-		if(eb.getFields().isEmpty()) {
+				.stream()
+				.sorted(Comparator.comparingInt(QOTWQuestion::getQuestionNumber))
+				.map(q -> new MessageEmbed.Field("Question #" + q.getQuestionNumber(), q.getText(), true))
+				.forEach(eb::addField);
+		if (eb.getFields().isEmpty()) {
 			eb.appendDescription("\nNo questions found");
-			if(page != 0) {
+			if (page != 0) {
 				eb.appendDescription(" on this page");
 			}
 		}
-		eb.setFooter("Page " + (page+1));
+		eb.setFooter("Page " + (page + 1));
 		eb.setColor(Responses.Type.DEFAULT.getColor());
 		return eb.build();
 	}
