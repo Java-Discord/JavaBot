@@ -36,6 +36,13 @@ public class SystemsConfig {
 	 */
 	private int asyncPoolSize = 4;
 
+
+	/**
+	 * The location of some sort of bash script that re-compiles a new version of the Bot.
+	 * Example in <a href="https://github.com/Java-Discord/JavaBot/pull/330">Pull Request #330</a>.
+	 */
+	private String redeployScriptLocation = "";
+
 	/**
 	 * Configuration for the Hikari connection pool that's used for the bot's
 	 * SQL data source.
