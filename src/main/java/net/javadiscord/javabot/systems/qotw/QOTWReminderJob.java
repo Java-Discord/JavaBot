@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import javax.management.Notification;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;

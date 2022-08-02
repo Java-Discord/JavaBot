@@ -9,7 +9,6 @@ import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.StringUtils;
 
-import javax.management.Notification;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
