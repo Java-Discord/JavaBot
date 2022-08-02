@@ -11,6 +11,7 @@ import java.util.List;
  * Dao class that represents the QOTW_POINTS SQL Table.
  */
 @RequiredArgsConstructor
+// TODO: Implement DatabaseRepository
 public class MessageCacheRepository {
 	private final Connection con;
 

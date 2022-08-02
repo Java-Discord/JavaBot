@@ -45,7 +45,7 @@ public class HelpExperienceService {
 				account = new HelpAccount();
 				account.setUserId(userId);
 				account.setExperience(0);
-				accountRepository.insert(account);
+				accountRepository.insert(account, false);
 			}
 			con.commit();
 			return account;

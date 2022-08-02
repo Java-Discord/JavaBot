@@ -14,6 +14,7 @@ import java.util.Optional;
  * Dao class that represents the CUSTOM_COMMANDS SQL Table.
  */
 @RequiredArgsConstructor
+// TODO: Implement DatabaseRepository
 public class CustomTagRepository {
 	private final Connection con;
 

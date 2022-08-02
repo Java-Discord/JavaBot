@@ -16,6 +16,7 @@ import java.util.Optional;
  */
 @Slf4j
 @RequiredArgsConstructor
+// TODO: Implement DatabaseRepository
 public class QOTWSubmissionRepository {
 	private final Connection con;
 
