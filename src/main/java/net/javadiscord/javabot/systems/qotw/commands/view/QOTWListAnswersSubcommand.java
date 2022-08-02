@@ -67,10 +67,11 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 			String allAnswers = submissions
 					.stream()
 					.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
-					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)
 					.filter(submission -> submission.getQuestionNumber() == questionNum)
 					.sorted((s1, s2) -> Boolean.compare(isBestAnswer(submissionChannel, s1), isBestAnswer(submissionChannel, s2)))
-					.map(s -> (isBestAnswer(submissionChannel, s) ? "**Best** " : "Accepted ") + "Answer by <@" + s.getAuthorId() + ">")
+					.map(s -> (isBestAnswer(submissionChannel,s) ?
+							"**Best** " : s.getStatus() == SubmissionStatus.ACCEPTED ? "Accepted " : "") +
+							"Answer by <@" + s.getAuthorId() + ">")
 					.collect(Collectors.joining("\n"));
 			if (allAnswers.isEmpty()) {
 				allAnswers = "No accepted answers found.";
