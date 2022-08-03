@@ -127,6 +127,7 @@ public class Bot {
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GLOBAL)
+				.disableLogging()
 				.build();
 		SystemsConfig.ApiConfig apiConfig = config.getSystems().getApiConfig();
 		oAuth = new DiscordOAuth(jda.getSelfUser().getApplicationId(), apiConfig.getClientSecret(), apiConfig.getRedirectUrl(), apiConfig.getScopes());

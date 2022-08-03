@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.api.model;
+package net.javadiscord.javabot.api.routes.metrics.model;
 
 import lombok.Data;
 

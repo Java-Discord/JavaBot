@@ -33,6 +33,9 @@ dependencies {
     // Discord OAuth2
     implementation("com.github.Mokulu:discord-oauth2-api:1.0.2")
 
+    // Caffeine (Caching Library)
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.0")
+
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.google.re2j:re2j:1.6")

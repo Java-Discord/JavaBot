@@ -7,7 +7,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.systems.user_preferences.UserPreferenceManager;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
@@ -27,7 +27,7 @@ public class QOTWUserReminderJob extends DiscordApiJob {
 			QOTWConfig config = Bot.getConfig().get(guild).getQotwConfig();
 			List<QOTWSubmission> submissions = new SubmissionManager(config).getActiveSubmissionThreads(guild.getIdLong());
 			for (QOTWSubmission submission : submissions) {
-				UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
+				UserPreferenceService manager = new UserPreferenceService(Bot.getDataSource());
 				UserPreference preference = manager.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
 				if (preference.isEnabled()) {
 					TextChannel channel = config.getSubmissionChannel();
