@@ -4,7 +4,9 @@ import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.zaxxer.hikari.HikariDataSource;
+import io.mokulu.discord.oauth.DiscordOAuth;
 import io.sentry.Sentry;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -16,6 +18,7 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.commands.QuickMigrateSubcommand;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
@@ -45,6 +48,8 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.SchedulerException;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
@@ -59,26 +64,37 @@ import java.util.concurrent.ScheduledExecutorService;
  * The main class where the bot is initialized.
  */
 @Slf4j
+@SpringBootApplication
 public class Bot {
 
+	@Getter
 	private static BotConfig config;
 
+	@Getter
 	private static AutoMod autoMod;
 
+	@Getter
 	private static DIH4JDA dih4jda;
 
+	@Getter
+	private static DiscordOAuth oAuth;
+
+	@Getter
 	private static MessageCache messageCache;
 
+	@Getter
 	private static ServerLockManager serverLockManager;
 
+	@Getter
 	private static CustomTagManager customTagManager;
 
+	@Getter
 	private static HikariDataSource dataSource;
 
+	@Getter
 	private static ScheduledExecutorService asyncPool;
 
-	private Bot() {
-	}
+	public Bot() {}
 
 	/**
 	 * The main method that starts the bot. This involves a few steps:
@@ -112,6 +128,8 @@ public class Bot {
 				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GLOBAL)
 				.build();
+		SystemsConfig.ApiConfig apiConfig = config.getSystems().getApiConfig();
+		oAuth = new DiscordOAuth(jda.getSelfUser().getApplicationId(), apiConfig.getClientSecret(), apiConfig.getRedirectUrl(), apiConfig.getScopes());
 		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
@@ -131,6 +149,7 @@ public class Bot {
 			log.error("Could not initialize all scheduled tasks.", e);
 			jda.shutdown();
 		}
+		SpringApplication.run(Bot.class, args);
 	}
 
 	/**
@@ -185,81 +204,6 @@ public class Bot {
 		dih4jda.addSelectMenuHandlers(Map.of(
 				List.of("qotw-submission-select"), new SubmissionInteractionManager()
 		));
-	}
-
-	/**
-	 * The set of configuration properties that this bot uses.
-	 *
-	 * @return The {@link BotConfig} which was set in {@link Bot#main(String[])}.
-	 */
-	public static BotConfig getConfig() {
-		return config;
-	}
-
-	/**
-	 * A static reference to the bots' {@link AutoMod} instance.
-	 *
-	 * @return The {@link AutoMod} instance which was created in {@link Bot#main(String[])}.
-	 */
-	public static AutoMod getAutoMod() {
-		return autoMod;
-	}
-
-	/**
-	 * A static reference to the bots' {@link DIH4JDA} instance.
-	 *
-	 * @return The {@link DIH4JDA} instance which was set in {@link Bot#main(String[])}.
-	 */
-	public static DIH4JDA getDIH4JDA() {
-		return dih4jda;
-	}
-
-	/**
-	 * The bots' {@link MessageCache}, which handles logging of deleted and edited messages.
-	 *
-	 * @return The {@link MessageCache} which was initialized in {@link Bot#main(String[])}.
-	 */
-	public static MessageCache getMessageCache() {
-		return messageCache;
-	}
-
-	/**
-	 * A reference to the bots' {@link ServerLockManager}.
-	 *
-	 * @return The {@link ServerLockManager} which was created in {@link Bot#main(String[])}.
-	 */
-	public static ServerLockManager getServerLockManager() {
-		return serverLockManager;
-	}
-
-	/**
-	 * A static reference to the {@link CustomTagManager} which handles and loads all registered Custom Commands.
-	 *
-	 * @return The {@link CustomTagManager} which was created in {@link Bot#main(String[])}.
-	 */
-	public static CustomTagManager getCustomTagManager() {
-		return customTagManager;
-	}
-
-	/**
-	 * A reference to the data source that provides access to the relational
-	 * database that this bot users for certain parts of the application. Use
-	 * this to obtain a connection and perform transactions.
-	 *
-	 * @return The {@link HikariDataSource} which was initialized in {@link Bot#main(String[])}.
-	 */
-	public static HikariDataSource getDataSource() {
-		return dataSource;
-	}
-
-	/**
-	 * A general-purpose thread pool that can be used by the bot to execute
-	 * tasks outside the main event processing thread.
-	 *
-	 * @return The {@link ScheduledExecutorService} which was set in {@link Bot#main(String[])}.
-	 */
-	public static ScheduledExecutorService getAsyncPool() {
-		return asyncPool;
 	}
 }
 

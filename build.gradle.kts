@@ -1,6 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.*
+
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
     checkstyle
 }
 
@@ -25,6 +29,9 @@ dependencies {
     // DIH4JDA (Interaction Framework) (includes JDA (jda5.0.0-alpha.17))
     implementation("com.github.DenuxPlays:DIH4JDA:7ac2c9c77c")
     implementation("org.reflections:reflections:0.10.2")
+
+    // Discord OAuth2
+    implementation("com.github.Mokulu:discord-oauth2-api:1.0.2")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
@@ -52,6 +59,12 @@ dependencies {
 
     // Sentry
     implementation("io.sentry:sentry:6.3.0")
+
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
+
+    // Apache HTTP-Client
+    implementation("org.apache.httpcomponents:httpclient:4.5.13")
 }
 
 tasks.withType<Jar> {
@@ -66,6 +79,19 @@ tasks.withType<JavaCompile>().configureEach {
     options.forkOptions.jvmArgs = listOf("--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
 }
 tasks.withType<Test>{ useJUnitPlatform() }
+
+tasks.withType<ShadowJar> {
+    isZip64 = true
+    // Required for Spring
+    mergeServiceFiles()
+    append("META-INF/spring.handlers")
+    append("META-INF/spring.schemas")
+    append("META-INF/spring.tooling")
+    transform(PropertiesFileTransformer().apply {
+        paths = listOf("META-INF/spring.factories")
+        mergeStrategy = "append"
+    })
+}
 
 checkstyle {
     toolVersion = "9.1"
