@@ -18,6 +18,7 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -54,6 +55,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 			// Create question
 			QOTWQuestion question = new QOTWQuestion();
 			question.setGuildId(event.getGuild().getIdLong());
+			question.setCreatedAt(LocalDateTime.now());
 			question.setCreatedBy(event.getUser().getIdLong());
 			question.setPriority(0);
 
@@ -74,7 +76,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 				question.setPriority(Integer.parseInt(priorityOption.getAsString()));
 			}
 
-			DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> dao.save(question));
+			DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> dao.insert(question, false));
 			Responses.success(event.getHook(), "Question Added", "Your question has been added to the queue.").queue();
 		}
 }

@@ -1,43 +1,40 @@
 package net.javadiscord.javabot.systems.qotw.dao;
 
-import lombok.RequiredArgsConstructor;
+import net.javadiscord.javabot.data.h2db.DatabaseRepository;
+import net.javadiscord.javabot.data.h2db.TableProperty;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
+import org.h2.api.H2Type;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Dao class that represents the QOTW_QUESTION SQL Table.
  */
-@RequiredArgsConstructor
-// TODO: Implement DatabaseRepository
-public class QuestionQueueRepository {
+public class QuestionQueueRepository extends DatabaseRepository<QOTWQuestion> {
 	private final Connection con;
 
 	/**
-	 * Inserts a single {@link QOTWQuestion}.
+	 * The constructor of this {@link DatabaseRepository} class which defines all important information
+	 * about the QOTW_QUESTION database table.
 	 *
-	 * @param question The {@link QOTWQuestion} to insert.
-	 * @throws SQLException If an error occurs.
+	 * @param con The {@link Connection} to use.
 	 */
-	public void save(QOTWQuestion question) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement(
-				"INSERT INTO qotw_question (guild_id, created_by, text, priority) VALUES (?, ?, ?, ?)",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			stmt.setLong(1, question.getGuildId());
-			stmt.setLong(2, question.getCreatedBy());
-			stmt.setString(3, question.getText());
-			stmt.setInt(4, question.getPriority());
-			int rows = stmt.executeUpdate();
-			if (rows == 0) throw new SQLException("New question was not inserted.");
-			ResultSet rs = stmt.getGeneratedKeys();
-			if (rs.next()) {
-				question.setId(rs.getLong(1));
-			}
-		}
+	public QuestionQueueRepository(Connection con) {
+		super(con, QOTWQuestion.class, "QOTW_QUESTION", List.of(
+				TableProperty.of("id",              H2Type.BIGINT,  (x, y) -> x.setId((Long) y),                    QOTWQuestion::getId, true),
+				TableProperty.of("created_at",      H2Type.BIGINT,  (x, y) -> x.setCreatedAt((LocalDateTime) y),    QOTWQuestion::getCreatedAt),
+				TableProperty.of("guild_id",        H2Type.BIGINT,  (x, y) -> x.setGuildId((Long) y),               QOTWQuestion::getGuildId),
+				TableProperty.of("created_by",      H2Type.BIGINT,  (x, y) -> x.setCreatedBy((Long) y),             QOTWQuestion::getCreatedBy),
+				TableProperty.of("text",            H2Type.VARCHAR, (x, y) -> x.setText((String) y),                QOTWQuestion::getText),
+				TableProperty.of("used",            H2Type.BOOLEAN, (x, y) -> x.setUsed((Boolean) y),               QOTWQuestion::isUsed),
+				TableProperty.of("question_number", H2Type.INTEGER, (x, y) -> x.setQuestionNumber((Integer) y),     QOTWQuestion::getQuestionNumber),
+				TableProperty.of("priority",        H2Type.INTEGER, (x, y) -> x.setPriority((Integer) y),           QOTWQuestion::getPriority)
+		));
+		this.con = con;
 	}
 
 	/**
@@ -48,15 +45,7 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public Optional<QOTWQuestion> findByQuestionNumber(int questionNumber) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_question WHERE question_number = ?")) {
-			QOTWQuestion question = null;
-			s.setInt(1, questionNumber);
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				question = read(rs);
-			}
-			return Optional.ofNullable(question);
-		}
+		return querySingle("WHERE question_number = ?", questionNumber);
 	}
 
 	/**
@@ -83,20 +72,14 @@ public class QuestionQueueRepository {
 	 * Marks a single {@link QOTWQuestion} as used.
 	 *
 	 * @param question The {@link QOTWQuestion} that should be marked as used.
+	 * @return Whether the operation was successful.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void markUsed(QOTWQuestion question) throws SQLException {
+	public boolean markUsed(@NotNull QOTWQuestion question) throws SQLException {
 		if (question.getQuestionNumber() == null) {
 			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
 		}
-		try (PreparedStatement stmt = con.prepareStatement("""
-				UPDATE qotw_question
-				SET used = TRUE, question_number = ?
-				WHERE id = ?""")) {
-			stmt.setInt(1, question.getQuestionNumber());
-			stmt.setLong(2, question.getId());
-			stmt.executeUpdate();
-		}
+		return update("UPDATE qotw_question SET used = TRUE, question_numer = ? WHERE id = ?", question.getQuestionNumber(), question.getId()) > 0;
 	}
 
 	/**
@@ -109,16 +92,7 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws SQLException {
-		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT %d OFFSET %d";
-		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, page))) {
-			stmt.setLong(1, guildId);
-			ResultSet rs = stmt.executeQuery();
-			List<QOTWQuestion> questions = new ArrayList<>(size);
-			while (rs.next()) {
-				questions.add(this.read(rs));
-			}
-			return questions;
-		}
+		return queryMultiple(String.format("WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT %d OFFSET %d", size, page), guildId);
 	}
 
 	/**
@@ -129,22 +103,7 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("""
-				SELECT *
-				FROM qotw_question
-				WHERE guild_id = ? AND used = FALSE
-				ORDER BY priority DESC, created_at
-				LIMIT 1""")) {
-			stmt.setLong(1, guildId);
-			ResultSet rs = stmt.executeQuery();
-			Optional<QOTWQuestion> optionalQuestion;
-			if (rs.next()) {
-				optionalQuestion = Optional.of(this.read(rs));
-			} else {
-				optionalQuestion = Optional.empty();
-			}
-			return optionalQuestion;
-		}
+		return querySingle("WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at LIMIT 1", guildId);
 	}
 
 	/**
@@ -162,19 +121,5 @@ public class QuestionQueueRepository {
 			int rows = stmt.executeUpdate();
 			return rows > 0;
 		}
-	}
-
-	private QOTWQuestion read(ResultSet rs) throws SQLException {
-		QOTWQuestion question = new QOTWQuestion();
-		question.setId(rs.getLong("id"));
-		question.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-		question.setGuildId(rs.getLong("guild_id"));
-		question.setCreatedBy(rs.getLong("created_by"));
-		question.setText(rs.getString("text"));
-		question.setUsed(rs.getBoolean("used"));
-		int questionNumber = rs.getInt("question_number");
-		question.setQuestionNumber(rs.wasNull() ? null : questionNumber);
-		question.setPriority(rs.getInt("priority"));
-		return question;
 	}
 }
