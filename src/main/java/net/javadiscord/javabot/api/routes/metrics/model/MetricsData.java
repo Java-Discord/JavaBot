@@ -10,5 +10,5 @@ import lombok.Data;
 public class MetricsData {
 	private long memberCount;
 	private long onlineCount;
-
+	private long weeklyMessages;
 }

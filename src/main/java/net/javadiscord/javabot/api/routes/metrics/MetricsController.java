@@ -2,6 +2,7 @@ package net.javadiscord.javabot.api.routes.metrics;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.JDAEntity;
@@ -38,6 +39,7 @@ public class MetricsController implements JDAEntity {
 		MetricsData data = new MetricsData();
 		data.setMemberCount(guild.getMemberCount());
 		data.setOnlineCount(guild.retrieveMetaData().complete().getApproximatePresences());
+		data.setWeeklyMessages(Bot.getConfig().get(guild).getMetricsConfig().getWeeklyMessages());
 		return new ResponseEntity<>(new ApiResponseBuilder().add("metrics", data).build(), HttpStatus.OK);
 	}
 }
