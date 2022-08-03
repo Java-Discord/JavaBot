@@ -30,9 +30,19 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Handles all GET-Requests on the {guild_id}/{user_id} route.
+ */
 @RestController
 public class UserProfileController implements JDAEntity {
 
+	/**
+	 * Serves a single users' profile in a specified guild.
+	 *
+	 * @param guildId The guilds' id.
+	 * @param userId  The users' id.
+	 * @return The {@link ResponseEntity}.
+	 */
 	@GetMapping(
 			value = "{guild_id}/{user_id}",
 			produces = MediaType.APPLICATION_JSON_VALUE

@@ -6,6 +6,9 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Adapter class for {@link Gson} which configures the serialization and deserialization of the {@link LocalDateTime} class.
+ */
 public class GsonLocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
 
 	@Override

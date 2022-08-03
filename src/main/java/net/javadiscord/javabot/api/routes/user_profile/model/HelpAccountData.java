@@ -9,6 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
+/**
+ * API-Data class which contains all necessary information about the users'
+ * help experience.
+ */
 @Data
 public class HelpAccountData {
 	private String currentRank;
@@ -20,6 +24,14 @@ public class HelpAccountData {
 	private double experiencePrevious;
 	private double experienceNext;
 
+	/**
+	 * A simple utility method which creates an instance of this class based on
+	 * the specified {@link HelpAccount}.
+	 *
+	 * @param account The {@link HelpAccount} to convert.
+	 * @param guild   The {@link Guild}.
+	 * @return An instance of the {@link HelpAccountData} class.
+	 */
 	public static @NotNull HelpAccountData of(@NotNull HelpAccount account, Guild guild) {
 		HelpAccountData data = new HelpAccountData();
 		data.setExperienceCurrent(account.getExperience());

@@ -65,9 +65,6 @@ dependencies {
 
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
-
-    // Apache HTTP-Client
-    implementation("org.apache.httpcomponents:httpclient:4.5.13")
 }
 
 tasks.withType<Jar> {

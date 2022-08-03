@@ -94,8 +94,6 @@ public class Bot {
 	@Getter
 	private static ScheduledExecutorService asyncPool;
 
-	public Bot() {}
-
 	/**
 	 * The main method that starts the bot. This involves a few steps:
 	 * <ol>
@@ -109,6 +107,7 @@ public class Bot {
 	 * @param args Command-line arguments.
 	 * @throws Exception If any exception occurs during bot creation.
 	 */
+	@SuppressWarnings("checkstyle:hideutilityclassconstructor")
 	public static void main(String[] args) throws Exception {
 		TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 		config = new BotConfig(Path.of("config"));

@@ -10,11 +10,18 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Utility class used to build JSON responses.
+ */
 public class ApiResponseBuilder {
 
 	private final Gson gson;
 	private final Map<String, Object> params;
 
+	/**
+	 * The constructor of this class which creates a new {@link Gson}
+	 * and initializes the {@link ApiResponseBuilder#params}.
+	 */
 	public ApiResponseBuilder() {
 		gson = new GsonBuilder()
 				.setPrettyPrinting()

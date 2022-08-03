@@ -7,6 +7,10 @@ import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 
 import java.util.List;
 
+/**
+ * API-Data class which contains all necessary information about a users'
+ * profile.
+ */
 @Data
 public class UserProfileData {
 	private long userId;

@@ -2,7 +2,6 @@ package net.javadiscord.javabot.api.routes.qotw_leaderboard;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.routes.qotw_leaderboard.model.QOTWLeaderboardData;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.JDAEntity;
@@ -19,9 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Handles all GET-Requests on the {guild_id}/qotw/leaderboard route.
+ */
 @RestController
 public class QOTWLeaderboardController implements JDAEntity {
 
+	/**
+	 * Serves the specified amount of users. Sorted by the
+	 * amount of qotw-points.
+	 *
+	 * @param guildId     The guilds' id.
+	 * @param amountParam The amount of users to return. Defaults to 3.
+	 * @return The {@link ResponseEntity}.
+	 */
 	@GetMapping(
 			value = "{guild_id}/qotw/leaderboard",
 			produces = MediaType.APPLICATION_JSON_VALUE
@@ -50,8 +60,6 @@ public class QOTWLeaderboardController implements JDAEntity {
 					return data;
 				})
 				.toList();
-		QOTWLeaderboardData data = new QOTWLeaderboardData();
-		data.setAccounts(members);
 		return new ResponseEntity<>(new ApiResponseBuilder().add("leaderboard", members).build(), HttpStatus.OK);
 	}
 }

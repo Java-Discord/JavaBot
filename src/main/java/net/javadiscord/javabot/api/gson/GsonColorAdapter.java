@@ -5,9 +5,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.lang.reflect.Type;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
+/**
+ * Adapter class for {@link Gson} which configures the serialization and deserialization of the {@link Color} class.
+ */
 public class GsonColorAdapter implements JsonSerializer<Color>, JsonDeserializer<Color> {
 
 	@Override
