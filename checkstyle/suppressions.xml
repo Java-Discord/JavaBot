@@ -1,3 +1,0 @@
-<suppressions>
-    <suppress files="SpringBootApplication.java" checks="HideUtilityClassConstructor" />
-</suppressions>
