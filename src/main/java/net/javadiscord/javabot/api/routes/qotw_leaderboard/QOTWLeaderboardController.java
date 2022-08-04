@@ -1,9 +1,11 @@
 package net.javadiscord.javabot.api.routes.qotw_leaderboard;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
+import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.JDAEntity;
 import net.javadiscord.javabot.api.routes.qotw_leaderboard.model.QOTWMemberData;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
@@ -17,12 +19,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles all GET-Requests on the {guild_id}/qotw/leaderboard route.
  */
 @RestController
-public class QOTWLeaderboardController implements JDAEntity {
+public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemberData>> implements JDAEntity {
+
+	/**
+	 * The constructor of this class which initializes the {@link Caffeine} cache.
+	 */
+	public QOTWLeaderboardController() {
+		super(Caffeine.newBuilder()
+				.expireAfterWrite(10, TimeUnit.MINUTES)
+				.build()
+		);
+	}
 
 	/**
 	 * Serves the specified amount of users. Sorted by the
@@ -49,17 +62,21 @@ public class QOTWLeaderboardController implements JDAEntity {
 		}
 		int amount = Integer.parseInt(amountParam);
 		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-		List<QOTWMemberData> members = service.getTopMembers(amount, guild).stream()
-				.map(p -> {
-					QOTWMemberData data = new QOTWMemberData();
-					data.setUserId(p.second().getIdLong());
-					data.setUserName(p.second().getUser().getName());
-					data.setDiscriminator(p.second().getUser().getDiscriminator());
-					data.setEffectiveAvatarUrl(p.second().getEffectiveAvatarUrl());
-					data.setAccount(p.first());
-					return data;
-				})
-				.toList();
-		return new ResponseEntity<>(new ApiResponseBuilder().add("leaderboard", members).build(), HttpStatus.OK);
+		List<QOTWMemberData> members = getCache().getIfPresent(guild.getIdLong());
+		if (members == null || members.isEmpty()) {
+			members = service.getTopMembers(amount, guild).stream()
+					.map(p -> {
+						QOTWMemberData data = new QOTWMemberData();
+						data.setUserId(p.second().getIdLong());
+						data.setUserName(p.second().getUser().getName());
+						data.setDiscriminator(p.second().getUser().getDiscriminator());
+						data.setEffectiveAvatarUrl(p.second().getEffectiveAvatarUrl());
+						data.setAccount(p.first());
+						return data;
+					})
+					.toList();
+			getCache().put(guild.getIdLong(), members);
+		}
+		return new ResponseEntity<>(new ApiResponseBuilder().add("leaderboard", members.stream().limit(amount).toList()).build(), HttpStatus.OK);
 	}
 }

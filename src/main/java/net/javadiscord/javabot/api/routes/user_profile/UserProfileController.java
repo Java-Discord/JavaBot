@@ -1,10 +1,12 @@
 package net.javadiscord.javabot.api.routes.user_profile;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
+import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.JDAEntity;
 import net.javadiscord.javabot.api.routes.user_profile.model.HelpAccountData;
 import net.javadiscord.javabot.api.routes.user_profile.model.UserProfileData;
@@ -17,6 +19,7 @@ import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +32,23 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles all GET-Requests on the {guild_id}/{user_id} route.
  */
 @RestController
-public class UserProfileController implements JDAEntity {
+public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserProfileData> implements JDAEntity {
+
+	/**
+	 * The constructor of this class which initializes the {@link Caffeine} cache.
+	 */
+	public UserProfileController() {
+		super(Caffeine.newBuilder()
+				.expireAfterWrite(10, TimeUnit.SECONDS)
+				.build()
+		);
+	}
 
 	/**
 	 * Serves a single users' profile in a specified guild.
@@ -60,28 +74,33 @@ public class UserProfileController implements JDAEntity {
 			return new ResponseEntity<>(ApiResponses.INVALID_USER_IN_REQUEST, HttpStatus.BAD_REQUEST);
 		}
 		try (Connection con = Bot.getDataSource().getConnection()) {
-			UserProfileData data = new UserProfileData();
-			data.setUserId(user.getIdLong());
-			data.setUserName(user.getName());
-			data.setDiscriminator(user.getDiscriminator());
-			data.setEffectiveAvatarUrl(user.getEffectiveAvatarUrl());
-			// Question of the Week Account
-			QOTWPointsService qotwService = new QOTWPointsService(Bot.getDataSource());
-			QOTWAccount qotwAccount = qotwService.getOrCreateAccount(user.getIdLong());
-			data.setQotwAccount(qotwAccount);
-			// Help Account
-			HelpExperienceService helpService = new HelpExperienceService(Bot.getDataSource());
-			HelpAccount helpAccount = helpService.getOrCreateAccount(user.getIdLong());
-			data.setHelpAccount(HelpAccountData.of(helpAccount, guild));
-			// User Preferences
-			UserPreferenceService preferenceService = new UserPreferenceService(Bot.getDataSource());
-			List<UserPreference> preferences = Arrays.stream(Preference.values()).map(p -> preferenceService.getOrCreate(user.getIdLong(), p)).toList();
-			data.setPreferences(preferences);
-			// User Warns
-			WarnRepository warnRepository = new WarnRepository(con);
-			LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.getConfig().get(guild).getModerationConfig().getWarnTimeoutDays());
-			data.setWarns(warnRepository.getWarnsByUserId(user.getIdLong(), cutoff));
-
+			// Check Cache
+			UserProfileData data = getCache().getIfPresent(new Pair<>(guild.getIdLong(), user.getIdLong()));
+			if (data == null) {
+				data = new UserProfileData();
+				data.setUserId(user.getIdLong());
+				data.setUserName(user.getName());
+				data.setDiscriminator(user.getDiscriminator());
+				data.setEffectiveAvatarUrl(user.getEffectiveAvatarUrl());
+				// Question of the Week Account
+				QOTWPointsService qotwService = new QOTWPointsService(Bot.getDataSource());
+				QOTWAccount qotwAccount = qotwService.getOrCreateAccount(user.getIdLong());
+				data.setQotwAccount(qotwAccount);
+				// Help Account
+				HelpExperienceService helpService = new HelpExperienceService(Bot.getDataSource());
+				HelpAccount helpAccount = helpService.getOrCreateAccount(user.getIdLong());
+				data.setHelpAccount(HelpAccountData.of(helpAccount, guild));
+				// User Preferences
+				UserPreferenceService preferenceService = new UserPreferenceService(Bot.getDataSource());
+				List<UserPreference> preferences = Arrays.stream(Preference.values()).map(p -> preferenceService.getOrCreate(user.getIdLong(), p)).toList();
+				data.setPreferences(preferences);
+				// User Warns
+				WarnRepository warnRepository = new WarnRepository(con);
+				LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.getConfig().get(guild).getModerationConfig().getWarnTimeoutDays());
+				data.setWarns(warnRepository.getWarnsByUserId(user.getIdLong(), cutoff));
+				// Insert into cache
+				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
+			}
 			return new ResponseEntity<>(new ApiResponseBuilder().add("profile", data).build(), HttpStatus.OK);
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());

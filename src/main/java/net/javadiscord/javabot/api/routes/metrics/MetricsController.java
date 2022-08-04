@@ -1,10 +1,12 @@
 package net.javadiscord.javabot.api.routes.metrics;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
+import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.JDAEntity;
 import net.javadiscord.javabot.api.routes.metrics.model.MetricsData;
 import org.springframework.http.HttpStatus;
@@ -14,12 +16,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Handles all GET-Requests on the {guild_id}/metrics route.
  */
 @Slf4j
 @RestController
-public class MetricsController implements JDAEntity {
+public class MetricsController extends CaffeineCache<Long, MetricsData> implements JDAEntity {
+
+	/**
+	 * The constructor of this class which initializes the {@link Caffeine} cache.
+	 */
+	public MetricsController() {
+		super(Caffeine.newBuilder()
+				.expireAfterWrite(15, TimeUnit.MINUTES)
+				.build()
+		);
+	}
 
 	/**
 	 * Serves metrics for the specified guild.
@@ -36,10 +50,14 @@ public class MetricsController implements JDAEntity {
 		if (guild == null) {
 			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
 		}
-		MetricsData data = new MetricsData();
-		data.setMemberCount(guild.getMemberCount());
-		data.setOnlineCount(guild.retrieveMetaData().complete().getApproximatePresences());
-		data.setWeeklyMessages(Bot.getConfig().get(guild).getMetricsConfig().getWeeklyMessages());
+		MetricsData data = getCache().getIfPresent(guild.getIdLong());
+		if (data == null) {
+			data = new MetricsData();
+			data.setMemberCount(guild.getMemberCount());
+			data.setOnlineCount(guild.retrieveMetaData().complete().getApproximatePresences());
+			data.setWeeklyMessages(Bot.getConfig().get(guild).getMetricsConfig().getWeeklyMessages());
+			getCache().put(guild.getIdLong(), data);
+		}
 		return new ResponseEntity<>(new ApiResponseBuilder().add("metrics", data).build(), HttpStatus.OK);
 	}
 }
