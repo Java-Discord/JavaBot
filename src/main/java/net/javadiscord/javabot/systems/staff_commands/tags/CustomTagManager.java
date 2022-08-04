@@ -63,12 +63,13 @@ public class CustomTagManager {
 	 * Replies with all available custom tags.
 	 *
 	 * @param guild The current {@link Guild}.
+	 * @param text The text choices need to match
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static @NotNull List<Command.Choice> replyTags(@NotNull Guild guild) {
+	public static @NotNull List<Command.Choice> replyTags(@NotNull Guild guild, String text) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		for (CustomTag command : LOADED_TAGS.get(guild.getIdLong())) {
-			if (choices.size() < 26) {
+			if (choices.size() < 26 && command.getName().toLowerCase().contains(text)) {
 				choices.add(new Command.Choice(command.getName(), command.getName()));
 			}
 		}
@@ -76,7 +77,7 @@ public class CustomTagManager {
 	}
 
 	public static @NotNull AutoCompleteCallbackAction handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
-		return event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> replyTags(e.getGuild())));
+		return event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> replyTags(e.getGuild(), e.getFocusedOption().getValue().toLowerCase())));
 	}
 
 	/**
