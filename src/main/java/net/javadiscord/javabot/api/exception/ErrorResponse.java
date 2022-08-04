@@ -10,4 +10,4 @@ import org.springframework.http.HttpStatus;
  * @param message The errors' message.
  * @param errors An array of additional error notices.
  */
-public record ApiError(HttpStatus status, String message, String... errors) {}
+public record ErrorResponse(HttpStatus status, String message, String... errors) {}
