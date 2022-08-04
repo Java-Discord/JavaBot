@@ -161,12 +161,11 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 			boolean left = true;
 			int y = logo.getHeight() + 3 * MARGIN;
-			for (Member m : topMembers.stream().map(Pair::second).toList()) {
-				drawUserCard(g2d, m, service, y, left);
+			for (Pair<QOTWAccount, Member> pair : topMembers) {
+				drawUserCard(g2d, pair.second(), service, y, left);
 				left = !left;
 				if (left) y = y + card.getHeight() + MARGIN;
 			}
-
 			ImageCache.removeCachedImagesByKeyword("qotw_leaderboard");
 			ImageCache.cacheImage(getCacheName(), image);
 			return getOutputStreamFromImage(image);
@@ -203,7 +202,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The image's {@link ByteArrayOutputStream}.
 	 * @throws IOException If an error occurs.
 	 */
-	private ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
+	private @NotNull ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ImageIO.write(image, "png", outputStream);
 		return outputStream;
