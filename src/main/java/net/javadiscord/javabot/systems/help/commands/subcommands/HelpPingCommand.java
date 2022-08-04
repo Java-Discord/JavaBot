@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help.commands;
+package net.javadiscord.javabot.systems.help.commands.subcommands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Handler for the /help-ping command that allows users to occasionally ping
+ * Handler for the /help ping sub-command that allows users to occasionally ping
  * helpers.
  */
 public class HelpPingCommand extends SlashCommand.Subcommand {
@@ -32,7 +32,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	 * Constructor that initializes and handles the cooldown map.
 	 */
 	public HelpPingCommand() {
-		setSubcommandData(new SubcommandData("help-ping", "Notify those with the help-ping role that your question is urgent."));
+		setSubcommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
 		Bot.getAsyncPool().scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
 	}
