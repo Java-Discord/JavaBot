@@ -1,7 +1,5 @@
 package net.javadiscord.javabot.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.*;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
