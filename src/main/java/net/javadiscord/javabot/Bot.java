@@ -4,7 +4,6 @@ import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.zaxxer.hikari.HikariDataSource;
-import io.mokulu.discord.oauth.DiscordOAuth;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -77,9 +76,6 @@ public class Bot {
 	private static DIH4JDA dih4jda;
 
 	@Getter
-	private static DiscordOAuth oAuth;
-
-	@Getter
 	private static MessageCache messageCache;
 
 	@Getter
@@ -128,7 +124,6 @@ public class Bot {
 				.disableLogging()
 				.build();
 		SystemsConfig.ApiConfig apiConfig = config.getSystems().getApiConfig();
-		oAuth = new DiscordOAuth(jda.getSelfUser().getApplicationId(), apiConfig.getClientSecret(), apiConfig.getRedirectUrl(), apiConfig.getScopes());
 		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);

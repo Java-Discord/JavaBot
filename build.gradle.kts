@@ -23,18 +23,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
     // DIH4JDA (Interaction Framework) (includes JDA (jda5.0.0-alpha.17))
     implementation("com.github.DenuxPlays:DIH4JDA:7ac2c9c77c")
     implementation("org.reflections:reflections:0.10.2")
 
-    // Discord OAuth2
-    implementation("com.github.Mokulu:discord-oauth2-api:1.0.2")
-
     // Caffeine (Caching Library)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.0")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.1")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
