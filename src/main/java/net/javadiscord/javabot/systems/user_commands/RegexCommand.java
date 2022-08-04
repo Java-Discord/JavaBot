@@ -38,7 +38,7 @@ public class RegexCommand extends SlashCommand {
 		try {
 			pattern = Pattern.compile(patternOption.getAsString());
 		} catch (PatternSyntaxException e) {
-			Responses.error(event, "Please provide a valid regex pattern!");
+			Responses.error(event, "Please provide a valid regex pattern!").queue();
 			return;
 		}
 		String string = stringOption.getAsString();

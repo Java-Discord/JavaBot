@@ -38,7 +38,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 		}
 		OptionMapping questionOption = event.getOption("question");
 		if (questionOption == null) {
-			Responses.replyMissingArguments(event);
+			Responses.replyMissingArguments(event).queue();
 			return;
 		}
 		OptionMapping answerOwnerOption = event.getOption("answerer");
@@ -64,7 +64,10 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 															buildQOTWInfoEmbed(submission, event.getMember() == null ? event.getUser().getName() : event.getMember().getEffectiveName()),
 															"QOTW #" + submission.getQuestionNumber(),
 															history.getRetrievedHistory(),
-															() -> Responses.success(event.getHook(), "View Answer", "Answer copied successfully"))),
+															thread -> {
+																Responses.success(event.getHook(), "View Answer", "Answer copied successfully").queue();
+																thread.getManager().setLocked(true);
+															})),
 									() -> Responses.error(event.getHook(), "The QOTW-Submission thread was not found.").queue()));
 		});
 	}

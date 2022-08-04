@@ -3,6 +3,7 @@ package net.javadiscord.javabot.util;
 import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -83,7 +85,7 @@ public class MessageActionUtils {
 	 * @param messages The messages to copy.
 	 * @param onFinish A callback to execute when copying is done.
 	 */
-	public static void copyMessagesToNewThread(GuildMessageChannel targetChannel, @NotNull MessageEmbed infoEmbed, String newThreadName, List<Message> messages, Runnable onFinish) {
+	public static void copyMessagesToNewThread(GuildMessageChannel targetChannel, @NotNull MessageEmbed infoEmbed, String newThreadName, List<Message> messages, Consumer<ThreadChannel> onFinish) {
 		targetChannel.sendMessageEmbeds(infoEmbed).queue(
 				message -> message.createThreadChannel(newThreadName).queue(
 						thread -> {
@@ -93,7 +95,7 @@ public class MessageActionUtils {
 								MessageActionUtils.addAttachmentsAndSend(m, thread.sendMessage(messageContent)
 										.allowedMentions(EnumSet.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL)));
 							});
-							onFinish.run();
+							onFinish.accept(thread);
 						}
 				));
 	}
