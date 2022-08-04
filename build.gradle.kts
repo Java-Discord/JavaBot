@@ -26,9 +26,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
-    // DIH4JDA (Interaction Framework) (includes JDA (jda5.0.0-alpha.17))
-    implementation("com.github.DenuxPlays:DIH4JDA:7ac2c9c77c")
-    implementation("org.reflections:reflections:0.10.2")
+    // DIH4JDA (Interaction Framework) & JDA
+    implementation("com.github.DynxstyGIT:DIH4JDA:f564af77e9")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.17") {
+        exclude(module = "opus-java")
+    }
 
     // Caffeine (Caching Library)
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.1")

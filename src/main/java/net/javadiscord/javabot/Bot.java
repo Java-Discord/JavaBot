@@ -2,7 +2,12 @@ package net.javadiscord.javabot;
 
 import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.DIH4JDABuilder;
+import com.dynxsty.dih4jda.DIH4JDALogger;
+import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.util.Checks;
+import com.dynxsty.dih4jda.util.ClassUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import io.sentry.Sentry;
 import lombok.Getter;
@@ -17,7 +22,6 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.commands.QuickMigrateSubcommand;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
@@ -47,15 +51,15 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -95,7 +99,7 @@ public class Bot {
 	 * <ol>
 	 *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
 	 *     <li>Loading the configuration JSON file.</li>
-	 *     <li>Creating and configuring the {@link JDA} instance that enables the bot's Discord connectivity.</li>
+	 *     <li>Creating and configuring the {@link JDA} instance that enables the bots' Discord connectivity.</li>
 	 *     <li>Initializing the {@link DIH4JDA} instance.</li>
 	 *     <li>Adding event listeners to the bot.</li>
 	 * </ol>
@@ -119,14 +123,13 @@ public class Bot {
 				.build();
 		AllowedMentions.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOJI));
 		dih4jda = DIH4JDABuilder.setJDA(jda)
-				.setCommandsPackage("net.javadiscord.javabot")
 				.setDefaultCommandType(RegistrationType.GLOBAL)
-				.disableLogging()
+				.disableLogging(DIH4JDALogger.Type.SMART_QUEUE_IGNORED)
 				.build();
-		SystemsConfig.ApiConfig apiConfig = config.getSystems().getApiConfig();
 		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
+		addCommands(dih4jda);
 		addEventListeners(jda, dih4jda);
 		addComponentHandler(dih4jda);
 		// initialize Sentry
@@ -147,7 +150,46 @@ public class Bot {
 	}
 
 	/**
-	 * Adds all the bot's event listeners to the JDA instance, except for
+	 * Uses Springs' ClassPath scanning in order to register all {@link SlashCommand} &
+	 * {@link ContextCommand}s using {@link DIH4JDA}.
+	 *
+	 * @param dih4jda The {@link DIH4JDA} which is used in order to execute both {@link SlashCommand}s
+	 *                and {@link ContextCommand}.
+	 */
+	private static void addCommands(DIH4JDA dih4jda) {
+		List<SlashCommand> commands = new ArrayList<>();
+		List<ContextCommand> contexts = new ArrayList<>();
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
+		provider.addIncludeFilter(new AssignableTypeFilter(SlashCommand.class));
+		provider.addIncludeFilter(new AssignableTypeFilter(ContextCommand.class));
+		Set<BeanDefinition> classes = provider.findCandidateComponents("net/javadiscord/javabot");
+		for (BeanDefinition bean : classes) {
+			try {
+				Class<?> cls = Class.forName(bean.getBeanClassName());
+				if (Checks.checkEmptyConstructor(cls)) {
+					Object instance = ClassUtils.getInstance(cls);
+					if (instance instanceof SlashCommand slashCommand) {
+						commands.add(slashCommand);
+					} else if (instance instanceof ContextCommand contextCommand) {
+						contexts.add(contextCommand);
+					}
+				} else {
+					log.error("Class {} needs an empty constructor!", cls.getSimpleName());
+				}
+			} catch (ReflectiveOperationException e) {
+				ExceptionLogger.capture(e, Bot.class.getSimpleName());
+			}
+		}
+		if (!commands.isEmpty()) {
+			dih4jda.addSlashCommands(commands.toArray(SlashCommand[]::new));
+		}
+		if (!contexts.isEmpty()) {
+			dih4jda.addContextCommands(contexts.toArray(ContextCommand[]::new));
+		}
+	}
+
+	/**
+	 * Adds all the bots' event listeners to the JDA instance, except for
 	 * the {@link AutoMod} instance.
 	 *
 	 * @param jda     The JDA bot instance to add listeners to.
@@ -171,7 +213,7 @@ public class Bot {
 				new PingableNameListener(),
 				new HugListener()
 		);
-		dih4jda.addListener(new DIH4JDAListener());
+		dih4jda.addEventListener(new DIH4JDAListener());
 	}
 
 	private static void addComponentHandler(@NotNull DIH4JDA dih4jda) {
