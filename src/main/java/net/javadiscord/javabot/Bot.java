@@ -6,8 +6,6 @@ import com.dynxsty.dih4jda.DIH4JDALogger;
 import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
 import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.Checks;
-import com.dynxsty.dih4jda.util.ClassUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import io.sentry.Sentry;
 import lombok.Getter;
@@ -35,14 +33,14 @@ import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockManager;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.commands.view.QOTWQuerySubcommand;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionInteractionManager;
-import net.javadiscord.javabot.systems.staff_commands.self_roles.SelfRoleInteractionManager;
 import net.javadiscord.javabot.systems.staff_commands.embeds.AddEmbedFieldSubcommand;
 import net.javadiscord.javabot.systems.staff_commands.embeds.CreateEmbedSubcommand;
 import net.javadiscord.javabot.systems.staff_commands.embeds.EditEmbedSubcommand;
-import net.javadiscord.javabot.systems.starboard.StarboardManager;
+import net.javadiscord.javabot.systems.staff_commands.self_roles.SelfRoleInteractionManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.commands.CreateCustomTagSubcommand;
 import net.javadiscord.javabot.systems.staff_commands.tags.commands.EditCustomTagSubcommand;
+import net.javadiscord.javabot.systems.starboard.StarboardManager;
 import net.javadiscord.javabot.systems.user_commands.leaderboard.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.tasks.MetricsUpdater;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
@@ -51,15 +49,18 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.SchedulerException;
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
 import java.nio.file.Path;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -68,6 +69,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 @Slf4j
 @SpringBootApplication
+@ComponentScan(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {SlashCommand.class, ContextCommand.class}))
 public class Bot {
 
 	@Getter
@@ -93,6 +95,28 @@ public class Bot {
 
 	@Getter
 	private static ScheduledExecutorService asyncPool;
+
+	/**
+	 * The constructor of this class, which also adds all {@link SlashCommand} and
+	 * {@link ContextCommand} to the {@link DIH4JDA} instance.
+	 *
+	 * @param commands The {@link Autowired} list of {@link SlashCommand}s.
+	 * @param contexts The {@link Autowired} list of {@link ContextCommand}s.
+	 */
+	@Autowired
+	public Bot(final List<SlashCommand> commands, final List<ContextCommand> contexts) {
+		if (!commands.isEmpty()) {
+			getDih4jda().addSlashCommands(commands.toArray(SlashCommand[]::new));
+		}
+		if (!contexts.isEmpty()) {
+			getDih4jda().addContextCommands(contexts.toArray(ContextCommand[]::new));
+		}
+		try {
+			getDih4jda().registerInteractions();
+		} catch (ReflectiveOperationException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+		}
+	}
 
 	/**
 	 * The main method that starts the bot. This involves a few steps:
@@ -125,11 +149,11 @@ public class Bot {
 		dih4jda = DIH4JDABuilder.setJDA(jda)
 				.setDefaultCommandType(RegistrationType.GLOBAL)
 				.disableLogging(DIH4JDALogger.Type.SMART_QUEUE_IGNORED)
+				.disableAutomaticCommandRegistration()
 				.build();
 		customTagManager = new CustomTagManager(jda, dataSource);
 		messageCache = new MessageCache();
 		serverLockManager = new ServerLockManager(jda);
-		addCommands(dih4jda);
 		addEventListeners(jda, dih4jda);
 		addComponentHandler(dih4jda);
 		// initialize Sentry
@@ -147,45 +171,6 @@ public class Bot {
 			jda.shutdown();
 		}
 		SpringApplication.run(Bot.class, args);
-	}
-
-	/**
-	 * Uses Springs' ClassPath scanning in order to register all {@link SlashCommand} &
-	 * {@link ContextCommand}s using {@link DIH4JDA}.
-	 *
-	 * @param dih4jda The {@link DIH4JDA} which is used in order to execute both {@link SlashCommand}s
-	 *                and {@link ContextCommand}.
-	 */
-	private static void addCommands(DIH4JDA dih4jda) {
-		List<SlashCommand> commands = new ArrayList<>();
-		List<ContextCommand> contexts = new ArrayList<>();
-		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-		provider.addIncludeFilter(new AssignableTypeFilter(SlashCommand.class));
-		provider.addIncludeFilter(new AssignableTypeFilter(ContextCommand.class));
-		Set<BeanDefinition> classes = provider.findCandidateComponents("net/javadiscord/javabot");
-		for (BeanDefinition bean : classes) {
-			try {
-				Class<?> cls = Class.forName(bean.getBeanClassName());
-				if (Checks.checkEmptyConstructor(cls)) {
-					Object instance = ClassUtils.getInstance(cls);
-					if (instance instanceof SlashCommand slashCommand) {
-						commands.add(slashCommand);
-					} else if (instance instanceof ContextCommand contextCommand) {
-						contexts.add(contextCommand);
-					}
-				} else {
-					log.error("Class {} needs an empty constructor!", cls.getSimpleName());
-				}
-			} catch (ReflectiveOperationException e) {
-				ExceptionLogger.capture(e, Bot.class.getSimpleName());
-			}
-		}
-		if (!commands.isEmpty()) {
-			dih4jda.addSlashCommands(commands.toArray(SlashCommand[]::new));
-		}
-		if (!contexts.isEmpty()) {
-			dih4jda.addContextCommands(contexts.toArray(ContextCommand[]::new));
-		}
 	}
 
 	/**
@@ -224,7 +209,7 @@ public class Bot {
 				List.of("self-role"), new SelfRoleInteractionManager(),
 				List.of("qotw-submission"), new SubmissionInteractionManager(),
 				List.of("help-channel", "help-thank"), new HelpChannelInteractionManager(),
-				List.of("qotw-list-questions"),new QOTWQuerySubcommand()
+				List.of("qotw-list-questions"), new QOTWQuerySubcommand()
 		));
 		dih4jda.addModalHandlers(Map.of(
 				List.of("qotw-add-question"), new AddQuestionSubcommand(),
