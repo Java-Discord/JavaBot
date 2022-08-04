@@ -1,15 +1,16 @@
 package net.javadiscord.javabot.api.routes.qotw_leaderboard;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
-import net.javadiscord.javabot.api.routes.JDAEntity;
 import net.javadiscord.javabot.api.routes.qotw_leaderboard.model.QOTWMemberData;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Checks;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +26,21 @@ import java.util.concurrent.TimeUnit;
  * Handles all GET-Requests on the {guild_id}/qotw/leaderboard route.
  */
 @RestController
-public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemberData>> implements JDAEntity {
+public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemberData>> {
+	private final JDA jda;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
+	 *
+	 * @param jda The {@link JDA} instance to use.
 	 */
-	public QOTWLeaderboardController() {
+	@Autowired
+	public QOTWLeaderboardController(final JDA jda) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
+		this.jda = jda;
 	}
 
 	/**
@@ -53,7 +59,7 @@ public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemb
 			@PathVariable(value = "guild_id") String guildId,
 			@RequestParam(value = "amount", defaultValue = "3") String amountParam
 	) {
-		Guild guild = getJDA().getGuildById(guildId);
+		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
 			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
 		}

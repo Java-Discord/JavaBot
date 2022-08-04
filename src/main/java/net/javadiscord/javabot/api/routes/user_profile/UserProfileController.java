@@ -1,13 +1,13 @@
 package net.javadiscord.javabot.api.routes.user_profile;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
-import net.javadiscord.javabot.api.routes.JDAEntity;
 import net.javadiscord.javabot.api.routes.user_profile.model.HelpAccountData;
 import net.javadiscord.javabot.api.routes.user_profile.model.UserProfileData;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
@@ -20,6 +20,7 @@ import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,16 +39,21 @@ import java.util.concurrent.TimeUnit;
  * Handles all GET-Requests on the {guild_id}/{user_id} route.
  */
 @RestController
-public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserProfileData> implements JDAEntity {
+public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserProfileData> {
+	private final JDA jda;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
+	 *
+	 * @param jda The {@link Autowired} {@link JDA} instance to use.
 	 */
-	public UserProfileController() {
+	@Autowired
+	public UserProfileController(final JDA jda) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
+		this.jda = jda;
 	}
 
 	/**
@@ -65,11 +71,11 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 			@PathVariable(value = "guild_id") String guildId,
 			@PathVariable(value = "user_id") String userId
 	) {
-		Guild guild = getJDA().getGuildById(guildId);
+		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
 			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
 		}
-		User user = getJDA().retrieveUserById(userId).complete();
+		User user = jda.retrieveUserById(userId).complete();
 		if (user == null) {
 			return new ResponseEntity<>(ApiResponses.INVALID_USER_IN_REQUEST, HttpStatus.BAD_REQUEST);
 		}
