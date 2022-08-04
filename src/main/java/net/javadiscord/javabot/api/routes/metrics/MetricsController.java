@@ -5,14 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.metrics.model.MetricsData;
 import net.javadiscord.javabot.data.config.guild.MetricsConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,10 +47,9 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	 * @return The {@link ResponseEntity}.
 	 */
 	@GetMapping(
-			value = "{guild_id}/metrics",
-			produces = MediaType.APPLICATION_JSON_VALUE
+			value = "{guild_id}/metrics"
 	)
-	public ResponseEntity<String> getMetrics(@PathVariable(value = "guild_id") String guildId) {
+	public ResponseEntity<?> getMetrics(@PathVariable(value = "guild_id") long guildId) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
 			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
@@ -67,6 +64,6 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 			data.setActiveMembers(config.getActiveMembers());
 			getCache().put(guild.getIdLong(), data);
 		}
-		return new ResponseEntity<>(new ApiResponseBuilder().add("metrics", data).build(), HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 }

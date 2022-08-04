@@ -4,12 +4,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.qotw_leaderboard.model.QOTWMemberData;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
-import net.javadiscord.javabot.util.Checks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,25 +46,21 @@ public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemb
 	 * amount of qotw-points.
 	 *
 	 * @param guildId     The guilds' id.
-	 * @param amountParam The amount of users to return. Defaults to 3.
+	 * @param amount The amount of users to return. Defaults to 3.
 	 * @return The {@link ResponseEntity}.
 	 */
 	@GetMapping(
 			value = "{guild_id}/qotw/leaderboard",
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public ResponseEntity<String> getQOTWLeaderboard(
-			@PathVariable(value = "guild_id") String guildId,
-			@RequestParam(value = "amount", defaultValue = "3") String amountParam
+	public ResponseEntity<?> getQOTWLeaderboard(
+			@PathVariable(value = "guild_id") long guildId,
+			@RequestParam(value = "amount", defaultValue = "3") int amount
 	) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
 			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
 		}
-		if (!Checks.checkInteger(amountParam)) {
-			return new ResponseEntity<>(ApiResponses.INVALID_NUMBER_IN_REQUEST, HttpStatus.BAD_REQUEST);
-		}
-		int amount = Integer.parseInt(amountParam);
 		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		List<QOTWMemberData> members = getCache().getIfPresent(guild.getIdLong());
 		if (members == null || members.isEmpty()) {
@@ -83,6 +77,6 @@ public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemb
 					.toList();
 			getCache().put(guild.getIdLong(), members);
 		}
-		return new ResponseEntity<>(new ApiResponseBuilder().add("leaderboard", members.stream().limit(amount).toList()).build(), HttpStatus.OK);
+		return new ResponseEntity<>(members.stream().limit(amount).toList(), HttpStatus.OK);
 	}
 }

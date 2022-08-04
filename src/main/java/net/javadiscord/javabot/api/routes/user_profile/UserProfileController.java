@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.response.ApiResponseBuilder;
 import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.user_profile.model.HelpAccountData;
@@ -67,9 +66,9 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 			value = "{guild_id}/{user_id}",
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public ResponseEntity<String> getUserProfile(
-			@PathVariable(value = "guild_id") String guildId,
-			@PathVariable(value = "user_id") String userId
+	public ResponseEntity<?> getUserProfile(
+			@PathVariable(value = "guild_id") long guildId,
+			@PathVariable(value = "user_id") long userId
 	) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
@@ -107,7 +106,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				// Insert into cache
 				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
 			}
-			return new ResponseEntity<>(new ApiResponseBuilder().add("profile", data).build(), HttpStatus.OK);
+			return new ResponseEntity<>(data, HttpStatus.OK);
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return new ResponseEntity<>(ApiResponses.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);

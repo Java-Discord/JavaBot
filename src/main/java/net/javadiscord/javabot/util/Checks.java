@@ -103,21 +103,6 @@ public final class Checks {
 		}
 	}
 
-	/**
-	 * Checks if the specified string is a valid {@link Integer}.
-	 *
-	 * @param integer The provided integer, as a string.
-	 * @return Whether the specified string is a valid {@link Integer}.
-	 */
-	public static boolean checkInteger(String integer) {
-		try {
-			int value = Integer.parseInt(integer);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
 	public static boolean checkHexColor(String hex) {
 		return HEX_PATTERN.matcher(hex).matches();
 	}

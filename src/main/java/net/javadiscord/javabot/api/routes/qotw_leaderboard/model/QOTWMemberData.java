@@ -5,7 +5,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 
 /**
  * API-Data class which contains all necessary information about a single users'
- * qotw account.
+ * QOTW-Account.
  */
 @Data
 public class QOTWMemberData {
