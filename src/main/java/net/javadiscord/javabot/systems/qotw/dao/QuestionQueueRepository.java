@@ -132,7 +132,7 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWQuestion> getUsedQuestionsWithQuery(long guildId, String query, int page, int size) throws SQLException {
-		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND \"text\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?";
+		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND \"TEXT\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?";
 		try (PreparedStatement stmt = con.prepareStatement(sql)) {
 			stmt.setLong(1, guildId);
 			stmt.setString(2, "%" + query.toLowerCase() + "%");

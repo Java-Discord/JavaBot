@@ -41,7 +41,7 @@ CREATE TABLE qotw_question
 	created_at      TIMESTAMP(0)  NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 	guild_id        BIGINT        NOT NULL,
 	created_by      BIGINT        NOT NULL,
-	"text"          VARCHAR(1024) NOT NULL,
+	"TEXT"          VARCHAR(1024) NOT NULL,
 	used            BOOLEAN       NOT NULL DEFAULT FALSE,
 	question_number INTEGER       NULL     DEFAULT NULL,
 	priority        INTEGER       NOT NULL DEFAULT 0
