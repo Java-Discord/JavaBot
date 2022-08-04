@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.sql.SQLException;
-
 /**
  * Handles all Rest Exceptions.
  */
@@ -42,14 +40,26 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Handles all {@link SQLException}s.
+	 * Handles all {@link InternalServerException}s.
 	 *
-	 * @param e The {@link SQLException} which was thrown.
+	 * @param e The {@link InternalServerException} which was thrown.
 	 * @return The {@link ResponseEntity} containing the {@link ErrorResponse}.
 	 */
-	@ExceptionHandler({ InternalServerException.class })
+	@ExceptionHandler(InternalServerException.class)
 	public ResponseEntity<ErrorResponse> handleInternalServerException(@NotNull InternalServerException e) {
-		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getCause().getLocalizedMessage(), e.getLocalizedMessage());
+		ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getCause().getLocalizedMessage(), e.getLocalizedMessage());
+		return new ResponseEntity<>(error, error.status());
+	}
+
+	/**
+	 * Handles all generic {@link Exception}.
+	 *
+	 * @param e The {@link Exception} which was thrown.
+	 * @return The {@link ResponseEntity} containing the {@link ErrorResponse}.
+	 */
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErrorResponse> handleGenericException(@NotNull Exception e) {
+		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
 		return new ResponseEntity<>(error, error.status());
 	}
 }
