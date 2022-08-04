@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.response.ApiResponses;
+import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.metrics.model.MetricsData;
 import net.javadiscord.javabot.data.config.guild.MetricsConfig;
@@ -49,10 +49,10 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	@GetMapping(
 			value = "{guild_id}/metrics"
 	)
-	public ResponseEntity<?> getMetrics(@PathVariable(value = "guild_id") long guildId) {
+	public ResponseEntity<MetricsData> getMetrics(@PathVariable(value = "guild_id") long guildId) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
-			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
+			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
 		MetricsData data = getCache().getIfPresent(guild.getIdLong());
 		if (data == null) {

@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.response.ApiResponses;
+import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.qotw_leaderboard.model.QOTWMemberData;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
@@ -53,13 +53,13 @@ public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemb
 			value = "{guild_id}/qotw/leaderboard",
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public ResponseEntity<?> getQOTWLeaderboard(
+	public ResponseEntity<List<QOTWMemberData>> getQOTWLeaderboard(
 			@PathVariable(value = "guild_id") long guildId,
 			@RequestParam(value = "amount", defaultValue = "3") int amount
 	) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
-			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
+			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
 		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		List<QOTWMemberData> members = getCache().getIfPresent(guild.getIdLong());

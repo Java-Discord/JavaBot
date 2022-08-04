@@ -5,7 +5,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.api.response.ApiResponses;
+import net.javadiscord.javabot.api.exception.InternalServerException;
+import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.user_profile.model.HelpAccountData;
 import net.javadiscord.javabot.api.routes.user_profile.model.UserProfileData;
@@ -17,7 +18,6 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,23 +60,23 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 *
 	 * @param guildId The guilds' id.
 	 * @param userId  The users' id.
-	 * @return The {@link ResponseEntity}.
+	 * @return The {@link ResponseEntity} containing the {@link UserProfileData}.
 	 */
 	@GetMapping(
 			value = "{guild_id}/{user_id}",
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public ResponseEntity<?> getUserProfile(
+	public ResponseEntity<UserProfileData> getUserProfile(
 			@PathVariable(value = "guild_id") long guildId,
 			@PathVariable(value = "user_id") long userId
 	) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
-			return new ResponseEntity<>(ApiResponses.INVALID_GUILD_IN_REQUEST, HttpStatus.BAD_REQUEST);
+			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
 		User user = jda.retrieveUserById(userId).complete();
 		if (user == null) {
-			return new ResponseEntity<>(ApiResponses.INVALID_USER_IN_REQUEST, HttpStatus.BAD_REQUEST);
+			throw new InvalidEntityIdException(User.class, "You've provided an invalid user id!");
 		}
 		try (Connection con = Bot.getDataSource().getConnection()) {
 			// Check Cache
@@ -108,8 +108,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 			}
 			return new ResponseEntity<>(data, HttpStatus.OK);
 		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-			return new ResponseEntity<>(ApiResponses.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new InternalServerException("An internal server error occurred.", e);
 		}
 	}
 }

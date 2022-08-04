@@ -1,5 +1,7 @@
 package net.javadiscord.javabot.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.*;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,5 +24,10 @@ public final class ColorUtils {
 		float saturation = (rand.nextInt(2000) + 1000) / 10000f;
 		float luminance = 0.9f;
 		return Color.getHSBColor(hue, saturation, luminance);
+	}
+
+	public static String toString(Color color) {
+		if (color == null) return null;
+		return "#" + Integer.toHexString(color.getRGB()).substring(2).toUpperCase();
 	}
 }
