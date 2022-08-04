@@ -62,13 +62,10 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 * @param userId  The users' id.
 	 * @return The {@link ResponseEntity} containing the {@link UserProfileData}.
 	 */
-	@GetMapping(
-			value = "{guild_id}/{user_id}",
-			produces = MediaType.APPLICATION_JSON_VALUE
-	)
+	@GetMapping("{guild_id}/{user_id}")
 	public ResponseEntity<UserProfileData> getUserProfile(
-			@PathVariable(value = "guild_id") long guildId,
-			@PathVariable(value = "user_id") long userId
+			@PathVariable("guild_id") long guildId,
+			@PathVariable("user_id") long userId
 	) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {

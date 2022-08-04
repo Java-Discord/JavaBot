@@ -49,12 +49,9 @@ public class QOTWLeaderboardController extends CaffeineCache<Long, List<QOTWMemb
 	 * @param amount The amount of users to return. Defaults to 3.
 	 * @return The {@link ResponseEntity}.
 	 */
-	@GetMapping(
-			value = "{guild_id}/qotw/leaderboard",
-			produces = MediaType.APPLICATION_JSON_VALUE
-	)
+	@GetMapping("{guild_id}/qotw/leaderboard")
 	public ResponseEntity<List<QOTWMemberData>> getQOTWLeaderboard(
-			@PathVariable(value = "guild_id") long guildId,
+			@PathVariable("guild_id") long guildId,
 			@RequestParam(value = "amount", defaultValue = "3") int amount
 	) {
 		Guild guild = jda.getGuildById(guildId);

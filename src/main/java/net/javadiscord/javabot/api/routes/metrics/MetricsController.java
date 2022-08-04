@@ -46,10 +46,8 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	 * @param guildId The guilds' id.
 	 * @return The {@link ResponseEntity}.
 	 */
-	@GetMapping(
-			value = "{guild_id}/metrics"
-	)
-	public ResponseEntity<MetricsData> getMetrics(@PathVariable(value = "guild_id") long guildId) {
+	@GetMapping("{guild_id}/metrics")
+	public ResponseEntity<MetricsData> getMetrics(@PathVariable("guild_id") long guildId) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
 			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
