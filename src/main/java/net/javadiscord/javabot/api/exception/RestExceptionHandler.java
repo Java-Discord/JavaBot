@@ -22,9 +22,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(@NotNull MethodArgumentTypeMismatchException e) {
-		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage(),
+		return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage(),
 				String.format("%s should be of type %s", e.getName(), e.getRequiredType() != null ? e.getRequiredType().getName() : ""));
-		return new ResponseEntity<>(error, error.status());
 	}
 
 	/**
@@ -35,8 +34,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(InvalidEntityIdException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidEntityIdException(@NotNull InvalidEntityIdException e) {
-		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage(), "Entity should be of type: " + e.getRequiredEntity().getName());
-		return new ResponseEntity<>(error, error.status());
+		return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage(),
+				"Entity should be of type: " + e.getRequiredEntity().getName());
 	}
 
 	/**
@@ -47,8 +46,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(InternalServerException.class)
 	public ResponseEntity<ErrorResponse> handleInternalServerException(@NotNull InternalServerException e) {
-		ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getCause().getLocalizedMessage(), e.getLocalizedMessage());
-		return new ResponseEntity<>(error, error.status());
+		return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getCause().getLocalizedMessage(), e.getLocalizedMessage());
 	}
 
 	/**
@@ -59,7 +57,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleGenericException(@NotNull Exception e) {
-		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
-		return new ResponseEntity<>(error, error.status());
+		return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+	}
+
+	private @NotNull ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message, String... errors) {
+		ErrorResponse error = new ErrorResponse(status, message, errors);
+		return new ResponseEntity<>(error, status);
 	}
 }
