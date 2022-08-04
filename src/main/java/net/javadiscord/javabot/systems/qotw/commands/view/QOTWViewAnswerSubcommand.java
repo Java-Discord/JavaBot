@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -49,6 +50,10 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 		OptionMapping answerOwnerOption = event.getOption("answerer");
 		if (answerOwnerOption == null) {
 			Responses.error(event, "The answerer option is missing.").queue();
+			return;
+		}
+		if (event.getChannelType() != ChannelType.TEXT) {
+			Responses.error(event, "This command can only be used in text channels.").queue();
 			return;
 		}
 		event.deferReply(true).queue();
