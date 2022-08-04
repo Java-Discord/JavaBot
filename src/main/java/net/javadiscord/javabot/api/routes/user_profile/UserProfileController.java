@@ -45,7 +45,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 */
 	public UserProfileController() {
 		super(Caffeine.newBuilder()
-				.expireAfterWrite(10, TimeUnit.SECONDS)
+				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
 	}
