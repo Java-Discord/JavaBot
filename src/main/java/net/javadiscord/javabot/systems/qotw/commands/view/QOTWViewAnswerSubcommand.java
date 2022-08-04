@@ -1,7 +1,13 @@
 package net.javadiscord.javabot.systems.qotw.commands.view;
 
+import java.util.Comparator;
+
+import org.jetbrains.annotations.NotNull;
+
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -13,7 +19,6 @@ import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionReposi
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents the `/qotw-view answer` subcommand. It allows for viewing an answer to a QOTW.
@@ -63,7 +68,12 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 													MessageActionUtils.copyMessagesToNewThread(event.getGuildChannel().asStandardGuildMessageChannel(),
 															buildQOTWInfoEmbed(submission, event.getMember() == null ? event.getUser().getName() : event.getMember().getEffectiveName()),
 															"QOTW #" + submission.getQuestionNumber(),
-															history.getRetrievedHistory(),
+															history
+																.getRetrievedHistory()
+																.stream()
+																.filter(msg -> !msg.getAuthor().isSystem() && !msg.getAuthor().isBot())
+																.sorted(Comparator.comparingLong(Message::getIdLong))
+																.toList(),
 															thread -> {
 																Responses.success(event.getHook(), "View Answer", "Answer copied successfully").queue();
 																thread.getManager().setLocked(true).queue();
