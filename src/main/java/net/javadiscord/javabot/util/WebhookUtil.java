@@ -2,6 +2,7 @@ package net.javadiscord.javabot.util;
 
 import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.send.component.LayoutComponent;
@@ -72,7 +73,7 @@ public class WebhookUtil {
 	 * @return a {@link CompletableFuture} representing the action of sending
 	 * the message
 	 */
-	public static CompletableFuture<Void> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, LayoutComponent @NotNull ... components) {
+	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, LayoutComponent @NotNull ... components) {
 		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
 				.setThreadId(threadId).buildJDA();
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
@@ -90,7 +91,7 @@ public class WebhookUtil {
 			futures[i] = attachment.getProxy().download().thenAccept(
 					is -> message.addFile((attachment.isSpoiler() ? "SPOILER_" : "") + attachment.getFileName(), is));
 		}
-		return CompletableFuture.allOf(futures).thenAccept(unused -> client.send(message.build()))
+		return CompletableFuture.allOf(futures).thenCompose(unused -> client.send(message.build()))
 				.whenComplete((result, err) -> client.close());
 	}
 }

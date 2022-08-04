@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
@@ -89,9 +90,10 @@ public class MessageActionUtils {
 				message -> message.createThreadChannel(newThreadName).queue(
 						thread -> {
 							WebhookUtil.ensureWebhookExists(targetChannel, wh->{
-								messages.forEach(m -> {
-									WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong());
-								});
+								CompletableFuture<ReadonlyMessage> future = CompletableFuture.completedFuture(null);
+								for (Message m : messages) {
+									future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong()));
+								}
 							});
 							onFinish.accept(thread);
 						}
