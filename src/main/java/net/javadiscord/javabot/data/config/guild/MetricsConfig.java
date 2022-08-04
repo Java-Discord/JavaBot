@@ -11,7 +11,8 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class MetricsConfig extends GuildConfigItem {
-	private long weeklyMessages = 0;
+	private String weeklyMessages = "";
+	private String activeMembers = "";
 	private long metricsCategoryId = 0;
 	private String metricsMessageTemplate = "";
 

@@ -9,6 +9,7 @@ import net.javadiscord.javabot.api.response.ApiResponses;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.JDAEntity;
 import net.javadiscord.javabot.api.routes.metrics.model.MetricsData;
+import net.javadiscord.javabot.data.config.guild.MetricsConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,9 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> implemen
 			data = new MetricsData();
 			data.setMemberCount(guild.getMemberCount());
 			data.setOnlineCount(guild.retrieveMetaData().complete().getApproximatePresences());
-			data.setWeeklyMessages(Bot.getConfig().get(guild).getMetricsConfig().getWeeklyMessages());
+			MetricsConfig config = Bot.getConfig().get(guild).getMetricsConfig();
+			data.setWeeklyMessages(config.getWeeklyMessages());
+			data.setActiveMembers(config.getActiveMembers());
 			getCache().put(guild.getIdLong(), data);
 		}
 		return new ResponseEntity<>(new ApiResponseBuilder().add("metrics", data).build(), HttpStatus.OK);
