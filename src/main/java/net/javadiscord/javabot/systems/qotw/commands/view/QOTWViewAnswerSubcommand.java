@@ -72,7 +72,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 											submissionChannel.getHistoryFromBeginning(100).queue(history ->
 													MessageActionUtils.copyMessagesToNewThread(event.getGuildChannel().asStandardGuildMessageChannel(),
 															buildQOTWInfoEmbed(submission, event.getMember() == null ? event.getUser().getName() : event.getMember().getEffectiveName()),
-															"QOTW #" + submission.getQuestionNumber(),
+															"(qotw-view) Answer to QOTW #" + submission.getQuestionNumber(),
 															history.getRetrievedHistory()
 																.stream()
 																.filter(msg -> !msg.getAuthor().isSystem() && !msg.getAuthor().isBot())
