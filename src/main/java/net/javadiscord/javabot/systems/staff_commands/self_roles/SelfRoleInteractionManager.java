@@ -82,15 +82,18 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 		TextInput age = TextInput.create("age", "Age", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("24")
+				.setRequiredRange(1, 2)
 				.build();
 		TextInput email = TextInput.create("email", "Email", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("moontm@javadiscord.net")
+				.setMaxLength(254)
 				.build();
 		TextInput timezone = TextInput.create("timezone", "Timezone", TextInputStyle.SHORT)
 				.setRequired(true)
 				.build();
 		TextInput extraRemarks = TextInput.create("extra-remarks", "Anything else?", TextInputStyle.PARAGRAPH)
+				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:staff:%s:%s", role.getId(), applicant.getId()), "Apply for " + role.getName())
 				.addActionRows(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
