@@ -61,7 +61,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 * @param userId  The users' id.
 	 * @return The {@link ResponseEntity} containing the {@link UserProfileData}.
 	 */
-	@GetMapping("{guild_id}/{user_id}")
+	@GetMapping("guilds/{guild_id}/users/{user_id}")
 	public ResponseEntity<UserProfileData> getUserProfile(
 			@PathVariable("guild_id") long guildId,
 			@PathVariable("user_id") long userId

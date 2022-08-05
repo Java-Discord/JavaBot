@@ -46,7 +46,7 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	 * @param guildId The guilds' id.
 	 * @return The {@link ResponseEntity}.
 	 */
-	@GetMapping("{guild_id}/metrics")
+	@GetMapping("guilds/{guild_id}/metrics")
 	public ResponseEntity<MetricsData> getMetrics(@PathVariable("guild_id") long guildId) {
 		Guild guild = jda.getGuildById(guildId);
 		if (guild == null) {
