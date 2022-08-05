@@ -425,7 +425,9 @@ public class HelpChannelUpdater implements Runnable {
 		if (!reservedHelpChannels.isEmpty()) {
 			builder.addField("Reserved Help Channels", reservedHelpChannels.toString(), false);
 		}
-		builder.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false);
+		if (!config.getDormantChannelCategory().getTextChannels().isEmpty()) {
+			builder.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false);
+		}
 		return builder.build();
 	}
 }
