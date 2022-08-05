@@ -6,18 +6,20 @@ import org.apache.coyote.ajp.AjpNioProtocol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Holds all configuration for the {@link org.springframework.boot.autoconfigure.web.ServerProperties.Tomcat}
  * web service.
  */
+@Configuration
 public class TomcatConfig {
 
 	@Value("${tomcat.ajp.port}")
-	int ajpPort;
+	private int ajpPort;
 
 	@Value("${tomcat.ajp.enabled}")
-	boolean tomcatAjpEnabled;
+	private boolean tomcatAjpEnabled;
 
 	/**
 	 * Sets up the {@link TomcatServletWebServerFactory} using the {@link Value}s defined in the
