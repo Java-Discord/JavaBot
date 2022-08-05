@@ -15,11 +15,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TomcatConfig {
 
-	@Value("${tomcat.ajp.port}")
-	private int ajpPort;
+	private final int ajpPort;
 
-	@Value("${tomcat.ajp.enabled}")
-	private boolean tomcatAjpEnabled;
+	private final boolean tomcatAjpEnabled;
+
+	public TomcatConfig(@Value("${tomcat.ajp.port}") int ajpPort, @Value("${tomcat.ajp.enabled}") boolean tomcatAjpEnabled) {
+		this.ajpPort = ajpPort;
+		this.tomcatAjpEnabled = tomcatAjpEnabled;
+	}
 
 	/**
 	 * Sets up the {@link TomcatServletWebServerFactory} using the {@link Value}s defined in the
