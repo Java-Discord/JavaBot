@@ -16,6 +16,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.ImageCache;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
+import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -146,7 +147,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		BufferedImage logo = ImageGenerationUtils.getResourceImage("assets/images/QuestionOfTheWeekHeader.png");
 		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 
-		List<Member> topMembers = service.getTopMembers(DISPLAY_COUNT, guild);
+		List<Pair<QOTWAccount, Member>> topMembers = service.getTopMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
 				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
@@ -160,12 +161,11 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 			boolean left = true;
 			int y = logo.getHeight() + 3 * MARGIN;
-			for (Member m : topMembers) {
-				drawUserCard(g2d, m, service, y, left);
+			for (Pair<QOTWAccount, Member> pair : topMembers) {
+				drawUserCard(g2d, pair.second(), service, y, left);
 				left = !left;
 				if (left) y = y + card.getHeight() + MARGIN;
 			}
-
 			ImageCache.removeCachedImagesByKeyword("qotw_leaderboard");
 			ImageCache.cacheImage(getCacheName(), image);
 			return getOutputStreamFromImage(image);
@@ -202,7 +202,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The image's {@link ByteArrayOutputStream}.
 	 * @throws IOException If an error occurs.
 	 */
-	private ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
+	private @NotNull ByteArrayOutputStream getOutputStreamFromImage(BufferedImage image) throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ImageIO.write(image, "png", outputStream);
 		return outputStream;

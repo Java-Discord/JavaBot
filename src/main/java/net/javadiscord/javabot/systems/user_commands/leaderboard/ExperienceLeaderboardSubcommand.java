@@ -42,7 +42,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	}
 
 	@Override
-	public void handleButton(ButtonInteractionEvent event, Button button) {
+	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		event.deferEdit().queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> {

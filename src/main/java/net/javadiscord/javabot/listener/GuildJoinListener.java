@@ -13,7 +13,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	public void onGuildJoin(GuildJoinEvent event) {
 		Bot.getConfig().addGuild(event.getGuild());
 		try {
-			Bot.getDIH4JDA().registerInteractions();
+			Bot.getDih4jda().registerInteractions();
 		} catch (ReflectiveOperationException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}

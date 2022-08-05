@@ -15,7 +15,7 @@ import java.util.Optional;
  * Handles & manages user preferences.
  */
 @RequiredArgsConstructor
-public class UserPreferenceManager {
+public class UserPreferenceService {
 	private final DataSource dataSource;
 
 	/**

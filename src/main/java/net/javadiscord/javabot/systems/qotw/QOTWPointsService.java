@@ -7,12 +7,12 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.Pair;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -90,14 +90,13 @@ public class QOTWPointsService {
 	 * @param guild The current guild.
 	 * @return A {@link List} with the top member ids.
 	 */
-	public List<Member> getTopMembers(int n, Guild guild) {
+	public List<Pair<QOTWAccount, Member>> getTopMembers(int n, Guild guild) {
 		try (Connection con = Bot.getDataSource().getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints();
 			return accounts.stream()
-					.map(QOTWAccount::getUserId)
-					.map(guild::getMemberById)
-					.filter(Objects::nonNull)
+					.map(s -> new Pair<>(s, guild.getMemberById(s.getUserId())))
+					.filter(p -> p.second() != null)
 					.limit(n)
 					.toList();
 		} catch (SQLException e) {

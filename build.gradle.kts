@@ -1,6 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.*
+
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
     checkstyle
 }
 
@@ -19,12 +23,17 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
-    // DIH4JDA (Interaction Framework) (includes JDA (jda5.0.0-alpha.17))
-    implementation("com.github.DenuxPlays:DIH4JDA:7ac2c9c77c")
-    implementation("org.reflections:reflections:0.10.2")
+    // DIH4JDA (Interaction Framework) & JDA
+    implementation("com.github.DynxstyGIT:DIH4JDA:f564af77e9")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.17") {
+        exclude(module = "opus-java")
+    }
+
+    // Caffeine (Caching Library)
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.1")
 
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.yaml:snakeyaml:1.30")
@@ -52,6 +61,9 @@ dependencies {
 
     // Sentry
     implementation("io.sentry:sentry:6.3.0")
+
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
 }
 
 tasks.withType<Jar> {
@@ -66,6 +78,19 @@ tasks.withType<JavaCompile>().configureEach {
     options.forkOptions.jvmArgs = listOf("--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
 }
 tasks.withType<Test>{ useJUnitPlatform() }
+
+tasks.withType<ShadowJar> {
+    isZip64 = true
+    // Required for Spring
+    mergeServiceFiles()
+    append("META-INF/spring.handlers")
+    append("META-INF/spring.schemas")
+    append("META-INF/spring.tooling")
+    transform(PropertiesFileTransformer().apply {
+        paths = listOf("META-INF/spring.factories")
+        mergeStrategy = "append"
+    })
+}
 
 checkstyle {
     toolVersion = "9.1"

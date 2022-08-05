@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.systems.user_preferences.UserPreferenceManager;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.Contract;
@@ -43,7 +43,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand {
 		}
 		Preference preference = Preference.values()[preferenceMapping.getAsInt()];
 		boolean state = stateMapping.getAsBoolean();
-		UserPreferenceManager manager = new UserPreferenceManager(Bot.getDataSource());
+		UserPreferenceService manager = new UserPreferenceService(Bot.getDataSource());
 		if (manager.setOrCreate(event.getUser().getIdLong(), preference, state)) {
 			Responses.info(event, "Preference Updated", "Successfully %s `%s`!", state ? "enabled" : "disabled", preference).queue();
 		} else {
