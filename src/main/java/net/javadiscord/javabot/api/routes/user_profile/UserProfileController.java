@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Handles all GET-Requests on the {guild_id}/{user_id} route.
+ * Handles all GET-Requests on the guilds/{guild_id}/users/{user_id}/ route.
  */
 @RestController
 public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserProfileData> {

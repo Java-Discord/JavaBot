@@ -88,6 +88,26 @@ public class QuestionPointsRepository {
 	}
 
 	/**
+	 * Gets a specified amount of {@link QOTWAccount}s.
+	 *
+	 * @param page    The page.
+	 * @param size    The amount of {@link QOTWAccount}s to return.
+	 * @return A {@link List} containing the specified amount of {@link QOTWAccount}s.
+	 * @throws SQLException If an error occurs.
+	 */
+	public List<QOTWAccount> getTopAccounts(int page, int size) throws SQLException {
+		String sql = "SELECT * FROM qotw_points WHERE points > 0 ORDER BY points DESC LIMIT %d OFFSET %d";
+		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, Math.max(0, (page * size) - size)))) {
+			ResultSet rs = stmt.executeQuery();
+			List<QOTWAccount> accounts = new ArrayList<>(size);
+			while (rs.next()) {
+				accounts.add(read(rs));
+			}
+			return accounts;
+		}
+	}
+
+	/**
 	 * Reads a {@link ResultSet} and returns a new {@link QOTWAccount} object.
 	 *
 	 * @param rs The query's ResultSet.

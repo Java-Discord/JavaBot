@@ -11,10 +11,13 @@ import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,18 +40,37 @@ public class HelpExperienceService {
 		HelpAccount account;
 		try (Connection con = this.dataSource.getConnection()) {
 			con.setAutoCommit(false);
-			HelpAccountRepository accountRepository = new HelpAccountRepository(con);
-			Optional<HelpAccount> optional = accountRepository.getByUserId(userId);
+			HelpAccountRepository repo = new HelpAccountRepository(con);
+			Optional<HelpAccount> optional = repo.getByUserId(userId);
 			if (optional.isPresent()) {
 				account = optional.get();
 			} else {
 				account = new HelpAccount();
 				account.setUserId(userId);
 				account.setExperience(0);
-				accountRepository.insert(account);
+				repo.insert(account);
 			}
 			con.commit();
 			return account;
+		}
+	}
+
+	/**
+	 * Returns the specified amount of {@link HelpAccount}s, sorted by their experience.
+	 *
+	 * @param amount The amount to retrieve.
+	 * @param page The page to get.
+	 * @return A {@link List} of {@link HelpAccount}s.
+	 */
+	public List<HelpAccount> getTopAccounts(int amount, int page) {
+		List<HelpAccount> accounts = new ArrayList<>(amount);
+		try (Connection con = dataSource.getConnection()) {
+			con.setReadOnly(true);
+			HelpAccountRepository repo = new HelpAccountRepository(con);
+			return repo.getAccounts(page, amount);
+		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			return accounts;
 		}
 	}
 
@@ -102,7 +124,7 @@ public class HelpExperienceService {
 		}
 	}
 
-	private void checkExperienceRoles(Guild guild, HelpAccount account) {
+	private void checkExperienceRoles(@NotNull Guild guild, @NotNull HelpAccount account) {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
 				Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles().forEach((key, value) -> {
 					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
