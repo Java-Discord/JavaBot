@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Handles all GET-Requests on the {guild_id}/metrics route.
+ * Handles all GET-Requests on the guilds/{guild_id}/metrics/ route.
  */
 @Slf4j
 @RestController

@@ -106,6 +106,23 @@ public class QOTWPointsService {
 	}
 
 	/**
+	 * Gets the specified amount of {@link QOTWAccount}s, sorted by their points.
+	 *
+	 * @param amount The amount to retrieve.
+	 * @param page The page to get.
+	 * @return An unmodifiable {@link List} of {@link QOTWAccount}s.
+	 */
+	public List<QOTWAccount> getTopAccounts(int amount, int page) {
+		try (Connection con = Bot.getDataSource().getConnection()) {
+			QuestionPointsRepository repo = new QuestionPointsRepository(con);
+			return repo.getTopAccounts(page, amount);
+		} catch (SQLException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			return List.of();
+		}
+	}
+
+	/**
 	 * Increments a single user's QOTW-Points.
 	 *
 	 * @param userId The discord Id of the user.
