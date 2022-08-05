@@ -5,15 +5,19 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
+import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.StringResourceCache;
+import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -55,14 +59,15 @@ public class HelpChannelUpdater implements Runnable {
 	@Override
 	public void run() {
 		for (TextChannel channel : config.getReservedChannelCategory().getTextChannels()) {
-			this.checkReservedChannel(channel).queue();
+			checkReservedChannel(channel).queue();
 		}
 		for (TextChannel channel : config.getOpenChannelCategory().getTextChannels()) {
-			this.checkOpenChannel(channel).queue();
+			checkOpenChannel(channel).queue();
 		}
-		this.balanceChannels();
-		if (config.getHelpOverviewChannel() != null) {
-			this.updateHelpOverview();
+		balanceChannels();
+		// periodically update the Help Channel Overview Message
+		if (config.getHelpOverviewMessageIds() != null && !config.getHelpOverviewMessageIds().isEmpty()) {
+			updateHelpOverview();
 		}
 	}
 
@@ -366,49 +371,63 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	private void updateHelpOverview() {
-		TextChannel channel = config.getHelpOverviewChannel();
-		MessageHistory history = channel.getHistory();
-		history.retrievePast(100).queue(
-				messages -> {
-					Optional<Message> latestMessage = messages.stream().filter(m -> m.getAuthor().equals(jda.getSelfUser())).findFirst();
-					if (latestMessage.isPresent()) {
-						latestMessage.get().editMessageEmbeds(buildHelpOverviewEmbed()).queue();
-					} else {
-						channel.sendMessageEmbeds(buildHelpOverviewEmbed()).queue();
-					}
-				}
-		);
+		config.getHelpOverviewMessageIds().forEach((channelId, messageId) -> {
+			TextChannel channel = config.getGuild().getTextChannelById(channelId);
+			if (channel == null) {
+				log.error("Could not find Help Overview Channel with id '{}'", channelId);
+				return;
+			}
+			List<TextChannel> availableChannels = config.getOpenChannelCategory().getTextChannels();
+			List<Button> buttons = new ArrayList<>(2);
+			if (!availableChannels.isEmpty()) {
+				buttons.add(Button.link(StringUtils.buildChannelJumpUrl(availableChannels.get(0)), "Show me an available Help Channel!"));
+			}
+			buttons.add(Button.link(StringResourceCache.load("/help_overview/overview_image_url.txt"), "How does this work?"));
+			channel.retrieveMessageById(messageId).queue(
+					m -> m.editMessageEmbeds(buildHelpOverviewEmbed()).setActionRow(buttons).queue(),
+					err -> channel.sendMessageEmbeds(buildHelpOverviewEmbed()).queue(m -> {
+						config.getHelpOverviewMessageIds().put(channelId, m.getIdLong());
+						Bot.getConfig().flush();
+						log.info("Successfully created new Help Overview Message in '{}' on message with id '{}'", channelId, m.getId());
+					})
+			);
+		});
 	}
 
-	private MessageEmbed buildHelpOverviewEmbed() {
+	private @NotNull MessageEmbed buildHelpOverviewEmbed() {
 		String availableHelpChannels = config.getOpenChannelCategory().getTextChannels()
 				.stream()
 				.map(TextChannel::getAsMention)
-				.collect(Collectors.joining("\n"));
+				.collect(Collectors.joining(", "));
 		StringBuilder reservedHelpChannels = new StringBuilder();
 		for (TextChannel channel : config.getReservedChannelCategory().getTextChannels()) {
 			Optional<ChannelReservation> optional = channelManager.getReservationForChannel(channel.getIdLong());
 			if (optional.isEmpty()) continue;
 			ChannelReservation reservation = optional.get();
+			// Attempt to fetch the user. As JDA will cache the user upon retrieval, this may be too 'slow' on the first run (for the appending),
+			// but will automatically fix itself after the embed is updated again.
 			jda.retrieveUserById(reservation.getUserId()).queue(
-					u -> reservedHelpChannels.append(String.format("""
+					user -> reservedHelpChannels.append(String.format("""
 									%s
 									Reserved by %s <t:%s:R>
 																
-									""", channel.getAsMention(), u.getAsMention(),
+									""", channel.getAsMention(), user.getAsMention(),
 							reservation.getReservedAt().toEpochSecond(ZoneOffset.UTC))),
-					e -> {
-					}
+					e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			);
 		}
-		return new EmbedBuilder()
+		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Help Overview")
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.addField("Available Help Channels", availableHelpChannels, false)
-				.addField("Reserved Help Channels", reservedHelpChannels.toString(), false)
-				.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false)
-				.setFooter(String.format("Last refreshed: %s", Instant.now()))
-				.setTimestamp(Instant.now())
-				.build();
+				.setDescription(availableHelpChannels + " are __**available**__ to claim!")
+				.setFooter("Last refreshed: ")
+				.setTimestamp(Instant.now());
+		if (!reservedHelpChannels.isEmpty()) {
+			builder.addField("Reserved Help Channels", reservedHelpChannels.toString(), false);
+		}
+		if (!config.getDormantChannelCategory().getTextChannels().isEmpty()) {
+			builder.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false);
+		}
+		return builder.build();
 	}
 }

@@ -2,7 +2,7 @@
 
 **2.** Only ask questions in open help channels. Asking a question in someone else's reserved help channel is not polite, and your messages may be removed without notice. Doing this often will result in a ban.
 
-**3.** You may use the` /help-ping` command if your question is urgent.
+**3.** You may use the `/help ping` command if your question is urgent.
 *__Abusing this will result in warnings and/or a ban.__*
 
 **4.** Do not ask for help with exams or homework. You may ask for help with understanding individual concepts and parts of a question, but homework and exam questions that show little effort on your part will most likely go unanswered and may be removed.
