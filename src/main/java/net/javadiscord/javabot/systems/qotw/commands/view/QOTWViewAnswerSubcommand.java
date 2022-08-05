@@ -73,8 +73,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 													MessageActionUtils.copyMessagesToNewThread(event.getGuildChannel().asStandardGuildMessageChannel(),
 															buildQOTWInfoEmbed(submission, event.getMember() == null ? event.getUser().getName() : event.getMember().getEffectiveName()),
 															"QOTW #" + submission.getQuestionNumber(),
-															history
-																.getRetrievedHistory()
+															history.getRetrievedHistory()
 																.stream()
 																.filter(msg -> !msg.getAuthor().isSystem() && !msg.getAuthor().isBot())
 																.sorted(Comparator.comparingLong(Message::getIdLong))
