@@ -57,7 +57,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleGenericException(@NotNull Exception e) {
-		return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+		return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
 	}
 
 	private @NotNull ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message, String... errors) {
