@@ -96,8 +96,9 @@ public class QuestionPointsRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWAccount> getTopAccounts(int page, int size) throws SQLException {
-		String sql = "SELECT * FROM qotw_points WHERE points > 0 ORDER BY points DESC LIMIT %d OFFSET %d";
-		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, Math.max(0, (page * size) - size)))) {
+		try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM qotw_points WHERE points > 0 ORDER BY points DESC LIMIT %d OFFSET %d")) {
+			stmt.setInt(1, size);
+			stmt.setInt(2, Math.max(0, (page * size) - size));
 			ResultSet rs = stmt.executeQuery();
 			List<QOTWAccount> accounts = new ArrayList<>(size);
 			while (rs.next()) {

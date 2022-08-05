@@ -70,6 +70,8 @@ For more information on how this works, visit the [DIH4JDA Wiki!](https://github
 #### `GET` `guilds/{guild_id}/leaderboard/experience?page=1`
 - A paginated endpoint which responds with an ordered list of users, based on their help channel experience.
 
+You can try out the API yourself on `api.javadiscord.net`! 
+
 # Credits
 
 Inspiration we took from other communities:
