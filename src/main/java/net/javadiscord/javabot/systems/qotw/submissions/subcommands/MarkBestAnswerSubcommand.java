@@ -147,7 +147,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 				this.buildBestAnswerEmbed(member),
 				submissionThread.getName(),
 				messages,
-				() -> Responses.success(hook, "Best Answer", "Successfully marked %s as the best answer", submissionThread.getAsMention()).queue());
+				thread -> Responses.success(hook, "Best Answer", "Successfully marked %s as the best answer", submissionThread.getAsMention()).queue());
 	}
 
 	/**

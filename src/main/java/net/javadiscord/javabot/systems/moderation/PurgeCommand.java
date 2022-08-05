@@ -14,6 +14,7 @@ import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -43,6 +44,7 @@ public class PurgeCommand extends ModerateCommand {
 	}
 
 	@Override
+	@CheckReturnValue
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
 		OptionMapping amountOption = event.getOption("amount");
 		OptionMapping userOption = event.getOption("user");

@@ -1,18 +1,20 @@
 package net.javadiscord.javabot.util;
 
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+import org.jetbrains.annotations.NotNull;
+
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Utility class for message actions.
@@ -83,17 +85,17 @@ public class MessageActionUtils {
 	 * @param messages The messages to copy.
 	 * @param onFinish A callback to execute when copying is done.
 	 */
-	public static void copyMessagesToNewThread(GuildMessageChannel targetChannel, @NotNull MessageEmbed infoEmbed, String newThreadName, List<Message> messages, Runnable onFinish) {
+	public static void copyMessagesToNewThread(StandardGuildMessageChannel targetChannel, @NotNull MessageEmbed infoEmbed, String newThreadName, List<Message> messages, Consumer<ThreadChannel> onFinish) {
 		targetChannel.sendMessageEmbeds(infoEmbed).queue(
 				message -> message.createThreadChannel(newThreadName).queue(
 						thread -> {
-							messages.forEach(m -> {
-								String messageContent = m.getContentRaw();
-								if (messageContent.trim().length() == 0) messageContent = "[attachment]";
-								MessageActionUtils.addAttachmentsAndSend(m, thread.sendMessage(messageContent)
-										.allowedMentions(EnumSet.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL)));
+							WebhookUtil.ensureWebhookExists(targetChannel, wh->{
+								CompletableFuture<ReadonlyMessage> future = CompletableFuture.completedFuture(null);
+								for (Message m : messages) {
+									future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong()));
+								}
 							});
-							onFinish.run();
+							onFinish.accept(thread);
 						}
 				));
 	}
