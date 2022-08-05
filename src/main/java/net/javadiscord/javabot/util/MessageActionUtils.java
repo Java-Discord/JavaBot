@@ -94,8 +94,8 @@ public class MessageActionUtils {
 								for (Message m : messages) {
 									future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong()));
 								}
+								future.thenAccept(unused -> onFinish.accept(thread));
 							});
-							onFinish.accept(thread);
 						}
 				));
 	}
