@@ -37,13 +37,13 @@ public class HelpAccountData {
 		HelpAccountData data = new HelpAccountData();
 		data.setExperienceCurrent(account.getExperience());
 		Pair<Role, Double> previousRank = account.getPreviousExperienceGoal(guild);
-		if (previousRank.first() != null) {
+		if (previousRank != null && previousRank.first() != null) {
 			data.setCurrentRank(previousRank.first().getName());
 			data.setCurrentRankColor(ColorUtils.toString(previousRank.first().getColor()));
 			data.setExperiencePrevious(previousRank.second());
 		}
 		Pair<Role, Double> nextRank = account.getNextExperienceGoal(guild);
-		if (nextRank.first() != null) {
+		if (nextRank != null && nextRank.first() != null) {
 			data.setNextRank(nextRank.first().getName());
 			data.setNextRankColor(ColorUtils.toString(nextRank.first().getColor()));
 			data.setExperienceNext(nextRank.second());
