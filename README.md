@@ -58,16 +58,16 @@ For more information on how this works, visit the [DIH4JDA Wiki!](https://github
 
 # API Documentation
 
-### `GET guilds/{guild_id}/metrics` 
+#### `GET` `guilds/{guild_id}/metrics` 
 - Responds with guild-specific metrics, such as the member- and (approximate) online count.
 
-### `GET guilds/{guild_id}/users/{user_id}`
+#### `GET` `guilds/{guild_id}/users/{user_id}`
 - Responds with the specified users' profile which includes some basic info, such as the users' name and avatar url, but also their recent warns, their current help experience and more!
 
-### `GET guilds/{guild_id}/leaderboard/qotw?page=1`
+#### `GET` `guilds/{guild_id}/leaderboard/qotw?page=1`
 - A paginated endpoint which responds with an ordered list of users, based on their QOTW points.
 
-### `GET guilds/{guild_id}/leaderboard/experience?page=1`
+#### `GET` `guilds/{guild_id}/leaderboard/experience?page=1`
 - A paginated endpoint which responds with an ordered list of users, based on their help channel experience.
 
 # Credits
