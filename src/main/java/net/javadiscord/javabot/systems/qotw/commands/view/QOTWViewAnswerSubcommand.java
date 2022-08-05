@@ -80,7 +80,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 																.toList(),
 															thread -> {
 																Responses.success(event.getHook(), "View Answer", "Answer copied successfully").queue();
-																thread.getManager().setLocked(true).queue();
+																thread.getManager().setLocked(true).setArchived(true).queue();
 															})),
 									() -> Responses.error(event.getHook(), "The QOTW-Submission thread was not found.").queue()));
 		});
