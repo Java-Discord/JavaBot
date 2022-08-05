@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.data;
+package net.javadiscord.javabot.api;
 
 import net.dv8tion.jda.api.JDA;
 import net.javadiscord.javabot.Bot;
