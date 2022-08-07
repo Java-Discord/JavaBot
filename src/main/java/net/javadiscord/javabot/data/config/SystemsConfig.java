@@ -43,6 +43,11 @@ public class SystemsConfig {
 	private HikariConfig hikariConfig = new HikariConfig();
 
 	/**
+	 * Configurations settings for the bots' internal API.
+	 */
+	private ApiConfig apiConfig = new ApiConfig();
+
+	/**
 	 * Configuration settings for certain commands which need an extra layer of
 	 * security.
 	 */
@@ -52,6 +57,17 @@ public class SystemsConfig {
 	 * Configuration settings for all the different emojis the bot uses.
 	 */
 	private EmojiConfig emojiConfig = new EmojiConfig();
+
+	/**
+	 * Configurations settings for the bots' internal API.
+	 */
+	@Data
+	public static class ApiConfig {
+		private String clientSecret = "";
+		private String redirectUrl = "";
+		private String[] scopes = new String[]{};
+		private String ajpSecret = "";
+	}
 
 	/**
 	 * Configuration settings for the Hikari connection pool.

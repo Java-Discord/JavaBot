@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.StringUtils;
 
@@ -71,7 +71,7 @@ public class PingableNameListener extends ListenerAdapter {
 		member.getUser().openPrivateChannel()
 				.flatMap(channel -> channel.sendMessageFormat("Your nickname has been set to `%s` since both your user- and nickname's first three characters were deemed as not-pingable.", newName))
 				.queue();
-		new GuildNotificationService(member.getGuild()).sendLogChannelNotification("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName);
+		NotificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName));
 	}
 
 	/**

@@ -41,7 +41,7 @@ CREATE TABLE qotw_question
 	created_at      TIMESTAMP(0)  NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 	guild_id        BIGINT        NOT NULL,
 	created_by      BIGINT        NOT NULL,
-	"text"          VARCHAR(1024) NOT NULL,
+	"TEXT"          VARCHAR(1024) NOT NULL,
 	used            BOOLEAN       NOT NULL DEFAULT FALSE,
 	question_number INTEGER       NULL     DEFAULT NULL,
 	priority        INTEGER       NOT NULL DEFAULT 0
@@ -104,3 +104,12 @@ CREATE TABLE message_cache
 	author_id       BIGINT        NOT NULL,
 	message_content VARCHAR(4000) NOT NULL
 );
+
+// User Preferences
+CREATE TABLE user_preferences
+(
+	user_id BIGINT  NOT NULL,
+	ordinal INTEGER NOT NULL,
+	enabled BOOLEAN NOT NULL DEFAULT TRUE,
+	PRIMARY KEY (user_id, ordinal)
+)

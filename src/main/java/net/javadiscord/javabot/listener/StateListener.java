@@ -13,7 +13,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.checks.SimpleGreetingCheck;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +47,7 @@ public class StateListener extends ListenerAdapter {
 					helpConfig.getUpdateIntervalSeconds(),
 					TimeUnit.SECONDS
 			);
-			new GuildNotificationService(guild).sendLogChannelNotification(buildBootedUpEmbed());
+			NotificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildBootedUpEmbed()));
 		}
 		try {
 			Bot.getCustomTagManager().init();

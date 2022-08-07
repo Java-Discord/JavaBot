@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.moderation.warn.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +29,7 @@ public class Warn {
 	 * @param severity The severity of the warning.
 	 * @param reason   The reason for the warning.
 	 */
-	public Warn(long userId, long warnedBy, WarnSeverity severity, String reason) {
+	public Warn(long userId, long warnedBy, @NotNull WarnSeverity severity, String reason) {
 		this.userId = userId;
 		this.warnedBy = warnedBy;
 		this.severity = severity.name();

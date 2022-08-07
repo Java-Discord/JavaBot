@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.Bot;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.time.Instant;
@@ -29,84 +30,104 @@ public final class Responses {
 	private Responses() {
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction success(CommandInteraction event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.SUCCESS.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> success(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.SUCCESS.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction info(CommandInteraction event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.INFO.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> info(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.INFO.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction error(CommandInteraction event, String message, Object... args) {
 		return reply(event, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> error(InteractionHook hook, String message, Object... args) {
 		return reply(hook, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction warning(CommandInteraction event, String message, Object... args) {
 		return warning(event, null, String.format(message, args));
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> warning(InteractionHook hook, String message, Object... args) {
 		return warning(hook, null, String.format(message, args));
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction warning(CommandInteraction event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyMissingArguments(CommandInteraction event) {
 		return error(event, "Missing required arguments.");
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> replyMissingArguments(InteractionHook hook) {
 		return error(hook, "Missing required arguments.");
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyGuildOnly(CommandInteraction event) {
 		return error(event, "This command may only be used inside servers.");
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> replyGuildOnly(InteractionHook hook) {
 		return error(hook, "This command may only be used inside servers.");
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(CommandInteraction event, Permission... permissions) {
 		return error(event, "I am missing one or more permissions in order to execute this action. (%s)",
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
 
+	@CheckReturnValue
 	public static @NotNull WebhookMessageAction<Message> replyInsufficientPermissions(InteractionHook hook, Permission... permissions) {
 		return error(hook, "I am missing one or more permissions in order to execute this action. (%s)",
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyMissingMember(CommandInteraction event) {
 		return error(event, "The provided user **must** be a member of this server. Please try again.");
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyCannotInteract(CommandInteraction event, @NotNull IMentionable mentionable) {
 		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, Guild guild) {
 		return error(event, "This command may only be used by staff members. (%s)", Bot.getConfig().get(guild).getModerationConfig().getStaffRole().getAsMention());
 	}
 
+	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyAdminOnly(CommandInteraction event, Guild guild) {
 		return error(event, "This command may only be used by admins. (%s)", Bot.getConfig().get(guild).getModerationConfig().getAdminRole().getAsMention());
 	}
@@ -121,6 +142,7 @@ public final class Responses {
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The reply action.
 	 */
+	@CheckReturnValue
 	private static @NotNull ReplyCallbackAction reply(@NotNull CommandInteraction event, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return event.replyEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
@@ -135,10 +157,12 @@ public final class Responses {
 	 * @param ephemeral Whether the message should be ephemeral.
 	 * @return The webhook message action.
 	 */
+	@CheckReturnValue
 	private static @NotNull WebhookMessageAction<Message> reply(@NotNull InteractionHook hook, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return hook.sendMessageEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 
+	@CheckReturnValue
 	private static @NotNull MessageEmbed buildEmbed(@Nullable String title, String message, Color color) {
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTimestamp(Instant.now())

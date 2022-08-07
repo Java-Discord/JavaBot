@@ -23,4 +23,9 @@ public final class ColorUtils {
 		float luminance = 0.9f;
 		return Color.getHSBColor(hue, saturation, luminance);
 	}
+
+	public static String toString(Color color) {
+		if (color == null) return null;
+		return "#" + Integer.toHexString(color.getRGB()).substring(2).toUpperCase();
+	}
 }

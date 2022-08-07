@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 import net.javadiscord.javabot.systems.help.naming_strategies.*;
 
@@ -20,7 +19,7 @@ public class HelpConfig extends GuildConfigItem {
 	/**
 	 * The id of the help overview channel.
 	 */
-	private long helpOverviewId;
+	private Map<String, Long> helpOverviewMessageIds = Map.of();
 
 	/**
 	 * The id of the channel category that contains all open channels.
@@ -187,10 +186,6 @@ public class HelpConfig extends GuildConfigItem {
 
 	public Category getDormantChannelCategory() {
 		return getGuild().getCategoryById(this.dormantCategoryId);
-	}
-
-	public TextChannel getHelpOverviewChannel() {
-		return getGuild().getTextChannelById(this.helpOverviewId);
 	}
 
 	public Role getHelperRole() {

@@ -40,17 +40,18 @@ public class HelpAccount {
 	}
 
 	/**
-	 * Tries to get the current, and thus last, experience goal.
+	 * Tries to get the last experience goal.
 	 *
 	 * @param guild The current {@link Guild}.
-	 * @return The experience needed for the last role, as a {@link Double}.
+	 * @return The {@link Pair} with both the Role, and the experience needed.
 	 */
-	public double getLastExperienceGoal(Guild guild) {
-		Optional<Double> experienceOptional = Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles()
-				.values().stream()
-				.filter(r -> r <= experience)
-				.max(Comparator.naturalOrder());
-		return experienceOptional.orElse(0.0);
+	public Pair<Role, Double> getPreviousExperienceGoal(Guild guild) {
+		Map<Long, Double> experienceRoles = Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles();
+		Optional<Pair<Role, Double>> experienceOptional = experienceRoles.entrySet().stream()
+				.filter(r -> r.getValue() < experience)
+				.map(e -> new Pair<>(guild.getRoleById(e.getKey()), e.getValue()))
+				.max(Comparator.comparingDouble(Pair::second));
+		return experienceOptional.orElse(null);
 	}
 
 	/**

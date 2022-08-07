@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -92,7 +92,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 			message.editMessageComponents(MessageActionUtils.toActionRows(buttons)).queue();
 		}
 		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type);
-		new GuildNotificationService(event.getGuild()).sendLogChannelNotification(logEmbed);
+		NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(logEmbed));
 		event.getHook().sendMessageEmbeds(logEmbed).setEphemeral(true).queue();
 	}
 

@@ -1,13 +1,20 @@
 package net.javadiscord.javabot.util;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+import org.jetbrains.annotations.NotNull;
+
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.entities.ThreadChannel;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
  * Utility class for message actions.
@@ -68,5 +75,28 @@ public class MessageActionUtils {
 		}
 		return CompletableFuture.allOf(attachmentFutures.toArray(new CompletableFuture<?>[0]))
 				.thenCompose(unusedActions -> action.submit());
+	}
+
+	/**
+	 * Sends a message with an embed, creates a thread from that message and copies all messages to the thread.
+	 * @param targetChannel The channel to send the embed/create the thread in.
+	 * @param infoEmbed The embed to send.
+	 * @param newThreadName The name of the thread.
+	 * @param messages The messages to copy.
+	 * @param onFinish A callback to execute when copying is done.
+	 */
+	public static void copyMessagesToNewThread(StandardGuildMessageChannel targetChannel, @NotNull MessageEmbed infoEmbed, String newThreadName, List<Message> messages, Consumer<ThreadChannel> onFinish) {
+		targetChannel.sendMessageEmbeds(infoEmbed).queue(
+				message -> message.createThreadChannel(newThreadName).queue(
+						thread -> {
+							WebhookUtil.ensureWebhookExists(targetChannel, wh->{
+								CompletableFuture<ReadonlyMessage> future = CompletableFuture.completedFuture(null);
+								for (Message m : messages) {
+									future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong()));
+								}
+								future.thenAccept(unused -> onFinish.accept(thread));
+							});
+						}
+				));
 	}
 }

@@ -126,19 +126,43 @@ public class QOTWSubmissionRepository {
 	/**
 	 * Returns all {@link QOTWSubmission}s based on the given question number.
 	 *
+	 * @param guildId the ID of the guild
 	 * @param questionNumber The week's number.
 	 * @return All {@link QOTWSubmission}s, as a {@link List}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<QOTWSubmission> getSubmissionByQuestionNumber(int questionNumber) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE question_number = ?")) {
-			s.setInt(1, questionNumber);
+	public List<QOTWSubmission> getSubmissionsByQuestionNumber(long guildId, int questionNumber) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ?")) {
+			s.setLong(1, guildId);
+			s.setInt(2, questionNumber);
 			ResultSet rs = s.executeQuery();
 			List<QOTWSubmission> submissions = new ArrayList<>();
 			while (rs.next()) {
 				submissions.add(this.read(rs));
 			}
 			return submissions;
+		}
+	}
+
+	/**
+	 * Returns the {@link QOTWSubmission} of a specific question by a specific user.
+	 *
+	 * @param guildId the ID of the guild
+	 * @param questionNumber The week's number.
+	 * @param authorID The ID of the user who created the submission.
+	 * @return The {@link QOTWSubmission} or {@code null} if the user has not submitted any answer to the question.
+	 * @throws SQLException If an error occurs.
+	 */
+	public QOTWSubmission getSubmissionByQuestionNumberAndAuthorID(long guildId,int questionNumber, long authorID) throws SQLException {
+		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ? AND author_id = ?")) {
+			s.setLong(1, guildId);
+			s.setInt(2, questionNumber);
+			s.setLong(3, authorID);
+			ResultSet rs = s.executeQuery();
+			if (rs.next()) {
+				return this.read(rs);
+			}
+			return null;
 		}
 	}
 

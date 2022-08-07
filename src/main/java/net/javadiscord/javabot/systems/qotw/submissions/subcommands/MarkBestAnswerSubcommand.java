@@ -1,7 +1,17 @@
 package net.javadiscord.javabot.systems.qotw.submissions.subcommands;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
+
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -18,7 +28,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
@@ -27,11 +37,6 @@ import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * <h3>This class represents the /qotw submissions mark-best command.</h3>
@@ -75,7 +80,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 				Responses.error(event.getHook(), "The Submission must be reviewed and accepted!").queue();
 				return;
 			}
-			if (config.getQotwConfig().getQuestionChannel().getThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()))) {
+			if (isSubmissionThreadABestAnswer(submissionThread)) {
 				Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
 				return;
 			}
@@ -88,11 +93,20 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 						}
 						QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 						service.increment(member.getIdLong());
-						new QOTWNotificationService(member.getUser(), event.getGuild()).sendBestAnswerNotification();
+						NotificationService.withQOTW(event.getGuild(), member.getUser()).sendBestAnswerNotification();
 						sendBestAnswer(event.getHook(), messages, member, submissionThread);
 					}
 			);
 		});
+	}
+
+	/**
+	 * Checks if the QOTW submission is marked as a best answer.
+	 * @param submissionThread the thread were the submission was sent to
+	 * @return {@code true} if it is a best answer, else {@code false}
+	 */
+	public static boolean isSubmissionThreadABestAnswer(ThreadChannel submissionThread) {
+		return Bot.getConfig().get(submissionThread.getGuild()).getQotwConfig().getQuestionChannel().retrieveArchivedPublicThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()));
 	}
 
 	private List<Message> getSubmissionContent(ThreadChannel thread) {
@@ -129,18 +143,11 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 * @param submissionThread The submission's thread.
 	 */
 	private void sendBestAnswer(InteractionHook hook, List<Message> messages, Member member, ThreadChannel submissionThread) {
-		Bot.getConfig().get(member.getGuild()).getQotwConfig().getQuestionChannel().sendMessageEmbeds(this.buildBestAnswerEmbed(member)).queue(
-				message -> message.createThreadChannel(submissionThread.getName()).queue(
-						thread -> {
-							messages.forEach(m -> {
-								String messageContent = m.getContentRaw();
-								if (messageContent.trim().length() == 0) messageContent = "[attachment]";
-								MessageActionUtils.addAttachmentsAndSend(m, thread.sendMessage(messageContent)
-										.allowedMentions(EnumSet.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL)));
-							});
-							Responses.success(hook, "Best Answer", "Successfully marked %s as the best answer", submissionThread.getAsMention()).queue();
-						}
-				));
+		MessageActionUtils.copyMessagesToNewThread(Bot.getConfig().get(member.getGuild()).getQotwConfig().getQuestionChannel(),
+				this.buildBestAnswerEmbed(member),
+				submissionThread.getName(),
+				messages,
+				thread -> Responses.success(hook, "Best Answer", "Successfully marked %s as the best answer", submissionThread.getAsMention()).queue());
 	}
 
 	/**
@@ -149,12 +156,12 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static List<Command.Choice> replyAcceptedSubmissions(CommandAutoCompleteInteractionEvent event) {
+	public static List<Command.Choice> replyAcceptedSubmissions(@NotNull CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Connection con = Bot.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 			QOTWConfig config = Bot.getConfig().get(event.getGuild()).getQotwConfig();
-			List<QOTWSubmission> submissions = repo.getSubmissionByQuestionNumber(repo.getCurrentQuestionNumber())
+			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), repo.getCurrentQuestionNumber())
 					.stream()
 					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)
 					.toList();

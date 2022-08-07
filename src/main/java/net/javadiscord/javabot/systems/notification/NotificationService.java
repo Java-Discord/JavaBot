@@ -1,35 +1,56 @@
 package net.javadiscord.javabot.systems.notification;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
 
 /**
- * Abstract class used for sending Notifications to Discord Users and Channels.
+ * Handles all types of guild & user notifications.
  */
-@Slf4j
-public abstract class NotificationService {
-	void sendDirectMessageNotification(User user, MessageEmbed message) {
-		user.openPrivateChannel().queue(
-				channel -> sendMessageChannelNotification(channel, message),
-				error -> log.warn("Could not send private Notification to User " + user.getAsTag())
-		);
+public final class NotificationService {
+	private NotificationService() {
 	}
 
-	void sendDirectMessageNotification(User user, String s, Object... args) {
-		user.openPrivateChannel().queue(
-				channel -> sendMessageChannelNotification(channel, s, args),
-				error -> log.warn("Could not send private Notification to User " + user.getAsTag())
-		);
+	@Contract("_ -> new")
+	public static @NotNull GuildNotificationService withGuild(Guild guild) {
+		return new GuildNotificationService(guild);
 	}
 
-	void sendMessageChannelNotification(MessageChannel channel, MessageEmbed message) {
-		channel.sendMessageEmbeds(message).queue(s -> {}, e -> log.warn("Could not send embed to channel " + channel.getName()));
+	@Contract("_ -> new")
+	public static @NotNull UserNotificationService withUser(User user) {
+		return new UserNotificationService(user);
 	}
 
-	void sendMessageChannelNotification(MessageChannel channel, String s, Object... args) {
-		channel.sendMessageFormat(s, args).queue(success -> {}, e -> log.warn("Could not send message to channel " + channel.getName()));
+	public static @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
+		return new QOTWGuildNotificationService(guild);
+	}
+
+	public static @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
+		return new QOTWNotificationService(user, guild);
+	}
+
+	/**
+	 * Abstract class which streamlines the logic of sending messages to a {@link MessageChannel}.
+	 */
+	@Slf4j
+	abstract static class MessageChannelNotification {
+		/**
+		 * Sends a single message to the specified {@link MessageChannel} using the
+		 * specified {@link Function}.
+		 *
+		 * @param channel  The target {@link MessageChannel}.
+		 * @param function The {@link Function} which is used in order to send the message.
+		 */
+		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageAction> function) {
+			function.apply(channel).queue(s -> {},
+					err -> log.error("Could not send message to channel \" " + channel.getName() + "\": ", err)
+			);
+		}
 	}
 }

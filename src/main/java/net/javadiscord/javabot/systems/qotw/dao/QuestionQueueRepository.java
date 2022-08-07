@@ -108,9 +108,36 @@ public class QuestionQueueRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws SQLException {
-		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT %d OFFSET %d";
-		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, page))) {
+		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT ? OFFSET ?";
+		try (PreparedStatement stmt = con.prepareStatement(sql)) {
 			stmt.setLong(1, guildId);
+			stmt.setInt(2, size);
+			stmt.setInt(3, page);
+			ResultSet rs = stmt.executeQuery();
+			List<QOTWQuestion> questions = new ArrayList<>(size);
+			while (rs.next()) {
+				questions.add(this.read(rs));
+			}
+			return questions;
+		}
+	}
+
+	/**
+	 * Gets as many questions matching a query as specified.
+	 * @param guildId The current guild's id..
+	 * @param query   The query to match questions against.
+	 * @param page    The page.
+	 * @param size    The amount of questions to return.
+	 * @return A {@link List} containing the specified amount (or less) of {@link QOTWQuestion} matching the query.
+	 * @throws SQLException If an error occurs.
+	 */
+	public List<QOTWQuestion> getUsedQuestionsWithQuery(long guildId, String query, int page, int size) throws SQLException {
+		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND \"TEXT\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?";
+		try (PreparedStatement stmt = con.prepareStatement(sql)) {
+			stmt.setLong(1, guildId);
+			stmt.setString(2, "%" + query.toLowerCase() + "%");
+			stmt.setInt(3, size);
+			stmt.setInt(4, page);
 			ResultSet rs = stmt.executeQuery();
 			List<QOTWQuestion> questions = new ArrayList<>(size);
 			while (rs.next()) {

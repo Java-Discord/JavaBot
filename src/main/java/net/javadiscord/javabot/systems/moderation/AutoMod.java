@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -123,7 +123,7 @@ public class AutoMod extends ListenerAdapter {
 	private void checkContentAutomod(@Nonnull Message message) {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
-			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Message: `" + message.getContentRaw() + "`");
+			NotificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message: `%s`", message.getContentRaw()));
 			new ModerationService(Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
@@ -141,7 +141,7 @@ public class AutoMod extends ListenerAdapter {
 
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
-			new GuildNotificationService(message.getGuild()).sendLogChannelNotification("Suspicious Link sent by: %s (`%s`)", message.getMember().getAsMention(), message);
+			NotificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Suspicious Link sent by: %s (`%s`)", message.getAuthor().getAsMention(), message.getContentRaw()));
 			new ModerationService(Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),

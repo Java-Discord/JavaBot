@@ -10,10 +10,11 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.notification.GuildNotificationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ServerLockConfig;
-import net.javadiscord.javabot.systems.notification.GuildNotificationService;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
 import org.jetbrains.annotations.NotNull;
@@ -193,7 +194,7 @@ public class ServerLockManager extends ListenerAdapter {
 				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg ->
 						event.getMember().kick().queue()));
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
-		new GuildNotificationService(event.getGuild()).sendLogChannelNotification("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff);
+		NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff));
 	}
 
 	/**
@@ -210,7 +211,7 @@ public class ServerLockManager extends ListenerAdapter {
 				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
 							success -> {},
-							error -> new GuildNotificationService(guild).sendLogChannelNotification("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage()));
+							error -> NotificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage())));
 				});
 			});
 		}
@@ -228,9 +229,9 @@ public class ServerLockManager extends ListenerAdapter {
 		GuildConfig config = Bot.getConfig().get(guild);
 		config.getServerLockConfig().setLocked("true");
 		Bot.getConfig().get(guild).flush();
-		GuildNotificationService notification = new GuildNotificationService(guild);
+		GuildNotificationService notification = NotificationService.withGuild(guild);
 		if (lockedBy == null) {
-			notification.sendLogChannelNotification("""
+			notification.sendToModerationLog(c -> c.sendMessageFormat("""
 							**Server Locked** %s
 							The automated locking system has detected that the following %d users may be part of a raid:
 							%s
@@ -238,9 +239,9 @@ public class ServerLockManager extends ListenerAdapter {
 					config.getModerationConfig().getStaffRole().getAsMention(),
 					potentialRaiders.size(),
 					membersString
-			);
+			));
 		} else {
-			notification.sendLogChannelNotification("Server locked by " + lockedBy.getAsMention());
+			notification.sendToModerationLog(c -> c.sendMessage("Server locked by " + lockedBy.getAsMention()));
 		}
 	}
 
@@ -255,11 +256,11 @@ public class ServerLockManager extends ListenerAdapter {
 		config.setLocked("false");
 		Bot.getConfig().get(guild).flush();
 		guildMemberQueues.clear();
-		GuildNotificationService notification = new GuildNotificationService(guild);
+		GuildNotificationService notification = NotificationService.withGuild(guild);
 		if (unlockedby == null) {
-			notification.sendLogChannelNotification("Server unlocked automatically.");
+			notification.sendToModerationLog(c -> c.sendMessage("Server unlocked automatically."));
 		} else {
-			notification.sendLogChannelNotification("Server unlocked by " + unlockedby.getAsMention());
+			notification.sendToModerationLog(c -> c.sendMessage("Server unlocked by " + unlockedby.getAsMention()));
 		}
 	}
 }

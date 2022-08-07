@@ -33,9 +33,8 @@ public class MigrationUtils {
 			return Path.of(uri);
 		} catch (FileSystemNotFoundException e) {
 			Map<String, String> env = new HashMap<>();
-			try (FileSystem dir = FileSystems.newFileSystem(uri, env)) {
-				return dir.getPath("/database/migrations/");
-			}
+			FileSystem dir = FileSystems.newFileSystem(uri, env);
+			return dir.getPath("/database/migrations/");
 		}
 	}
 }

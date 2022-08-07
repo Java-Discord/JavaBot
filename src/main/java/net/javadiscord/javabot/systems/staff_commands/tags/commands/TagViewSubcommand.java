@@ -40,7 +40,7 @@ public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable
 		if (tagOptional.isPresent()) {
 			CustomTagManager.handleCustomTag(event, tagOptional.get()).queue();
 		} else {
-			Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", nameMapping.getAsString());
+			Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", nameMapping.getAsString()).queue();
 		}
 		return event.deferReply(false);
 	}
