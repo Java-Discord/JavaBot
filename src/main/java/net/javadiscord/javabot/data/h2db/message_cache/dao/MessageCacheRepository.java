@@ -44,12 +44,14 @@ public class MessageCacheRepository {
 		try (PreparedStatement stmt = con.prepareStatement("MERGE INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
+			con.setAutoCommit(false);
 			for (CachedMessage msg : messages) {
 				stmt.setLong(1, msg.getMessageId());
 				stmt.setLong(2, msg.getAuthorId());
 				stmt.setString(3, msg.getMessageContent());
 				stmt.executeUpdate();
 			}
+			con.commit();
 		}
 	}
 
