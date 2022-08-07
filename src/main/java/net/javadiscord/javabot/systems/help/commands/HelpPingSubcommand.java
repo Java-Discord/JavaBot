@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help.commands.subcommands;
+package net.javadiscord.javabot.systems.help.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * Handler for the /help ping sub-command that allows users to occasionally ping
  * helpers.
  */
-public class HelpPingCommand extends SlashCommand.Subcommand {
+public class HelpPingSubcommand extends SlashCommand.Subcommand {
 	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **reserved help channels**.";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
@@ -31,7 +31,7 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	/**
 	 * Constructor that initializes and handles the cooldown map.
 	 */
-	public HelpPingCommand() {
+	public HelpPingSubcommand() {
 		setSubcommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
 		Bot.getAsyncPool().scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
