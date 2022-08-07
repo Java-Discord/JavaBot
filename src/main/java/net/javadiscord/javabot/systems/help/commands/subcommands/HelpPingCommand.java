@@ -87,33 +87,35 @@ public class HelpPingCommand extends SlashCommand.Subcommand {
 	/**
 	 * Determines if a user is forbidden from sending a help-ping command due
 	 * to their status in the server.
+	 *
 	 * @param reservation The channel reservation for the channel they're
 	 *                    trying to send the command in.
-	 * @param member The member.
-	 * @param config The guild config.
+	 * @param member      The member.
+	 * @param config      The guild config.
 	 * @return True if the user is forbidden from sending the command.
 	 */
 	private boolean isHelpPingForbiddenForMember(@NotNull ChannelReservation reservation, @NotNull Member member, @NotNull GuildConfig config) {
 		Set<Role> allowedRoles = Set.of(config.getModerationConfig().getStaffRole(), config.getHelpConfig().getHelperRole());
 		return !(
 				reservation.getUserId() == member.getUser().getIdLong() ||
-				member.getRoles().stream().anyMatch(allowedRoles::contains) ||
-				member.isOwner()
+						member.getRoles().stream().anyMatch(allowedRoles::contains) ||
+						member.isOwner()
 		);
 	}
 
 	/**
 	 * Determines if the user's timeout has elapsed (or doesn't exist), which
 	 * implies that it's fine for the user to send the command.
+	 *
 	 * @param memberId The members' id.
-	 * @param config The guild config.
+	 * @param config   The guild config.
 	 * @return True if the user's timeout has elapsed or doesn't exist, or
 	 * false if the user should NOT send the command because of their timeout.
 	 */
 	private boolean isHelpPingTimeoutElapsed(long memberId, GuildConfig config) {
-		Long lastPing = lastPingTimes.get(memberId).first();
+		Pair<Long, Guild> lastPing = lastPingTimes.get(memberId);
 		return lastPing == null ||
-				lastPing + config.getHelpConfig().getHelpPingTimeoutSeconds() * 1000L < System.currentTimeMillis();
+				lastPing.first() + config.getHelpConfig().getHelpPingTimeoutSeconds() * 1000L < System.currentTimeMillis();
 	}
 
 	/**
