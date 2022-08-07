@@ -2,6 +2,7 @@ package net.javadiscord.javabot.data.h2db.message_cache.dao;
 
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -39,16 +40,18 @@ public class MessageCacheRepository {
 	 * @param messages The List to insert.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void insertList(List<CachedMessage> messages) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
+	public void insertList(@NotNull List<CachedMessage> messages) throws SQLException {
+		try (PreparedStatement stmt = con.prepareStatement("MERGE INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
+			con.setAutoCommit(false);
 			for (CachedMessage msg : messages) {
 				stmt.setLong(1, msg.getMessageId());
 				stmt.setLong(2, msg.getAuthorId());
 				stmt.setString(3, msg.getMessageContent());
 				stmt.executeUpdate();
 			}
+			con.commit();
 		}
 	}
 
@@ -59,7 +62,7 @@ public class MessageCacheRepository {
 	 * @return Whether there were rows affected by this process.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean update(CachedMessage message) throws SQLException {
+	public boolean update(@NotNull CachedMessage message) throws SQLException {
 		try (PreparedStatement stmt = con.prepareStatement("UPDATE message_cache SET message_content = ? WHERE message_id = ?",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
