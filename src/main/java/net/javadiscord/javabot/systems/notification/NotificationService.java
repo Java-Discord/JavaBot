@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,11 +48,9 @@ public final class NotificationService {
 		 * @param function The {@link Function} which is used in order to send the message.
 		 */
 		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageAction> function) {
-			function.apply(channel).queue(s -> {
-			}, err -> {
-				ExceptionLogger.capture(err, getClass().getSimpleName());
-				log.error("Could not send message to channel \" " + channel.getName() + "\": ", err);
-			});
+			function.apply(channel).queue(s -> {},
+					err -> log.error("Could not send message to channel \" " + channel.getName() + "\": ", err)
+			);
 		}
 	}
 }

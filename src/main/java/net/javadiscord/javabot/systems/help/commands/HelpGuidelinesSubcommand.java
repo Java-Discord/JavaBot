@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help.commands.subcommands;
+package net.javadiscord.javabot.systems.help.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 /**
  * Shows the server's help-guidelines.
  */
-public class HelpGuidelinesCommand extends SlashCommand.Subcommand {
+public class HelpGuidelinesSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
-	public HelpGuidelinesCommand() {
+	public HelpGuidelinesSubcommand() {
 		setSubcommandData(new SubcommandData("guidelines", "Show the server's help guidelines in a simple format."));
 	}
 
