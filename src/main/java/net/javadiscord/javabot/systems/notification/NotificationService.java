@@ -49,11 +49,9 @@ public final class NotificationService {
 		 * @param function The {@link Function} which is used in order to send the message.
 		 */
 		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageAction> function) {
-			function.apply(channel).queue(s -> {
-			}, err -> {
-				ExceptionLogger.capture(err, getClass().getSimpleName());
-				log.error("Could not send message to channel \" " + channel.getName() + "\": ", err);
-			});
+			function.apply(channel).queue(s -> {},
+					err -> log.error("Could not send message to channel \" " + channel.getName() + "\": ", err)
+			);
 		}
 	}
 }
