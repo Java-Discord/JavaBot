@@ -41,11 +41,10 @@ public class MessageCacheRepository {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void insertList(@NotNull List<CachedMessage> messages) throws SQLException {
-		List<CachedMessage> all = getAll();
-		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
+		try (PreparedStatement stmt = con.prepareStatement("MERGE INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				Statement.RETURN_GENERATED_KEYS
 		)) {
-			for (CachedMessage msg : messages.stream().filter(s -> !all.contains(s)).toList()) {
+			for (CachedMessage msg : messages) {
 				stmt.setLong(1, msg.getMessageId());
 				stmt.setLong(2, msg.getAuthorId());
 				stmt.setString(3, msg.getMessageContent());
