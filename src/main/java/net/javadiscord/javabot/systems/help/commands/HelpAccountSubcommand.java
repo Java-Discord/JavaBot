@@ -88,10 +88,11 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	}
 
 	private String formatExperience(Guild guild, HelpAccount account) {
-		double currentXp = account.getExperience() - account.getPreviousExperienceGoal(guild).second();
+		Pair<Role, Double> previousRoleAndXp = account.getPreviousExperienceGoal(guild);
 		Pair<Role, Double> currentRoleAndXp = account.getCurrentExperienceGoal(guild);
 		Pair<Role, Double> nextRoleAndXp = account.getNextExperienceGoal(guild);
-		double goalXp = nextRoleAndXp.second() - account.getPreviousExperienceGoal(guild).second();
+		double currentXp = account.getExperience() - (previousRoleAndXp == null ? 0 : previousRoleAndXp.second());
+		double goalXp = nextRoleAndXp.second() - (previousRoleAndXp == null ? 0 : previousRoleAndXp.second());
 		StringBuilder sb = new StringBuilder();
 
 		if (currentRoleAndXp.first() != null) {
