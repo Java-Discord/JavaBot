@@ -72,7 +72,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements
 		String preferenceString = event.getOption("preference", OptionMapping::getAsString);
 		if (preferenceString != null && Arrays.stream(Preference.values()).map(Preference::name).anyMatch(c -> c.equals(preferenceString))) {
 			Preference preference = Preference.valueOf(preferenceString);
-			if (preference.getType().getDefaultChoices() != null) {
+			if (preference.getType().getDefaultChoices() != null && preference.getType().getDefaultChoices().length > 0) {
 				event.replyChoices(AutoCompleteUtils.filterChoices(event, List.of(preference.getType().getDefaultChoices()))).queue();
 			}
 		}
