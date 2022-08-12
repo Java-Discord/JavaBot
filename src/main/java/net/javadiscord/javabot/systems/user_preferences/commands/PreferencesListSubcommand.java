@@ -9,12 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
-import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * <h3>This class represents the /preferences list command.</h3>
