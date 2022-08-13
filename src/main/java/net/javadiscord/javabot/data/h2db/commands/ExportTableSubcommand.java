@@ -42,7 +42,8 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 								.addChoice("Question of the Week Submissions", "QOTW_SUBMISSIONS")
 								.addChoice("Reserved Help Channels", "RESERVED_HELP_CHANNELS")
 								.addChoice("Starboard", "STARBOARD")
-								.addChoice("Warns", "WARN"),
+								.addChoice("Warns", "WARN")
+								.addChoice("User Preferences", "USER_PREFERENCES"),
 						new OptionData(OptionType.BOOLEAN, "include-data", "Should data be included in the export?")));
 		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
