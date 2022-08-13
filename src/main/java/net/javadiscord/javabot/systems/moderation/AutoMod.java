@@ -227,8 +227,12 @@ public class AutoMod extends ListenerAdapter {
 	public boolean hasAdvertisingLink(@NotNull Message message) {
 		// Advertising
 		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
-		if (matcher.find()) {
-			return Bot.getConfig().get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(message.getContentRaw()::contains);
+		int start = 0;
+		while (matcher.find(start)) {
+			if (Bot.getConfig().get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(matcher.group()::contains)) {
+				return true;
+			}
+			start = matcher.start() + 1;
 		}
 		return false;
 	}
