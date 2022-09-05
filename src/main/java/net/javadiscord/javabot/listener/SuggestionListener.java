@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.listener;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.SystemsConfig;
+import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -19,11 +21,14 @@ import java.time.Instant;
  * {@link net.javadiscord.javabot.data.config.guild.ModerationConfig#getSuggestionChannel()} channel.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class SuggestionListener extends ListenerAdapter {
+	private final AutoMod autoMod;
+
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!canCreateSuggestion(event)) return;
-		if (Bot.getAutoMod().hasSuspiciousLink(event.getMessage()) || Bot.getAutoMod().hasAdvertisingLink(event.getMessage())) {
+		if (autoMod.hasSuspiciousLink(event.getMessage()) || autoMod.hasAdvertisingLink(event.getMessage())) {
 			event.getMessage().delete().queue();
 			return;
 		}

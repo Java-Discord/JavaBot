@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 
 /**
  * Represents the `/leaderboard` command. This holds commands viewing all the server's different leaderboards.
@@ -9,13 +10,14 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 public class LeaderboardCommand extends SlashCommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param pointsService The {@link QOTWPointsService}
 	 */
-	public LeaderboardCommand() {
+	public LeaderboardCommand(QOTWPointsService pointsService) {
 		setSlashCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
 				.setGuildOnly(true)
 		);
 		addSubcommands(
-				new QOTWLeaderboardSubcommand(),
+				new QOTWLeaderboardSubcommand(pointsService),
 				new ThanksLeaderboardSubcommand(),
 				new ExperienceLeaderboardSubcommand());
 	}

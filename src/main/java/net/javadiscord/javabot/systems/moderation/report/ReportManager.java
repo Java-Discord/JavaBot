@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,7 @@ import java.util.List;
  * Manages all interactions regarding the report-system.
  */
 @Slf4j
+@AutoDetectableComponentHandler({"resolve-report","report"})
 public class ReportManager implements ButtonHandler, ModalHandler {
 
 	@Override

@@ -8,14 +8,15 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.util.ExceptionLogger;
-import org.jetbrains.annotations.NotNull;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,9 +27,19 @@ import java.util.Optional;
 /**
  * Job which disables the Submission button.
  */
-public class QOTWCloseSubmissionsJob extends DiscordApiJob {
-	@Override
-	protected void execute(JobExecutionContext context, @NotNull JDA jda) throws JobExecutionException {
+@Service
+@RequiredArgsConstructor
+public class QOTWCloseSubmissionsJob {
+	private final JDA jda;
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
+
+	/**
+	 * disable the Submission button.
+	 * @throws SQLException if an SQL error occurs
+	 */
+	@Scheduled(cron = "0 0 21 * * 7")//Sunday 21:00
+	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			// Disable 'Submit your Answer' button on latest QOTW
 			GuildConfig config = Bot.getConfig().get(guild);
@@ -46,10 +57,10 @@ public class QOTWCloseSubmissionsJob extends DiscordApiJob {
 					QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 					Optional<QOTWSubmission> optionalSubmission = repo.getSubmissionByThreadId(thread.getIdLong());
 					if (optionalSubmission.isEmpty()) continue;
-					new SubmissionControlsManager(thread.getGuild(), optionalSubmission.get()).sendControls();
+					new SubmissionControlsManager(thread.getGuild(), optionalSubmission.get(), pointsService, notificationService).sendControls();
 				} catch (SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
-					throw new JobExecutionException(e);
+					throw e;
 				}
 			}
 		}

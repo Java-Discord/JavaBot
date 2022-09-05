@@ -35,14 +35,17 @@ import java.util.Optional;
 public class ModerationService {
 	private static final int BAN_DELETE_DAYS = 7;
 
+	private final NotificationService notificationService;
 	private final ModerationConfig moderationConfig;
 
 	/**
 	 * Constructs the service.
 	 *
 	 * @param config The {@link GuildConfig} to use.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public ModerationService(@NotNull GuildConfig config) {
+	public ModerationService(NotificationService notificationService,@NotNull GuildConfig config) {
+		this.notificationService=notificationService;
 		this.moderationConfig = config.getModerationConfig();
 	}
 
@@ -50,9 +53,11 @@ public class ModerationService {
 	 * Constructs the service using information obtained from an interaction.
 	 *
 	 * @param interaction The interaction to use.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public ModerationService(@NotNull Interaction interaction) {
+	public ModerationService(NotificationService notificationService, @NotNull Interaction interaction) {
 		this(
+				notificationService,
 				Bot.getConfig().get(interaction.getGuild())
 		);
 	}
@@ -72,8 +77,8 @@ public class ModerationService {
 			dao.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
 			int totalSeverity = dao.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
 			MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
-			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
-			NotificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
+			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
+			notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
 			if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
 				channel.sendMessageEmbeds(warnEmbed).queue();
 			}
@@ -93,8 +98,8 @@ public class ModerationService {
 		DbHelper.doDaoAction(WarnRepository::new, dao -> {
 			dao.discardAll(user.getIdLong());
 			MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
-			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
-			NotificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
+			notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 		});
 	}
 
@@ -112,7 +117,7 @@ public class ModerationService {
 			if (warnOptional.isPresent()) {
 				Warn warn = warnOptional.get();
 				repo.discardById(warn.getId());
-				NotificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(buildClearWarnsByIdEmbed(warn, clearedBy)));
+				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(buildClearWarnsByIdEmbed(warn, clearedBy)));
 				return true;
 			}
 		} catch (SQLException e) {
@@ -151,8 +156,8 @@ public class ModerationService {
 	public void timeout(@Nonnull Member member, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
 		MessageEmbed timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
 		member.getGuild().timeoutFor(member, duration).queue(s -> {
-			NotificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
-			NotificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
+			notificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
+			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -169,8 +174,8 @@ public class ModerationService {
 	public void removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
 		removedBy.getGuild().removeTimeout(member).queue(s -> {
-			NotificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
-			NotificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
+			notificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
+			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -187,8 +192,8 @@ public class ModerationService {
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
 		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, reason).queue(s -> {
-			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(banEmbed));
-			NotificationService.withGuild(bannedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(banEmbed));
+			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(banEmbed));
+			notificationService.withGuild(bannedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(banEmbed));
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -233,8 +238,8 @@ public class ModerationService {
 	public void kick(User user, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed kickEmbed = buildKickEmbed(user, kickedBy, reason);
 		kickedBy.getGuild().kick(user).queue(s -> {
-			NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(kickEmbed));
-			NotificationService.withGuild(kickedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(kickEmbed));
+			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(kickEmbed));
+			notificationService.withGuild(kickedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(kickEmbed));
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 		}, ExceptionLogger::capture);
 	}

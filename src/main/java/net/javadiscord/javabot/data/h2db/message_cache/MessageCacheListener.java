@@ -10,24 +10,28 @@ import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import org.jetbrains.annotations.NotNull;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Listener class that listens for incoming, updated or deleted messages.
  */
+@RequiredArgsConstructor
 public class MessageCacheListener extends ListenerAdapter {
+	private final MessageCache messageCache;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
-		Bot.getMessageCache().cache(event.getMessage());
+		messageCache.cache(event.getMessage());
 	}
 
 	@Override
 	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
-		List<CachedMessage> cache = Bot.getMessageCache().cache;
+		List<CachedMessage> cache = messageCache.cache;
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		CachedMessage before;
 		if (optional.isPresent()) {
@@ -37,17 +41,17 @@ public class MessageCacheListener extends ListenerAdapter {
 			before = new CachedMessage();
 			before.setMessageId(event.getMessageIdLong());
 			before.setMessageContent("[unknown content]");
-			Bot.getMessageCache().cache(event.getMessage());
+			messageCache.cache(event.getMessage());
 		}
-		Bot.getMessageCache().sendUpdatedMessageToLog(event.getMessage(), before);
+		messageCache.sendUpdatedMessageToLog(event.getMessage(), before);
 	}
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		Optional<CachedMessage> optional = Bot.getMessageCache().cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
+		Optional<CachedMessage> optional = messageCache.cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		optional.ifPresent(message -> {
-			Bot.getMessageCache().sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
-			Bot.getMessageCache().cache.remove(message);
+			messageCache.sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
+			messageCache.cache.remove(message);
 		});
 	}
 

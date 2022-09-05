@@ -19,6 +19,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.Responses;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,7 @@ import java.util.List;
  * Handles all Interactions related to the Self Role System.
  */
 @Slf4j
+@AutoDetectableComponentHandler("self-role")
 public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 
 	@Override

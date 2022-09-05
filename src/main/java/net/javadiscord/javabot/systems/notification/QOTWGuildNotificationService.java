@@ -24,6 +24,10 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class QOTWGuildNotificationService {
+	/**
+	 * The {@link NotificationService}.
+	 */
+	protected final NotificationService notificationService;
 	private final Guild guild;
 
 	/**
@@ -38,7 +42,7 @@ public class QOTWGuildNotificationService {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(submissionThread.getIdLong());
 			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
-				NotificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons)));
+				notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons)));
 				log.info("{} {} {}'s QOTW Submission{}", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag(), reasons != null ? " for: " + String.join(", ", reasons) : ".");
 			}));
 		});

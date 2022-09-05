@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import java.util.List;
  * This subcommand is responsible for executing quick SQL migrations on the bot's
  * schema.
  */
+@AutoDetectableComponentHandler("quick-migrate")
 public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.

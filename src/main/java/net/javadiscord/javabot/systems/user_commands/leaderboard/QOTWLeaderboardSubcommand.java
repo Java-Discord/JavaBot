@@ -45,8 +45,11 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 */
 	private static final int WIDTH = 3000;
 
-	public QOTWLeaderboardSubcommand() {
+	private final QOTWPointsService pointsService;
+
+	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService) {
 		setSubcommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
+		this.pointsService=pointsService;
 	}
 
 	@Override
@@ -54,14 +57,13 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		event.deferReply().queue();
 		Bot.getAsyncPool().submit(() -> {
 			try {
-				QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-				WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember(), service));
+				WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
 				// check whether the image may already been cached
 				byte[] array = ImageCache.isCached(getCacheName()) ?
 						// retrieve the image from the cache
 						getOutputStreamFromImage(ImageCache.getCachedImage(getCacheName())).toByteArray() :
 						// generate an entirely new image
-						generateLeaderboard(event.getGuild(), service).toByteArray();
+						generateLeaderboard(event.getGuild()).toByteArray();
 				action.addFile(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png").queue();
 			} catch (IOException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -73,18 +75,17 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * Builds the Leaderboard Rank {@link MessageEmbed}.
 	 *
 	 * @param member  The member which executed the command.
-	 * @param service The {@link QOTWPointsService}.
 	 * @return A {@link MessageEmbed} object.
 	 */
-	private MessageEmbed buildLeaderboardRankEmbed(Member member, QOTWPointsService service) {
-		int rank = service.getQOTWRank(member.getIdLong());
+	private MessageEmbed buildLeaderboardRankEmbed(Member member) {
+		int rank = pointsService.getQOTWRank(member.getIdLong());
 		String rankSuffix = switch (rank % 10) {
 			case 1 -> "st";
 			case 2 -> "nd";
 			case 3 -> "rd";
 			default -> "th";
 		};
-		long points = service.getPoints(member.getIdLong());
+		long points = pointsService.getPoints(member.getIdLong());
 		String pointsText = points == 1 ? "point" : "points";
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
@@ -139,15 +140,14 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * Draws and constructs the leaderboard image.
 	 *
 	 * @param guild   The current guild.
-	 * @param service The {@link QOTWPointsService}.
 	 * @return The finished image as a {@link ByteArrayInputStream}.
 	 * @throws IOException If an error occurs.
 	 */
-	private @NotNull ByteArrayOutputStream generateLeaderboard(Guild guild, @NotNull QOTWPointsService service) throws IOException {
+	private @NotNull ByteArrayOutputStream generateLeaderboard(Guild guild) throws IOException {
 		BufferedImage logo = ImageGenerationUtils.getResourceImage("assets/images/QuestionOfTheWeekHeader.png");
 		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 
-		List<Pair<QOTWAccount, Member>> topMembers = service.getTopMembers(DISPLAY_COUNT, guild);
+		List<Pair<QOTWAccount, Member>> topMembers = pointsService.getTopMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
 				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
@@ -162,7 +162,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 			boolean left = true;
 			int y = logo.getHeight() + 3 * MARGIN;
 			for (Pair<QOTWAccount, Member> pair : topMembers) {
-				drawUserCard(g2d, pair.second(), service, y, left);
+				drawUserCard(g2d, pair.second(), pointsService, y, left);
 				left = !left;
 				if (left) y = y + card.getHeight() + MARGIN;
 			}

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,10 +14,14 @@ import org.jetbrains.annotations.NotNull;
  * <h3>This class represents the /warn discard-by-id command.</h3>
  */
 public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public DiscardWarnByIdSubCommand() {
+	public DiscardWarnByIdSubCommand(NotificationService notificationService) {
+		this.notificationService = notificationService;
 		setSubcommandData(new SubcommandData("discard-by-id", "Discards a single warn, based on its id.")
 				.addOption(OptionType.INTEGER, "id", "The warn's unique identifier.", true)
 		);
@@ -34,7 +39,7 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 			return;
 		}
 		int id = idMapping.getAsInt();
-		ModerationService service = new ModerationService(event);
+		ModerationService service = new ModerationService(notificationService, event);
 		if (service.discardWarnById(id, event.getUser())) {
 			Responses.success(event, "Warn Discarded", "Successfully discarded the specified warn with id `%s`", id).queue();
 		} else {

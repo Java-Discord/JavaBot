@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagRepository;
@@ -26,10 +25,14 @@ import java.util.Optional;
  * <h3>This class represents the /tag-admin delete command.</h3>
  */
 public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCompletable {
+	private final CustomTagManager customTagManager;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param customTagManager The {@link CustomTagManager}
 	 */
-	public DeleteCustomTagSubcommand() {
+	public DeleteCustomTagSubcommand(CustomTagManager customTagManager) {
+		this.customTagManager = customTagManager;
 		setSubcommandData(new SubcommandData("delete", "Deletes a single Custom Tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
@@ -48,7 +51,7 @@ public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCom
 				Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", tagName).queue();
 				return;
 			}
-			if (Bot.getCustomTagManager().removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {
+			if (customTagManager.removeCommand(event.getGuild().getIdLong(), tagOptional.get())) {
 				event.getHook().sendMessageEmbeds(buildDeleteCommandEmbed(event.getMember(), tagOptional.get())).queue();
 				return;
 			}

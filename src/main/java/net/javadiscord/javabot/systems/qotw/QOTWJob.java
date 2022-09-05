@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -15,11 +16,10 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,9 +32,18 @@ import java.util.Set;
  * Job which posts a new question to the QOTW channel.
  */
 @Slf4j
-public class QOTWJob extends DiscordApiJob {
-	@Override
-	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
+@Service
+@RequiredArgsConstructor
+public class QOTWJob {
+	private final JDA jda;
+	private final NotificationService notificationService;
+
+	/**
+	 * Posts a new question to the QOTW channel.
+	 * @throws SQLException if an SQL error occurs
+	 */
+	@Scheduled(cron = "0 0 9 * * 0")//MONDAY, 09:00
+	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			if (guild.getBoostTier() == Guild.BoostTier.TIER_1) {
 				log.error("Guild {} does not have access to private threads. ({})", guild.getName(), guild.getBoostTier().name());
@@ -46,7 +55,7 @@ public class QOTWJob extends DiscordApiJob {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
-					NotificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
+					notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
 				} else {
 					QOTWQuestion question = nextQuestion.get();
 					QOTWConfig qotw = config.getQotwConfig();
@@ -67,8 +76,8 @@ public class QOTWJob extends DiscordApiJob {
 				}
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
-				NotificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageFormat("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotwConfig().getQOTWReviewRole().getAsMention(), e.getMessage()));
-				throw new JobExecutionException(e);
+				notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageFormat("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotwConfig().getQOTWReviewRole().getAsMention(), e.getMessage()));
+				throw e;
 			}
 		}
 	}

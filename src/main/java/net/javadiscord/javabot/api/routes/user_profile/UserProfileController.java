@@ -39,19 +39,22 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserProfileData> {
 	private final JDA jda;
+	private final QOTWPointsService qotwPointsService;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
 	 *
 	 * @param jda The {@link Autowired} {@link JDA} instance to use.
+	 * @param qotwPointsService The {@link QOTWPointsService}
 	 */
 	@Autowired
-	public UserProfileController(final JDA jda) {
+	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
 		this.jda = jda;
+		this.qotwPointsService = qotwPointsService;
 	}
 
 	/**
@@ -84,8 +87,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				data.setDiscriminator(user.getDiscriminator());
 				data.setEffectiveAvatarUrl(user.getEffectiveAvatarUrl());
 				// Question of the Week Account
-				QOTWPointsService qotwService = new QOTWPointsService(Bot.getDataSource());
-				QOTWAccount qotwAccount = qotwService.getOrCreateAccount(user.getIdLong());
+				QOTWAccount qotwAccount = qotwPointsService.getOrCreateAccount(user.getIdLong());
 				data.setQotwAccount(qotwAccount);
 				// Help Account
 				HelpExperienceService helpService = new HelpExperienceService(Bot.getDataSource());

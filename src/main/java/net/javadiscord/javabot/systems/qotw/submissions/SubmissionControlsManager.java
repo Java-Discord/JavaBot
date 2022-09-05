@@ -37,26 +37,34 @@ public class SubmissionControlsManager {
 	private final Guild guild;
 	private final QOTWConfig config;
 	private final QOTWSubmission submission;
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
 
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param guild      The current {@link Guild}.
-	 * @param submission The {@link QOTWSubmission}.
+	 * @param guild               The current {@link Guild}.
+	 * @param submission          The {@link QOTWSubmission}.
+	 * @param pointsService       The {@link QOTWPointsService}
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public SubmissionControlsManager(Guild guild, QOTWSubmission submission) {
+	public SubmissionControlsManager(Guild guild, QOTWSubmission submission, QOTWPointsService pointsService, NotificationService notificationService) {
 		this.guild = guild;
 		this.submission = submission;
 		this.config = Bot.getConfig().get(guild).getQotwConfig();
+		this.pointsService = pointsService;
+		this.notificationService = notificationService;
 	}
 
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param guild   The current {@link Guild}.
-	 * @param channel The {@link ThreadChannel}, which is used to retrieve the corresponding {@link QOTWSubmission}.
+	 * @param guild               The current {@link Guild}.
+	 * @param channel             The {@link ThreadChannel}, which is used to retrieve the corresponding {@link QOTWSubmission}.
+	 * @param pointsService       The {@link QOTWPointsService}
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public SubmissionControlsManager(Guild guild, ThreadChannel channel) {
+	public SubmissionControlsManager(Guild guild, ThreadChannel channel, QOTWPointsService pointsService, NotificationService notificationService) {
 		QOTWSubmission submission = null;
 		try (Connection con = Bot.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
@@ -72,6 +80,8 @@ public class SubmissionControlsManager {
 		this.guild = guild;
 		this.submission = submission;
 		this.config = Bot.getConfig().get(guild).getQotwConfig();
+		this.pointsService = pointsService;
+		this.notificationService = notificationService;
 	}
 
 	/**
@@ -109,15 +119,14 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-			service.increment(user.getIdLong());
-			NotificationService.withQOTW(event.getGuild(), user).sendAccountIncrementedNotification();
+			pointsService.increment(user.getIdLong());
+			notificationService.withQOTW(event.getGuild(), user).sendAccountIncrementedNotification();
 			Responses.success(event.getHook(), "Submission Accepted",
 					"Successfully accepted submission by " + user.getAsMention()).queue();
 			}
 		);
 		this.disableControls(String.format("Accepted by %s", event.getUser().getAsTag()), event.getMessage());
-		NotificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);
+		notificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.ACCEPTED);
 	}
 
 	/**
@@ -130,13 +139,13 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
-			NotificationService.withQOTW(event.getGuild(), user).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
+			notificationService.withQOTW(event.getGuild(), user).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
 				Responses.success(event.getHook(), "Submission Declined",
 						String.format("Successfully declined submission by %s for the following reasons:\n`%s`", user.getAsMention(), String.join(", ", event.getValues()))).queue();
 				}
 		);
 		this.disableControls(String.format("Declined by %s", event.getUser().getAsTag()), event.getMessage());
-		NotificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DECLINED, event.getValues().toArray(new String[0]));
+		notificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DECLINED, event.getValues().toArray(new String[0]));
 	}
 
 	/**
@@ -149,7 +158,7 @@ public class SubmissionControlsManager {
 		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
 		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
-		NotificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DELETED);
+		notificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DELETED);
 		thread.delete().queueAfter(10, TimeUnit.SECONDS);
 	}
 

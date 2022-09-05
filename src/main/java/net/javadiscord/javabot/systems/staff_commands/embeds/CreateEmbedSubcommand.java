@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
@@ -28,6 +29,7 @@ import java.util.List;
 /**
  * This class represents the `/embed create` command.
  */
+@AutoDetectableComponentHandler("embed-create")
 public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.

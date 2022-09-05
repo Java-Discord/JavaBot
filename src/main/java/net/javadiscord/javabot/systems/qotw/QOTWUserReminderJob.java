@@ -10,19 +10,27 @@ import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
-import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
-import org.jetbrains.annotations.NotNull;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 /**
  * Checks that there's a question in the QOTW queue ready for posting soon.
  */
-public class QOTWUserReminderJob extends DiscordApiJob {
-	@Override
-	protected void execute(JobExecutionContext context, @NotNull JDA jda) throws JobExecutionException {
+@Service
+@RequiredArgsConstructor
+public class QOTWUserReminderJob {
+	private final JDA jda;
+
+	/**
+	 * Checks that there's a question in the QOTW queue ready for posting soon.
+	 */
+	@Scheduled(cron = "* 0 16 * * 5")//Friday 16:00
+	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = Bot.getConfig().get(guild).getQotwConfig();
 			List<QOTWSubmission> submissions = new SubmissionManager(config).getActiveSubmissionThreads(guild.getIdLong());

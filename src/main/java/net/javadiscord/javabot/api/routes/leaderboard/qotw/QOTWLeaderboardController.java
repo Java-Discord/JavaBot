@@ -3,7 +3,6 @@ package net.javadiscord.javabot.api.routes.leaderboard.qotw;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.leaderboard.qotw.model.QOTWUserData;
@@ -27,19 +26,22 @@ import java.util.concurrent.TimeUnit;
 public class QOTWLeaderboardController extends CaffeineCache<Pair<Long, Integer>, List<QOTWUserData>> {
 	private static final int PAGE_AMOUNT = 8;
 	private final JDA jda;
+	private final QOTWPointsService pointsService;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
 	 *
 	 * @param jda The {@link JDA} instance to use.
+	 * @param pointsService The {@link QOTWPointsService}
 	 */
 	@Autowired
-	public QOTWLeaderboardController(final JDA jda) {
+	public QOTWLeaderboardController(final JDA jda, QOTWPointsService pointsService) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
 		this.jda = jda;
+		this.pointsService = pointsService;
 	}
 
 	/**
@@ -59,10 +61,9 @@ public class QOTWLeaderboardController extends CaffeineCache<Pair<Long, Integer>
 		if (guild == null) {
 			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
-		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		List<QOTWUserData> members = getCache().getIfPresent(new Pair<>(guild.getIdLong(), page));
 		if (members == null || members.isEmpty()) {
-			members = service.getTopAccounts(PAGE_AMOUNT, page).stream()
+			members = pointsService.getTopAccounts(PAGE_AMOUNT, page).stream()
 					.map(p -> QOTWUserData.of(p, jda.retrieveUserById(p.getUserId()).complete()))
 					.toList();
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);

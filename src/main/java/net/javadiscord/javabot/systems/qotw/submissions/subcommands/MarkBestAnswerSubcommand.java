@@ -45,10 +45,17 @@ import net.javadiscord.javabot.util.Responses;
  * others to view.
  */
 public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param pointsService the {@link QOTWPointsService}
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public MarkBestAnswerSubcommand() {
+	public MarkBestAnswerSubcommand(QOTWPointsService pointsService, NotificationService notificationService) {
+		this.pointsService = pointsService;
+		this.notificationService=notificationService;
 		setSubcommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
 				.addOption(OptionType.STRING, "thread-id", "The submission's thread id.", true, true)
 		);
@@ -91,9 +98,8 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 							Responses.error(event.getHook(), "Could not find member with id: `%s`", submission.getAuthorId()).queue();
 							return;
 						}
-						QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-						service.increment(member.getIdLong());
-						NotificationService.withQOTW(event.getGuild(), member.getUser()).sendBestAnswerNotification();
+						pointsService.increment(member.getIdLong());
+						notificationService.withQOTW(event.getGuild(), member.getUser()).sendBestAnswerNotification();
 						sendBestAnswer(event.getHook(), messages, member, submissionThread);
 					}
 			);

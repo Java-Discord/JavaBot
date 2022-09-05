@@ -40,12 +40,15 @@ public class AutoMod extends ListenerAdapter {
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
 					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+	private final NotificationService notificationService;
 	private List<String> spamUrls;
 
 	/**
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
+	 * @param notificationService The {@link QOTWPointsService}
 	 */
-	public AutoMod() {
+	public AutoMod(NotificationService notificationService) {
+		this.notificationService = notificationService;
 		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
@@ -90,7 +93,7 @@ public class AutoMod extends ListenerAdapter {
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
 		if (message.getMentions().getUsers().size() >= 5) {
-			new ModerationService(Bot.getConfig().get(message.getGuild()))
+			new ModerationService(notificationService, Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -123,8 +126,8 @@ public class AutoMod extends ListenerAdapter {
 	private void checkContentAutomod(@Nonnull Message message) {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
-			NotificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message: `%s`", message.getContentRaw()));
-			new ModerationService(Bot.getConfig().get(message.getGuild()))
+			notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message: `%s`", message.getContentRaw()));
+			new ModerationService(notificationService, Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -141,8 +144,8 @@ public class AutoMod extends ListenerAdapter {
 
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
-			NotificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Suspicious Link sent by: %s (`%s`)", message.getAuthor().getAsMention(), message.getContentRaw()));
-			new ModerationService(Bot.getConfig().get(message.getGuild()))
+			notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Suspicious Link sent by: %s (`%s`)", message.getAuthor().getAsMention(), message.getContentRaw()));
+			new ModerationService(notificationService, Bot.getConfig().get(message.getGuild()))
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -167,7 +170,7 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
 			return;
 		}
-		new ModerationService(Bot.getConfig().get(member.getGuild()))
+		new ModerationService(notificationService, Bot.getConfig().get(member.getGuild()))
 				.timeout(
 						member,
 						"Automod: Spam",

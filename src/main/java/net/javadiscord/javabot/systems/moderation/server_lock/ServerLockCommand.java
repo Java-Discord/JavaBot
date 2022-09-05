@@ -11,9 +11,10 @@ public class ServerLockCommand extends SlashCommand implements CommandModeration
 	/**
 	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.Subcommand}s.
+	 * @param serverLockManager the service containing functionality regarding the server lock
 	 */
-	public ServerLockCommand() {
+	public ServerLockCommand(ServerLockManager serverLockManager) {
 		setModerationSlashCommandData(Commands.slash("serverlock-admin", "Administrative commands for managing the server lock functionality."));
-		addSubcommands(new SetLockStatusSubcommand(), new CheckLockStatusSubcommand());
+		addSubcommands(new SetLockStatusSubcommand(serverLockManager), new CheckLockStatusSubcommand());
 	}
 }

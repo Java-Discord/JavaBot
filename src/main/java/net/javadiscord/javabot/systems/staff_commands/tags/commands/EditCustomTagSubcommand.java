@@ -19,8 +19,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagRepository;
 import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
@@ -35,11 +35,16 @@ import java.util.Set;
 /**
  * <h3>This class represents the /tag-admin edit command.</h3>
  */
+@AutoDetectableComponentHandler("tag-edit")
 public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompletable, ModalHandler {
+	private final CustomTagManager customTagManager;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param customTagManager The {@link CustomTagManager}
 	 */
-	public EditCustomTagSubcommand() {
+	public EditCustomTagSubcommand(CustomTagManager customTagManager) {
+		this.customTagManager = customTagManager;
 		setSubcommandData(new SubcommandData("edit", "Edits a single Custom Tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
@@ -54,7 +59,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 		if (event.getGuild() == null) {
 			return Responses.replyGuildOnly(event);
 		}
-		Set<CustomTag> tags = Bot.getCustomTagManager().getLoadedCommands(event.getGuild().getIdLong());
+		Set<CustomTag> tags = customTagManager.getLoadedCommands(event.getGuild().getIdLong());
 		Optional<CustomTag> tagOptional = tags.stream()
 				.filter(t -> t.getName().equalsIgnoreCase(nameMapping.getAsString()))
 				.findFirst();
@@ -69,7 +74,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				.setPlaceholder("""
 						According to all known laws
 						of aviation,
-						      
+
 						there is no way a bee
 						should be able to fly...
 						""")
@@ -146,7 +151,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				Responses.error(event.getHook(), "Could not find Custom Tag with name `/%s`.", update.getName()).queue();
 				return;
 			}
-			if (Bot.getCustomTagManager().editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {
+			if (customTagManager.editCommand(event.getGuild().getIdLong(), tagOptional.get(), update)) {
 				event.getHook().sendMessageEmbeds(buildEditTagEmbed(event.getMember(), update)).queue();
 				return;
 			}

@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -24,6 +25,7 @@ import java.util.Optional;
  * Handles various interactions regarding the help channel system.
  */
 @Slf4j
+@AutoDetectableComponentHandler({"help-channel", "help-thank"})
 public class HelpChannelInteractionManager implements ButtonHandler {
 
 	/**

@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.util.Pair;
@@ -29,6 +30,7 @@ import java.util.List;
 /**
  * <h3>This class represents the /leaderboard help-experience command.</h3>
  */
+@AutoDetectableComponentHandler("experience-leaderboard")
 public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 	private static final int PAGE_SIZE = 5;
 

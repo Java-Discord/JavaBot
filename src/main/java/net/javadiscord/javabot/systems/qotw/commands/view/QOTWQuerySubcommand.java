@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
@@ -27,6 +28,7 @@ import java.util.List;
 /**
  * Represents the `/qotw-view query` subcommand. It allows for listing filtering QOTWs.
  */
+@AutoDetectableComponentHandler("qotw-list-questions")
 public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 
 	private static final int MAX_BUTTON_QUERY_LENGTH = 10;

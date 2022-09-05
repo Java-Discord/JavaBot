@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
@@ -35,6 +36,7 @@ import java.util.Map;
 /**
  * <h3>This class represents the /embed edit command.</h3>
  */
+@AutoDetectableComponentHandler(EditEmbedSubcommand.EDIT_EMBED_ID)
 public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler {
 	/**
 	 * The {@link Modal}s id for editing an embed.

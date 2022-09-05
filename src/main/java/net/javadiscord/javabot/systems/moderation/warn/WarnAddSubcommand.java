@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,10 +18,14 @@ import org.jetbrains.annotations.NotNull;
  * This Subcommand allows staff-members to add a single warn to any user.
  */
 public class WarnAddSubcommand extends SlashCommand.Subcommand {
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public WarnAddSubcommand() {
+	public WarnAddSubcommand(NotificationService notificationService) {
+		this.notificationService = notificationService;
 		setSubcommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
 				.addOptions(
 						new OptionData(OptionType.USER, "user", "The user to warn.", true),
@@ -54,7 +59,7 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService service = new ModerationService(event);
+		ModerationService service = new ModerationService(notificationService, event);
 		service.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
 		Responses.success(event, "User Warned", "%s has been successfully warned.", target.getAsMention()).queue();
 	}

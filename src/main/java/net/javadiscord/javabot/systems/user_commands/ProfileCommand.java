@@ -12,6 +12,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -27,10 +28,17 @@ import java.util.Optional;
  * <h3>This class represents the /profile command.</h3>
  */
 public class ProfileCommand extends SlashCommand {
+	private final QOTWPointsService qotwPointsService;
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param qotwPointsService The {@link QOTWPointsService}
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public ProfileCommand() {
+	public ProfileCommand(QOTWPointsService qotwPointsService, NotificationService notificationService) {
+		this.qotwPointsService = qotwPointsService;
+		this.notificationService = notificationService;
 		setSlashCommandData(Commands.slash("profile", "Shows your server profile.")
 				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)
 				.setGuildOnly(true)
@@ -49,16 +57,16 @@ public class ProfileCommand extends SlashCommand {
 			return;
 		}
 		try {
-			event.replyEmbeds(buildProfileEmbed(member, new QOTWPointsService(Bot.getDataSource()))).queue();
+			event.replyEmbeds(buildProfileEmbed(member)).queue();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
 
-	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member, @NotNull QOTWPointsService service) throws SQLException {
+	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member) throws SQLException {
 		GuildConfig config = Bot.getConfig().get(member.getGuild());
-		List<Warn> warns = new ModerationService(config).getWarns(member.getIdLong());
-		long points = service.getPoints(member.getIdLong());
+		List<Warn> warns = new ModerationService(notificationService, config).getWarns(member.getIdLong());
+		long points = qotwPointsService.getPoints(member.getIdLong());
 		List<Role> roles = member.getRoles();
 		String status = member.getOnlineStatus().name();
 		double helpXP = new HelpExperienceService(Bot.getDataSource()).getOrCreateAccount(member.getIdLong()).getExperience();
@@ -83,7 +91,7 @@ public class ProfileCommand extends SlashCommand {
 		}
 		embed.addField("QOTW-Points", String.format("`%s point%s (#%s)`",
 						points, points == 1 ? "" : "s",
-						service.getQOTWRank(member.getIdLong())), true)
+						qotwPointsService.getQOTWRank(member.getIdLong())), true)
 				.addField("Total Help XP", String.format("`%.2f XP`", helpXP), true)
 				.addField("Server joined", String.format("<t:%s:R>", member.getTimeJoined().toEpochSecond()), true)
 				.addField("Account created", String.format("<t:%s:R>", member.getUser().getTimeCreated().toEpochSecond()), true);

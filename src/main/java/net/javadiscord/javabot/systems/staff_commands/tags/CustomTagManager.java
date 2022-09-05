@@ -13,6 +13,7 @@ import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagReposito
 import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * basically customizable Slash Commands.
  */
 @Slf4j
+@Service
 public class CustomTagManager {
 	private static final Map<Long, Set<CustomTag>> LOADED_TAGS;
 

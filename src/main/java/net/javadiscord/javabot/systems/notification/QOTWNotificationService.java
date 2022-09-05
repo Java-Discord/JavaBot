@@ -25,14 +25,13 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 	private final User user;
 	private final QOTWAccount account;
 
-	QOTWNotificationService(@NotNull User user, Guild guild) {
-		super(guild);
+	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild) {
+		super(notificationService, guild);
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;
 		try {
-			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-			account = service.getOrCreateAccount(user.getIdLong());
+			account = pointsService.getOrCreateAccount(user.getIdLong());
 		} catch (SQLException e) {
 			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
 			account = null;
@@ -41,15 +40,15 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 	}
 
 	public void sendBestAnswerNotification() {
-		NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildBestAnswerEmbed(account.getPoints())));
+		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildBestAnswerEmbed(account.getPoints())));
 	}
 
 	public void sendAccountIncrementedNotification() {
-		NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildAccountIncrementEmbed(account.getPoints())));
+		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildAccountIncrementEmbed(account.getPoints())));
 	}
 
 	public void sendSubmissionDeclinedEmbed(@Nonnull String reason) {
-		NotificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(reason)));
+		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(reason)));
 	}
 
 	private @NotNull EmbedBuilder buildQOTWNotificationEmbed() {

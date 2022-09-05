@@ -26,15 +26,18 @@ public class PingableNameListener extends ListenerAdapter {
 	private static final String ADJECTIVES_URL = "https://gist.githubusercontent.com/karlbright/f91229b8c5ac6f4291dc/raw/4a69c2c50b88ee4559b021c443fee899535adc60/adjectives.txt";
 	private static final String NOUNS_URL = "https://raw.githubusercontent.com/hugsy/stuff/main/random-word/english-nouns.txt";
 	private static final Random random = new Random();
+	private final NotificationService notificationService;
 	private final List<String> nouns;
 	private final List<String> adjectives;
 
 	/**
 	 * Constructs a new PingableNameListener and loads nouns & adjectives.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public PingableNameListener() {
+	public PingableNameListener(NotificationService notificationService) {
 		nouns = readStrings(NOUNS_URL);
 		adjectives = readStrings(ADJECTIVES_URL);
+		this.notificationService = notificationService;
 		log.info("Loaded {} Nouns!", nouns.size());
 		log.info("Loaded {} Adjectives!", adjectives.size());
 	}
@@ -71,7 +74,7 @@ public class PingableNameListener extends ListenerAdapter {
 		member.getUser().openPrivateChannel()
 				.flatMap(channel -> channel.sendMessageFormat("Your nickname has been set to `%s` since both your user- and nickname's first three characters were deemed as not-pingable.", newName))
 				.queue();
-		NotificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName));
+		notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName));
 	}
 
 	/**

@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.qotw.submissions;
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import com.dynxsty.dih4jda.interactions.components.SelectMenuHandler;
+
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -12,6 +14,9 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,14 +25,18 @@ import java.util.List;
 /**
  * Handles all interactions regarding the QOTW Submission System.
  */
+@AutoDetectableComponentHandler({"qotw-submission","qotw-submission-select"})
+@RequiredArgsConstructor
 public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHandler {
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		SubmissionManager manager = new SubmissionManager(Bot.getConfig().get(event.getGuild()).getQotwConfig());
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
-			case "controls" -> SubmissionInteractionManager.handleControlButtons(id, event);
+			case "controls" -> handleControlButtons(id, event);
 			case "submit" -> manager.handleSubmission(event, Integer.parseInt(id[2])).queue();
 			case "delete" -> manager.handleThreadDeletion(event);
 		}
@@ -37,7 +46,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	public void handleSelectMenu(@NotNull SelectMenuInteractionEvent event, List<String> values) {
 		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
-		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
+		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel(), pointsService, notificationService);
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
@@ -59,9 +68,9 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	 * @param id    The button's id, split by ":".
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
-	public static void handleControlButtons(String[] id, @NotNull ButtonInteractionEvent event) {
+	public void handleControlButtons(String[] id, @NotNull ButtonInteractionEvent event) {
 		event.deferReply(true).queue();
-		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel());
+		SubmissionControlsManager manager = new SubmissionControlsManager(event.getGuild(), (ThreadChannel) event.getGuildChannel(), pointsService, notificationService);
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").queue();
 			return;

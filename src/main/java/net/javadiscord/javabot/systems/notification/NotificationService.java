@@ -1,38 +1,44 @@
 package net.javadiscord.javabot.systems.notification;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.function.Function;
 
 /**
  * Handles all types of guild & user notifications.
  */
+@Service
+@RequiredArgsConstructor
 public final class NotificationService {
-	private NotificationService() {
-	}
+
+	private final QOTWPointsService qotwPointsService;
 
 	@Contract("_ -> new")
-	public static @NotNull GuildNotificationService withGuild(Guild guild) {
+	public @NotNull GuildNotificationService withGuild(Guild guild) {
 		return new GuildNotificationService(guild);
 	}
 
 	@Contract("_ -> new")
-	public static @NotNull UserNotificationService withUser(User user) {
+	public @NotNull UserNotificationService withUser(User user) {
 		return new UserNotificationService(user);
 	}
 
-	public static @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
-		return new QOTWGuildNotificationService(guild);
+	public @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
+		return new QOTWGuildNotificationService(this, guild);
 	}
 
-	public static @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
-		return new QOTWNotificationService(user, guild);
+	public @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
+		return new QOTWNotificationService(this, qotwPointsService, user, guild);
 	}
 
 	/**

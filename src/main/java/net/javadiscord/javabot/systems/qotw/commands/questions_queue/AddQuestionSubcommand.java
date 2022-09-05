@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
@@ -23,6 +24,7 @@ import java.util.List;
 /**
  * Subcommand that allows staff-members to add question to the QOTW-Queue.
  */
+@AutoDetectableComponentHandler("qotw-add-question")
 public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandler {
 	public AddQuestionSubcommand() {
 		setSubcommandData(new SubcommandData("add", "Add a question to the queue."));

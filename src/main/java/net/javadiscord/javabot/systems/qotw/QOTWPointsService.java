@@ -10,6 +10,9 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 
 import javax.sql.DataSource;
+
+import org.springframework.stereotype.Service;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.Optional;
  * Service class which is used to get and manipulate other {@link QOTWAccount}s.
  */
 @RequiredArgsConstructor
+@Service
 public class QOTWPointsService {
 	private final DataSource dataSource;
 

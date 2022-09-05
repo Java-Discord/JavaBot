@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +22,14 @@ import org.jetbrains.annotations.NotNull;
  */
 @Slf4j
 public class RedeployCommand extends SlashCommand {
+	private final MessageCache messageCache;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param messageCache A service managing recent messages
 	 */
-	public RedeployCommand() {
+	public RedeployCommand(MessageCache messageCache) {
+		this.messageCache = messageCache;
 		setSlashCommandData(Commands.slash("redeploy", "(ADMIN-ONLY) Makes the bot redeploy.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
@@ -40,7 +45,7 @@ public class RedeployCommand extends SlashCommand {
 		}
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
 		event.reply("**Redeploying...** This may take some time.").queue();
-		Bot.getMessageCache().synchronize();
+		messageCache.synchronize();
 		System.exit(0);
 	}
 }

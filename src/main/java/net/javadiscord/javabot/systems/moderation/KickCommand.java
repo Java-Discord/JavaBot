@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
@@ -19,10 +20,14 @@ import javax.annotation.Nullable;
  * <h3>This class represents the /kick command.</h3>
  */
 public class KickCommand extends ModerateUserCommand {
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public KickCommand() {
+	public KickCommand(NotificationService notificationService) {
+		this.notificationService = notificationService;
 		setModerationSlashCommandData(Commands.slash("kick", "Kicks a member")
 				.addOption(OptionType.USER, "user", "The user to kick.", true)
 				.addOption(OptionType.STRING, "reason", "The reason for kicking this user.", true)
@@ -36,7 +41,7 @@ public class KickCommand extends ModerateUserCommand {
 			return Responses.replyInsufficientPermissions(event.getHook(), Permission.KICK_MEMBERS);
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService service = new ModerationService(event.getInteraction());
+		ModerationService service = new ModerationService(notificationService, event.getInteraction());
 		service.kick(target, reason, event.getMember(), event.getChannel(), quiet);
 		return Responses.success(event.getHook(), "User Kicked", "%s has been kicked.", target.getAsMention());
 	}

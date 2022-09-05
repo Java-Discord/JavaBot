@@ -19,8 +19,14 @@ import java.time.Instant;
  * Subcommands that removes all Elements on all ActionRows.
  */
 public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
+	private final NotificationService notificationService;
 
-	public RemoveSelfRolesSubcommand() {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param notificationService The {@link NotificationService}
+	 */
+	public RemoveSelfRolesSubcommand(NotificationService notificationService) {
+		this.notificationService = notificationService;
 		setSubcommandData(new SubcommandData("remove-all", "Removes all Self-Roles from a specified message.")
 				.addOption(OptionType.STRING, "message-id", "Id of the message.", true));
 	}
@@ -36,7 +42,7 @@ public class RemoveSelfRolesSubcommand extends SlashCommand.Subcommand {
 		event.getChannel().retrieveMessageById(idMapping.getAsLong()).queue(message -> {
 			message.editMessageComponents().queue();
 			MessageEmbed embed = buildSelfRoleDeletedEmbed(event.getUser(), message);
-			NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+			notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 			event.getHook().sendMessageEmbeds(embed).setEphemeral(true).queue();
 		}, e -> Responses.error(event.getHook(), e.getMessage()));
 	}

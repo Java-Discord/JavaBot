@@ -10,16 +10,21 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
+import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.util.Responses;
 
 /**
  * Allows staff members to get more detailed information about the message cache.
  */
 public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
+	private final MessageCache messageCache;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param messageCache A service managing recent messages
 	 */
-	public MessageCacheInfoSubcommand() {
+	public MessageCacheInfoSubcommand(MessageCache messageCache) {
+		this.messageCache = messageCache;
 		setSubcommandData(new SubcommandData("info", "Displays some info about the Message Cache."));
 		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
@@ -38,8 +43,8 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 				.setTitle("Message Cache Info")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Table Size", DbActions.getLogicalSize("message_cache") + " bytes", false)
-				.addField("Message Count", String.valueOf(Bot.getMessageCache().messageCount), true)
-				.addField("Cached (Memory)", String.format("%s/%s (%.2f%%)", Bot.getMessageCache().cache.size(), maxMessages, ((float) Bot.getMessageCache().cache.size() / maxMessages) * 100), true)
+				.addField("Message Count", String.valueOf(messageCache.messageCount), true)
+				.addField("Cached (Memory)", String.format("%s/%s (%.2f%%)", messageCache.cache.size(), maxMessages, ((float) messageCache.cache.size() / maxMessages) * 100), true)
 				.addField("Cached (Database)", String.format("%s/%s (%.2f%%)", messages, maxMessages, ((float) messages / maxMessages) * 100), true)
 				.build();
 	}

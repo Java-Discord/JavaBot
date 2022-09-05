@@ -26,10 +26,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 /**
  * Listens for Incoming Messages and stores them in the Message Cache.
  */
 @Slf4j
+@Service
 public class MessageCache {
 	/**
 	 * A memory-cache (list) of sent Messages, wrapped to a {@link CachedMessage} object.
@@ -163,9 +166,9 @@ public class MessageCache {
 				Author: %s
 				ID: %s
 				Created at: %s
-								
+
 				--- Message Content ---
-								
+
 				%s
 				""", author.getAsTag(), message.getMessageId(), formatter.format(instant), message.getMessageContent());
 		return new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));
@@ -178,13 +181,13 @@ public class MessageCache {
 				Author: %s
 				ID: %s
 				Created at: %s
-								
+
 				--- Message Content (before) ---
-								
+
 				%s
-								
+
 				--- Message Content (after) ---
-								
+
 				%s
 				""", author.getAsTag(), before.getMessageId(), formatter.format(instant), before.getMessageContent(), after.getContentRaw());
 		return new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));

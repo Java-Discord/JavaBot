@@ -22,10 +22,14 @@ import java.sql.SQLException;
  * This Subcommand allows staff-members to edit the QOTW-Point amount of any user.
  */
 public class SetPointsSubcommand extends SlashCommand.Subcommand {
+	private final QOTWPointsService service;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param service The {@link QOTWPointsService}
 	 */
-	public SetPointsSubcommand() {
+	public SetPointsSubcommand(QOTWPointsService service) {
+		this.service = service;
 		setSubcommandData(new SubcommandData("set", "Allows to modify the QOTW-Points of a single user.")
 				.addOption(OptionType.USER, "user", "The user whose points should be changed.", true)
 				.addOption(OptionType.INTEGER, "points", "The amount of points.", true)
@@ -43,7 +47,6 @@ public class SetPointsSubcommand extends SlashCommand.Subcommand {
 		Member member = memberMapping.getAsMember();
 		long points = pointsMapping.getAsLong();
 		try (Connection con = Bot.getDataSource().getConnection()) {
-			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 			QOTWAccount account = service.getOrCreateAccount(member.getIdLong());
 			account.setPoints(points);
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);

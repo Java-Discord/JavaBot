@@ -17,10 +17,14 @@ import java.util.Collections;
  * <h3>This class represents the /serverlock-admin set-status command.</h3>
  */
 public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
+	private final ServerLockManager serverLockManager;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param serverLockManager the service containing functionality regarding the server lock
 	 */
-	public SetLockStatusSubcommand() {
+	public SetLockStatusSubcommand(ServerLockManager serverLockManager) {
+		this.serverLockManager = serverLockManager;
 		setSubcommandData(new SubcommandData("set-status", "Command for changing the current server lock status.")
 				.addOption(OptionType.BOOLEAN, "locked", "Whether the server should be locked or not.", true));
 	}
@@ -50,9 +54,9 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 		config.getServerLockConfig().setLocked(String.valueOf(locked));
 		Bot.getConfig().flush();
 		if (locked) {
-			Bot.getServerLockManager().lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
+			serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
 		} else {
-			Bot.getServerLockManager().unlockServer(event.getGuild(), event.getUser());
+			serverLockManager.unlockServer(event.getGuild(), event.getUser());
 		}
 		Responses.info(event, "Server Lock Status", "Successfully %slocked the current server!", locked ? "" : "un").queue();
 	}
