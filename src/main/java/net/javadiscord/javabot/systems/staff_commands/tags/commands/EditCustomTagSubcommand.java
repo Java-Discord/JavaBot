@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
@@ -38,13 +39,18 @@ import java.util.Set;
 @AutoDetectableComponentHandler("tag-edit")
 public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompletable, ModalHandler {
 	private final CustomTagManager customTagManager;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param customTagManager The {@link CustomTagManager}
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public EditCustomTagSubcommand(CustomTagManager customTagManager) {
+	public EditCustomTagSubcommand(CustomTagManager customTagManager, BotConfig botConfig, DbHelper dbHelper) {
+		super(botConfig);
 		this.customTagManager = customTagManager;
+		this.dbHelper = dbHelper;
 		setSubcommandData(new SubcommandData("edit", "Edits a single Custom Tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
@@ -145,7 +151,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 		update.setEmbed(Boolean.parseBoolean(embedMapping.getAsString()));
 
 		event.deferReply(true).queue();
-		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {
+		dbHelper.doDaoAction(CustomTagRepository::new, dao -> {
 			Optional<CustomTag> tagOptional = dao.findByName(event.getGuild().getIdLong(), update.getName());
 			if (tagOptional.isEmpty()) {
 				Responses.error(event.getHook(), "Could not find Custom Tag with name `/%s`.", update.getName()).queue();

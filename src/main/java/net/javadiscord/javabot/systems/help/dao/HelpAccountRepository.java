@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.help.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class HelpAccountRepository {
 	private final Connection con;
+	private final BotConfig botConfig;
 
 	/**
 	 * Inserts a new {@link HelpAccount}.
@@ -122,7 +124,7 @@ public class HelpAccountRepository {
 	}
 
 	private @NotNull HelpAccount read(@NotNull ResultSet rs) throws SQLException {
-		HelpAccount account = new HelpAccount();
+		HelpAccount account = new HelpAccount(botConfig);
 		account.setUserId(rs.getLong("user_id"));
 		account.setExperience(rs.getDouble("experience"));
 		return account;

@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Pair;
@@ -57,8 +58,10 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public EditEmbedSubcommand() {
+	public EditEmbedSubcommand(BotConfig botConfig) {
+		super(botConfig);
 		setSubcommandData(new SubcommandData("edit", "Edits a single embed message.")
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "The embed's message id.", true),

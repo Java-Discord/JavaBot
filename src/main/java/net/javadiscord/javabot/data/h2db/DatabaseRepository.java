@@ -27,6 +27,7 @@ public abstract class DatabaseRepository<T> {
 	private final Class<T> modelClass;
 	private final String tableName;
 	private final List<TableProperty<T>> properties;
+	private final DbActions dbActions;
 
 	/**
 	 * Inserts a single instance of the specified model class into the database.
@@ -67,7 +68,7 @@ public abstract class DatabaseRepository<T> {
 	}
 
 	public final int update(String query, Object... args) throws SQLException {
-		return DbActions.update(query, args);
+		return dbActions.update(query, args);
 	}
 
 	/**
@@ -120,15 +121,15 @@ public abstract class DatabaseRepository<T> {
 	}
 
 	public final long count() {
-		return DbActions.count("SELECT COUNT (*) FROM " + tableName);
+		return dbActions.count("SELECT COUNT (*) FROM " + tableName);
 	}
 
 	public final long count(String query, Object... args) {
-		return DbActions.count(String.format(query, args));
+		return dbActions.count(String.format(query, args));
 	}
 
 	public final int getLogicalSize() {
-		return DbActions.getLogicalSize(tableName);
+		return dbActions.getLogicalSize(tableName);
 	}
 
 	/**

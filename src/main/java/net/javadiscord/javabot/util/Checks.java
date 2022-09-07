@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -28,12 +28,12 @@ public final class Checks {
 	private Checks() {
 	}
 
-	public static boolean hasStaffRole(Guild guild, @NotNull Member member) {
-		return member.getRoles().contains(Bot.getConfig().get(guild).getModerationConfig().getStaffRole());
+	public static boolean hasStaffRole(BotConfig botConfig, @NotNull Member member) {
+		return member.getRoles().contains(botConfig.get(member.getGuild()).getModerationConfig().getStaffRole());
 	}
 
-	public static boolean hasAdminRole(Guild guild, @NotNull Member member) {
-		return member.getRoles().contains(Bot.getConfig().get(guild).getModerationConfig().getAdminRole());
+	public static boolean hasAdminRole(BotConfig botConfig, @NotNull Member member) {
+		return member.getRoles().contains(botConfig.get(member.getGuild()).getModerationConfig().getAdminRole());
 	}
 
 	public static boolean hasPermissions(Guild guild, @NotNull Set<Permission> perms) {

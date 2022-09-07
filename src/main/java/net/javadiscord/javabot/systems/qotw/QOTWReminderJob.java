@@ -2,7 +2,7 @@ package net.javadiscord.javabot.systems.qotw;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -17,6 +17,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import javax.sql.DataSource;
+
 /**
  * Checks that there's a question in the QOTW queue ready for posting soon.
  */
@@ -25,6 +27,8 @@ import java.util.Optional;
 public class QOTWReminderJob {
 	private final JDA jda;
 	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DataSource dataSource;
 
 	/**
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
@@ -33,8 +37,8 @@ public class QOTWReminderJob {
 	@Scheduled(cron = "0 0 9 * * *")//daily, 09:00
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
-			ModerationConfig config = Bot.getConfig().get(guild).getModerationConfig();
-			try (Connection c = Bot.getDataSource().getConnection()) {
+			ModerationConfig config = botConfig.get(guild).getModerationConfig();
+			try (Connection c = dataSource.getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				Optional<QOTWQuestion> q = repo.getNextQuestion(guild.getIdLong());
 				if (q.isEmpty()) {

@@ -33,11 +33,14 @@ import java.util.List;
 @AutoDetectableComponentHandler("experience-leaderboard")
 public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 	private static final int PAGE_SIZE = 5;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param dbHelper An object managing databse operations
 	 */
-	public ExperienceLeaderboardSubcommand() {
+	public ExperienceLeaderboardSubcommand(DbHelper dbHelper) {
+		this.dbHelper = dbHelper;
 		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
 		);
@@ -47,7 +50,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		event.deferEdit().queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
-		DbHelper.doDaoAction(HelpAccountRepository::new, dao -> {
+		dbHelper.doDaoAction(HelpAccountRepository::new, dao -> {
 			int page = Integer.parseInt(id[2]);
 			// increment/decrement page
 			if (id[1].equals("left")) {
@@ -94,7 +97,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		int page = event.getOption("page", 1, OptionMapping::getAsInt);
 		event.deferReply().queue();
-		DbHelper.doDaoAction(HelpAccountRepository::new, dao ->
+		dbHelper.doDaoAction(HelpAccountRepository::new, dao ->
 				event.getHook().sendMessageEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
 						.addActionRows(buildPageControls(page))
 						.queue());

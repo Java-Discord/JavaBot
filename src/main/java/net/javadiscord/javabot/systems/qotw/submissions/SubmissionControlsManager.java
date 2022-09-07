@@ -9,18 +9,15 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -36,52 +33,52 @@ public class SubmissionControlsManager {
 
 	private final Guild guild;
 	private final QOTWConfig config;
-	private final QOTWSubmission submission;
+	private QOTWSubmission submission;
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param guild               The current {@link Guild}.
+	 * @param guildConfig         Configuration of the guild where submission controls should be managed.
 	 * @param submission          The {@link QOTWSubmission}.
 	 * @param pointsService       The {@link QOTWPointsService}
 	 * @param notificationService The {@link NotificationService}
+	 * @param dbHelper            An object managing databse operations
 	 */
-	public SubmissionControlsManager(Guild guild, QOTWSubmission submission, QOTWPointsService pointsService, NotificationService notificationService) {
-		this.guild = guild;
+	public SubmissionControlsManager(GuildConfig guildConfig, DbHelper dbHelper, QOTWSubmission submission, QOTWPointsService pointsService, NotificationService notificationService) {
+		this.guild = guildConfig.getGuild();
 		this.submission = submission;
-		this.config = Bot.getConfig().get(guild).getQotwConfig();
+		this.config = guildConfig.getQotwConfig();
 		this.pointsService = pointsService;
 		this.notificationService = notificationService;
+		this.dbHelper=dbHelper;
 	}
 
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param guild               The current {@link Guild}.
+	 * @param guildConfig         Configuration of the guild where submission controls should be managed.
 	 * @param channel             The {@link ThreadChannel}, which is used to retrieve the corresponding {@link QOTWSubmission}.
 	 * @param pointsService       The {@link QOTWPointsService}
 	 * @param notificationService The {@link NotificationService}
+	 * @param dbHelper            An object managing databse operations
 	 */
-	public SubmissionControlsManager(Guild guild, ThreadChannel channel, QOTWPointsService pointsService, NotificationService notificationService) {
-		QOTWSubmission submission = null;
-		try (Connection con = Bot.getDataSource().getConnection()) {
-			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
+	public SubmissionControlsManager(GuildConfig guildConfig, DbHelper dbHelper, ThreadChannel channel, QOTWPointsService pointsService, NotificationService notificationService) {
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, repo->{
 			Optional<QOTWSubmission> submissionOptional = repo.getSubmissionByThreadId(channel.getIdLong());
 			if (submissionOptional.isEmpty()) {
 				log.error("Could not retrieve Submission from Thread: " + channel.getId());
 			} else {
 				submission = submissionOptional.get();
 			}
-		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-		}
-		this.guild = guild;
-		this.submission = submission;
-		this.config = Bot.getConfig().get(guild).getQotwConfig();
+		});
+		this.guild = guildConfig.getGuild();
+		this.config = guildConfig.getQotwConfig();
 		this.pointsService = pointsService;
 		this.notificationService = notificationService;
+		this.dbHelper=dbHelper;
 	}
 
 	/**
@@ -116,7 +113,7 @@ public class SubmissionControlsManager {
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
 	protected void acceptSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.ACCEPTED));
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
 			pointsService.increment(user.getIdLong());
@@ -136,7 +133,7 @@ public class SubmissionControlsManager {
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
 	protected void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED));
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		event.getJDA().retrieveUserById(submission.getAuthorId()).queue(user -> {
 			notificationService.withQOTW(event.getGuild(), user).sendSubmissionDeclinedEmbed(String.join(", ", event.getValues()));
@@ -155,7 +152,7 @@ public class SubmissionControlsManager {
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
 	protected void deleteSubmission(ButtonInteractionEvent event, ThreadChannel thread) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> dao.deleteSubmission(thread.getIdLong()));
 		event.getHook().sendMessage("This Submission will be deleted in 10 seconds.").setEphemeral(true).queue();
 		this.disableControls(String.format("Deleted by %s", event.getUser().getAsTag()), event.getMessage());
 		notificationService.withQOTW(guild).sendSubmissionActionNotification(event.getUser(), thread, SubmissionStatus.DELETED);

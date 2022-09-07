@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
@@ -32,8 +33,10 @@ import java.util.List;
 public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHandler {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public AddEmbedFieldSubcommand() {
+	public AddEmbedFieldSubcommand(BotConfig botConfig) {
+		super(botConfig);
 		setSubcommandData(new SubcommandData("add-field", "Adds a field to an embed message.")
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "The embed's message id.", true),

@@ -1,12 +1,16 @@
 package net.javadiscord.javabot.systems.user_preferences;
 
 import lombok.RequiredArgsConstructor;
+import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.user_preferences.dao.UserPreferenceRepository;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.sql.DataSource;
+
+import org.springframework.stereotype.Service;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -15,7 +19,9 @@ import java.util.Optional;
  * Handles & manages user preferences.
  */
 @RequiredArgsConstructor
+@Service
 public class UserPreferenceService {
+	private final DbActions dbActions;
 	private final DataSource dataSource;
 
 	/**
@@ -29,7 +35,7 @@ public class UserPreferenceService {
 	 */
 	public boolean setOrCreate(long userId, Preference preference, boolean enabled) {
 		try (Connection con = dataSource.getConnection()) {
-			UserPreferenceRepository repo = new UserPreferenceRepository(con);
+			UserPreferenceRepository repo = new UserPreferenceRepository(dbActions, con);
 			Optional<UserPreference> preferenceOptional = repo.getById(userId, preference);
 			if (preferenceOptional.isPresent()) {
 				return repo.updateState(userId, preference, enabled);
@@ -56,7 +62,7 @@ public class UserPreferenceService {
 	 */
 	public UserPreference getOrCreate(long userId, Preference preference) {
 		try (Connection con = dataSource.getConnection()) {
-			UserPreferenceRepository repo = new UserPreferenceRepository(con);
+			UserPreferenceRepository repo = new UserPreferenceRepository(dbActions, con);
 			Optional<UserPreference> preferenceOptional = repo.getById(userId, preference);
 			if (preferenceOptional.isPresent()) {
 				return preferenceOptional.get();

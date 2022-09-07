@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -26,7 +26,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
 
 /**
  * <h3>This class represents the /db-admin migrate command.</h3>
@@ -40,13 +43,22 @@ import java.util.stream.Stream;
  * </p>
  */
 public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCompletable {
+
+	private final ExecutorService asyncPool;
+	private final DataSource dataSource;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param dataSource A factory for connections to the main database
+	 * @param systemsConfig Configuration for various systems
 	 */
-	public MigrateSubcommand() {
+	public MigrateSubcommand(ExecutorService asyncPool, DataSource dataSource, SystemsConfig systemsConfig) {
+		this.asyncPool = asyncPool;
+		this.dataSource = dataSource;
 		setSubcommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
 				.addOption(OptionType.STRING, "name", "The migration's filename", true, true));
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -88,8 +100,8 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 				return;
 			}
 			event.deferReply().queue();
-			Bot.getAsyncPool().submit(() -> {
-				try (Connection con = Bot.getDataSource().getConnection()) {
+			asyncPool.submit(() -> {
+				try (Connection con = dataSource.getConnection()) {
 					for (int i = 0; i < statements.length; i++) {
 						if (statements[i].isBlank()) {
 							event.getHook().sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();

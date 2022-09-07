@@ -1,9 +1,10 @@
 package net.javadiscord.javabot.systems.help.model;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,9 @@ import java.util.Optional;
  * Data class that represents a single Help User Account.
  */
 @Data
+@RequiredArgsConstructor
 public class HelpAccount {
+	private final BotConfig botConfig;
 	private long userId;
 	private double experience;
 
@@ -31,7 +34,7 @@ public class HelpAccount {
 	 * @return A {@link Pair} with both the Role, and the experience needed.
 	 */
 	public @NotNull Pair<Role, Double> getCurrentExperienceGoal(Guild guild) {
-		Map<Long, Double> experienceRoles = Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles();
+		Map<Long, Double> experienceRoles = botConfig.get(guild).getHelpConfig().getExperienceRoles();
 		Map.Entry<Long, Double> highestExperience = Map.entry(0L, 0.0);
 		for (Map.Entry<Long, Double> entry : experienceRoles.entrySet()) {
 			if (experience > entry.getValue() && entry.getValue() > highestExperience.getValue()) {
@@ -48,7 +51,7 @@ public class HelpAccount {
 	 * @return The {@link Pair} with both the Role, and the experience needed.
 	 */
 	public @Nullable Pair<Role, Double> getPreviousExperienceGoal(Guild guild) {
-		Map<Long, Double> experienceRoles = Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles();
+		Map<Long, Double> experienceRoles = botConfig.get(guild).getHelpConfig().getExperienceRoles();
 		Optional<Pair<Role, Double>> experienceOptional = experienceRoles.entrySet().stream()
 				.filter(r -> r.getValue() < experience)
 				.map(e -> new Pair<>(guild.getRoleById(e.getKey()), e.getValue()))
@@ -63,7 +66,7 @@ public class HelpAccount {
 	 * @return A {@link Pair} with both the Role, and the experience needed.
 	 */
 	public @NotNull Pair<Role, Double> getNextExperienceGoal(Guild guild) {
-		Map<Long, Double> experienceRoles = Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles();
+		Map<Long, Double> experienceRoles = botConfig.get(guild).getHelpConfig().getExperienceRoles();
 		Map.Entry<Long, Double> entry = experienceRoles.entrySet()
 				.stream()
 				.filter(r -> r.getValue() > experience)

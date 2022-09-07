@@ -3,7 +3,6 @@ package net.javadiscord.javabot.systems.qotw;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -59,7 +58,7 @@ public class QOTWPointsService {
 	 * @return The QOTW-Rank as an integer.
 	 */
 	public int getQOTWRank(long userId) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints();
 			return accounts.stream()
@@ -95,7 +94,7 @@ public class QOTWPointsService {
 	 * @return A {@link List} with the top member ids.
 	 */
 	public List<Pair<QOTWAccount, Member>> getTopMembers(int n, Guild guild) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints();
 			return accounts.stream()
@@ -117,7 +116,7 @@ public class QOTWPointsService {
 	 * @return An unmodifiable {@link List} of {@link QOTWAccount}s.
 	 */
 	public List<QOTWAccount> getTopAccounts(int amount, int page) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			return repo.getTopAccounts(page, amount);
 		} catch (SQLException e) {

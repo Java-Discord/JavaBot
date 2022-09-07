@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
@@ -20,6 +19,8 @@ import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
+import javax.sql.DataSource;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -29,6 +30,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Command for QOTW Leaderboard.
@@ -46,16 +48,26 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	private static final int WIDTH = 3000;
 
 	private final QOTWPointsService pointsService;
+	private final ExecutorService asyncPool;
+	private final DataSource dataSource;
 
-	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService) {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param pointsService The {@link QOTWPointsService} managing {@link QOTWAccount}s
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param dataSource A factory for connections to the main database
+	 */
+	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool, DataSource dataSource) {
 		setSubcommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
 		this.pointsService=pointsService;
+		this.asyncPool = asyncPool;
+		this.dataSource = dataSource;
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		event.deferReply().queue();
-		Bot.getAsyncPool().submit(() -> {
+		asyncPool.submit(() -> {
 			try {
 				WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
 				// check whether the image may already been cached
@@ -180,7 +192,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The image's cache name.
 	 */
 	private @NotNull String getCacheName() {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			QuestionPointsRepository repo = new QuestionPointsRepository(con);
 			List<QOTWAccount> accounts = repo.sortByPoints()
 					.stream()

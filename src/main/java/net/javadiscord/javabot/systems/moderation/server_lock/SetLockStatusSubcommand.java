@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
@@ -18,13 +18,16 @@ import java.util.Collections;
  */
 public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 	private final ServerLockManager serverLockManager;
+	private final BotConfig botConfig;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param serverLockManager the service containing functionality regarding the server lock
+	 * @param botConfig The main configuration of the bot
 	 */
-	public SetLockStatusSubcommand(ServerLockManager serverLockManager) {
+	public SetLockStatusSubcommand(ServerLockManager serverLockManager, BotConfig botConfig) {
 		this.serverLockManager = serverLockManager;
+		this.botConfig = botConfig;
 		setSubcommandData(new SubcommandData("set-status", "Command for changing the current server lock status.")
 				.addOption(OptionType.BOOLEAN, "locked", "Whether the server should be locked or not.", true));
 	}
@@ -40,11 +43,11 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
-			Responses.replyStaffOnly(event, event.getGuild()).queue();
+		if (!Checks.hasStaffRole(botConfig, event.getMember())) {
+			Responses.replyStaffOnly(event, botConfig).queue();
 			return;
 		}
-		GuildConfig config = Bot.getConfig().get(event.getGuild());
+		GuildConfig config = botConfig.get(event.getGuild());
 		boolean locked = lockedMapping.getAsBoolean();
 		if (locked == config.getServerLockConfig().isLocked()) {
 			Responses.info(event, String.format("Server already %slocked", locked ? "" : "un"),
@@ -52,7 +55,7 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		config.getServerLockConfig().setLocked(String.valueOf(locked));
-		Bot.getConfig().flush();
+		botConfig.flush();
 		if (locked) {
 			serverLockManager.lockServer(event.getGuild(), Collections.emptyList(), event.getUser());
 		} else {

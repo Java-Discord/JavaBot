@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
@@ -36,8 +37,10 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param tagManager The {@link CustomTagManager}
+	 * @param botConfig The main configuration of the bot
 	 */
-	public CreateCustomTagSubcommand(CustomTagManager tagManager) {
+	public CreateCustomTagSubcommand(CustomTagManager tagManager, BotConfig botConfig) {
+		super(botConfig);
 		this.tagManager = tagManager;
 		setSubcommandData(new SubcommandData("create", "Creates a new Custom Tag."));
 	}

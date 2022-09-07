@@ -2,13 +2,16 @@ package net.javadiscord.javabot.data.h2db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.h2.tools.Server;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,18 +22,26 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 /**
  * Class that provides helper methods for dealing with the database.
  */
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class DbHelper {
-	private DbHelper() {
-	}
+	@Getter
+	private final DataSource dataSource;
+	private final ExecutorService asyncPool;
+	private final BotConfig botConfig;
 
 	/**
 	 * Initializes the data source that'll be used throughout the bot to access
@@ -80,9 +91,9 @@ public class DbHelper {
 	 *
 	 * @param consumer The consumer that will use a connection.
 	 */
-	public static void doDbAction(ConnectionConsumer consumer) {
-		Bot.getAsyncPool().submit(() -> {
-			try (Connection c = Bot.getDataSource().getConnection()) {
+	public void doDbAction(ConnectionConsumer consumer) {
+		asyncPool.submit(() -> {
+			try (Connection c = dataSource.getConnection()) {
 				consumer.consume(c);
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
@@ -99,10 +110,23 @@ public class DbHelper {
 	 * @param consumer       The consumer that does something with the DAO.
 	 * @param <T>            The type of data access object. Usually some kind of repository.
 	 */
-	public static <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
-		Bot.getAsyncPool().submit(() -> {
-			try (Connection c = Bot.getDataSource().getConnection()) {
-				T dao = daoConstructor.apply(c);
+	public <T> void doDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
+		doDaoAction((con,conf)->daoConstructor.apply(con), consumer);
+	}
+
+	/**
+	 * Does an asynchronous database action using the bot's async pool, and
+	 * wraps access to the connection behind a data access object that can be
+	 * built using the provided dao constructor.
+	 *
+	 * @param daoConstructor A function to build a DAO using a connection.
+	 * @param consumer       The consumer that does something with the DAO.
+	 * @param <T>            The type of data access object. Usually some kind of repository.
+	 */
+	public <T> void doDaoAction(BiFunction<Connection, BotConfig, T> daoConstructor, DaoConsumer<T> consumer) {
+		asyncPool.submit(() -> {
+			try (Connection c = dataSource.getConnection()) {
+				T dao = daoConstructor.apply(c, botConfig);
 				consumer.consume(dao);
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());

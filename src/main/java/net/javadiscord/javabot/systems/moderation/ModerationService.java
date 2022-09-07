@@ -1,11 +1,10 @@
 package net.javadiscord.javabot.systems.moderation;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
@@ -31,22 +30,25 @@ import java.util.Optional;
  * This service provides methods for performing moderation actions, like banning
  * or warning users.
  */
-@Slf4j
 public class ModerationService {
 	private static final int BAN_DELETE_DAYS = 7;
 
 	private final NotificationService notificationService;
 	private final ModerationConfig moderationConfig;
 
+	private final DbHelper dbHelper;
+
 	/**
 	 * Constructs the service.
 	 *
 	 * @param config The {@link GuildConfig} to use.
 	 * @param notificationService The {@link NotificationService}
+	 * @param dbHelper An object managing databse operations
 	 */
-	public ModerationService(NotificationService notificationService,@NotNull GuildConfig config) {
-		this.notificationService=notificationService;
+	public ModerationService(NotificationService notificationService,@NotNull GuildConfig config, DbHelper dbHelper) {
+		this.notificationService = notificationService;
 		this.moderationConfig = config.getModerationConfig();
+		this.dbHelper = dbHelper;
 	}
 
 	/**
@@ -54,11 +56,14 @@ public class ModerationService {
 	 *
 	 * @param interaction The interaction to use.
 	 * @param notificationService The {@link NotificationService}
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public ModerationService(NotificationService notificationService, @NotNull Interaction interaction) {
+	public ModerationService(NotificationService notificationService,BotConfig botConfig, @NotNull Interaction interaction, DbHelper dbHelper) {
 		this(
 				notificationService,
-				Bot.getConfig().get(interaction.getGuild())
+				botConfig.get(interaction.getGuild()),
+				dbHelper
 		);
 	}
 
@@ -73,7 +78,7 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 */
 	public void warn(User user, WarnSeverity severity, String reason, Member warnedBy, MessageChannel channel, boolean quiet) {
-		DbHelper.doDaoAction(WarnRepository::new, dao -> {
+		dbHelper.doDaoAction(WarnRepository::new, dao -> {
 			dao.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
 			int totalSeverity = dao.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
 			MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
@@ -95,7 +100,7 @@ public class ModerationService {
 	 * @param clearedBy The user who cleared the warns.
 	 */
 	public void discardAllWarns(User user, User clearedBy) {
-		DbHelper.doDaoAction(WarnRepository::new, dao -> {
+		dbHelper.doDaoAction(WarnRepository::new, dao -> {
 			dao.discardAll(user.getIdLong());
 			MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
 			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
@@ -111,7 +116,7 @@ public class ModerationService {
 	 * @return Whether the Warn was discarded or not.
 	 */
 	public boolean discardWarnById(long id, User clearedBy) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dbHelper.getDataSource().getConnection()) {
 			WarnRepository repo = new WarnRepository(con);
 			Optional<Warn> warnOptional = repo.findById(id);
 			if (warnOptional.isPresent()) {
@@ -133,7 +138,7 @@ public class ModerationService {
 	 * @return A {@link List} with all warns.
 	 */
 	public List<Warn> getWarns(long userId) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dbHelper.getDataSource().getConnection()) {
 			WarnRepository repo = new WarnRepository(con);
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays());
 			return repo.getWarnsByUserId(userId, cutoff);

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.util.WebhookUtil;
 
@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 @RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
 	private final AutoMod autoMod;
+	private final BotConfig botConfig;
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
@@ -33,7 +34,7 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
-		if (event.getChannel().getIdLong() == Bot.getConfig().get(event.getGuild()).getModerationConfig()
+		if (event.getChannel().getIdLong() == botConfig.get(event.getGuild()).getModerationConfig()
 				.getSuggestionChannelId()) {
 			return;
 		}

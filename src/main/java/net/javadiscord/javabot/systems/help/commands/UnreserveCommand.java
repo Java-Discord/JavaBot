@@ -1,5 +1,9 @@
 package net.javadiscord.javabot.systems.help.commands;
 
+import java.util.concurrent.ScheduledExecutorService;
+
+import javax.sql.DataSource;
+
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -7,8 +11,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.util.Responses;
 
@@ -17,10 +22,22 @@ import net.javadiscord.javabot.util.Responses;
  * immediately unreserve them, instead of waiting for a timeout.
  */
 public class UnreserveCommand extends SlashCommand {
+	private final BotConfig botConfig;
+	private final DataSource dataSource;
+	private final ScheduledExecutorService asyncPool;
+	private final DbActions dbActions;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param botConfig The main configuration of the bot
+	 * @param dbActions A utility object providing various operations on the main database
 	 */
-	public UnreserveCommand() {
+	public UnreserveCommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions) {
+		this.botConfig = botConfig;
+		this.dataSource = dbActions.getDataSource();
+		this.asyncPool = asyncPool;
+		this.dbActions = dbActions;
 		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
@@ -30,10 +47,9 @@ public class UnreserveCommand extends SlashCommand {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		TextChannel channel = event.getChannel().asTextChannel();
-		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
-		HelpChannelManager channelManager = new HelpChannelManager(config);
+		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool);
 		User owner = channelManager.getReservedChannelOwner(channel);
-		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
+		if (isEligibleToBeUnreserved(event, channel, botConfig.get(event.getGuild()).getHelpConfig(), owner)) {
 			String reason = event.getOption("reason", null, OptionMapping::getAsString);
 			event.deferReply(true).queue();
 			channelManager.unreserveChannelByOwner(channel, owner, reason, event);
@@ -57,11 +73,11 @@ public class UnreserveCommand extends SlashCommand {
 
 	private boolean memberHasStaffRole(SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
-				event.getMember().getRoles().contains(Bot.getConfig().get(event.getGuild()).getModerationConfig().getStaffRole());
+				event.getMember().getRoles().contains(botConfig.get(event.getGuild()).getModerationConfig().getStaffRole());
 	}
 
 	private boolean memberHasHelperRole(SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
-				event.getMember().getRoles().contains(Bot.getConfig().get(event.getGuild()).getHelpConfig().getHelperRole());
+				event.getMember().getRoles().contains(botConfig.get(event.getGuild()).getHelpConfig().getHelperRole());
 	}
 }

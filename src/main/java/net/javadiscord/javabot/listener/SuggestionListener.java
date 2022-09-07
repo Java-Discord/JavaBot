@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.util.MessageActionUtils;
@@ -24,6 +24,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class SuggestionListener extends ListenerAdapter {
 	private final AutoMod autoMod;
+	private final BotConfig botConfig;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -56,7 +57,7 @@ public class SuggestionListener extends ListenerAdapter {
 		if (event.getChannelType() == ChannelType.PRIVATE) return false;
 		return !event.getAuthor().isBot() && !event.getAuthor().isSystem() && !event.getMember().isTimedOut() &&
 				event.getMessage().getType() != MessageType.THREAD_CREATED &&
-				event.getChannel().getIdLong() == Bot.getConfig().get(event.getGuild()).getModerationConfig().getSuggestionChannelId();
+				event.getChannel().getIdLong() == botConfig.get(event.getGuild()).getModerationConfig().getSuggestionChannelId();
 	}
 
 	/**
@@ -66,7 +67,7 @@ public class SuggestionListener extends ListenerAdapter {
 	 * @return A {@link RestAction}.
 	 */
 	private RestAction<?> addReactions(Message message) {
-		SystemsConfig.EmojiConfig config = Bot.getConfig().getSystems().getEmojiConfig();
+		SystemsConfig.EmojiConfig config = botConfig.getSystems().getEmojiConfig();
 		return RestAction.allOf(
 				message.addReaction(config.getUpvoteEmote(message.getJDA())),
 				message.addReaction(config.getDownvoteEmote(message.getJDA()))

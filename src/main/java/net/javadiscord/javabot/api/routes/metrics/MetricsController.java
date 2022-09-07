@@ -4,10 +4,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.metrics.model.MetricsData;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.MetricsConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,19 +25,22 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	private final JDA jda;
+	private final BotConfig botConfig;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
 	 *
 	 * @param jda The {@link Autowired} {@link JDA} instance to use.
+	 * @param botConfig The main configuration of the bot
 	 */
 	@Autowired
-	public MetricsController(final JDA jda) {
+	public MetricsController(final JDA jda, BotConfig botConfig) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(15, TimeUnit.MINUTES)
 				.build()
 		);
 		this.jda = jda;
+		this.botConfig = botConfig;
 	}
 
 	/**
@@ -57,7 +60,7 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 			data = new MetricsData();
 			data.setMemberCount(guild.getMemberCount());
 			data.setOnlineCount(guild.retrieveMetaData().complete().getApproximatePresences());
-			MetricsConfig config = Bot.getConfig().get(guild).getMetricsConfig();
+			MetricsConfig config = botConfig.get(guild).getMetricsConfig();
 			data.setWeeklyMessages(config.getWeeklyMessages());
 			data.setActiveMembers(config.getActiveMembers());
 			getCache().put(guild.getIdLong(), data);

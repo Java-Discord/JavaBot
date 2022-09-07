@@ -5,9 +5,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.Pair;
@@ -16,7 +17,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.sql.DataSource;
 
 /**
  * Handler for the /help ping sub-command that allows users to occasionally ping
@@ -27,14 +31,25 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
 	private final Map<Long, Pair<Long, Guild>> lastPingTimes;
+	private final BotConfig botConfig;
+	private final DataSource dataSource;
+	private final ScheduledExecutorService asyncPool;
+	private final DbActions dbActions;
 
 	/**
 	 * Constructor that initializes and handles the cooldown map.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param botConfig The main configuration of the bot
+	 * @param dbActions A utility instance providing various operations to the main database
 	 */
-	public HelpPingSubcommand() {
+	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions) {
 		setSubcommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
-		Bot.getAsyncPool().scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
+		this.botConfig = botConfig;
+		this.dataSource = dbActions.getDataSource();
+		this.asyncPool = asyncPool;
+		this.dbActions = dbActions;
+		asyncPool.scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -44,8 +59,8 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 			Responses.warning(event, WRONG_CHANNEL_MSG).queue();
 			return;
 		}
-		GuildConfig config = Bot.getConfig().get(guild);
-		HelpChannelManager channelManager = new HelpChannelManager(config.getHelpConfig());
+		GuildConfig config = botConfig.get(guild);
+		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool);
 		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
 			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
 			if (optionalReservation.isEmpty()) {
@@ -125,7 +140,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 	private void cleanTimeoutCache() {
 		// Find the list of members whose last ping time was old enough that they should be removed from the cache.
 		List<Long> memberIdsToRemove = lastPingTimes.entrySet().stream().filter(entry -> {
-			HelpConfig config = Bot.getConfig().get(entry.getValue().second()).getHelpConfig();
+			HelpConfig config = botConfig.get(entry.getValue().second()).getHelpConfig();
 			long timeoutMillis = config.getHelpPingTimeoutSeconds() * 1000L;
 			return entry.getValue().first() + timeoutMillis < System.currentTimeMillis();
 		}).map(Map.Entry::getKey).toList();

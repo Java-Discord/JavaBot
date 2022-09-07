@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +17,14 @@ import java.io.IOException;
  * This Command allows members to search the internet using the Bing API.
  */
 public class SearchWebCommand extends SlashCommand {
+	private final SystemsConfig systemsConfig;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param systemsConfig Configuration for various systems
 	 */
-	public SearchWebCommand() {
+	public SearchWebCommand(SystemsConfig systemsConfig) {
+		this.systemsConfig = systemsConfig;
 		setSlashCommandData(Commands.slash("search-web", "Searches the web by turning your text-input into a search query")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true)
@@ -34,7 +39,7 @@ public class SearchWebCommand extends SlashCommand {
 			return;
 		}
 		event.deferReply().queue();
-		SearchWebService service = new SearchWebService();
+		SearchWebService service = new SearchWebService(systemsConfig);
 		try {
 			event.getHook().sendMessageEmbeds(service.buildSearchWebEmbed(queryMapping.getAsString())).queue();
 		} catch (IOException e) {

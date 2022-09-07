@@ -26,7 +26,15 @@ import java.util.List;
  */
 @AutoDetectableComponentHandler("qotw-add-question")
 public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandler {
-	public AddQuestionSubcommand() {
+	private final DbHelper dbHelper;
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param dbHelper An object managing databse operations
+	 */
+	public AddQuestionSubcommand(DbHelper dbHelper) {
+		super(dbHelper.getDataSource());
+		this.dbHelper = dbHelper;
 		setSubcommandData(new SubcommandData("add", "Add a question to the queue."));
 	}
 
@@ -76,7 +84,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 				question.setPriority(Integer.parseInt(priorityOption.getAsString()));
 			}
 
-			DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> dao.save(question));
+			dbHelper.doDaoAction(QuestionQueueRepository::new, dao -> dao.save(question));
 			Responses.success(event.getHook(), "Question Added", "Your question has been added to the queue.").queue();
 		}
 }

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
@@ -28,8 +28,10 @@ public class PruneCommand extends ModerateCommand {
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public PruneCommand() {
+	public PruneCommand(BotConfig botConfig) {
+		super(botConfig);
 		setModerationSlashCommandData(Commands.slash("prune", "Removes members from the server.")
 				.addOption(OptionType.STRING, "pattern", "A regular expression pattern to use, to remove members whose contains a match with the pattern.", false)
 				.addOption(OptionType.STRING, "before", "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
@@ -41,10 +43,10 @@ public class PruneCommand extends ModerateCommand {
 
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
-		if (!Checks.hasAdminRole(event.getGuild(), moderator)) {
-			return Responses.replyAdminOnly(event, event.getGuild());
+		if (!Checks.hasAdminRole(botConfig, moderator)) {
+			return Responses.replyAdminOnly(event, botConfig);
 		}
-		ModerationConfig config = Bot.getConfig().get(event.getGuild()).getModerationConfig();
+		ModerationConfig config = botConfig.get(event.getGuild()).getModerationConfig();
 
 		OptionMapping patternOption = event.getOption("pattern");
 		OptionMapping beforeOption = event.getOption("before");

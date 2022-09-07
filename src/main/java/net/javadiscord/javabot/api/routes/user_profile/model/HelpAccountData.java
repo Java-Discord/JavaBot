@@ -8,8 +8,6 @@ import net.javadiscord.javabot.util.ColorUtils;
 import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-
 /**
  * API-Data class which contains all necessary information about the users'
  * help experience.

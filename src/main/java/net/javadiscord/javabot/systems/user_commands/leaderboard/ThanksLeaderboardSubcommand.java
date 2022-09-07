@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -16,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -23,7 +23,18 @@ import java.util.stream.Collectors;
  * Command that generates a leaderboard based on the help channel thanks count.
  */
 public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
-	public ThanksLeaderboardSubcommand() {
+
+	private final ExecutorService asyncPool;
+	private final DbActions dbActions;
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param dbActions A service object responsible for various operations on the main database
+	 */
+	public ThanksLeaderboardSubcommand(ExecutorService asyncPool, DbActions dbActions) {
+		this.asyncPool = asyncPool;
+		this.dbActions = dbActions;
 		setSubcommandData(new SubcommandData("thanks", "The Thanks Leaderboard."));
 	}
 
@@ -32,7 +43,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 		event.deferReply(false).queue();
 		Collector<CharSequence, ?, String> collector = Collectors.joining("\n");
 		String format = "**%d** %s";
-		Bot.getAsyncPool().submit(() -> {
+		asyncPool.submit(() -> {
 			String totalHelpers = getCounts("""
 					SELECT COUNT(id), helper_id
 					FROM help_channel_thanks
@@ -76,7 +87,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 	private List<Pair<Member, Long>> getCounts(String query, Guild guild) {
 		try {
-			return DbActions.mapQuery(
+			return dbActions.mapQuery(
 					query,
 					s -> {
 					},

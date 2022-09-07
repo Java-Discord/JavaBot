@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
@@ -17,15 +16,22 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.sql.DataSource;
 
 /**
  * Subcommand that allows staff-members to list QOTW Questions.
  */
 public class ListQuestionsSubcommand extends QOTWSubcommand {
+	private ExecutorService asyncPool;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param dataSource A factory for connections to the main database
 	 */
-	public ListQuestionsSubcommand() {
+	public ListQuestionsSubcommand(DataSource dataSource) {
+		super(dataSource);
 		setSubcommandData(new SubcommandData("list", "Show a list of all questions in the queue.")
 				.addOption(OptionType.INTEGER, "page", "The page of results you get.", false)
 		);
@@ -52,7 +58,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 			embedBuilder.setDescription("There are no questions in the queue.");
 			return event.replyEmbeds(embedBuilder.build());
 		}
-		Bot.getAsyncPool().submit(() -> {
+		asyncPool.submit(() -> {
 			for (QOTWQuestion question : questions) {
 				embedBuilder.addField(
 						String.valueOf(question.getId()),

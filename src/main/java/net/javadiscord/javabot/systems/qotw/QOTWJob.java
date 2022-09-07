@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 /**
  * Job which posts a new question to the QOTW channel.
  */
@@ -37,6 +39,8 @@ import java.util.Set;
 public class QOTWJob {
 	private final JDA jda;
 	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DataSource dataSource;
 
 	/**
 	 * Posts a new question to the QOTW channel.
@@ -49,9 +53,9 @@ public class QOTWJob {
 				log.error("Guild {} does not have access to private threads. ({})", guild.getName(), guild.getBoostTier().name());
 				return;
 			}
-			GuildConfig config = Bot.getConfig().get(guild);
+			GuildConfig config = botConfig.get(guild);
 			if (config.getModerationConfig().getLogChannel() == null) continue;
-			try (Connection c = Bot.getDataSource().getConnection()) {
+			try (Connection c = dataSource.getConnection()) {
 				QuestionQueueRepository repo = new QuestionQueueRepository(c);
 				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {

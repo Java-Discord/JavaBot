@@ -5,9 +5,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
@@ -33,6 +34,8 @@ public class QOTWCloseSubmissionsJob {
 	private final JDA jda;
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
 
 	/**
 	 * disable the Submission button.
@@ -42,7 +45,7 @@ public class QOTWCloseSubmissionsJob {
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			// Disable 'Submit your Answer' button on latest QOTW
-			GuildConfig config = Bot.getConfig().get(guild);
+			GuildConfig config = botConfig.get(guild);
 			QOTWConfig qotwConfig = config.getQotwConfig();
 			qotwConfig.getSubmissionChannel().getManager()
 					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS))
@@ -53,11 +56,11 @@ public class QOTWCloseSubmissionsJob {
 			if (message == null) continue;
 			message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
 			for (ThreadChannel thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				try (Connection con = Bot.getDataSource().getConnection()) {
+				try (Connection con = dbHelper.getDataSource().getConnection()) {
 					QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 					Optional<QOTWSubmission> optionalSubmission = repo.getSubmissionByThreadId(thread.getIdLong());
 					if (optionalSubmission.isEmpty()) continue;
-					new SubmissionControlsManager(thread.getGuild(), optionalSubmission.get(), pointsService, notificationService).sendControls();
+					new SubmissionControlsManager(botConfig.get(guild), dbHelper, optionalSubmission.get(), pointsService, notificationService).sendControls();
 				} catch (SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
 					throw e;

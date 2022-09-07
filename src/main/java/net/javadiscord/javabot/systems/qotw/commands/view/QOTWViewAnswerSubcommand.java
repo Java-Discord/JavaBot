@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
@@ -25,11 +25,17 @@ import net.javadiscord.javabot.util.Responses;
  * Represents the `/qotw-view answer` subcommand. It allows for viewing an answer to a QOTW.
  */
 public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
+	private final BotConfig botConfig;
+	private final DbActions dbActions;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
+	 * @param dbActions A service object responsible for various operations on the main database
 	 */
-	public QOTWViewAnswerSubcommand() {
+	public QOTWViewAnswerSubcommand(BotConfig botConfig, DbActions dbActions) {
+		this.botConfig = botConfig;
+		this.dbActions = dbActions;
 		setSubcommandData(new SubcommandData("answer", "Views the content of an answer to the Question of the Week")
 				.addOption(OptionType.INTEGER, "question", "The question number the answer has been submitted to", true)
 				.addOption(OptionType.USER, "answerer", "The user who answered the question", true)
@@ -57,13 +63,13 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply(true).queue();
-		DbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
+		dbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
 			QOTWSubmission submission = repo.getSubmissionByQuestionNumberAndAuthorID(event.getGuild().getIdLong(), questionOption.getAsInt(), answerOwnerOption.getAsUser().getIdLong());
 			if (submission == null || !QOTWListAnswersSubcommand.isSubmissionVisible(submission, event.getUser().getIdLong())) {
 				Responses.error(event.getHook(), "No answer to the question was found from the specific user.").queue();
 				return;
 			}
-			Bot.getConfig().get(event.getGuild()).getQotwConfig()
+			botConfig.get(event.getGuild()).getQotwConfig()
 					.getSubmissionChannel().retrieveArchivedPrivateThreadChannels().queue(threadChannels -> threadChannels
 							.stream()
 							.filter(c -> c.getIdLong() == submission.getThreadId())

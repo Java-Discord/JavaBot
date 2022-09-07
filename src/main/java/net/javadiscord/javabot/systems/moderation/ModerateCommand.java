@@ -1,10 +1,13 @@
 package net.javadiscord.javabot.systems.moderation;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +15,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Abstract class that represents a single moderation command.
  */
+@RequiredArgsConstructor
 public abstract class ModerateCommand extends SlashCommand implements CommandModerationPermissions {
+	/**
+	 * The main configuration of the bot.
+	 */
+	protected final BotConfig botConfig;
 	private boolean requireStaff = true;
 
 	@Override
@@ -26,8 +34,8 @@ public abstract class ModerateCommand extends SlashCommand implements CommandMod
 			Responses.replyMissingMember(event).queue();
 			return;
 		}
-		if (requireStaff && !Checks.hasStaffRole(event.getGuild(), member)) {
-			Responses.replyStaffOnly(event, event.getGuild()).queue();
+		if (requireStaff && !Checks.hasStaffRole(botConfig, member)) {
+			Responses.replyStaffOnly(event, botConfig).queue();
 			return;
 		}
 		if (event.getChannelType() != ChannelType.TEXT && event.getChannelType() != ChannelType.VOICE && !event.getChannelType().isThread()) {

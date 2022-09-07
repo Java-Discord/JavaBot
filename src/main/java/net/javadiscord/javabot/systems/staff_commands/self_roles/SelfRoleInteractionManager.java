@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.staff_commands.self_roles;
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -15,8 +17,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Constants;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
@@ -31,8 +33,11 @@ import java.util.List;
  * Handles all Interactions related to the Self Role System.
  */
 @Slf4j
+@RequiredArgsConstructor
 @AutoDetectableComponentHandler("self-role")
 public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
+
+	private final BotConfig botConfig;
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
@@ -57,7 +62,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 	public void handleModal(@NotNull ModalInteractionEvent event, List<ModalMapping> values) {
 		String[] args = ComponentIdBuilder.split(event.getModalId());
 		event.deferReply(true).queue();
-		GuildConfig config = Bot.getConfig().get(event.getGuild());
+		GuildConfig config = botConfig.get(event.getGuild());
 		switch (args[1]) {
 			case "staff" -> sendStaffSubmission(event, config, args[2], args[3]).queue();
 			case "expert" -> sendExpertSubmission(event, config.getModerationConfig(), args[2]).queue();
@@ -110,7 +115,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 	 * @param applicant The Applicant.
 	 */
 	private void buildExpertApplication(@NotNull ButtonInteractionEvent event, @NotNull Member applicant) {
-		Role role = Bot.getConfig().get(event.getGuild()).getModerationConfig().getExpertRole();
+		Role role = botConfig.get(event.getGuild()).getModerationConfig().getExpertRole();
 		if (applicant.getRoles().contains(role)) {
 			event.reply("You already have the Expert Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;

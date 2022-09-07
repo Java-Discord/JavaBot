@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
@@ -23,14 +22,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 /**
  * Subcommand that allows staff-members to remove single questions from the QOTW Queue.
  */
 public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoCompletable {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param dataSource A factory for connections to the main database
 	 */
-	public RemoveQuestionSubcommand() {
+	public RemoveQuestionSubcommand(DataSource dataSource) {
+		super(dataSource);
 		setSubcommandData(new SubcommandData("remove", "Removes a question from the queue.")
 				.addOption(OptionType.INTEGER, "id", "The id of the question to remove.", true, true)
 		);
@@ -57,9 +60,9 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static List<Command.Choice> replyQuestions(CommandAutoCompleteInteractionEvent event) {
+	public List<Command.Choice> replyQuestions(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			QuestionQueueRepository repo = new QuestionQueueRepository(con);
 			List<QOTWQuestion> questions = repo.getQuestions(event.getGuild().getIdLong(), 0, 25);
 			questions.forEach(question -> choices.add(new Command.Choice(String.format("(Priority: %s) %s", question.getPriority(), question.getText()), question.getId())));
@@ -71,6 +74,6 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, RemoveQuestionSubcommand::replyQuestions)).queue();
+		event.replyChoices(AutoCompleteUtils.handleChoices(event, this::replyQuestions)).queue();
 	}
 }

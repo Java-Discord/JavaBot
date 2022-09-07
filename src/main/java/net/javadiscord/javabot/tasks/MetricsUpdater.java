@@ -1,15 +1,17 @@
 package net.javadiscord.javabot.tasks;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.MetricsConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -21,17 +23,21 @@ import java.util.function.Function;
  * </p>
  */
 @Slf4j
+@RequiredArgsConstructor
 public class MetricsUpdater extends ListenerAdapter {
 	private static final Map<String, Function<Guild, String>> TEXT_VARIABLES = Map.of(
 			"{!member_count}", g -> String.valueOf(g.getMemberCount()),
 			"{!server_name}", Guild::getName
 	);
 
+	private final ScheduledExecutorService asyncPool;
+	private final BotConfig botConfig;
+
 	@Override
 	public void onReady(@NotNull ReadyEvent event) {
-		Bot.getAsyncPool().scheduleWithFixedDelay(() -> {
+		asyncPool.scheduleWithFixedDelay(() -> {
 			for (Guild guild : event.getJDA().getGuilds()) {
-				MetricsConfig config = Bot.getConfig().get(guild).getMetricsConfig();
+				MetricsConfig config = botConfig.get(guild).getMetricsConfig();
 				if (config.getMetricsCategory() == null || config.getMetricsMessageTemplate().isEmpty()) {
 					continue;
 				}

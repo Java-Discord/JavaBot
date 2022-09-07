@@ -34,17 +34,14 @@ public class CustomTagManager {
 		LOADED_TAGS = new HashMap<>();
 	}
 
-	private final JDA jda;
 	private final DataSource dataSource;
 
 	/**
 	 * The constructor of this class.
 	 *
-	 * @param jda        The {@link JDA} instance.
 	 * @param dataSource The {@link DataSource} which is used to make connections to the database.
 	 */
-	public CustomTagManager(@NotNull JDA jda, @NotNull DataSource dataSource) {
-		this.jda = jda;
+	public CustomTagManager(@NotNull DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
@@ -112,10 +109,10 @@ public class CustomTagManager {
 
 	/**
 	 * Iterates through all guilds and loads their corresponding {@link CustomTag}s.
-	 *
+	 * @param jda The main {@link JDA} instance
 	 * @throws SQLException If an error occurs.
 	 */
-	public void init() throws SQLException {
+	public void init(JDA jda) throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			Set<CustomTag> tags = LOADED_TAGS.put(guild.getIdLong(), getCustomTags(guild.getIdLong()));
 			if (tags != null && !tags.isEmpty()) {

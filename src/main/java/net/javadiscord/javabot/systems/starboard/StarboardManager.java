@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.starboard;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -11,7 +12,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
@@ -23,12 +24,21 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+
+import javax.sql.DataSource;
 
 /**
  * Handles & manages all starboard interactions.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class StarboardManager extends ListenerAdapter {
+	private final BotConfig botConfig;
+	private final ExecutorService asyncPool;
+	private final DataSource dataSource;
+	private final DbHelper dbHelper;
+
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
 		if (isInvalidUser(event.getUser())) return;
@@ -44,15 +54,15 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	private void handleReactionEvent(Guild guild, Emoji emoji, MessageChannel channel, long messageId) {
-		Bot.getAsyncPool().submit(() -> {
-			StarboardConfig config = Bot.getConfig().get(guild).getStarboardConfig();
+		asyncPool.submit(() -> {
+			StarboardConfig config = botConfig.get(guild).getStarboardConfig();
 			if (config.getStarboardChannel().equals(channel)) return;
 			Emoji starEmote = config.getEmojis().get(0);
 			if (!emoji.equals(starEmote)) return;
 			channel.retrieveMessageById(messageId).queue(
 					message -> {
 						int stars = getReactionCountForEmote(starEmote, message);
-						DbHelper.doDaoAction(StarboardRepository::new, dao -> {
+						dbHelper.doDaoAction(StarboardRepository::new, dao -> {
 							StarboardEntry entry = dao.getEntryByMessageId(message.getIdLong());
 							if (entry != null) {
 								updateStarboardMessage(message, stars, config);
@@ -75,9 +85,9 @@ public class StarboardManager extends ListenerAdapter {
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
 		if (isInvalidChannel(event.getChannel())) return;
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
-			StarboardConfig config = Bot.getConfig().get(event.getGuild()).getStarboardConfig();
+			StarboardConfig config = botConfig.get(event.getGuild()).getStarboardConfig();
 			StarboardEntry entry;
 			if (event.getChannel().getIdLong() == config.getStarboardChannelId()) {
 				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
@@ -132,13 +142,13 @@ public class StarboardManager extends ListenerAdapter {
 			entry.setChannelId(message.getChannel().getIdLong());
 			entry.setAuthorId(message.getAuthor().getIdLong());
 			entry.setStarboardMessageId(starboardMessage.getIdLong());
-			DbHelper.doDaoAction(StarboardRepository::new, dao -> dao.insert(entry));
+			dbHelper.doDaoAction(StarboardRepository::new, dao -> dao.insert(entry));
 			}, e -> log.error("Could not send Message to Starboard", e)
 		);
 	}
 
 	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
 			StarboardEntry starboardEntry = repo.getEntryByMessageId(message.getIdLong());
 			long starboardId = starboardEntry.getStarboardMessageId();
@@ -177,7 +187,7 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	private boolean removeMessageFromStarboard(long messageId, MessageChannel channel, StarboardConfig config) throws SQLException {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			StarboardRepository repo = new StarboardRepository(con);
 			StarboardEntry entry = repo.getEntryByMessageId(messageId);
 			if (entry == null) return false;

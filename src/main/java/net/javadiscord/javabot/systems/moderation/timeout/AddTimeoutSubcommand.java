@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Responses;
@@ -23,12 +25,16 @@ import java.time.temporal.ChronoUnit;
 public class AddTimeoutSubcommand extends TimeoutSubcommand {
 
 	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param notificationService The {@link NotificationService}
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public AddTimeoutSubcommand(NotificationService notificationService) {
+	public AddTimeoutSubcommand(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
 		setSubcommandData(new SubcommandData("add", "Adds a timeout to the specified server member.")
 				.addOptions(
 						new OptionData(OptionType.USER, "member", "The member that should be timed out.", true),
@@ -44,6 +50,8 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 				)
 		);
 		this.notificationService=notificationService;
+		this.botConfig = botConfig;
+		this.dbHelper = dbHelper;
 	}
 
 	@Override
@@ -67,7 +75,7 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 		if (member.isTimedOut()) {
 			return Responses.error(event, "Could not timeout %s; they're already timed out.", member.getAsMention());
 		}
-		ModerationService service = new ModerationService(notificationService, event.getInteraction());
+		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), dbHelper);
 		service.timeout(member, reasonOption.getAsString(), event.getMember(), duration, channel, quiet);
 		return Responses.success(event, "User Timed Out", "%s has been timed out.", member.getAsMention());
 	}

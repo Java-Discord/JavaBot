@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -22,6 +22,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.sql.DataSource;
 
 /**
  * <h3>This class represents the /db-admin quick-migrate command.</h3>
@@ -30,12 +33,21 @@ import java.util.List;
  */
 @AutoDetectableComponentHandler("quick-migrate")
 public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements ModalHandler {
+
+	private final ExecutorService asyncPool;
+	private final DataSource dataSource;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param dataSource A factory for connections to the main database
+	 * @param systemsConfig Configuration for various systems
 	 */
-	public QuickMigrateSubcommand() {
+	public QuickMigrateSubcommand(DataSource dataSource, ExecutorService asyncPool, SystemsConfig systemsConfig) {
+		this.asyncPool = asyncPool;
+		this.dataSource = dataSource;
 		setSubcommandData(new SubcommandData("quick-migrate", "(ADMIN ONLY) Run a single quick database migration"));
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -63,9 +75,9 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 			Responses.error(event.getHook(), "The provided migration does not contain any statements. Please remove or edit it before running again.").queue();
 			return;
 		}
-		Bot.getAsyncPool().submit(() -> {
+		asyncPool.submit(() -> {
 			TextChannel channel = event.getChannel().asTextChannel();
-			try (Connection con = Bot.getDataSource().getConnection()) {
+			try (Connection con = dataSource.getConnection()) {
 				for (int i = 0; i < statements.length; i++) {
 					if (statements[i].isBlank()) {
 						channel.sendMessage("Skipping statement " + (i + 1) + "; it is blank.").queue();

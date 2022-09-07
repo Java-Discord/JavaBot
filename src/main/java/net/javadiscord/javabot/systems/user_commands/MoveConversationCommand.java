@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +28,14 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private static final String MOVED_FROM_MESSAGE = "\uD83D\uDCE5 Conversation moved **here** from %s by %s\n%s";
 
+	private final BotConfig botConfig;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The injected {@link BotConfig}
 	 */
-	public MoveConversationCommand() {
+	public MoveConversationCommand(BotConfig botConfig) {
+		this.botConfig = botConfig;
 		setSlashCommandData(Commands.slash("move-conversation", "Suggest to move the current conversation into another channel!")
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "Where should the current conversation be continued?", true)
@@ -87,7 +91,7 @@ public class MoveConversationCommand extends SlashCommand {
 	 * @return Whether the {@link GuildMessageChannel} provided by the {@link Member} is invalid.
 	 */
 	private boolean isInvalidChannel(@NotNull Member member, GuildMessageChannel channel) {
-		ModerationConfig config = Bot.getConfig().get(member.getGuild()).getModerationConfig();
+		ModerationConfig config = botConfig.get(member.getGuild()).getModerationConfig();
 		return !member.hasPermission(channel, Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL) ||
 				// check thread permissions
 				channel.getType().isThread() && !member.hasPermission(channel, Permission.MESSAGE_SEND_IN_THREADS) ||

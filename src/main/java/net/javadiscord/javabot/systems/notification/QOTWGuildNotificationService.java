@@ -29,6 +29,7 @@ public class QOTWGuildNotificationService {
 	 */
 	protected final NotificationService notificationService;
 	private final Guild guild;
+	private final DbHelper dbHelper;
 
 	/**
 	 * Sends the executed action, performed on a QOTW submission thread, to the {@link Guild}s log channel.
@@ -39,7 +40,7 @@ public class QOTWGuildNotificationService {
 	 * @param reasons          The reasons for taking this action.
 	 */
 	public void sendSubmissionActionNotification(User reviewedBy, ThreadChannel submissionThread, SubmissionStatus status, @Nullable String... reasons) {
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(submissionThread.getIdLong());
 			submissionOptional.ifPresent(submission -> guild.getJDA().retrieveUserById(submission.getAuthorId()).queue(author -> {
 				notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status, reasons)));

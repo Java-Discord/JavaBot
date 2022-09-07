@@ -3,11 +3,14 @@ package net.javadiscord.javabot.systems.user_commands.search;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -23,16 +26,20 @@ import java.util.Scanner;
  * Service class which is used to search the internet for a specifed query using
  * the Bing API.
  */
+@RequiredArgsConstructor
+@Service
 public final class SearchWebService {
 	private static final String HOST = "https://api.bing.microsoft.com";
 	private static final String PATH = "/v7.0/search";
+
+	private final SystemsConfig systemsConfig;
 
 	private @NotNull SearchResult searchWeb(@NotNull String searchQuery) throws IOException {
 		// Construct the URL.
 		URL url = new URL(HOST + PATH + "?q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString()) + "&mkt=en-US&safeSearch=Strict");
 		// Open the connection.
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestProperty("Ocp-Apim-Subscription-Key", Bot.getConfig().getSystems().getAzureSubscriptionKey());
+		connection.setRequestProperty("Ocp-Apim-Subscription-Key", systemsConfig.getAzureSubscriptionKey());
 		// Receive the JSON response body.
 		String response;
 		try (Scanner scan = new Scanner(connection.getInputStream()).useDelimiter("\\A")) {

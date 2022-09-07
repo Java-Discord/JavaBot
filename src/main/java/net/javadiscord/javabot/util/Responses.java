@@ -1,8 +1,17 @@
 package net.javadiscord.javabot.util;
 
+import java.awt.Color;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.NotNull;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -11,15 +20,7 @@ import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
-import net.javadiscord.javabot.Bot;
-import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
-import java.awt.*;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import net.javadiscord.javabot.data.config.BotConfig;
 
 /**
  * Utility class that provides standardized formatting for responses the bot
@@ -123,13 +124,13 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, Guild guild) {
-		return error(event, "This command may only be used by staff members. (%s)", Bot.getConfig().get(guild).getModerationConfig().getStaffRole().getAsMention());
+	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, BotConfig botConfig) {
+		return error(event, "This command may only be used by staff members. (%s)", botConfig.get(event.getGuild()).getModerationConfig().getStaffRole().getAsMention());
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyAdminOnly(CommandInteraction event, Guild guild) {
-		return error(event, "This command may only be used by admins. (%s)", Bot.getConfig().get(guild).getModerationConfig().getAdminRole().getAsMention());
+	public static @NotNull ReplyCallbackAction replyAdminOnly(CommandInteraction event, BotConfig botConfig) {
+		return error(event, "This command may only be used by admins. (%s)", botConfig.get(event.getGuild()).getModerationConfig().getAdminRole().getAsMention());
 	}
 
 	/**

@@ -3,9 +3,8 @@ package net.javadiscord.javabot.systems.configuration;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
-
 import javax.annotation.Nonnull;
 import java.io.File;
 
@@ -14,9 +13,15 @@ import java.io.File;
  * current value.
  */
 public class ExportConfigSubcommand extends ConfigSubcommand {
-	public ExportConfigSubcommand() {
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The main configuration of the bot
+	 */
+	public ExportConfigSubcommand(BotConfig botConfig) {
+		super(botConfig);
 		setSubcommandData(new SubcommandData("export", "Exports a list of all configuration properties, and their current values."));
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

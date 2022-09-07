@@ -1,12 +1,14 @@
 package net.javadiscord.javabot.api;
 
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.SystemsConfig;
+
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.ajp.AjpNioProtocol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 /**
  * Holds all configuration for the {@link org.springframework.boot.autoconfigure.web.ServerProperties.Tomcat}
@@ -16,12 +18,19 @@ import org.springframework.context.annotation.Configuration;
 public class TomcatConfig {
 
 	private final int ajpPort;
-
 	private final boolean tomcatAjpEnabled;
+	private final SystemsConfig systemsConfig;
 
-	public TomcatConfig(@Value("${tomcat.ajp.port}") int ajpPort, @Value("${tomcat.ajp.enabled}") boolean tomcatAjpEnabled) {
+	/**
+	 * Initializes this object.
+	 * @param ajpPort The port to run AJP under
+	 * @param tomcatAjpEnabled <code>true</code> if AJP is enabled, else <code>false</code>
+	 * @param systemsConfig an object representing the configuration of various systems
+	 */
+	public TomcatConfig(@Value("${tomcat.ajp.port}") int ajpPort, @Value("${tomcat.ajp.enabled}") boolean tomcatAjpEnabled, SystemsConfig systemsConfig) {
 		this.ajpPort = ajpPort;
 		this.tomcatAjpEnabled = tomcatAjpEnabled;
+		this.systemsConfig = systemsConfig;
 	}
 
 	/**
@@ -36,7 +45,7 @@ public class TomcatConfig {
 		if (tomcatAjpEnabled) {
 			Connector ajpConnector = new Connector("org.apache.coyote.ajp.AjpNioProtocol");
 			AjpNioProtocol protocol= (AjpNioProtocol) ajpConnector.getProtocolHandler();
-			protocol.setSecret(Bot.getConfig().getSystems().getApiConfig().getAjpSecret());
+			protocol.setSecret(systemsConfig.getApiConfig().getAjpSecret());
 			ajpConnector.setPort(ajpPort);
 			ajpConnector.setSecure(true);
 			tomcat.addAdditionalTomcatConnectors(ajpConnector);

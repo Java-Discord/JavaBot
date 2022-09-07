@@ -1,22 +1,30 @@
 package net.javadiscord.javabot.data.h2db;
 
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.sql.*;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+
+import javax.sql.DataSource;
 
 /**
  * Utility that provides some convenience methods for performing database
  * actions.
  */
+@Service
+@RequiredArgsConstructor
 public class DbActions {
-	// Hide the constructor.
-	private DbActions() {
-	}
+	private final ExecutorService asyncPool;
+	@Getter
+	private final DataSource dataSource;
 
 	/**
 	 * Consumes an action based on the given {@link ConnectionConsumer}.
@@ -24,8 +32,8 @@ public class DbActions {
 	 * @param consumer The {@link ConnectionConsumer}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static void doAction(@NotNull ConnectionConsumer consumer) throws SQLException {
-		try (Connection c = Bot.getDataSource().getConnection()) {
+	public void doAction(@NotNull ConnectionConsumer consumer) throws SQLException {
+		try (Connection c = dataSource.getConnection()) {
 			consumer.consume(c);
 		}
 	}
@@ -38,8 +46,8 @@ public class DbActions {
 	 * @return A generic type.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static <T> T map(@NotNull ConnectionFunction<T> function) throws SQLException {
-		try (Connection c = Bot.getDataSource().getConnection()) {
+	public <T> T map(@NotNull ConnectionFunction<T> function) throws SQLException {
+		try (Connection c = dataSource.getConnection()) {
 			return function.apply(c);
 		}
 	}
@@ -54,8 +62,8 @@ public class DbActions {
 	 * @return A generic type.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static <T> T mapQuery(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) throws SQLException {
-		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
+	public <T> T mapQuery(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) throws SQLException {
+		try (Connection c = dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			ResultSet rs = stmt.executeQuery();
 			return mapper.map(rs);
@@ -71,9 +79,9 @@ public class DbActions {
 	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 */
-	public static <T> @NotNull CompletableFuture<T> mapQueryAsync(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) {
+	public <T> @NotNull CompletableFuture<T> mapQueryAsync(@NotNull String query, @NotNull StatementModifier modifier, @NotNull ResultSetMapper<T> mapper) {
 		CompletableFuture<T> cf = new CompletableFuture<>();
-		Bot.getAsyncPool().submit(() -> {
+		asyncPool.submit(() -> {
 			try {
 				cf.complete(mapQuery(query, modifier, mapper));
 			} catch (SQLException e) {
@@ -92,8 +100,8 @@ public class DbActions {
 	 * @param modifier A modifier to use to set parameters for the query.
 	 * @return The column value.
 	 */
-	public static long count(@NotNull String query, @NotNull StatementModifier modifier) {
-		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
+	public long count(@NotNull String query, @NotNull StatementModifier modifier) {
+		try (Connection c = dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
 			modifier.modify(stmt);
 			ResultSet rs = stmt.executeQuery();
 			if (!rs.next()) return 0;
@@ -111,9 +119,9 @@ public class DbActions {
 	 * @param query The query.
 	 * @return The column value.
 	 */
-	public static long count(@NotNull String query) {
+	public long count(@NotNull String query) {
 		try (
-				Connection conn = Bot.getDataSource().getConnection();
+				Connection conn = dataSource.getConnection();
 				Statement stmt = conn.createStatement()
 		) {
 			ResultSet rs = stmt.executeQuery(query);
@@ -138,7 +146,7 @@ public class DbActions {
 	 * @param args        The set of arguments to pass to the formatter.
 	 * @return The count.
 	 */
-	public static long countf(@NotNull String queryFormat, @NotNull Object... args) {
+	public long countf(@NotNull String queryFormat, @NotNull Object... args) {
 		return count(String.format(queryFormat, args));
 	}
 
@@ -150,8 +158,8 @@ public class DbActions {
 	 * @return The rows that got updates during this process.
 	 * @throws SQLException If an error occurs.
 	 */
-	public static int update(@NotNull String query, Object @NotNull ... params) throws SQLException {
-		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
+	public int update(@NotNull String query, Object @NotNull ... params) throws SQLException {
+		try (Connection c = dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement(query)) {
 			int i = 1;
 			for (Object param : params) {
 				stmt.setObject(i++, param);
@@ -166,10 +174,10 @@ public class DbActions {
 	 * @param consumer The consumer that will use a connection.
 	 * @return A future that completes when the action is complete.
 	 */
-	public static @NotNull CompletableFuture<Void> doAsyncAction(ConnectionConsumer consumer) {
+	public @NotNull CompletableFuture<Void> doAsyncAction(ConnectionConsumer consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		Bot.getAsyncPool().submit(() -> {
-			try (Connection c = Bot.getDataSource().getConnection()) {
+		asyncPool.submit(() -> {
+			try (Connection c = dataSource.getConnection()) {
 				consumer.consume(c);
 				future.complete(null);
 			} catch (SQLException e) {
@@ -190,10 +198,10 @@ public class DbActions {
 	 * @param <T>            The type of data access object. Usually some kind of repository.
 	 * @return A future that completes when the action is complete.
 	 */
-	public static <T> @NotNull CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
+	public <T> @NotNull CompletableFuture<Void> doAsyncDaoAction(Function<Connection, T> daoConstructor, DaoConsumer<T> consumer) {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		Bot.getAsyncPool().submit(() -> {
-			try (Connection c = Bot.getDataSource().getConnection()) {
+		asyncPool.submit(() -> {
+			try (Connection c = dataSource.getConnection()) {
 				T dao = daoConstructor.apply(c);
 				consumer.consume(dao);
 				future.complete(null);
@@ -212,10 +220,10 @@ public class DbActions {
 	 * @param <T>      The generic type.
 	 * @return A generic type.
 	 */
-	public static <T> @NotNull CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {
+	public <T> @NotNull CompletableFuture<T> mapAsync(ConnectionFunction<T> function) {
 		CompletableFuture<T> future = new CompletableFuture<>();
-		Bot.getAsyncPool().submit(() -> {
-			try (Connection c = Bot.getDataSource().getConnection()) {
+		asyncPool.submit(() -> {
+			try (Connection c = dataSource.getConnection()) {
 				future.complete(function.apply(c));
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, DbActions.class.getSimpleName());
@@ -235,7 +243,7 @@ public class DbActions {
 	 * @param <T>      The result type.
 	 * @return An optional that may contain the result, if one was found.
 	 */
-	public static <T> Optional<T> fetchSingleEntity(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {
+	public <T> Optional<T> fetchSingleEntity(String query, StatementModifier modifier, ResultSetMapper<T> mapper) {
 		try {
 			return mapQuery(query, modifier, rs -> {
 				if (!rs.next()) return Optional.empty();
@@ -253,8 +261,8 @@ public class DbActions {
 	 * @param table The database table.
 	 * @return The logical size, in bytes.
 	 */
-	public static int getLogicalSize(String table) {
-		try (Connection c = Bot.getDataSource().getConnection(); PreparedStatement stmt = c.prepareStatement("CALL DISK_SPACE_USED(?)")) {
+	public int getLogicalSize(String table) {
+		try (Connection c = dataSource.getConnection(); PreparedStatement stmt = c.prepareStatement("CALL DISK_SPACE_USED(?)")) {
 			stmt.setString(1, table);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.message_cache.MessageCache;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
@@ -23,24 +23,27 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class RedeployCommand extends SlashCommand {
 	private final MessageCache messageCache;
+	private final BotConfig botConfig;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param messageCache A service managing recent messages
+	 * @param botConfig The main configuration of the bot
 	 */
-	public RedeployCommand(MessageCache messageCache) {
+	public RedeployCommand(MessageCache messageCache, BotConfig botConfig) {
 		this.messageCache = messageCache;
+		this.botConfig=botConfig;
 		setSlashCommandData(Commands.slash("redeploy", "(ADMIN-ONLY) Makes the bot redeploy.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (!Checks.hasAdminRole(event.getGuild(), event.getMember())) {
-			Responses.replyAdminOnly(event, event.getGuild()).queue();
+		if (!Checks.hasAdminRole(botConfig, event.getMember())) {
+			Responses.replyAdminOnly(event, botConfig).queue();
 			return;
 		}
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());

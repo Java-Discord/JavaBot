@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MessageCacheListener extends ListenerAdapter {
 	private final MessageCache messageCache;
+	private final BotConfig botConfig;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -72,7 +73,7 @@ public class MessageCacheListener extends ListenerAdapter {
 	 */
 	private boolean ignoreMessageCache(Message message) {
 		if (!message.isFromGuild()) return true;
-		MessageCacheConfig config = Bot.getConfig().get(message.getGuild()).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(message.getGuild()).getMessageCacheConfig();
 		return message.getAuthor().isBot() || message.getAuthor().isSystem() ||
 				config.getExcludedUsers().contains(message.getAuthor().getIdLong()) ||
 				config.getExcludedChannels().contains(message.getChannel().getIdLong());

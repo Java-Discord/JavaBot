@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +18,10 @@ import org.jetbrains.annotations.NotNull;
 public class RemoveEmbedFieldSubcommand extends EmbedSubcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public RemoveEmbedFieldSubcommand() {
+	public RemoveEmbedFieldSubcommand(BotConfig botConfig) {
+		super(botConfig);
 		setSubcommandData(new SubcommandData("remove-field", "Adds a field to an embed message.")
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "The embed's message id.", true),

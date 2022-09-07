@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -39,6 +38,7 @@ public class SubmissionManager {
 	 */
 	public static final String THREAD_NAME = "%s — %s";
 	private final QOTWConfig config;
+	private final DbHelper dbHelper;
 
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
@@ -57,7 +57,7 @@ public class SubmissionManager {
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					try (Connection con = Bot.getDataSource().getConnection()) {
+					try (Connection con = dbHelper.getDataSource().getConnection()) {
 						QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 						QOTWSubmission submission = new QOTWSubmission();
 						submission.setThreadId(thread.getIdLong());
@@ -65,7 +65,7 @@ public class SubmissionManager {
 						submission.setGuildId(thread.getGuild().getIdLong());
 						submission.setAuthorId(member.getIdLong());
 						repo.insert(submission);
-						DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> {
+						dbHelper.doDaoAction(QuestionQueueRepository::new, dao -> {
 							Optional<QOTWQuestion> questionOptional = dao.findByQuestionNumber(questionNumber);
 							if (questionOptional.isPresent()) {
 								thread.sendMessage(member.getAsMention())
@@ -94,7 +94,7 @@ public class SubmissionManager {
 	 */
 	public void handleThreadDeletion(ButtonInteractionEvent event) {
 		ThreadChannel thread = (ThreadChannel) event.getGuildChannel();
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
 			if (submissionOptional.isPresent()) {
 				QOTWSubmission submission = submissionOptional.get();
@@ -121,7 +121,7 @@ public class SubmissionManager {
 	 * @return Whether the user hat unreviewed submissions or not.
 	 */
 	public boolean hasActiveSubmissionThreads(long authorId) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dbHelper.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 			return !repo.getUnreviewedSubmissions(authorId).isEmpty();
 		} catch (SQLException e) {
@@ -137,7 +137,7 @@ public class SubmissionManager {
 	 * @return An immutable {@link List} of {@link QOTWSubmission}s.
 	 */
 	public List<QOTWSubmission> getActiveSubmissionThreads(long guildId) {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dbHelper.getDataSource().getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
 			return repo.getSubmissionsByQuestionNumber(guildId, repo.getCurrentQuestionNumber());
 		} catch (SQLException e) {
@@ -153,7 +153,7 @@ public class SubmissionManager {
 				.setTitle(String.format("Question of the Week #%s", question.getQuestionNumber()))
 				.setDescription(String.format("""
 								%s
-								
+
 								Hey, %s! Please submit your answer into this private thread.
 								The %s will review your submission once a new question appears.""",
 						question.getText(), createdBy.getAsMention(), config.getQOTWReviewRole().getAsMention()))
@@ -162,7 +162,7 @@ public class SubmissionManager {
 								To maximize your chances of getting this week's QOTW Point make sure to:
 								— Provide a **Code example** (if possible)
 								— Try to answer the question as detailed as possible.
-								
+
 								Staff usually won't reply in here.""", false)
 				.setTimestamp(Instant.now())
 				.build();

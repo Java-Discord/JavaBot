@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
@@ -26,10 +26,17 @@ import java.util.List;
  * This Command allows users to see all their active warns.
  */
 public class WarnsListCommand extends SlashCommand {
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public WarnsListCommand() {
+	public WarnsListCommand(BotConfig botConfig, DbHelper dbHelper) {
+		this.botConfig = botConfig;
+		this.dbHelper = dbHelper;
 		setSlashCommandData(Commands.slash("warns", "Shows a list of all recent warning.")
 				.addOption(OptionType.USER, "user", "If given, shows the recent warns of the given user instead.", false)
 				.setGuildOnly(true)
@@ -66,8 +73,8 @@ public class WarnsListCommand extends SlashCommand {
 			return;
 		}
 		event.deferReply(false).queue();
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(Bot.getConfig().get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
-		DbHelper.doDaoAction(WarnRepository::new, dao ->
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
+		dbHelper.doDaoAction(WarnRepository::new, dao ->
 				event.getHook().sendMessageEmbeds(buildWarnsEmbed(dao.getWarnsByUserId(user.getIdLong(), cutoff), user)).queue());
 	}
 }

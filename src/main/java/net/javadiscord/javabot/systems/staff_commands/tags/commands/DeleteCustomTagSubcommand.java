@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagRepository;
@@ -26,13 +27,18 @@ import java.util.Optional;
  */
 public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCompletable {
 	private final CustomTagManager customTagManager;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param customTagManager The {@link CustomTagManager}
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public DeleteCustomTagSubcommand(CustomTagManager customTagManager) {
+	public DeleteCustomTagSubcommand(CustomTagManager customTagManager, BotConfig botConfig, DbHelper dbHelper) {
+		super(botConfig);
 		this.customTagManager = customTagManager;
+		this.dbHelper = dbHelper;
 		setSubcommandData(new SubcommandData("delete", "Deletes a single Custom Tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
@@ -45,7 +51,7 @@ public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCom
 			return Responses.replyMissingArguments(event);
 		}
 		String tagName = CustomTagManager.cleanString(nameMapping.getAsString());
-		DbHelper.doDaoAction(CustomTagRepository::new, dao -> {
+		dbHelper.doDaoAction(CustomTagRepository::new, dao -> {
 			Optional<CustomTag> tagOptional = dao.findByName(event.getGuild().getIdLong(), tagName);
 			if (tagOptional.isEmpty()) {
 				Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", tagName).queue();

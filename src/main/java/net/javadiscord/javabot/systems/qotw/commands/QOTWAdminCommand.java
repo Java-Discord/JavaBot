@@ -4,6 +4,8 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.commands.qotw_points.IncrementPointsSubcommand;
@@ -25,16 +27,18 @@ public class QOTWAdminCommand extends SlashCommand {
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.SubcommandGroup}s.
 	 * @param pointsService The {@link QOTWPointsService}
 	 * @param notificationService The {@link NotificationService}
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public QOTWAdminCommand(QOTWPointsService pointsService, NotificationService notificationService) {
+	public QOTWAdminCommand(QOTWPointsService pointsService, NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
 		setSlashCommandData(Commands.slash("qotw-admin", "Administrative tools for managing the Question of the Week.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommandGroups(Map.of(
-				new SubcommandGroupData("questions-queue", "Commands for interacting with the set of QOTW questions that are in queue."), Set.of(new ListQuestionsSubcommand(), new AddQuestionSubcommand(), new RemoveQuestionSubcommand()),
-				new SubcommandGroupData("account", "Commands for interaction with Users Question of the Week points."), Set.of(new IncrementPointsSubcommand(pointsService, notificationService), new SetPointsSubcommand(pointsService)),
-				new SubcommandGroupData("submissions", "Commands for managing QOTW Submissions."), Set.of(new MarkBestAnswerSubcommand(pointsService, notificationService))
+				new SubcommandGroupData("questions-queue", "Commands for interacting with the set of QOTW questions that are in queue."), Set.of(new ListQuestionsSubcommand(dbHelper.getDataSource()), new AddQuestionSubcommand(dbHelper), new RemoveQuestionSubcommand(dbHelper.getDataSource())),
+				new SubcommandGroupData("account", "Commands for interaction with Users Question of the Week points."), Set.of(new IncrementPointsSubcommand(pointsService, notificationService), new SetPointsSubcommand(pointsService, dbHelper.getDataSource())),
+				new SubcommandGroupData("submissions", "Commands for managing QOTW Submissions."), Set.of(new MarkBestAnswerSubcommand(pointsService, notificationService, botConfig, dbHelper.getDataSource(), dbHelper))
 		));
 	}
 }

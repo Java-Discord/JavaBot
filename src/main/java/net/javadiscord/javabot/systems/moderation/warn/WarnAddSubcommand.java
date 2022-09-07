@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -19,13 +21,19 @@ import org.jetbrains.annotations.NotNull;
  */
 public class WarnAddSubcommand extends SlashCommand.Subcommand {
 	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param notificationService The {@link NotificationService}
+	 * @param botConfig The main configuration of the bot
+	 * @param dbHelper An object managing databse operations
 	 */
-	public WarnAddSubcommand(NotificationService notificationService) {
+	public WarnAddSubcommand(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
 		this.notificationService = notificationService;
+		this.botConfig = botConfig;
+		this.dbHelper = dbHelper;
 		setSubcommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
 				.addOptions(
 						new OptionData(OptionType.USER, "user", "The user to warn.", true),
@@ -59,7 +67,7 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService service = new ModerationService(notificationService, event);
+		ModerationService service = new ModerationService(notificationService, botConfig, event, dbHelper);
 		service.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
 		Responses.success(event, "User Warned", "%s has been successfully warned.", target.getAsMention()).queue();
 	}

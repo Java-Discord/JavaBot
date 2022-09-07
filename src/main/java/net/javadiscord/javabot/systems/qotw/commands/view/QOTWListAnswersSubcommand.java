@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
@@ -23,10 +23,18 @@ import java.util.stream.Collectors;
  * Represents the `/qotw-view list-answers` subcommand. It allows for listing answers to a specific QOTW.
  */
 public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
+
+	private final BotConfig botConfig;
+	private final DbActions dbActions;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The injected {@link BotConfig}
+	 * @param dbActions A service object responsible for various operations on the main database
 	 */
-	public QOTWListAnswersSubcommand() {
+	public QOTWListAnswersSubcommand(BotConfig botConfig, DbActions dbActions) {
+		this.botConfig = botConfig;
+		this.dbActions = dbActions;
 		setSubcommandData(new SubcommandData("list-answers", "Lists answers to (previous) questions of the week")
 				.addOption(OptionType.INTEGER, "question", "The question number", true)
 		);
@@ -57,13 +65,13 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 		int questionNum = questionNumOption.getAsInt();
 
 		event.deferReply(true).queue();
-		DbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
+		dbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
 			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), questionNum);
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Answers of Question of the Week #" + questionNum)
 					.setColor(Responses.Type.DEFAULT.getColor())
 					.setFooter("Results may not be accurate due to historic data.");
-			TextChannel submissionChannel = Bot.getConfig().get(event.getGuild()).getQotwConfig().getSubmissionChannel();
+			TextChannel submissionChannel = botConfig.get(event.getGuild()).getQotwConfig().getSubmissionChannel();
 			String allAnswers = submissions
 					.stream()
 					.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
@@ -86,7 +94,7 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 				.stream()
 				.filter(t -> t.getIdLong() == submission.getThreadId())
 				.findAny()
-				.map(MarkBestAnswerSubcommand::isSubmissionThreadABestAnswer)
+				.map(t -> MarkBestAnswerSubcommand.isSubmissionThreadABestAnswer(botConfig, t))
 				.orElse(false);
 	}
 }

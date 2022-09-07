@@ -33,11 +33,17 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 
 	private static final int MAX_BUTTON_QUERY_LENGTH = 10;
 	private static final int PAGE_LIMIT = 20;
+	private final DbHelper dbHelper;
+	private final DbActions dbActions;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param dbHelper An object managing databse operations
+	 * @param dbActions A service object responsible for various operations on the main database
 	 */
-	public QOTWQuerySubcommand() {
+	public QOTWQuerySubcommand(DbHelper dbHelper, DbActions dbActions) {
+		this.dbHelper = dbHelper;
+		this.dbActions = dbActions;
 		setSubcommandData(new SubcommandData("list-questions", "Lists previous 'Questions of the Week'")
 				.addOption(OptionType.STRING, "query", "Only queries questions that contain a specific query", false)
 				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false)
@@ -57,7 +63,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			return;
 		}
 		event.deferReply(true).queue();
-		DbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo -> {
+		dbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo -> {
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
 					.sendMessageEmbeds(embed)
@@ -76,7 +82,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			Responses.error(event.getHook(), "The page must be equal to or greater than 1!").queue();
 			return;
 		}
-		DbHelper.doDaoAction(QuestionQueueRepository::new, repo -> {
+		dbHelper.doDaoAction(QuestionQueueRepository::new, repo -> {
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
 					.editOriginalEmbeds(embed)

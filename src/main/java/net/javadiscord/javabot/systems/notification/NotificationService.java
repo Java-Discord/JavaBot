@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 
 import org.jetbrains.annotations.Contract;
@@ -22,10 +24,12 @@ import java.util.function.Function;
 public final class NotificationService {
 
 	private final QOTWPointsService qotwPointsService;
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
 
 	@Contract("_ -> new")
 	public @NotNull GuildNotificationService withGuild(Guild guild) {
-		return new GuildNotificationService(guild);
+		return new GuildNotificationService(botConfig.get(guild));
 	}
 
 	@Contract("_ -> new")
@@ -34,11 +38,11 @@ public final class NotificationService {
 	}
 
 	public @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
-		return new QOTWGuildNotificationService(this, guild);
+		return new QOTWGuildNotificationService(this, guild, dbHelper);
 	}
 
 	public @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
-		return new QOTWNotificationService(this, qotwPointsService, user, guild);
+		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems(), dbHelper);
 	}
 
 	/**

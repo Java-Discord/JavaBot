@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * <h3>This class represents the /purge command.</h3>
@@ -31,11 +32,16 @@ import java.util.List;
  */
 public class PurgeCommand extends ModerateCommand {
 	private static final Path ARCHIVE_DIR = Path.of("purgeArchives");
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param botConfig The main configuration of the bot
 	 */
-	public PurgeCommand() {
+	public PurgeCommand(BotConfig botConfig, ExecutorService asyncPool) {
+		super(botConfig);
+		this.asyncPool = asyncPool;
 		setModerationSlashCommandData(Commands.slash("purge", "Deletes messages from a channel.")
 				.addOption(OptionType.INTEGER, "amount", "Number of messages to remove.", true)
 				.addOption(OptionType.USER, "user", "The user whose messages to remove. If left blank, messages from any user are removed.", false)
@@ -50,14 +56,14 @@ public class PurgeCommand extends ModerateCommand {
 		OptionMapping userOption = event.getOption("user");
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
-		ModerationConfig config = Bot.getConfig().get(event.getGuild()).getModerationConfig();
+		ModerationConfig config = botConfig.get(event.getGuild()).getModerationConfig();
 		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
 		int maxAmount = config.getPurgeMaxMessageCount();
 		if (amount == null || amount < 1 || amount > maxAmount) {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
-		Bot.getAsyncPool().submit(() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel()));
+		asyncPool.submit(() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel()));
 		StringBuilder sb = new StringBuilder();
 		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {

@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
@@ -25,6 +25,8 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.springframework.stereotype.Service;
 
@@ -46,11 +48,19 @@ public class MessageCache {
 	 */
 	public int messageCount = 0;
 
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
+
 	/**
 	 * Creates a new messages & loads messages from the DB into a List.
+	 * @param botConfig The main configuration of the bot
+	 * @param dataSource A factory for connections to the main database
+	 * @param dbHelper An object managing databse operations
 	 */
-	public MessageCache() {
-		try (Connection con = Bot.getDataSource().getConnection()) {
+	public MessageCache(BotConfig botConfig, DataSource dataSource, DbHelper dbHelper) {
+		this.botConfig = botConfig;
+		this.dbHelper = dbHelper;
+		try (Connection con = dataSource.getConnection()) {
 			cache = new MessageCacheRepository(con).getAll();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -62,7 +72,7 @@ public class MessageCache {
 	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
 	 */
 	public void synchronize() {
-		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
+		dbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
 			dao.delete(cache.size());
 			dao.insertList(cache);
 			messageCount = 0;
@@ -76,7 +86,7 @@ public class MessageCache {
 	 * @param message The message to cache.
 	 */
 	public void cache(Message message) {
-		MessageCacheConfig config = Bot.getConfig().get(message.getGuild()).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(message.getGuild()).getMessageCacheConfig();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
@@ -94,7 +104,7 @@ public class MessageCache {
 	 * @param before  The {@link CachedMessage}.
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
-		MessageCacheConfig config = Bot.getConfig().get(updated.getGuild()).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(updated.getGuild()).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
 		MessageAction action = config.getMessageCacheLogChannel()
@@ -114,7 +124,7 @@ public class MessageCache {
 	 * @param message The {@link CachedMessage}.
 	 */
 	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
-		MessageCacheConfig config = Bot.getConfig().get(guild).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
 			MessageAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));

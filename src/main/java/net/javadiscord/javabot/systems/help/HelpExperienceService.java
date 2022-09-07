@@ -1,11 +1,10 @@
 package net.javadiscord.javabot.systems.help;
 
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -21,13 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.sql.DataSource;
+
 /**
  * Service class that handles Help Experience Transactions.
  */
 @Slf4j
 @RequiredArgsConstructor
 public class HelpExperienceService {
-	private final HikariDataSource dataSource;
+	private final DataSource dataSource;
+	private final BotConfig botConfig;
 
 	/**
 	 * Creates a new Help Account if none exists.
@@ -40,12 +42,12 @@ public class HelpExperienceService {
 		HelpAccount account;
 		try (Connection con = this.dataSource.getConnection()) {
 			con.setAutoCommit(false);
-			HelpAccountRepository repo = new HelpAccountRepository(con);
+			HelpAccountRepository repo = new HelpAccountRepository(con, botConfig);
 			Optional<HelpAccount> optional = repo.getByUserId(userId);
 			if (optional.isPresent()) {
 				account = optional.get();
 			} else {
-				account = new HelpAccount();
+				account = new HelpAccount(botConfig);
 				account.setUserId(userId);
 				account.setExperience(0);
 				repo.insert(account);
@@ -66,7 +68,7 @@ public class HelpExperienceService {
 		List<HelpAccount> accounts = new ArrayList<>(amount);
 		try (Connection con = dataSource.getConnection()) {
 			con.setReadOnly(true);
-			HelpAccountRepository repo = new HelpAccountRepository(con);
+			HelpAccountRepository repo = new HelpAccountRepository(con, botConfig);
 			return repo.getAccounts(page, amount);
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -112,7 +114,7 @@ public class HelpExperienceService {
 		transaction.setMessageType(message.ordinal());
 		try (Connection con = dataSource.getConnection()) {
 			con.setAutoCommit(false);
-			HelpAccountRepository accountRepository = new HelpAccountRepository(con);
+			HelpAccountRepository accountRepository = new HelpAccountRepository(con, botConfig);
 			HelpTransactionRepository transactionRepository = new HelpTransactionRepository(con);
 			HelpAccount account = this.getOrCreateAccount(recipient);
 			account.updateExperience(value);
@@ -126,7 +128,7 @@ public class HelpExperienceService {
 
 	private void checkExperienceRoles(@NotNull Guild guild, @NotNull HelpAccount account) {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
-				Bot.getConfig().get(guild).getHelpConfig().getExperienceRoles().forEach((key, value) -> {
+				botConfig.get(guild).getHelpConfig().getExperienceRoles().forEach((key, value) -> {
 					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
 					if (role.first() == null) return;
 					if (key.equals(role.first().getIdLong())) {

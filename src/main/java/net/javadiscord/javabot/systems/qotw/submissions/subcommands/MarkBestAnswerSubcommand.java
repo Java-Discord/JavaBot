@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import javax.sql.DataSource;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
@@ -24,8 +26,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -47,15 +48,24 @@ import net.javadiscord.javabot.util.Responses;
 public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DataSource dataSource;
+	private final DbHelper dbHelper;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param pointsService the {@link QOTWPointsService}
 	 * @param notificationService The {@link NotificationService}
+	 * @param botConfig The main configuration of the bot
+	 * @param dataSource A factory for connections to the main database
+	 * @param dbHelper An object managing databse operations
 	 */
-	public MarkBestAnswerSubcommand(QOTWPointsService pointsService, NotificationService notificationService) {
+	public MarkBestAnswerSubcommand(QOTWPointsService pointsService, NotificationService notificationService, BotConfig botConfig, DataSource dataSource, DbHelper dbHelper) {
 		this.pointsService = pointsService;
 		this.notificationService=notificationService;
+		this.botConfig = botConfig;
+		this.dataSource = dataSource;
+		this.dbHelper = dbHelper;
 		setSubcommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
 				.addOption(OptionType.STRING, "thread-id", "The submission's thread id.", true, true)
 		);
@@ -69,14 +79,13 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		long threadId = Long.parseLong(idMapping.getAsString());
-		GuildConfig config = Bot.getConfig().get(event.getGuild());
 		ThreadChannel submissionThread = event.getGuild().getThreadChannelById(threadId);
 		if (submissionThread == null) {
 			Responses.error(event, "Could not find thread with id: `%s`", threadId).queue();
 			return;
 		}
 		event.deferReply(true).queue();
-		DbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
+		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
 			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(threadId);
 			if (submissionOptional.isEmpty()) {
 				Responses.error(event.getHook(), "Could not find submission with thread id: `%s`", threadId).queue();
@@ -87,7 +96,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 				Responses.error(event.getHook(), "The Submission must be reviewed and accepted!").queue();
 				return;
 			}
-			if (isSubmissionThreadABestAnswer(submissionThread)) {
+			if (isSubmissionThreadABestAnswer(botConfig, submissionThread)) {
 				Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
 				return;
 			}
@@ -109,10 +118,11 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * Checks if the QOTW submission is marked as a best answer.
 	 * @param submissionThread the thread were the submission was sent to
+	 * @param botConfig The main configuration of the bot
 	 * @return {@code true} if it is a best answer, else {@code false}
 	 */
-	public static boolean isSubmissionThreadABestAnswer(ThreadChannel submissionThread) {
-		return Bot.getConfig().get(submissionThread.getGuild()).getQotwConfig().getQuestionChannel().retrieveArchivedPublicThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()));
+	public static boolean isSubmissionThreadABestAnswer(BotConfig botConfig, ThreadChannel submissionThread) {
+		return botConfig.get(submissionThread.getGuild()).getQotwConfig().getQuestionChannel().retrieveArchivedPublicThreadChannels().stream().anyMatch(thread -> thread.getName().equals(submissionThread.getName()));
 	}
 
 	private List<Message> getSubmissionContent(ThreadChannel thread) {
@@ -149,7 +159,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 * @param submissionThread The submission's thread.
 	 */
 	private void sendBestAnswer(InteractionHook hook, List<Message> messages, Member member, ThreadChannel submissionThread) {
-		MessageActionUtils.copyMessagesToNewThread(Bot.getConfig().get(member.getGuild()).getQotwConfig().getQuestionChannel(),
+		MessageActionUtils.copyMessagesToNewThread(botConfig.get(member.getGuild()).getQotwConfig().getQuestionChannel(),
 				this.buildBestAnswerEmbed(member),
 				submissionThread.getName(),
 				messages,
@@ -162,11 +172,11 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static List<Command.Choice> replyAcceptedSubmissions(@NotNull CommandAutoCompleteInteractionEvent event) {
+	public List<Command.Choice> replyAcceptedSubmissions(@NotNull CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (Connection con = Bot.getDataSource().getConnection()) {
+		try (Connection con = dataSource.getConnection()) {
 			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			QOTWConfig config = Bot.getConfig().get(event.getGuild()).getQotwConfig();
+			QOTWConfig config = botConfig.get(event.getGuild()).getQotwConfig();
 			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), repo.getCurrentQuestionNumber())
 					.stream()
 					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)
