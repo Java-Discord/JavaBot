@@ -389,6 +389,8 @@ public class HelpChannelUpdater implements Runnable {
 						config.getHelpOverviewMessageIds().put(channelId, m.getIdLong());
 						Bot.getConfig().flush();
 						log.info("Successfully created new Help Overview Message in '{}' on message with id '{}'", channelId, m.getId());
+						ExceptionLogger.capture(err);
+						Bot.getConfig().get(m.getGuild()).getModerationConfig().getLogChannel().sendMessage("Sent new help-overview message (Check sentry for cause!)").queue();
 					})
 			);
 		});
