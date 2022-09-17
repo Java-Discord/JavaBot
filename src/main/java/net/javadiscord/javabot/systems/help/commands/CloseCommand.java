@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 /**
  * A simple command that can be used inside reserved help channels to immediately unreserve them,
  * instead of waiting for a timeout.
+ * An alias to /unreserve
  */
 public class CloseCommand extends UnreserveCommand {
 
