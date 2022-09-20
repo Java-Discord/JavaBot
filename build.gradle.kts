@@ -47,9 +47,6 @@ dependencies {
     implementation("com.h2database:h2:2.1.212")
     implementation("com.zaxxer:HikariCP:5.0.1")
 
-    // Quartz Scheduler
-    implementation("org.quartz-scheduler:quartz:2.3.2")
-    
     // Webhooks
     implementation("com.github.DynxstyGIT:discord-webhooks:74301a46a0")
 
