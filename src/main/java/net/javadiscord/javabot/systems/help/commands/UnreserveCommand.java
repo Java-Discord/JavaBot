@@ -2,8 +2,6 @@ package net.javadiscord.javabot.systems.help.commands;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.sql.DataSource;
-
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -23,7 +21,6 @@ import net.javadiscord.javabot.util.Responses;
  */
 public class UnreserveCommand extends SlashCommand {
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
 	private final ScheduledExecutorService asyncPool;
 	private final DbActions dbActions;
 
@@ -35,7 +32,6 @@ public class UnreserveCommand extends SlashCommand {
 	 */
 	public UnreserveCommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions) {
 		this.botConfig = botConfig;
-		this.dataSource = dbActions.getDataSource();
 		this.asyncPool = asyncPool;
 		this.dbActions = dbActions;
 		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
