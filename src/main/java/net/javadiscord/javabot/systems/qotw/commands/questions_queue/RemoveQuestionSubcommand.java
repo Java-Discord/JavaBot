@@ -16,37 +16,38 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 /**
  * Subcommand that allows staff-members to remove single questions from the QOTW Queue.
  */
 public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoCompletable {
+	private final QuestionQueueRepository questionQueueRepository;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param dataSource A factory for connections to the main database
+	 * @param questionQueueRepository Dao class that represents the QOTW_QUESTION SQL Table.
 	 */
-	public RemoveQuestionSubcommand(DataSource dataSource) {
-		super(dataSource);
+	public RemoveQuestionSubcommand(QuestionQueueRepository questionQueueRepository) {
+		this.questionQueueRepository = questionQueueRepository;
 		setSubcommandData(new SubcommandData("remove", "Removes a question from the queue.")
 				.addOption(OptionType.INTEGER, "id", "The id of the question to remove.", true, true)
 		);
 	}
 
 	@Override
-	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
+	@Transactional
+	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, long guildId) throws DataAccessException {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null) {
 			return Responses.replyMissingArguments(event);
 		}
 		long id = idOption.getAsLong();
-		boolean removed = new QuestionQueueRepository(con).removeQuestion(guildId, id);
+		boolean removed = questionQueueRepository.removeQuestion(guildId, id);
 		if (removed) {
 			return Responses.success(event, "Question Removed", "The question with id `" + id + "` has been removed.");
 		} else {
@@ -62,11 +63,10 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	 */
 	public List<Command.Choice> replyQuestions(CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (Connection con = dataSource.getConnection()) {
-			QuestionQueueRepository repo = new QuestionQueueRepository(con);
-			List<QOTWQuestion> questions = repo.getQuestions(event.getGuild().getIdLong(), 0, 25);
+		try {
+			List<QOTWQuestion> questions = questionQueueRepository.getQuestions(event.getGuild().getIdLong(), 0, 25);
 			questions.forEach(question -> choices.add(new Command.Choice(String.format("(Priority: %s) %s", question.getPriority(), question.getText()), question.getId())));
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, RemoveQuestionSubcommand.class.getSimpleName());
 		}
 		return choices;

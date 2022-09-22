@@ -1,15 +1,13 @@
 package net.javadiscord.javabot.systems.qotw.submissions.subcommands;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import javax.sql.DataSource;
+import java.util.concurrent.ExecutorService;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
@@ -28,7 +26,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
@@ -49,23 +46,23 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
-	private final DbHelper dbHelper;
+	private final ExecutorService asyncPool;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param pointsService the {@link QOTWPointsService}
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dataSource A factory for connections to the main database
-	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param qotwSubmissionRepository Dao object that represents the QOTW_SUBMISSIONS SQL Table.
 	 */
-	public MarkBestAnswerSubcommand(QOTWPointsService pointsService, NotificationService notificationService, BotConfig botConfig, DataSource dataSource, DbHelper dbHelper) {
+	public MarkBestAnswerSubcommand(QOTWPointsService pointsService, NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
 		this.pointsService = pointsService;
 		this.notificationService=notificationService;
 		this.botConfig = botConfig;
-		this.dataSource = dataSource;
-		this.dbHelper = dbHelper;
+		this.asyncPool = asyncPool;
+		this.qotwSubmissionRepository = qotwSubmissionRepository;
 		setSubcommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
 				.addOption(OptionType.STRING, "thread-id", "The submission's thread id.", true, true)
 		);
@@ -85,33 +82,38 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply(true).queue();
-		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(threadId);
-			if (submissionOptional.isEmpty()) {
-				Responses.error(event.getHook(), "Could not find submission with thread id: `%s`", threadId).queue();
-				return;
-			}
-			QOTWSubmission submission = submissionOptional.get();
-			if (submission.getStatus() != SubmissionStatus.ACCEPTED) {
-				Responses.error(event.getHook(), "The Submission must be reviewed and accepted!").queue();
-				return;
-			}
-			if (isSubmissionThreadABestAnswer(botConfig, submissionThread)) {
-				Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
-				return;
-			}
-			List<Message> messages = getSubmissionContent(submissionThread);
-			event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
-					member -> {
-						if (member == null) {
-							Responses.error(event.getHook(), "Could not find member with id: `%s`", submission.getAuthorId()).queue();
-							return;
+
+		asyncPool.execute(()->{
+			try {
+				Optional<QOTWSubmission> submissionOptional = qotwSubmissionRepository.getSubmissionByThreadId(threadId);
+				if (submissionOptional.isEmpty()) {
+					Responses.error(event.getHook(), "Could not find submission with thread id: `%s`", threadId).queue();
+					return;
+				}
+				QOTWSubmission submission = submissionOptional.get();
+				if (submission.getStatus() != SubmissionStatus.ACCEPTED) {
+					Responses.error(event.getHook(), "The Submission must be reviewed and accepted!").queue();
+					return;
+				}
+				if (isSubmissionThreadABestAnswer(botConfig, submissionThread)) {
+					Responses.error(event.getHook(), "The Submission was already marked as one of the best answers.").queue();
+					return;
+				}
+				List<Message> messages = getSubmissionContent(submissionThread);
+				event.getGuild().retrieveMemberById(submission.getAuthorId()).queue(
+						member -> {
+							if (member == null) {
+								Responses.error(event.getHook(), "Could not find member with id: `%s`", submission.getAuthorId()).queue();
+								return;
+							}
+							pointsService.increment(member.getIdLong());
+							notificationService.withQOTW(event.getGuild(), member.getUser()).sendBestAnswerNotification();
+							sendBestAnswer(event.getHook(), messages, member, submissionThread);
 						}
-						pointsService.increment(member.getIdLong());
-						notificationService.withQOTW(event.getGuild(), member.getUser()).sendBestAnswerNotification();
-						sendBestAnswer(event.getHook(), messages, member, submissionThread);
-					}
-			);
+				);
+			} catch (DataAccessException e) {
+				ExceptionLogger.capture(e,MarkBestAnswerSubcommand.class.getSimpleName());
+			}
 		});
 	}
 
@@ -174,10 +176,9 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 	 */
 	public List<Command.Choice> replyAcceptedSubmissions(@NotNull CommandAutoCompleteInteractionEvent event) {
 		List<Command.Choice> choices = new ArrayList<>(25);
-		try (Connection con = dataSource.getConnection()) {
-			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
+		try {
 			QOTWConfig config = botConfig.get(event.getGuild()).getQotwConfig();
-			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), repo.getCurrentQuestionNumber())
+			List<QOTWSubmission> submissions = qotwSubmissionRepository.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), qotwSubmissionRepository.getCurrentQuestionNumber())
 					.stream()
 					.filter(submission -> submission.getStatus() == SubmissionStatus.ACCEPTED)
 					.toList();
@@ -188,7 +189,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 					choices.add(new Command.Choice(name, submission.getThreadId()));
 				}
 			});
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, MarkBestAnswerSubcommand.class.getSimpleName());
 		}
 		return AutoCompleteUtils.filterChoices(event, choices);

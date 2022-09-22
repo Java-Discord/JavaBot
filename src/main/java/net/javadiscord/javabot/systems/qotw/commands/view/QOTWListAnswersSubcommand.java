@@ -8,15 +8,17 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -25,16 +27,19 @@ import java.util.stream.Collectors;
 public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 
 	private final BotConfig botConfig;
-	private final DbActions dbActions;
+	private final ExecutorService asyncPool;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param botConfig The injected {@link BotConfig}
-	 * @param dbActions A service object responsible for various operations on the main database
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param qotwSubmissionRepository Dao object that represents the QOTW_SUBMISSIONS SQL Table.
 	 */
-	public QOTWListAnswersSubcommand(BotConfig botConfig, DbActions dbActions) {
+	public QOTWListAnswersSubcommand(BotConfig botConfig, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
 		this.botConfig = botConfig;
-		this.dbActions = dbActions;
+		this.asyncPool = asyncPool;
+		this.qotwSubmissionRepository = qotwSubmissionRepository;
 		setSubcommandData(new SubcommandData("list-answers", "Lists answers to (previous) questions of the week")
 				.addOption(OptionType.INTEGER, "question", "The question number", true)
 		);
@@ -65,26 +70,30 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 		int questionNum = questionNumOption.getAsInt();
 
 		event.deferReply(true).queue();
-		dbActions.doAsyncDaoAction(QOTWSubmissionRepository::new, repo -> {
-			List<QOTWSubmission> submissions = repo.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), questionNum);
-			EmbedBuilder eb = new EmbedBuilder()
-					.setTitle("Answers of Question of the Week #" + questionNum)
-					.setColor(Responses.Type.DEFAULT.getColor())
-					.setFooter("Results may not be accurate due to historic data.");
-			TextChannel submissionChannel = botConfig.get(event.getGuild()).getQotwConfig().getSubmissionChannel();
-			String allAnswers = submissions
-					.stream()
-					.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
-					.filter(submission -> submission.getQuestionNumber() == questionNum)
-					.map(s -> (isBestAnswer(submissionChannel,s) ?
-							"**Best** " : s.getStatus() == SubmissionStatus.ACCEPTED ? "Accepted " : "") +
-							"Answer by <@" + s.getAuthorId() + ">")
-					.collect(Collectors.joining("\n"));
-			if (allAnswers.isEmpty()) {
-				allAnswers = "No accepted answers found.";
+		asyncPool.execute(()->{
+			try {
+				List<QOTWSubmission> submissions = qotwSubmissionRepository.getSubmissionsByQuestionNumber(event.getGuild().getIdLong(), questionNum);
+				EmbedBuilder eb = new EmbedBuilder()
+						.setTitle("Answers of Question of the Week #" + questionNum)
+						.setColor(Responses.Type.DEFAULT.getColor())
+						.setFooter("Results may not be accurate due to historic data.");
+				TextChannel submissionChannel = botConfig.get(event.getGuild()).getQotwConfig().getSubmissionChannel();
+				String allAnswers = submissions
+						.stream()
+						.filter(submission -> isSubmissionVisible(submission, event.getUser().getIdLong()))
+						.filter(submission -> submission.getQuestionNumber() == questionNum)
+						.map(s -> (isBestAnswer(submissionChannel,s) ?
+								"**Best** " : s.getStatus() == SubmissionStatus.ACCEPTED ? "Accepted " : "") +
+								"Answer by <@" + s.getAuthorId() + ">")
+						.collect(Collectors.joining("\n"));
+				if (allAnswers.isEmpty()) {
+					allAnswers = "No accepted answers found.";
+				}
+				eb.appendDescription(allAnswers);
+				event.getHook().sendMessageEmbeds(eb.build()).queue();
+			} catch (DataAccessException e) {
+				ExceptionLogger.capture(e, QOTWListAnswersSubcommand.class.getSimpleName());
 			}
-			eb.appendDescription(allAnswers);
-			event.getHook().sendMessageEmbeds(eb.build()).queue();
 		});
 	}
 

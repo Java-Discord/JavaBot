@@ -13,10 +13,14 @@ import net.javadiscord.javabot.systems.qotw.commands.qotw_points.SetPointsSubcom
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.ListQuestionsSubcommand;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.RemoveQuestionSubcommand;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Represents the `/qotw-admin` command. This holds administrative commands for managing the Question of the Week.
@@ -29,16 +33,20 @@ public class QOTWAdminCommand extends SlashCommand {
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
 	 * @param dbHelper An object managing databse operations
+	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
+	 * @param questionQueueRepository Dao class that represents the QOTW_QUESTION SQL Table.
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param qotwSubmissionRepository Dao object that represents the QOTW_SUBMISSIONS SQL Table.
 	 */
-	public QOTWAdminCommand(QOTWPointsService pointsService, NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
+	public QOTWAdminCommand(QOTWPointsService pointsService, NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper, QuestionPointsRepository qotwPointsRepository, QuestionQueueRepository questionQueueRepository, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
 		setSlashCommandData(Commands.slash("qotw-admin", "Administrative tools for managing the Question of the Week.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
 		addSubcommandGroups(Map.of(
-				new SubcommandGroupData("questions-queue", "Commands for interacting with the set of QOTW questions that are in queue."), Set.of(new ListQuestionsSubcommand(dbHelper.getDataSource()), new AddQuestionSubcommand(dbHelper), new RemoveQuestionSubcommand(dbHelper.getDataSource())),
-				new SubcommandGroupData("account", "Commands for interaction with Users Question of the Week points."), Set.of(new IncrementPointsSubcommand(pointsService, notificationService), new SetPointsSubcommand(pointsService, dbHelper.getDataSource())),
-				new SubcommandGroupData("submissions", "Commands for managing QOTW Submissions."), Set.of(new MarkBestAnswerSubcommand(pointsService, notificationService, botConfig, dbHelper.getDataSource(), dbHelper))
+				new SubcommandGroupData("questions-queue", "Commands for interacting with the set of QOTW questions that are in queue."), Set.of(new ListQuestionsSubcommand(questionQueueRepository, asyncPool), new AddQuestionSubcommand(questionQueueRepository, asyncPool), new RemoveQuestionSubcommand(questionQueueRepository)),
+				new SubcommandGroupData("account", "Commands for interaction with Users Question of the Week points."), Set.of(new IncrementPointsSubcommand(pointsService, notificationService), new SetPointsSubcommand(pointsService, dbHelper.getDataSource(), qotwPointsRepository)),
+				new SubcommandGroupData("submissions", "Commands for managing QOTW Submissions."), Set.of(new MarkBestAnswerSubcommand(pointsService, notificationService, botConfig, asyncPool, qotwSubmissionRepository))
 		));
 	}
 }

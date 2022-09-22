@@ -9,11 +9,13 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 /**
@@ -25,6 +27,8 @@ public class NotificationService {
 	private final QOTWPointsService qotwPointsService;
 	private final BotConfig botConfig;
 	private final DbHelper dbHelper;
+	private final ExecutorService asyncPool;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	@Contract("_ -> new")
 	public @NotNull GuildNotificationService withGuild(Guild guild) {
@@ -37,11 +41,11 @@ public class NotificationService {
 	}
 
 	public @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
-		return new QOTWGuildNotificationService(this, guild, dbHelper);
+		return new QOTWGuildNotificationService(this, guild, asyncPool, qotwSubmissionRepository);
 	}
 
 	public @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
-		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems(), dbHelper);
+		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems(), asyncPool, qotwSubmissionRepository);
 	}
 
 	/**

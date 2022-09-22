@@ -20,12 +20,15 @@ import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -39,6 +42,9 @@ public class SubmissionManager {
 	public static final String THREAD_NAME = "%s — %s";
 	private final QOTWConfig config;
 	private final DbHelper dbHelper;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
+	private final QuestionQueueRepository questionQueueRepository;
+	private ExecutorService asyncPool;
 
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
@@ -47,6 +53,7 @@ public class SubmissionManager {
 	 * @param questionNumber The current qotw-week number.
 	 * @return A {@link WebhookMessageAction}.
 	 */
+	@Transactional
 	public WebhookMessageAction<?> handleSubmission(@NotNull ButtonInteractionEvent event, int questionNumber) {
 		event.deferEdit().queue();
 		Member member = event.getMember();
@@ -57,16 +64,15 @@ public class SubmissionManager {
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					try (Connection con = dbHelper.getDataSource().getConnection()) {
-						QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
+					try{
 						QOTWSubmission submission = new QOTWSubmission();
 						submission.setThreadId(thread.getIdLong());
 						submission.setQuestionNumber(questionNumber);
 						submission.setGuildId(thread.getGuild().getIdLong());
 						submission.setAuthorId(member.getIdLong());
-						repo.insert(submission);
-						dbHelper.doDaoAction(QuestionQueueRepository::new, dao -> {
-							Optional<QOTWQuestion> questionOptional = dao.findByQuestionNumber(questionNumber);
+						qotwSubmissionRepository.insert(submission);
+						asyncPool.execute(()->{
+							Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(questionNumber);
 							if (questionOptional.isPresent()) {
 								thread.sendMessage(member.getAsMention())
 										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
@@ -77,7 +83,7 @@ public class SubmissionManager {
 										.queue();
 							}
 						});
-					} catch (SQLException e) {
+					} catch (DataAccessException e) {
 						ExceptionLogger.capture(e, getClass().getSimpleName());
 					}
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
@@ -94,15 +100,19 @@ public class SubmissionManager {
 	 */
 	public void handleThreadDeletion(ButtonInteractionEvent event) {
 		ThreadChannel thread = (ThreadChannel) event.getGuildChannel();
-		dbHelper.doDaoAction(QOTWSubmissionRepository::new, dao -> {
-			Optional<QOTWSubmission> submissionOptional = dao.getSubmissionByThreadId(thread.getIdLong());
-			if (submissionOptional.isPresent()) {
-				QOTWSubmission submission = submissionOptional.get();
-				if (submission.getAuthorId() != event.getMember().getIdLong()) {
-					return;
+		asyncPool.execute(()->{
+			try {
+				Optional<QOTWSubmission> submissionOptional = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
+				if (submissionOptional.isPresent()) {
+					QOTWSubmission submission = submissionOptional.get();
+					if (submission.getAuthorId() != event.getMember().getIdLong()) {
+						return;
+					}
+					qotwSubmissionRepository.deleteSubmission(thread.getIdLong());
+					thread.delete().queue();
 				}
-				dao.deleteSubmission(thread.getIdLong());
-				thread.delete().queue();
+			} catch (DataAccessException e) {
+				ExceptionLogger.capture(e, SubmissionManager.class.getSimpleName());
 			}
 		});
 	}
@@ -122,8 +132,7 @@ public class SubmissionManager {
 	 */
 	public boolean hasActiveSubmissionThreads(long authorId) {
 		try (Connection con = dbHelper.getDataSource().getConnection()) {
-			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			return !repo.getUnreviewedSubmissions(authorId).isEmpty();
+			return !qotwSubmissionRepository.getUnreviewedSubmissions(authorId).isEmpty();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return false;
@@ -138,8 +147,7 @@ public class SubmissionManager {
 	 */
 	public List<QOTWSubmission> getActiveSubmissionThreads(long guildId) {
 		try (Connection con = dbHelper.getDataSource().getConnection()) {
-			QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-			return repo.getSubmissionsByQuestionNumber(guildId, repo.getCurrentQuestionNumber());
+			return qotwSubmissionRepository.getSubmissionsByQuestionNumber(guildId, qotwSubmissionRepository.getCurrentQuestionNumber());
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();

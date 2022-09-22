@@ -36,6 +36,7 @@ public class QOTWCloseSubmissionsJob {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final DbHelper dbHelper;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
 	 * disable the Submission button.
@@ -57,10 +58,9 @@ public class QOTWCloseSubmissionsJob {
 			message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
 			for (ThreadChannel thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
 				try (Connection con = dbHelper.getDataSource().getConnection()) {
-					QOTWSubmissionRepository repo = new QOTWSubmissionRepository(con);
-					Optional<QOTWSubmission> optionalSubmission = repo.getSubmissionByThreadId(thread.getIdLong());
+					Optional<QOTWSubmission> optionalSubmission = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
 					if (optionalSubmission.isEmpty()) continue;
-					new SubmissionControlsManager(botConfig.get(guild), dbHelper, optionalSubmission.get(), pointsService, notificationService).sendControls();
+					new SubmissionControlsManager(botConfig.get(guild), optionalSubmission.get(), pointsService, notificationService).sendControls();
 				} catch (SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
 					throw e;

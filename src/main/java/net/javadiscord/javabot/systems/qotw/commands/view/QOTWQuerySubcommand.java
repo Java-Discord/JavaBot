@@ -12,42 +12,43 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import javax.annotation.Nonnull;
-import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
- * Represents the `/qotw-view query` subcommand. It allows for listing filtering QOTWs.
+ * Represents the `/qotw-view query` subcommand. It allows for listing filtering
+ * QOTWs.
  */
 @AutoDetectableComponentHandler("qotw-list-questions")
 public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 
 	private static final int MAX_BUTTON_QUERY_LENGTH = 10;
 	private static final int PAGE_LIMIT = 20;
-	private final DbHelper dbHelper;
-	private final DbActions dbActions;
+	private final ExecutorService asyncPool;
+	private final QuestionQueueRepository questionQueueRepository;
 
 	/**
-	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param dbHelper An object managing databse operations
-	 * @param dbActions A service object responsible for various operations on the main database
+	 * The constructor of this class, which sets the corresponding
+	 * {@link SubcommandData}.
+	 * @param questionQueueRepository Dao class that represents the
+	 * QOTW_QUESTION SQL Table.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public QOTWQuerySubcommand(DbHelper dbHelper, DbActions dbActions) {
-		this.dbHelper = dbHelper;
-		this.dbActions = dbActions;
+	public QOTWQuerySubcommand(ExecutorService asyncPool, QuestionQueueRepository questionQueueRepository) {
+		this.asyncPool = asyncPool;
+		this.questionQueueRepository = questionQueueRepository;
 		setSubcommandData(new SubcommandData("list-questions", "Lists previous 'Questions of the Week'")
 				.addOption(OptionType.STRING, "query", "Only queries questions that contain a specific query", false)
-				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false)
-		);
+				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false));
 	}
 
 	@Override
@@ -63,12 +64,10 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			return;
 		}
 		event.deferReply(true).queue();
-		dbActions.doAsyncDaoAction(QuestionQueueRepository::new, repo -> {
-			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
-			event.getHook()
-					.sendMessageEmbeds(embed)
-					.addActionRows(buildPageControls(query, page, embed))
-					.queue();
+
+		asyncPool.execute(() -> {
+			MessageEmbed embed = buildListQuestionsEmbed(questionQueueRepository, event.getGuild().getIdLong(), query, page);
+			event.getHook().sendMessageEmbeds(embed).addActionRows(buildPageControls(query, page, embed)).queue();
 		});
 	}
 
@@ -82,12 +81,9 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			Responses.error(event.getHook(), "The page must be equal to or greater than 1!").queue();
 			return;
 		}
-		dbHelper.doDaoAction(QuestionQueueRepository::new, repo -> {
-			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
-			event.getHook()
-					.editOriginalEmbeds(embed)
-					.setActionRows(buildPageControls(query, page, embed))
-					.queue();
+		asyncPool.execute(() -> {
+			MessageEmbed embed = buildListQuestionsEmbed(questionQueueRepository, event.getGuild().getIdLong(), query, page);
+			event.getHook().editOriginalEmbeds(embed).setActionRows(buildPageControls(query, page, embed)).queue();
 		});
 	}
 
@@ -100,18 +96,16 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 				Button.primary(ComponentIdBuilder.build("qotw-list-questions", page - 1 + "", query), "Previous Page")
 						.withDisabled(page <= 0),
 				Button.primary(ComponentIdBuilder.build("qotw-list-questions", page + 1 + "", query), "Next Page")
-						.withDisabled(embed.getFields().size() < PAGE_LIMIT)
-		);
+						.withDisabled(embed.getFields().size() < PAGE_LIMIT));
 	}
 
-	private @NotNull MessageEmbed buildListQuestionsEmbed(@NotNull QuestionQueueRepository repo, long guildId, String query, int page) throws SQLException {
+	private @NotNull MessageEmbed buildListQuestionsEmbed(@NotNull QuestionQueueRepository repo, long guildId,
+			String query, int page) throws DataAccessException {
 		List<QOTWQuestion> questions = repo.getUsedQuestionsWithQuery(guildId, query, page * PAGE_LIMIT, PAGE_LIMIT);
 		EmbedBuilder eb = new EmbedBuilder()
 				.setDescription("**Questions of the Week" + (query.isEmpty() ? "" : " matching '" + query + "'") + "**")
-				.setColor(Responses.Type.DEFAULT.getColor())
-				.setFooter("Page " + (page + 1));
-		questions.stream()
-				.sorted(Comparator.comparingInt(QOTWQuestion::getQuestionNumber))
+				.setColor(Responses.Type.DEFAULT.getColor()).setFooter("Page " + (page + 1));
+		questions.stream().sorted(Comparator.comparingInt(QOTWQuestion::getQuestionNumber))
 				.map(q -> new MessageEmbed.Field("Question #" + q.getQuestionNumber(), q.getText(), true))
 				.forEach(eb::addField);
 		if (eb.getFields().isEmpty()) {

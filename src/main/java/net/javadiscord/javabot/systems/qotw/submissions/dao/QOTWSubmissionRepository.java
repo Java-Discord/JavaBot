@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +19,9 @@ import java.util.Optional;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class QOTWSubmissionRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Inserts a new {@link QOTWSubmission}.
@@ -25,18 +29,11 @@ public class QOTWSubmissionRepository {
 	 * @param submission The account to insert.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void insert(QOTWSubmission submission) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_submissions (thread_id, question_number, guild_id, author_id) VALUES (?, ?, ?, ?)",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			stmt.setLong(1, submission.getThreadId());
-			stmt.setInt(2, submission.getQuestionNumber());
-			stmt.setLong(3, submission.getGuildId());
-			stmt.setLong(4, submission.getAuthorId());
-			int rows = stmt.executeUpdate();
-			if (rows == 0) throw new SQLException("Submission was not inserted.");
-			log.info("Inserted new QOTW-Submission: {}", submission);
-		}
+	public void insert(QOTWSubmission submission) throws DataAccessException {
+		int rows = jdbcTemplate.update("INSERT INTO qotw_submissions (thread_id, question_number, guild_id, author_id) VALUES (?, ?, ?, ?)",
+				submission.getThreadId(),submission.getQuestionNumber(),submission.getGuildId(),submission.getAuthorId());
+		if (rows == 0) throw new DataAccessException("Submission was not inserted.") {};
+		log.info("Inserted new QOTW-Submission: {}", submission);
 	}
 
 	/**
@@ -46,12 +43,9 @@ public class QOTWSubmissionRepository {
 	 * @return Whether the {@link QOTWSubmission} was actually removed.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean deleteSubmission(long threadId) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_submissions WHERE thread_id = ?")) {
-			stmt.setLong(1, threadId);
-			int rows = stmt.executeUpdate();
-			return rows > 0;
-		}
+	public boolean deleteSubmission(long threadId) throws DataAccessException {
+		return jdbcTemplate.update("DELETE FROM qotw_submissions WHERE thread_id = ?",
+				threadId) > 0;
 	}
 
 	/**
@@ -61,12 +55,9 @@ public class QOTWSubmissionRepository {
 	 * @param status The new {@link SubmissionStatus}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void updateStatus(long threadId, @NotNull SubmissionStatus status) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("UPDATE qotw_submissions SET status = ? WHERE thread_id = ?")) {
-			stmt.setInt(1, status.ordinal());
-			stmt.setLong(2, threadId);
-			stmt.executeUpdate();
-		}
+	public void updateStatus(long threadId, @NotNull SubmissionStatus status) throws DataAccessException {
+		jdbcTemplate.update("UPDATE qotw_submissions SET status = ? WHERE thread_id = ?",
+				status.ordinal(),threadId);
 	}
 
 	/**
@@ -76,16 +67,9 @@ public class QOTWSubmissionRepository {
 	 * @return A List of unreviewed {@link QOTWSubmission}s.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<QOTWSubmission> getUnreviewedSubmissions(long authorId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE author_id = ? AND status = 0")) {
-			s.setLong(1, authorId);
-			ResultSet rs = s.executeQuery();
-			List<QOTWSubmission> submissions = new ArrayList<>();
-			while (rs.next()) {
-				submissions.add(read(rs));
-			}
-			return submissions;
-		}
+	public List<QOTWSubmission> getUnreviewedSubmissions(long authorId) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM qotw_submissions WHERE author_id = ? AND status = 0", (rs,row)->this.read(rs),
+				authorId);
 	}
 
 	/**
@@ -95,15 +79,12 @@ public class QOTWSubmissionRepository {
 	 * @return The {@link QOTWSubmission} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<QOTWSubmission> getSubmissionByThreadId(long threadId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE thread_id = ?")) {
-			s.setLong(1, threadId);
-			ResultSet rs = s.executeQuery();
-			QOTWSubmission submission = null;
-			if (rs.next()) {
-				submission = read(rs);
-			}
-			return Optional.ofNullable(submission);
+	public Optional<QOTWSubmission> getSubmissionByThreadId(long threadId) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM qotw_submissions WHERE thread_id = ?", (rs, row)->this.read(rs),
+					threadId));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -113,12 +94,10 @@ public class QOTWSubmissionRepository {
 	 * @return The current Question Number.
 	 * @throws SQLException If an error occurs.
 	 */
-	public int getCurrentQuestionNumber() throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT MAX(question_number) FROM qotw_submissions")) {
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				return rs.getInt(1);
-			}
+	public int getCurrentQuestionNumber() throws DataAccessException {
+		try {
+			return jdbcTemplate.queryForObject("SELECT MAX(question_number) FROM qotw_submissions",(rs, row)->rs.getInt(1));
+		}catch (EmptyResultDataAccessException e) {
 			return 0;
 		}
 	}
@@ -131,17 +110,9 @@ public class QOTWSubmissionRepository {
 	 * @return All {@link QOTWSubmission}s, as a {@link List}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<QOTWSubmission> getSubmissionsByQuestionNumber(long guildId, int questionNumber) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ?")) {
-			s.setLong(1, guildId);
-			s.setInt(2, questionNumber);
-			ResultSet rs = s.executeQuery();
-			List<QOTWSubmission> submissions = new ArrayList<>();
-			while (rs.next()) {
-				submissions.add(this.read(rs));
-			}
-			return submissions;
-		}
+	public List<QOTWSubmission> getSubmissionsByQuestionNumber(long guildId, int questionNumber) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ?", (rs, row)->this.read(rs),
+				guildId, questionNumber);
 	}
 
 	/**
@@ -153,15 +124,11 @@ public class QOTWSubmissionRepository {
 	 * @return The {@link QOTWSubmission} or {@code null} if the user has not submitted any answer to the question.
 	 * @throws SQLException If an error occurs.
 	 */
-	public QOTWSubmission getSubmissionByQuestionNumberAndAuthorID(long guildId,int questionNumber, long authorID) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ? AND author_id = ?")) {
-			s.setLong(1, guildId);
-			s.setInt(2, questionNumber);
-			s.setLong(3, authorID);
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				return this.read(rs);
-			}
+	public QOTWSubmission getSubmissionByQuestionNumberAndAuthorID(long guildId,int questionNumber, long authorID) throws DataAccessException {
+		try{
+			return jdbcTemplate.queryForObject("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ? AND author_id = ?", (rs, row)->this.read(rs),
+				guildId, questionNumber, authorID);
+		}catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}

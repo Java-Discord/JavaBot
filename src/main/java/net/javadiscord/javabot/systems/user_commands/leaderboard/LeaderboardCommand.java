@@ -8,6 +8,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 
 /**
  * Represents the `/leaderboard` command. This holds commands viewing all the server's different leaderboards.
@@ -20,13 +21,14 @@ public class LeaderboardCommand extends SlashCommand {
 	 * @param dbHelper An object managing databse operations
 	 * @param dbActions A utility object providing various operations on the main database
 	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
+	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
 	 */
-	public LeaderboardCommand(QOTWPointsService pointsService, ExecutorService asyncPool, DbHelper dbHelper, DbActions dbActions, HelpAccountRepository helpAccountRepository) {
+	public LeaderboardCommand(QOTWPointsService pointsService, ExecutorService asyncPool, DbHelper dbHelper, DbActions dbActions, HelpAccountRepository helpAccountRepository, QuestionPointsRepository qotwPointsRepository) {
 		setSlashCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
 				.setGuildOnly(true)
 		);
 		addSubcommands(
-				new QOTWLeaderboardSubcommand(pointsService, asyncPool, dbActions.getDataSource()),
+				new QOTWLeaderboardSubcommand(pointsService, asyncPool, qotwPointsRepository),
 				new ThanksLeaderboardSubcommand(asyncPool, dbActions),
 				new ExperienceLeaderboardSubcommand(helpAccountRepository, asyncPool));
 	}

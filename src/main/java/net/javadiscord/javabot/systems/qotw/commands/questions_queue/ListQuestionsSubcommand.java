@@ -11,35 +11,36 @@ import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
-import javax.sql.DataSource;
 
 /**
  * Subcommand that allows staff-members to list QOTW Questions.
  */
 public class ListQuestionsSubcommand extends QOTWSubcommand {
-	private ExecutorService asyncPool;
+	private final ExecutorService asyncPool;
+	private final QuestionQueueRepository questionQueueRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param dataSource A factory for connections to the main database
+	 * @param questionQueueRepository Dao class that represents the QOTW_QUESTION SQL Table.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public ListQuestionsSubcommand(DataSource dataSource) {
-		super(dataSource);
+	public ListQuestionsSubcommand(QuestionQueueRepository questionQueueRepository, ExecutorService asyncPool) {
+		this.asyncPool = asyncPool;
+		this.questionQueueRepository = questionQueueRepository;
 		setSubcommandData(new SubcommandData("list", "Show a list of all questions in the queue.")
 				.addOption(OptionType.INTEGER, "page", "The page of results you get.", false)
 		);
 	}
 
 	@Override
-	protected InteractionCallbackAction<?> handleCommand(@NotNull SlashCommandInteractionEvent event, Connection con, long guildId) throws SQLException {
-		QuestionQueueRepository repository = new QuestionQueueRepository(con);
+	@Transactional
+	protected InteractionCallbackAction<?> handleCommand(@NotNull SlashCommandInteractionEvent event, long guildId) throws DataAccessException {
 		OptionMapping pageOption = event.getOption("page");
 		int page = 0;
 		if (pageOption != null) {
@@ -49,7 +50,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 			}
 			page = userPage;
 		}
-		List<QOTWQuestion> questions = repository.getQuestions(guildId, page, 10);
+		List<QOTWQuestion> questions = questionQueueRepository.getQuestions(guildId, page, 10);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
 				.setTitle("QOTW Questions Queue")

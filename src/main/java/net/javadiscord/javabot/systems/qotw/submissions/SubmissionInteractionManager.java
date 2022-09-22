@@ -18,10 +18,13 @@ import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Handles all interactions regarding the QOTW Submission System.
@@ -33,10 +36,13 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final DbHelper dbHelper;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
+	private final QuestionQueueRepository questionQueueRepository;
+	private final ExecutorService asyncPool;
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
-		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), dbHelper);
+		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), dbHelper, qotwSubmissionRepository, questionQueueRepository);
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
 			case "controls" -> handleControlButtons(id, event);
@@ -49,7 +55,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	public void handleSelectMenu(@NotNull SelectMenuInteractionEvent event, List<String> values) {
 		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
-		SubmissionControlsManager manager = new SubmissionControlsManager(botConfig.get(event.getGuild()), dbHelper, (ThreadChannel) event.getGuildChannel(), pointsService, notificationService);
+		SubmissionControlsManager manager = new SubmissionControlsManager(botConfig.get(event.getGuild()), (ThreadChannel) event.getGuildChannel(), pointsService, notificationService, asyncPool, qotwSubmissionRepository);
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").setEphemeral(true).queue();
 			return;
@@ -73,7 +79,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	 */
 	public void handleControlButtons(String[] id, @NotNull ButtonInteractionEvent event) {
 		event.deferReply(true).queue();
-		SubmissionControlsManager manager = new SubmissionControlsManager(botConfig.get(event.getGuild()), dbHelper, (ThreadChannel) event.getGuildChannel(), pointsService, notificationService);
+		SubmissionControlsManager manager = new SubmissionControlsManager(botConfig.get(event.getGuild()), (ThreadChannel) event.getGuildChannel(), pointsService, notificationService, asyncPool, qotwSubmissionRepository);
 		if (!hasPermissions(event.getMember())) {
 			event.getHook().sendMessage("Insufficient Permissions.").queue();
 			return;

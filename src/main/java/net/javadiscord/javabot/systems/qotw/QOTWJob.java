@@ -41,6 +41,7 @@ public class QOTWJob {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final DataSource dataSource;
+	private final QuestionQueueRepository questionQueueRepository;
 
 	/**
 	 * Posts a new question to the QOTW channel.
@@ -56,8 +57,7 @@ public class QOTWJob {
 			GuildConfig config = botConfig.get(guild);
 			if (config.getModerationConfig().getLogChannel() == null) continue;
 			try (Connection c = dataSource.getConnection()) {
-				QuestionQueueRepository repo = new QuestionQueueRepository(c);
-				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
+				Optional<QOTWQuestion> nextQuestion = questionQueueRepository.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
 					notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
 				} else {
@@ -68,7 +68,7 @@ public class QOTWJob {
 							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
 							.queue();
 					if (question.getQuestionNumber() == null) {
-						question.setQuestionNumber(repo.getNextQuestionNumber());
+						question.setQuestionNumber(questionQueueRepository.getNextQuestionNumber());
 					}
 					NewsChannel questionChannel = qotw.getQuestionChannel();
 					if (questionChannel == null) continue;
@@ -76,7 +76,7 @@ public class QOTWJob {
 							.setEmbeds(this.buildQuestionEmbed(question))
 							.setActionRows(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
-					repo.markUsed(question);
+					questionQueueRepository.markUsed(question);
 				}
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());

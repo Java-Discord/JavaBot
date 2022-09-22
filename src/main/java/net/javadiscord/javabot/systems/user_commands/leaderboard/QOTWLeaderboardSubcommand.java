@@ -1,6 +1,24 @@
 package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.imageio.ImageIO;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -16,21 +34,6 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.ImageCache;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
 import net.javadiscord.javabot.util.Pair;
-import org.jetbrains.annotations.NotNull;
-
-import javax.imageio.ImageIO;
-import javax.sql.DataSource;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Command for QOTW Leaderboard.
@@ -49,19 +52,19 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 	private final QOTWPointsService pointsService;
 	private final ExecutorService asyncPool;
-	private final DataSource dataSource;
+	private final QuestionPointsRepository qotwPointsRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param pointsService The {@link QOTWPointsService} managing {@link QOTWAccount}s
 	 * @param asyncPool The thread pool for asynchronous operations
-	 * @param dataSource A factory for connections to the main database
+	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
 	 */
-	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool, DataSource dataSource) {
+	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool, QuestionPointsRepository qotwPointsRepository) {
 		setSubcommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
 		this.pointsService=pointsService;
 		this.asyncPool = asyncPool;
-		this.dataSource = dataSource;
+		this.qotwPointsRepository = qotwPointsRepository;
 	}
 
 	@Override
@@ -192,16 +195,15 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The image's cache name.
 	 */
 	private @NotNull String getCacheName() {
-		try (Connection con = dataSource.getConnection()) {
-			QuestionPointsRepository repo = new QuestionPointsRepository(con);
-			List<QOTWAccount> accounts = repo.sortByPoints()
+		try {
+			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints()
 					.stream()
 					.limit(DISPLAY_COUNT)
 					.toList();
 			StringBuilder sb = new StringBuilder("qotw_leaderboard_");
 			accounts.forEach(account -> sb.append(String.format(":%s:%s", account.getUserId(), account.getPoints())));
 			return sb.toString();
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return "";
 		}

@@ -29,6 +29,7 @@ public class QOTWReminderJob {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final DataSource dataSource;
+	private final QuestionQueueRepository questionQueueRepository;
 
 	/**
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
@@ -39,8 +40,7 @@ public class QOTWReminderJob {
 		for (Guild guild : jda.getGuilds()) {
 			ModerationConfig config = botConfig.get(guild).getModerationConfig();
 			try (Connection c = dataSource.getConnection()) {
-				QuestionQueueRepository repo = new QuestionQueueRepository(c);
-				Optional<QOTWQuestion> q = repo.getNextQuestion(guild.getIdLong());
+				Optional<QOTWQuestion> q = questionQueueRepository.getNextQuestion(guild.getIdLong());
 				if (q.isEmpty()) {
 					notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
 							"Warning! %s There's no Question of the Week in the queue. Please add one before it's time to post!",

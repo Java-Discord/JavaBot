@@ -6,7 +6,9 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
@@ -29,6 +31,8 @@ public class QOTWUserReminderJob {
 	private final UserPreferenceService userPreferenceService;
 	private final BotConfig botConfig;
 	private final DbHelper dbHelper;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
+	private final QuestionQueueRepository questionQueueRepository;
 
 	/**
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
@@ -37,7 +41,7 @@ public class QOTWUserReminderJob {
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = botConfig.get(guild).getQotwConfig();
-			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper).getActiveSubmissionThreads(guild.getIdLong());
+			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper, qotwSubmissionRepository, questionQueueRepository).getActiveSubmissionThreads(guild.getIdLong());
 			for (QOTWSubmission submission : submissions) {
 				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
 				if (preference.isEnabled()) {

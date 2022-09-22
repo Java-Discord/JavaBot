@@ -6,15 +6,16 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.data.config.SystemsConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import javax.annotation.Nonnull;
-import java.sql.SQLException;
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
 
 /**
  * An extension of {@link QOTWGuildNotificationService} which also handles user qotw
@@ -27,14 +28,14 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 	private final QOTWAccount account;
 	private final SystemsConfig systemsConfig;
 
-	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig, DbHelper dbHelper) {
-		super(notificationService, guild, dbHelper);
+	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
+		super(notificationService, guild, asyncPool, qotwSubmissionRepository);
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;
 		try {
 			account = pointsService.getOrCreateAccount(user.getIdLong());
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			log.error("Could not find Account with user Id: {}", user.getIdLong(), e);
 			account = null;
 		}
