@@ -15,6 +15,7 @@ import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.ChannelSemanticCheck;
 import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
+import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -40,6 +41,7 @@ public class StateListener extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private final ScheduledExecutorService asyncPool;
 	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
 	@Override
 	public void onReady(@NotNull ReadyEvent event) {
@@ -52,7 +54,7 @@ public class StateListener extends ListenerAdapter {
 			// Schedule the help channel updater to run periodically for each guild.
 			HelpConfig helpConfig = botConfig.get(guild).getHelpConfig();
 			asyncPool.scheduleAtFixedRate(
-					new HelpChannelUpdater(guild, botConfig, dbActions, asyncPool, channelSemanticChecks),
+					new HelpChannelUpdater(guild, botConfig, dbActions, asyncPool, channelSemanticChecks, helpExperienceService),
 					5,
 					helpConfig.getUpdateIntervalSeconds(),
 					TimeUnit.SECONDS

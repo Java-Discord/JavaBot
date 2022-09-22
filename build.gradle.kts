@@ -4,6 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("org.springframework.boot") version "2.7.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     checkstyle
 }
@@ -59,8 +60,9 @@ dependencies {
     // Sentry
     implementation("io.sentry:sentry:6.3.0")
 
-    // Spring Boot
-    implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
+    // Spring
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 }
 
 tasks.withType<Jar> {

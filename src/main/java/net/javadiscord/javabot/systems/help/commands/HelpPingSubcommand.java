@@ -10,6 +10,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
+import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
@@ -19,8 +20,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
 
 /**
  * Handler for the /help ping sub-command that allows users to occasionally ping
@@ -32,23 +31,24 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 
 	private final Map<Long, Pair<Long, Guild>> lastPingTimes;
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
-	private final ScheduledExecutorService asyncPool;
 	private final DbActions dbActions;
+	private final ScheduledExecutorService asyncPool;
+	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * Constructor that initializes and handles the cooldown map.
 	 * @param asyncPool The thread pool for asynchronous operations
 	 * @param botConfig The main configuration of the bot
-	 * @param dbActions A utility instance providing various operations to the main database
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
+	 * @param dbActions A service object responsible for various operations on the main database
 	 */
-	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions) {
+	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool, HelpExperienceService helpExperienceService, DbActions dbActions) {
 		setSubcommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
 		this.botConfig = botConfig;
-		this.dataSource = dbActions.getDataSource();
-		this.asyncPool = asyncPool;
 		this.dbActions = dbActions;
+		this.asyncPool=asyncPool;
+		this.helpExperienceService = helpExperienceService;
 		asyncPool.scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
 	}
 
@@ -60,7 +60,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		GuildConfig config = botConfig.get(guild);
-		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool);
+		HelpChannelManager channelManager=new HelpChannelManager(botConfig, guild, dbActions, asyncPool, helpExperienceService);
 		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
 			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
 			if (optionalReservation.isEmpty()) {

@@ -7,10 +7,13 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
+
+import java.util.concurrent.ExecutorService;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,18 +22,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public class UnbanCommand extends ModerateCommand {
 	private final NotificationService notificationService;
-	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
-	public UnbanCommand(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
+	public UnbanCommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		super(botConfig);
 		this.notificationService = notificationService;
-		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		setModerationSlashCommandData(Commands.slash("unban", "Unbans a member")
 				.addOption(OptionType.STRING, "id", "The id of the user you want to unban", true)
 				.addOption(OptionType.STRING, "reason", "The reason for unbanning this user", true)
@@ -46,7 +52,7 @@ public class UnbanCommand extends ModerateCommand {
 		}
 		long id = idOption.getAsLong();
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
 		if (service.unban(id, reasonOption.getAsString(), event.getMember(), event.getChannel(), quiet)) {
 			return Responses.success(event, "User Unbanned", "User with id `%s` has been unbanned.", id);
 		} else {

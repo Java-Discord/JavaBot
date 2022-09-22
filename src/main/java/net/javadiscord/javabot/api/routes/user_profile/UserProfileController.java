@@ -20,6 +20,7 @@ import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +46,8 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	private final UserPreferenceService preferenceService;
 	private final DataSource dataSource;
 	private final BotConfig botConfig;
+	private final HelpExperienceService helpExperienceService;
+	private final WarnRepository warnRepository;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
@@ -54,9 +57,11 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 * @param preferenceService The {@link UserPreferenceService}
 	 * @param botConfig The main configuration of the bot
 	 * @param dataSource A factory for connections to the main database
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
 	@Autowired
-	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService, UserPreferenceService preferenceService, BotConfig botConfig, DataSource dataSource) {
+	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService, UserPreferenceService preferenceService, BotConfig botConfig, DataSource dataSource, HelpExperienceService helpExperienceService, WarnRepository warnRepository) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
@@ -66,6 +71,8 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 		this.preferenceService = preferenceService;
 		this.dataSource = dataSource;
 		this.botConfig = botConfig;
+		this.helpExperienceService = helpExperienceService;
+		this.warnRepository = warnRepository;
 	}
 
 	/**
@@ -101,21 +108,19 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				QOTWAccount qotwAccount = qotwPointsService.getOrCreateAccount(user.getIdLong());
 				data.setQotwAccount(qotwAccount);
 				// Help Account
-				HelpExperienceService helpService = new HelpExperienceService(dataSource, botConfig);
-				HelpAccount helpAccount = helpService.getOrCreateAccount(user.getIdLong());
+				HelpAccount helpAccount = helpExperienceService.getOrCreateAccount(user.getIdLong());
 				data.setHelpAccount(HelpAccountData.of(helpAccount, guild));
 				// User Preferences
 				List<UserPreference> preferences = Arrays.stream(Preference.values()).map(p -> preferenceService.getOrCreate(user.getIdLong(), p)).toList();
 				data.setPreferences(preferences);
 				// User Warns
-				WarnRepository warnRepository = new WarnRepository(con);
 				LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(guild).getModerationConfig().getWarnTimeoutDays());
 				data.setWarns(warnRepository.getWarnsByUserId(user.getIdLong(), cutoff));
 				// Insert into cache
 				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
 			}
 			return new ResponseEntity<>(data, HttpStatus.OK);
-		} catch (SQLException e) {
+		} catch (DataAccessException|SQLException e) {
 			throw new InternalServerException("An internal server error occurred.", e);
 		}
 	}

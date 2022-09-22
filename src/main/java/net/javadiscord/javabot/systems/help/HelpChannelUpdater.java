@@ -53,13 +53,14 @@ public class HelpChannelUpdater implements Runnable {
 	 * @param asyncPool The thread pool for asynchronous operations
 	 * @param botConfig The main configuration of the bot
 	 * @param dbActions A utility object providing various operations on the main database
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
-	public HelpChannelUpdater(Guild guild, BotConfig botConfig, DbActions dbActions, ScheduledExecutorService asyncPool, List<ChannelSemanticCheck> semanticChecks) {
+	public HelpChannelUpdater(Guild guild, BotConfig botConfig, DbActions dbActions, ScheduledExecutorService asyncPool, List<ChannelSemanticCheck> semanticChecks, HelpExperienceService helpExperienceService) {
 		this.jda = guild.getJDA();
 		this.botConfig = botConfig;
 		this.helpConfig = botConfig.get(guild).getHelpConfig();
 		this.semanticChecks = semanticChecks;
-		this.channelManager = new HelpChannelManager(botConfig, guild, dbActions, asyncPool);
+		this.channelManager = new HelpChannelManager(botConfig, guild, dbActions, asyncPool, helpExperienceService);
 	}
 
 	@Override

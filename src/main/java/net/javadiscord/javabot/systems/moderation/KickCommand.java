@@ -10,10 +10,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
+
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,18 +25,21 @@ import javax.annotation.Nullable;
  */
 public class KickCommand extends ModerateUserCommand {
 	private final NotificationService notificationService;
-	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
-	public KickCommand(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
+	public KickCommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		super(botConfig);
 		this.notificationService = notificationService;
-		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		setModerationSlashCommandData(Commands.slash("kick", "Kicks a member")
 				.addOption(OptionType.USER, "user", "The user to kick.", true)
 				.addOption(OptionType.STRING, "reason", "The reason for kicking this user.", true)
@@ -48,7 +53,7 @@ public class KickCommand extends ModerateUserCommand {
 			return Responses.replyInsufficientPermissions(event.getHook(), Permission.KICK_MEMBERS);
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
 		service.kick(target, reason, event.getMember(), event.getChannel(), quiet);
 		return Responses.success(event.getHook(), "User Kicked", "%s has been kicked.", target.getAsMention());
 	}

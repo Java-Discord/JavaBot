@@ -18,13 +18,12 @@ import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
-
-import javax.sql.DataSource;
 
 /**
  * Handles various interactions regarding the help channel system.
@@ -35,9 +34,9 @@ import javax.sql.DataSource;
 public class HelpChannelInteractionManager implements ButtonHandler {
 
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
 	private final ScheduledExecutorService asyncPool;
 	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * Handles button interactions pertaining to the interaction provided to
@@ -51,7 +50,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 	private void handleHelpThankButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
 		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
-		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool);
+		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool, helpExperienceService);
 		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
 			event.getInteraction().getHook().sendMessage("Could not find reservation data for this channel. Perhaps it's no longer reserved?")
@@ -126,11 +125,10 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 					);
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", helper.getAsTag()).setEphemeral(true).queue();
 					HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
-					HelpExperienceService service = new HelpExperienceService(dataSource, botConfig);
 					// Perform experience transactions
-					service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
-					service.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
-				} catch (SQLException e) {
+					helpExperienceService.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
+					helpExperienceService.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
+				} catch (DataAccessException|SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
 					botConfig.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
 							"Could not record user %s thanking %s for help in channel %s: %s",
@@ -158,7 +156,7 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 
 	private void handleHelpChannelButton(@NotNull ButtonInteractionEvent event, String reservationId, String action) {
 		event.deferEdit().queue();
-		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(),dbActions, asyncPool);
+		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(),dbActions, asyncPool, helpExperienceService);
 		Optional<ChannelReservation> optionalReservation = channelManager.getReservation(Long.parseLong(reservationId));
 		if (optionalReservation.isEmpty()) {
 			event.reply("Could not find reservation data for this channel. Perhaps it's no longer reserved?")

@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.user_commands.IdCalculatorCommand;
@@ -18,16 +17,14 @@ import net.javadiscord.javabot.util.TimeUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
-import javax.sql.DataSource;
-
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,33 +45,36 @@ public class MessageCache {
 	 */
 	public int messageCount = 0;
 
+	private final ExecutorService asyncPool;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
+	private final MessageCacheRepository cacheRepository;
 
 	/**
 	 * Creates a new messages & loads messages from the DB into a List.
 	 * @param botConfig The main configuration of the bot
-	 * @param dataSource A factory for connections to the main database
-	 * @param dbHelper An object managing databse operations
+	 * @param cacheRepository Dao class that represents the QOTW_POINTS SQL Table.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public MessageCache(BotConfig botConfig, DataSource dataSource, DbHelper dbHelper) {
+	public MessageCache(BotConfig botConfig, MessageCacheRepository cacheRepository, ExecutorService asyncPool) {
+		this.asyncPool = asyncPool;
 		this.botConfig = botConfig;
-		this.dbHelper = dbHelper;
-		try (Connection con = dataSource.getConnection()) {
-			cache = new MessageCacheRepository(con).getAll();
-		} catch (SQLException e) {
+		this.cacheRepository = cacheRepository;
+		try {
+			cache = cacheRepository.getAll();
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
+
 	}
 
 	/**
 	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
 	 */
 	public void synchronize() {
-		dbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
-			dao.delete(cache.size());
-			dao.insertList(cache);
+		asyncPool.execute(()->{
+			cacheRepository.delete(cache.size());
+			cacheRepository.insertList(cache);
 			messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
 		});

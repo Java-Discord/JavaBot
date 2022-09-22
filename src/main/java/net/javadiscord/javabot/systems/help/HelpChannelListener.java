@@ -35,6 +35,7 @@ public class HelpChannelListener extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private final ScheduledExecutorService asyncPool;
 	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
@@ -43,7 +44,7 @@ public class HelpChannelListener extends ListenerAdapter {
 		}
 		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		TextChannel channel = event.getChannel().asTextChannel();
-		HelpChannelManager manager = new HelpChannelManager(botConfig, event.getGuild(),dbActions, asyncPool);
+		HelpChannelManager manager = new HelpChannelManager(botConfig, event.getGuild(),dbActions, asyncPool, helpExperienceService);
 
 		// If a message was sent in an open text channel, reserve it.
 		Category openChannelCategory = config.getOpenChannelCategory();

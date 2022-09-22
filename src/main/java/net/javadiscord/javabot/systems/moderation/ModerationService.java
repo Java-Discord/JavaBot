@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
@@ -15,16 +14,16 @@ import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import javax.annotation.Nonnull;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 /**
  * This service provides methods for performing moderation actions, like banning
@@ -35,20 +34,22 @@ public class ModerationService {
 
 	private final NotificationService notificationService;
 	private final ModerationConfig moderationConfig;
-
-	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * Constructs the service.
 	 *
 	 * @param config The {@link GuildConfig} to use.
 	 * @param notificationService The {@link NotificationService}
-	 * @param dbHelper An object managing databse operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public ModerationService(NotificationService notificationService,@NotNull GuildConfig config, DbHelper dbHelper) {
+	public ModerationService(NotificationService notificationService,@NotNull GuildConfig config, WarnRepository warnRepository, ExecutorService asyncPool) {
 		this.notificationService = notificationService;
 		this.moderationConfig = config.getModerationConfig();
-		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 	}
 
 	/**
@@ -57,13 +58,15 @@ public class ModerationService {
 	 * @param interaction The interaction to use.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public ModerationService(NotificationService notificationService,BotConfig botConfig, @NotNull Interaction interaction, DbHelper dbHelper) {
+	public ModerationService(NotificationService notificationService,BotConfig botConfig, @NotNull Interaction interaction, WarnRepository warnRepository, ExecutorService asyncPool) {
 		this(
 				notificationService,
 				botConfig.get(interaction.getGuild()),
-				dbHelper
+				warnRepository,
+				asyncPool
 		);
 	}
 
@@ -78,17 +81,21 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 */
 	public void warn(User user, WarnSeverity severity, String reason, Member warnedBy, MessageChannel channel, boolean quiet) {
-		dbHelper.doDaoAction(WarnRepository::new, dao -> {
-			dao.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
-			int totalSeverity = dao.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
-			MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
-			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
-			notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
-			if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
-				channel.sendMessageEmbeds(warnEmbed).queue();
-			}
-			if (totalSeverity > moderationConfig.getMaxWarnSeverity()) {
-				ban(user, "Too many warns", warnedBy, channel, quiet);
+		asyncPool.execute(() -> {
+			try {
+				warnRepository.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
+				int totalSeverity = warnRepository.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
+				MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
+				notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
+				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
+				if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
+					channel.sendMessageEmbeds(warnEmbed).queue();
+				}
+				if (totalSeverity > moderationConfig.getMaxWarnSeverity()) {
+					ban(user, "Too many warns", warnedBy, channel, quiet);
+				}
+			} catch (DataAccessException e) {
+				ExceptionLogger.capture(e, ModerationService.class.getSimpleName());
 			}
 		});
 	}
@@ -100,11 +107,15 @@ public class ModerationService {
 	 * @param clearedBy The user who cleared the warns.
 	 */
 	public void discardAllWarns(User user, User clearedBy) {
-		dbHelper.doDaoAction(WarnRepository::new, dao -> {
-			dao.discardAll(user.getIdLong());
-			MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
-			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
-			notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+		asyncPool.execute(() -> {
+			try {
+				warnRepository.discardAll(user.getIdLong());
+				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
+				notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
+				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+			} catch (DataAccessException e) {
+				ExceptionLogger.capture(e, ModerationService.class.getSimpleName());
+			}
 		});
 	}
 
@@ -116,16 +127,15 @@ public class ModerationService {
 	 * @return Whether the Warn was discarded or not.
 	 */
 	public boolean discardWarnById(long id, User clearedBy) {
-		try (Connection con = dbHelper.getDataSource().getConnection()) {
-			WarnRepository repo = new WarnRepository(con);
-			Optional<Warn> warnOptional = repo.findById(id);
+		try {
+			Optional<Warn> warnOptional = warnRepository.findById(id);
 			if (warnOptional.isPresent()) {
 				Warn warn = warnOptional.get();
-				repo.discardById(warn.getId());
+				warnRepository.discardById(warn.getId());
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(buildClearWarnsByIdEmbed(warn, clearedBy)));
 				return true;
 			}
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		return false;
@@ -138,11 +148,11 @@ public class ModerationService {
 	 * @return A {@link List} with all warns.
 	 */
 	public List<Warn> getWarns(long userId) {
-		try (Connection con = dbHelper.getDataSource().getConnection()) {
-			WarnRepository repo = new WarnRepository(con);
+		try {
+			WarnRepository repo = warnRepository;
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays());
 			return repo.getWarnsByUserId(userId, cutoff);
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
 		}

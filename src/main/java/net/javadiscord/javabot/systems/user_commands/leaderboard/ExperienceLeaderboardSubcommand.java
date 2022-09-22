@@ -15,17 +15,18 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
-import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * <h3>This class represents the /leaderboard help-experience command.</h3>
@@ -33,14 +34,17 @@ import java.util.List;
 @AutoDetectableComponentHandler("experience-leaderboard")
 public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 	private static final int PAGE_SIZE = 5;
-	private final DbHelper dbHelper;
+	private final ExecutorService asyncPool;
+	private final HelpAccountRepository helpAccountRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param dbHelper An object managing databse operations
+	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
+	 * @param asyncPool the main thread pool for asynchronous operations
 	 */
-	public ExperienceLeaderboardSubcommand(DbHelper dbHelper) {
-		this.dbHelper = dbHelper;
+	public ExperienceLeaderboardSubcommand(HelpAccountRepository helpAccountRepository, ExecutorService asyncPool) {
+		this.asyncPool = asyncPool;
+		this.helpAccountRepository = helpAccountRepository;
 		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
 		);
@@ -50,24 +54,28 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
 		event.deferEdit().queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
-		dbHelper.doDaoAction(HelpAccountRepository::new, dao -> {
-			int page = Integer.parseInt(id[2]);
-			// increment/decrement page
-			if (id[1].equals("left")) {
-				page--;
-			} else {
-				page++;
+		asyncPool.execute(() -> {
+			try {
+				int page = Integer.parseInt(id[2]);
+				// increment/decrement page
+				if (id[1].equals("left")) {
+					page--;
+				} else {
+					page++;
+				}
+				int maxPage = helpAccountRepository.getTotalAccounts() / PAGE_SIZE;
+				if (page <= 0) page = maxPage;
+				if (page > maxPage) page = 1;
+				event.getHook().editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), helpAccountRepository, page))
+						.setActionRows(buildPageControls(page))
+						.queue();
+			}catch (DataAccessException e) {
+				ExceptionLogger.capture(e, ExperienceLeaderboardSubcommand.class.getSimpleName());
 			}
-			int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
-			if (page <= 0) page = maxPage;
-			if (page > maxPage) page = 1;
-			event.getHook().editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
-					.setActionRows(buildPageControls(page))
-					.queue();
 		});
 	}
 
-	private static @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, @NotNull HelpAccountRepository dao, int page) throws SQLException {
+	private static @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, @NotNull HelpAccountRepository dao, int page) throws DataAccessException {
 		int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
 		List<HelpAccount> accounts = dao.getAccounts(Math.min(page, maxPage), PAGE_SIZE);
 		EmbedBuilder builder = new EmbedBuilder()
@@ -97,9 +105,14 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		int page = event.getOption("page", 1, OptionMapping::getAsInt);
 		event.deferReply().queue();
-		dbHelper.doDaoAction(HelpAccountRepository::new, dao ->
-				event.getHook().sendMessageEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
+		asyncPool.execute(() -> {
+			try {
+				event.getHook().sendMessageEmbeds(buildExperienceLeaderboard(event.getGuild(), helpAccountRepository, page))
 						.addActionRows(buildPageControls(page))
-						.queue());
+						.queue();
+			}catch (DataAccessException e) {
+				ExceptionLogger.capture(e, ExperienceLeaderboardSubcommand.class.getSimpleName());
+			}
+		});
 	}
 }

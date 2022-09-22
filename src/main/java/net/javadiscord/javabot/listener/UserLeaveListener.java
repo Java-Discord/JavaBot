@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
+import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.sql.SQLException;
@@ -23,6 +24,7 @@ public class UserLeaveListener extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private final DbActions dbActions;
 	private final ScheduledExecutorService asyncPool;
+	private final HelpExperienceService helpExperienceService;
 
 	@Override
 	public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
@@ -40,7 +42,7 @@ public class UserLeaveListener extends ListenerAdapter {
 	 */
 	private void unreserveAllChannels(User user, Guild guild) {
 		try {
-			HelpChannelManager manager = new HelpChannelManager(botConfig, guild, dbActions, asyncPool);
+			HelpChannelManager manager = new HelpChannelManager(botConfig, guild, dbActions, asyncPool, helpExperienceService);
 			manager.unreserveAllOwnedChannels(user);
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());

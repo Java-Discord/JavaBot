@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,17 +48,23 @@ public class AutoMod extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private List<String> spamUrls;
 	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
 	 * @param notificationService The {@link QOTWPointsService}
 	 * @param botConfig The main configuration of the bot
 	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository The main thread pool for asynchronous operations
 	 */
-	public AutoMod(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
+	public AutoMod(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper, ExecutorService asyncPool, WarnRepository warnRepository) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
 		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
@@ -101,7 +109,7 @@ public class AutoMod extends ListenerAdapter {
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// mention spam
 		if (message.getMentions().getUsers().size() >= 5) {
-			new ModerationService(notificationService, botConfig.get(message.getGuild()), dbHelper)
+			new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -135,7 +143,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
 			notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message: `%s`", message.getContentRaw()));
-			new ModerationService(notificationService, botConfig.get(message.getGuild()), dbHelper)
+			new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -153,7 +161,7 @@ public class AutoMod extends ListenerAdapter {
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
 			notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Suspicious Link sent by: %s (`%s`)", message.getAuthor().getAsMention(), message.getContentRaw()));
-			new ModerationService(notificationService, botConfig.get(message.getGuild()), dbHelper)
+			new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
 					.warn(
 							message.getAuthor(),
 							WarnSeverity.MEDIUM,
@@ -178,7 +186,7 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
 			return;
 		}
-		new ModerationService(notificationService, botConfig.get(member.getGuild()), dbHelper)
+		new ModerationService(notificationService, botConfig.get(member.getGuild()), warnRepository, asyncPool)
 				.timeout(
 						member,
 						"Automod: Spam",

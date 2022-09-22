@@ -5,12 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.CallableStatementCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,8 +22,9 @@ import java.util.Optional;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class HelpAccountRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 	private final BotConfig botConfig;
 
 	/**
@@ -29,13 +33,12 @@ public class HelpAccountRepository {
 	 * @param account The account that should be inserted.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void insert(HelpAccount account) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_account (user_id, experience) VALUES ( ?, ? )")) {
-			s.setLong(1, account.getUserId());
-			s.setDouble(2, account.getExperience());
-			s.executeUpdate();
-			log.info("Inserted new Help Account: {}", account);
-		}
+	public void insert(HelpAccount account) throws DataAccessException {
+
+		jdbcTemplate.update("INSERT INTO help_account (user_id, experience) VALUES ( ?, ? )",
+				account.getUserId(),
+				account.getExperience());
+		log.info("Inserted new Help Account: {}", account);
 	}
 
 	/**
@@ -44,12 +47,10 @@ public class HelpAccountRepository {
 	 * @param account The account that should be updated.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void update(HelpAccount account) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = ? WHERE user_id = ?")) {
-			s.setDouble(1, account.getExperience());
-			s.setLong(2, account.getUserId());
-			s.executeUpdate();
-		}
+	public void update(HelpAccount account) throws DataAccessException {
+		jdbcTemplate.update("UPDATE help_account SET experience = ? WHERE user_id = ?",
+				account.getExperience(),
+				account.getUserId());
 	}
 
 	/**
@@ -59,15 +60,11 @@ public class HelpAccountRepository {
 	 * @return An {@link HelpAccount} object, as an {@link Optional}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<HelpAccount> getByUserId(long userId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM help_account WHERE user_id = ?")) {
-			s.setLong(1, userId);
-			ResultSet rs = s.executeQuery();
-			HelpAccount account = null;
-			if (rs.next()) {
-				account = this.read(rs);
-			}
-			return Optional.ofNullable(account);
+	public Optional<HelpAccount> getByUserId(long userId) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM help_account WHERE user_id = ?", (rs, row)->this.read(rs), userId));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -79,16 +76,9 @@ public class HelpAccountRepository {
 	 * @return A {@link List} containing the specified amount of {@link HelpAccount}s.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<HelpAccount> getAccounts(int page, int size) throws SQLException {
-		String sql = "SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT %d OFFSET %d";
-		try (PreparedStatement stmt = con.prepareStatement(String.format(sql, size, Math.max(0, (page * size) - size)))) {
-			ResultSet rs = stmt.executeQuery();
-			List<HelpAccount> accounts = new ArrayList<>(size);
-			while (rs.next()) {
-				accounts.add(this.read(rs));
-			}
-			return accounts;
-		}
+	public List<HelpAccount> getAccounts(int page, int size) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT ? OFFSET ?", (rs, row)->this.read(rs),
+				size, Math.max(0, (page * size) - size));
 	}
 
 	/**
@@ -97,10 +87,10 @@ public class HelpAccountRepository {
 	 * @return The amount, as an {@link Integer}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public int getTotalAccounts() throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT COUNT(*) FROM help_account WHERE experience > 0")) {
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) return rs.getInt(1);
+	public int getTotalAccounts() throws DataAccessException {
+		try {
+			return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM help_account WHERE experience > 0", (rs, row)->rs.getInt(1));
+		}catch (EmptyResultDataAccessException e) {
 			return 0;
 		}
 	}
@@ -113,14 +103,18 @@ public class HelpAccountRepository {
 	 * @param max The maximum amount to subtract.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void removeExperienceFromAllAccounts(double change, int min, int max) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (1 - ? / 100), ?), ?), 0)")) {
-			s.setDouble(1, change);
-			s.setInt(2, min);
-			s.setInt(3, max);
-			long rows = s.executeLargeUpdate();
-			log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
-		}
+	public void removeExperienceFromAllAccounts(double change, int min, int max) throws DataAccessException {
+		long rows = jdbcTemplate.execute("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (1 - ? / 100), ?), ?), 0)",new CallableStatementCallback<Long>() {
+
+			@Override
+			public Long doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
+				cs.setDouble(1, change);
+				cs.setInt(2, min);
+				cs.setInt(3, max);
+				return cs.executeLargeUpdate();
+			}
+		});
+		log.info("Removed {} experience from all Help Accounts. {} rows affected.", change, rows);
 	}
 
 	private @NotNull HelpAccount read(@NotNull ResultSet rs) throws SQLException {

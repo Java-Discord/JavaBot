@@ -6,6 +6,7 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 
 /**
@@ -18,14 +19,15 @@ public class LeaderboardCommand extends SlashCommand {
 	 * @param asyncPool The thread pool for asynchronous operations
 	 * @param dbHelper An object managing databse operations
 	 * @param dbActions A utility object providing various operations on the main database
+	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
 	 */
-	public LeaderboardCommand(QOTWPointsService pointsService, ExecutorService asyncPool, DbHelper dbHelper, DbActions dbActions) {
+	public LeaderboardCommand(QOTWPointsService pointsService, ExecutorService asyncPool, DbHelper dbHelper, DbActions dbActions, HelpAccountRepository helpAccountRepository) {
 		setSlashCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
 				.setGuildOnly(true)
 		);
 		addSubcommands(
 				new QOTWLeaderboardSubcommand(pointsService, asyncPool, dbActions.getDataSource()),
 				new ThanksLeaderboardSubcommand(asyncPool, dbActions),
-				new ExperienceLeaderboardSubcommand(dbHelper));
+				new ExperienceLeaderboardSubcommand(helpAccountRepository, asyncPool));
 	}
 }

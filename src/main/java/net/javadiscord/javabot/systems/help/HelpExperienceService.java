@@ -13,10 +13,11 @@ import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,34 +28,33 @@ import javax.sql.DataSource;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class HelpExperienceService {
 	private final DataSource dataSource;
 	private final BotConfig botConfig;
+	private final HelpAccountRepository helpAccountRepository;
+	private final HelpTransactionRepository helpTransactionRepository;
 
 	/**
 	 * Creates a new Help Account if none exists.
 	 *
 	 * @param userId The user's id.
 	 * @return An {@link HelpAccount} object.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public HelpAccount getOrCreateAccount(long userId) throws SQLException {
+	@Transactional
+	public HelpAccount getOrCreateAccount(long userId) throws DataAccessException {
 		HelpAccount account;
-		try (Connection con = this.dataSource.getConnection()) {
-			con.setAutoCommit(false);
-			HelpAccountRepository repo = new HelpAccountRepository(con, botConfig);
-			Optional<HelpAccount> optional = repo.getByUserId(userId);
+			Optional<HelpAccount> optional = helpAccountRepository.getByUserId(userId);
 			if (optional.isPresent()) {
 				account = optional.get();
 			} else {
 				account = new HelpAccount(botConfig);
 				account.setUserId(userId);
 				account.setExperience(0);
-				repo.insert(account);
+				helpAccountRepository.insert(account);
 			}
-			con.commit();
 			return account;
-		}
 	}
 
 	/**
@@ -65,14 +65,11 @@ public class HelpExperienceService {
 	 * @return A {@link List} of {@link HelpAccount}s.
 	 */
 	public List<HelpAccount> getTopAccounts(int amount, int page) {
-		List<HelpAccount> accounts = new ArrayList<>(amount);
-		try (Connection con = dataSource.getConnection()) {
-			con.setReadOnly(true);
-			HelpAccountRepository repo = new HelpAccountRepository(con, botConfig);
-			return repo.getAccounts(page, amount);
-		} catch (SQLException e) {
+		try{
+			return helpAccountRepository.getAccounts(page, amount);
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
-			return accounts;
+			return Collections.emptyList();
 		}
 	}
 
@@ -82,15 +79,11 @@ public class HelpExperienceService {
 	 * @param userId The user's id.
 	 * @param count  The count of transactions to retrieve.
 	 * @return A {@link List} with all transactions.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public List<HelpTransaction> getRecentTransactions(long userId, int count) throws SQLException {
-		try (Connection con = this.dataSource.getConnection()) {
-			con.setReadOnly(true);
-			HelpTransactionRepository repo = new HelpTransactionRepository(con);
-			List<HelpTransaction> transactions = repo.getTransactions(userId, count);
-			return transactions;
-		}
+	public List<HelpTransaction> getRecentTransactions(long userId, int count) throws DataAccessException {
+		List<HelpTransaction> transactions = helpTransactionRepository.getTransactions(userId, count);
+		return transactions;
 	}
 
 	/**
@@ -101,9 +94,10 @@ public class HelpExperienceService {
 	 * @param message    The transaction's message.
 	 * @param guild      The current guild.
 	 * @return A {@link HelpTransaction} object.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public HelpTransaction performTransaction(long recipient, double value, HelpTransactionMessage message, Guild guild) throws SQLException {
+	@Transactional
+	public HelpTransaction performTransaction(long recipient, double value, HelpTransactionMessage message, Guild guild) throws DataAccessException {
 		if (value == 0) {
 			log.error("Cannot make zero-value transactions");
 			return null;
@@ -112,18 +106,12 @@ public class HelpExperienceService {
 		transaction.setRecipient(recipient);
 		transaction.setWeight(value);
 		transaction.setMessageType(message.ordinal());
-		try (Connection con = dataSource.getConnection()) {
-			con.setAutoCommit(false);
-			HelpAccountRepository accountRepository = new HelpAccountRepository(con, botConfig);
-			HelpTransactionRepository transactionRepository = new HelpTransactionRepository(con);
-			HelpAccount account = this.getOrCreateAccount(recipient);
-			account.updateExperience(value);
-			accountRepository.update(account);
-			transaction = transactionRepository.save(transaction);
-			this.checkExperienceRoles(guild, account);
-			con.commit();
-			return transactionRepository.getTransaction(transaction.getId()).orElse(null);
-		}
+		HelpAccount account = this.getOrCreateAccount(recipient);
+		account.updateExperience(value);
+		helpAccountRepository.update(account);
+		transaction = helpTransactionRepository.save(transaction);
+		this.checkExperienceRoles(guild, account);
+		return helpTransactionRepository.getTransaction(transaction.getId()).orElse(null);
 	}
 
 	private void checkExperienceRoles(@NotNull Guild guild, @NotNull HelpAccount account) {

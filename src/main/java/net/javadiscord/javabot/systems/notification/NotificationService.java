@@ -21,8 +21,7 @@ import java.util.function.Function;
  */
 @Service
 @RequiredArgsConstructor
-public final class NotificationService {
-
+public class NotificationService {
 	private final QOTWPointsService qotwPointsService;
 	private final BotConfig botConfig;
 	private final DbHelper dbHelper;

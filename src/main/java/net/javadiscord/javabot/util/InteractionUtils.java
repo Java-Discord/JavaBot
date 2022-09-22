@@ -15,7 +15,10 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.notification.NotificationService;
+
+import java.util.concurrent.ExecutorService;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +52,8 @@ public class InteractionUtils implements ButtonHandler {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * Deletes a message, only if the person deleting the message is the author
@@ -76,7 +81,7 @@ public class InteractionUtils implements ButtonHandler {
 	}
 
 	private void kick(ButtonInteraction interaction, @NotNull Guild guild, String memberId) {
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
 		guild.retrieveMemberById(memberId).queue(
 				member -> {
 					service.kick(member.getUser(), "None", interaction.getMember(), interaction.getMessageChannel(), false);
@@ -86,7 +91,7 @@ public class InteractionUtils implements ButtonHandler {
 	}
 
 	private void ban(ButtonInteraction interaction, @NotNull Guild guild, String memberId) {
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
 		guild.getJDA().retrieveUserById(memberId).queue(
 				user -> {
 					service.ban(user, "None", interaction.getMember(), interaction.getMessageChannel(), false);
@@ -96,7 +101,7 @@ public class InteractionUtils implements ButtonHandler {
 	}
 
 	private void unban(ButtonInteraction interaction, long memberId) {
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
 		service.unban(memberId, "None", interaction.getMember(), interaction.getMessageChannel(), false);
 		interaction.editButton(interaction.getButton().withLabel("Unbanned by " + interaction.getUser().getAsTag()).asDisabled()).queue();
 	}

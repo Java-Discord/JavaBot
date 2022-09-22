@@ -1,6 +1,18 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.annotation.Nonnull;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -9,17 +21,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
-import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nonnull;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
 
 /**
  * <h3>This class represents the /warns command.</h3>
@@ -27,16 +32,19 @@ import java.util.List;
  */
 public class WarnsListCommand extends SlashCommand {
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
-	public WarnsListCommand(BotConfig botConfig, DbHelper dbHelper) {
+	public WarnsListCommand(BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		this.botConfig = botConfig;
-		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		setSlashCommandData(Commands.slash("warns", "Shows a list of all recent warning.")
 				.addOption(OptionType.USER, "user", "If given, shows the recent warns of the given user instead.", false)
 				.setGuildOnly(true)
@@ -74,7 +82,12 @@ public class WarnsListCommand extends SlashCommand {
 		}
 		event.deferReply(false).queue();
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
-		dbHelper.doDaoAction(WarnRepository::new, dao ->
-				event.getHook().sendMessageEmbeds(buildWarnsEmbed(dao.getWarnsByUserId(user.getIdLong(), cutoff), user)).queue());
+		asyncPool.execute(() -> {
+			try {
+				event.getHook().sendMessageEmbeds(buildWarnsEmbed(warnRepository.getWarnsByUserId(user.getIdLong(), cutoff), user)).queue();
+			} catch (DataAccessException e) {
+				ExceptionLogger.capture(e, WarnsListCommand.class.getSimpleName());
+			}
+		});
 	}
 }

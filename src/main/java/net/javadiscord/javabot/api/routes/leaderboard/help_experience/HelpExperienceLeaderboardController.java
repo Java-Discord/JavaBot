@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.leaderboard.help_experience.model.ExperienceUserData;
-import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.sql.DataSource;
-
 /**
  * Handles all GET-Requests on the guilds/{guild_id}/leaderboard/experience/ route.
  */
@@ -29,25 +26,22 @@ import javax.sql.DataSource;
 public class HelpExperienceLeaderboardController extends CaffeineCache<Pair<Long, Integer>, List<ExperienceUserData>> {
 	private static final int PAGE_AMOUNT = 8;
 	private final JDA jda;
-	private final DataSource dataSource;
-	private final BotConfig botConfig;
+	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
 	 *
 	 * @param jda The {@link JDA} instance to use.
-	 * @param botConfig The main configuration of the bot
-	 * @param dataSource A factory for connections to the main database
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
 	@Autowired
-	public HelpExperienceLeaderboardController(final JDA jda, DataSource dataSource, BotConfig botConfig) {
+	public HelpExperienceLeaderboardController(final JDA jda, HelpExperienceService helpExperienceService) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
 		this.jda = jda;
-		this.dataSource = dataSource;
-		this.botConfig = botConfig;
+		this.helpExperienceService = helpExperienceService;
 	}
 
 	/**
@@ -67,10 +61,9 @@ public class HelpExperienceLeaderboardController extends CaffeineCache<Pair<Long
 		if (guild == null) {
 			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
-		HelpExperienceService service = new HelpExperienceService(dataSource, botConfig);
 		List<ExperienceUserData> members = getCache().getIfPresent(new Pair<>(guild.getIdLong(), page));
 		if (members == null || members.isEmpty()) {
-			members = service.getTopAccounts(PAGE_AMOUNT, page).stream()
+			members = helpExperienceService.getTopAccounts(PAGE_AMOUNT, page).stream()
 					.map(p -> ExperienceUserData.of(p, jda.retrieveUserById(p.getUserId()).complete()))
 					.toList();
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);

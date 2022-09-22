@@ -24,6 +24,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
@@ -49,13 +50,13 @@ public class HelpChannelManager {
 	 */
 	public static final String THANK_MESSAGE_TEXT = "Before your channel will be unreserved, would you like to express your gratitude to any of the people who helped you? When you're done, click **Unreserve**.";
 
-	private final BotConfig botConfig;
 	@Getter
 	private final HelpConfig config;
 	private final ScheduledExecutorService asyncPool;
 	private final TextChannel logChannel;
 	private final DataSource dataSource;
 	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * Initializes the {@link HelpChannelManager} object.
@@ -63,14 +64,15 @@ public class HelpChannelManager {
 	 * @param guild the {@link Guild} help channels should be managed in
 	 * @param dbActions A service object responsible for various operations on the main database
 	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
-	public HelpChannelManager(BotConfig botConfig, Guild guild, DbActions dbActions, ScheduledExecutorService asyncPool) {
-		this.botConfig = botConfig;
+	public HelpChannelManager(BotConfig botConfig, Guild guild, DbActions dbActions, ScheduledExecutorService asyncPool, HelpExperienceService helpExperienceService) {
 		this.config = botConfig.get(guild).getHelpConfig();
 		this.dataSource = dbActions.getDataSource();
 		this.dbActions = dbActions;
 		this.asyncPool = asyncPool;
 		this.logChannel = botConfig.get(guild).getModerationConfig().getLogChannel();
+		this.helpExperienceService = helpExperienceService;
 	}
 
 	public boolean isOpen(TextChannel channel) {
@@ -344,13 +346,12 @@ public class HelpChannelManager {
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
 			try (Connection con = dataSource.getConnection()) {
-				HelpExperienceService service = new HelpExperienceService(dataSource, botConfig);
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
 					ChannelReservation reservation = reservationOptional.get();
 					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId());
 					for (Long recipient : experience.keySet()) {
-						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
+						helpExperienceService.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
 					}
 				}
 				try (PreparedStatement stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
@@ -374,7 +375,7 @@ public class HelpChannelManager {
 									channel.sendMessage(config.getReopenedChannelMessage()))
 					);
 				}
-			} catch (SQLException e) {
+			} catch (DataAccessException|SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage());
 			}

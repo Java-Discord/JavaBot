@@ -13,6 +13,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
+import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.util.Responses;
 
 /**
@@ -23,17 +24,20 @@ public class UnreserveCommand extends SlashCommand {
 	private final BotConfig botConfig;
 	private final ScheduledExecutorService asyncPool;
 	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param asyncPool The thread pool for asynchronous operations
 	 * @param botConfig The main configuration of the bot
 	 * @param dbActions A utility object providing various operations on the main database
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
-	public UnreserveCommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions) {
+	public UnreserveCommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions, HelpExperienceService helpExperienceService) {
 		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
 		this.dbActions = dbActions;
+		this.helpExperienceService = helpExperienceService;
 		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
@@ -43,7 +47,7 @@ public class UnreserveCommand extends SlashCommand {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		TextChannel channel = event.getChannel().asTextChannel();
-		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool);
+		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool, helpExperienceService);
 		User owner = channelManager.getReservedChannelOwner(channel);
 		if (isEligibleToBeUnreserved(event, channel, botConfig.get(event.getGuild()).getHelpConfig(), owner)) {
 			String reason = event.getOption("reason", null, OptionMapping::getAsString);

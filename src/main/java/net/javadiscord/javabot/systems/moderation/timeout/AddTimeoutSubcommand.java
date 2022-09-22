@@ -10,14 +10,15 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Subcommand that allows staff-members to add timeouts to a single users.
@@ -26,15 +27,17 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
-	public AddTimeoutSubcommand(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
+	public AddTimeoutSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		setSubcommandData(new SubcommandData("add", "Adds a timeout to the specified server member.")
 				.addOptions(
 						new OptionData(OptionType.USER, "member", "The member that should be timed out.", true),
@@ -51,7 +54,8 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 		);
 		this.notificationService=notificationService;
 		this.botConfig = botConfig;
-		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 	}
 
 	@Override
@@ -75,7 +79,7 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 		if (member.isTimedOut()) {
 			return Responses.error(event, "Could not timeout %s; they're already timed out.", member.getAsMention());
 		}
-		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
 		service.timeout(member, reasonOption.getAsString(), event.getMember(), duration, channel, quiet);
 		return Responses.success(event, "User Timed Out", "%s has been timed out.", member.getAsMention());
 	}

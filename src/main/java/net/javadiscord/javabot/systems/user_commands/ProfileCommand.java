@@ -9,9 +9,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
@@ -24,8 +24,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-
-import javax.sql.DataSource;
+import java.util.concurrent.ExecutorService;
 
 /**
  * <h3>This class represents the /profile command.</h3>
@@ -33,24 +32,27 @@ import javax.sql.DataSource;
 public class ProfileCommand extends SlashCommand {
 	private final QOTWPointsService qotwPointsService;
 	private final NotificationService notificationService;
-	private final DataSource dataSource;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
+	private final HelpExperienceService helpExperienceService;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param qotwPointsService The {@link QOTWPointsService}
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dataSource A factory for connections to the main database
-	 * @param dbHelper An object managing databse operations
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public ProfileCommand(QOTWPointsService qotwPointsService, NotificationService notificationService, BotConfig botConfig, DataSource dataSource, DbHelper dbHelper) {
+	public ProfileCommand(QOTWPointsService qotwPointsService, NotificationService notificationService, BotConfig botConfig, HelpExperienceService helpExperienceService, WarnRepository warnRepository, ExecutorService asyncPool) {
 		this.qotwPointsService = qotwPointsService;
 		this.notificationService = notificationService;
-		this.dataSource = dataSource;
 		this.botConfig = botConfig;
-		this.dbHelper = dbHelper;
+		this.helpExperienceService = helpExperienceService;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		setSlashCommandData(Commands.slash("profile", "Shows your server profile.")
 				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)
 				.setGuildOnly(true)
@@ -77,11 +79,11 @@ public class ProfileCommand extends SlashCommand {
 
 	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member) throws SQLException {
 		GuildConfig config = botConfig.get(member.getGuild());
-		List<Warn> warns = new ModerationService(notificationService, config, dbHelper).getWarns(member.getIdLong());
+		List<Warn> warns = new ModerationService(notificationService, config, warnRepository, asyncPool).getWarns(member.getIdLong());
 		long points = qotwPointsService.getPoints(member.getIdLong());
 		List<Role> roles = member.getRoles();
 		String status = member.getOnlineStatus().name();
-		double helpXP = new HelpExperienceService(dataSource, botConfig).getOrCreateAccount(member.getIdLong()).getExperience();
+		double helpXP = helpExperienceService.getOrCreateAccount(member.getIdLong()).getExperience();
 		EmbedBuilder embed = new EmbedBuilder()
 				.setTitle("Profile")
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())

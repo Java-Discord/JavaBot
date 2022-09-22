@@ -8,11 +8,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Responses;
+
+import java.util.concurrent.ExecutorService;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,18 +25,21 @@ import org.jetbrains.annotations.NotNull;
 public class WarnAddSubcommand extends SlashCommand.Subcommand {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
-	public WarnAddSubcommand(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper) {
+	public WarnAddSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
-		this.dbHelper = dbHelper;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		setSubcommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
 				.addOptions(
 						new OptionData(OptionType.USER, "user", "The user to warn.", true),
@@ -67,7 +73,7 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
-		ModerationService service = new ModerationService(notificationService, botConfig, event, dbHelper);
+		ModerationService service = new ModerationService(notificationService, botConfig, event, warnRepository, asyncPool);
 		service.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
 		Responses.success(event, "User Warned", "%s has been successfully warned.", target.getAsMention()).queue();
 	}
