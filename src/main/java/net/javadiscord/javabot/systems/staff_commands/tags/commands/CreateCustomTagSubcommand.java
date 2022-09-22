@@ -22,8 +22,8 @@ import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 
@@ -124,7 +124,7 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 			} else {
 				Responses.error(event.getHook(), "Could not create Custom Tag. Please try again.").queue();
 			}
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e);
 			Responses.error(event.getHook(), "An unexpected error occurred. Please try again.").queue();
 		}
