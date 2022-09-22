@@ -20,9 +20,9 @@ import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -38,6 +38,7 @@ public class StarboardManager extends ListenerAdapter {
 	private final ExecutorService asyncPool;
 	private final DataSource dataSource;
 	private final DbHelper dbHelper;
+	private final StarboardRepository starboardRepository;
 
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
@@ -62,14 +63,21 @@ public class StarboardManager extends ListenerAdapter {
 			channel.retrieveMessageById(messageId).queue(
 					message -> {
 						int stars = getReactionCountForEmote(starEmote, message);
-						dbHelper.doDaoAction(StarboardRepository::new, dao -> {
-							StarboardEntry entry = dao.getEntryByMessageId(message.getIdLong());
-							if (entry != null) {
-								updateStarboardMessage(message, stars, config);
-							} else if (stars >= config.getReactionThreshold()) {
-								addMessageToStarboard(message, stars, config);
-							} else if (stars < 1 && !removeMessageFromStarboard(message.getIdLong(), channel, config)) {
-								log.error("Could not remove Message from Starboard");
+						asyncPool.execute(()->{
+							try {
+								starboardRepository
+									.getEntryByMessageId(message.getIdLong())
+									.ifPresentOrElse(entry->{
+										updateStarboardMessage(message, stars, config);
+									}, ()->{
+										if (stars >= config.getReactionThreshold()) {
+											addMessageToStarboard(message, stars, config);
+										} else if (stars < 1 && !removeMessageFromStarboard(message.getIdLong(), channel, config)) {
+											log.error("Could not remove Message from Starboard");
+										}
+									});
+							} catch (DataAccessException e) {
+								ExceptionLogger.capture(e, StarboardManager.class.getSimpleName());
 							}
 						});
 					}, e -> log.error("Could not add Message to Starboard", e)
@@ -85,19 +93,21 @@ public class StarboardManager extends ListenerAdapter {
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
 		if (isInvalidChannel(event.getChannel())) return;
-		try (Connection con = dataSource.getConnection()) {
-			StarboardRepository repo = new StarboardRepository(con);
+		try {
 			StarboardConfig config = botConfig.get(event.getGuild()).getStarboardConfig();
-			StarboardEntry entry;
+			Optional<StarboardEntry> entry;
 			if (event.getChannel().getIdLong() == config.getStarboardChannelId()) {
-				entry = repo.getEntryByStarboardMessageId(event.getMessageIdLong());
+				entry = starboardRepository.getEntryByStarboardMessageId(event.getMessageIdLong());
 			} else {
-				entry = repo.getEntryByMessageId(event.getMessageIdLong());
+				entry = starboardRepository.getEntryByMessageId(event.getMessageIdLong());
 			}
-			if (entry != null && !removeMessageFromStarboard(entry.getOriginalMessageId(), event.getChannel(), config)) {
-				log.error("Could not remove Message from Starboard");
-			}
-		} catch (SQLException e) {
+			entry.ifPresent(e->{
+				if (!removeMessageFromStarboard(e.getOriginalMessageId(), event.getChannel(), config)) {
+					log.error("Could not remove Message from Starboard");
+				}
+			});
+
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 	}
@@ -121,7 +131,7 @@ public class StarboardManager extends ListenerAdapter {
 				.orElse(0);
 	}
 
-	private void addMessageToStarboard(Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
+	private void addMessageToStarboard(Message message, int stars, @NotNull StarboardConfig config) throws DataAccessException {
 		if (stars < config.getReactionThreshold()) return;
 		MessageEmbed embed = buildStarboardEmbed(message);
 		MessageAction action = config.getStarboardChannel()
@@ -136,22 +146,27 @@ public class StarboardManager extends ListenerAdapter {
 			}
 		}
 		action.queue(starboardMessage -> {
-			StarboardEntry entry = new StarboardEntry();
-			entry.setOriginalMessageId(message.getIdLong());
-			entry.setGuildId(message.getGuild().getIdLong());
-			entry.setChannelId(message.getChannel().getIdLong());
-			entry.setAuthorId(message.getAuthor().getIdLong());
-			entry.setStarboardMessageId(starboardMessage.getIdLong());
-			dbHelper.doDaoAction(StarboardRepository::new, dao -> dao.insert(entry));
+				StarboardEntry entry = new StarboardEntry();
+				entry.setOriginalMessageId(message.getIdLong());
+				entry.setGuildId(message.getGuild().getIdLong());
+				entry.setChannelId(message.getChannel().getIdLong());
+				entry.setAuthorId(message.getAuthor().getIdLong());
+				entry.setStarboardMessageId(starboardMessage.getIdLong());
+				asyncPool.execute(()->{
+					try {
+						starboardRepository.insert(entry);
+					} catch (DataAccessException e) {
+						ExceptionLogger.capture(e, StarboardManager.class.getSimpleName());
+					}
+				});
 			}, e -> log.error("Could not send Message to Starboard", e)
 		);
 	}
 
-	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws SQLException {
-		try (Connection con = dataSource.getConnection()) {
-			StarboardRepository repo = new StarboardRepository(con);
-			StarboardEntry starboardEntry = repo.getEntryByMessageId(message.getIdLong());
-			long starboardId = starboardEntry.getStarboardMessageId();
+	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws DataAccessException {
+		Optional<StarboardEntry> starboardEntry = starboardRepository.getEntryByMessageId(message.getIdLong());
+		starboardEntry.ifPresentOrElse(entry->{
+			long starboardId = entry.getStarboardMessageId();
 			config.getStarboardChannel().retrieveMessageById(starboardId).queue(
 					starboardMessage -> {
 						if (starboardMessage.getAuthor().getIdLong() != message.getJDA().getSelfUser().getIdLong()) {
@@ -163,7 +178,7 @@ public class StarboardManager extends ListenerAdapter {
 								if (!removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config)) {
 									log.error("Could not remove Message from Starboard");
 								}
-							} catch (SQLException e) {
+							} catch (DataAccessException e) {
 								ExceptionLogger.capture(e, getClass().getSimpleName());
 							}
 						} else {
@@ -178,28 +193,26 @@ public class StarboardManager extends ListenerAdapter {
 						log.error("Could not retrieve original Message. Deleting corresponding Starboard Entry...");
 						try {
 							removeMessageFromStarboard(message.getIdLong(), message.getChannel(), config);
-						} catch (SQLException ex) {
+						} catch (DataAccessException ex) {
 							ex.printStackTrace();
 						}
 					}
 			);
-		}
+		}, ()->log.error("updateStarboardMessage called but StarboardEntry was not found"));
+
 	}
 
-	private boolean removeMessageFromStarboard(long messageId, MessageChannel channel, StarboardConfig config) throws SQLException {
-		try (Connection con = dataSource.getConnection()) {
-			StarboardRepository repo = new StarboardRepository(con);
-			StarboardEntry entry = repo.getEntryByMessageId(messageId);
-			if (entry == null) return false;
-			if (!channel.equals(config.getStarboardChannel())) {
-				config.getStarboardChannel().retrieveMessageById(entry.getStarboardMessageId()).queue(
-						starboardMessage -> starboardMessage.delete().queue(), ExceptionLogger::capture
-				);
-			}
-			repo.delete(messageId);
-			log.info("Removed Starboard Entry with message Id {}", messageId);
-			return true;
+	private boolean removeMessageFromStarboard(long messageId, MessageChannel channel, StarboardConfig config) throws DataAccessException {
+		Optional<StarboardEntry> entry = starboardRepository.getEntryByMessageId(messageId);
+		if (entry.isEmpty()) return false;
+		if (!channel.equals(config.getStarboardChannel())) {
+			config.getStarboardChannel().retrieveMessageById(entry.get().getStarboardMessageId()).queue(
+					starboardMessage -> starboardMessage.delete().queue(), ExceptionLogger::capture
+			);
 		}
+		starboardRepository.delete(messageId);
+		log.info("Removed Starboard Entry with message Id {}", messageId);
+		return true;
 	}
 
 	private @NotNull MessageEmbed buildStarboardEmbed(@NotNull Message message) {

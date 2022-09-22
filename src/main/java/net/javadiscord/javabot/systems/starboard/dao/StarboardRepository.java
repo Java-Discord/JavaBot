@@ -4,18 +4,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Dao class that represents the STARBOARD SQL Table.
  */
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class StarboardRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Insertes a single {@link StarboardEntry}.
@@ -23,19 +28,11 @@ public class StarboardRepository {
 	 * @param entry The {@link StarboardEntry}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void insert(StarboardEntry entry) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO starboard (original_message_id, guild_id, channel_id, author_id, starboard_message_id) VALUES (?, ?, ?, ?, ?)",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			stmt.setLong(1, entry.getOriginalMessageId());
-			stmt.setLong(2, entry.getGuildId());
-			stmt.setLong(3, entry.getChannelId());
-			stmt.setLong(4, entry.getAuthorId());
-			stmt.setLong(5, entry.getStarboardMessageId());
-			int rows = stmt.executeUpdate();
-			if (rows == 0) throw new SQLException("Starboard Entry was not inserted.");
-			log.info("Inserted new Starboard-Entry: {}", entry);
-		}
+	public void insert(StarboardEntry entry) throws DataAccessException {
+		int rows = jdbcTemplate.update("INSERT INTO starboard (original_message_id, guild_id, channel_id, author_id, starboard_message_id) VALUES (?, ?, ?, ?, ?)",
+				entry.getOriginalMessageId(), entry.getGuildId(), entry.getChannelId(), entry.getAuthorId(), entry.getStarboardMessageId());
+		if (rows == 0) throw new DataAccessException("Starboard Entry was not inserted.") {};
+		log.info("Inserted new Starboard-Entry: {}", entry);
 	}
 
 	/**
@@ -44,13 +41,11 @@ public class StarboardRepository {
 	 * @param messageId The entries' message id.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void delete(long messageId) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("""
+	public void delete(long messageId) throws DataAccessException {
+		jdbcTemplate.update("""
 				DELETE FROM starboard
-				WHERE original_message_id = ?""")) {
-			stmt.setLong(1, messageId);
-			stmt.executeUpdate();
-		}
+				WHERE original_message_id = ?""",
+				messageId);
 	}
 
 	/**
@@ -60,16 +55,13 @@ public class StarboardRepository {
 	 * @return The {@link StarboardEntry} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public StarboardEntry getEntryByMessageId(long messageId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE original_message_id = ?")) {
-			s.setLong(1, messageId);
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				return read(rs);
-			}
+	public Optional<StarboardEntry> getEntryByMessageId(long messageId) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM starboard WHERE original_message_id = ?", (rs, row)->this.read(rs),
+					messageId));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
-		// TODO: DatabaseRepository-Refactor: Use Optional
-		return null;
 	}
 
 	/**
@@ -79,15 +71,12 @@ public class StarboardRepository {
 	 * @return The {@link StarboardEntry} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public StarboardEntry getEntryByStarboardMessageId(long starboardMessageId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE starboard_message_id = ?")) {
-			s.setLong(1, starboardMessageId);
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				return read(rs);
-			}
-			// TODO: DatabaseRepository-Refactor: Use Optional
-			return null;
+	public Optional<StarboardEntry> getEntryByStarboardMessageId(long starboardMessageId) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM starboard WHERE starboard_message_id = ?", (rs, row)->this.read(rs),
+					starboardMessageId));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -98,16 +87,9 @@ public class StarboardRepository {
 	 * @return A {@link List} containing all {@link StarboardEntry}s.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<StarboardEntry> getAllStarboardEntries(long guildId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM starboard WHERE guild_id = ?")) {
-			s.setLong(1, guildId);
-			ResultSet rs = s.executeQuery();
-			List<StarboardEntry> entries = new ArrayList<>();
-			while (rs.next()) {
-				entries.add(read(rs));
-			}
-			return entries;
-		}
+	public List<StarboardEntry> getAllStarboardEntries(long guildId) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM starboard WHERE guild_id = ?", (rs, row)->this.read(rs),
+				guildId);
 	}
 
 	private @NotNull StarboardEntry read(@NotNull ResultSet rs) throws SQLException {

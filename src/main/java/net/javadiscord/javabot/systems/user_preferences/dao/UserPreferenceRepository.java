@@ -1,41 +1,54 @@
 package net.javadiscord.javabot.systems.user_preferences.dao;
 
-import net.javadiscord.javabot.data.h2db.DatabaseRepository;
-import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.data.h2db.TableProperty;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
-import org.h2.api.H2Type;
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Dao class that represents the USER_PREFERENCES SQL Table.
  */
-public class UserPreferenceRepository extends DatabaseRepository<UserPreference> {
+@Repository
+@RequiredArgsConstructor
+public class UserPreferenceRepository {
+	private final JdbcTemplate jdbcTemplate;
+
 	/**
-	 * The constructor of this {@link DatabaseRepository} class which defines all important information
-	 * about the USER_PREFERENCES database table.
-	 * @param dbActions A service object responsible for various operations on the main database
-	 * @param con The {@link Connection} to use.
+	 * Gets a specific preference value of a user.
+	 * @param userId the ID of the user
+	 * @param preference the preference to obtain the value from
+	 * @return An {@link Optional} containing the value of the preference
+	 * @throws DataAccessException if any error occured
 	 */
-	public UserPreferenceRepository(DbActions dbActions, Connection con) {
-		super(con, UserPreference.class, "USER_PREFERENCES", List.of(
-				TableProperty.of("user_id", H2Type.BIGINT, (x, y) -> x.setUserId((Long) y), UserPreference::getUserId),
-				TableProperty.of("ordinal", H2Type.INTEGER, (x, y) -> x.setPreference(Preference.values()[(Integer) y]), p -> p.getPreference().ordinal()),
-				TableProperty.of("enabled", H2Type.BOOLEAN, (x, y) -> x.setEnabled((Boolean) y), UserPreference::isEnabled)
-		), dbActions);
+	public Optional<UserPreference> getById(long userId, @NotNull Preference preference) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM USER_PREFERENCES WHERE user_id = ? AND ordinal = ?", (rs, row)->this.read(rs),
+					userId, preference.ordinal()));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
+		}
 	}
 
-	public Optional<UserPreference> getById(long userId, @NotNull Preference preference) throws SQLException {
-		return querySingle("WHERE user_id = ? AND ordinal = ?", userId, preference.ordinal());
+	public boolean updateState(long userId, @NotNull Preference preference, boolean enabled) throws DataAccessException {
+		return jdbcTemplate.update("UPDATE USER_PREFERENCES SET enabled = ? WHERE user_id = ? AND ordinal = ?",
+				enabled, userId, preference.ordinal()) > 0;
 	}
 
-	public boolean updateState(long userId, @NotNull Preference preference, boolean enabled) throws SQLException {
-		return update("UPDATE user_preferences SET enabled = ? WHERE user_id = ? AND ordinal = ?", enabled, userId, preference.ordinal()) > 0;
+	public void insert(UserPreference instance) throws DataAccessException {
+		jdbcTemplate.update("INSERT INTO USER_PREFERENCES (user_id, ordinal, enabled) VALUES (?,?,?)",
+				instance.getUserId(), instance.getPreference().ordinal(), instance.isEnabled());
+	}
+
+	private UserPreference read(ResultSet rs) throws SQLException {
+		return new UserPreference(rs.getLong("user_id"),Preference.values()[rs.getInt("ordinal")],rs.getBoolean("enabled"));
 	}
 }

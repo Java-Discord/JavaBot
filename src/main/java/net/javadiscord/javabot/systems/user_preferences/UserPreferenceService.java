@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.user_preferences;
 
 import lombok.RequiredArgsConstructor;
-import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.user_preferences.dao.UserPreferenceRepository;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
@@ -21,8 +20,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class UserPreferenceService {
-	private final DbActions dbActions;
 	private final DataSource dataSource;
+	private final UserPreferenceRepository userPreferenceRepository;
 
 	/**
 	 * Simply sets the state of the specified {@link Preference} for the specified user.
@@ -35,16 +34,15 @@ public class UserPreferenceService {
 	 */
 	public boolean setOrCreate(long userId, Preference preference, boolean enabled) {
 		try (Connection con = dataSource.getConnection()) {
-			UserPreferenceRepository repo = new UserPreferenceRepository(dbActions, con);
-			Optional<UserPreference> preferenceOptional = repo.getById(userId, preference);
+			Optional<UserPreference> preferenceOptional = userPreferenceRepository.getById(userId, preference);
 			if (preferenceOptional.isPresent()) {
-				return repo.updateState(userId, preference, enabled);
+				return userPreferenceRepository.updateState(userId, preference, enabled);
 			} else {
 				UserPreference userPreference = new UserPreference();
 				userPreference.setUserId(userId);
 				userPreference.setPreference(preference);
 				userPreference.setEnabled(enabled);
-				repo.insert(userPreference, false);
+				userPreferenceRepository.insert(userPreference);
 				return true;
 			}
 		} catch (SQLException e) {
@@ -62,8 +60,7 @@ public class UserPreferenceService {
 	 */
 	public UserPreference getOrCreate(long userId, Preference preference) {
 		try (Connection con = dataSource.getConnection()) {
-			UserPreferenceRepository repo = new UserPreferenceRepository(dbActions, con);
-			Optional<UserPreference> preferenceOptional = repo.getById(userId, preference);
+			Optional<UserPreference> preferenceOptional = userPreferenceRepository.getById(userId, preference);
 			if (preferenceOptional.isPresent()) {
 				return preferenceOptional.get();
 			} else {
@@ -71,7 +68,7 @@ public class UserPreferenceService {
 				userPreference.setUserId(userId);
 				userPreference.setPreference(preference);
 				userPreference.setEnabled(preference.getDefaultState());
-				repo.insert(userPreference, false);
+				userPreferenceRepository.insert(userPreference);
 				return userPreference;
 			}
 		} catch (SQLException e) {
