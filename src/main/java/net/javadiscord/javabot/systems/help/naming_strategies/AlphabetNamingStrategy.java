@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.help.naming_strategies;
 
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 
 import java.util.List;

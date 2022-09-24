@@ -3,7 +3,7 @@ package net.javadiscord.javabot.data.h2db.commands;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;

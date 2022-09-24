@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.Constants;
 import net.javadiscord.javabot.data.config.GuildConfig;
@@ -166,9 +166,9 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 	 * @param config The {@link GuildConfig} for the current Guild.
 	 * @param roleId The role's id that was applied for.
 	 * @param userId The applicant's id.
-	 * @return The {@link WebhookMessageAction}.
+	 * @return The {@link WebhookMessageCreateAction}.
 	 */
-	private WebhookMessageAction<Message> sendStaffSubmission(@NotNull ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
+	private WebhookMessageCreateAction<Message> sendStaffSubmission(@NotNull ModalInteractionEvent event, GuildConfig config, String roleId, String userId) {
 		ModalMapping nameOption = event.getValue("name");
 		ModalMapping ageOption = event.getValue("age");
 		ModalMapping emailOption = event.getValue("email");
@@ -213,9 +213,9 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 	 * @param event  The {@link ModalInteractionEvent} that is fired upon submitting a Modal.
 	 * @param config The {@link ModerationConfig} for the current Guild.
 	 * @param userId The applicant's id.
-	 * @return The {@link WebhookMessageAction}.
+	 * @return The {@link WebhookMessageCreateAction}.
 	 */
-	private @NotNull WebhookMessageAction<Message> sendExpertSubmission(@NotNull ModalInteractionEvent event, ModerationConfig config, String userId) {
+	private @NotNull WebhookMessageCreateAction<Message> sendExpertSubmission(@NotNull ModalInteractionEvent event, ModerationConfig config, String userId) {
 		if (event.getGuild() == null || !event.isFromGuild()) {
 			return Responses.error(event.getHook(), "This may only be used inside a server.");
 		}

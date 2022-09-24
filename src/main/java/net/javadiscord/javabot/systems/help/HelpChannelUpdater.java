@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
@@ -17,7 +19,6 @@ import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringResourceCache;
-import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -380,7 +381,7 @@ public class HelpChannelUpdater implements Runnable {
 			List<TextChannel> availableChannels = config.getOpenChannelCategory().getTextChannels();
 			List<Button> buttons = new ArrayList<>(2);
 			if (!availableChannels.isEmpty()) {
-				buttons.add(Button.link(StringUtils.buildChannelJumpUrl(availableChannels.get(0)), "Show me an available Help Channel!"));
+				buttons.add(Button.link(availableChannels.get(0).getJumpUrl(), "Show me an available Help Channel!"));
 			}
 			buttons.add(Button.link(StringResourceCache.load("/help_overview/overview_image_url.txt"), "How does this work?"));
 			channel.retrieveMessageById(messageId).queue(

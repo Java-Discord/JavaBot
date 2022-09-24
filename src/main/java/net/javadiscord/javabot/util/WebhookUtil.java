@@ -8,8 +8,8 @@ import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.send.component.LayoutComponent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class WebhookUtil {
 	 * Makes sure that a writable webhook exists in a specific channel. if no
 	 * suitable webhook is found, one is created.
 	 *
-	 * @param channel  the {@link TextChannel} the webhook should exist in
+	 * @param channel  the {@link StandardGuildMessageChannel} the webhook should exist in
 	 * @param callback an action that is executed once a webhook is
 	 *                 found/created
 	 */
@@ -41,7 +41,7 @@ public class WebhookUtil {
 	 * Makes sure that a writable webhook exists in a specific channel. if no
 	 * suitable webhook is found, one is created.
 	 *
-	 * @param channel         the {@link TextChannel} the webhook should exist in
+	 * @param channel         the {@link StandardGuildMessageChannel} the webhook should exist in
 	 * @param callback        an action that is executed once a webhook is
 	 *                        found/created
 	 * @param failureCallback an action that is executed if the webhook

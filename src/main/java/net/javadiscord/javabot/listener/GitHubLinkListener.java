@@ -35,7 +35,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 			Pair<String, String> content = parseGithubUrl(matcher.group());
 			if (!content.getFirst().isBlank() && !content.getSecond().isBlank()) {
 				event.getMessage().reply(String.format("```%s\n%s\n```", content.getSecond(), StringUtils.standardSanitizer().compute(content.getFirst())))
-						.allowedMentions(List.of())
+						.setAllowedMentions(List.of())
 						.setActionRow(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"), Button.link(matcher.group(), "View on GitHub"))
 						.queue();
 			}

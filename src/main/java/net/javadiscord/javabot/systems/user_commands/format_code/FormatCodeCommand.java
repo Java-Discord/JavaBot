@@ -75,8 +75,8 @@ public class FormatCodeCommand extends SlashCommand {
 								.orElse(null);
 						if (target != null) {
 							event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
-									.allowedMentions(List.of())
-									.addActionRows(buildActionRow(target))
+									.setAllowedMentions(List.of())
+									.setComponents(buildActionRow(target))
 									.queue();
 						} else {
 							Responses.error(event.getHook(), "Could not find message; please specify a message id.").queue();
@@ -90,8 +90,8 @@ public class FormatCodeCommand extends SlashCommand {
 			long messageId = idOption.getAsLong();
 			event.getChannel().retrieveMessageById(messageId).queue(
 					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
-							.allowedMentions(List.of())
-							.addActionRows(buildActionRow(target))
+							.setAllowedMentions(List.of())
+							.setComponents(buildActionRow(target))
 							.queue(),
 					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
 		}

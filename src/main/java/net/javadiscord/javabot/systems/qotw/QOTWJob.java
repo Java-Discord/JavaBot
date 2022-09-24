@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.Bot;
@@ -61,7 +61,7 @@ public class QOTWJob extends DiscordApiJob {
 					if (questionChannel == null) continue;
 					questionChannel.sendMessage(qotw.getQOTWRole().getAsMention())
 							.setEmbeds(this.buildQuestionEmbed(question))
-							.setActionRows(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
+							.setComponents(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
 					repo.markUsed(question);
 				}

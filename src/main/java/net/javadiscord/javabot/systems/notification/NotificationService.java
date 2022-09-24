@@ -2,9 +2,9 @@ package net.javadiscord.javabot.systems.notification;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,7 +47,7 @@ public final class NotificationService {
 		 * @param channel  The target {@link MessageChannel}.
 		 * @param function The {@link Function} which is used in order to send the message.
 		 */
-		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageAction> function) {
+		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageCreateAction> function) {
 			function.apply(channel).queue(s -> {},
 					err -> log.error("Could not send message to channel \" " + channel.getName() + "\": ", err)
 			);

@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.configuration;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 
@@ -22,6 +23,6 @@ public class ExportConfigSubcommand extends ConfigSubcommand {
 	@Override
 	public ReplyCallbackAction handleConfigSubcommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull GuildConfig config) {
 		return event.deferReply()
-				.addFile(new File("config/" + event.getGuild().getId() + ".json"));
+				.addFiles(FileUpload.fromData(new File("config/" + event.getGuild().getId() + ".json")));
 	}
 }

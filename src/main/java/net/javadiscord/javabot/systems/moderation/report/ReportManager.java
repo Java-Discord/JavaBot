@@ -6,6 +6,9 @@ import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -17,7 +20,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
@@ -107,9 +110,9 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	 * @param hook The {@link InteractionHook} to respond to.
 	 * @param reason The reason for reporting this user.
 	 * @param targetId The targeted user's id.
-	 * @return The {@link WebhookMessageAction}.
+	 * @return The {@link WebhookMessageCreateAction}.
 	 */
-	protected WebhookMessageAction<Message> handleUserReport(InteractionHook hook, @NotNull String reason, String targetId) {
+	protected WebhookMessageCreateAction<Message> handleUserReport(InteractionHook hook, @NotNull String reason, String targetId) {
 		if (reason.isBlank()) {
 			return Responses.error(hook, "No report reason was provided.");
 		}
@@ -166,7 +169,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	private void createReportThread(Message message, long targetId, ModerationConfig config) {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
 				thread -> thread.sendMessage(config.getStaffRole().getAsMention())
-						.setActionRows(setComponents(targetId, thread.getIdLong()))
+						.setComponents(setComponents(targetId, thread.getIdLong()))
 						.queue()
 		);
 	}

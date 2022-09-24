@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.Bot;
@@ -36,7 +36,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> success(InteractionHook hook, String title, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> success(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.SUCCESS.getColor(), true);
 	}
 
@@ -46,7 +46,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> info(InteractionHook hook, String title, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> info(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.INFO.getColor(), true);
 	}
 
@@ -56,7 +56,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> error(InteractionHook hook, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> error(InteractionHook hook, String message, Object... args) {
 		return reply(hook, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
 
@@ -66,7 +66,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> warning(InteractionHook hook, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> warning(InteractionHook hook, String message, Object... args) {
 		return warning(hook, null, String.format(message, args));
 	}
 
@@ -76,7 +76,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> warning(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
@@ -86,7 +86,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> replyMissingArguments(InteractionHook hook) {
+	public static @NotNull WebhookMessageCreateAction<Message> replyMissingArguments(InteractionHook hook) {
 		return error(hook, "Missing required arguments.");
 	}
 
@@ -96,7 +96,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> replyGuildOnly(InteractionHook hook) {
+	public static @NotNull WebhookMessageCreateAction<Message> replyGuildOnly(InteractionHook hook) {
 		return error(hook, "This command may only be used inside servers.");
 	}
 
@@ -107,7 +107,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> replyInsufficientPermissions(InteractionHook hook, Permission... permissions) {
+	public static @NotNull WebhookMessageCreateAction<Message> replyInsufficientPermissions(InteractionHook hook, Permission... permissions) {
 		return error(hook, "I am missing one or more permissions in order to execute this action. (%s)",
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
@@ -158,7 +158,7 @@ public final class Responses {
 	 * @return The webhook message action.
 	 */
 	@CheckReturnValue
-	private static @NotNull WebhookMessageAction<Message> reply(@NotNull InteractionHook hook, @Nullable String title, String message, Color color, boolean ephemeral) {
+	private static @NotNull WebhookMessageCreateAction<Message> reply(@NotNull InteractionHook hook, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return hook.sendMessageEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 

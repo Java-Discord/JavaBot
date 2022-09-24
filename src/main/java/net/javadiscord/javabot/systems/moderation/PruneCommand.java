@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -75,7 +76,7 @@ public class PruneCommand extends ModerateCommand {
 						(after == null || member.getTimeJoined().isAfter(after));
 				if (shouldRemove) {
 					config.getLogChannel().sendMessage("Removing " + member.getUser().getAsTag() + " as part of prune.").queue();
-					member.ban(delDays, reason).queue();
+					member.ban(delDays, TimeUnit.DAYS).reason(reason).queue();
 				}
 			});
 		});
