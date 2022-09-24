@@ -31,6 +31,7 @@ public class GuildConfig {
 	private transient Path file;
 
 	private HelpConfig helpConfig;
+	private HelpForumConfig helpForumConfig;
 	private ModerationConfig moderationConfig;
 	private QOTWConfig qotwConfig;
 	private MetricsConfig metricsConfig;
@@ -48,6 +49,7 @@ public class GuildConfig {
 		this.file = file;
 		// Initialize all config items.
 		this.helpConfig = new HelpConfig();
+		this.helpForumConfig = new HelpForumConfig();
 		this.moderationConfig = new ModerationConfig();
 		this.qotwConfig = new QOTWConfig();
 		this.metricsConfig = new MetricsConfig();
@@ -95,6 +97,8 @@ public class GuildConfig {
 		this.guild = guild;
 		if (this.helpConfig == null) this.helpConfig = new HelpConfig();
 		this.helpConfig.setGuildConfig(this);
+		if (this.helpForumConfig == null) this.helpForumConfig = new HelpForumConfig();
+		this.helpForumConfig.setGuildConfig(this);
 		if (this.moderationConfig == null) this.moderationConfig = new ModerationConfig();
 		this.moderationConfig.setGuildConfig(this);
 		if (this.qotwConfig == null) this.qotwConfig = new QOTWConfig();

@@ -4,13 +4,16 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
+import net.javadiscord.javabot.systems.help.forum.ForumHelpManager;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,15 +34,40 @@ public class UnreserveCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (event.getChannelType() != ChannelType.TEXT) {
-			Responses.error(event, "This command cannot be used outside of help channels.").queue();
+		// check whether the channel type is either text or thread (possible forum post?)
+		if (event.getChannelType() != ChannelType.TEXT && event.getChannelType() != ChannelType.GUILD_PUBLIC_THREAD) {
+			replyInvalidChannel(event);
 			return;
 		}
-		TextChannel channel = event.getChannel().asTextChannel();
+		// handle forum-based help system
+		if (event.getChannelType() == ChannelType.GUILD_PUBLIC_THREAD) {
+			handleForumBasedHelp(event, event.getChannel().asThreadChannel());
+		}
+		// handle text-based help system
+		if (event.getChannelType() == ChannelType.TEXT) {
+			handleTextBasedHelp(event, event.getChannel().asTextChannel());
+		}
+	}
+
+	private void handleForumBasedHelp(SlashCommandInteractionEvent event, @NotNull ThreadChannel postThread) {
+		if (postThread.getParentChannel().getType() != ChannelType.FORUM) {
+			replyInvalidChannel(event);
+		}
+		ForumHelpManager manager = new ForumHelpManager(postThread);
+		if (isForumEligibleToBeUnreserved(event, postThread)) {
+			manager.close(event, event.getUser().getIdLong() == postThread.getOwnerIdLong(),
+					event.getOption("reason", null, OptionMapping::getAsString)
+			);
+		} else {
+			Responses.warning(event, "Could not close this post", "You're not allowed to close this post.").queue();
+		}
+	}
+
+	private void handleTextBasedHelp(@NotNull SlashCommandInteractionEvent event, TextChannel channel) {
 		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);
 		User owner = channelManager.getReservedChannelOwner(channel);
-		if (isEligibleToBeUnreserved(event, channel, config, owner)) {
+		if (isTextEligibleToBeUnreserved(event, channel, config, owner)) {
 			String reason = event.getOption("reason", null, OptionMapping::getAsString);
 			event.deferReply(true).queue();
 			channelManager.unreserveChannelByOwner(channel, owner, reason, event);
@@ -48,12 +76,22 @@ public class UnreserveCommand extends SlashCommand {
 		}
 	}
 
-	private boolean isEligibleToBeUnreserved(SlashCommandInteractionEvent event, TextChannel channel, HelpConfig config, User owner) {
+	private void replyInvalidChannel(CommandInteraction interaction) {
+		Responses.warning(interaction, "Invalid Channel",
+						"This command may only be used in either the text-channel-based help system, or in our new forum help system.")
+				.queue();
+	}
+
+	private boolean isForumEligibleToBeUnreserved(@NotNull SlashCommandInteractionEvent event, @NotNull ThreadChannel postThread) {
+		return event.getUser().getIdLong() == postThread.getOwnerIdLong() || memberHasHelperRole(event) || memberHasStaffRole(event);
+	}
+
+	private boolean isTextEligibleToBeUnreserved(SlashCommandInteractionEvent event, TextChannel channel, HelpConfig config, User owner) {
 		return channelIsInReservedCategory(channel, config) &&
 				(isUserWhoReservedChannel(event, owner) || memberHasHelperRole(event) || memberHasStaffRole(event));
 	}
 
-	private boolean channelIsInReservedCategory(TextChannel channel, HelpConfig config) {
+	private boolean channelIsInReservedCategory(@NotNull TextChannel channel, @NotNull HelpConfig config) {
 		return config.getReservedChannelCategory().equals(channel.getParentCategory());
 	}
 
@@ -61,12 +99,12 @@ public class UnreserveCommand extends SlashCommand {
 		return owner != null && event.getUser().equals(owner);
 	}
 
-	private boolean memberHasStaffRole(SlashCommandInteractionEvent event) {
+	private boolean memberHasStaffRole(@NotNull SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
 				event.getMember().getRoles().contains(Bot.getConfig().get(event.getGuild()).getModerationConfig().getStaffRole());
 	}
 
-	private boolean memberHasHelperRole(SlashCommandInteractionEvent event) {
+	private boolean memberHasHelperRole(@NotNull SlashCommandInteractionEvent event) {
 		return event.getMember() != null &&
 				event.getMember().getRoles().contains(Bot.getConfig().get(event.getGuild()).getHelpConfig().getHelperRole());
 	}
