@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.help.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -30,6 +31,10 @@ public class UnreserveCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		if (event.getChannelType() != ChannelType.TEXT) {
+			Responses.error(event, "This command cannot be used outside of help channels.").queue();
+			return;
+		}
 		TextChannel channel = event.getChannel().asTextChannel();
 		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);

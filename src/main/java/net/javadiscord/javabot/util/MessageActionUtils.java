@@ -31,7 +31,7 @@ public class MessageActionUtils {
 	 * @param components The {@link List} of {@link ItemComponent}s.
 	 * @return A {@link List} of {@link ActionRow}s.
 	 */
-	public static List<ActionRow> toActionRows(List<? extends ItemComponent> components) {
+	public static @NotNull List<ActionRow> toActionRows(@NotNull List<? extends ItemComponent> components) {
 		if (components.size() > 25) {
 			throw new IllegalArgumentException("Cannot add more than 25 components to a message action.");
 		}
