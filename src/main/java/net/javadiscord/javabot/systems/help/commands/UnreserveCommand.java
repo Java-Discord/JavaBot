@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.help.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -11,6 +11,7 @@ import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.util.Responses;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A simple command that can be used inside reserved help channels to
@@ -28,7 +29,7 @@ public class UnreserveCommand extends SlashCommand {
 	}
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		TextChannel channel = event.getChannel().asTextChannel();
 		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		HelpChannelManager channelManager = new HelpChannelManager(config);

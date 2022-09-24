@@ -2,12 +2,12 @@ package net.javadiscord.javabot.systems.qotw.commands.view;
 
 import java.util.Comparator;
 
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import org.jetbrains.annotations.NotNull;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
@@ -27,7 +27,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	}
 
 	@Override
-	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
+	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed, config);
 		SystemsConfig.EmojiConfig emojiConfig = Bot.getConfig().getSystems().getEmojiConfig();
@@ -38,7 +38,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 				},
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Cleared", "Successfully cleared suggestion with id `%s`", message.getId())
-				.addActionRows(getJumpButton(message));
+				.setComponents(getJumpButton(message));
 	}
 
 	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull MessageEmbed embed, @NotNull GuildConfig config) {

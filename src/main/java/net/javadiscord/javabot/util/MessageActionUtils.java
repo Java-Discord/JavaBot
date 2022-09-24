@@ -5,16 +5,17 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
-import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
  * Utility class for message actions.
@@ -61,16 +62,16 @@ public class MessageActionUtils {
 	 * Adds all Attachments from the initial message to the new message action and sends the message.
 	 *
 	 * @param message The initial {@link Message} object.
-	 * @param action  The new {@link MessageAction}.
+	 * @param action  The new {@link net.dv8tion.jda.api.requests.restaction.MessageCreateAction}.
 	 * @return A {@link CompletableFuture} with the message that is being sent.
 	 */
-	public static CompletableFuture<Message> addAttachmentsAndSend(Message message, MessageAction action) {
+	public static CompletableFuture<Message> addAttachmentsAndSend(Message message, MessageCreateAction action) {
 		List<CompletableFuture<?>> attachmentFutures = new ArrayList<>();
 		for (Message.Attachment attachment : message.getAttachments()) {
 			attachmentFutures.add(
 					attachment.getProxy().download()
-							.thenApply(is -> action.addFile(is, attachment.getFileName()))
-							.exceptionally(e -> action.append("Could not add Attachment: " + attachment.getFileName()))
+							.thenApply(is -> action.addFiles(FileUpload.fromData(is, attachment.getFileName())))
+							.exceptionally(e -> action.addContent("Could not add Attachment: " + attachment.getFileName()))
 			);
 		}
 		return CompletableFuture.allOf(attachmentFutures.toArray(new CompletableFuture<?>[0]))
@@ -88,15 +89,13 @@ public class MessageActionUtils {
 	public static void copyMessagesToNewThread(StandardGuildMessageChannel targetChannel, @NotNull MessageEmbed infoEmbed, String newThreadName, List<Message> messages, Consumer<ThreadChannel> onFinish) {
 		targetChannel.sendMessageEmbeds(infoEmbed).queue(
 				message -> message.createThreadChannel(newThreadName).queue(
-						thread -> {
-							WebhookUtil.ensureWebhookExists(targetChannel, wh->{
-								CompletableFuture<ReadonlyMessage> future = CompletableFuture.completedFuture(null);
-								for (Message m : messages) {
-									future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong()));
-								}
-								future.thenAccept(unused -> onFinish.accept(thread));
-							});
-						}
+						thread -> WebhookUtil.ensureWebhookExists(targetChannel, wh->{
+							CompletableFuture<ReadonlyMessage> future = CompletableFuture.completedFuture(null);
+							for (Message m : messages) {
+								future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong()));
+							}
+							future.thenAccept(unused -> onFinish.accept(thread));
+						})
 				));
 	}
 }

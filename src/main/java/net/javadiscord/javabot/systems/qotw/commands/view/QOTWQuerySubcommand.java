@@ -59,7 +59,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
 					.sendMessageEmbeds(embed)
-					.addActionRows(buildPageControls(query, page, embed))
+					.setComponents(buildPageControls(query, page, embed))
 					.queue();
 		});
 	}
@@ -78,7 +78,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			MessageEmbed embed = buildListQuestionsEmbed(repo, event.getGuild().getIdLong(), query, page);
 			event.getHook()
 					.editOriginalEmbeds(embed)
-					.setActionRows(buildPageControls(query, page, embed))
+					.setComponents(buildPageControls(query, page, embed))
 					.queue();
 		});
 	}

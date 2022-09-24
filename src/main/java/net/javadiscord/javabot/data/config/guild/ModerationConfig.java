@@ -3,7 +3,7 @@ package net.javadiscord.javabot.data.config.guild;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
 import java.util.List;

@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Responses;
@@ -27,14 +27,14 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 	}
 
 	@Override
-	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
+	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed onHoldEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
 		message.editMessageEmbeds(onHoldEmbed).queue(
 				edit -> edit.addReaction(Bot.getConfig().getSystems().getEmojiConfig().getClockEmoji()).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion On Hold", "Successfully marked suggestion with id `%s` as On Hold", message.getId())
-				.addActionRows(getJumpButton(message));
+				.setComponents(getJumpButton(message));
 	}
 
 	private @NotNull MessageEmbed buildSuggestionAcceptEmbed(@NotNull User user, @NotNull MessageEmbed embed, @NotNull GuildConfig config) {

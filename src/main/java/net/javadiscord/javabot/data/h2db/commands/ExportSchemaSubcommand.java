@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.ExceptionLogger;
 
@@ -45,7 +46,8 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 				if (!success) {
 					event.getHook().sendMessage("Exporting the schema was not successful.").queue();
 				} else {
-					event.getHook().sendMessage("The export was successful.").addFile(SCHEMA_FILE.toFile(), "database/schema.sql").queue(msg -> {
+					event.getHook().sendMessage("The export was successful.")
+							.addFiles(FileUpload.fromData(SCHEMA_FILE.toFile(), "database/schema.sql")).queue(msg -> {
 						try {
 							Files.delete(SCHEMA_FILE);
 						} catch (IOException e) {

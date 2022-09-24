@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.listener;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.Bot;
 
 /**

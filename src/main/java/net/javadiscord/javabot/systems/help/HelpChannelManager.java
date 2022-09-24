@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.help;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -294,7 +296,7 @@ public class HelpChannelManager {
 		List<ActionRow> rows = new ArrayList<>(5);
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
-		channel.sendMessage(THANK_MESSAGE_TEXT).setActionRows(rows).queue();
+		channel.sendMessage(THANK_MESSAGE_TEXT).setComponents(rows).queue();
 	}
 
 	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, SlashCommandInteractionEvent interaction) {

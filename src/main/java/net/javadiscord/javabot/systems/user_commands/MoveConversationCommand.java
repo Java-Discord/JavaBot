@@ -2,17 +2,18 @@ package net.javadiscord.javabot.systems.user_commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.Responses;
@@ -99,19 +100,19 @@ public class MoveConversationCommand extends SlashCommand {
 				channel.getIdLong() == config.getLogChannelId();
 	}
 
-	private @NotNull MessageAction sendMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel, @NotNull Message movedTo) {
+	private @NotNull MessageCreateAction sendMoveToChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel, @NotNull Message movedTo) {
 		return event.getChannel().sendMessageFormat(MOVE_TO_MESSAGE, event.getUser().getAsMention(), channel.getAsMention(), movedTo.getJumpUrl())
-				.allowedMentions(Collections.emptySet());
+				.setAllowedMentions(Collections.emptySet());
 	}
 
-	private @NotNull MessageAction sendMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel) {
+	private @NotNull MessageCreateAction sendMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull GuildMessageChannel channel) {
 		return channel.sendMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), "Waiting for Link...")
-				.allowedMentions(Collections.emptySet());
+				.setAllowedMentions(Collections.emptySet());
 	}
 
-	private @NotNull MessageAction editMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
+	private @NotNull MessageEditAction editMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
 		return movedTo.editMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), movedFrom.getJumpUrl())
 				.setActionRow(Button.link(movedFrom.getJumpUrl(), "Jump to Message"))
-				.allowedMentions(Collections.emptySet());
+				.setAllowedMentions(Collections.emptySet());
 	}
 }

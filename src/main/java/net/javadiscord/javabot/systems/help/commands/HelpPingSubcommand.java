@@ -66,7 +66,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 				lastPingTimes.put(event.getMember().getIdLong(), new Pair<>(System.currentTimeMillis(), guild));
 				Role role = channelManager.getConfig().getHelpPingRole();
 				event.getChannel().sendMessage(role.getAsMention())
-						.allowedMentions(EnumSet.of(Message.MentionType.ROLE))
+						.setAllowedMentions(EnumSet.of(Message.MentionType.ROLE))
 						.setEmbeds(buildAuthorEmbed(event.getUser()))
 						.queue();
 				event.replyFormat("Successfully pinged " + role.getAsMention()).setEphemeral(true).queue();

@@ -57,7 +57,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 			if (page <= 0) page = maxPage;
 			if (page > maxPage) page = 1;
 			event.getHook().editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
-					.setActionRows(buildPageControls(page))
+					.setComponents(buildPageControls(page))
 					.queue();
 		});
 	}
@@ -94,7 +94,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		event.deferReply().queue();
 		DbHelper.doDaoAction(HelpAccountRepository::new, dao ->
 				event.getHook().sendMessageEmbeds(buildExperienceLeaderboard(event.getGuild(), dao, page))
-						.addActionRows(buildPageControls(page))
+						.setComponents(buildPageControls(page))
 						.queue());
 	}
 }
