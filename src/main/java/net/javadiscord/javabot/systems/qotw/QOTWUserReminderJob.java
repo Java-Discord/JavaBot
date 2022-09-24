@@ -29,7 +29,7 @@ public class QOTWUserReminderJob extends DiscordApiJob {
 			for (QOTWSubmission submission : submissions) {
 				UserPreferenceService manager = new UserPreferenceService(Bot.getDataSource());
 				UserPreference preference = manager.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
-				if (preference.isEnabled()) {
+				if (Boolean.parseBoolean(preference.getState())) {
 					TextChannel channel = config.getSubmissionChannel();
 					channel.getThreadChannels().stream().filter(t -> t.getIdLong() == submission.getThreadId()).forEach(t -> {
 						if (t.getMessageCount() <= 1) {

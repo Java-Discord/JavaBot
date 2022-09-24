@@ -26,7 +26,7 @@ public class UserPreferenceRepository extends DatabaseRepository<UserPreference>
 		super(con, UserPreference.class, "USER_PREFERENCES", List.of(
 				TableProperty.of("user_id", H2Type.BIGINT, (x, y) -> x.setUserId((Long) y), UserPreference::getUserId),
 				TableProperty.of("ordinal", H2Type.INTEGER, (x, y) -> x.setPreference(Preference.values()[(Integer) y]), p -> p.getPreference().ordinal()),
-				TableProperty.of("enabled", H2Type.BOOLEAN, (x, y) -> x.setEnabled((Boolean) y), UserPreference::isEnabled)
+				TableProperty.of("state", H2Type.VARCHAR, (x, y) -> x.setState((String) y), UserPreference::getState)
 		));
 	}
 
@@ -34,7 +34,7 @@ public class UserPreferenceRepository extends DatabaseRepository<UserPreference>
 		return querySingle("WHERE user_id = ? AND ordinal = ?", userId, preference.ordinal());
 	}
 
-	public boolean updateState(long userId, @NotNull Preference preference, boolean enabled) throws SQLException {
-		return update("UPDATE user_preferences SET enabled = ? WHERE user_id = ? AND ordinal = ?", enabled, userId, preference.ordinal()) > 0;
+	public boolean updateState(long userId, @NotNull Preference preference, String state) throws SQLException {
+		return update("UPDATE user_preferences SET state = ? WHERE user_id = ? AND ordinal = ?", state, userId, preference.ordinal()) > 0;
 	}
 }
