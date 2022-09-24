@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.systems.help.forum;
 
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
@@ -15,7 +14,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -30,21 +28,26 @@ import java.util.List;
 
 /**
  * Manages all interactions regarding the help forum system.
+ *
+ * @param postThread The posts' {@link ThreadChannel}.
  */
-@RequiredArgsConstructor
-public class ForumHelpManager {
+public record ForumHelpManager(ThreadChannel postThread) {
+	/**
+	 * Static String that contains the Thank Message Text.
+	 */
+	public static final String THANK_MESSAGE_TEXT = "Before your post will be closed, would you like to express your gratitude to any of the people who helped you? When you're done, click **I'm done here. Close this post!**.";
+
 	/**
 	 * The identifier used for all help thanks-related buttons.
 	 */
 	public static final String HELP_THANKS_IDENTIFIER = "forum-help-thank";
-	private final ThreadChannel postThread;
 
 	/**
 	 * Builds and replies {@link ActionRow}s with all members which helped the
 	 * owner of the {@link ForumHelpManager#postThread} forum post.
 	 *
 	 * @param callback The callback to reply to.
-	 * @param helpers The list of helpers to thank.
+	 * @param helpers  The list of helpers to thank.
 	 * @return The {@link ReplyCallbackAction}.
 	 */
 	public ReplyCallbackAction replyHelpThanks(IReplyCallback callback, @NotNull List<Member> helpers) {
@@ -61,7 +64,7 @@ public class ForumHelpManager {
 		List<ActionRow> rows = new ArrayList<>();
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(helperThanksButtons));
-		return callback.reply(HelpChannelManager.THANK_MESSAGE_TEXT)
+		return callback.reply(THANK_MESSAGE_TEXT)
 				.setComponents(rows);
 	}
 
@@ -86,9 +89,9 @@ public class ForumHelpManager {
 	/**
 	 * Thanks a single user.
 	 *
-	 * @param event The {@link ButtonInteractionEvent} that was fired.
+	 * @param event      The {@link ButtonInteractionEvent} that was fired.
 	 * @param postThread The {@link ThreadChannel} post.
-	 * @param helperId The helpers' discord id.
+	 * @param helperId   The helpers' discord id.
 	 */
 	public void thankHelper(@NotNull ButtonInteractionEvent event, ThreadChannel postThread, long helperId) {
 		event.getJDA().retrieveUserById(helperId).queue(helper -> {
@@ -119,9 +122,6 @@ public class ForumHelpManager {
 		});
 	}
 
-	public ThreadChannel getPostThread() {
-		return postThread;
-	}
 
 	private @NotNull List<Member> getPostHelpers() {
 		List<Member> helpers = new ArrayList<>(20);

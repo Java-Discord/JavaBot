@@ -78,7 +78,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 	}
 
 	private void handleHelpThanksInteraction(@NotNull ButtonInteractionEvent event, @NotNull ForumHelpManager manager, String @NotNull [] id) {
-		ThreadChannel post = manager.getPostThread();
+		ThreadChannel post = manager.postThread();
 		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
 		switch (id[2]) {
 			case "done" -> {
