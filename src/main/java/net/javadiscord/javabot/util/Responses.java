@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
@@ -31,7 +31,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction success(CommandInteraction event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction success(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.SUCCESS.getColor(), true);
 	}
 
@@ -41,7 +41,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction info(CommandInteraction event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction info(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.INFO.getColor(), true);
 	}
 
@@ -51,7 +51,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction error(CommandInteraction event, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction error(IReplyCallback event, String message, Object... args) {
 		return reply(event, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
 
@@ -61,7 +61,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction warning(CommandInteraction event, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String message, Object... args) {
 		return warning(event, null, String.format(message, args));
 	}
 
@@ -71,7 +71,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction warning(CommandInteraction event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
@@ -81,7 +81,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyMissingArguments(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyMissingArguments(IReplyCallback event) {
 		return error(event, "Missing required arguments.");
 	}
 
@@ -91,7 +91,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyGuildOnly(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyGuildOnly(IReplyCallback event) {
 		return error(event, "This command may only be used inside servers.");
 	}
 
@@ -101,7 +101,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(CommandInteraction event, Permission... permissions) {
+	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(IReplyCallback event, Permission... permissions) {
 		return error(event, "I am missing one or more permissions in order to execute this action. (%s)",
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
@@ -113,22 +113,22 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyMissingMember(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyMissingMember(IReplyCallback event) {
 		return error(event, "The provided user **must** be a member of this server. Please try again.");
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyCannotInteract(CommandInteraction event, @NotNull IMentionable mentionable) {
+	public static @NotNull ReplyCallbackAction replyCannotInteract(IReplyCallback event, @NotNull IMentionable mentionable) {
 		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, Guild guild) {
+	public static @NotNull ReplyCallbackAction replyStaffOnly(IReplyCallback event, Guild guild) {
 		return error(event, "This command may only be used by staff members. (%s)", Bot.getConfig().get(guild).getModerationConfig().getStaffRole().getAsMention());
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyAdminOnly(CommandInteraction event, Guild guild) {
+	public static @NotNull ReplyCallbackAction replyAdminOnly(IReplyCallback event, Guild guild) {
 		return error(event, "This command may only be used by admins. (%s)", Bot.getConfig().get(guild).getModerationConfig().getAdminRole().getAsMention());
 	}
 
@@ -143,7 +143,7 @@ public final class Responses {
 	 * @return The reply action.
 	 */
 	@CheckReturnValue
-	private static @NotNull ReplyCallbackAction reply(@NotNull CommandInteraction event, @Nullable String title, String message, Color color, boolean ephemeral) {
+	private static @NotNull ReplyCallbackAction reply(@NotNull IReplyCallback event, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return event.replyEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 

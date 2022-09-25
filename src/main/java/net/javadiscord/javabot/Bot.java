@@ -27,6 +27,8 @@ import net.javadiscord.javabot.data.h2db.message_cache.MessageCacheListener;
 import net.javadiscord.javabot.listener.*;
 import net.javadiscord.javabot.systems.help.HelpChannelInteractionManager;
 import net.javadiscord.javabot.systems.help.HelpChannelListener;
+import net.javadiscord.javabot.systems.help.forum.ForumHelpListener;
+import net.javadiscord.javabot.systems.help.forum.ForumHelpManager;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.moderation.report.ReportManager;
 import net.javadiscord.javabot.systems.moderation.server_lock.ServerLockManager;
@@ -192,6 +194,7 @@ public class Bot {
 				new MetricsUpdater(),
 				new SuggestionListener(),
 				new StarboardManager(),
+				new ForumHelpListener(),
 				new HelpChannelListener(),
 				new ShareKnowledgeVoteListener(),
 				new JobChannelVoteListener(),
@@ -209,7 +212,8 @@ public class Bot {
 				List.of("self-role"), new SelfRoleInteractionManager(),
 				List.of("qotw-submission"), new SubmissionInteractionManager(),
 				List.of("help-channel", "help-thank"), new HelpChannelInteractionManager(),
-				List.of("qotw-list-questions"), new QOTWQuerySubcommand()
+				List.of("qotw-list-questions"), new QOTWQuerySubcommand(),
+				List.of(ForumHelpManager.HELP_THANKS_IDENTIFIER), new ForumHelpListener()
 		));
 		dih4jda.addModalHandlers(Map.of(
 				List.of("qotw-add-question"), new AddQuestionSubcommand(),

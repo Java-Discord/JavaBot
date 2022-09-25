@@ -86,8 +86,7 @@ public class HelpExperienceService {
 		try (Connection con = this.dataSource.getConnection()) {
 			con.setReadOnly(true);
 			HelpTransactionRepository repo = new HelpTransactionRepository(con);
-			List<HelpTransaction> transactions = repo.getTransactions(userId, count);
-			return transactions;
+			return repo.getTransactions(userId, count);
 		}
 	}
 

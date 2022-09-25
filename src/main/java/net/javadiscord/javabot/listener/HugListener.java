@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.Bot;
@@ -40,7 +40,7 @@ public class HugListener extends ListenerAdapter {
 			tc = event.getChannel().asTextChannel();
 		}
 		if (event.isFromThread()) {
-			GuildMessageChannel parentChannel = event.getChannel().asThreadChannel().getParentMessageChannel();
+			StandardGuildChannel parentChannel = event.getChannel().asThreadChannel().getParentChannel().asStandardGuildChannel();
 			if (parentChannel instanceof TextChannel textChannel) {
 				tc = textChannel;
 			}
