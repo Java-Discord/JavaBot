@@ -124,17 +124,13 @@ public record ForumHelpManager(ThreadChannel postThread) {
 
 
 	private @NotNull List<Member> getPostHelpers() {
-		List<Member> helpers = new ArrayList<>(20);
 		List<Message> messages = ForumHelpListener.HELP_POST_MESSAGES.get(postThread.getIdLong());
-		if (messages == null) return helpers;
-		for (Message message : messages) {
-			if (message.getMember() == null || message.getMember().getIdLong() == postThread.getOwnerIdLong() ||
-					helpers.contains(message.getMember())
-			) {
-				continue;
-			}
-			helpers.add(message.getMember());
-		}
-		return helpers;
+		if (messages == null) return List.of();
+		return messages.stream()
+				.filter(m -> m.getMember() != null && m.getAuthor().getIdLong() != postThread.getOwnerIdLong())
+				.map(Message::getMember)
+				.distinct()
+				.limit(20)
+				.toList();
 	}
 }
