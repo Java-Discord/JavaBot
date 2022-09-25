@@ -108,7 +108,6 @@ public record ForumHelpManager(ThreadChannel postThread) {
 				HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
 				// Perform experience transactions
 				service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
-				service.performTransaction(postThread.getOwnerIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				Bot.getConfig().get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
