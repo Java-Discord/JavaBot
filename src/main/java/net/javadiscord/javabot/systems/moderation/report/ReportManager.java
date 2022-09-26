@@ -188,8 +188,8 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				.addField("Reported by", reportedBy.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Reported on", String.format("<t:%s:F>", Instant.now().getEpochSecond()), false)
-				.addField("ID", String.format("```%s```", reported.getId()), true)
-				.addField("Reason", String.format("```%s```", reason), false)
+				.addField("ID", String.format("``` %s ```", reported.getId()), true)
+				.addField("Reason", String.format("``` %s ```", reason), false)
 				.setFooter(reportedBy.getAsTag(), reportedBy.getEffectiveAvatarUrl())
 				.setTimestamp(Instant.now());
 	}
