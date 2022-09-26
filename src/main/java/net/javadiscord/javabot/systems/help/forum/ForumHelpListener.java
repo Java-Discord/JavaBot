@@ -80,7 +80,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 		// send post buttons
 		post.sendMessageComponents(ActionRow.of(
 				Button.primary(ComponentIdBuilder.build(ForumHelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
-				Button.secondary(ComponentIdBuilder.build(ForumHelpManager.HELP_GUIDELINES_IDENTIFIER), "Help Guidelines").withEmoji(Emoji.fromUnicode("📚"))
+				Button.secondary(ComponentIdBuilder.build(ForumHelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
 		)).queue(success -> {
 			// send /close reminder (if enabled)
 			UserPreferenceService service = new UserPreferenceService(Bot.getDataSource());
