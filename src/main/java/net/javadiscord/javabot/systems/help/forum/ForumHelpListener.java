@@ -5,12 +5,10 @@ import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
-import net.dv8tion.jda.api.entities.channel.unions.ChannelUnion;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -109,14 +107,9 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 		}
 	}
 
-	private boolean isInvalidForumPost(@NotNull MessageChannelUnion union) {
-		return union.getType() != ChannelType.GUILD_PUBLIC_THREAD ||
-				union.asThreadChannel().getParentChannel().getType() != ChannelType.FORUM;
-	}
-
-	private boolean isInvalidForumPost(@NotNull ChannelUnion union) {
-		return union.getType() != ChannelType.GUILD_PUBLIC_THREAD ||
-				union.asThreadChannel().getParentChannel().getType() != ChannelType.FORUM;
+	private boolean isInvalidForumPost(@NotNull Channel channel) {
+		return channel.getType() != ChannelType.GUILD_PUBLIC_THREAD ||
+				((ThreadChannel) channel).getParentChannel().getType() != ChannelType.FORUM;
 	}
 
 	private boolean isInvalidHelpForumChannel(@NotNull ForumChannel forum) {
