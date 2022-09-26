@@ -13,10 +13,13 @@ public class ConfigCommand extends SlashCommand implements CommandModerationPerm
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param botConfig The main configuration of the bot
+	 * @param exportConfigSubcommand /config export
+	 * @param getConfigSubcommand /config get
+	 * @param setConfigSubcommand /config set
 	 */
-	public ConfigCommand(BotConfig botConfig) {
+	public ConfigCommand(BotConfig botConfig, ExportConfigSubcommand exportConfigSubcommand, GetConfigSubcommand getConfigSubcommand, SetConfigSubcommand setConfigSubcommand) {
 		setModerationSlashCommandData(Commands.slash("config", "Administrative Commands for managing the bot's configuration."));
-		addSubcommands(new ExportConfigSubcommand(botConfig), new GetConfigSubcommand(botConfig), new SetConfigSubcommand(botConfig));
+		addSubcommands(exportConfigSubcommand, getConfigSubcommand, setConfigSubcommand);
 		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 }

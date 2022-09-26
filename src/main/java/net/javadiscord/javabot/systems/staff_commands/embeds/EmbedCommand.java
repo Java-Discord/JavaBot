@@ -2,7 +2,6 @@ package net.javadiscord.javabot.systems.staff_commands.embeds;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.CommandModerationPermissions;
 
 /**
@@ -12,10 +11,13 @@ public class EmbedCommand extends SlashCommand implements CommandModerationPermi
 	/**
 	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.Subcommand}s.
-	 * @param botConfig The main configuration of the bot
+	 * @param createEmbedSubcommand /embed create
+	 * @param editEmbedSubcommand /embed edit
+	 * @param addEmbedFieldSubcommand /embed add-field
+	 * @param removeEmbedFieldSubcommand /embed remove-field
 	 */
-	public EmbedCommand(BotConfig botConfig) {
+	public EmbedCommand(CreateEmbedSubcommand createEmbedSubcommand, EditEmbedSubcommand editEmbedSubcommand, AddEmbedFieldSubcommand addEmbedFieldSubcommand, RemoveEmbedFieldSubcommand removeEmbedFieldSubcommand) {
 		setModerationSlashCommandData(Commands.slash("embed", "Administrative commands for creating and editing embed messages."));
-		addSubcommands(new CreateEmbedSubcommand(botConfig), new EditEmbedSubcommand(botConfig), new AddEmbedFieldSubcommand(botConfig), new RemoveEmbedFieldSubcommand(botConfig));
+		addSubcommands(createEmbedSubcommand, editEmbedSubcommand, addEmbedFieldSubcommand, removeEmbedFieldSubcommand);
 	}
 }

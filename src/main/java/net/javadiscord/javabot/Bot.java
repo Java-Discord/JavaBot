@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.dynxsty.dih4jda.DIH4JDA;
 import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand;
 import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import com.dynxsty.dih4jda.interactions.components.SelectMenuHandler;
@@ -39,7 +40,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
  */
 @SpringBootApplication
 @ComponentScan(
-	includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SlashCommand.class, ContextCommand.class, ListenerAdapter.class }),
+	includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SlashCommand.class, ContextCommand.class, ListenerAdapter.class, Subcommand.class }),
 	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = PresenceUpdater.class)
 )
 @EnableScheduling
