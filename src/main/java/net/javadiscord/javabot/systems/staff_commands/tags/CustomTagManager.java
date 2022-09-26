@@ -91,9 +91,9 @@ public class CustomTagManager {
 			}
 		} else {
 			if (tag.isReply()) {
-				actions.add(event.getHook().sendMessage(tag.getResponse()).allowedMentions(List.of()));
+				actions.add(event.getHook().sendMessage(tag.getResponse()).setAllowedMentions(List.of()));
 			} else {
-				actions.add(event.getChannel().sendMessage(tag.getResponse()).allowedMentions(List.of()));
+				actions.add(event.getChannel().sendMessage(tag.getResponse()).setAllowedMentions(List.of()));
 			}
 		}
 		if (!tag.isReply()) {

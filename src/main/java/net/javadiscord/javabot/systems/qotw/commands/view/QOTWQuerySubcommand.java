@@ -64,10 +64,12 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 			return;
 		}
 		event.deferReply(true).queue();
-
 		asyncPool.execute(() -> {
 			MessageEmbed embed = buildListQuestionsEmbed(questionQueueRepository, event.getGuild().getIdLong(), query, page);
-			event.getHook().sendMessageEmbeds(embed).addActionRows(buildPageControls(query, page, embed)).queue();
+			event.getHook()
+					.sendMessageEmbeds(embed)
+					.setComponents(buildPageControls(query, page, embed))
+					.queue();
 		});
 	}
 
@@ -83,7 +85,10 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 		}
 		asyncPool.execute(() -> {
 			MessageEmbed embed = buildListQuestionsEmbed(questionQueueRepository, event.getGuild().getIdLong(), query, page);
-			event.getHook().editOriginalEmbeds(embed).setActionRows(buildPageControls(query, page, embed)).queue();
+			event.getHook()
+					.editOriginalEmbeds(embed)
+					.setComponents(buildPageControls(query, page, embed))
+					.queue();
 		});
 	}
 

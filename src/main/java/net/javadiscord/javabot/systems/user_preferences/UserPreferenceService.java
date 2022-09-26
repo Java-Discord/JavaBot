@@ -29,19 +29,19 @@ public class UserPreferenceService {
 	 *
 	 * @param userId     The users' id.
 	 * @param preference The {@link Preference} to change the state for.
-	 * @param enabled    The preferences' state.
+	 * @param state    The preferences' state.
 	 * @return Whether the operation was successful.
 	 */
-	public boolean setOrCreate(long userId, Preference preference, boolean enabled) {
+	public boolean setOrCreate(long userId, Preference preference, String state) {
 		try (Connection con = dataSource.getConnection()) {
 			Optional<UserPreference> preferenceOptional = userPreferenceRepository.getById(userId, preference);
 			if (preferenceOptional.isPresent()) {
-				return userPreferenceRepository.updateState(userId, preference, enabled);
+				return userPreferenceRepository.updateState(userId, preference, state);
 			} else {
 				UserPreference userPreference = new UserPreference();
 				userPreference.setUserId(userId);
 				userPreference.setPreference(preference);
-				userPreference.setEnabled(enabled);
+				userPreference.setState(state);
 				userPreferenceRepository.insert(userPreference);
 				return true;
 			}
@@ -67,7 +67,7 @@ public class UserPreferenceService {
 				UserPreference userPreference = new UserPreference();
 				userPreference.setUserId(userId);
 				userPreference.setPreference(preference);
-				userPreference.setEnabled(preference.getDefaultState());
+				userPreference.setState(preference.getDefaultState());
 				userPreferenceRepository.insert(userPreference);
 				return userPreference;
 			}

@@ -24,8 +24,8 @@ public class FormatCodeMessageContext extends ContextCommand.Message {
 	@Override
 	public void execute(@NotNull MessageContextInteractionEvent event) {
 		event.replyFormat("```java\n%s\n```", StringUtils.standardSanitizer().compute(event.getTarget().getContentRaw()))
-				.allowedMentions(List.of())
-				.addActionRows(FormatCodeCommand.buildActionRow(event.getTarget()))
+				.setAllowedMentions(List.of())
+				.setComponents(FormatCodeCommand.buildActionRow(event.getTarget()))
 				.queue();
 	}
 }

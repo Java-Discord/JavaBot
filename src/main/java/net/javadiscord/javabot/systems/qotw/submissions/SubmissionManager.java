@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.ThreadChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -51,10 +51,10 @@ public class SubmissionManager {
 	 *
 	 * @param event          The {@link ButtonInteractionEvent} that is fired upon use.
 	 * @param questionNumber The current qotw-week number.
-	 * @return A {@link WebhookMessageAction}.
+	 * @return A {@link WebhookMessageCreateAction}.
 	 */
 	@Transactional
-	public WebhookMessageAction<?> handleSubmission(@NotNull ButtonInteractionEvent event, int questionNumber) {
+	public WebhookMessageCreateAction<?> handleSubmission(@NotNull ButtonInteractionEvent event, int questionNumber) {
 		event.deferEdit().queue();
 		Member member = event.getMember();
 		if (!this.canCreateSubmissions(member)) {
@@ -76,7 +76,7 @@ public class SubmissionManager {
 							if (questionOptional.isPresent()) {
 								thread.sendMessage(member.getAsMention())
 										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
-										.setActionRows(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
+										.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
 										.queue();
 							} else {
 								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")

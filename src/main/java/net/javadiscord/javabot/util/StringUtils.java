@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.util;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -180,9 +179,5 @@ public class StringUtils {
 		return (int) reaction.retrieveUsers().stream()
 				.filter(user -> !user.isBot() && !user.isSystem())
 				.count();
-	}
-
-	public static String buildChannelJumpUrl(@NotNull GuildMessageChannel channel) {
-		return String.format("https://discord.com/channels/%s/%s", channel.getGuild().getId(), channel.getIdLong());
 	}
 }

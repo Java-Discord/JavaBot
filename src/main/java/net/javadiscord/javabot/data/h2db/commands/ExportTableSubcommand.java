@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.SystemsConfig;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 
@@ -77,7 +78,8 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 				if (!success) {
 					event.getHook().sendMessage("Exporting the table was not successful.").queue();
 				} else {
-					event.getHook().sendMessage("The export was successful.").addFile(TABLE_FILE.toFile(), "table.sql").queue(msg -> {
+					event.getHook().sendMessage("The export was successful.")
+							.addFiles(FileUpload.fromData(TABLE_FILE.toFile(), "table.sql")).queue(msg -> {
 						try {
 							Files.delete(TABLE_FILE);
 						} catch (IOException e) {

@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 public class UserPreference {
 	private long userId;
 	private Preference preference;
-	private boolean enabled;
+	private String state;
 }

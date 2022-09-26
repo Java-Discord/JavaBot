@@ -6,6 +6,10 @@ import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -55,7 +59,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			return;
 		}
 		if (!Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.replyStaffOnly(event, botConfig).queue();
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		GuildMessageChannel channel = event.getOption("channel", event.getChannel().asGuildMessageChannel(), m -> m.getAsChannel().asGuildMessageChannel());

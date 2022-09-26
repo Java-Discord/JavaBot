@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Responses;
@@ -39,14 +39,14 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 				Responses.error(event.getHook(), "You cannot perform actions on a higher member staff member.").queue();
 				return;
 			}
-			WebhookMessageAction<Message> action = handleModerationUserCommand(event, moderator, target, reasonOption.getAsString());
+			WebhookMessageCreateAction<Message> action = handleModerationUserCommand(event, moderator, target, reasonOption.getAsString());
 			if (action != null) action.queue();
 		}, e -> {
-			WebhookMessageAction<Message> action = handleModerationUserCommand(event, moderator, target, reasonOption.getAsString());
+			WebhookMessageCreateAction<Message> action = handleModerationUserCommand(event, moderator, target, reasonOption.getAsString());
 			if (action != null) action.queue();
 		});
 		return event.deferReply(true);
 	}
 
-	protected abstract WebhookMessageAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nullable String reason);
+	protected abstract WebhookMessageCreateAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nullable String reason);
 }

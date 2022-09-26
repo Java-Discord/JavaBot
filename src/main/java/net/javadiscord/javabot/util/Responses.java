@@ -16,11 +16,11 @@ import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
-import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.config.GuildConfig;
 
 /**
  * Utility class that provides standardized formatting for responses the bot
@@ -32,105 +32,105 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction success(CommandInteraction event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction success(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.SUCCESS.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> success(InteractionHook hook, String title, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> success(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.SUCCESS.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction info(CommandInteraction event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction info(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.INFO.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> info(InteractionHook hook, String title, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> info(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.INFO.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction error(CommandInteraction event, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction error(IReplyCallback event, String message, Object... args) {
 		return reply(event, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> error(InteractionHook hook, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> error(InteractionHook hook, String message, Object... args) {
 		return reply(hook, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction warning(CommandInteraction event, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String message, Object... args) {
 		return warning(event, null, String.format(message, args));
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> warning(InteractionHook hook, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> warning(InteractionHook hook, String message, Object... args) {
 		return warning(hook, null, String.format(message, args));
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction warning(CommandInteraction event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> warning(InteractionHook hook, String title, String message, Object... args) {
+	public static @NotNull WebhookMessageCreateAction<Message> warning(InteractionHook hook, String title, String message, Object... args) {
 		return reply(hook, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyMissingArguments(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyMissingArguments(IReplyCallback event) {
 		return error(event, "Missing required arguments.");
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> replyMissingArguments(InteractionHook hook) {
+	public static @NotNull WebhookMessageCreateAction<Message> replyMissingArguments(InteractionHook hook) {
 		return error(hook, "Missing required arguments.");
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyGuildOnly(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyGuildOnly(IReplyCallback event) {
 		return error(event, "This command may only be used inside servers.");
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> replyGuildOnly(InteractionHook hook) {
+	public static @NotNull WebhookMessageCreateAction<Message> replyGuildOnly(InteractionHook hook) {
 		return error(hook, "This command may only be used inside servers.");
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(CommandInteraction event, Permission... permissions) {
+	public static @NotNull ReplyCallbackAction replyInsufficientPermissions(IReplyCallback event, Permission... permissions) {
 		return error(event, "I am missing one or more permissions in order to execute this action. (%s)",
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
 
 	@CheckReturnValue
-	public static @NotNull WebhookMessageAction<Message> replyInsufficientPermissions(InteractionHook hook, Permission... permissions) {
+	public static @NotNull WebhookMessageCreateAction<Message> replyInsufficientPermissions(InteractionHook hook, Permission... permissions) {
 		return error(hook, "I am missing one or more permissions in order to execute this action. (%s)",
 				Arrays.stream(permissions).map(p -> MarkdownUtil.monospace(p.getName())).collect(Collectors.joining(", ")));
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyMissingMember(CommandInteraction event) {
+	public static @NotNull ReplyCallbackAction replyMissingMember(IReplyCallback event) {
 		return error(event, "The provided user **must** be a member of this server. Please try again.");
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyCannotInteract(CommandInteraction event, @NotNull IMentionable mentionable) {
+	public static @NotNull ReplyCallbackAction replyCannotInteract(IReplyCallback event, @NotNull IMentionable mentionable) {
 		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyStaffOnly(CommandInteraction event, BotConfig botConfig) {
-		return error(event, "This command may only be used by staff members. (%s)", botConfig.get(event.getGuild()).getModerationConfig().getStaffRole().getAsMention());
+	public static @NotNull ReplyCallbackAction replyStaffOnly(IReplyCallback event, GuildConfig guildConfig) {
+		return error(event, "This command may only be used by staff members. (%s)", guildConfig.getModerationConfig().getStaffRole().getAsMention());
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction replyAdminOnly(CommandInteraction event, BotConfig botConfig) {
-		return error(event, "This command may only be used by admins. (%s)", botConfig.get(event.getGuild()).getModerationConfig().getAdminRole().getAsMention());
+	public static @NotNull ReplyCallbackAction replyAdminOnly(IReplyCallback event, GuildConfig guildConfig) {
+		return error(event, "This command may only be used by admins. (%s)", guildConfig.getModerationConfig().getAdminRole().getAsMention());
 	}
 
 	/**
@@ -144,7 +144,7 @@ public final class Responses {
 	 * @return The reply action.
 	 */
 	@CheckReturnValue
-	private static @NotNull ReplyCallbackAction reply(@NotNull CommandInteraction event, @Nullable String title, String message, Color color, boolean ephemeral) {
+	private static @NotNull ReplyCallbackAction reply(@NotNull IReplyCallback event, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return event.replyEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 
@@ -159,7 +159,7 @@ public final class Responses {
 	 * @return The webhook message action.
 	 */
 	@CheckReturnValue
-	private static @NotNull WebhookMessageAction<Message> reply(@NotNull InteractionHook hook, @Nullable String title, String message, Color color, boolean ephemeral) {
+	private static @NotNull WebhookMessageCreateAction<Message> reply(@NotNull InteractionHook hook, @Nullable String title, String message, Color color, boolean ephemeral) {
 		return hook.sendMessageEmbeds(buildEmbed(title, message, color)).setEphemeral(ephemeral);
 	}
 

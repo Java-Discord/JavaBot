@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -24,6 +25,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This service provides methods for performing moderation actions, like banning
@@ -206,7 +208,7 @@ public class ModerationService {
 	 */
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
-		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, reason).queue(s -> {
+		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, TimeUnit.DAYS).reason(reason).queue(s -> {
 			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(banEmbed));
 			notificationService.withGuild(bannedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(banEmbed));
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();

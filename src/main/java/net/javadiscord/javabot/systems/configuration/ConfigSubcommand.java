@@ -33,7 +33,7 @@ public abstract class ConfigSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		if (!Checks.hasAdminRole(botConfig, event.getMember())) {
-			Responses.replyAdminOnly(event, botConfig).queue();
+			Responses.replyAdminOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		try {

@@ -26,7 +26,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
@@ -72,14 +73,14 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		event.deferReply().queue();
 		asyncPool.submit(() -> {
 			try {
-				WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
+				WebhookMessageCreateAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
 				// check whether the image may already been cached
 				byte[] array = ImageCache.isCached(getCacheName()) ?
 						// retrieve the image from the cache
 						getOutputStreamFromImage(ImageCache.getCachedImage(getCacheName())).toByteArray() :
 						// generate an entirely new image
 						generateLeaderboard(event.getGuild()).toByteArray();
-				action.addFile(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png").queue();
+				action.addFiles(FileUpload.fromData(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png")).queue();
 			} catch (IOException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 			}

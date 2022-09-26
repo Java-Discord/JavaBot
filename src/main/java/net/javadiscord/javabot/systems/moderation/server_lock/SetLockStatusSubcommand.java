@@ -44,7 +44,7 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		if (!Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.replyStaffOnly(event, botConfig).queue();
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		GuildConfig config = botConfig.get(event.getGuild());

@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -30,18 +30,18 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 	}
 
 	@Override
-	protected WebhookMessageAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
+	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		String reason = event.getOption("reason", null, OptionMapping::getAsString);
 		MessageEmbed embed = message.getEmbeds().get(0);
-		MessageEmbed declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, reason, config);
+		MessageEmbed declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, reason);
 		message.editMessageEmbeds(declineEmbed).queue(
 				edit -> edit.addReaction(botConfig.getSystems().getEmojiConfig().getFailureEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
 		return Responses.success(event.getHook(), "Suggestion Declined", "Successfully declined suggestion with id `%s`", message.getId())
-				.addActionRows(getJumpButton(message));
+				.setComponents(getJumpButton(message));
 	}
 
-	private @NotNull MessageEmbed buildSuggestionDeclineEmbed(@NotNull User user, @NotNull MessageEmbed embed, String reason, @NotNull GuildConfig config) {
+	private @NotNull MessageEmbed buildSuggestionDeclineEmbed(@NotNull User user, @NotNull MessageEmbed embed, String reason) {
 		EmbedBuilder builder = new EmbedBuilder()
 				.setColor(Responses.Type.ERROR.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())

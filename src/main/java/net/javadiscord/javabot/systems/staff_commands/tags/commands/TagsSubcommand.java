@@ -29,7 +29,7 @@ public abstract class TagsSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		if (requireStaff && !Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.replyStaffOnly(event, botConfig).queue();
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		try {

@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
@@ -11,8 +13,9 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
@@ -134,15 +137,15 @@ public class StarboardManager extends ListenerAdapter {
 	private void addMessageToStarboard(Message message, int stars, @NotNull StarboardConfig config) throws DataAccessException {
 		if (stars < config.getReactionThreshold()) return;
 		MessageEmbed embed = buildStarboardEmbed(message);
-		MessageAction action = config.getStarboardChannel()
+		MessageCreateAction action = config.getStarboardChannel()
 				.sendMessage(String.format("%s %s", config.getEmojis().get(0), stars))
 				.setActionRow(Button.link(message.getJumpUrl(), "Jump to Message"))
 				.setEmbeds(embed);
 		for (Message.Attachment a : message.getAttachments()) {
 			try {
-				action.addFile(a.getProxy().download().get(), a.getFileName());
+				action.addFiles(FileUpload.fromData(a.getProxy().download().get(), a.getFileName()));
 			} catch (InterruptedException | ExecutionException e) {
-				action.append("Could not add Attachment: ").append(a.getFileName());
+				action.addContent("Could not add Attachment: " + a.getFileName());
 			}
 		}
 		action.queue(starboardMessage -> {

@@ -2,8 +2,8 @@ package net.javadiscord.javabot.systems.qotw;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -44,7 +44,7 @@ public class QOTWUserReminderJob {
 			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper, qotwSubmissionRepository, questionQueueRepository).getActiveSubmissionThreads(guild.getIdLong());
 			for (QOTWSubmission submission : submissions) {
 				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
-				if (preference.isEnabled()) {
+				if (Boolean.parseBoolean(preference.getState())) {
 					TextChannel channel = config.getSubmissionChannel();
 					channel.getThreadChannels().stream().filter(t -> t.getIdLong() == submission.getThreadId()).forEach(t -> {
 						if (t.getMessageCount() <= 1) {

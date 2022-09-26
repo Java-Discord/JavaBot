@@ -64,12 +64,16 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 					page++;
 				}
 				int maxPage = helpAccountRepository.getTotalAccounts() / PAGE_SIZE;
-				if (page <= 0) page = maxPage;
-				if (page > maxPage) page = 1;
-				event.getHook().editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), helpAccountRepository, page))
-						.setActionRows(buildPageControls(page))
-						.queue();
-			}catch (DataAccessException e) {
+				if (page <= 0) {
+					page = maxPage;
+				}
+				if (page > maxPage) {
+					page = 1;
+				}
+				event.getHook()
+						.editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), helpAccountRepository, page))
+						.setComponents(buildPageControls(page)).queue();
+			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, ExperienceLeaderboardSubcommand.class.getSimpleName());
 			}
 		});
@@ -108,8 +112,8 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		asyncPool.execute(() -> {
 			try {
 				event.getHook().sendMessageEmbeds(buildExperienceLeaderboard(event.getGuild(), helpAccountRepository, page))
-						.addActionRows(buildPageControls(page))
-						.queue();
+					.setComponents(buildPageControls(page))
+					.queue();
 			}catch (DataAccessException e) {
 				ExceptionLogger.capture(e, ExperienceLeaderboardSubcommand.class.getSimpleName());
 			}

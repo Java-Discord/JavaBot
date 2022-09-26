@@ -3,13 +3,13 @@ package net.javadiscord.javabot.systems.qotw.commands.view;
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

@@ -3,9 +3,11 @@ package net.javadiscord.javabot.data.h2db.message_cache;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
@@ -107,11 +109,11 @@ public class MessageCache {
 		MessageCacheConfig config = botConfig.get(updated.getGuild()).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
-		MessageAction action = config.getMessageCacheLogChannel()
+		MessageCreateAction action = config.getMessageCacheLogChannel()
 				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
 				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-			action.addFile(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt");
+			action.addFiles(FileUpload.fromData(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt"));
 		}
 		action.queue();
 	}
@@ -127,9 +129,9 @@ public class MessageCache {
 		MessageCacheConfig config = botConfig.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-			MessageAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
+			MessageCreateAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
-				action.addFile(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt");
+				action.addFiles(FileUpload.fromData(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt"));
 			}
 			action.queue();
 		});

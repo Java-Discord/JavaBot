@@ -3,9 +3,9 @@ package net.javadiscord.javabot.systems.notification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -19,11 +19,11 @@ public final class UserNotificationService extends NotificationService.MessageCh
 	private final User user;
 
 	/**
-	 * Sends a notification to a {@link User}s' {@link net.dv8tion.jda.api.entities.PrivateChannel}.
+	 * Sends a notification to a {@link User}s' {@link net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel}.
 	 *
-	 * @param function The {@link Function} to use which MUST return a {@link MessageAction}.
+	 * @param function The {@link Function} to use which MUST return a {@link MessageCreateAction}.
 	 */
-	public void sendDirectMessage(@NotNull Function<MessageChannel, MessageAction> function) {
+	public void sendDirectMessage(@NotNull Function<MessageChannel, MessageCreateAction> function) {
 		user.openPrivateChannel().queue(
 				channel -> send(channel, function),
 				error -> log.error("Could not open PrivateChannel with user " + user.getAsTag(), error)

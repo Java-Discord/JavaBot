@@ -39,7 +39,7 @@ public class SayCommand extends SlashCommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (!Checks.hasAdminRole(botConfig, event.getMember())) {
-			Responses.replyAdminOnly(event, botConfig).queue();
+			Responses.replyAdminOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		OptionMapping textMapping = event.getOption("text");
@@ -51,7 +51,7 @@ public class SayCommand extends SlashCommand {
 		log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), event.getUser().getAsTag());
 		event.deferReply(true).queue();
 		event.getChannel().sendMessage(text)
-				.allowedMentions(Set.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL))
+				.setAllowedMentions(Set.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL))
 				.queue(m -> event.getHook().sendMessage("Done! " + m.getJumpUrl()).queue(),
 						err -> event.getHook().sendMessage("An error occurred. Please try again.").queue()
 				);

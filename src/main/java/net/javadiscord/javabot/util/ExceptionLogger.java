@@ -20,6 +20,7 @@ public final class ExceptionLogger {
 	public static void capture(Throwable t, String name) {
 		Sentry.captureException(t);
 		log.error("I've encountered an {} in {}: {}", t.getClass().getSimpleName(), name, t.getMessage());
+		t.printStackTrace();
 	}
 
 	/**
@@ -30,5 +31,6 @@ public final class ExceptionLogger {
 	public static void capture(Throwable t) {
 		Sentry.captureException(t);
 		log.error("I've encountered an {}: {}", t.getClass().getSimpleName(), t.getMessage());
+		t.printStackTrace();
 	}
 }

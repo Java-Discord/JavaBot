@@ -38,17 +38,17 @@ public class UserPreferenceRepository {
 		}
 	}
 
-	public boolean updateState(long userId, @NotNull Preference preference, boolean enabled) throws DataAccessException {
-		return jdbcTemplate.update("UPDATE USER_PREFERENCES SET enabled = ? WHERE user_id = ? AND ordinal = ?",
-				enabled, userId, preference.ordinal()) > 0;
+	public boolean updateState(long userId, @NotNull Preference preference, String state) throws DataAccessException {
+		return jdbcTemplate.update("UPDATE USER_PREFERENCES SET state = ? WHERE user_id = ? AND ordinal = ?",
+				state, userId, preference.ordinal()) > 0;
 	}
 
 	public void insert(UserPreference instance) throws DataAccessException {
-		jdbcTemplate.update("INSERT INTO USER_PREFERENCES (user_id, ordinal, enabled) VALUES (?,?,?)",
-				instance.getUserId(), instance.getPreference().ordinal(), instance.isEnabled());
+		jdbcTemplate.update("INSERT INTO USER_PREFERENCES (user_id, ordinal, state) VALUES (?,?,?)",
+				instance.getUserId(), instance.getPreference().ordinal(), instance.getState());
 	}
 
 	private UserPreference read(ResultSet rs) throws SQLException {
-		return new UserPreference(rs.getLong("user_id"),Preference.values()[rs.getInt("ordinal")],rs.getBoolean("enabled"));
+		return new UserPreference(rs.getLong("user_id"),Preference.values()[rs.getInt("ordinal")],rs.getString("state"));
 	}
 }

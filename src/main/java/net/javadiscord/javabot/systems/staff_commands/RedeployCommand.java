@@ -43,7 +43,7 @@ public class RedeployCommand extends SlashCommand {
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (!Checks.hasAdminRole(botConfig, event.getMember())) {
-			Responses.replyAdminOnly(event, botConfig).queue();
+			Responses.replyAdminOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());

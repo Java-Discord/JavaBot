@@ -3,8 +3,8 @@ package net.javadiscord.javabot.listener;
 import java.util.concurrent.ExecutorService;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 /**
  * Listens for messages and reactions in #share-knowledge.

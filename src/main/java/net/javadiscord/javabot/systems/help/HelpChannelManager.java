@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.help;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -314,7 +316,7 @@ public class HelpChannelManager {
 		List<ActionRow> rows = new ArrayList<>(5);
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(thanksButtons));
-		channel.sendMessage(THANK_MESSAGE_TEXT).setActionRows(rows).queue();
+		channel.sendMessage(THANK_MESSAGE_TEXT).setComponents(rows).queue();
 	}
 
 	private void unreserveChannelByOtherUser(TextChannel channel, User owner, @Nullable String reason, SlashCommandInteractionEvent interaction) {
@@ -349,7 +351,7 @@ public class HelpChannelManager {
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
 					ChannelReservation reservation = reservationOptional.get();
-					Map<Long, Double> experience = this.calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId());
+					Map<Long, Double> experience = calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId(), config);
 					for (Long recipient : experience.keySet()) {
 						helpExperienceService.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
 					}
@@ -544,7 +546,15 @@ public class HelpChannelManager {
 		}
 	}
 
-	private Map<Long, Double> calculateExperience(List<Message> messages, long ownerId) {
+	/**
+	 * Calculates the experience for each user, based on the messages they sent.
+	 *
+	 * @param messages The list of {@link Message}s.
+	 * @param ownerId The owner id.
+	 * @param config The {@link HelpConfig}, containing some static info for the calculation.
+	 * @return A {@link Map}, containing the users' id as the key, and the amount of xp as the value.
+	 */
+	public static Map<Long, Double> calculateExperience(List<Message> messages, long ownerId, HelpConfig config) {
 		Map<Long, Double> experience = new HashMap<>();
 		if (messages == null || messages.isEmpty()) return Map.of();
 		for (User user : messages.stream().map(Message::getAuthor).collect(Collectors.toSet())) {

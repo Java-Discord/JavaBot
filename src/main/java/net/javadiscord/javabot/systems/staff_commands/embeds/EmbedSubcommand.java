@@ -4,7 +4,7 @@ import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -31,7 +31,7 @@ public abstract class EmbedSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		if (!Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.replyStaffOnly(event, botConfig).queue();
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		GuildMessageChannel channel = event.getOption("channel", event.getChannel().asGuildMessageChannel(), m -> m.getAsChannel().asGuildMessageChannel());

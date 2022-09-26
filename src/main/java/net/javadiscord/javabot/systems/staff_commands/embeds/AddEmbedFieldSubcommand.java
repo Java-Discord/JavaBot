@@ -3,10 +3,10 @@ package net.javadiscord.javabot.systems.staff_commands.embeds;
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -17,9 +17,9 @@ import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +73,7 @@ public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHan
 			Responses.error(event.getHook(), "An unexpected error occurred. Please try again.").queue();
 			return;
 		}
-		Pair<String, MessageAction> action = handleAddField(event, pair.first(), pair.second());
+		Pair<String, MessageEditAction> action = handleAddField(event, pair.first(), pair.second());
 		if (action.second() != null) {
 			action.second().queue(
 					success -> Responses.info(event.getHook(), "Embed Field Added", "Successfully added the field to %s", pair.first().getJumpUrl()).queue(),
@@ -110,7 +110,7 @@ public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHan
 				.build();
 	}
 
-	private @NotNull Pair<String, MessageAction> handleAddField(@NotNull ModalInteractionEvent event, Message message, MessageEmbed embed) {
+	private @NotNull Pair<String, MessageEditAction> handleAddField(@NotNull ModalInteractionEvent event, Message message, MessageEmbed embed) {
 		ModalMapping nameMapping = event.getValue("name");
 		ModalMapping valueMapping = event.getValue("value");
 		ModalMapping inlineMapping = event.getValue("inline");

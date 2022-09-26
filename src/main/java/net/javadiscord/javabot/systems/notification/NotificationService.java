@@ -3,14 +3,12 @@ package net.javadiscord.javabot.systems.notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ import java.util.function.Function;
 public class NotificationService {
 	private final QOTWPointsService qotwPointsService;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
 	private final ExecutorService asyncPool;
 	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
@@ -60,7 +57,7 @@ public class NotificationService {
 		 * @param channel  The target {@link MessageChannel}.
 		 * @param function The {@link Function} which is used in order to send the message.
 		 */
-		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageAction> function) {
+		protected void send(MessageChannel channel, @NotNull Function<MessageChannel, MessageCreateAction> function) {
 			function.apply(channel).queue(s -> {},
 					err -> log.error("Could not send message to channel \" " + channel.getName() + "\": ", err)
 			);

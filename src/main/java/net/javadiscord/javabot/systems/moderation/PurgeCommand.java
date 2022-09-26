@@ -1,13 +1,16 @@
 package net.javadiscord.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -110,13 +113,15 @@ public class PurgeCommand extends ModerateCommand {
 		if (archiveWriter != null) {
 			archiveWriter.close();
 		}
-		MessageAction action = logChannel.sendMessage(String.format(
+		MessageCreateAction action = logChannel.sendMessage(String.format(
 				"Purge of channel %s has completed. %d messages have been removed, and the purge took %s.",
 				channel.getAsMention(),
 				count,
 				new TimeUtils().formatDurationToNow(startTime)
 		));
-		if (archive) action.addFile(ARCHIVE_DIR.resolve(file).toFile());
+		if (archive) {
+			action.addFiles(FileUpload.fromData(ARCHIVE_DIR.resolve(file).toFile()));
+		}
 		action.queue();
 	}
 

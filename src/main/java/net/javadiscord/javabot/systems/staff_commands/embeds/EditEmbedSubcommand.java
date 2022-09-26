@@ -3,10 +3,10 @@ package net.javadiscord.javabot.systems.staff_commands.embeds;
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -18,9 +18,9 @@ import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
@@ -127,7 +127,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 			Responses.error(event.getHook(), "An unexpected error occurred. Please try again.").queue();
 			return;
 		}
-		Pair<String, MessageAction> action = switch (id[1]) {
+		Pair<String, MessageEditAction> action = switch (id[1]) {
 			case AUTHOR_ID -> handleAuthorModal(event, pair.first(), pair.second());
 			case TITLE_DESC_COLOR_ID -> handleTitleDescColorModal(event, pair.first(), pair.second());
 			case IMG_THUMB_ID -> handleImageThumbnailModal(event, pair.first(), pair.second());
@@ -246,7 +246,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 	}
 
 	@Contract("_, _, _ -> new")
-	private @NotNull Pair<String, MessageAction> handleAuthorModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
+	private @NotNull Pair<String, MessageEditAction> handleAuthorModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
 		ModalMapping authorNameMapping = event.getValue("author-name");
 		ModalMapping authorUrlMapping = event.getValue("author-url");
 		ModalMapping authorIconUrlMapping = event.getValue("author-iconurl");
@@ -277,7 +277,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 	}
 
 	@Contract("_, _, _ -> new")
-	private @NotNull Pair<String, MessageAction> handleTitleDescColorModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
+	private @NotNull Pair<String, MessageEditAction> handleTitleDescColorModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
 		ModalMapping titleMapping = event.getValue("title");
 		ModalMapping titleUrlMapping = event.getValue("title-url");
 		ModalMapping descriptionMapping = event.getValue("description");
@@ -309,7 +309,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 	}
 
 	@Contract("_, _, _ -> new")
-	private @NotNull Pair<String, MessageAction> handleImageThumbnailModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
+	private @NotNull Pair<String, MessageEditAction> handleImageThumbnailModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
 		ModalMapping imageUrlMapping = event.getValue("image-url");
 		ModalMapping thumbnailUrlMapping = event.getValue("thumbnail-url");
 		if (imageUrlMapping == null || thumbnailUrlMapping == null) {
@@ -330,7 +330,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 	}
 
 	@Contract("_, _, _ -> new")
-	private @NotNull Pair<String, MessageAction> handleFooterTimestampModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
+	private @NotNull Pair<String, MessageEditAction> handleFooterTimestampModal(@NotNull ModalInteractionEvent event, @NotNull Message message, MessageEmbed embed) {
 		ModalMapping footerTextMapping = event.getValue("footer-text");
 		ModalMapping footerIconUrlMapping = event.getValue("footer-iconurl");
 		ModalMapping timestampMapping = event.getValue("timestamp");
