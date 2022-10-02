@@ -25,10 +25,12 @@ repositories {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    compileOnly("org.jetbrains:annotations:23.0.0")
 
     // DIH4JDA (Interaction Framework) & JDA
     implementation("com.github.DynxstyGIT:DIH4JDA:c8f7928efc")
-    implementation("net.dv8tion:JDA:5.0.0-alpha.20") {
+    implementation("com.github.DV8FromTheWorld:JDA:dab2a864da") {
         exclude(module = "opus-java")
     }
 
