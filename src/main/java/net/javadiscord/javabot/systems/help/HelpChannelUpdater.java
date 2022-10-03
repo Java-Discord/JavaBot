@@ -5,8 +5,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -15,6 +17,7 @@ import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -372,6 +375,7 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	private void updateHelpOverview() {
+		HelpForumConfig forumConfig = Bot.getConfig().get(config.getGuild()).getHelpForumConfig();
 		config.getHelpOverviewMessageIds().forEach((channelId, messageId) -> {
 			TextChannel channel = config.getGuild().getTextChannelById(channelId);
 			if (channel == null) {
@@ -381,11 +385,17 @@ public class HelpChannelUpdater implements Runnable {
 			List<TextChannel> availableChannels = config.getOpenChannelCategory().getTextChannels();
 			List<Button> buttons = new ArrayList<>(2);
 			if (!availableChannels.isEmpty()) {
-				buttons.add(Button.link(availableChannels.get(0).getJumpUrl(), "Show me an available Help Channel!"));
+				buttons.add(Button.link(availableChannels.get(0).getJumpUrl(), "Show me an Available Help Channel!"));
 			}
 			buttons.add(Button.link(StringResourceCache.load("/help_overview/overview_image_url.txt"), "How does this work?"));
 			channel.retrieveMessageById(messageId).queue(
-					m -> m.editMessageEmbeds(buildHelpOverviewEmbed()).setActionRow(buttons).queue(),
+					m -> m.editMessageEmbeds(buildHelpOverviewEmbed()).setComponents(
+							ActionRow.of(
+									// Temporary Forum Channel Upsell
+									Button.link(forumConfig.getHelpForumChannel().getJumpUrl(), "Try our new Help Forum!"),
+									Button.link("https://discord.com/blog/forum-channels-space-for-organized-conversation", "What are Forums?")
+							),
+							ActionRow.of(buttons)).queue(),
 					err -> channel.sendMessageEmbeds(buildHelpOverviewEmbed()).queue(m -> {
 						config.getHelpOverviewMessageIds().put(channelId, m.getIdLong());
 						Bot.getConfig().flush();
@@ -419,10 +429,14 @@ public class HelpChannelUpdater implements Runnable {
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			);
 		}
+		ForumChannel forum = Bot.getConfig().get(config.getGuild()).getHelpForumConfig().getHelpForumChannel();
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Help Overview")
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.setDescription(availableHelpChannels + " are __**available**__ to claim!")
+				.setDescription(availableHelpChannels.isEmpty() ?
+						String.format("There are no help channels available to claim.%nHow about using our new **[Help Forum](%s)** (%s) then?",
+								forum.getJumpUrl(), forum.getAsMention()) :
+						availableHelpChannels + " are __**available**__ to claim!")
 				.setFooter("Last refreshed: ")
 				.setTimestamp(Instant.now());
 		if (!reservedHelpChannels.isEmpty()) {

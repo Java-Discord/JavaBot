@@ -54,7 +54,7 @@ public class UnreserveCommand extends SlashCommand {
 			replyInvalidChannel(event);
 		}
 		ForumHelpManager manager = new ForumHelpManager(postThread);
-		if (isForumEligibleToBeUnreserved(event, postThread)) {
+		if (manager.isForumEligibleToBeUnreserved(event)) {
 			manager.close(event, event.getUser().getIdLong() == postThread.getOwnerIdLong(),
 					event.getOption("reason", null, OptionMapping::getAsString)
 			);
@@ -80,10 +80,6 @@ public class UnreserveCommand extends SlashCommand {
 		Responses.warning(interaction, "Invalid Channel",
 						"This command may only be used in either the text-channel-based help system, or in our new forum help system.")
 				.queue();
-	}
-
-	private boolean isForumEligibleToBeUnreserved(@NotNull SlashCommandInteractionEvent event, @NotNull ThreadChannel postThread) {
-		return event.getUser().getIdLong() == postThread.getOwnerIdLong() || memberHasHelperRole(event) || memberHasStaffRole(event);
 	}
 
 	private boolean isTextEligibleToBeUnreserved(SlashCommandInteractionEvent event, TextChannel channel, HelpConfig config, User owner) {

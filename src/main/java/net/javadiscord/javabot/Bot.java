@@ -213,7 +213,7 @@ public class Bot {
 				List.of("qotw-submission"), new SubmissionInteractionManager(),
 				List.of("help-channel", "help-thank"), new HelpChannelInteractionManager(),
 				List.of("qotw-list-questions"), new QOTWQuerySubcommand(),
-				List.of(ForumHelpManager.HELP_THANKS_IDENTIFIER), new ForumHelpListener()
+				List.of(ForumHelpManager.HELP_THANKS_IDENTIFIER, ForumHelpManager.HELP_CLOSE_IDENTIFIER, ForumHelpManager.HELP_GUIDELINES_IDENTIFIER), new ForumHelpListener()
 		));
 		dih4jda.addModalHandlers(Map.of(
 				List.of("qotw-add-question"), new AddQuestionSubcommand(),
