@@ -4,13 +4,11 @@ import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
@@ -18,7 +16,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
-import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
@@ -42,19 +39,14 @@ import javax.sql.DataSource;
 @RequiredArgsConstructor
 public class ForumHelpManager {
 	/**
+	 * Static String that contains the Thank Message Text.
+	 */
+	public static final String THANK_MESSAGE_TEXT = "Before your post will be closed, would you like to express your gratitude to any of the people who helped you? When you're done, click **I'm done here. Close this post!**.";
+
+	/**
 	 * The identifier used for all help thanks-related buttons.
 	 */
 	public static final String HELP_THANKS_IDENTIFIER = "forum-help-thank";
-
-	/**
-	 * The identifier used for all help close-related buttons.
-	 */
-	public static final String HELP_CLOSE_IDENTIFIER = "forum-help-close";
-
-	/**
-	 * The identifier used for all help guidelines-related buttons.
-	 */
-	public static final String HELP_GUIDELINES_IDENTIFIER = "forum-help-guidelines";
 
 	@Getter
 	private final ThreadChannel postThread;
@@ -75,7 +67,6 @@ public class ForumHelpManager {
 	 * @return The {@link ReplyCallbackAction}.
 	 */
 	public ReplyCallbackAction replyHelpThanks(IReplyCallback callback, @NotNull List<Member> helpers) {
-		HelpForumConfig config = Bot.getConfig().get(callback.getGuild()).getHelpForumConfig();
 		List<ItemComponent> helperThanksButtons = new ArrayList<>(20);
 		for (Member helper : helpers.subList(0, Math.min(helpers.size(), 20))) {
 			helperThanksButtons.add(Button.success(ComponentIdBuilder.build(HELP_THANKS_IDENTIFIER, postThread.getId(), helper.getId()), helper.getEffectiveName())
@@ -89,7 +80,7 @@ public class ForumHelpManager {
 		List<ActionRow> rows = new ArrayList<>();
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(helperThanksButtons));
-		return callback.reply(config.getHelpThanksText())
+		return callback.reply(THANK_MESSAGE_TEXT)
 				.setComponents(rows);
 	}
 
@@ -146,25 +137,6 @@ public class ForumHelpManager {
 		});
 	}
 
-	/**
-	 * Checks if the interactions' user is eligible to close a forum post.
-	 *
-	 * @param interaction The interaction itself.
-	 * @return Whether the user is eligible to close the post.
-	 */
-	public boolean isForumEligibleToBeUnreserved(@NotNull Interaction interaction) {
-		if (interaction.getGuild() == null) return false;
-		return interaction.getUser().getIdLong() == postThread.getOwnerIdLong() ||
-				hasMemberHelperRole(interaction.getGuild(), interaction.getMember()) || hasMemberStaffRole(interaction.getGuild(), interaction.getMember());
-	}
-
-	private boolean hasMemberStaffRole(@NotNull Guild guild, @Nullable Member member) {
-		return member != null && member.getRoles().contains(Bot.getConfig().get(guild).getModerationConfig().getStaffRole());
-	}
-
-	private boolean hasMemberHelperRole(@NotNull Guild guild, @Nullable Member member) {
-		return member != null && member.getRoles().contains(Bot.getConfig().get(guild).getHelpConfig().getHelperRole());
-	}
 
 	private @NotNull List<Member> getPostHelpers() {
 		List<Message> messages = ForumHelpListener.HELP_POST_MESSAGES.get(postThread.getIdLong());
@@ -173,6 +145,7 @@ public class ForumHelpManager {
 				.filter(m -> m.getMember() != null && m.getAuthor().getIdLong() != postThread.getOwnerIdLong())
 				.map(Message::getMember)
 				.distinct()
+				.limit(20)
 				.toList();
 	}
 }

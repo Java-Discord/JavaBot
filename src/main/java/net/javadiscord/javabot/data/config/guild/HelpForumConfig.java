@@ -13,8 +13,6 @@ import net.javadiscord.javabot.data.config.GuildConfigItem;
 @EqualsAndHashCode(callSuper = true)
 public class HelpForumConfig extends GuildConfigItem {
 	private long helpForumChannelId = 0;
-	private String closeReminderText = "Hey, %s!\nPlease remember to `/close` this post once your question has been answered!";
-	private String helpThanksText = "Before your post will be closed, would you like to express your gratitude to any of the people who helped you? When you're done, click **I'm done here. Close this post!**.";
 
 	public ForumChannel getHelpForumChannel() {
 		return getGuild().getForumChannelById(helpForumChannelId);

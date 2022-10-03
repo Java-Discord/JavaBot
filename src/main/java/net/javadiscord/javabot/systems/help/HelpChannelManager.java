@@ -173,6 +173,8 @@ public class HelpChannelManager {
 				TextChannel targetChannel = dormantChannels.get(0);
 				targetChannel.getManager().setParent(targetCategory).sync(targetCategory).queue();
 				targetChannel.sendMessage(config.getReopenedChannelMessage()).queue();
+			} else {
+				logChannel.sendMessage("Warning: No dormant channels were available to replenish an open channel that was just reserved.").queue();
 			}
 		} else {
 			this.openNew();
