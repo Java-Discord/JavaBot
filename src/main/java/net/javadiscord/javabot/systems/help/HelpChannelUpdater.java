@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -384,7 +385,7 @@ public class HelpChannelUpdater implements Runnable {
 			List<TextChannel> availableChannels = config.getOpenChannelCategory().getTextChannels();
 			List<Button> buttons = new ArrayList<>(2);
 			if (!availableChannels.isEmpty()) {
-				buttons.add(Button.link(availableChannels.get(0).getJumpUrl(), "Show me an available Help Channel!"));
+				buttons.add(Button.link(availableChannels.get(0).getJumpUrl(), "Show me an Available Help Channel!"));
 			}
 			buttons.add(Button.link(StringResourceCache.load("/help_overview/overview_image_url.txt"), "How does this work?"));
 			channel.retrieveMessageById(messageId).queue(
@@ -428,12 +429,13 @@ public class HelpChannelUpdater implements Runnable {
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			);
 		}
+		ForumChannel forum = Bot.getConfig().get(config.getGuild()).getHelpForumConfig().getHelpForumChannel();
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Help Overview")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(availableHelpChannels.isEmpty() ?
-						String.format("There are no help channels available to claim. How about using our new **[Help Forum](%s)** then?",
-								Bot.getConfig().get(config.getGuild()).getHelpForumConfig().getHelpForumChannel().getJumpUrl()) :
+						String.format("There are no help channels available to claim.%nHow about using our new **[Help Forum](%s)** (%s) then?",
+								forum.getJumpUrl(), forum.getAsMention()) :
 						availableHelpChannels + " are __**available**__ to claim!")
 				.setFooter("Last refreshed: ")
 				.setTimestamp(Instant.now());
