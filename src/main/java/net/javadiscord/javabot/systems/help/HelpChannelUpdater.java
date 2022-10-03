@@ -382,9 +382,9 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	private void updateHelpOverview() {
-		HelpForumConfig forumConfig = Bot.getConfig().get(config.getGuild()).getHelpForumConfig();
-		config.getHelpOverviewMessageIds().forEach((channelId, messageId) -> {
-			TextChannel channel = config.getGuild().getTextChannelById(channelId);
+		HelpForumConfig forumConfig = botConfig.get(helpConfig.getGuild()).getHelpForumConfig();
+		helpConfig.getHelpOverviewMessageIds().forEach((channelId, messageId) -> {
+			TextChannel channel = helpConfig.getGuild().getTextChannelById(channelId);
 			if (channel == null) {
 				log.error("Could not find Help Overview Channel with id '{}'", channelId);
 				return;
@@ -436,7 +436,7 @@ public class HelpChannelUpdater implements Runnable {
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			);
 		}
-		ForumChannel forum = Bot.getConfig().get(config.getGuild()).getHelpForumConfig().getHelpForumChannel();
+		ForumChannel forum = botConfig.get(helpConfig.getGuild()).getHelpForumConfig().getHelpForumChannel();
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Help Overview")
 				.setColor(Responses.Type.DEFAULT.getColor())

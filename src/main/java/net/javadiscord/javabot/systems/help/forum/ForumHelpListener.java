@@ -20,11 +20,8 @@ import net.dv8tion.jda.api.interactions.components.ActionComponent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.Bot;
-import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
@@ -58,6 +55,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 	private final DataSource dataSource;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
+	private final UserPreferenceService userPreferenceService;
 	private final DbActions dbActions;
 
 	@Override
@@ -87,7 +85,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 		if (event.getGuild() == null || isInvalidForumPost(event.getChannel())) {
 			return;
 		}
-		HelpForumConfig config = Bot.getConfig().get(event.getGuild()).getHelpForumConfig();
+		HelpForumConfig config = botConfig.get(event.getGuild()).getHelpForumConfig();
 		ThreadChannel post = event.getChannel().asThreadChannel();
 		if (isInvalidHelpForumChannel(post.getParentChannel().asForumChannel())) {
 			return;
@@ -98,8 +96,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 				Button.secondary(ComponentIdBuilder.build(ForumHelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
 		)).queue(success -> {
 			// send /close reminder (if enabled)
-			UserPreferenceService service = new UserPreferenceService(Bot.getDataSource());
-			UserPreference preference = service.getOrCreate(post.getOwnerIdLong(), Preference.FORUM_CLOSE_REMINDER);
+			UserPreference preference = userPreferenceService.getOrCreate(post.getOwnerIdLong(), Preference.FORUM_CLOSE_REMINDER);
 			if (Boolean.parseBoolean(preference.getState())) {
 				post.sendMessageFormat(config.getCloseReminderText(), UserSnowflake.fromId(post.getOwnerIdLong()).getAsMention()).queue();
 			}
@@ -115,9 +112,8 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 			Responses.error(event, "This button may only be used inside help forum threads.").queue();
 			return;
 		}
-		ForumHelpManager manager = new ForumHelpManager(event.getChannel().asThreadChannel(), dbActions, botConfig, dataSource, helpAccountRepository, helpTransactionRepository);
 		ThreadChannel post = event.getChannel().asThreadChannel();
-		ForumHelpManager manager = new ForumHelpManager(post);
+		ForumHelpManager manager = new ForumHelpManager(post, dbActions, botConfig, dataSource, helpAccountRepository, helpTransactionRepository);
 		switch (id[0]) {
 			case ForumHelpManager.HELP_THANKS_IDENTIFIER -> handleHelpThanksInteraction(event, manager, id);
 			case ForumHelpManager.HELP_GUIDELINES_IDENTIFIER -> handleReplyGuidelines(event, post.getParentChannel().asForumChannel());
@@ -131,7 +127,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 	}
 
 	private boolean isInvalidHelpForumChannel(@NotNull ForumChannel forum) {
-		HelpForumConfig config = Bot.getConfig().get(forum.getGuild()).getHelpForumConfig();
+		HelpForumConfig config = botConfig.get(forum.getGuild()).getHelpForumConfig();
 		return config.getHelpForumChannelId() != forum.getIdLong();
 	}
 
@@ -178,7 +174,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 
 	private void handlePostClose(ButtonInteractionEvent event, @NotNull ForumHelpManager manager) {
 		if (manager.isForumEligibleToBeUnreserved(event)) {
-			manager.close(event, event.getUser().getIdLong() == manager.postThread().getOwnerIdLong(), null);
+			manager.close(event, event.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(), null);
 		} else {
 			Responses.warning(event, "Could not close this post", "You're not allowed to close this post.").queue();
 		}

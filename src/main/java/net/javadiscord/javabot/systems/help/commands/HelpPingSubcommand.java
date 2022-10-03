@@ -61,7 +61,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 			Responses.warning(event, WRONG_CHANNEL_MSG).queue();
 			return;
 		}
-		GuildConfig config = Bot.getConfig().get(guild);
+		GuildConfig config = botConfig.get(guild);
 		if (event.getChannelType() == ChannelType.TEXT) {
 			handleTextBasedHelpPing(event, config);
 		} else if (event.getChannelType() == ChannelType.GUILD_PUBLIC_THREAD) {
@@ -99,7 +99,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 	}
 
 	private void handleTextBasedHelpPing(@NotNull SlashCommandInteractionEvent event, @NotNull GuildConfig config) {
-		HelpChannelManager channelManager = new HelpChannelManager(config.getHelpConfig());
+		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool, helpExperienceService);
 		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
 			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
 			if (optionalReservation.isEmpty()) {
