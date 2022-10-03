@@ -107,10 +107,6 @@ public class UnreserveCommand extends SlashCommand {
 				.queue();
 	}
 
-	private boolean isForumEligibleToBeUnreserved(@NotNull SlashCommandInteractionEvent event, @NotNull ThreadChannel postThread) {
-		return event.getUser().getIdLong() == postThread.getOwnerIdLong() || memberHasHelperRole(event) || memberHasStaffRole(event);
-	}
-
 	private boolean isTextEligibleToBeUnreserved(SlashCommandInteractionEvent event, TextChannel channel, HelpConfig config, User owner) {
 		return channelIsInReservedCategory(channel, config) &&
 				(isUserWhoReservedChannel(event, owner) || memberHasHelperRole(event) || memberHasStaffRole(event));
