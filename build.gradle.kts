@@ -31,7 +31,7 @@ dependencies {
 
     // DIH4JDA (Interaction Framework) & JDA
     implementation("com.github.DynxstyGIT:DIH4JDA:c8f7928efc")
-    implementation("com.github.DV8FromTheWorld:JDA:86af73d377") {
+    implementation("net.dv8tion:JDA:5.0.0-alpha.21") {
         exclude(module = "opus-java")
     }
 

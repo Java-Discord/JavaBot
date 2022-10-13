@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.ReconnectedEvent;
-import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.events.session.SessionRecreateEvent;
+import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
@@ -70,7 +70,7 @@ public class StateListener extends ListenerAdapter {
 	}
 
 	@Override
-	public void onReconnected(@NotNull ReconnectedEvent event) {
+	public void onSessionRecreate(@NotNull SessionRecreateEvent event) {
 		botConfig.loadGuilds(event.getJDA().getGuilds());
 		botConfig.flush();
 	}
