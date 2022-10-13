@@ -23,6 +23,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
@@ -44,6 +45,7 @@ import javax.sql.DataSource;
  * Listens for all events releated to the forum help channel system.
  */
 @RequiredArgsConstructor
+@AutoDetectableComponentHandler({ForumHelpManager.HELP_THANKS_IDENTIFIER, ForumHelpManager.HELP_CLOSE_IDENTIFIER, ForumHelpManager.HELP_GUIDELINES_IDENTIFIER})
 public class ForumHelpListener extends ListenerAdapter implements ButtonHandler {
 
 	/**
