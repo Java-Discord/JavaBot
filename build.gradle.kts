@@ -30,7 +30,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
 
     // DIH4JDA (Interaction Framework) & JDA
-    implementation("com.github.DynxstyGIT:DIH4JDA:c8f7928efc")
+    implementation("com.github.DynxstyGIT:DIH4JDA:9e02a171e8")
     implementation("net.dv8tion:JDA:5.0.0-alpha.21") {
         exclude(module = "opus-java")
     }
