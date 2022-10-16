@@ -136,6 +136,10 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 	private void handleHelpThanksInteraction(@NotNull ButtonInteractionEvent event, @NotNull ForumHelpManager manager, String @NotNull [] id) {
 		ThreadChannel post = manager.getPostThread();
 		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
+		if (event.getUser().getIdLong() != post.getOwnerIdLong()) {
+			Responses.warning(event, "Sorry, only the person who reserved this channel can thank users.").queue();
+			return;
+		}
 		switch (id[2]) {
 			case "done" -> {
 				List<Button> buttons = event.getMessage().getButtons();
