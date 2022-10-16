@@ -15,8 +15,9 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -32,6 +33,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -42,35 +44,40 @@ public class HelpChannelUpdater implements Runnable {
 	private static final String ACTIVITY_CHECK_MESSAGE = "Hey %s, it looks like this channel is inactive. Are you finished with this channel?\n\n> _If no response is received after %d minutes, this channel will be removed._";
 
 	private final JDA jda;
-	private final HelpConfig config;
+	private final BotConfig botConfig;
+	private final HelpConfig helpConfig;
 	private final HelpChannelManager channelManager;
 	private final List<ChannelSemanticCheck> semanticChecks;
 
 	/**
 	 * The Constructor of the class.
 	 *
-	 * @param jda            The {@link JDA} instance.
-	 * @param config         The bot's {@link HelpConfig}.
+	 * @param guild The {@link Guild} help channels should be updated in
 	 * @param semanticChecks A list with all {@link ChannelSemanticCheck}s.
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param botConfig The main configuration of the bot
+	 * @param dbActions A utility object providing various operations on the main database
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
-	public HelpChannelUpdater(JDA jda, HelpConfig config, List<ChannelSemanticCheck> semanticChecks) {
-		this.jda = jda;
-		this.config = config;
+	public HelpChannelUpdater(Guild guild, BotConfig botConfig, DbActions dbActions, ScheduledExecutorService asyncPool, List<ChannelSemanticCheck> semanticChecks, HelpExperienceService helpExperienceService) {
+		this.jda = guild.getJDA();
+		this.botConfig = botConfig;
+		this.helpConfig = botConfig.get(guild).getHelpConfig();
 		this.semanticChecks = semanticChecks;
-		this.channelManager = new HelpChannelManager(config);
+		this.channelManager = new HelpChannelManager(botConfig, guild, dbActions, asyncPool, helpExperienceService);
 	}
 
 	@Override
 	public void run() {
-		for (TextChannel channel : config.getReservedChannelCategory().getTextChannels()) {
+		for (TextChannel channel : helpConfig.getReservedChannelCategory().getTextChannels()) {
 			checkReservedChannel(channel).queue();
 		}
-		for (TextChannel channel : config.getOpenChannelCategory().getTextChannels()) {
+		for (TextChannel channel : helpConfig.getOpenChannelCategory().getTextChannels()) {
 			checkOpenChannel(channel).queue();
 		}
 		balanceChannels();
 		// periodically update the Help Channel Overview Message
-		if (config.getHelpOverviewMessageIds() != null && !config.getHelpOverviewMessageIds().isEmpty()) {
+		if (helpConfig.getHelpOverviewMessageIds() != null && !helpConfig.getHelpOverviewMessageIds().isEmpty()) {
 			updateHelpOverview();
 		}
 	}
@@ -121,12 +128,12 @@ public class HelpChannelUpdater implements Runnable {
 			try {
 				// Check if the most recent message is a channel inactivity check, and check that it's old enough to surpass the remove timeout.
 				if (isActivityCheck(mostRecentMessage)) {
-					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveInactiveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+					if (mostRecentMessage.getTimeCreated().plusMinutes(helpConfig.getRemoveInactiveTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
 						log.info("Unreserving channel {} because of no response to activity check.", channel.getName());
 						return unreserveInactiveChannel(channel, owner, mostRecentMessage, messages);
 					}
 				} else if (isThankMessage(mostRecentMessage)) {
-					if (mostRecentMessage.getTimeCreated().plusMinutes(config.getRemoveThanksTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
+					if (mostRecentMessage.getTimeCreated().plusMinutes(helpConfig.getRemoveThanksTimeoutMinutes()).isBefore(OffsetDateTime.now())) {
 						log.info("Unreserving channel {} because no response to thanks question was received.", channel.getName());
 						return unreserveInactiveChannel(channel, owner, mostRecentMessage, messages);
 					}
@@ -158,7 +165,7 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes when the check is done.
 	 */
 	private @NotNull RestAction<?> checkOpenChannel(TextChannel channel) {
-		if (!this.config.isRecycleChannels()) {
+		if (!this.helpConfig.isRecycleChannels()) {
 			return channel.getHistory().retrievePast(1).map(messages -> {
 				Message lastMessage = messages.isEmpty() ? null : messages.get(0);
 				if (lastMessage != null) {
@@ -181,11 +188,11 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private void balanceChannels() {
 		int openChannelCount = this.channelManager.getOpenChannelCount();
-		while (openChannelCount < this.config.getPreferredOpenChannelCount()) {
-			if (this.config.isRecycleChannels()) {
-				List<TextChannel> dormantChannels = this.config.getDormantChannelCategory().getTextChannels();
+		while (openChannelCount < this.helpConfig.getPreferredOpenChannelCount()) {
+			if (this.helpConfig.isRecycleChannels()) {
+				List<TextChannel> dormantChannels = this.helpConfig.getDormantChannelCategory().getTextChannels();
 				if (!dormantChannels.isEmpty()) {
-					Category target = this.config.getOpenChannelCategory();
+					Category target = this.helpConfig.getOpenChannelCategory();
 					dormantChannels.get(0).getManager().setParent(target).sync(target).queue();
 					openChannelCount++;
 				} else {
@@ -197,10 +204,10 @@ public class HelpChannelUpdater implements Runnable {
 				openChannelCount++;
 			}
 		}
-		while (openChannelCount > this.config.getPreferredOpenChannelCount()) {
-			TextChannel channel = this.config.getOpenChannelCategory().getTextChannels().get(0);
-			if (this.config.isRecycleChannels()) {
-				Category target = this.config.getDormantChannelCategory();
+		while (openChannelCount > this.helpConfig.getPreferredOpenChannelCount()) {
+			TextChannel channel = this.helpConfig.getOpenChannelCategory().getTextChannels().get(0);
+			if (this.helpConfig.isRecycleChannels()) {
+				Category target = this.helpConfig.getDormantChannelCategory();
 				channel.getManager().setParent(target).sync(target).queue();
 			} else {
 				channel.delete().queue();
@@ -245,8 +252,8 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private boolean isReservationMessage(Message message) {
 		return message.getAuthor().equals(this.jda.getSelfUser()) &&
-				config.getReservedChannelMessage() != null &&
-				message.getContentRaw().contains(config.getReservedChannelMessage());
+				helpConfig.getReservedChannelMessage() != null &&
+				message.getContentRaw().contains(helpConfig.getReservedChannelMessage());
 	}
 
 	/**
@@ -272,7 +279,7 @@ public class HelpChannelUpdater implements Runnable {
 	 */
 	private RestAction<?> sendActivityCheck(TextChannel channel, User owner, ChannelReservation reservation) {
 		log.info("Sending inactivity check to {} because of no activity since timeout.", channel.getName());
-		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), config.getRemoveInactiveTimeoutMinutes()))
+		return channel.sendMessage(String.format(ACTIVITY_CHECK_MESSAGE, owner.getAsMention(), helpConfig.getRemoveInactiveTimeoutMinutes()))
 				.setActionRow(
 						new ButtonImpl("help-channel:" + reservation.getId() + ":done", "Yes, I'm done here!", ButtonStyle.SUCCESS, false, Emoji.fromUnicode("\u2705")),
 						new ButtonImpl("help-channel:" + reservation.getId() + ":not-done", "No, I'm still using it.", ButtonStyle.SECONDARY, false, Emoji.fromUnicode("\u274C"))
@@ -291,7 +298,7 @@ public class HelpChannelUpdater implements Runnable {
 	 * @return A rest action that completes once the channel is unreserved.
 	 */
 	private RestAction<?> unreserveInactiveChannel(TextChannel channel, User owner, Message mostRecentMessage, List<Message> messages) {
-		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getName(), config.getRemoveInactiveTimeoutMinutes());
+		log.info("Unreserving channel {} because of inactivity for {} minutes following inactive check.", channel.getName(), helpConfig.getRemoveInactiveTimeoutMinutes());
 		return RestAction.allOf(
 				mostRecentMessage.delete(),
 				deleteThankMessages(messages),
@@ -375,14 +382,14 @@ public class HelpChannelUpdater implements Runnable {
 	}
 
 	private void updateHelpOverview() {
-		HelpForumConfig forumConfig = Bot.getConfig().get(config.getGuild()).getHelpForumConfig();
-		config.getHelpOverviewMessageIds().forEach((channelId, messageId) -> {
-			TextChannel channel = config.getGuild().getTextChannelById(channelId);
+		HelpForumConfig forumConfig = botConfig.get(helpConfig.getGuild()).getHelpForumConfig();
+		helpConfig.getHelpOverviewMessageIds().forEach((channelId, messageId) -> {
+			TextChannel channel = helpConfig.getGuild().getTextChannelById(channelId);
 			if (channel == null) {
 				log.error("Could not find Help Overview Channel with id '{}'", channelId);
 				return;
 			}
-			List<TextChannel> availableChannels = config.getOpenChannelCategory().getTextChannels();
+			List<TextChannel> availableChannels = helpConfig.getOpenChannelCategory().getTextChannels();
 			List<Button> buttons = new ArrayList<>(2);
 			if (!availableChannels.isEmpty()) {
 				buttons.add(Button.link(availableChannels.get(0).getJumpUrl(), "Show me an Available Help Channel!"));
@@ -397,23 +404,23 @@ public class HelpChannelUpdater implements Runnable {
 							),
 							ActionRow.of(buttons)).queue(),
 					err -> channel.sendMessageEmbeds(buildHelpOverviewEmbed()).queue(m -> {
-						config.getHelpOverviewMessageIds().put(channelId, m.getIdLong());
-						Bot.getConfig().flush();
+						helpConfig.getHelpOverviewMessageIds().put(channelId, m.getIdLong());
+						botConfig.flush();
 						log.info("Successfully created new Help Overview Message in '{}' on message with id '{}'", channelId, m.getId());
 						ExceptionLogger.capture(err);
-						Bot.getConfig().get(m.getGuild()).getModerationConfig().getLogChannel().sendMessage("Sent new help-overview message (Check sentry for cause!)").queue();
+						botConfig.get(m.getGuild()).getModerationConfig().getLogChannel().sendMessage("Sent new help-overview message (Check sentry for cause!)").queue();
 					})
 			);
 		});
 	}
 
 	private @NotNull MessageEmbed buildHelpOverviewEmbed() {
-		String availableHelpChannels = config.getOpenChannelCategory().getTextChannels()
+		String availableHelpChannels = helpConfig.getOpenChannelCategory().getTextChannels()
 				.stream()
 				.map(TextChannel::getAsMention)
 				.collect(Collectors.joining(", "));
 		StringBuilder reservedHelpChannels = new StringBuilder();
-		for (TextChannel channel : config.getReservedChannelCategory().getTextChannels()) {
+		for (TextChannel channel : helpConfig.getReservedChannelCategory().getTextChannels()) {
 			Optional<ChannelReservation> optional = channelManager.getReservationForChannel(channel.getIdLong());
 			if (optional.isEmpty()) continue;
 			ChannelReservation reservation = optional.get();
@@ -423,13 +430,13 @@ public class HelpChannelUpdater implements Runnable {
 					user -> reservedHelpChannels.append(String.format("""
 									%s
 									Reserved by %s <t:%s:R>
-																
+
 									""", channel.getAsMention(), user.getAsMention(),
 							reservation.getReservedAt().toEpochSecond(ZoneOffset.UTC))),
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			);
 		}
-		ForumChannel forum = Bot.getConfig().get(config.getGuild()).getHelpForumConfig().getHelpForumChannel();
+		ForumChannel forum = botConfig.get(helpConfig.getGuild()).getHelpForumConfig().getHelpForumChannel();
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Help Overview")
 				.setColor(Responses.Type.DEFAULT.getColor())
@@ -442,8 +449,8 @@ public class HelpChannelUpdater implements Runnable {
 		if (!reservedHelpChannels.isEmpty()) {
 			builder.addField("Reserved Help Channels", reservedHelpChannels.toString(), false);
 		}
-		if (!config.getDormantChannelCategory().getTextChannels().isEmpty()) {
-			builder.addField("Dormant Help Channels", String.format("%s dormant channels", config.getDormantChannelCategory().getTextChannels().size()), false);
+		if (!helpConfig.getDormantChannelCategory().getTextChannels().isEmpty()) {
+			builder.addField("Dormant Help Channels", String.format("%s dormant channels", helpConfig.getDormantChannelCategory().getTextChannels().size()), false);
 		}
 		return builder.build();
 	}

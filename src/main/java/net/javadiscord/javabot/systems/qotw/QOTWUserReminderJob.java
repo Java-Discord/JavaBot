@@ -2,33 +2,48 @@ package net.javadiscord.javabot.systems.qotw;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
+import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
-import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
-import org.jetbrains.annotations.NotNull;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 /**
  * Checks that there's a question in the QOTW queue ready for posting soon.
  */
-public class QOTWUserReminderJob extends DiscordApiJob {
-	@Override
-	protected void execute(JobExecutionContext context, @NotNull JDA jda) throws JobExecutionException {
+@Service
+@RequiredArgsConstructor
+public class QOTWUserReminderJob {
+	private final JDA jda;
+	private final UserPreferenceService userPreferenceService;
+	private final BotConfig botConfig;
+	private final DbHelper dbHelper;
+	private final QOTWSubmissionRepository qotwSubmissionRepository;
+	private final QuestionQueueRepository questionQueueRepository;
+
+	/**
+	 * Checks that there's a question in the QOTW queue ready for posting soon.
+	 */
+	@Scheduled(cron = "* 0 16 * * 5")//Friday 16:00
+	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
-			QOTWConfig config = Bot.getConfig().get(guild).getQotwConfig();
-			List<QOTWSubmission> submissions = new SubmissionManager(config).getActiveSubmissionThreads(guild.getIdLong());
+			QOTWConfig config = botConfig.get(guild).getQotwConfig();
+			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper, qotwSubmissionRepository, questionQueueRepository).getActiveSubmissionThreads(guild.getIdLong());
 			for (QOTWSubmission submission : submissions) {
-				UserPreferenceService manager = new UserPreferenceService(Bot.getDataSource());
-				UserPreference preference = manager.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
+				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
 				if (Boolean.parseBoolean(preference.getState())) {
 					TextChannel channel = config.getSubmissionChannel();
 					channel.getThreadChannels().stream().filter(t -> t.getIdLong() == submission.getThreadId()).forEach(t -> {

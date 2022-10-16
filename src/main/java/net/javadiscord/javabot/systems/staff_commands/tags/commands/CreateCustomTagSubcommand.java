@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -14,24 +15,33 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 
 /**
  * Administrative Subcommand that allows to create {@link CustomTag}s.
  */
+@AutoDetectableComponentHandler("tag-create")
 public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHandler {
+	private final CustomTagManager tagManager;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param tagManager The {@link CustomTagManager}
+	 * @param botConfig The main configuration of the bot
 	 */
-	public CreateCustomTagSubcommand() {
+	public CreateCustomTagSubcommand(CustomTagManager tagManager, BotConfig botConfig) {
+		super(botConfig);
+		this.tagManager = tagManager;
 		setSubcommandData(new SubcommandData("create", "Creates a new Custom Tag."));
 	}
 
@@ -50,7 +60,7 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 				.setPlaceholder("""
 						According to all known laws
 						of aviation,
-						      
+
 						there is no way a bee
 						should be able to fly...
 						""")
@@ -109,12 +119,12 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 		command.setReply(Boolean.parseBoolean(replyMapping.getAsString()));
 		command.setEmbed(Boolean.parseBoolean(embedMapping.getAsString()));
 		try {
-			if (Bot.getCustomTagManager().addCommand(event.getGuild(), command)) {
+			if (tagManager.addCommand(event.getGuild(), command)) {
 				event.getHook().sendMessageEmbeds(buildCreateCommandEmbed(event.getUser(), command)).queue();
 			} else {
 				Responses.error(event.getHook(), "Could not create Custom Tag. Please try again.").queue();
 			}
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e);
 			Responses.error(event.getHook(), "An unexpected error occurred. Please try again.").queue();
 		}

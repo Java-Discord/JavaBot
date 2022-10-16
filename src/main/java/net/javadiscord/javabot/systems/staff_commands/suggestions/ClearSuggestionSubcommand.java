@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.Responses;
@@ -19,8 +19,10 @@ import org.jetbrains.annotations.NotNull;
 public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public ClearSuggestionSubcommand() {
+	public ClearSuggestionSubcommand(BotConfig botConfig) {
+		super(botConfig);
 		setSubcommandData(new SubcommandData("clear", "Clears a single suggestion.")
 				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to clear.", true)
 		);
@@ -30,7 +32,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed, config);
-		SystemsConfig.EmojiConfig emojiConfig = Bot.getConfig().getSystems().getEmojiConfig();
+		SystemsConfig.EmojiConfig emojiConfig = botConfig.getSystems().getEmojiConfig();
 		message.editMessageEmbeds(clearEmbed).queue(
 				edit -> {
 					edit.addReaction(emojiConfig.getUpvoteEmote(event.getJDA())).queue();

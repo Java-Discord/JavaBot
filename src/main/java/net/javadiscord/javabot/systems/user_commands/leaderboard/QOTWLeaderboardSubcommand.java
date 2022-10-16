@@ -1,6 +1,24 @@
 package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.imageio.ImageIO;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -10,7 +28,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
@@ -18,18 +35,6 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.ImageCache;
 import net.javadiscord.javabot.util.ImageGenerationUtils;
 import net.javadiscord.javabot.util.Pair;
-import org.jetbrains.annotations.NotNull;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.Instant;
-import java.util.List;
 
 /**
  * Command for QOTW Leaderboard.
@@ -46,23 +51,35 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 */
 	private static final int WIDTH = 3000;
 
-	public QOTWLeaderboardSubcommand() {
+	private final QOTWPointsService pointsService;
+	private final ExecutorService asyncPool;
+	private final QuestionPointsRepository qotwPointsRepository;
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param pointsService The {@link QOTWPointsService} managing {@link QOTWAccount}s
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
+	 */
+	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool, QuestionPointsRepository qotwPointsRepository) {
 		setSubcommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
+		this.pointsService=pointsService;
+		this.asyncPool = asyncPool;
+		this.qotwPointsRepository = qotwPointsRepository;
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		event.deferReply().queue();
-		Bot.getAsyncPool().submit(() -> {
+		asyncPool.submit(() -> {
 			try {
-				QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-				WebhookMessageCreateAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember(), service));
+				WebhookMessageCreateAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
 				// check whether the image may already been cached
 				byte[] array = ImageCache.isCached(getCacheName()) ?
 						// retrieve the image from the cache
 						getOutputStreamFromImage(ImageCache.getCachedImage(getCacheName())).toByteArray() :
 						// generate an entirely new image
-						generateLeaderboard(event.getGuild(), service).toByteArray();
+						generateLeaderboard(event.getGuild()).toByteArray();
 				action.addFiles(FileUpload.fromData(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png")).queue();
 			} catch (IOException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -74,18 +91,17 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * Builds the Leaderboard Rank {@link MessageEmbed}.
 	 *
 	 * @param member  The member which executed the command.
-	 * @param service The {@link QOTWPointsService}.
 	 * @return A {@link MessageEmbed} object.
 	 */
-	private MessageEmbed buildLeaderboardRankEmbed(Member member, QOTWPointsService service) {
-		int rank = service.getQOTWRank(member.getIdLong());
+	private MessageEmbed buildLeaderboardRankEmbed(Member member) {
+		int rank = pointsService.getQOTWRank(member.getIdLong());
 		String rankSuffix = switch (rank % 10) {
 			case 1 -> "st";
 			case 2 -> "nd";
 			case 3 -> "rd";
 			default -> "th";
 		};
-		long points = service.getPoints(member.getIdLong());
+		long points = pointsService.getPoints(member.getIdLong());
 		String pointsText = points == 1 ? "point" : "points";
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
@@ -140,15 +156,14 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * Draws and constructs the leaderboard image.
 	 *
 	 * @param guild   The current guild.
-	 * @param service The {@link QOTWPointsService}.
 	 * @return The finished image as a {@link ByteArrayInputStream}.
 	 * @throws IOException If an error occurs.
 	 */
-	private @NotNull ByteArrayOutputStream generateLeaderboard(Guild guild, @NotNull QOTWPointsService service) throws IOException {
+	private @NotNull ByteArrayOutputStream generateLeaderboard(Guild guild) throws IOException {
 		BufferedImage logo = ImageGenerationUtils.getResourceImage("assets/images/QuestionOfTheWeekHeader.png");
 		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
 
-		List<Pair<QOTWAccount, Member>> topMembers = service.getTopMembers(DISPLAY_COUNT, guild);
+		List<Pair<QOTWAccount, Member>> topMembers = pointsService.getTopMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
 				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
@@ -163,7 +178,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 			boolean left = true;
 			int y = logo.getHeight() + 3 * MARGIN;
 			for (Pair<QOTWAccount, Member> pair : topMembers) {
-				drawUserCard(g2d, pair.second(), service, y, left);
+				drawUserCard(g2d, pair.second(), pointsService, y, left);
 				left = !left;
 				if (left) y = y + card.getHeight() + MARGIN;
 			}
@@ -181,16 +196,15 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @return The image's cache name.
 	 */
 	private @NotNull String getCacheName() {
-		try (Connection con = Bot.getDataSource().getConnection()) {
-			QuestionPointsRepository repo = new QuestionPointsRepository(con);
-			List<QOTWAccount> accounts = repo.sortByPoints()
+		try {
+			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints()
 					.stream()
 					.limit(DISPLAY_COUNT)
 					.toList();
 			StringBuilder sb = new StringBuilder("qotw_leaderboard_");
 			accounts.forEach(account -> sb.append(String.format(":%s:%s", account.getUserId(), account.getPoints())));
 			return sb.toString();
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return "";
 		}

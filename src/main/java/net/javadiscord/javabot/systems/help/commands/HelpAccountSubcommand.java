@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -20,8 +19,7 @@ import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.SQLException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * <h3>This class represents the /help account command.</h3>
@@ -29,10 +27,18 @@ import java.sql.SQLException;
  * their help.
  */
 public class HelpAccountSubcommand extends SlashCommand.Subcommand {
+
+	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param dbActions  An object responsible for various database actions
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
-	public HelpAccountSubcommand() {
+	public HelpAccountSubcommand(DbActions dbActions, HelpExperienceService helpExperienceService) {
+		this.dbActions = dbActions;
+		this.helpExperienceService = helpExperienceService;
 		setSubcommandData(new SubcommandData("account", "Shows an overview of your Help Account.")
 				.addOption(OptionType.USER, "user", "If set, show the Help Account of the specified user instead.", false)
 				.addOption(OptionType.BOOLEAN, "show-transactions", "Should the recent transactions be shown?", false)
@@ -43,18 +49,18 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
 		boolean showTransactions = event.getOption("show-transactions", false, OptionMapping::getAsBoolean);
-		long totalThanks = DbActions.count(
+		long totalThanks = dbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ?",
 				s -> s.setLong(1, user.getIdLong())
 		);
-		long weekThanks = DbActions.count(
+		long weekThanks = dbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ? AND thanked_at > DATEADD('week', -1, CURRENT_TIMESTAMP(0))",
 				s -> s.setLong(1, user.getIdLong())
 		);
 		try {
-			HelpAccount account = new HelpExperienceService(Bot.getDataSource()).getOrCreateAccount(user.getIdLong());
+			HelpAccount account = helpExperienceService.getOrCreateAccount(user.getIdLong());
 			event.replyEmbeds(buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks, showTransactions)).queue();
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, e.getMessage()).queue();
 		}
@@ -77,11 +83,10 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	private @NotNull String formatTransactionHistory(long userId) {
 		StringBuilder sb = new StringBuilder();
 		try {
-			HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
-			for (HelpTransaction t :service.getRecentTransactions(userId, 3)) {
+			for (HelpTransaction t :helpExperienceService.getRecentTransactions(userId, 3)) {
 				sb.append(t.format()).append("\n\n");
 			}
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 		}
 		return sb.toString().length() > 0 ? sb.toString() : "No recent transactions";

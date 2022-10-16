@@ -24,10 +24,14 @@ import java.util.List;
  * This class represents the `/self-role create` command.
  */
 public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public CreateSelfRoleSubcommand() {
+	public CreateSelfRoleSubcommand(NotificationService notificationService) {
+		this.notificationService = notificationService;
 		setSubcommandData(new SubcommandData("create", "Creates a reaction role")
 				.addOptions(
 						new OptionData(OptionType.STRING, "type", "The self-role's type.", true)
@@ -93,7 +97,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 			message.editMessageComponents(MessageActionUtils.toActionRows(buttons)).queue();
 		}
 		MessageEmbed logEmbed = this.buildSelfRoleCreateEmbed(event.getUser(), role, event.getChannel(), message.getJumpUrl(), type);
-		NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(logEmbed));
+		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(logEmbed));
 		event.getHook().sendMessageEmbeds(logEmbed).setEphemeral(true).queue();
 	}
 

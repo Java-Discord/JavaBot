@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -9,17 +10,16 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.tasks.jobs.DiscordApiJob;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,25 +28,38 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 /**
  * Job which posts a new question to the QOTW channel.
  */
 @Slf4j
-public class QOTWJob extends DiscordApiJob {
-	@Override
-	protected void execute(JobExecutionContext context, JDA jda) throws JobExecutionException {
+@Service
+@RequiredArgsConstructor
+public class QOTWJob {
+	private final JDA jda;
+	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final DataSource dataSource;
+	private final QuestionQueueRepository questionQueueRepository;
+
+	/**
+	 * Posts a new question to the QOTW channel.
+	 * @throws SQLException if an SQL error occurs
+	 */
+	@Scheduled(cron = "0 0 9 * * 0")//MONDAY, 09:00
+	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			if (guild.getBoostTier() == Guild.BoostTier.TIER_1) {
 				log.error("Guild {} does not have access to private threads. ({})", guild.getName(), guild.getBoostTier().name());
 				return;
 			}
-			GuildConfig config = Bot.getConfig().get(guild);
+			GuildConfig config = botConfig.get(guild);
 			if (config.getModerationConfig().getLogChannel() == null) continue;
-			try (Connection c = Bot.getDataSource().getConnection()) {
-				QuestionQueueRepository repo = new QuestionQueueRepository(c);
-				Optional<QOTWQuestion> nextQuestion = repo.getNextQuestion(guild.getIdLong());
+			try (Connection c = dataSource.getConnection()) {
+				Optional<QOTWQuestion> nextQuestion = questionQueueRepository.getNextQuestion(guild.getIdLong());
 				if (nextQuestion.isEmpty()) {
-					NotificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
+					notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
 				} else {
 					QOTWQuestion question = nextQuestion.get();
 					QOTWConfig qotw = config.getQotwConfig();
@@ -55,7 +68,7 @@ public class QOTWJob extends DiscordApiJob {
 							.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
 							.queue();
 					if (question.getQuestionNumber() == null) {
-						question.setQuestionNumber(repo.getNextQuestionNumber());
+						question.setQuestionNumber(questionQueueRepository.getNextQuestionNumber());
 					}
 					NewsChannel questionChannel = qotw.getQuestionChannel();
 					if (questionChannel == null) continue;
@@ -63,12 +76,12 @@ public class QOTWJob extends DiscordApiJob {
 							.setEmbeds(this.buildQuestionEmbed(question))
 							.setComponents(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
-					repo.markUsed(question);
+					questionQueueRepository.markUsed(question);
 				}
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
-				NotificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageFormat("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotwConfig().getQOTWReviewRole().getAsMention(), e.getMessage()));
-				throw new JobExecutionException(e);
+				notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageFormat("Warning! %s Could not send next QOTW question:\n```\n%s\n```\n", config.getQotwConfig().getQOTWReviewRole().getAsMention(), e.getMessage()));
+				throw e;
 			}
 		}
 	}

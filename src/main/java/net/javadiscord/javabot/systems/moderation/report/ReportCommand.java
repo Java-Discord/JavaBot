@@ -1,12 +1,12 @@
 package net.javadiscord.javabot.systems.moderation.report;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.systems.moderation.ModerateUserCommand;
 
@@ -15,12 +15,13 @@ import javax.annotation.Nonnull;
 /**
  * <h3>This class represents the /report command.</h3>
  */
-@Slf4j
 public class ReportCommand extends ModerateUserCommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public ReportCommand() {
+	public ReportCommand(BotConfig botConfig) {
+		super(botConfig);
 		setSlashCommandData(Commands.slash("report", "Reports a member.")
 				.addOption(OptionType.USER, "user", "The user you want to report", true)
 				.addOption(OptionType.STRING, "reason", "The reason", true)
@@ -31,7 +32,7 @@ public class ReportCommand extends ModerateUserCommand {
 
 	@Override
 	protected WebhookMessageCreateAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nonnull String reason) {
-		return new ReportManager().handleUserReport(event.getHook(), reason, target.getId());
+		return new ReportManager(botConfig).handleUserReport(event.getHook(), reason, target.getId());
 	}
 }
 

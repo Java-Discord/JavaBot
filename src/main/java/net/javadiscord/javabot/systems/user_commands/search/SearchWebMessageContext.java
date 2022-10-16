@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.user_commands.search;
 import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -14,10 +15,14 @@ import java.io.IOException;
  * This Context Command allows members to search the internet using the Bing API.
  */
 public class SearchWebMessageContext extends ContextCommand.Message {
+	private final SystemsConfig systemsConfig;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.CommandData}.
+	 * @param systemsConfig Configuration for various systems
 	 */
-	public SearchWebMessageContext() {
+	public SearchWebMessageContext(SystemsConfig systemsConfig) {
+		this.systemsConfig = systemsConfig;
 		setCommandData(Commands.message("Search the Web")
 				.setGuildOnly(true)
 		);
@@ -31,7 +36,7 @@ public class SearchWebMessageContext extends ContextCommand.Message {
 			return;
 		}
 		event.deferReply().queue();
-		SearchWebService service = new SearchWebService();
+		SearchWebService service = new SearchWebService(systemsConfig);
 		try {
 			event.getHook().sendMessageEmbeds(service.buildSearchWebEmbed(query)).queue();
 		} catch (IOException e) {

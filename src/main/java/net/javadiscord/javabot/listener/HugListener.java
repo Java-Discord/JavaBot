@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.listener;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -7,7 +8,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.util.WebhookUtil;
 
 import javax.annotation.Nonnull;
@@ -16,13 +18,17 @@ import javax.annotation.Nonnull;
  * Replaces all occurrences of 'fuck' in incoming messages with 'hug'.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
+	private final AutoMod autoMod;
+	private final BotConfig botConfig;
+
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		if (!event.isFromGuild()) {
 			return;
 		}
-		if (Bot.getAutoMod().hasSuspiciousLink(event.getMessage()) || Bot.getAutoMod().hasAdvertisingLink(event.getMessage())) {
+		if (autoMod.hasSuspiciousLink(event.getMessage()) || autoMod.hasAdvertisingLink(event.getMessage())) {
 			return;
 		}
 		if (!event.getMessage().getMentions().getUsers().isEmpty()) {
@@ -31,7 +37,7 @@ public class HugListener extends ListenerAdapter {
 		if (event.isWebhookMessage()) {
 			return;
 		}
-		if (event.getChannel().getIdLong() == Bot.getConfig().get(event.getGuild()).getModerationConfig()
+		if (event.getChannel().getIdLong() == botConfig.get(event.getGuild()).getModerationConfig()
 				.getSuggestionChannelId()) {
 			return;
 		}

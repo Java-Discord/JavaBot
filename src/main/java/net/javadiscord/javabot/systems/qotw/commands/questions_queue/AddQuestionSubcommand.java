@@ -10,26 +10,39 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
-import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
-import java.sql.Connection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Subcommand that allows staff-members to add question to the QOTW-Queue.
  */
+@AutoDetectableComponentHandler("qotw-add-question")
 public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandler {
-	public AddQuestionSubcommand() {
+	private final ExecutorService asyncPool;
+	private final QuestionQueueRepository questionQueueRepository;
+
+	/**
+	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param questionQueueRepository Dao class that represents the QOTW_QUESTION SQL Table.
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 */
+	public AddQuestionSubcommand(QuestionQueueRepository questionQueueRepository, ExecutorService asyncPool) {
+		this.asyncPool = asyncPool;
+		this.questionQueueRepository = questionQueueRepository;
 		setSubcommandData(new SubcommandData("add", "Add a question to the queue."));
 	}
 
 	@Override
-	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, Connection con, long guildId) {
+	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, long guildId) {
 		return event.replyModal(buildQuestionModal());
 	}
 
@@ -74,7 +87,13 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 				question.setPriority(Integer.parseInt(priorityOption.getAsString()));
 			}
 
-			DbHelper.doDaoAction(QuestionQueueRepository::new, dao -> dao.save(question));
+			asyncPool.submit(() -> {
+				try {
+					questionQueueRepository.save(question);
+				} catch (DataAccessException e) {
+					ExceptionLogger.capture(e, AddQuestionSubcommand.class.getSimpleName());
+				}
+			});
 			Responses.success(event.getHook(), "Question Added", "Your question has been added to the queue.").queue();
 		}
 }

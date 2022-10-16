@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -20,10 +21,14 @@ import java.util.Set;
  */
 @Slf4j
 public class SayCommand extends SlashCommand {
+	private final BotConfig botConfig;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The injected {@link BotConfig}
 	 */
-	public SayCommand() {
+	public SayCommand(BotConfig botConfig) {
+		this.botConfig = botConfig;
 		setSlashCommandData(Commands.slash("say", "Let the bot say everything you want!")
 				.addOption(OptionType.STRING, "text", "The text that should be mirrored.", true)
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
@@ -33,8 +38,8 @@ public class SayCommand extends SlashCommand {
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		if (!Checks.hasAdminRole(event.getGuild(), event.getMember())) {
-			Responses.replyAdminOnly(event, event.getGuild()).queue();
+		if (!Checks.hasAdminRole(botConfig, event.getMember())) {
+			Responses.replyAdminOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		OptionMapping textMapping = event.getOption("text");

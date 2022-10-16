@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
 import net.javadiscord.javabot.util.Responses;
@@ -18,13 +18,15 @@ import javax.annotation.Nonnull;
 public class SetConfigSubcommand extends ConfigSubcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public SetConfigSubcommand() {
+	public SetConfigSubcommand(BotConfig botConfig) {
+		super(botConfig);
 		setSubcommandData(new SubcommandData("set", "Sets the value of a configuration property.")
 				.addOption(OptionType.STRING, "property", "The name of a property.", true)
 				.addOption(OptionType.STRING, "value", "The value to set for the property.", true)
 		);
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override
@@ -36,7 +38,7 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 		}
 		String property = propertyOption.getAsString().trim();
 		String valueString = valueOption.getAsString().trim();
-		Bot.getConfig().get(event.getGuild()).set(property, valueString);
+		botConfig.get(event.getGuild()).set(property, valueString);
 		return Responses.success(event, "Configuration Updated", "The property `%s` has been set to `%s`.", property, valueString);
 	}
 }

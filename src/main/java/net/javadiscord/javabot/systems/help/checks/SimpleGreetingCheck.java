@@ -8,6 +8,7 @@ import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.javadiscord.javabot.systems.help.ChannelSemanticCheck;
 import net.javadiscord.javabot.systems.help.ChannelSemanticData;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * and replies to their message asking them to elaborate on what their question
  * is.
  */
+@Component
 public class SimpleGreetingCheck implements ChannelSemanticCheck {
 	private static final String[] GREETINGS = {"hi", "hello", "hey", "yo"};
 	private static final String MESSAGE = "Hi there! It would be helpful if you could provide a detailed description of your problem.";

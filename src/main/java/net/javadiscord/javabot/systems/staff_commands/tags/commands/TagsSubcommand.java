@@ -1,9 +1,11 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import lombok.extern.slf4j.Slf4j;
+
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -15,9 +17,10 @@ import java.sql.SQLException;
  * An abstraction of {@link com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand} which handles all
  * custom-tag-related commands.
  */
-@Slf4j
+@RequiredArgsConstructor
 public abstract class TagsSubcommand extends SlashCommand.Subcommand {
 	private boolean requireStaff = true;
+	private final BotConfig botConfig;
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
@@ -25,8 +28,8 @@ public abstract class TagsSubcommand extends SlashCommand.Subcommand {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		if (requireStaff && !Checks.hasStaffRole(event.getGuild(), event.getMember())) {
-			Responses.replyStaffOnly(event, event.getGuild()).queue();
+		if (requireStaff && !Checks.hasStaffRole(botConfig, event.getMember())) {
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		try {

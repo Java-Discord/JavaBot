@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +19,10 @@ import java.util.Objects;
  * An abstraction of {@link ModerateCommand} which is used for commands that require a user.
  */
 public abstract class ModerateUserCommand extends ModerateCommand {
+	public ModerateUserCommand(BotConfig botConfig) {
+		super(botConfig);
+	}
+
 	@Override
 	protected ReplyCallbackAction handleModerationCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Member moderator) {
 		OptionMapping targetOption = event.getOption("user");

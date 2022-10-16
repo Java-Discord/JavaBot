@@ -5,11 +5,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.guild.MessageCacheConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
 import net.javadiscord.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.javadiscord.javabot.systems.user_commands.IdCalculatorCommand;
@@ -20,18 +19,21 @@ import net.javadiscord.javabot.util.TimeUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 /**
  * Listens for Incoming Messages and stores them in the Message Cache.
  */
 @Slf4j
+@Service
 public class MessageCache {
 	/**
 	 * A memory-cache (list) of sent Messages, wrapped to a {@link CachedMessage} object.
@@ -45,25 +47,36 @@ public class MessageCache {
 	 */
 	public int messageCount = 0;
 
+	private final ExecutorService asyncPool;
+	private final BotConfig botConfig;
+	private final MessageCacheRepository cacheRepository;
+
 	/**
 	 * Creates a new messages & loads messages from the DB into a List.
+	 * @param botConfig The main configuration of the bot
+	 * @param cacheRepository Dao class that represents the QOTW_POINTS SQL Table.
+	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
-	public MessageCache() {
-		try (Connection con = Bot.getDataSource().getConnection()) {
-			cache = new MessageCacheRepository(con).getAll();
-		} catch (SQLException e) {
+	public MessageCache(BotConfig botConfig, MessageCacheRepository cacheRepository, ExecutorService asyncPool) {
+		this.asyncPool = asyncPool;
+		this.botConfig = botConfig;
+		this.cacheRepository = cacheRepository;
+		try {
+			cache = cacheRepository.getAll();
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
+
 	}
 
 	/**
 	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
 	 */
 	public void synchronize() {
-		DbHelper.doDaoAction(MessageCacheRepository::new, dao -> {
-			dao.delete(cache.size());
-			dao.insertList(cache);
+		asyncPool.execute(()->{
+			cacheRepository.delete(cache.size());
+			cacheRepository.insertList(cache);
 			messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
 		});
@@ -75,7 +88,7 @@ public class MessageCache {
 	 * @param message The message to cache.
 	 */
 	public void cache(Message message) {
-		MessageCacheConfig config = Bot.getConfig().get(message.getGuild()).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(message.getGuild()).getMessageCacheConfig();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
 			cache.remove(0);
 		}
@@ -93,7 +106,7 @@ public class MessageCache {
 	 * @param before  The {@link CachedMessage}.
 	 */
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
-		MessageCacheConfig config = Bot.getConfig().get(updated.getGuild()).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(updated.getGuild()).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
 		MessageCreateAction action = config.getMessageCacheLogChannel()
@@ -113,7 +126,7 @@ public class MessageCache {
 	 * @param message The {@link CachedMessage}.
 	 */
 	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
-		MessageCacheConfig config = Bot.getConfig().get(guild).getMessageCacheConfig();
+		MessageCacheConfig config = botConfig.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
 			MessageCreateAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
@@ -165,9 +178,9 @@ public class MessageCache {
 				Author: %s
 				ID: %s
 				Created at: %s
-								
+
 				--- Message Content ---
-								
+
 				%s
 				""", author.getAsTag(), message.getMessageId(), formatter.format(instant), message.getMessageContent());
 		return new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));
@@ -180,13 +193,13 @@ public class MessageCache {
 				Author: %s
 				ID: %s
 				Created at: %s
-								
+
 				--- Message Content (before) ---
-								
+
 				%s
-								
+
 				--- Message Content (after) ---
-								
+
 				%s
 				""", author.getAsTag(), before.getMessageId(), formatter.format(instant), before.getMessageContent(), after.getContentRaw());
 		return new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));

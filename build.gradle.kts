@@ -4,6 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("org.springframework.boot") version "2.7.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     checkstyle
 }
@@ -29,8 +30,8 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
 
     // DIH4JDA (Interaction Framework) & JDA
-    implementation("com.github.DynxstyGIT:DIH4JDA:c8f7928efc")
-    implementation("com.github.DV8FromTheWorld:JDA:86af73d377") {
+    implementation("com.github.DynxstyGIT:DIH4JDA:9e02a171e8")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.21") {
         exclude(module = "opus-java")
     }
 
@@ -49,9 +50,6 @@ dependencies {
     implementation("com.h2database:h2:2.1.212")
     implementation("com.zaxxer:HikariCP:5.0.1")
 
-    // Quartz Scheduler
-    implementation("org.quartz-scheduler:quartz:2.3.2")
-    
     // Webhooks
     implementation("com.github.DynxstyGIT:discord-webhooks:74301a46a0")
 
@@ -64,8 +62,9 @@ dependencies {
     // Sentry
     implementation("io.sentry:sentry:6.3.0")
 
-    // Spring Boot
-    implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
+    // Spring
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 }
 
 tasks.withType<Jar> {

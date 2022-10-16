@@ -8,8 +8,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.Responses;
+
+import java.util.concurrent.ExecutorService;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -17,10 +23,23 @@ import org.jetbrains.annotations.NotNull;
  * This Subcommand allows staff-members to manually remove a timeout.
  */
 public class RemoveTimeoutSubcommand extends TimeoutSubcommand {
+	private final NotificationService notificationService;
+	private final BotConfig botConfig;
+	private final WarnRepository warnRepository;
+	private final ExecutorService asyncPool;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param notificationService The {@link NotificationService}
+	 * @param botConfig The main configuration of the bot
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param warnRepository The main thread pool for asynchronous operations
 	 */
-	public RemoveTimeoutSubcommand() {
+	public RemoveTimeoutSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
+		this.notificationService = notificationService;
+		this.botConfig = botConfig;
+		this.warnRepository = warnRepository;
+		this.asyncPool = asyncPool;
 		setSubcommandData(new SubcommandData("remove", "Removes a timeout from the specified server member.")
 				.addOptions(
 						new OptionData(OptionType.USER, "member", "The member whose timeout should be removed.", true),
@@ -44,7 +63,7 @@ public class RemoveTimeoutSubcommand extends TimeoutSubcommand {
 		if (!member.isTimedOut()) {
 			return Responses.error(event, "Could not remove timeout from member %s; they're not timed out.", member.getAsMention());
 		}
-		ModerationService service = new ModerationService(event);
+		ModerationService service = new ModerationService(notificationService, botConfig.get(event.getGuild()), warnRepository, asyncPool);
 		service.removeTimeout(member, reasonOption.getAsString(), event.getMember(), channel, quiet);
 		return Responses.success(event, "Timeout Removed", "%s's timeout has been removed.", member.getAsMention());
 	}

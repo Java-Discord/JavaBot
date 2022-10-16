@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
@@ -26,8 +26,11 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
 import javax.annotation.Nullable;
+import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +38,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -50,11 +54,27 @@ public class HelpChannelManager {
 
 	@Getter
 	private final HelpConfig config;
+	private final ScheduledExecutorService asyncPool;
 	private final TextChannel logChannel;
+	private final DataSource dataSource;
+	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
-	public HelpChannelManager(HelpConfig config) {
-		this.config = config;
-		this.logChannel = Bot.getConfig().get(config.getGuild()).getModerationConfig().getLogChannel();
+	/**
+	 * Initializes the {@link HelpChannelManager} object.
+	 * @param botConfig The main configuration of the bot
+	 * @param guild the {@link Guild} help channels should be managed in
+	 * @param dbActions A service object responsible for various operations on the main database
+	 * @param asyncPool The thread pool for asynchronous operations
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
+	 */
+	public HelpChannelManager(BotConfig botConfig, Guild guild, DbActions dbActions, ScheduledExecutorService asyncPool, HelpExperienceService helpExperienceService) {
+		this.config = botConfig.get(guild).getHelpConfig();
+		this.dataSource = dbActions.getDataSource();
+		this.dbActions = dbActions;
+		this.asyncPool = asyncPool;
+		this.logChannel = botConfig.get(guild).getModerationConfig().getLogChannel();
+		this.helpExperienceService = helpExperienceService;
 	}
 
 	public boolean isOpen(TextChannel channel) {
@@ -81,7 +101,7 @@ public class HelpChannelManager {
 		if (member == null) return false;
 		// Don't allow muted users.
 		if (member.isTimedOut()) return false;
-		try (Connection con = Bot.getDataSource().getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
+		try (Connection con = dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT COUNT(channel_id) FROM reserved_help_channels WHERE user_id = ?")) {
 			stmt.setLong(1, user.getIdLong());
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() && rs.getLong(1) < this.config.getMaxReservedChannelsPerUser();
@@ -117,16 +137,16 @@ public class HelpChannelManager {
 	public void reserve(TextChannel channel, User reservingUser, Message message) throws SQLException {
 		if (!isOpen(channel)) throw new IllegalArgumentException("Can only reserve open channels!");
 		// Check if the database still has this channel marked as reserved (which can happen if an admin manually moves a channel.)
-		long alreadyReservedCount = DbActions.count(
+		long alreadyReservedCount = dbActions.count(
 				"SELECT COUNT(id) FROM reserved_help_channels WHERE channel_id = ?",
 				s -> s.setLong(1, channel.getIdLong())
 		);
 		// If it's marked in the DB as reserved, remove that so that we can reserve it anew.
 		if (alreadyReservedCount > 0) {
-			DbActions.update("DELETE FROM reserved_help_channels WHERE channel_id = ?", channel.getIdLong());
+			dbActions.update("DELETE FROM reserved_help_channels WHERE channel_id = ?", channel.getIdLong());
 		}
 		int timeout = config.getInactivityTimeouts().get(0);
-		DbActions.update(
+		dbActions.update(
 				"INSERT INTO reserved_help_channels (channel_id, user_id, timeout) VALUES (?, ?, ?)",
 				channel.getIdLong(), reservingUser.getIdLong(), timeout
 		);
@@ -167,7 +187,7 @@ public class HelpChannelManager {
 	 */
 	public User getReservedChannelOwner(TextChannel channel) {
 		try {
-			return DbActions.mapQuery(
+			return dbActions.mapQuery(
 					"SELECT user_id FROM reserved_help_channels WHERE channel_id = ?",
 					s -> s.setLong(1, channel.getIdLong()),
 					rs -> {
@@ -192,7 +212,7 @@ public class HelpChannelManager {
 		int limit = 300;
 		MessageHistory history = channel.getHistory();
 		final CompletableFuture<Map<Member, List<Message>>> cf = new CompletableFuture<>();
-		Bot.getAsyncPool().execute(() -> {
+		asyncPool.execute(() -> {
 			final Map<Member, List<Message>> userMessages = new HashMap<>();
 			boolean endFound = false;
 			while (!endFound && history.size() < limit) {
@@ -325,14 +345,13 @@ public class HelpChannelManager {
 	 */
 	public RestAction<?> unreserveChannel(TextChannel channel) {
 		if (this.config.isRecycleChannels()) {
-			try (Connection con = Bot.getDataSource().getConnection()) {
-				HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
+			try (Connection con = dataSource.getConnection()) {
 				Optional<ChannelReservation> reservationOptional = this.getReservationForChannel(channel.getIdLong());
 				if (reservationOptional.isPresent()) {
 					ChannelReservation reservation = reservationOptional.get();
 					Map<Long, Double> experience = calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId(), config);
 					for (Long recipient : experience.keySet()) {
-						service.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
+						helpExperienceService.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
 					}
 				}
 				try (PreparedStatement stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {
@@ -356,7 +375,7 @@ public class HelpChannelManager {
 									channel.sendMessage(config.getReopenedChannelMessage()))
 					);
 				}
-			} catch (SQLException e) {
+			} catch (DataAccessException|SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				return logChannel.sendMessage("Error occurred while unreserving help channel " + channel.getAsMention() + ": " + e.getMessage());
 			}
@@ -372,7 +391,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void unreserveAllOwnedChannels(User user) throws SQLException {
-		List<TextChannel> channels = DbActions.mapQuery(
+		List<TextChannel> channels = dbActions.mapQuery(
 				"SELECT channel_id FROM reserved_help_channels WHERE user_id = ?",
 				s -> s.setLong(1, user.getIdLong()),
 				rs -> {
@@ -395,7 +414,7 @@ public class HelpChannelManager {
 	 * @return The {@link ChannelReservation} object as an {@link Optional}.
 	 */
 	public Optional<ChannelReservation> getReservationForChannel(long channelId) {
-		return DbActions.fetchSingleEntity(
+		return dbActions.fetchSingleEntity(
 				"SELECT * FROM reserved_help_channels WHERE channel_id = ?",
 				s -> s.setLong(1, channelId),
 				rs -> new ChannelReservation(
@@ -415,7 +434,7 @@ public class HelpChannelManager {
 	 * @return The {@link ChannelReservation} object as an {@link Optional}.
 	 */
 	public Optional<ChannelReservation> getReservation(long id) {
-		return DbActions.fetchSingleEntity(
+		return dbActions.fetchSingleEntity(
 				"SELECT * FROM reserved_help_channels WHERE id = ?",
 				s -> s.setLong(1, id),
 				rs -> new ChannelReservation(
@@ -436,7 +455,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public void setTimeout(@NotNull TextChannel channel, int timeout) throws SQLException {
-		try (Connection con = Bot.getDataSource().getConnection(); PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
+		try (Connection con = dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("UPDATE reserved_help_channels SET timeout = ? WHERE channel_id = ?")) {
 			stmt.setInt(1, timeout);
 			stmt.setLong(2, channel.getIdLong());
 			stmt.executeUpdate();
@@ -451,7 +470,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public int getTimeout(TextChannel channel) throws SQLException {
-		try (Connection con = Bot.getDataSource().getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
+		try (Connection con = dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement("SELECT timeout FROM reserved_help_channels WHERE channel_id = ?")) {
 			stmt.setLong(1, channel.getIdLong());
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
@@ -470,7 +489,7 @@ public class HelpChannelManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	public LocalDateTime getReservedAt(TextChannel channel) throws SQLException {
-		return DbActions.mapQuery(
+		return dbActions.mapQuery(
 				"SELECT reserved_at FROM reserved_help_channels WHERE channel_id = ?",
 				s -> s.setLong(1, channel.getIdLong()),
 				rs -> {
@@ -511,7 +530,7 @@ public class HelpChannelManager {
 	 */
 	public Optional<Long> getReservationId(TextChannel channel) {
 		try {
-			return DbActions.mapQuery(
+			return dbActions.mapQuery(
 					"SELECT id FROM reserved_help_channels WHERE channel_id = ?",
 					s -> s.setLong(1, channel.getIdLong()),
 					rs -> {

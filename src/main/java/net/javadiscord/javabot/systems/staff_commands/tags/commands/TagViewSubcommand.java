@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import net.javadiscord.javabot.util.Responses;
@@ -20,10 +20,16 @@ import java.util.Optional;
  * <h3>This class represents the /tag command.</h3>
  */
 public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable {
+	private final CustomTagManager tagManager;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param tagManager The {@link CustomTagManager}
+	 * @param botConfig The main configuration of the bot
 	 */
-	public TagViewSubcommand() {
+	public TagViewSubcommand(CustomTagManager tagManager, BotConfig botConfig) {
+		super(botConfig);
+		this.tagManager = tagManager;
 		setSubcommandData(new SubcommandData("view", "Allows to view a tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
@@ -36,7 +42,7 @@ public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable
 		if (nameMapping == null) {
 			return Responses.replyMissingArguments(event);
 		}
-		Optional<CustomTag> tagOptional = Bot.getCustomTagManager().getByName(event.getGuild().getIdLong(), nameMapping.getAsString());
+		Optional<CustomTag> tagOptional = tagManager.getByName(event.getGuild().getIdLong(), nameMapping.getAsString());
 		if (tagOptional.isPresent()) {
 			CustomTagManager.handleCustomTag(event, tagOptional.get()).queue();
 		} else {

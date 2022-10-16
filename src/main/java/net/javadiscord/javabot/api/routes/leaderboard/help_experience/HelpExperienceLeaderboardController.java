@@ -3,7 +3,6 @@ package net.javadiscord.javabot.api.routes.leaderboard.help_experience;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.leaderboard.help_experience.model.ExperienceUserData;
@@ -27,19 +26,22 @@ import java.util.concurrent.TimeUnit;
 public class HelpExperienceLeaderboardController extends CaffeineCache<Pair<Long, Integer>, List<ExperienceUserData>> {
 	private static final int PAGE_AMOUNT = 8;
 	private final JDA jda;
+	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
 	 *
 	 * @param jda The {@link JDA} instance to use.
+	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 */
 	@Autowired
-	public HelpExperienceLeaderboardController(final JDA jda) {
+	public HelpExperienceLeaderboardController(final JDA jda, HelpExperienceService helpExperienceService) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
 		this.jda = jda;
+		this.helpExperienceService = helpExperienceService;
 	}
 
 	/**
@@ -59,10 +61,9 @@ public class HelpExperienceLeaderboardController extends CaffeineCache<Pair<Long
 		if (guild == null) {
 			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
-		HelpExperienceService service = new HelpExperienceService(Bot.getDataSource());
 		List<ExperienceUserData> members = getCache().getIfPresent(new Pair<>(guild.getIdLong(), page));
 		if (members == null || members.isEmpty()) {
-			members = service.getTopAccounts(PAGE_AMOUNT, page).stream()
+			members = helpExperienceService.getTopAccounts(PAGE_AMOUNT, page).stream()
 					.map(p -> ExperienceUserData.of(p, jda.retrieveUserById(p.getUserId()).complete()))
 					.toList();
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);

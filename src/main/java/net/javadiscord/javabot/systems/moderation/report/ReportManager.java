@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.moderation.report;
 import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
 import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -20,10 +22,11 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +38,10 @@ import java.util.List;
  * Manages all interactions regarding the report-system.
  */
 @Slf4j
+@RequiredArgsConstructor
+@AutoDetectableComponentHandler({"resolve-report","report"})
 public class ReportManager implements ButtonHandler, ModalHandler {
+	private final BotConfig botConfig;
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
@@ -117,7 +123,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			return Responses.error(hook, "No report reason was provided.");
 		}
 		hook.getJDA().retrieveUserById(targetId).queue(target -> {
-			GuildConfig config = Bot.getConfig().get(hook.getInteraction().getGuild());
+			GuildConfig config = botConfig.get(hook.getInteraction().getGuild());
 			EmbedBuilder embed = buildReportEmbed(target, hook.getInteraction().getUser(), reason, hook.getInteraction().getChannel());
 			embed.setTitle(String.format("%s reported %s", hook.getInteraction().getUser().getName(), target.getName()));
 			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
@@ -143,7 +149,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 		event.getMessageChannel().retrieveMessageById(messageId).queue(target -> {
-			GuildConfig config = Bot.getConfig().get(event.getGuild());
+			GuildConfig config = botConfig.get(event.getGuild());
 			EmbedBuilder embed = buildReportEmbed(target.getAuthor(), event.getUser(), reason, event.getChannel());
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
@@ -182,8 +188,8 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				.addField("Reported by", reportedBy.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Reported on", String.format("<t:%s:F>", Instant.now().getEpochSecond()), false)
-				.addField("ID", String.format("```%s```", reported.getId()), true)
-				.addField("Reason", String.format("```%s```", reason), false)
+				.addField("ID", String.format("``` %s ```", reported.getId()), true)
+				.addField("Reason", String.format("``` %s ```", reason), false)
 				.setFooter(reportedBy.getAsTag(), reportedBy.getEffectiveAvatarUrl())
 				.setTimestamp(Instant.now());
 	}

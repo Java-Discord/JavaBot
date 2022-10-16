@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.h2db.MigrationUtils;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
@@ -25,10 +25,11 @@ import java.util.stream.Stream;
 public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param systemsConfig Configuration for various systems
 	 */
-	public MigrationsListSubcommand() {
+	public MigrationsListSubcommand(SystemsConfig systemsConfig) {
 		setSubcommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 

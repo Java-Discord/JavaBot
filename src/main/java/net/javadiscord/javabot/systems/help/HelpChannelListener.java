@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.help;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -7,35 +8,43 @@ import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.ExceptionLogger;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * This listener is responsible for handling messages that are sent in one or
  * more designated help channels.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class HelpChannelListener extends ListenerAdapter {
 
 	/**
 	 * A static Map that holds all messages that was sent in a specific reserved channel.
 	 */
-	public static Map<Long, List<Message>> reservationMessages = new HashMap<>();
+	public static final Map<Long, List<Message>> reservationMessages = new HashMap<>();
+
+	private final BotConfig botConfig;
+	private final ScheduledExecutorService asyncPool;
+	private final DbActions dbActions;
+	private final HelpExperienceService helpExperienceService;
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getChannelType() != ChannelType.TEXT) {
 			return;
 		}
-		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
+		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		TextChannel channel = event.getChannel().asTextChannel();
-		HelpChannelManager manager = new HelpChannelManager(config);
+		HelpChannelManager manager = new HelpChannelManager(botConfig, event.getGuild(),dbActions, asyncPool, helpExperienceService);
 
 		// If a message was sent in an open text channel, reserve it.
 		Category openChannelCategory = config.getOpenChannelCategory();

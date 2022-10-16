@@ -4,16 +4,23 @@ import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 
 /**
  * Dao class that represents the QOTW_QUESTION SQL Table.
  */
 @RequiredArgsConstructor
+@Repository
 public class QuestionQueueRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Inserts a single {@link QOTWQuestion}.
@@ -21,22 +28,18 @@ public class QuestionQueueRepository {
 	 * @param question The {@link QOTWQuestion} to insert.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void save(QOTWQuestion question) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement(
-				"INSERT INTO qotw_question (guild_id, created_by, text, priority) VALUES (?, ?, ?, ?)",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			stmt.setLong(1, question.getGuildId());
-			stmt.setLong(2, question.getCreatedBy());
-			stmt.setString(3, question.getText());
-			stmt.setInt(4, question.getPriority());
-			int rows = stmt.executeUpdate();
-			if (rows == 0) throw new SQLException("New question was not inserted.");
-			ResultSet rs = stmt.getGeneratedKeys();
-			if (rs.next()) {
-				question.setId(rs.getLong(1));
-			}
-		}
+	public void save(QOTWQuestion question) throws DataAccessException {
+		Number key = new SimpleJdbcInsert(jdbcTemplate)
+		.withTableName("qotw_question")
+		.usingColumns("guild_id","created_by","text","priority")
+		.usingGeneratedKeyColumns("id")
+		.executeAndReturnKey(Map.of(
+				"guild_id",question.getGuildId(),
+				"created_by",question.getCreatedBy(),
+				"text",question.getText(),
+				"priority",question.getPriority()
+				));
+		question.setId(key.longValue());
 	}
 
 	/**
@@ -46,15 +49,12 @@ public class QuestionQueueRepository {
 	 * @return The question as an {@link Optional}
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<QOTWQuestion> findByQuestionNumber(int questionNumber) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_question WHERE question_number = ?")) {
-			QOTWQuestion question = null;
-			s.setInt(1, questionNumber);
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				question = read(rs);
-			}
-			return Optional.ofNullable(question);
+	public Optional<QOTWQuestion> findByQuestionNumber(int questionNumber) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM qotw_question WHERE question_number = ?", (rs, row)->this.read(rs),
+					questionNumber));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -64,18 +64,17 @@ public class QuestionQueueRepository {
 	 * @return The next Question's week number as an integer.
 	 * @throws SQLException If an error occurs.
 	 */
-	public int getNextQuestionNumber() throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("""
-				SELECT question_number + 1
-				FROM qotw_question
-				WHERE used = TRUE AND question_number IS NOT NULL
-				ORDER BY created_at DESC LIMIT 1""")) {
-			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
-				return rs.getInt(1);
-			}
+	public int getNextQuestionNumber() throws DataAccessException {
+		try {
+			return jdbcTemplate.queryForObject("""
+					SELECT question_number + 1
+					FROM qotw_question
+					WHERE used = TRUE AND question_number IS NOT NULL
+					ORDER BY created_at DESC LIMIT 1""", (rs, row)->rs.getInt(1));
+		}catch (EmptyResultDataAccessException e) {
 			return 1;
 		}
+
 	}
 
 	/**
@@ -84,18 +83,15 @@ public class QuestionQueueRepository {
 	 * @param question The {@link QOTWQuestion} that should be marked as used.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void markUsed(QOTWQuestion question) throws SQLException {
+	public void markUsed(QOTWQuestion question) throws DataAccessException {
 		if (question.getQuestionNumber() == null) {
 			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
 		}
-		try (PreparedStatement stmt = con.prepareStatement("""
+		jdbcTemplate.update("""
 				UPDATE qotw_question
 				SET used = TRUE, question_number = ?
-				WHERE id = ?""")) {
-			stmt.setInt(1, question.getQuestionNumber());
-			stmt.setLong(2, question.getId());
-			stmt.executeUpdate();
-		}
+				WHERE id = ?""",
+				question.getQuestionNumber(), question.getId());
 	}
 
 	/**
@@ -107,19 +103,9 @@ public class QuestionQueueRepository {
 	 * @return A {@link List} containing the specified amount of {@link QOTWQuestion}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws SQLException {
-		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT ? OFFSET ?";
-		try (PreparedStatement stmt = con.prepareStatement(sql)) {
-			stmt.setLong(1, guildId);
-			stmt.setInt(2, size);
-			stmt.setInt(3, page);
-			ResultSet rs = stmt.executeQuery();
-			List<QOTWQuestion> questions = new ArrayList<>(size);
-			while (rs.next()) {
-				questions.add(this.read(rs));
-			}
-			return questions;
-		}
+	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT ? OFFSET ?", (rs, row)-> this.read(rs),
+				guildId, size, page);
 	}
 
 	/**
@@ -131,20 +117,9 @@ public class QuestionQueueRepository {
 	 * @return A {@link List} containing the specified amount (or less) of {@link QOTWQuestion} matching the query.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<QOTWQuestion> getUsedQuestionsWithQuery(long guildId, String query, int page, int size) throws SQLException {
-		String sql = "SELECT * FROM qotw_question WHERE guild_id = ? AND \"TEXT\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?";
-		try (PreparedStatement stmt = con.prepareStatement(sql)) {
-			stmt.setLong(1, guildId);
-			stmt.setString(2, "%" + query.toLowerCase() + "%");
-			stmt.setInt(3, size);
-			stmt.setInt(4, page);
-			ResultSet rs = stmt.executeQuery();
-			List<QOTWQuestion> questions = new ArrayList<>(size);
-			while (rs.next()) {
-				questions.add(this.read(rs));
-			}
-			return questions;
-		}
+	public List<QOTWQuestion> getUsedQuestionsWithQuery(long guildId, String query, int page, int size) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM qotw_question WHERE guild_id = ? AND \"TEXT\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?", (rs, rows)->this.read(rs),
+				guildId, "%" + query.toLowerCase() + "%", size, page);
 	}
 
 	/**
@@ -154,22 +129,18 @@ public class QuestionQueueRepository {
 	 * @return The next {@link QOTWQuestion} as an {@link Optional}
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("""
-				SELECT *
-				FROM qotw_question
-				WHERE guild_id = ? AND used = FALSE
-				ORDER BY priority DESC, created_at
-				LIMIT 1""")) {
-			stmt.setLong(1, guildId);
-			ResultSet rs = stmt.executeQuery();
-			Optional<QOTWQuestion> optionalQuestion;
-			if (rs.next()) {
-				optionalQuestion = Optional.of(this.read(rs));
-			} else {
-				optionalQuestion = Optional.empty();
-			}
-			return optionalQuestion;
+	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("""
+					SELECT *
+					FROM qotw_question
+					WHERE guild_id = ? AND used = FALSE
+					ORDER BY priority DESC, created_at
+					LIMIT 1""",
+					(rs, rows)->this.read(rs),
+					guildId));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -181,13 +152,9 @@ public class QuestionQueueRepository {
 	 * @return Whether the {@link QOTWQuestion} was actually removed.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean removeQuestion(long guildId, long id) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("DELETE FROM qotw_question WHERE guild_id = ? AND id = ?")) {
-			stmt.setLong(1, guildId);
-			stmt.setLong(2, id);
-			int rows = stmt.executeUpdate();
-			return rows > 0;
-		}
+	public boolean removeQuestion(long guildId, long id) throws DataAccessException {
+		return jdbcTemplate.update("DELETE FROM qotw_question WHERE guild_id = ? AND id = ?",
+				guildId, id) > 0;
 	}
 
 	private QOTWQuestion read(ResultSet rs) throws SQLException {

@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.Responses;
@@ -25,10 +24,14 @@ import java.util.List;
  * <h3>This class represents the /preferences set command.</h3>
  */
 public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements AutoCompletable {
+	private final UserPreferenceService service;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param service The {@link UserPreferenceService}
 	 */
-	public PreferencesSetSubcommand() {
+	public PreferencesSetSubcommand(UserPreferenceService service) {
+		this.service = service;
 		setSubcommandData(new SubcommandData("set", "Allows you to set your preferences!")
 				.addOptions(
 						new OptionData(OptionType.INTEGER, "preference", "The preference to set.", true)
@@ -54,8 +57,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements
 			).queue();
 			return;
 		}
-		UserPreferenceService manager = new UserPreferenceService(Bot.getDataSource());
-		if (manager.setOrCreate(event.getUser().getIdLong(), preference, state)) {
+		if (service.setOrCreate(event.getUser().getIdLong(), preference, state)) {
 			Responses.info(event, "Preference Updated", "Successfully set %s to `%s`!", preference, state).queue();
 		} else {
 			Responses.error(event, "Could not set %s to `%s`.", preference, state).queue();

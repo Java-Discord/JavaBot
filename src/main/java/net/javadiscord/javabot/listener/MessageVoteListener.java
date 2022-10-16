@@ -9,15 +9,27 @@ import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.StringUtils;
+
+import java.util.concurrent.ExecutorService;
+
 import org.jetbrains.annotations.NotNull;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Generic listener that can be extended to add the ability for users to vote
  * on whether a message should stay in the channel.
  */
+@RequiredArgsConstructor
 public abstract class MessageVoteListener extends ListenerAdapter {
+	/**
+	 * The main configuration of the bot.
+	 */
+	protected final BotConfig botConfig;
+	private final ExecutorService asyncPool;
+
 	/**
 	 * Gets the text channel in which this vote listener operates.
 	 *
@@ -62,7 +74,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @return The emote.
 	 */
 	protected Emoji getUpvoteEmote(JDA jda) {
-		return Bot.getConfig().getSystems().getEmojiConfig().getUpvoteEmote(jda);
+		return botConfig.getSystems().getEmojiConfig().getUpvoteEmote(jda);
 	}
 
 	/**
@@ -72,7 +84,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @return The emote.
 	 */
 	protected Emoji getDownvoteEmote(JDA jda) {
-		return Bot.getConfig().getSystems().getEmojiConfig().getDownvoteEmote(jda);
+		return botConfig.getSystems().getEmojiConfig().getDownvoteEmote(jda);
 	}
 
 	/**
@@ -96,12 +108,12 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-		Bot.getAsyncPool().submit(() -> handleReactionEvent(event));
+		asyncPool.submit(() -> handleReactionEvent(event));
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
-		Bot.getAsyncPool().submit(() -> handleReactionEvent(event));
+		asyncPool.submit(() -> handleReactionEvent(event));
 	}
 
 	/**

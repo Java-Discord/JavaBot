@@ -4,21 +4,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 
 /**
  * Dao class that represents the HELP_TRANSACTION SQL Table.
  */
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class HelpTransactionRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Inserts a new {@link HelpTransaction}.
@@ -27,21 +32,19 @@ public class HelpTransactionRepository {
 	 * @return The inserted {@link HelpTransaction}.
 	 * @throws SQLException If an error occurs.
 	 */
-	public HelpTransaction save(HelpTransaction transaction) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("INSERT INTO help_transaction (recipient, weight, messageType) VALUES ( ?, ?, ? )")) {
-			s.setLong(1, transaction.getRecipient());
-			s.setDouble(2, transaction.getWeight());
-			if (transaction.getMessage() != null) {
-				s.setInt(3, transaction.getMessageType());
-			}
-			s.executeUpdate();
-			ResultSet rs = s.getGeneratedKeys();
-			if (rs.next()) {
-				transaction.setId(rs.getLong(1));
-			}
-			log.info("Inserted new Help Transaction: {}", transaction);
-			return transaction;
-		}
+	public HelpTransaction save(HelpTransaction transaction) throws DataAccessException {
+		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+		.withTableName("help_transaction")
+		.usingColumns("recipient","weight","messageType")
+		.usingGeneratedKeyColumns("id");
+		Number key = simpleJdbcInsert.executeAndReturnKey(Map.of(
+					"recipient",transaction.getRecipient(),
+					"weight",transaction.getWeight(),
+					"messageType",transaction.getMessageType())
+				);
+		transaction.setId(key.longValue());
+		log.info("Inserted new Help Transaction: {}", transaction);
+		return transaction;
 	}
 
 	/**
@@ -51,15 +54,11 @@ public class HelpTransactionRepository {
 	 * @return A {@link HelpTransaction} object.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<HelpTransaction> getTransaction(long id) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM help_transaction WHERE id = ?")) {
-			stmt.setLong(1, id);
-			ResultSet rs = stmt.executeQuery();
-			HelpTransaction transaction = null;
-			if (rs.next()) {
-				transaction = this.read(rs);
-			}
-			return Optional.ofNullable(transaction);
+	public Optional<HelpTransaction> getTransaction(long id) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM help_transaction WHERE id = ?", (rs, row)->this.read(rs), id));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -71,17 +70,8 @@ public class HelpTransactionRepository {
 	 * @return A List with all {@link HelpTransaction}s.
 	 * @throws SQLException If an error occurs.
 	 */
-	public List<HelpTransaction> getTransactions(long userId, int count) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM help_transaction WHERE recipient = ? ORDER BY created_at DESC LIMIT ?")) {
-			s.setLong(1, userId);
-			s.setInt(2, count);
-			ResultSet rs = s.executeQuery();
-			List<HelpTransaction> transactions = new ArrayList<>(count);
-			while (rs.next()) {
-				transactions.add(this.read(rs));
-			}
-			return transactions;
-		}
+	public List<HelpTransaction> getTransactions(long userId, int count) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM help_transaction WHERE recipient = ? ORDER BY created_at DESC LIMIT ?", (rs, rowNumber) -> this.read(rs), userId, count);
 	}
 
 	private HelpTransaction read(ResultSet rs) throws SQLException {

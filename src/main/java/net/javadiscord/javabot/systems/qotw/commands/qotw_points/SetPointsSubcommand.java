@@ -6,26 +6,36 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 /**
  * <h3>This class represents the /qotw account set command.</h3>
  * This Subcommand allows staff-members to edit the QOTW-Point amount of any user.
  */
 public class SetPointsSubcommand extends SlashCommand.Subcommand {
+	private final QOTWPointsService service;
+	private final DataSource dataSource;
+	private final QuestionPointsRepository qotwPointsRepository;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param service The {@link QOTWPointsService}
+	 * @param dataSource A factory for connections to the main database
+	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
 	 */
-	public SetPointsSubcommand() {
+	public SetPointsSubcommand(QOTWPointsService service, DataSource dataSource, QuestionPointsRepository qotwPointsRepository) {
+		this.service = service;
+		this.dataSource = dataSource;
+		this.qotwPointsRepository = qotwPointsRepository;
 		setSubcommandData(new SubcommandData("set", "Allows to modify the QOTW-Points of a single user.")
 				.addOption(OptionType.USER, "user", "The user whose points should be changed.", true)
 				.addOption(OptionType.INTEGER, "points", "The amount of points.", true)
@@ -42,15 +52,13 @@ public class SetPointsSubcommand extends SlashCommand.Subcommand {
 		}
 		Member member = memberMapping.getAsMember();
 		long points = pointsMapping.getAsLong();
-		try (Connection con = Bot.getDataSource().getConnection()) {
-			QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
+		try {
 			QOTWAccount account = service.getOrCreateAccount(member.getIdLong());
 			account.setPoints(points);
-			QuestionPointsRepository repo = new QuestionPointsRepository(con);
-			repo.update(account);
+			qotwPointsRepository.update(account);
 			Responses.success(event, "Set QOTW-Points",
 					String.format("Successfully changed the points of %s to %s", member.getUser().getAsMention(), points)).queue();
-		} catch (SQLException e) {
+		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			Responses.error(event, "An Error occurred. Please try again.").queue();
 		}

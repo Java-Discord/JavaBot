@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
@@ -22,10 +21,18 @@ import java.time.Instant;
  * This Subcommand allows staff-members to increment the QOTW-Account of any user.
  */
 public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
+
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param pointsService The {@link QOTWPointsService}
+	 * @param notificationService The {@link NotificationService}
 	 */
-	public IncrementPointsSubcommand() {
+	public IncrementPointsSubcommand(QOTWPointsService pointsService, NotificationService notificationService) {
+		this.pointsService = pointsService;
+		this.notificationService = notificationService;
 		setSubcommandData(new SubcommandData("increment", "Adds one point to the user's QOTW-Account")
 				.addOption(OptionType.USER, "user", "The user whose points should be incremented.", true)
 		);
@@ -44,22 +51,20 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply().queue();
-		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
-		long points = service.increment(member.getIdLong());
+		long points = pointsService.increment(member.getIdLong());
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
-		NotificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
-		NotificationService.withQOTW(event.getGuild(), member.getUser()).sendAccountIncrementedNotification();
+		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+		notificationService.withQOTW(event.getGuild(), member.getUser()).sendAccountIncrementedNotification();
 		event.getHook().sendMessageEmbeds(embed).queue();
 	}
 
 	private @NotNull MessageEmbed buildIncrementEmbed(@NotNull User user, long points) {
-		QOTWPointsService service = new QOTWPointsService(Bot.getDataSource());
 		return new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Account Incremented")
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.addField("Total QOTW-Points", "```" + points + "```", true)
-				.addField("Rank", "```#" + service.getQOTWRank(user.getIdLong()) + "```", true)
+				.addField("Rank", "```#" + pointsService.getQOTWRank(user.getIdLong()) + "```", true)
 				.setFooter("ID: " + user.getId())
 				.setTimestamp(Instant.now())
 				.build();

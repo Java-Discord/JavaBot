@@ -1,39 +1,40 @@
 package net.javadiscord.javabot.systems.qotw.dao;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Dao class that represents the QOTW_POINTS SQL Table.
  */
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class QuestionPointsRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Inserts a new {@link QOTWAccount} if none exists.
 	 *
 	 * @param account The account to insert.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public void insert(QOTWAccount account) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			stmt.setLong(1, account.getUserId());
-			stmt.setLong(2, account.getPoints());
-			int rows = stmt.executeUpdate();
-			if (rows == 0) throw new SQLException("User was not inserted.");
-			log.info("Inserted new QOTW-Account: {}", account);
-		}
+	public void insert(QOTWAccount account) throws DataAccessException {
+		int rows = jdbcTemplate.update("INSERT INTO qotw_points (user_id, points) VALUES (?, ?)",
+				account.getUserId(),account.getPoints());
+		if (rows == 0) throw new DataAccessException("User was not inserted.") {};
+		log.info("Inserted new QOTW-Account: {}", account);
 	}
 
 	/**
@@ -41,17 +42,13 @@ public class QuestionPointsRepository {
 	 *
 	 * @param userId The discord Id of the user.
 	 * @return The {@link QOTWAccount} object.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public Optional<QOTWAccount> getByUserId(long userId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points WHERE user_id = ?")) {
-			s.setLong(1, userId);
-			QOTWAccount account = null;
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				account = read(rs);
-			}
-			return Optional.ofNullable(account);
+	public Optional<QOTWAccount> getByUserId(long userId) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM qotw_points WHERE user_id = ?", (rs, row)->this.read(rs),userId));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -60,31 +57,21 @@ public class QuestionPointsRepository {
 	 *
 	 * @param account The updated QOTW Account.
 	 * @return Whether the update affected rows.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public boolean update(@NotNull QOTWAccount account) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("UPDATE qotw_points SET points = ? WHERE user_id = ?")) {
-			s.setLong(1, account.getPoints());
-			s.setLong(2, account.getUserId());
-			return s.executeUpdate() > 0;
-		}
+	public boolean update(@NotNull QOTWAccount account) throws DataAccessException {
+		return jdbcTemplate.update("UPDATE qotw_points SET points = ? WHERE user_id = ?",
+				account.getPoints(), account.getUserId()) > 0;
 	}
 
 	/**
 	 * Gets all {@link QOTWAccount} and sorts them by their points.
 	 *
 	 * @return A {@link List} that contains all {@link QOTWAccount}s sorted by their points.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public List<QOTWAccount> sortByPoints() throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM qotw_points ORDER BY points DESC")) {
-			ResultSet rs = s.executeQuery();
-			List<QOTWAccount> accounts = new ArrayList<>();
-			while (rs.next()) {
-				accounts.add(read(rs));
-			}
-			return accounts;
-		}
+	public List<QOTWAccount> sortByPoints() throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM qotw_points ORDER BY points DESC", (rs, row)->this.read(rs));
 	}
 
 	/**
@@ -93,19 +80,11 @@ public class QuestionPointsRepository {
 	 * @param page    The page.
 	 * @param size    The amount of {@link QOTWAccount}s to return.
 	 * @return A {@link List} containing the specified amount of {@link QOTWAccount}s.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public List<QOTWAccount> getTopAccounts(int page, int size) throws SQLException {
-		try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM qotw_points WHERE points > 0 ORDER BY points DESC LIMIT ? OFFSET ?")) {
-			stmt.setInt(1, size);
-			stmt.setInt(2, Math.max(0, (page * size) - size));
-			ResultSet rs = stmt.executeQuery();
-			List<QOTWAccount> accounts = new ArrayList<>(size);
-			while (rs.next()) {
-				accounts.add(read(rs));
-			}
-			return accounts;
-		}
+	public List<QOTWAccount> getTopAccounts(int page, int size) throws DataAccessException {
+		return jdbcTemplate.query("SELECT * FROM qotw_points WHERE points > 0 ORDER BY points DESC LIMIT ? OFFSET ?", (rs,row)->this.read(rs),
+				size, Math.max(0, (page * size) - size));
 	}
 
 	/**

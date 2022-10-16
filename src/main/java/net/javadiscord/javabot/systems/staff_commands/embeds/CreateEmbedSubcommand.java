@@ -21,6 +21,8 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
@@ -32,11 +34,16 @@ import java.util.List;
 /**
  * This class represents the `/embed create` command.
  */
+@AutoDetectableComponentHandler("embed-create")
 public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements ModalHandler {
+	private final BotConfig botConfig;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public CreateEmbedSubcommand() {
+	public CreateEmbedSubcommand(BotConfig botConfig) {
+		this.botConfig = botConfig;
 		setSubcommandData(new SubcommandData("create", "Creates a new basic embed message.")
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "What channel should the embed be sent to?", false)
@@ -51,8 +58,8 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		if (!Checks.hasStaffRole(event.getGuild(), event.getMember())) {
-			Responses.replyStaffOnly(event, event.getGuild()).queue();
+		if (!Checks.hasStaffRole(botConfig, event.getMember())) {
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		GuildMessageChannel channel = event.getOption("channel", event.getChannel().asGuildMessageChannel(), m -> m.getAsChannel().asGuildMessageChannel());

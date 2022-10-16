@@ -2,21 +2,26 @@ package net.javadiscord.javabot.systems.moderation.warn.dao;
 
 import lombok.RequiredArgsConstructor;
 import net.javadiscord.javabot.systems.moderation.warn.model.Warn;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * DAO for interacting with the set of {@link Warn} objects.
  */
 @RequiredArgsConstructor
+@Repository
 public class WarnRepository {
-	private final Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Inserts a new warn into the database.
@@ -25,22 +30,20 @@ public class WarnRepository {
 	 * @return The warn that was saved.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Warn insert(@NotNull Warn warn) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement(
-				"INSERT INTO warn (user_id, warned_by, severity, severity_weight, reason) VALUES (?, ?, ?, ?, ?)",
-				Statement.RETURN_GENERATED_KEYS
-		)) {
-			s.setLong(1, warn.getUserId());
-			s.setLong(2, warn.getWarnedBy());
-			s.setString(3, warn.getSeverity());
-			s.setInt(4, warn.getSeverityWeight());
-			s.setString(5, warn.getReason());
-			s.executeUpdate();
-			ResultSet rs = s.getGeneratedKeys();
-			if (!rs.next()) throw new SQLException("No generated keys returned.");
-			long id = rs.getLong(1);
-			return findById(id).orElseThrow();
-		}
+	public Warn insert(@NotNull Warn warn) throws DataAccessException {
+		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+				.withTableName("warn")
+				.usingColumns("user_id","warned_by","severity","severity_weight","reason")
+				.usingGeneratedKeyColumns("id");
+				Number key = simpleJdbcInsert.executeAndReturnKey(Map.of(
+							"user_id",warn.getUserId(),
+							"warned_by",warn.getWarnedBy(),
+							"severity",warn.getSeverity(),
+							"severity_weight",warn.getSeverityWeight(),
+							"reason",warn.getReason())
+						);
+				long id = key.longValue();
+				return findById(id).orElseThrow();
 	}
 
 	/**
@@ -50,17 +53,12 @@ public class WarnRepository {
 	 * @return The warn, if it was found.
 	 * @throws SQLException If an error occurs.
 	 */
-	public Optional<Warn> findById(long id) throws SQLException {
-		Warn warn = null;
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM warn WHERE id = ?")) {
-			s.setLong(1, id);
-			ResultSet rs = s.executeQuery();
-			if (rs.next()) {
-				warn = read(rs);
-			}
-			rs.close();
+	public Optional<Warn> findById(long id) throws DataAccessException {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM warn WHERE id = ?", (rs, row)->read(rs),id));
+		}catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
 		}
-		return Optional.ofNullable(warn);
 	}
 
 	/**
@@ -72,17 +70,12 @@ public class WarnRepository {
 	 * @return The total weight of all warn severities.
 	 * @throws SQLException If an error occurs.
 	 */
-	public int getTotalSeverityWeight(long userId, LocalDateTime cutoff) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("SELECT SUM(severity_weight) FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?")) {
-			s.setLong(1, userId);
-			s.setTimestamp(2, Timestamp.valueOf(cutoff));
-			ResultSet rs = s.executeQuery();
-			int sum = 0;
-			if (rs.next()) {
-				sum = rs.getInt(1);
-			}
-			rs.close();
-			return sum;
+	public int getTotalSeverityWeight(long userId, LocalDateTime cutoff) throws DataAccessException {
+		try {
+			return jdbcTemplate.queryForObject("SELECT SUM(severity_weight) FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?", (rs, rows)->rs.getInt(1),
+					userId, Timestamp.valueOf(cutoff));
+		}catch (EmptyResultDataAccessException e) {
+			return 0;
 		}
 	}
 
@@ -92,13 +85,11 @@ public class WarnRepository {
 	 * @param userId The id of the user to discard warnings for.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void discardAll(long userId) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("""
+	public void discardAll(long userId) throws DataAccessException {
+		jdbcTemplate.update("""
 				UPDATE warn SET discarded = TRUE
-				WHERE user_id = ?""")) {
-			s.setLong(1, userId);
-			s.executeUpdate();
-		}
+				WHERE user_id = ?""",
+				userId);
 	}
 
 	/**
@@ -107,13 +98,11 @@ public class WarnRepository {
 	 * @param id The id of the Warn to discard.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void discardById(long id) throws SQLException {
-		try (PreparedStatement s = con.prepareStatement("""
+	public void discardById(long id) throws DataAccessException {
+		jdbcTemplate.update("""
 				UPDATE warn SET discarded = TRUE
-				WHERE id = ?""")) {
-			s.setLong(1, id);
-			s.executeUpdate();
-		}
+				WHERE id = ?""",
+				id);
 	}
 
 	/**
@@ -145,17 +134,7 @@ public class WarnRepository {
 	 * @return A List with all Warns.
 	 */
 	public List<Warn> getWarnsByUserId(long userId, LocalDateTime cutoff) {
-		List<Warn> warns = new ArrayList<>();
-		try (PreparedStatement s = con.prepareStatement("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?")) {
-			s.setLong(1, userId);
-			s.setTimestamp(2, Timestamp.valueOf(cutoff));
-			ResultSet rs = s.executeQuery();
-			while (rs.next()) warns.add(read(rs));
-			rs.close();
-			return warns;
-		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-			return List.of();
-		}
+		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?",(rs, row)->this.read(rs),
+				userId, Timestamp.valueOf(cutoff));
 	}
 }

@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.io.IOException;
@@ -16,6 +16,9 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+
+import javax.sql.DataSource;
 
 /**
  * <h3>This class represents the /db-admin export-schema command.</h3>
@@ -25,13 +28,21 @@ import java.sql.SQLException;
 public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 	private static final Path SCHEMA_FILE = Path.of("___schema.sql");
 
+	private final ExecutorService asyncPool;
+	private final DataSource dataSource;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param botConfig The main configuration of the bot
+	 * @param dataSource A factory for connections to the main database
 	 */
-	public ExportSchemaSubcommand() {
+	public ExportSchemaSubcommand(ExecutorService asyncPool, BotConfig botConfig, DataSource dataSource) {
+		this.asyncPool = asyncPool;
+		this.dataSource = dataSource;
 		setSubcommandData(new SubcommandData("export-schema", "(ADMIN ONLY) Exports the bot's schema.")
 				.addOption(OptionType.BOOLEAN, "include-data", "Should data be included in the export?"));
-		requireUsers(Bot.getConfig().getSystems().getAdminConfig().getAdminUsers());
+		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 		requirePermissions(Permission.MANAGE_SERVER);
 	}
 
@@ -39,8 +50,8 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 	public void execute(SlashCommandInteractionEvent event) {
 		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		event.deferReply(false).queue();
-		Bot.getAsyncPool().submit(() -> {
-			try (Connection con = Bot.getDataSource().getConnection()) {
+		asyncPool.submit(() -> {
+			try (Connection con = dataSource.getConnection()) {
 				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
 				boolean success = stmt.execute();
 				if (!success) {

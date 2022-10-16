@@ -1,6 +1,8 @@
 package net.javadiscord.javabot.systems.staff_commands.tags;
 
 import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -13,9 +15,10 @@ import net.javadiscord.javabot.systems.staff_commands.tags.dao.CustomTagReposito
 import net.javadiscord.javabot.systems.staff_commands.tags.model.CustomTag;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
  * basically customizable Slash Commands.
  */
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class CustomTagManager {
 	private static final Map<Long, Set<CustomTag>> LOADED_TAGS;
 
@@ -32,19 +37,8 @@ public class CustomTagManager {
 		LOADED_TAGS = new HashMap<>();
 	}
 
-	private final JDA jda;
 	private final DataSource dataSource;
-
-	/**
-	 * The constructor of this class.
-	 *
-	 * @param jda        The {@link JDA} instance.
-	 * @param dataSource The {@link DataSource} which is used to make connections to the database.
-	 */
-	public CustomTagManager(@NotNull JDA jda, @NotNull DataSource dataSource) {
-		this.jda = jda;
-		this.dataSource = dataSource;
-	}
+	private final CustomTagRepository customTagRepository;
 
 	/**
 	 * Cleans the given String by removing all whitespaces and slashes, so it can be used for custom tags.
@@ -110,10 +104,10 @@ public class CustomTagManager {
 
 	/**
 	 * Iterates through all guilds and loads their corresponding {@link CustomTag}s.
-	 *
+	 * @param jda The main {@link JDA} instance
 	 * @throws SQLException If an error occurs.
 	 */
-	public void init() throws SQLException {
+	public void init(JDA jda) throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			Set<CustomTag> tags = LOADED_TAGS.put(guild.getIdLong(), getCustomTags(guild.getIdLong()));
 			if (tags != null && !tags.isEmpty()) {
@@ -131,11 +125,8 @@ public class CustomTagManager {
 	 * @throws SQLException If an error occurs.
 	 */
 	@Contract("_ -> new")
-	private @NotNull Set<CustomTag> getCustomTags(long guildId) throws SQLException {
-		try (Connection con = dataSource.getConnection()) {
-			CustomTagRepository repo = new CustomTagRepository(con);
-			return new HashSet<>(repo.getCustomTagsByGuildId(guildId));
-		}
+	private @NotNull Set<CustomTag> getCustomTags(long guildId) throws DataAccessException {
+		return new HashSet<>(customTagRepository.getCustomTagsByGuildId(guildId));
 	}
 
 	/**
@@ -169,18 +160,15 @@ public class CustomTagManager {
 	 * @return Whether the command was successfully created/added.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean addCommand(@NotNull Guild guild, @NotNull CustomTag tag) throws SQLException {
+	public boolean addCommand(@NotNull Guild guild, @NotNull CustomTag tag) throws DataAccessException {
 		if (doesTagExist(guild.getIdLong(), tag.getName())) {
 			return false;
 		}
-		try (Connection con = dataSource.getConnection()) {
-			CustomTagRepository repo = new CustomTagRepository(con);
-			Set<CustomTag> tags = new HashSet<>(LOADED_TAGS.get(guild.getIdLong()));
-			tags.add(tag);
-			LOADED_TAGS.put(guild.getIdLong(), tags);
-			log.info("Created Custom Tag in guild \"{}\": {}", guild.getName(), tag.getName());
-			return repo.insert(tag) != null;
-		}
+		Set<CustomTag> tags = new HashSet<>(LOADED_TAGS.get(guild.getIdLong()));
+		tags.add(tag);
+		LOADED_TAGS.put(guild.getIdLong(), tags);
+		log.info("Created Custom Tag in guild \"{}\": {}", guild.getName(), tag.getName());
+		return customTagRepository.insert(tag) != null;
 	}
 
 	/**
@@ -191,16 +179,13 @@ public class CustomTagManager {
 	 * @return Whether the command was successfully deleted.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean removeCommand(long guildId, @NotNull CustomTag tag) throws SQLException {
+	public boolean removeCommand(long guildId, @NotNull CustomTag tag) throws DataAccessException {
 		if (!doesTagExist(guildId, tag.getName())) {
 			return false;
 		}
-		try (Connection con = dataSource.getConnection()) {
-			CustomTagRepository repo = new CustomTagRepository(con);
-			repo.delete(tag);
-			LOADED_TAGS.put(guildId, new HashSet<>(getCustomTags(guildId)));
-			log.info("Deleted Custom Tag in guild \"{}\": {}", guildId, tag);
-		}
+		customTagRepository.delete(tag);
+		LOADED_TAGS.put(guildId, new HashSet<>(getCustomTags(guildId)));
+		log.info("Deleted Custom Tag in guild \"{}\": {}", guildId, tag);
 		return true;
 	}
 
@@ -213,17 +198,14 @@ public class CustomTagManager {
 	 * @return Whether the command was successfully edited.
 	 * @throws SQLException If an error occurs.
 	 */
-	public boolean editCommand(long guildId, @NotNull CustomTag old, @NotNull CustomTag update) throws SQLException {
+	public boolean editCommand(long guildId, @NotNull CustomTag old, @NotNull CustomTag update) throws DataAccessException {
 		if (!doesTagExist(guildId, old.getName())) {
 			return false;
 		}
-		try (Connection con = dataSource.getConnection()) {
-			CustomTagRepository repo = new CustomTagRepository(con);
-			repo.edit(old, update);
-			LOADED_TAGS.put(guildId, new HashSet<>(getCustomTags(guildId)));
-			log.info("Edited Custom Tag in guild \"{}\": {} -> {}", guildId, old, update);
-			return true;
-		}
+		customTagRepository.edit(old, update);
+		LOADED_TAGS.put(guildId, new HashSet<>(getCustomTags(guildId)));
+		log.info("Edited Custom Tag in guild \"{}\": {} -> {}", guildId, old, update);
+		return true;
 	}
 
 	/**

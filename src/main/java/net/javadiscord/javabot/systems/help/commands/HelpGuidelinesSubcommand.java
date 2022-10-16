@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.javadiscord.javabot.Bot;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringResourceCache;
@@ -17,16 +17,20 @@ import java.util.stream.Collectors;
  * Shows the server's help-guidelines.
  */
 public class HelpGuidelinesSubcommand extends SlashCommand.Subcommand {
+	private final BotConfig botConfig;
+
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The main configuration of the bot
 	 */
-	public HelpGuidelinesSubcommand() {
+	public HelpGuidelinesSubcommand(BotConfig botConfig) {
+		this.botConfig = botConfig;
 		setSubcommandData(new SubcommandData("guidelines", "Show the server's help guidelines in a simple format."));
 	}
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
-		HelpConfig config = Bot.getConfig().get(event.getGuild()).getHelpConfig();
+		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		String channels = "N/A";
 		if (config.getOpenChannelCategory() != null) {
 			channels = config.getOpenChannelCategory().getChannels()

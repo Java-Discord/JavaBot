@@ -11,13 +11,16 @@ public class SelfRoleCommand extends SlashCommand {
 	/**
 	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.Subcommand}s.
+	 * @param createSelfRoleSubcommand /self-role create
+	 * @param changeSelfRoleStatusSubcommand /self-role status
+	 * @param removeSelfRolesSubcommand /self-role remove-all
 	 */
-	public SelfRoleCommand() {
+	public SelfRoleCommand(CreateSelfRoleSubcommand createSelfRoleSubcommand, ChangeSelfRoleStatusSubcommand changeSelfRoleStatusSubcommand, RemoveSelfRolesSubcommand removeSelfRolesSubcommand) {
 		setSlashCommandData(Commands.slash("self-role", "Administrative Commands for managing Self Roles.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
-		addSubcommands(new CreateSelfRoleSubcommand(), new ChangeSelfRoleStatusSubcommand(), new RemoveSelfRolesSubcommand());
+		addSubcommands(createSelfRoleSubcommand, changeSelfRoleStatusSubcommand, removeSelfRolesSubcommand);
 	}
 }
 

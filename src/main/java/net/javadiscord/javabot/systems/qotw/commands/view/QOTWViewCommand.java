@@ -12,13 +12,16 @@ public class QOTWViewCommand extends SlashCommand {
 	/**
 	 * This classes constructor which sets the {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData} and
 	 * adds the corresponding {@link net.dv8tion.jda.api.interactions.commands.Command.SubcommandGroup}s.
+	 * @param qotwQuerySubcommand /qotw-view query
+	 * @param qotwListAnswersSubcommand /qotw-view list-answers
+	 * @param qotwViewAnswerSubcommand /qotw-view answer
 	 */
-	public QOTWViewCommand() {
+	public QOTWViewCommand(QOTWQuerySubcommand qotwQuerySubcommand, QOTWListAnswersSubcommand qotwListAnswersSubcommand, QOTWViewAnswerSubcommand qotwViewAnswerSubcommand) {
 		setSlashCommandData(Commands.slash("qotw-view", "Query 'Questions of the Week' and their answers")
 				.setDefaultPermissions(DefaultMemberPermissions.ENABLED)
 				.setGuildOnly(true)
 		);
-		addSubcommands(new QOTWQuerySubcommand(), new QOTWListAnswersSubcommand(), new QOTWViewAnswerSubcommand());
+		addSubcommands(qotwQuerySubcommand, qotwListAnswersSubcommand, qotwViewAnswerSubcommand);
 
 	}
 }

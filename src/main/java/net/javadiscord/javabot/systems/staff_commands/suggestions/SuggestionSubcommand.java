@@ -1,6 +1,7 @@
 package net.javadiscord.javabot.systems.staff_commands.suggestions;
 
 import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -8,8 +9,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
-import net.javadiscord.javabot.Bot;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
@@ -21,14 +22,20 @@ import javax.annotation.Nonnull;
  * Abstract parent class for all Suggestion subcommands, which handles the standard
  * behavior of retrieving the {@link Message} by its given id.
  */
+@RequiredArgsConstructor
 public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The main configuration of the bot.
+	 */
+	protected final BotConfig botConfig;
+
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		if (event.getGuild() == null) {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		GuildConfig config = Bot.getConfig().get(event.getGuild());
+		GuildConfig config = botConfig.get(event.getGuild());
 		TextChannel suggestionChannel = config.getModerationConfig().getSuggestionChannel();
 		if (event.getChannelType() != ChannelType.TEXT || !event.getChannel().asTextChannel().equals(suggestionChannel)) {
 			Responses.warning(event, "This command can only be used in " + suggestionChannel.getAsMention()).queue();
