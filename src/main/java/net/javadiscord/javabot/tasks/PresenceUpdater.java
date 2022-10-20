@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.javadiscord.javabot.annotations.PreRegisteredListener;
 
 import javax.annotation.Nonnull;
 
@@ -25,6 +26,7 @@ import java.util.function.Function;
  * will automatically begin operation when the bot gives the ready event.
  * </p>
  */
+@PreRegisteredListener
 public class PresenceUpdater extends ListenerAdapter {
 	/**
 	 * The executor that is responsible for the scheduled updates of the bot's

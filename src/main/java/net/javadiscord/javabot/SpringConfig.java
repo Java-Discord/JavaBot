@@ -1,12 +1,14 @@
 package net.javadiscord.javabot;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,10 +26,10 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.javadiscord.javabot.annotations.PreRegisteredListener;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.listener.StateListener;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 
 /**
@@ -64,20 +66,20 @@ public class SpringConfig {
 	/**
 	 * Initializes the {@link JDA} instances.
 	 * @param botConfig the main configuration of the bot
-	 * @param stateListener The {@link StateListener} which is listening for JDA lifecycle events and needs to be added before JDA is fully initialized
-	 * @param presenceUpdater A {@link ListenerAdapter} responsible for updating the status/(rich) presence of the bot
+	 * @param ctx the Spring application context used for obtaining all listeners
 	 * @return the initialized {@link JDA} object
 	 * @throws LoginException if the token is invalid
 	 */
 	@Bean
-	public JDA jda(BotConfig botConfig, StateListener stateListener, PresenceUpdater presenceUpdater) throws LoginException {
+	public JDA jda(BotConfig botConfig, ApplicationContext ctx) throws LoginException {
+		Collection<Object> listeners = ctx.getBeansWithAnnotation(PreRegisteredListener.class).values();
 		return JDABuilder.createDefault(botConfig.getSystems().getJdaBotToken())
 			.setStatus(OnlineStatus.DO_NOT_DISTURB)
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.setMemberCachePolicy(MemberCachePolicy.ALL)
 			.enableCache(CacheFlag.ACTIVITY)
 			.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.MESSAGE_CONTENT)
-			.addEventListeners(stateListener, presenceUpdater)
+			.addEventListeners(listeners.toArray())
 			.build();
 	}
 

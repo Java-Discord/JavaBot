@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;

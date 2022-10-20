@@ -12,10 +12,10 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
-import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;

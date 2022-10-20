@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems;
+package net.javadiscord.javabot.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

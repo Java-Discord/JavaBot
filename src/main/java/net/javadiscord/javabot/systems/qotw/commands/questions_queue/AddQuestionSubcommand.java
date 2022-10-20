@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
-import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
