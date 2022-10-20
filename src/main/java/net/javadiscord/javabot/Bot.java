@@ -42,7 +42,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 @SpringBootApplication
 @ComponentScan(
 	includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SlashCommand.class, ContextCommand.class, ListenerAdapter.class, Subcommand.class }),
-	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = {PresenceUpdater.class})
+	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = PresenceUpdater.class)
 )
 @EnableScheduling
 @RequiredArgsConstructor
