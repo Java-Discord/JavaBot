@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.messages.MessageRequest;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.listener.StateListener;
 import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -41,7 +42,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 @SpringBootApplication
 @ComponentScan(
 	includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SlashCommand.class, ContextCommand.class, ListenerAdapter.class, Subcommand.class }),
-	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = PresenceUpdater.class)
+	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = {PresenceUpdater.class, StateListener.class})
 )
 @EnableScheduling
 @RequiredArgsConstructor

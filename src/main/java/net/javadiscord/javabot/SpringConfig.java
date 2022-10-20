@@ -65,18 +65,19 @@ public class SpringConfig {
 	 * Initializes the {@link JDA} instances.
 	 * @param botConfig the main configuration of the bot
 	 * @param stateListener The {@link StateListener} which is listening for JDA lifecycle events and needs to be added before JDA is fully initialized
+	 * @param presenceUpdater A {@link ListenerAdapter} responsible for updating the status/(rich) presence of the bot
 	 * @return the initialized {@link JDA} object
 	 * @throws LoginException if the token is invalid
 	 */
 	@Bean
-	public JDA jda(BotConfig botConfig, StateListener stateListener) throws LoginException {
+	public JDA jda(BotConfig botConfig, StateListener stateListener, PresenceUpdater presenceUpdater) throws LoginException {
 		return JDABuilder.createDefault(botConfig.getSystems().getJdaBotToken())
 			.setStatus(OnlineStatus.DO_NOT_DISTURB)
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.setMemberCachePolicy(MemberCachePolicy.ALL)
 			.enableCache(CacheFlag.ACTIVITY)
 			.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.MESSAGE_CONTENT)
-			.addEventListeners(stateListener)
+			.addEventListeners(stateListener, presenceUpdater)
 			.build();
 	}
 
