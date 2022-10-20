@@ -42,7 +42,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 @SpringBootApplication
 @ComponentScan(
 	includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SlashCommand.class, ContextCommand.class, ListenerAdapter.class, Subcommand.class }),
-	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = {PresenceUpdater.class, StateListener.class})
+	excludeFilters = @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes = {PresenceUpdater.class})
 )
 @EnableScheduling
 @RequiredArgsConstructor
@@ -58,7 +58,9 @@ public class Bot {
 
 	private void addEventListeners(final List<ListenerAdapter> listeners) {
 		for (ListenerAdapter listener : listeners) {
-			dih4jda.getJDA().addEventListener(listener);
+			if(!(listener instanceof StateListener)) {
+				dih4jda.getJDA().addEventListener(listener);
+			}
 		}
 		dih4jda.getJDA().addEventListener(dih4jda);
 	}
