@@ -30,8 +30,9 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.messages.MessageRequest;
+import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.annotations.PreRegisteredListener;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.systems.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
 import net.javadiscord.javabot.util.ExceptionLogger;
 
@@ -57,7 +58,9 @@ public class Bot {
 
 	private void addEventListeners(final List<ListenerAdapter> listeners) {
 		for (ListenerAdapter listener : listeners) {
-			dih4jda.getJDA().addEventListener(listener);
+			if(!(listener.getClass().isAnnotationPresent(PreRegisteredListener.class))) {
+				dih4jda.getJDA().addEventListener(listener);
+			}
 		}
 		dih4jda.getJDA().addEventListener(dih4jda);
 	}
