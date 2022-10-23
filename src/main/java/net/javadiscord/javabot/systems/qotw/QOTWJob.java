@@ -47,7 +47,7 @@ public class QOTWJob {
 	 * Posts a new question to the QOTW channel.
 	 * @throws SQLException if an SQL error occurs
 	 */
-	@Scheduled(cron = "0 0 9 * * 0")//MONDAY, 09:00
+	@Scheduled(cron = "0 0 9 * * 1")//MONDAY, 09:00
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			if (guild.getBoostTier() == Guild.BoostTier.TIER_1) {
