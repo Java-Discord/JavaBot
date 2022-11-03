@@ -42,7 +42,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
-		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), dbHelper, qotwSubmissionRepository, questionQueueRepository);
+		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), dbHelper, qotwSubmissionRepository, questionQueueRepository, asyncPool);
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
 			case "controls" -> handleControlButtons(id, event);

@@ -44,7 +44,7 @@ public class SubmissionManager {
 	private final DbHelper dbHelper;
 	private final QOTWSubmissionRepository qotwSubmissionRepository;
 	private final QuestionQueueRepository questionQueueRepository;
-	private ExecutorService asyncPool;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
