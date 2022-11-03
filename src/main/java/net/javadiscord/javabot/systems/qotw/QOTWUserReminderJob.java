@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Checks that there's a question in the QOTW queue ready for posting soon.
@@ -33,6 +34,7 @@ public class QOTWUserReminderJob {
 	private final DbHelper dbHelper;
 	private final QOTWSubmissionRepository qotwSubmissionRepository;
 	private final QuestionQueueRepository questionQueueRepository;
+	private final ExecutorService asyncPool;
 
 	/**
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
@@ -41,7 +43,7 @@ public class QOTWUserReminderJob {
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = botConfig.get(guild).getQotwConfig();
-			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper, qotwSubmissionRepository, questionQueueRepository).getActiveSubmissionThreads(guild.getIdLong());
+			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper, qotwSubmissionRepository, questionQueueRepository, asyncPool).getActiveSubmissionThreads(guild.getIdLong());
 			for (QOTWSubmission submission : submissions) {
 				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
 				if (Boolean.parseBoolean(preference.getState())) {
