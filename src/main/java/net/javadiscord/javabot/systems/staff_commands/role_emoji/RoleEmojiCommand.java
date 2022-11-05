@@ -20,7 +20,7 @@ public class RoleEmojiCommand extends SlashCommand {
 	 * @param addRoleEmojiSubcommand A subcommand allowing to add role-exclusive emojis
 	 */
 	public RoleEmojiCommand(BotConfig botConfig, AddRoleEmojiSubcommand addRoleEmojiSubcommand) {
-		SlashCommandData slashCommandData = Commands.slash("emoji-admin", "Administrative command for managing server emojis")
+		SlashCommandData slashCommandData = Commands.slash("emoji-admin", "Administrative command for managing guild emojis")
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
 				.setGuildOnly(true);
 		setSlashCommandData(slashCommandData);
