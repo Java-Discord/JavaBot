@@ -18,7 +18,7 @@ import net.javadiscord.javabot.util.Responses;
  * This class represents the /emoji-admin add subcommand.
  * This subcommand allows adding emojis which are usable only be members with certain roles.
  */
-public class AddRoleEmojiSubcommand extends Subcommand{
+public class AddRoleEmojiSubcommand extends Subcommand {
 
 	private final BotConfig botConfig;
 
@@ -34,7 +34,7 @@ public class AddRoleEmojiSubcommand extends Subcommand{
 		for (int i = 1; i <= 10; i++) {
 			subCommandData.addOption(OptionType.ROLE, "role-"+i, "A role allowed to use the emoji", i==1);
 		}
-		setSubcommandData(subCommandData );
+		setSubcommandData(subCommandData);
 		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
@@ -52,17 +52,17 @@ public class AddRoleEmojiSubcommand extends Subcommand{
 				.map(option -> option.getAsRole())
 				.toArray(Role[]::new);
 		event.deferReply().queue();
-		attachment.getProxy().downloadAsIcon().thenAccept(icon->{
+		attachment.getProxy().downloadAsIcon().thenAccept(icon -> {
 			event
 				.getGuild()
 				.createEmoji(event.getOption("name",attachment.getFileName(), OptionMapping::getAsString), icon, roles)
 				.queue(emoji -> {
 					event.getHook().sendMessage("Emoji "+emoji.getName()+" successfully created").queue();
-				},e->{
-					event.getHook().sendMessage("Cannot create emoji because `"+e.getMessage()+"`").queue();
+				}, e -> {
+					event.getHook().sendMessage("Cannot create emoji because `" + e.getMessage() + "`").queue();
 				});
 		}).exceptionally(e -> {
-			event.getHook().sendMessage("Cannot create emoji because `"+e.getMessage()+"`").queue();
+			event.getHook().sendMessage("Cannot create emoji because `" + e.getMessage() + "`").queue();
 			return null;
 		});
 	}
