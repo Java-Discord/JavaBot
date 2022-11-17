@@ -57,6 +57,7 @@ public class DbHelper {
 		// Now that we have remembered whether we need to initialize the schema, start up the server.
 		Server server;
 		try {
+			System.setProperty("h2.bindAddress", "127.0.0.1");
 			server = Server.createTcpServer("-tcpPort", "9122", "-ifNotExists").start();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
