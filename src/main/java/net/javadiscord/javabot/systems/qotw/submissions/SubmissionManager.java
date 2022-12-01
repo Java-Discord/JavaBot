@@ -131,12 +131,7 @@ public class SubmissionManager {
 	 * @return Whether the user hat unreviewed submissions or not.
 	 */
 	public boolean hasActiveSubmissionThreads(long authorId) {
-		try (Connection con = dbHelper.getDataSource().getConnection()) {
-			return !qotwSubmissionRepository.getUnreviewedSubmissions(authorId).isEmpty();
-		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-			return false;
-		}
+		return !qotwSubmissionRepository.getUnreviewedSubmissions(authorId).isEmpty();
 	}
 
 	/**
@@ -146,12 +141,7 @@ public class SubmissionManager {
 	 * @return An immutable {@link List} of {@link QOTWSubmission}s.
 	 */
 	public List<QOTWSubmission> getActiveSubmissionThreads(long guildId) {
-		try (Connection con = dbHelper.getDataSource().getConnection()) {
-			return qotwSubmissionRepository.getSubmissionsByQuestionNumber(guildId, qotwSubmissionRepository.getCurrentQuestionNumber());
-		} catch (SQLException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-			return List.of();
-		}
+		return qotwSubmissionRepository.getSubmissionsByQuestionNumber(guildId, qotwSubmissionRepository.getCurrentQuestionNumber());
 	}
 
 	private @NotNull MessageEmbed buildSubmissionThreadEmbed(@NotNull User createdBy, @NotNull QOTWQuestion question, @NotNull QOTWConfig config) {

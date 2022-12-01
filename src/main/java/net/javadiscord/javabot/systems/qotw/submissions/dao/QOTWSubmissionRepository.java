@@ -27,7 +27,7 @@ public class QOTWSubmissionRepository {
 	 * Inserts a new {@link QOTWSubmission}.
 	 *
 	 * @param submission The account to insert.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public void insert(QOTWSubmission submission) throws DataAccessException {
 		int rows = jdbcTemplate.update("INSERT INTO qotw_submissions (thread_id, question_number, guild_id, author_id) VALUES (?, ?, ?, ?)",
@@ -41,7 +41,7 @@ public class QOTWSubmissionRepository {
 	 *
 	 * @param threadId The current thread's id.
 	 * @return Whether the {@link QOTWSubmission} was actually removed.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public boolean deleteSubmission(long threadId) throws DataAccessException {
 		return jdbcTemplate.update("DELETE FROM qotw_submissions WHERE thread_id = ?",
@@ -53,7 +53,7 @@ public class QOTWSubmissionRepository {
 	 *
 	 * @param threadId The submission's thread id.
 	 * @param status The new {@link SubmissionStatus}.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public void updateStatus(long threadId, @NotNull SubmissionStatus status) throws DataAccessException {
 		jdbcTemplate.update("UPDATE qotw_submissions SET status = ? WHERE thread_id = ?",
@@ -65,7 +65,7 @@ public class QOTWSubmissionRepository {
 	 *
 	 * @param authorId The user's id.
 	 * @return A List of unreviewed {@link QOTWSubmission}s.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWSubmission> getUnreviewedSubmissions(long authorId) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM qotw_submissions WHERE author_id = ? AND status = 0", (rs,row)->this.read(rs),
@@ -77,11 +77,11 @@ public class QOTWSubmissionRepository {
 	 *
 	 * @param threadId The discord Id of the user.
 	 * @return The {@link QOTWSubmission} object.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public Optional<QOTWSubmission> getSubmissionByThreadId(long threadId) throws DataAccessException {
 		try {
-			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM qotw_submissions WHERE thread_id = ?", (rs, row)->this.read(rs),
+			return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM qotw_submissions WHERE thread_id = ?", (rs, row)->this.read(rs),
 					threadId));
 		}catch (EmptyResultDataAccessException e) {
 			return Optional.empty();
@@ -108,7 +108,7 @@ public class QOTWSubmissionRepository {
 	 * @param guildId the ID of the guild
 	 * @param questionNumber The week's number.
 	 * @return All {@link QOTWSubmission}s, as a {@link List}.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWSubmission> getSubmissionsByQuestionNumber(long guildId, int questionNumber) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM qotw_submissions WHERE guild_id = ? AND question_number = ?", (rs, row)->this.read(rs),
@@ -122,7 +122,7 @@ public class QOTWSubmissionRepository {
 	 * @param questionNumber The week's number.
 	 * @param authorID The ID of the user who created the submission.
 	 * @return The {@link QOTWSubmission} or {@code null} if the user has not submitted any answer to the question.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public QOTWSubmission getSubmissionByQuestionNumberAndAuthorID(long guildId,int questionNumber, long authorID) throws DataAccessException {
 		try{
