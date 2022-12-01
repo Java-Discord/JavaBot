@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -23,7 +23,7 @@ public class IdCalculatorCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public IdCalculatorCommand() {
-		setSlashCommandData(Commands.slash("id-calc", "Generates a human-readable timestamp out of any discord id")
+		setCommandData(Commands.slash("id-calc", "Generates a human-readable timestamp out of any discord id")
 				.addOption(OptionType.STRING, "id", "The ID which should be converted.", true)
 				.setGuildOnly(true)
 		);

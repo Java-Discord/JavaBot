@@ -1,14 +1,15 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
-import com.dynxsty.dih4jda.interactions.components.SelectMenuHandler;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import xyz.dynxsty.dih4jda.interactions.components.StringSelectMenuHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
@@ -31,7 +32,7 @@ import java.util.concurrent.ExecutorService;
  */
 @AutoDetectableComponentHandler({"qotw-submission","qotw-submission-select"})
 @RequiredArgsConstructor
-public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHandler {
+public class SubmissionInteractionManager implements ButtonHandler, StringSelectMenuHandler {
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
@@ -52,7 +53,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	}
 
 	@Override
-	public void handleSelectMenu(@NotNull SelectMenuInteractionEvent event, List<String> values) {
+	public void handleStringSelectMenu(@NotNull StringSelectInteractionEvent event, List<String> values) {
 		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		SubmissionControlsManager manager = new SubmissionControlsManager(botConfig.get(event.getGuild()), (ThreadChannel) event.getGuildChannel(), pointsService, notificationService, asyncPool, qotwSubmissionRepository);
@@ -103,7 +104,7 @@ public class SubmissionInteractionManager implements ButtonHandler, SelectMenuHa
 	}
 
 	private static @NotNull SelectMenu buildDeclineMenu() {
-		return SelectMenu.create("qotw-submission-select:decline")
+		return StringSelectMenu.create("qotw-submission-select:decline")
 				.setPlaceholder("Select a reason for declining this submission.")
 				.setRequiredRange(1, 3)
 				.addOption("Wrong Answer", "Wrong Answer", "The content of the submission was not correct.")

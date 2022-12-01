@@ -12,11 +12,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.dynxsty.dih4jda.DIH4JDA;
-import com.dynxsty.dih4jda.DIH4JDABuilder;
-import com.dynxsty.dih4jda.DIH4JDALogger;
-import com.dynxsty.dih4jda.exceptions.DIH4JDAException;
-import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
+import xyz.dynxsty.dih4jda.DIH4JDA;
+import xyz.dynxsty.dih4jda.DIH4JDABuilder;
+import xyz.dynxsty.dih4jda.DIH4JDALogger;
+import xyz.dynxsty.dih4jda.exceptions.DIH4JDAException;
+import xyz.dynxsty.dih4jda.interactions.commands.application.RegistrationType;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
@@ -91,8 +91,8 @@ public class SpringConfig {
 	 */
 	@Bean
 	public DIH4JDA initializeDIH4JDA(JDA jda) throws DIH4JDAException {
+		DIH4JDA.setDefaultRegistrationType(RegistrationType.GLOBAL);
 		return DIH4JDABuilder.setJDA(jda)
-			.setDefaultCommandType(RegistrationType.GLOBAL)
 			.disableLogging(DIH4JDALogger.Type.SMART_QUEUE_IGNORED)
 			.disableAutomaticCommandRegistration()
 			.build();

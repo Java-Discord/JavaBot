@@ -24,7 +24,7 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 	 */
 	public OnHoldSuggestionSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("on-hold", "Marks a single suggestion as \"On Hold\".")
+		setCommandData(new SubcommandData("on-hold", "Marks a single suggestion as \"On Hold\".")
 				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to mark as \"On Hold\".", true)
 		);
 	}

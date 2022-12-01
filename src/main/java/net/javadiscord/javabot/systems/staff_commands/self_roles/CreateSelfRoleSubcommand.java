@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
@@ -32,7 +32,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 	 */
 	public CreateSelfRoleSubcommand(NotificationService notificationService) {
 		this.notificationService = notificationService;
-		setSubcommandData(new SubcommandData("create", "Creates a reaction role")
+		setCommandData(new SubcommandData("create", "Creates a reaction role")
 				.addOptions(
 						new OptionData(OptionType.STRING, "type", "The self-role's type.", true)
 								.addChoice("None (Just creates the embed)", "NONE")

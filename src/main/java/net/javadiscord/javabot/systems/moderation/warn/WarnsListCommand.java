@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -45,7 +45,7 @@ public class WarnsListCommand extends SlashCommand {
 		this.botConfig = botConfig;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
-		setSlashCommandData(Commands.slash("warns", "Shows a list of all recent warning.")
+		setCommandData(Commands.slash("warns", "Shows a list of all recent warning.")
 				.addOption(OptionType.USER, "user", "If given, shows the recent warns of the given user instead.", false)
 				.setGuildOnly(true)
 		);

@@ -1,14 +1,14 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -46,9 +46,9 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 	public QuickMigrateSubcommand(DataSource dataSource, ExecutorService asyncPool, SystemsConfig systemsConfig) {
 		this.asyncPool = asyncPool;
 		this.dataSource = dataSource;
-		setSubcommandData(new SubcommandData("quick-migrate", "(ADMIN ONLY) Run a single quick database migration"));
-		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
-		requirePermissions(Permission.MANAGE_SERVER);
+		setCommandData(new SubcommandData("quick-migrate", "(ADMIN ONLY) Run a single quick database migration"));
+		setRequiredUsers(systemsConfig.getAdminConfig().getAdminUsers());
+		setRequiredPermissions(Permission.MANAGE_SERVER);
 	}
 
 	@Override

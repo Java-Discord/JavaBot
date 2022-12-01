@@ -33,7 +33,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 	public ListQuestionsSubcommand(QuestionQueueRepository questionQueueRepository, ExecutorService asyncPool) {
 		this.asyncPool = asyncPool;
 		this.questionQueueRepository = questionQueueRepository;
-		setSubcommandData(new SubcommandData("list", "Show a list of all questions in the queue.")
+		setCommandData(new SubcommandData("list", "Show a list of all questions in the queue.")
 				.addOption(OptionType.INTEGER, "page", "The page of results you get.", false)
 		);
 	}

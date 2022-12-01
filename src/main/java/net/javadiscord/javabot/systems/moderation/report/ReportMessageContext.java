@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.report;
 
-import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.ContextCommand;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.config.BotConfig;

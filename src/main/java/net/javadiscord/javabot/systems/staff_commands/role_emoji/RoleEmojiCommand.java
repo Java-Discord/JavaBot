@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.role_emoji;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -23,8 +23,8 @@ public class RoleEmojiCommand extends SlashCommand {
 		SlashCommandData slashCommandData = Commands.slash("emoji-admin", "Administrative command for managing guild emojis")
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
 				.setGuildOnly(true);
-		setSlashCommandData(slashCommandData);
+		setCommandData(slashCommandData);
 		addSubcommands(addRoleEmojiSubcommand);
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 }

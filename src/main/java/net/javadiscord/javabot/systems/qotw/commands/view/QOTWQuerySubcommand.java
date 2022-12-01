@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.qotw.commands.view;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -46,7 +46,7 @@ public class QOTWQuerySubcommand extends SlashCommand.Subcommand implements Butt
 	public QOTWQuerySubcommand(ExecutorService asyncPool, QuestionQueueRepository questionQueueRepository) {
 		this.asyncPool = asyncPool;
 		this.questionQueueRepository = questionQueueRepository;
-		setSubcommandData(new SubcommandData("list-questions", "Lists previous 'Questions of the Week'")
+		setCommandData(new SubcommandData("list-questions", "Lists previous 'Questions of the Week'")
 				.addOption(OptionType.STRING, "query", "Only queries questions that contain a specific query", false)
 				.addOption(OptionType.INTEGER, "page", "The page to show, starting with 1", false));
 	}

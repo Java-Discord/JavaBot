@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -23,7 +23,7 @@ public class BotInfoCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public BotInfoCommand() {
-		setSlashCommandData(Commands.slash("botinfo", "Shows some information about the Bot.")
+		setCommandData(Commands.slash("botinfo", "Shows some information about the Bot.")
 				.setGuildOnly(true)
 		);
 	}

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
+import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -44,7 +44,7 @@ public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCom
 		this.customTagManager = customTagManager;
 		this.asyncPool = asyncPool;
 		this.customTagRepository = customTagRepository;
-		setSubcommandData(new SubcommandData("delete", "Deletes a single Custom Tag.")
+		setCommandData(new SubcommandData("delete", "Deletes a single Custom Tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
 	}

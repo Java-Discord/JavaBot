@@ -2,7 +2,7 @@ package net.javadiscord.javabot.systems.help.commands;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -51,7 +51,7 @@ public class UnreserveCommand extends SlashCommand {
 		this.helpExperienceService = helpExperienceService;
 		this.helpAccountRepository = helpAccountRepository;
 		this.helpTransactionRepository = helpTransactionRepository;
-		setSlashCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
+		setCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
 		);

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -33,14 +33,14 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
 	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param warnRepository DAO for interacting with the set of {@link net.javadiscord.javabot.systems.moderation.warn.model.Warn} objects.
 	 */
 	public WarnAddSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
-		setSubcommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
+		setCommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
 				.addOptions(
 						new OptionData(OptionType.USER, "user", "The user to warn.", true),
 						new OptionData(OptionType.STRING, "severity", "How severe was the offense?", true)

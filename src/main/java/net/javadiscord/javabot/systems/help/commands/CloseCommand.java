@@ -29,7 +29,7 @@ public class CloseCommand extends UnreserveCommand {
 	 */
 	public CloseCommand(BotConfig botConfig, ScheduledExecutorService asyncPool, DbActions dbActions, HelpExperienceService helpExperienceService, HelpTransactionRepository helpTransactionRepository, HelpAccountRepository helpAccountRepository) {
 		super(botConfig, asyncPool, dbActions, helpExperienceService, helpTransactionRepository, helpAccountRepository);
-		setSlashCommandData(
+		setCommandData(
 				Commands.slash("close", "Unreserves this help channel so that others can use it.")
 						.setGuildOnly(true).addOption(OptionType.STRING, "reason",
 								"The reason why you're unreserving this channel", false));

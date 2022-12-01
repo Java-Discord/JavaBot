@@ -38,7 +38,7 @@ public class PingCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public PingCommand() {
-		setSlashCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
+		setCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
 				.setGuildOnly(true)
 		);
 	}

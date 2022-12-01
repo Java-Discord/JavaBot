@@ -35,10 +35,10 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
 	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param warnRepository DAO for interacting with the set of {@link net.javadiscord.javabot.systems.moderation.warn.model.Warn} objects.
 	 */
 	public AddTimeoutSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
-		setSubcommandData(new SubcommandData("add", "Adds a timeout to the specified server member.")
+		setCommandData(new SubcommandData("add", "Adds a timeout to the specified server member.")
 				.addOptions(
 						new OptionData(OptionType.USER, "member", "The member that should be timed out.", true),
 						new OptionData(OptionType.INTEGER, "duration-amount", "How long the timeout should last.", true),

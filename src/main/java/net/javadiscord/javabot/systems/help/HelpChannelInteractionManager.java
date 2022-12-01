@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.help;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

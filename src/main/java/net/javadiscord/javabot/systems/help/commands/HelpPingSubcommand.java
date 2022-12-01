@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -45,7 +45,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 	 * @param dbActions A service object responsible for various operations on the main database
 	 */
 	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool, HelpExperienceService helpExperienceService, DbActions dbActions) {
-		setSubcommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
+		setCommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
 		this.botConfig = botConfig;
 		this.dbActions = dbActions;

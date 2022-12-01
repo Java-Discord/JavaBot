@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands.format_code;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -27,7 +27,7 @@ public class FormatCodeCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public FormatCodeCommand() {
-		setSlashCommandData(Commands.slash("format-code", "Format unformatted code from a message")
+		setCommandData(Commands.slash("format-code", "Format unformatted code from a message")
 				.setGuildOnly(true)
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "Message to be formatted, last message used if left blank.", false),

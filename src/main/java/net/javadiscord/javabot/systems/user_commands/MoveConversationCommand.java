@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -37,7 +37,7 @@ public class MoveConversationCommand extends SlashCommand {
 	 */
 	public MoveConversationCommand(BotConfig botConfig) {
 		this.botConfig = botConfig;
-		setSlashCommandData(Commands.slash("move-conversation", "Suggest to move the current conversation into another channel!")
+		setCommandData(Commands.slash("move-conversation", "Suggest to move the current conversation into another channel!")
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "Where should the current conversation be continued?", true)
 								.setChannelTypes(ChannelType.TEXT, ChannelType.GUILD_NEWS_THREAD, ChannelType.GUILD_PRIVATE_THREAD, ChannelType.GUILD_PUBLIC_THREAD, ChannelType.VOICE, ChannelType.STAGE)

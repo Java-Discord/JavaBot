@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -41,7 +41,7 @@ public class QOTWViewAnswerSubcommand extends SlashCommand.Subcommand {
 		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
 		this.qotwSubmissionRepository = qotwSubmissionRepository;
-		setSubcommandData(new SubcommandData("answer", "Views the content of an answer to the Question of the Week")
+		setCommandData(new SubcommandData("answer", "Views the content of an answer to the Question of the Week")
 				.addOption(OptionType.INTEGER, "question", "The question number the answer has been submitted to", true)
 				.addOption(OptionType.USER, "answerer", "The user who answered the question", true)
 		);

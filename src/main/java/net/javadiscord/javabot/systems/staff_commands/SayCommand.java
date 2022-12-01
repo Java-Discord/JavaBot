@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -29,7 +29,7 @@ public class SayCommand extends SlashCommand {
 	 */
 	public SayCommand(BotConfig botConfig) {
 		this.botConfig = botConfig;
-		setSlashCommandData(Commands.slash("say", "Let the bot say everything you want!")
+		setCommandData(Commands.slash("say", "Let the bot say everything you want!")
 				.addOption(OptionType.STRING, "text", "The text that should be mirrored.", true)
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)

@@ -1,12 +1,12 @@
 package net.javadiscord.javabot.listener;
 
-import com.dynxsty.dih4jda.DIH4JDA;
+import org.jetbrains.annotations.NotNull;
+import xyz.dynxsty.dih4jda.DIH4JDA;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.util.ExceptionLogger;
 
 /**
  * Listens for {@link GuildJoinEvent}.
@@ -17,12 +17,8 @@ public class GuildJoinListener extends ListenerAdapter {
 	private final DIH4JDA dih4jda;
 
 	@Override
-	public void onGuildJoin(GuildJoinEvent event) {
+	public void onGuildJoin(@NotNull GuildJoinEvent event) {
 		botConfig.addGuild(event.getGuild());
-		try {
-			dih4jda.registerInteractions();
-		} catch (ReflectiveOperationException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-		}
+		dih4jda.registerInteractions();
 	}
 }

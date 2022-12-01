@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -29,7 +29,7 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param warnRepository DAO for interacting with the set of {@link net.javadiscord.javabot.systems.moderation.warn.model.Warn} objects.
 	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
 	public DiscardAllWarnsSubcommand(NotificationService notificationService, BotConfig botConfig, WarnRepository warnRepository, ExecutorService asyncPool) {
@@ -37,7 +37,7 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 		this.botConfig = botConfig;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
-		setSubcommandData(new SubcommandData("discard-all", "Discards all warns from a single user.")
+		setCommandData(new SubcommandData("discard-all", "Discards all warns from a single user.")
 				.addOption(OptionType.USER, "user", "The user which warns should be discarded.", true)
 		);
 	}

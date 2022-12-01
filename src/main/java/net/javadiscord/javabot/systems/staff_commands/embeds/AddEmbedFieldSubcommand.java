@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.staff_commands.embeds;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -37,7 +37,7 @@ public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHan
 	 */
 	public AddEmbedFieldSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("add-field", "Adds a field to an embed message.")
+		setCommandData(new SubcommandData("add-field", "Adds a field to an embed message.")
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "The embed's message id.", true),
 						new OptionData(OptionType.CHANNEL, "channel", "What channel is the embed in?", false)

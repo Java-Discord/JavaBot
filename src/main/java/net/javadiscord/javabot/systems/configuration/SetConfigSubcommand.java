@@ -22,11 +22,11 @@ public class SetConfigSubcommand extends ConfigSubcommand {
 	 */
 	public SetConfigSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("set", "Sets the value of a configuration property.")
+		setCommandData(new SubcommandData("set", "Sets the value of a configuration property.")
 				.addOption(OptionType.STRING, "property", "The name of a property.", true)
 				.addOption(OptionType.STRING, "value", "The value to set for the property.", true)
 		);
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

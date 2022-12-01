@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands.search;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -25,7 +25,7 @@ public class SearchWebCommand extends SlashCommand {
 	 */
 	public SearchWebCommand(SystemsConfig systemsConfig) {
 		this.systemsConfig = systemsConfig;
-		setSlashCommandData(Commands.slash("search-web", "Searches the web by turning your text-input into a search query")
+		setCommandData(Commands.slash("search-web", "Searches the web by turning your text-input into a search query")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true)
 		);

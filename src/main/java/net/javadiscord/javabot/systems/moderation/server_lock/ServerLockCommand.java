@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.server_lock;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.systems.moderation.CommandModerationPermissions;
 

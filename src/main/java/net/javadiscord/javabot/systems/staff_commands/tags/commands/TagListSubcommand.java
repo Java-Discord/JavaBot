@@ -33,7 +33,7 @@ public class TagListSubcommand extends TagsSubcommand {
 		super(botConfig);
 		this.asyncPool = asyncPool;
 		this.customTagRepository = customTagRepository;
-		setSubcommandData(new SubcommandData("list", "Lists all custom tags"));
+		setCommandData(new SubcommandData("list", "Lists all custom tags"));
 		setRequiredStaff(false);
 	}
 

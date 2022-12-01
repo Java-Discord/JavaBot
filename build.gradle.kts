@@ -29,9 +29,9 @@ dependencies {
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("org.jetbrains:annotations:23.0.0")
 
-    // DIH4JDA (Interaction Framework) & JDA
-    implementation("com.github.DynxstyGIT:DIH4JDA:9e02a171e8")
-    implementation("net.dv8tion:JDA:5.0.0-alpha.21") {
+    // DIH4JDA (Command Framework) & JDA
+    implementation("xyz.dynxsty:dih4jda:1.6.1")
+    implementation("net.dv8tion:JDA:5.0.0-beta.1") {
         exclude(module = "opus-java")
     }
 

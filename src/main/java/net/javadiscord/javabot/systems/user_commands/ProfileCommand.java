@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -53,7 +53,7 @@ public class ProfileCommand extends SlashCommand {
 		this.helpExperienceService = helpExperienceService;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
-		setSlashCommandData(Commands.slash("profile", "Shows your server profile.")
+		setCommandData(Commands.slash("profile", "Shows your server profile.")
 				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)
 				.setGuildOnly(true)
 		);

@@ -2,7 +2,7 @@ package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
 import java.util.concurrent.ExecutorService;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.h2db.DbHelper;
@@ -24,7 +24,7 @@ public class LeaderboardCommand extends SlashCommand {
 	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
 	 */
 	public LeaderboardCommand(QOTWPointsService pointsService, ExecutorService asyncPool, DbHelper dbHelper, DbActions dbActions, HelpAccountRepository helpAccountRepository, QuestionPointsRepository qotwPointsRepository) {
-		setSlashCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
+		setCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
 				.setGuildOnly(true)
 		);
 		addSubcommands(

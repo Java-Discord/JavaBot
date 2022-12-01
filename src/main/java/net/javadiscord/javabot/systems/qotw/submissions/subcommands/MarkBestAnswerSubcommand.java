@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -63,7 +63,7 @@ public class MarkBestAnswerSubcommand extends SlashCommand.Subcommand {
 		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
 		this.qotwSubmissionRepository = qotwSubmissionRepository;
-		setSubcommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
+		setCommandData(new SubcommandData("mark-best", "Marks a single QOTW Submission as on of the best answers.")
 				.addOption(OptionType.STRING, "thread-id", "The submission's thread id.", true, true)
 		);
 	}

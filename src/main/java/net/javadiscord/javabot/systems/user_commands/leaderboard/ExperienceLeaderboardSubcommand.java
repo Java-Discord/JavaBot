@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -45,7 +45,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public ExperienceLeaderboardSubcommand(HelpAccountRepository helpAccountRepository, ExecutorService asyncPool) {
 		this.asyncPool = asyncPool;
 		this.helpAccountRepository = helpAccountRepository;
-		setSubcommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
+		setCommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
 				.addOption(OptionType.INTEGER, "page", "The page of results to show. By default it starts at 1.", false)
 		);
 	}

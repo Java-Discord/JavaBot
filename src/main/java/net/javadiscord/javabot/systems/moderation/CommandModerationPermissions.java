@@ -19,10 +19,10 @@ public interface CommandModerationPermissions {
 	 * @param data The {@link SlashCommandData}.
 	 */
 	default void setModerationSlashCommandData(@NotNull SlashCommandData data) {
-		setSlashCommandData(data.setGuildOnly(true)
+		setCommandData(data.setGuildOnly(true)
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
 		);
 	}
 
-	void setSlashCommandData(SlashCommandData data);
+	void setCommandData(SlashCommandData data);
 }

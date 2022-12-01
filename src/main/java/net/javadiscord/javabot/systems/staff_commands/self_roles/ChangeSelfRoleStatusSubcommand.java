@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -28,7 +28,7 @@ public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
 	 */
 	public ChangeSelfRoleStatusSubcommand(NotificationService notificationService) {
 		this.notificationService = notificationService;
-		setSubcommandData(new SubcommandData("status", "Either enables or disables all message components (thus, the self role) on a single message.")
+		setCommandData(new SubcommandData("status", "Either enables or disables all message components (thus, the self role) on a single message.")
 				.addOption(OptionType.STRING, "message-id", "The message's id.", true)
 				.addOption(OptionType.BOOLEAN, "disable", "Should all action rows be disabled?", true)
 		);

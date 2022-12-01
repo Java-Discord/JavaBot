@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
+import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -30,7 +30,7 @@ public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable
 	public TagViewSubcommand(CustomTagManager tagManager, BotConfig botConfig) {
 		super(botConfig);
 		this.tagManager = tagManager;
-		setSubcommandData(new SubcommandData("view", "Allows to view a tag.")
+		setCommandData(new SubcommandData("view", "Allows to view a tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
 		setRequiredStaff(false);

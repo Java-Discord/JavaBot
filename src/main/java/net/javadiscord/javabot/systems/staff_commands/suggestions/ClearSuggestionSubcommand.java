@@ -23,7 +23,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	 */
 	public ClearSuggestionSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("clear", "Clears a single suggestion.")
+		setCommandData(new SubcommandData("clear", "Clears a single suggestion.")
 				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to clear.", true)
 		);
 	}

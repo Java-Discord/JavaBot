@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.timeout;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -11,7 +11,7 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An abstraction of {@link com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand} which handles all
+ * An abstraction of {@link xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand} which handles all
  * timeout-related commands.
  */
 public abstract class TimeoutSubcommand extends SlashCommand.Subcommand {

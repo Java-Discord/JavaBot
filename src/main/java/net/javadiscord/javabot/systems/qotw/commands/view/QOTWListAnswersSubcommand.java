@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.view;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -40,7 +40,7 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
 		this.qotwSubmissionRepository = qotwSubmissionRepository;
-		setSubcommandData(new SubcommandData("list-answers", "Lists answers to (previous) questions of the week")
+		setCommandData(new SubcommandData("list-answers", "Lists answers to (previous) questions of the week")
 				.addOption(OptionType.INTEGER, "question", "The question number", true)
 		);
 	}
