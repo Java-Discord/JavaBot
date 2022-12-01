@@ -50,10 +50,6 @@ public class QOTWJob {
 	@Scheduled(cron = "0 0 9 * * 1")//MONDAY, 09:00
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
-			if (guild.getBoostTier() == Guild.BoostTier.TIER_1) {
-				log.error("Guild {} does not have access to private threads. ({})", guild.getName(), guild.getBoostTier().name());
-				return;
-			}
 			GuildConfig config = botConfig.get(guild);
 			if (config.getModerationConfig().getLogChannel() == null) continue;
 			try (Connection c = dataSource.getConnection()) {
