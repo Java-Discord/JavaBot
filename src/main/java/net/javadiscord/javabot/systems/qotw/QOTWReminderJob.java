@@ -39,19 +39,11 @@ public class QOTWReminderJob {
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			ModerationConfig config = botConfig.get(guild).getModerationConfig();
-			try (Connection c = dataSource.getConnection()) {
-				Optional<QOTWQuestion> q = questionQueueRepository.getNextQuestion(guild.getIdLong());
-				if (q.isEmpty()) {
-					notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
-							"Warning! %s There's no Question of the Week in the queue. Please add one before it's time to post!",
-							config.getStaffRole().getAsMention()));
-				}
-			} catch (SQLException e) {
-				ExceptionLogger.capture(e, getClass().getSimpleName());
-				notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageFormat(
-						"Warning! %s Could not check to see if there's a question in the QOTW queue:\n```\n%s\n```\n",
-						config.getStaffRole().getAsMention(), e.getMessage()));
-				throw e;
+			Optional<QOTWQuestion> q = questionQueueRepository.getNextQuestion(guild.getIdLong());
+			if (q.isEmpty()) {
+				notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
+						"Warning! %s There's no Question of the Week in the queue. Please add one before it's time to post!",
+						config.getStaffRole().getAsMention()));
 			}
 		}
 	}
