@@ -1,57 +1,61 @@
 package net.javadiscord.javabot.listener;
 
-import com.dynxsty.dih4jda.events.DIH4JDAEventListener;
+import xyz.dynxsty.dih4jda.events.CommandExceptionEvent;
+import xyz.dynxsty.dih4jda.events.ComponentExceptionEvent;
+import xyz.dynxsty.dih4jda.events.DIH4JDAEventListener;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.ModalInteraction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
-import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
-import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import xyz.dynxsty.dih4jda.events.InsufficientPermissionsEvent;
+import xyz.dynxsty.dih4jda.events.InvalidRoleEvent;
+import xyz.dynxsty.dih4jda.events.InvalidUserEvent;
+import xyz.dynxsty.dih4jda.events.ModalExceptionEvent;
 
 import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Listener class for various events provided by {@link com.dynxsty.dih4jda.DIH4JDA}.
+ * Listener class for various events provided by {@link xyz.dynxsty.dih4jda.DIH4JDA}.
  */
 public class DIH4JDAListener implements DIH4JDAEventListener {
+
 	@Override
-	public void onCommandException(CommandInteraction interaction, Exception e) {
-		ExceptionLogger.capture(e, getClass().getSimpleName());
-		handleReply(interaction, buildExceptionEmbed(e));
+	public void onCommandException(@NotNull CommandExceptionEvent event) {
+		ExceptionLogger.capture(event.getThrowable(), getClass().getSimpleName());
+		handleReply(event.getInteraction(), buildExceptionEmbed(event.getThrowable()));
 	}
 
 	@Override
-	public void onComponentException(ComponentInteraction interaction, Exception e) {
-		ExceptionLogger.capture(e, getClass().getSimpleName());
-		handleReply(interaction, buildExceptionEmbed(e));
+	public void onComponentException(@NotNull ComponentExceptionEvent event) {
+		ExceptionLogger.capture(event.getThrowable(), getClass().getSimpleName());
+		handleReply(event.getInteraction(), buildExceptionEmbed(event.getThrowable()));
 	}
 
 	@Override
-	public void onModalException(ModalInteraction interaction, Exception e) {
-		ExceptionLogger.capture(e, getClass().getSimpleName());
-		handleReply(interaction, buildExceptionEmbed(e));
+	public void onModalException(@NotNull ModalExceptionEvent event) {
+		ExceptionLogger.capture(event.getThrowable(), getClass().getSimpleName());
+		handleReply(event.getInteraction(), buildExceptionEmbed(event.getThrowable()));
 	}
 
 	@Override
-	public void onInvalidUser(CommandInteraction interaction, Set<Long> userIds) {
-		handleReply(interaction, buildNoAccessEmbed());
+	public void onInvalidUser(@NotNull InvalidUserEvent event) {
+		handleReply(event.getInteraction(), buildNoAccessEmbed());
 	}
 
 	@Override
-	public void onInvalidRole(CommandInteraction interaction, Set<Long> userIds) {
-		handleReply(interaction, buildNoAccessEmbed());
+	public void onInvalidRole(@NotNull InvalidRoleEvent event) {
+		handleReply(event.getInteraction(), buildNoAccessEmbed());
 	}
 
 	@Override
-	public void onInsufficientPermissions(CommandInteraction interaction, Set<Permission> permissions) {
-		handleReply(interaction, buildInsufficientPermissionsEmbed(permissions));
+	public void onInsufficientPermissions(@NotNull InsufficientPermissionsEvent event) {
+		handleReply(event.getInteraction(), buildInsufficientPermissionsEmbed(event.getPermissions()));
 	}
 
 	/**
@@ -74,10 +78,10 @@ public class DIH4JDAListener implements DIH4JDAEventListener {
 				.setTimestamp(Instant.now());
 	}
 
-	private @NotNull MessageEmbed buildExceptionEmbed(@NotNull Exception e) {
+	private @NotNull MessageEmbed buildExceptionEmbed(@NotNull Throwable throwable) {
 		return buildErrorEmbed()
-				.setDescription(e.getMessage() == null ? "An error occurred." : MarkdownUtil.codeblock(e.getMessage()))
-				.setFooter(e.getClass().getSimpleName())
+				.setDescription(throwable.getMessage() == null ? "An error occurred." : MarkdownUtil.codeblock(throwable.getMessage()))
+				.setFooter(throwable.getClass().getSimpleName())
 				.build();
 	}
 

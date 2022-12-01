@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
-import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -56,7 +56,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 		this.customTagManager = customTagManager;
 		this.asyncPool = asyncPool;
 		this.customTagRepository = customTagRepository;
-		setSubcommandData(new SubcommandData("edit", "Edits a single Custom Tag.")
+		setCommandData(new SubcommandData("edit", "Edits a single Custom Tag.")
 				.addOption(OptionType.STRING, "name", "The tag's name.", true, true)
 		);
 	}

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -39,7 +39,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	public HelpAccountSubcommand(DbActions dbActions, HelpExperienceService helpExperienceService) {
 		this.dbActions = dbActions;
 		this.helpExperienceService = helpExperienceService;
-		setSubcommandData(new SubcommandData("account", "Shows an overview of your Help Account.")
+		setCommandData(new SubcommandData("account", "Shows an overview of your Help Account.")
 				.addOption(OptionType.USER, "user", "If set, show the Help Account of the specified user instead.", false)
 				.addOption(OptionType.BOOLEAN, "show-transactions", "Should the recent transactions be shown?", false)
 		);

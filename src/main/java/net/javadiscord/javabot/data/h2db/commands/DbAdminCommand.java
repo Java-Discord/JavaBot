@@ -1,10 +1,7 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import java.util.Map;
-import java.util.Set;
-
-import com.dynxsty.dih4jda.interactions.commands.RegistrationType;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.RegistrationType;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -29,14 +26,14 @@ public class DbAdminCommand extends SlashCommand {
 	 */
 	public DbAdminCommand(BotConfig botConfig, ExportSchemaSubcommand exportSchemaSubcommand, ExportTableSubcommand exportTableSubcommand, MigrationsListSubcommand migrationsListSubcommand, MigrateSubcommand migrateSubcommand, QuickMigrateSubcommand quickMigrateSubcommand, MessageCacheInfoSubcommand messageCacheInfoSubcommand) {
 		setRegistrationType(RegistrationType.GUILD);
-		setSlashCommandData(Commands.slash("db-admin", "(ADMIN ONLY) Administrative Commands for managing the bot's database.")
+		setCommandData(Commands.slash("db-admin", "(ADMIN ONLY) Administrative Commands for managing the bot's database.")
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
 				.setGuildOnly(true)
 		);
 		addSubcommands(exportSchemaSubcommand, exportTableSubcommand, migrationsListSubcommand, migrateSubcommand, quickMigrateSubcommand);
-		addSubcommandGroups(Map.of(
-				new SubcommandGroupData("message-cache", "Administrative tools for managing the Message Cache."), Set.of(messageCacheInfoSubcommand)
+		addSubcommandGroups(SubcommandGroup.of(
+				new SubcommandGroupData("message-cache", "Administrative tools for managing the Message Cache."), messageCacheInfoSubcommand
 		));
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 }

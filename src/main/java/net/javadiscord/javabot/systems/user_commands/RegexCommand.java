@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import com.google.re2j.Pattern;
 import com.google.re2j.PatternSyntaxException;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -19,7 +19,7 @@ public class RegexCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public RegexCommand() {
-		setSlashCommandData(Commands.slash("regex", "Checks if the given string matches the regex pattern")
+		setCommandData(Commands.slash("regex", "Checks if the given string matches the regex pattern")
 				.addOption(OptionType.STRING, "regex", "The regex pattern", true)
 				.addOption(OptionType.STRING, "string", "The string which is tested", true)
 				.setGuildOnly(true)

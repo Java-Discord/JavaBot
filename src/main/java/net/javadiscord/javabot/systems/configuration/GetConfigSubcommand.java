@@ -22,10 +22,10 @@ public class GetConfigSubcommand extends ConfigSubcommand {
 	 */
 	public GetConfigSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("get", "Get the current value of a configuration property.")
+		setCommandData(new SubcommandData("get", "Get the current value of a configuration property.")
 				.addOption(OptionType.STRING, "property", "The name of a property.", true)
 		);
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_preferences.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -23,7 +23,7 @@ public class PreferencesListSubcommand extends SlashCommand.Subcommand {
 	 */
 	public PreferencesListSubcommand(UserPreferenceService service) {
 		this.service = service;
-		setSubcommandData(new SubcommandData("list", "Shows all your preferences."));
+		setCommandData(new SubcommandData("list", "Shows all your preferences."));
 	}
 
 	@Override

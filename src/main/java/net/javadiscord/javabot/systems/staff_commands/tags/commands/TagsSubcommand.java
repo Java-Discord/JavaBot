@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 
 /**
- * An abstraction of {@link com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand} which handles all
+ * An abstraction of {@link xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand} which handles all
  * custom-tag-related commands.
  */
 @RequiredArgsConstructor

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.view;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
@@ -17,7 +17,7 @@ public class QOTWViewCommand extends SlashCommand {
 	 * @param qotwViewAnswerSubcommand /qotw-view answer
 	 */
 	public QOTWViewCommand(QOTWQuerySubcommand qotwQuerySubcommand, QOTWListAnswersSubcommand qotwListAnswersSubcommand, QOTWViewAnswerSubcommand qotwViewAnswerSubcommand) {
-		setSlashCommandData(Commands.slash("qotw-view", "Query 'Questions of the Week' and their answers")
+		setCommandData(Commands.slash("qotw-view", "Query 'Questions of the Week' and their answers")
 				.setDefaultPermissions(DefaultMemberPermissions.ENABLED)
 				.setGuildOnly(true)
 		);

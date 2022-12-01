@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.help.forum;
 
-import com.dynxsty.dih4jda.interactions.ComponentIdBuilder;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

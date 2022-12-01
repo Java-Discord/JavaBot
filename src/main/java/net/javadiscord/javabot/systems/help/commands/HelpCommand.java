@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.config.BotConfig;
 
@@ -16,7 +16,7 @@ public class HelpCommand extends SlashCommand {
 	 * @param helpGuidelinesSubcommand /help guidelines
 	 */
 	public HelpCommand(BotConfig botConfig, HelpAccountSubcommand helpAccountSubcommand, HelpPingSubcommand helpPingSubcommand, HelpGuidelinesSubcommand helpGuidelinesSubcommand) {
-		setSlashCommandData(Commands.slash("help", "Commands related to the help system.")
+		setCommandData(Commands.slash("help", "Commands related to the help system.")
 				.setGuildOnly(true)
 		);
 		addSubcommands(helpAccountSubcommand, helpPingSubcommand, helpGuidelinesSubcommand);

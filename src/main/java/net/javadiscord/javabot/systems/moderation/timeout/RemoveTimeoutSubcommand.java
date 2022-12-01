@@ -40,7 +40,7 @@ public class RemoveTimeoutSubcommand extends TimeoutSubcommand {
 		this.botConfig = botConfig;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
-		setSubcommandData(new SubcommandData("remove", "Removes a timeout from the specified server member.")
+		setCommandData(new SubcommandData("remove", "Removes a timeout from the specified server member.")
 				.addOptions(
 						new OptionData(OptionType.USER, "member", "The member whose timeout should be removed.", true),
 						new OptionData(OptionType.STRING, "reason", "The reason for removing this timeout.", true),

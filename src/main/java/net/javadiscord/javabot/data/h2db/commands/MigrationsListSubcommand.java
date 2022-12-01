@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,9 +28,9 @@ public class MigrationsListSubcommand extends SlashCommand.Subcommand {
 	 * @param systemsConfig Configuration for various systems
 	 */
 	public MigrationsListSubcommand(SystemsConfig systemsConfig) {
-		setSubcommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
-		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
-		requirePermissions(Permission.MANAGE_SERVER);
+		setCommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
+		setRequiredUsers(systemsConfig.getAdminConfig().getAdminUsers());
+		setRequiredPermissions(Permission.MANAGE_SERVER);
 	}
 
 	@Override

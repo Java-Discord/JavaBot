@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
-import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -42,7 +42,7 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 	public CreateCustomTagSubcommand(CustomTagManager tagManager, BotConfig botConfig) {
 		super(botConfig);
 		this.tagManager = tagManager;
-		setSubcommandData(new SubcommandData("create", "Creates a new Custom Tag."));
+		setCommandData(new SubcommandData("create", "Creates a new Custom Tag."));
 	}
 
 	@Override

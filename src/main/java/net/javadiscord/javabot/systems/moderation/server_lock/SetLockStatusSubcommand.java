@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.server_lock;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -28,7 +28,7 @@ public class SetLockStatusSubcommand extends SlashCommand.Subcommand {
 	public SetLockStatusSubcommand(ServerLockManager serverLockManager, BotConfig botConfig) {
 		this.serverLockManager = serverLockManager;
 		this.botConfig = botConfig;
-		setSubcommandData(new SubcommandData("set-status", "Command for changing the current server lock status.")
+		setCommandData(new SubcommandData("set-status", "Command for changing the current server lock status.")
 				.addOption(OptionType.BOOLEAN, "locked", "Whether the server should be locked or not.", true));
 	}
 

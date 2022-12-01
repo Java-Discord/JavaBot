@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -34,7 +34,7 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	 */
 	public RemoveQuestionSubcommand(QuestionQueueRepository questionQueueRepository) {
 		this.questionQueueRepository = questionQueueRepository;
-		setSubcommandData(new SubcommandData("remove", "Removes a question from the queue.")
+		setCommandData(new SubcommandData("remove", "Removes a question from the queue.")
 				.addOption(OptionType.INTEGER, "id", "The id of the question to remove.", true, true)
 		);
 	}
@@ -74,6 +74,6 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, this::replyQuestions)).queue();
+		event.replyChoices(AutoCompleteUtils.filterChoices(event, replyQuestions(event))).queue();
 	}
 }

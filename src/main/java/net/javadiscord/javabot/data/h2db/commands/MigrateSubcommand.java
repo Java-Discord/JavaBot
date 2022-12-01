@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -56,10 +56,10 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	public MigrateSubcommand(ExecutorService asyncPool, DataSource dataSource, SystemsConfig systemsConfig) {
 		this.asyncPool = asyncPool;
 		this.dataSource = dataSource;
-		setSubcommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
+		setCommandData(new SubcommandData("migrate", "(ADMIN ONLY) Run a single database migration")
 				.addOption(OptionType.STRING, "name", "The migration's filename", true, true));
-		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
-		requirePermissions(Permission.MANAGE_SERVER);
+		setRequiredUsers(systemsConfig.getAdminConfig().getAdminUsers());
+		setRequiredPermissions(Permission.MANAGE_SERVER);
 	}
 
 	/**
@@ -133,6 +133,6 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.handleChoices(event, MigrateSubcommand::replyMigrations)).queue();
+		event.replyChoices(AutoCompleteUtils.filterChoices(event, replyMigrations(event))).queue();
 	}
 }

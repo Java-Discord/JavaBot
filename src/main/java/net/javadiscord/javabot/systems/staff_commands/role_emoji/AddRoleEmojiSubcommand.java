@@ -2,7 +2,7 @@ package net.javadiscord.javabot.systems.staff_commands.role_emoji;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.Role;
@@ -27,15 +27,15 @@ public class AddRoleEmojiSubcommand extends Subcommand {
 	 * @param botConfig The main configuration of the bot
 	 */
 	public AddRoleEmojiSubcommand(BotConfig botConfig) {
-		this.botConfig=botConfig;
+		this.botConfig = botConfig;
 		SubcommandData subCommandData = new SubcommandData("add", "Adds an emoji only usable only with certain roles")
 				.addOption(OptionType.STRING, "name", "The name of the emoji", true)
 				.addOption(OptionType.ATTACHMENT, "emoji", "the emoji", true);
 		for (int i = 1; i <= 10; i++) {
-			subCommandData.addOption(OptionType.ROLE, "role-"+i, "A role allowed to use the emoji", i==1);
+			subCommandData.addOption(OptionType.ROLE, "role-" + i, "A role allowed to use the emoji", i==1);
 		}
-		setSubcommandData(subCommandData);
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setCommandData(subCommandData);
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

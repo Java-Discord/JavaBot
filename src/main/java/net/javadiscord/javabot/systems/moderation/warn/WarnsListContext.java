@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
-import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.ContextCommand;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -29,7 +29,7 @@ public class WarnsListContext extends ContextCommand.User {
 	 * @param botConfig The main configuration of the bot
 	 * @param dbHelper An object managing databse operations
 	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param warnRepository DAO for interacting with the set of {@link net.javadiscord.javabot.systems.moderation.warn.model.Warn} objects.
 	 */
 	public WarnsListContext(BotConfig botConfig, DbHelper dbHelper, ExecutorService asyncPool, WarnRepository warnRepository) {
 		this.botConfig = botConfig;

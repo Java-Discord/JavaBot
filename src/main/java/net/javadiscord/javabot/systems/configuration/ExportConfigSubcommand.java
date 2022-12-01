@@ -21,8 +21,8 @@ public class ExportConfigSubcommand extends ConfigSubcommand {
 	 */
 	public ExportConfigSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("export", "Exports a list of all configuration properties, and their current values."));
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setCommandData(new SubcommandData("export", "Exports a list of all configuration properties, and their current values."));
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

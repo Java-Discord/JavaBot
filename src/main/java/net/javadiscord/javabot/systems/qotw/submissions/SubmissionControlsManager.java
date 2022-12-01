@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.GuildConfig;
@@ -148,7 +148,7 @@ public class SubmissionControlsManager {
 	 * @param event The {@link ButtonInteractionEvent} that was fired.
 	 * @param thread The submission's {@link ThreadChannel}.
 	 */
-	protected void declineSelectSubmission(SelectMenuInteractionEvent event, ThreadChannel thread) {
+	protected void declineSelectSubmission(StringSelectInteractionEvent event, ThreadChannel thread) {
 		asyncPool.execute(()->{
 			try {
 				qotwSubmissionRepository.updateStatus(thread.getIdLong(), SubmissionStatus.DECLINED);

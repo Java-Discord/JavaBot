@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.server_lock;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -21,7 +21,7 @@ public class CheckLockStatusSubcommand extends SlashCommand.Subcommand {
 	 */
 	public CheckLockStatusSubcommand(BotConfig botConfig) {
 		this.botConfig = botConfig;
-		setSubcommandData(new SubcommandData("check-status", "Command for checking the current server lock status."));
+		setCommandData(new SubcommandData("check-status", "Command for checking the current server lock status."));
 	}
 
 	@Override

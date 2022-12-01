@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -40,10 +40,10 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 	public ExportSchemaSubcommand(ExecutorService asyncPool, BotConfig botConfig, DataSource dataSource) {
 		this.asyncPool = asyncPool;
 		this.dataSource = dataSource;
-		setSubcommandData(new SubcommandData("export-schema", "(ADMIN ONLY) Exports the bot's schema.")
+		setCommandData(new SubcommandData("export-schema", "(ADMIN ONLY) Exports the bot's schema.")
 				.addOption(OptionType.BOOLEAN, "include-data", "Should data be included in the export?"));
-		requireUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
-		requirePermissions(Permission.MANAGE_SERVER);
+		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
+		setRequiredPermissions(Permission.MANAGE_SERVER);
 	}
 
 	@Override

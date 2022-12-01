@@ -24,7 +24,7 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 	 */
 	public DeclineSuggestionSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("decline", "Declines a single suggestion.")
+		setCommandData(new SubcommandData("decline", "Declines a single suggestion.")
 				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to decline.", true)
 		);
 	}

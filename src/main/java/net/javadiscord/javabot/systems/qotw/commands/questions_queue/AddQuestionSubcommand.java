@@ -1,11 +1,11 @@
 package net.javadiscord.javabot.systems.qotw.commands.questions_queue;
 
-import com.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -38,7 +38,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 	public AddQuestionSubcommand(QuestionQueueRepository questionQueueRepository, ExecutorService asyncPool) {
 		this.asyncPool = asyncPool;
 		this.questionQueueRepository = questionQueueRepository;
-		setSubcommandData(new SubcommandData("add", "Add a question to the queue."));
+		setCommandData(new SubcommandData("add", "Add a question to the queue."));
 	}
 
 	@Override

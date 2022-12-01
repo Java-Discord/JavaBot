@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -28,7 +28,7 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param warnRepository DAO for interacting with the set of {@link net.javadiscord.javabot.systems.moderation.warn.model.Warn} objects.
 	 * @param asyncPool The main thread pool for asynchronous operations
 	 */
 	public DiscardWarnByIdSubCommand(NotificationService notificationService, BotConfig botConfig, WarnRepository warnRepository, ExecutorService asyncPool) {
@@ -36,7 +36,7 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 		this.botConfig = botConfig;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
-		setSubcommandData(new SubcommandData("discard-by-id", "Discards a single warn, based on its id.")
+		setCommandData(new SubcommandData("discard-by-id", "Discards a single warn, based on its id.")
 				.addOption(OptionType.INTEGER, "id", "The warn's unique identifier.", true)
 		);
 	}

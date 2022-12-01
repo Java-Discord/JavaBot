@@ -23,7 +23,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 	 */
 	public AcceptSuggestionSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("accept", "Accepts a single suggestion.")
+		setCommandData(new SubcommandData("accept", "Accepts a single suggestion.")
 				.addOption(OptionType.STRING, "message-id", "The message id of the suggestion you want to accept.", true)
 		);
 	}

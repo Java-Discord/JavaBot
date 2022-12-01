@@ -1,15 +1,15 @@
 package net.javadiscord.javabot;
 
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -17,13 +17,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.dynxsty.dih4jda.DIH4JDA;
-import com.dynxsty.dih4jda.interactions.commands.ContextCommand;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand.Subcommand;
-import com.dynxsty.dih4jda.interactions.components.ButtonHandler;
-import com.dynxsty.dih4jda.interactions.components.ModalHandler;
-import com.dynxsty.dih4jda.interactions.components.SelectMenuHandler;
+import xyz.dynxsty.dih4jda.DIH4JDA;
+import xyz.dynxsty.dih4jda.interactions.commands.application.ContextCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.interactions.components.IdMapping;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.interactions.components.StringSelectMenuHandler;
 
 import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,6 @@ import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.annotations.PreRegisteredListener;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.tasks.PresenceUpdater;
-import net.javadiscord.javabot.util.ExceptionLogger;
 
 /**
  * The main class where the bot is initialized.
@@ -81,11 +81,7 @@ public class Bot {
 		if (!contextCommands.isEmpty()) {
 			dih4jda.addContextCommands(contextCommands.toArray(ContextCommand[]::new));
 		}
-		try {
-			dih4jda.registerInteractions();
-		} catch (ReflectiveOperationException e) {
-			ExceptionLogger.capture(e, getClass().getSimpleName());
-		}
+		dih4jda.registerInteractions();
 		addEventListeners(listeners);
 		registerComponentHandlers(ctx);
 	}
@@ -95,7 +91,7 @@ public class Bot {
 	 * <ol>
 	 *     <li>Setting the time zone to UTC, to keep our sanity when working with times.</li>
 	 *     <li>Loading the configuration JSON file.</li>
-	 *     <li>Creating and configuring the {@link JDA} instance that enables the bots' Discord connectivity.</li>
+	 *     <li>Creating and configuring the {@link net.dv8tion.jda.api.JDA} instance that enables the bots' Discord connectivity.</li>
 	 *     <li>Initializing the {@link DIH4JDA} instance.</li>
 	 *     <li>Adding event listeners to the bot.</li>
 	 * </ol>
@@ -109,29 +105,26 @@ public class Bot {
 		SpringApplication.run(Bot.class, args);
 	}
 
-	private void registerComponentHandlers(ApplicationContext ctx) {
+	private void registerComponentHandlers(@NotNull ApplicationContext ctx) {
 		Map<String, Object> interactionHandlers = ctx.getBeansWithAnnotation(AutoDetectableComponentHandler.class);
-		Map<List<String>, ButtonHandler> buttonHandlers = new HashMap<>();
-		Map<List<String>, ModalHandler> modalHandlers = new HashMap<>();
-		Map<List<String>, SelectMenuHandler> selectMenuHandlers = new HashMap<>();
+		List<IdMapping<ButtonHandler>> buttonMappings = new ArrayList<>();
+		List<IdMapping<ModalHandler>> modalMappings = new ArrayList<>();
+		List<IdMapping<StringSelectMenuHandler>> stringSelectMappings = new ArrayList<>();
 		for (Object handler : interactionHandlers.values()) {
 			AutoDetectableComponentHandler annotation = handler.getClass().getAnnotation(AutoDetectableComponentHandler.class);
-			List<String> keys = Arrays.asList(annotation.value());
-			addComponentHandler(buttonHandlers, keys, handler, ButtonHandler.class);
-			addComponentHandler(modalHandlers, keys, handler, ModalHandler.class);
-			addComponentHandler(selectMenuHandlers, keys, handler, SelectMenuHandler.class);
+			String[] keys = annotation.value();
+			addComponentHandler(buttonMappings, keys, handler, ButtonHandler.class);
+			addComponentHandler(modalMappings, keys, handler, ModalHandler.class);
+			addComponentHandler(stringSelectMappings, keys, handler, StringSelectMenuHandler.class);
 		}
-		dih4jda.addButtonHandlers(buttonHandlers);
-		dih4jda.addModalHandlers(modalHandlers);
-		dih4jda.addSelectMenuHandlers(selectMenuHandlers);
+		dih4jda.addButtonMappings(buttonMappings.toArray(IdMapping[]::new));
+		dih4jda.addModalMappings(modalMappings.toArray(IdMapping[]::new));
+		dih4jda.addStringSelectMenuMappings(stringSelectMappings.toArray(IdMapping[]::new));
 	}
 
-	private <T> void addComponentHandler(Map<List<String>, T> handlers, List<String> keys, Object handler, Class<T> type) {
+	private <T> void addComponentHandler(List<IdMapping<T>> handlers, String[] keys, Object handler, @NotNull Class<T> type) {
 		if (type.isInstance(handler)) {
-			T old = handlers.putIfAbsent(keys, type.cast(handler));
-			if(old!=null) {
-				throw new IllegalStateException("The same interaction name was registered multiple times");
-			}
+			handlers.add(IdMapping.of(type.cast(handler), keys));
 		}
 	}
 }

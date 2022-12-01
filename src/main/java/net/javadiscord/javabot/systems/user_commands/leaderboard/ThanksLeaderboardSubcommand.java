@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.Pair;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.util.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -35,7 +35,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 	public ThanksLeaderboardSubcommand(ExecutorService asyncPool, DbActions dbActions) {
 		this.asyncPool = asyncPool;
 		this.dbActions = dbActions;
-		setSubcommandData(new SubcommandData("thanks", "The Thanks Leaderboard."));
+		setCommandData(new SubcommandData("thanks", "The Thanks Leaderboard."));
 	}
 
 	@Override

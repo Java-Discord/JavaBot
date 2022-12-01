@@ -1,8 +1,8 @@
 package net.javadiscord.javabot.systems.user_preferences.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.AutoCompletable;
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -32,7 +32,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements
 	 */
 	public PreferencesSetSubcommand(UserPreferenceService service) {
 		this.service = service;
-		setSubcommandData(new SubcommandData("set", "Allows you to set your preferences!")
+		setCommandData(new SubcommandData("set", "Allows you to set your preferences!")
 				.addOptions(
 						new OptionData(OptionType.INTEGER, "preference", "The preference to set.", true)
 								.addChoices(Arrays.stream(Preference.values()).map(this::toChoice).toList()),

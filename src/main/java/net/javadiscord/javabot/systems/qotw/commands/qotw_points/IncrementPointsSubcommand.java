@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.qotw_points;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -33,7 +33,7 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 	public IncrementPointsSubcommand(QOTWPointsService pointsService, NotificationService notificationService) {
 		this.pointsService = pointsService;
 		this.notificationService = notificationService;
-		setSubcommandData(new SubcommandData("increment", "Adds one point to the user's QOTW-Account")
+		setCommandData(new SubcommandData("increment", "Adds one point to the user's QOTW-Account")
 				.addOption(OptionType.USER, "user", "The user whose points should be incremented.", true)
 		);
 	}

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -15,7 +15,7 @@ public class PingCommand extends SlashCommand {
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 */
 	public PingCommand() {
-		setSlashCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
+		setCommandData(Commands.slash("ping", "Shows the bot's gateway ping.")
 				.setGuildOnly(true)
 		);
 	}

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.qotw_points;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -36,7 +36,7 @@ public class SetPointsSubcommand extends SlashCommand.Subcommand {
 		this.service = service;
 		this.dataSource = dataSource;
 		this.qotwPointsRepository = qotwPointsRepository;
-		setSubcommandData(new SubcommandData("set", "Allows to modify the QOTW-Points of a single user.")
+		setCommandData(new SubcommandData("set", "Allows to modify the QOTW-Points of a single user.")
 				.addOption(OptionType.USER, "user", "The user whose points should be changed.", true)
 				.addOption(OptionType.INTEGER, "points", "The amount of points.", true)
 		);

@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -43,7 +43,7 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 	public ExportTableSubcommand(ExecutorService asyncPool, SystemsConfig systemsConfig, DataSource dataSource) {
 		this.asyncPool = asyncPool;
 		this.dataSource = dataSource;
-		setSubcommandData(new SubcommandData("export-table", "(ADMIN ONLY) Export a single database table")
+		setCommandData(new SubcommandData("export-table", "(ADMIN ONLY) Export a single database table")
 				.addOptions(new OptionData(OptionType.STRING, "table", "What table should be exported", true)
 								.addChoice("Custom Tags", "CUSTOM_TAGS")
 								.addChoice("Help Account", "HELP_ACCOUNT")
@@ -58,8 +58,8 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 								.addChoice("Warns", "WARN")
 								.addChoice("User Preferences", "USER_PREFERENCES"),
 						new OptionData(OptionType.BOOLEAN, "include-data", "Should data be included in the export?")));
-		requireUsers(systemsConfig.getAdminConfig().getAdminUsers());
-		requirePermissions(Permission.MANAGE_SERVER);
+		setRequiredUsers(systemsConfig.getAdminConfig().getAdminUsers());
+		setRequiredPermissions(Permission.MANAGE_SERVER);
 	}
 
 	@Override

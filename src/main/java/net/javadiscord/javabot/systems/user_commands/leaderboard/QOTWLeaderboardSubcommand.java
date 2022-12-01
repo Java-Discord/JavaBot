@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
-import com.dynxsty.dih4jda.interactions.commands.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -62,7 +62,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
 	 */
 	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool, QuestionPointsRepository qotwPointsRepository) {
-		setSubcommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
+		setCommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
 		this.pointsService=pointsService;
 		this.asyncPool = asyncPool;
 		this.qotwPointsRepository = qotwPointsRepository;

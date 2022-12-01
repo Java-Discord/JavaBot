@@ -1,6 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags;
 
-import com.dynxsty.dih4jda.util.AutoCompleteUtils;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +71,7 @@ public class CustomTagManager {
 	}
 
 	public static @NotNull AutoCompleteCallbackAction handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
-		return event.replyChoices(AutoCompleteUtils.handleChoices(event, e -> replyTags(e.getGuild(), e.getFocusedOption().getValue().toLowerCase())));
+		return event.replyChoices(AutoCompleteUtils.filterChoices(event, replyTags(event.getGuild(), event.getFocusedOption().getValue().toLowerCase())));
 	}
 
 	/**

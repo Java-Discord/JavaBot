@@ -22,7 +22,7 @@ public class RemoveEmbedFieldSubcommand extends EmbedSubcommand {
 	 */
 	public RemoveEmbedFieldSubcommand(BotConfig botConfig) {
 		super(botConfig);
-		setSubcommandData(new SubcommandData("remove-field", "Adds a field to an embed message.")
+		setCommandData(new SubcommandData("remove-field", "Adds a field to an embed message.")
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "The embed's message id.", true),
 						new OptionData(OptionType.INTEGER, "field-position", "The field's position. Starts with 0.", true)
