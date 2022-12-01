@@ -16,19 +16,15 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.sql.DataSource;
 
 /**
  * Job which posts a new question to the QOTW channel.
@@ -40,7 +36,6 @@ public class QOTWJob {
 	private final JDA jda;
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
 	private final QuestionQueueRepository questionQueueRepository;
 
 	/**
@@ -51,7 +46,9 @@ public class QOTWJob {
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			GuildConfig config = botConfig.get(guild);
-			if (config.getModerationConfig().getLogChannel() == null) continue;
+			if (config.getModerationConfig().getLogChannel() == null) {
+				continue;
+			}
 			Optional<QOTWQuestion> nextQuestion = questionQueueRepository.getNextQuestion(guild.getIdLong());
 			if (nextQuestion.isEmpty()) {
 				notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
@@ -66,12 +63,13 @@ public class QOTWJob {
 					question.setQuestionNumber(questionQueueRepository.getNextQuestionNumber());
 				}
 				NewsChannel questionChannel = qotw.getQuestionChannel();
-				if (questionChannel == null) continue;
-				questionChannel.sendMessage(qotw.getQOTWRole().getAsMention())
-						.setEmbeds(this.buildQuestionEmbed(question))
-						.setComponents(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
-						.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
-				questionQueueRepository.markUsed(question);
+				if (questionChannel != null) {
+					questionChannel.sendMessage(qotw.getQOTWRole().getAsMention())
+							.setEmbeds(this.buildQuestionEmbed(question))
+							.setComponents(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
+							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());
+					questionQueueRepository.markUsed(question);
+				}
 			}
 		}
 	}
@@ -80,7 +78,7 @@ public class QOTWJob {
 		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
-				.setDescription(String.format("%s\n\nClick the button below to submit your answer.\nYour answers will be checked by <t:%d:F>",
+				.setDescription(String.format("%s%n%nClick the button below to submit your answer.%nYour answer will be checked by <t:%d:F>",
 						question.getText(), checkTime.toEpochSecond()))
 				.build();
 	}
