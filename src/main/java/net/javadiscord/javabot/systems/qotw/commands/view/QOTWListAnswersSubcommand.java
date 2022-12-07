@@ -8,10 +8,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -28,18 +24,15 @@ public class QOTWListAnswersSubcommand extends SlashCommand.Subcommand {
 
 	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
-	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param botConfig The injected {@link BotConfig}
 	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param qotwSubmissionRepository Dao object that represents the QOTW_SUBMISSIONS SQL Table.
 	 */
-	public QOTWListAnswersSubcommand(BotConfig botConfig, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
+	public QOTWListAnswersSubcommand(BotConfig botConfig, ExecutorService asyncPool) {
 		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
-		this.qotwSubmissionRepository = qotwSubmissionRepository;
 		setCommandData(new SubcommandData("list-answers", "Lists answers to (previous) questions of the week")
 				.addOption(OptionType.INTEGER, "question", "The question number", true)
 		);

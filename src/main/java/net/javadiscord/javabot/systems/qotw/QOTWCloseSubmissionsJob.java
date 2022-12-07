@@ -1,9 +1,11 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -11,18 +13,13 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
-import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
 
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Job which disables the Submission button.
@@ -31,13 +28,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QOTWCloseSubmissionsJob {
 	private final JDA jda;
-	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
-	 * disable the Submission button.
+	 * Disables the submission button.
+	 *
 	 * @throws SQLException if an SQL error occurs
 	 */
 	@Scheduled(cron = "0 0 21 * * 7")//Sunday 21:00
@@ -51,18 +47,21 @@ public class QOTWCloseSubmissionsJob {
 					.queue();
 			if (config.getModerationConfig().getLogChannel() == null) continue;
 			if (qotwConfig.getSubmissionChannel() == null || qotwConfig.getQuestionChannel() == null) continue;
-			Message message = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
-			if (message == null) continue;
-			message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
-			for (ThreadChannel thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				Optional<QOTWSubmission> optionalSubmission = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
-				if (optionalSubmission.isEmpty()) continue;
-				new SubmissionControlsManager(botConfig.get(guild), optionalSubmission.get(), pointsService, notificationService).sendControls();
-			}
+			getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda)
+					.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
+			notificationService.withGuild(guild)
+					.sendToMessageLog(log ->
+							log.sendMessageFormat("%s%nIt's review time! There are %s threads to review!",
+									qotwConfig.getQOTWReviewRole().getAsMention(), countThreads(qotwConfig))
+					);
 		}
 	}
 
-	private Message getLatestQOTWMessage(MessageChannel channel, QOTWConfig config, JDA jda) {
+	private long countThreads(@NotNull QOTWConfig qotwConfig) {
+		return qotwConfig.getSubmissionChannel().getThreadChannels().size();
+	}
+
+	private Message getLatestQOTWMessage(@NotNull MessageChannel channel, QOTWConfig config, JDA jda) {
 		MessageHistory history = channel.getHistory();
 		Message message = null;
 		while (message == null) {

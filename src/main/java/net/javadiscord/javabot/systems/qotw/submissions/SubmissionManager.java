@@ -4,28 +4,29 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -40,10 +41,13 @@ public class SubmissionManager {
 	 * The submission thread's name.
 	 */
 	public static final String THREAD_NAME = "%s — %s";
+	private static final String SUBMISSION_ACCEPTED = "\u2705";
+	private static final String SUBMISSION_DECLINED = "\u274C";
+	private static final String SUBMISSION_PENDING = "\uD83D\uDD52";
 	private final QOTWConfig config;
-	private final DbHelper dbHelper;
-	private final QOTWSubmissionRepository qotwSubmissionRepository;
+	private final QOTWPointsService pointsService;
 	private final QuestionQueueRepository questionQueueRepository;
+	private final NotificationService notificationService;
 	private final ExecutorService asyncPool;
 
 	/**
@@ -66,19 +70,14 @@ public class SubmissionManager {
 					thread.addThreadMember(member).queue();
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
 					try {
-						QOTWSubmission submission = new QOTWSubmission();
-						submission.setThreadId(thread.getIdLong());
-						submission.setQuestionNumber(questionNumber);
-						submission.setGuildId(thread.getGuild().getIdLong());
-						submission.setAuthorId(member.getIdLong());
-						qotwSubmissionRepository.insert(submission);
 						asyncPool.execute(() -> {
 							Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(questionNumber);
 							if (questionOptional.isPresent()) {
 								thread.sendMessage(member.getAsMention())
 										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
 										.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
-										.queue(s -> {}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
+										.queue(s -> {
+										}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
 							} else {
 								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
 										.queue();
@@ -97,52 +96,65 @@ public class SubmissionManager {
 	/**
 	 * Handles the "Delete Submission" Button.
 	 *
-	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
+	 * @param event  The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
-	public void handleThreadDeletion(ButtonInteractionEvent event) {
-		ThreadChannel thread = (ThreadChannel) event.getGuildChannel();
-		asyncPool.execute(()->{
-			try {
-				Optional<QOTWSubmission> submissionOptional = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
-				if (submissionOptional.isPresent()) {
-					QOTWSubmission submission = submissionOptional.get();
-					if (submission.getAuthorId() != event.getMember().getIdLong()) {
-						return;
-					}
-					qotwSubmissionRepository.deleteSubmission(thread.getIdLong());
-					thread.delete().queue();
-				}
-			} catch (DataAccessException e) {
-				ExceptionLogger.capture(e, SubmissionManager.class.getSimpleName());
-			}
-		});
+	public void handleThreadDeletion(@NotNull ButtonInteractionEvent event) {
+		// TODO: add author check
+		event.getGuildChannel().delete().queue();
 	}
 
 	private boolean canCreateSubmissions(Member member) {
 		if (member == null) return false;
 		if (member.getUser().isBot() || member.getUser().isSystem()) return false;
-		if (member.isTimedOut() || member.isPending()) return false;
-		return !hasActiveSubmissionThreads(member.getIdLong());
+		return !member.isTimedOut() && !member.isPending();
 	}
 
 	/**
-	 * Checks if the given user has unreviewed submissions.
+	 * Accepts a submission.
 	 *
-	 * @param authorId The user's id.
-	 * @return Whether the user hat unreviewed submissions or not.
+	 * @param hook   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
+	 * @param thread The submission's {@link ThreadChannel}.
+	 * @param author The submissions' author.
+	 * @param bestAnswer Whether the submission is among the best answers for this week.
 	 */
-	public boolean hasActiveSubmissionThreads(long authorId) {
-		return !qotwSubmissionRepository.getUnreviewedSubmissions(authorId).isEmpty();
+	public void acceptSubmission(InteractionHook hook, @NotNull ThreadChannel thread, @NotNull User author, boolean bestAnswer) {
+		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
+		pointsService.increment(author.getIdLong());
+		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
+		Responses.success(hook, "Submission Accepted",
+				"Successfully accepted submission by " + author.getAsMention()).queue();
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, thread, bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
+		// TODO: add forum handling
 	}
 
 	/**
-	 * Gets all active submission threads.
+	 * Declines a submission.
 	 *
-	 * @param guildId The ID of the guild to get the submission threads from
-	 * @return An immutable {@link List} of {@link QOTWSubmission}s.
+	 * @param hook   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
+	 * @param thread The submission's {@link ThreadChannel}.
+	 * @param author The submissions' author.
 	 */
-	public List<QOTWSubmission> getActiveSubmissionThreads(long guildId) {
-		return qotwSubmissionRepository.getSubmissionsByQuestionNumber(guildId, qotwSubmissionRepository.getCurrentQuestionNumber());
+	public void declineSubmission(InteractionHook hook, @NotNull ThreadChannel thread, User author) {
+		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
+		// TODO: fix reason
+		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed("darum");
+		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, thread, SubmissionStatus.DECLINE);
+	}
+
+	private @NotNull List<Message> getSubmissionContent(@NotNull ThreadChannel thread) {
+		List<Message> messages = new ArrayList<>();
+		int count = thread.getMessageCount();
+		while (count > 0) {
+			List<Message> retrieved = thread.getHistory().retrievePast(Math.min(count, 100)).complete()
+					.stream()
+					.filter(m -> !m.getAuthor().isBot())
+					.toList();
+			messages.addAll(retrieved);
+			count -= Math.min(count, 100);
+		}
+		Collections.reverse(messages);
+		return messages;
 	}
 
 	private @NotNull MessageEmbed buildSubmissionThreadEmbed(@NotNull User createdBy, @NotNull QOTWQuestion question, @NotNull QOTWConfig config) {

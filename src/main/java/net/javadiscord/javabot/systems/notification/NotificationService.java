@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.Contract;
@@ -25,7 +24,6 @@ public class NotificationService {
 	private final QOTWPointsService qotwPointsService;
 	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
-	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	@Contract("_ -> new")
 	public @NotNull GuildNotificationService withGuild(Guild guild) {
@@ -38,11 +36,11 @@ public class NotificationService {
 	}
 
 	public @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
-		return new QOTWGuildNotificationService(this, guild, asyncPool, qotwSubmissionRepository);
+		return new QOTWGuildNotificationService(this, guild);
 	}
 
 	public @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
-		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems(), asyncPool, qotwSubmissionRepository);
+		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems(), asyncPool);
 	}
 
 	/**

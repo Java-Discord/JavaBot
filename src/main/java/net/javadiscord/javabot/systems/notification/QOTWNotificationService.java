@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
@@ -28,8 +27,8 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 	private final QOTWAccount account;
 	private final SystemsConfig systemsConfig;
 
-	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
-		super(notificationService, guild, asyncPool, qotwSubmissionRepository);
+	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig, ExecutorService asyncPool) {
+		super(notificationService, guild, asyncPool);
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;

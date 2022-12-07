@@ -8,8 +8,6 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;

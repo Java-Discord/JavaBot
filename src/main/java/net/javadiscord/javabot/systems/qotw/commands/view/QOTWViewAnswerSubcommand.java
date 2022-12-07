@@ -17,8 +17,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
