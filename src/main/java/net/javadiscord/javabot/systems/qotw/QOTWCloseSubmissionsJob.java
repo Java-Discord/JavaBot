@@ -10,18 +10,15 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
 import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +34,6 @@ public class QOTWCloseSubmissionsJob {
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
 	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
@@ -59,14 +55,9 @@ public class QOTWCloseSubmissionsJob {
 			if (message == null) continue;
 			message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
 			for (ThreadChannel thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				try (Connection con = dbHelper.getDataSource().getConnection()) {
-					Optional<QOTWSubmission> optionalSubmission = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
-					if (optionalSubmission.isEmpty()) continue;
-					new SubmissionControlsManager(botConfig.get(guild), optionalSubmission.get(), pointsService, notificationService).sendControls();
-				} catch (SQLException e) {
-					ExceptionLogger.capture(e, getClass().getSimpleName());
-					throw e;
-				}
+				Optional<QOTWSubmission> optionalSubmission = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
+				if (optionalSubmission.isEmpty()) continue;
+				new SubmissionControlsManager(botConfig.get(guild), optionalSubmission.get(), pointsService, notificationService).sendControls();
 			}
 		}
 	}
