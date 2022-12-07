@@ -9,7 +9,7 @@ import club.minnced.discord.webhook.send.component.LayoutComponent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.Webhook;
-import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -32,9 +32,8 @@ public class WebhookUtil {
 	 * @param callback an action that is executed once a webhook is
 	 *                 found/created
 	 */
-	public static void ensureWebhookExists(StandardGuildMessageChannel channel, Consumer<? super Webhook> callback) {
-		ensureWebhookExists(channel, callback, err -> {
-		});
+	public static void ensureWebhookExists(@NotNull IWebhookContainer channel, @NotNull Consumer<? super Webhook> callback) {
+		ensureWebhookExists(channel, callback, ExceptionLogger::capture);
 	}
 
 	/**
@@ -47,7 +46,7 @@ public class WebhookUtil {
 	 * @param failureCallback an action that is executed if the webhook
 	 *                        lookup/creation failed
 	 */
-	public static void ensureWebhookExists(@NotNull StandardGuildMessageChannel channel, Consumer<? super Webhook> callback, Consumer<? super Throwable> failureCallback) {
+	public static void ensureWebhookExists(@NotNull IWebhookContainer channel, @NotNull Consumer<? super Webhook> callback, @NotNull Consumer<? super Throwable> failureCallback) {
 
 		channel.retrieveWebhooks().queue(webhooks -> {
 			Optional<Webhook> hook = webhooks.stream()

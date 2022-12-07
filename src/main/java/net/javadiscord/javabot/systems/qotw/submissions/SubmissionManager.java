@@ -63,21 +63,22 @@ public class SubmissionManager {
 		config.getSubmissionChannel().createThreadChannel(
 				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
 				thread -> {
+					thread.addThreadMember(member).queue();
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					try{
+					try {
 						QOTWSubmission submission = new QOTWSubmission();
 						submission.setThreadId(thread.getIdLong());
 						submission.setQuestionNumber(questionNumber);
 						submission.setGuildId(thread.getGuild().getIdLong());
 						submission.setAuthorId(member.getIdLong());
 						qotwSubmissionRepository.insert(submission);
-						asyncPool.execute(()->{
+						asyncPool.execute(() -> {
 							Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(questionNumber);
 							if (questionOptional.isPresent()) {
 								thread.sendMessage(member.getAsMention())
 										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
 										.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
-										.queue();
+										.queue(s -> {}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
 							} else {
 								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
 										.queue();
