@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -150,7 +150,7 @@ public class AutoMod extends ListenerAdapter {
 							"Automod: Advertising",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
 							message.getChannel(),
-							isSuggestionsChannel(message.getChannel().asTextChannel())
+							isSuggestionsChannel(message.getChannel())
 					);
 			message.delete().queue(success -> {
 			}, error -> log.info("Message was deleted before Automod was able to handle it."));
@@ -168,7 +168,7 @@ public class AutoMod extends ListenerAdapter {
 							"Automod: Suspicious Link",
 							message.getGuild().getMember(message.getJDA().getSelfUser()),
 							message.getChannel(),
-							isSuggestionsChannel(message.getChannel().asTextChannel())
+							isSuggestionsChannel(message.getChannel())
 					);
 			message.delete().queue(success -> {
 			}, error -> log.info("Message was deleted before Automod was able to handle it."));
@@ -256,7 +256,8 @@ public class AutoMod extends ListenerAdapter {
 		return false;
 	}
 
-	private boolean isSuggestionsChannel(@NotNull TextChannel channel) {
-		return channel.equals(botConfig.get(channel.getGuild()).getModerationConfig().getSuggestionChannel());
+	private boolean isSuggestionsChannel(@NotNull MessageChannelUnion channel) {
+		return channel.getType().isGuild() &&
+				channel.getIdLong() == botConfig.get(channel.asGuildMessageChannel().getGuild()).getModerationConfig().getSuggestionChannel().getIdLong();
 	}
 }
