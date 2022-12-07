@@ -51,7 +51,7 @@ public class Bot {
 	private final DIH4JDA dih4jda;
 	private final BotConfig config;
 	private final List<SlashCommand> commands;
-	private final List<ContextCommand> contextCommands;
+	private final List<ContextCommand<?>> contextCommands;
 	private final List<ListenerAdapter> listeners;
 	private final ApplicationContext ctx;
 

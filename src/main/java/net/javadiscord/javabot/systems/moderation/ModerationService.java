@@ -208,8 +208,17 @@ public class ModerationService {
 	 */
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
+		user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessageEmbeds(banEmbed)).queue(success -> {
+			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
+		}, err-> {
+			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
+			ExceptionLogger.capture(err, ModerationService.class.getName());
+		});
+	}
+
+	private void banAndSendGuildNotifications(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet,
+			MessageEmbed banEmbed) {
 		bannedBy.getGuild().ban(user, BAN_DELETE_DAYS, TimeUnit.DAYS).reason(reason).queue(s -> {
-			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(banEmbed));
 			notificationService.withGuild(bannedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(banEmbed));
 			if (!quiet) channel.sendMessageEmbeds(banEmbed).queue();
 		}, ExceptionLogger::capture);
