@@ -29,10 +29,13 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.WebhookUtil;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Manages all interactions regarding the report-system.
@@ -154,7 +157,11 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			embed.setTitle(String.format("%s reported a Message from %s", event.getUser().getName(), target.getAuthor().getName()));
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
 			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
-			reportChannel.sendMessageEmbeds(embed.build()).queue(m -> createReportThread(m, target.getAuthor().getIdLong(), config.getModerationConfig()));
+			reportChannel.sendMessageEmbeds(embed.build()).queue(m -> createReportThread(m, target.getAuthor().getIdLong(), config.getModerationConfig(), thread->{
+				WebhookUtil.ensureWebhookExists(thread.getParentChannel().asStandardGuildMessageChannel(), wh->{
+					WebhookUtil.mirrorMessageToWebhook(wh, target, target.getContentRaw(), thread.getIdLong());
+				});
+			}));
 			embed.setDescription("Successfully reported " + "`" + target.getAuthor().getAsTag() + "`!\nYour report has been send to our Moderators");
 			event.getHook().sendMessageEmbeds(embed.build()).queue();
 		}, failure -> {
@@ -173,12 +180,23 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	}
 
 	private void createReportThread(Message message, long targetId, ModerationConfig config) {
+		createReportThread(message, targetId, config, thread->{});
+	}
+
+	private void createReportThread(Message message, long targetId, ModerationConfig config, Consumer<ThreadChannel> onSuccess) {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
-				thread -> thread.sendMessage(config.getStaffRole().getAsMention())
+				thread -> {
+					thread.sendMessage(config.getStaffRole().getAsMention())
 						.setComponents(setComponents(targetId, thread.getIdLong()))
-						.queue()
+						.queue();
+					onSuccess.accept(thread);
+				}
 		);
 	}
+
+
+
+
 
 	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, String reason, Channel channel) {
 		return new EmbedBuilder()
