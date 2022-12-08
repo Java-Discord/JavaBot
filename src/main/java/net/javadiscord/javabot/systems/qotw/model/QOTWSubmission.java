@@ -26,6 +26,10 @@ public class QOTWSubmission {
 	 * @param onSuccess The success-{@link Consumer} for this operation.
 	 */
 	public void retrieveAuthor(Consumer<User> onSuccess) {
+		if (author != null) {
+			onSuccess.accept(author);
+			return;
+		}
 		thread.retrieveThreadMembers().queue(s -> s.forEach(m -> {
 			if (author == null && !m.getUser().isBot()) {
 				author = m.getUser();
