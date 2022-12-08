@@ -25,6 +25,7 @@ public class QOTWSubmissionListener extends ListenerAdapter {
 		}
 		QOTWConfig qotwConfig = config.get(event.getGuild()).getQotwConfig();
 		ThreadChannel thread = event.getChannel().asThreadChannel();
+		// TODO: fix check
 		if (thread.getParentChannel().getIdLong() != qotwConfig.getSubmissionChannelId()) {
 			return;
 		}
