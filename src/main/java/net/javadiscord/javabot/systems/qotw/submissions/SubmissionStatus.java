@@ -7,13 +7,23 @@ public enum SubmissionStatus {
 	/**
 	 * The submission got accepted and was among the best answers for the current week.
 	 */
-	ACCEPT_BEST,
+	ACCEPT_BEST("accepted (best answer)"),
 	/**
 	 * The submission simply got accepted.
 	 */
-	ACCEPT,
+	ACCEPT("accepted"),
 	/**
 	 * The submission got declined.
 	 */
-	DECLINE
+	DECLINE("declined");
+
+	private final String verb;
+
+	SubmissionStatus(String verb) {
+		this.verb = verb;
+	}
+
+	public String getVerb() {
+		return verb;
+	}
 }

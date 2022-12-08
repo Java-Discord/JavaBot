@@ -34,10 +34,10 @@ public class QOTWGuildNotificationService {
 	 * @param submission	   The {@link QOTWSubmission}.
 	 * @param status           The {@link SubmissionStatus}.
 	 */
-	public void sendSubmissionActionNotification(User reviewedBy, QOTWSubmission submission, SubmissionStatus status) {
+	public void sendSubmissionActionNotification(User reviewedBy, @NotNull QOTWSubmission submission, SubmissionStatus status) {
 		submission.retrieveAuthor(author -> {
 			notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submission.getThread(), reviewedBy, status)));
-			log.info("{} {} {}'s QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag());
+			log.info("{} {} {}'s QOTW Submission", reviewedBy.getAsTag(), status.getVerb(), author.getAsTag());
 		});
 	}
 
