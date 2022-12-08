@@ -3,12 +3,18 @@ package net.javadiscord.javabot.systems.qotw.submissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageType;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -24,9 +30,16 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -106,7 +119,7 @@ public class SubmissionManager {
 	/**
 	 * Handles the "Delete Submission" Button.
 	 *
-	 * @param event  The {@link ButtonInteractionEvent} that is fired upon use.
+	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
 	public void handleThreadDeletion(@NotNull ButtonInteractionEvent event) {
 		config.getSubmissionChannel().getThreadChannels()
@@ -150,9 +163,9 @@ public class SubmissionManager {
 	/**
 	 * Accepts a submission.
 	 *
-	 * @param hook   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
-	 * @param thread The submission's {@link ThreadChannel}.
-	 * @param author The submissions' author.
+	 * @param hook       The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
+	 * @param thread     The submission's {@link ThreadChannel}.
+	 * @param author     The submissions' author.
 	 * @param bestAnswer Whether the submission is among the best answers for this week.
 	 */
 	public void acceptSubmission(InteractionHook hook, @NotNull ThreadChannel thread, @NotNull User author, boolean bestAnswer) {
@@ -166,11 +179,13 @@ public class SubmissionManager {
 				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 		if (newestPostOptional.isPresent()) {
 			ThreadChannel newestPost = newestPostOptional.get();
-			for (Message message : getSubmissionContent(thread)) {
-				WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asStandardGuildMessageChannel(), wh -> {
-					WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
-				});
-			}
+			getMessagesByUser(thread, author).thenAccept(messages -> {
+				for (Message message : messages) {
+					if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
+					WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh ->
+							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong()));
+				}
+			}).thenAccept(v -> newestPost.sendMessageEmbeds(buildAuthorEmbed(author)).queue());
 		}
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
@@ -191,19 +206,17 @@ public class SubmissionManager {
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
 
-	private @NotNull List<Message> getSubmissionContent(@NotNull ThreadChannel thread) {
-		List<Message> messages = new ArrayList<>();
-		int count = thread.getMessageCount();
-		while (count > 0) {
-			List<Message> retrieved = thread.getHistory().retrievePast(Math.min(count, 100)).complete()
-					.stream()
-					.filter(m -> !m.getAuthor().isBot())
-					.toList();
-			messages.addAll(retrieved);
-			count -= Math.min(count, 100);
-		}
-		Collections.reverse(messages);
-		return messages;
+	private CompletableFuture<List<Message>> getMessagesByUser(@NotNull ThreadChannel channel, User user) {
+		return channel.getIterableHistory()
+				.reverse()
+				.takeAsync(channel.getMessageCount())
+				.thenApply(list -> list.stream().filter(m -> m.getAuthor().equals(user)).toList());
+	}
+
+	private @NotNull MessageEmbed buildAuthorEmbed(User user) {
+		return new EmbedBuilder()
+				.setAuthor("Submission from " + user.getAsTag(), null, user.getAvatarUrl())
+				.build();
 	}
 
 	private @NotNull MessageEmbed buildSubmissionThreadEmbed(@NotNull User createdBy, @NotNull QOTWQuestion question, @NotNull QOTWConfig config) {
