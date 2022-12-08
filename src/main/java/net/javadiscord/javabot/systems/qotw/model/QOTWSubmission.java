@@ -17,7 +17,7 @@ public class QOTWSubmission {
 
 	public void retrieveAuthor(Consumer<User> onSuccess) {
 		thread.retrieveThreadMembers().queue(s -> s.forEach(m -> {
-			if (!hasAuthor() && !m.getUser().isBot()) {
+			if (author == null && !m.getUser().isBot()) {
 				author = m.getUser();
 				onSuccess.accept(author);
 			}

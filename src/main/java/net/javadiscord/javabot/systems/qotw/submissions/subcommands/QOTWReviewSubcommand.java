@@ -14,6 +14,7 @@ import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -76,23 +77,14 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply().queue();
-		submissionThread.retrieveThreadMembers().queue(
-				members -> {
-					Optional<ThreadMember> authorOptional = members.stream()
-							.filter(m -> !m.getUser().isBot())
-							.findFirst();
-					if (authorOptional.isEmpty()) {
-						Responses.info(event.getHook(), "Could not find submission author of thread %s", submissionThread.getAsMention()).queue();
-						return;
-					}
-					User author = authorOptional.get().getUser();
-					SubmissionManager manager = new SubmissionManager(qotwConfig, pointsService, questionQueueRepository, notificationService, asyncPool);
-					if (state.contains("ACCEPT")) {
-						manager.acceptSubmission(event.getHook(), submissionThread, author, state.equals("ACCEPT_BEST"));
-					} else {
-						manager.declineSubmission(event.getHook(), submissionThread, author);
-					}
-				}
-		);
+		QOTWSubmission submission = new QOTWSubmission(submissionThread);
+		submission.retrieveAuthor(author -> {
+			SubmissionManager manager = new SubmissionManager(qotwConfig, pointsService, questionQueueRepository, notificationService, asyncPool);
+			if (state.contains("ACCEPT")) {
+				manager.acceptSubmission(event.getHook(), submissionThread, author, state.equals("ACCEPT_BEST"));
+			} else {
+				manager.declineSubmission(event.getHook(), submissionThread, author);
+			}
+		});
 	}
 }

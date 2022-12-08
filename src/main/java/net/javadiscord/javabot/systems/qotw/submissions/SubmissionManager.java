@@ -18,6 +18,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,6 @@ public class SubmissionManager {
 	public static final String THREAD_NAME = "%s — %s";
 	private static final String SUBMISSION_ACCEPTED = "\u2705";
 	private static final String SUBMISSION_DECLINED = "\u274C";
-	private static final String SUBMISSION_PENDING = "\uD83D\uDD52";
 	private static final Map<Long, QOTWSubmission> submissionCache;
 
 	static {
@@ -162,7 +162,17 @@ public class SubmissionManager {
 		Responses.success(hook, "Submission Accepted",
 				"Successfully accepted submission by " + author.getAsMention()).queue();
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
-		// TODO: add forum handling
+		Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
+				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
+		if (newestPostOptional.isPresent()) {
+			ThreadChannel newestPost = newestPostOptional.get();
+			for (Message message : getSubmissionContent(thread)) {
+				WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asStandardGuildMessageChannel(), wh -> {
+					WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
+				});
+			}
+		}
+		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
 
 	/**
@@ -178,6 +188,7 @@ public class SubmissionManager {
 		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed("EMPTY_REASON");
 		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), SubmissionStatus.DECLINE);
+		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
 
 	private @NotNull List<Message> getSubmissionContent(@NotNull ThreadChannel thread) {
