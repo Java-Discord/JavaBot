@@ -178,8 +178,14 @@ public class SubmissionManager {
 			getMessagesByUser(thread, author).thenAccept(messages -> {
 				for (Message message : messages) {
 					if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
-					WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh ->
-							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong()));
+					WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh -> {
+						if (message.getContentRaw().length() > 2000) {
+							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong());
+							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2001), newestPost.getIdLong());
+						} else {
+							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
+						}
+					});
 				}
 				newestPost.sendMessageEmbeds(buildAuthorEmbed(author, bestAnswer)).queue();
 			});
