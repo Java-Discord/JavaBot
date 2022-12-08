@@ -23,11 +23,8 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import javax.swing.text.html.Option;
 import java.sql.SQLException;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

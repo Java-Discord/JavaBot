@@ -1,7 +1,5 @@
 package net.javadiscord.javabot.systems.qotw.submissions.subcommands;
 
-import net.dv8tion.jda.api.entities.ThreadMember;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -20,7 +18,6 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**

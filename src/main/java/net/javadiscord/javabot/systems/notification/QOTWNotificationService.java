@@ -14,7 +14,6 @@ import org.springframework.dao.DataAccessException;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
-import java.util.concurrent.ExecutorService;
 
 /**
  * An extension of {@link QOTWGuildNotificationService} which also handles user qotw

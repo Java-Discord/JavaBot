@@ -7,13 +7,11 @@ import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
