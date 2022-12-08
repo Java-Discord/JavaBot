@@ -44,7 +44,7 @@ public class QOTWGuildNotificationService {
 	private @NotNull MessageEmbed buildSubmissionActionEmbed(@NotNull User author, ThreadChannel thread, @NotNull User reviewedBy, @NotNull SubmissionStatus status) {
 		EmbedBuilder builder = new EmbedBuilder()
 				.setAuthor(reviewedBy.getAsTag(), null, reviewedBy.getEffectiveAvatarUrl())
-				.setTitle(String.format("%s %s %s's QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag()))
+				.setTitle(String.format("%s %s %s's QOTW Submission", reviewedBy.getAsTag(), status.getVerb(), author.getAsTag()))
 				.setTimestamp(Instant.now());
 		if (thread != null) {
 			builder.addField("Thread", thread.getAsMention(), true);
