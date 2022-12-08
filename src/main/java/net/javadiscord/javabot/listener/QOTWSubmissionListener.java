@@ -16,14 +16,14 @@ import org.jetbrains.annotations.NotNull;
  */
 @RequiredArgsConstructor
 public class QOTWSubmissionListener extends ListenerAdapter {
-	private final BotConfig config;
+	private final BotConfig botConfig;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		if (!event.isFromGuild() || !event.isFromThread() || event.getChannelType() != ChannelType.GUILD_PRIVATE_THREAD) {
 			return;
 		}
-		QOTWConfig qotwConfig = config.get(event.getGuild()).getQotwConfig();
+		QOTWConfig qotwConfig = botConfig.get(event.getGuild()).getQotwConfig();
 		ThreadChannel thread = event.getChannel().asThreadChannel();
 		// TODO: fix check
 		if (thread.getParentChannel().getIdLong() != qotwConfig.getSubmissionChannelId()) {
