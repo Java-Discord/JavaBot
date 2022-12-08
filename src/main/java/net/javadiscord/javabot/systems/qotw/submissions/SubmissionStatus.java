@@ -9,7 +9,7 @@ public enum SubmissionStatus {
 	 */
 	ACCEPT_BEST("accepted (best answer)"),
 	/**
-	 * The submission simply got accepted.
+	 * The submission got accepted but was not among the best answers for the current week.
 	 */
 	ACCEPT("accepted"),
 	/**
