@@ -84,7 +84,7 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 			} else {
 				manager.declineSubmission(event.getHook(), submissionThread, author);
 			}
-			if (qotwConfig.getSubmissionChannel().getThreadChannels().size() - 1 <= 0) {
+			if (qotwConfig.getSubmissionChannel().getThreadChannels().size() <= 1) {
 				Optional<ThreadChannel> newestPostOptional = qotwConfig.getSubmissionsForumChannel().getThreadChannels()
 						.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 				newestPostOptional.ifPresent(p -> {
