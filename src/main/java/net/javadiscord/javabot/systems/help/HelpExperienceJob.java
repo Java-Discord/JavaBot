@@ -28,7 +28,7 @@ public class HelpExperienceJob {
 	/**
 	 * Removes a specified amount of experience from everyone's help account.
 	 */
-	@Scheduled(cron = "0 0 0 * * *")//daily 00:00
+	@Scheduled(cron = "0 0 0 * * *") // Daily, 00:00 UTC
 	public void execute() {
 		asyncPool.execute(() -> {
 			try {

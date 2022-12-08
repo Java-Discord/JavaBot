@@ -42,7 +42,7 @@ public class QOTWJob {
 	 * Posts a new question to the QOTW channel.
 	 * @throws SQLException if an SQL error occurs
 	 */
-	@Scheduled(cron = "0 0 9 * * 1")//MONDAY, 09:00
+	@Scheduled(cron = "0 0 9 * * 1") // Monday, 09:00  UTC
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			GuildConfig config = botConfig.get(guild);

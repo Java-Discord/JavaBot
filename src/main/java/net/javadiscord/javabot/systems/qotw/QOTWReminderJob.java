@@ -33,7 +33,7 @@ public class QOTWReminderJob {
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
 	 * @throws SQLException if an SQL error occurs
 	 */
-	@Scheduled(cron = "0 0 9 * * *")//daily, 09:00
+	@Scheduled(cron = "0 0 9 * * *") // Daily, 09:00 UTC
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			ModerationConfig config = botConfig.get(guild).getModerationConfig();

@@ -50,7 +50,7 @@ public class QOTWCloseSubmissionsJob {
 	 *
 	 * @throws SQLException if an SQL error occurs
 	 */
-	@Scheduled(cron = "0 0 21 * * 7")//Sunday 21:00
+	@Scheduled(cron = "0 0 17 * * 7") // Sunday, 17:00 UTC
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			// Disable 'Submit your Answer' button on latest QOTW

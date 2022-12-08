@@ -37,7 +37,7 @@ public class QOTWUserReminderJob {
 	/**
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
 	 */
-	@Scheduled(cron = "0 0 16 * * 5")//Friday 16:00
+	@Scheduled(cron = "0 0 16 * * 5") // Friday, 16:00 UTC
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = botConfig.get(guild).getQotwConfig();
