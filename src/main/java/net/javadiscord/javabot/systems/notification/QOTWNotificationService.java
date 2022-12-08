@@ -27,8 +27,8 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 	private final QOTWAccount account;
 	private final SystemsConfig systemsConfig;
 
-	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig, ExecutorService asyncPool) {
-		super(notificationService, guild, asyncPool);
+	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig) {
+		super(notificationService, guild);
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;

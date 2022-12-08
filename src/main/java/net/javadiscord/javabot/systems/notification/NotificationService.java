@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 /**
@@ -23,7 +22,6 @@ import java.util.function.Function;
 public class NotificationService {
 	private final QOTWPointsService qotwPointsService;
 	private final BotConfig botConfig;
-	private final ExecutorService asyncPool;
 
 	@Contract("_ -> new")
 	public @NotNull GuildNotificationService withGuild(Guild guild) {
@@ -40,7 +38,7 @@ public class NotificationService {
 	}
 
 	public @NotNull QOTWNotificationService withQOTW(Guild guild, User user) {
-		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems(), asyncPool);
+		return new QOTWNotificationService(this, qotwPointsService, user, guild, botConfig.getSystems());
 	}
 
 	/**

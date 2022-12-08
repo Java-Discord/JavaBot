@@ -3,10 +3,7 @@ package net.javadiscord.javabot.systems.qotw.submissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -18,6 +15,7 @@ import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
+import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -25,11 +23,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -44,6 +40,12 @@ public class SubmissionManager {
 	private static final String SUBMISSION_ACCEPTED = "\u2705";
 	private static final String SUBMISSION_DECLINED = "\u274C";
 	private static final String SUBMISSION_PENDING = "\uD83D\uDD52";
+	private static final Map<Long, QOTWSubmission> submissionCache;
+
+	static {
+		submissionCache = new HashMap<>();
+	}
+
 	private final QOTWConfig config;
 	private final QOTWPointsService pointsService;
 	private final QuestionQueueRepository questionQueueRepository;
@@ -78,6 +80,9 @@ public class SubmissionManager {
 										.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
 										.queue(s -> {
 										}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
+								QOTWSubmission submission = new QOTWSubmission(thread);
+								submission.setAuthor(member.getUser());
+								submissionCache.put(thread.getIdLong(), submission);
 							} else {
 								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
 										.queue();
@@ -90,7 +95,12 @@ public class SubmissionManager {
 		);
 		log.info("Opened new Submission Thread for User {}", member.getUser().getAsTag());
 		return Responses.success(event.getHook(), "Submission Thread created", "Successfully created a new private Thread for your submission.");
+	}
 
+	public List<QOTWSubmission> getActiveSubmissions() {
+		return config.getSubmissionChannel().getThreadChannels()
+				.stream()
+				.map(this::getOrRetrieveSubmission).toList();
 	}
 
 	/**
@@ -99,8 +109,36 @@ public class SubmissionManager {
 	 * @param event  The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
 	public void handleThreadDeletion(@NotNull ButtonInteractionEvent event) {
-		// TODO: add author check
-		event.getGuildChannel().delete().queue();
+		config.getSubmissionChannel().getThreadChannels()
+				.stream().filter(t -> t.getIdLong() == event.getChannel().getIdLong())
+				.map(this::getOrRetrieveSubmission)
+				.forEach(s -> getOrRetrieveAuthor(s, author -> {
+					if (event.getUser().getIdLong() == author.getIdLong()) {
+						s.getThread().delete().queue();
+					}
+				}));
+	}
+
+	private void getOrRetrieveAuthor(@NotNull QOTWSubmission submission, Consumer<User> onSuccess) {
+		if (submission.hasAuthor()) {
+			onSuccess.accept(submission.getAuthor());
+		} else {
+			submission.retrieveAuthor(author -> {
+				submission.setAuthor(author);
+				submissionCache.put(submission.getThread().getIdLong(), submission);
+				onSuccess.accept(author);
+			});
+		}
+	}
+
+	private QOTWSubmission getOrRetrieveSubmission(@NotNull ThreadChannel thread) {
+		if (submissionCache.containsKey(thread.getIdLong())) {
+			return submissionCache.get(thread.getIdLong());
+		} else {
+			QOTWSubmission submission = new QOTWSubmission(thread);
+			submissionCache.put(thread.getIdLong(), submission);
+			return submission;
+		}
 	}
 
 	private boolean canCreateSubmissions(Member member) {
@@ -123,7 +161,7 @@ public class SubmissionManager {
 		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
 		Responses.success(hook, "Submission Accepted",
 				"Successfully accepted submission by " + author.getAsMention()).queue();
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, thread, bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
 		// TODO: add forum handling
 	}
 
@@ -137,9 +175,9 @@ public class SubmissionManager {
 	public void declineSubmission(InteractionHook hook, @NotNull ThreadChannel thread, User author) {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		// TODO: fix reason
-		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed("darum");
+		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed("EMPTY_REASON");
 		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, thread, SubmissionStatus.DECLINE);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), SubmissionStatus.DECLINE);
 	}
 
 	private @NotNull List<Message> getSubmissionContent(@NotNull ThreadChannel thread) {

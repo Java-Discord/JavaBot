@@ -3,10 +3,10 @@ package net.javadiscord.javabot.systems.qotw;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
+import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
@@ -29,8 +29,8 @@ public class QOTWUserReminderJob {
 	private final JDA jda;
 	private final UserPreferenceService userPreferenceService;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
-	private final QOTWSubmissionRepository qotwSubmissionRepository;
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
 	private final QuestionQueueRepository questionQueueRepository;
 	private final ExecutorService asyncPool;
 
@@ -41,17 +41,13 @@ public class QOTWUserReminderJob {
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = botConfig.get(guild).getQotwConfig();
-			List<QOTWSubmission> submissions = new SubmissionManager(config, dbHelper, qotwSubmissionRepository, questionQueueRepository, asyncPool).getActiveSubmissionThreads(guild.getIdLong());
+			List<QOTWSubmission> submissions = new SubmissionManager(config, pointsService, questionQueueRepository, notificationService, asyncPool).getActiveSubmissions();
 			for (QOTWSubmission submission : submissions) {
-				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthorId(), Preference.QOTW_REMINDER);
-				if (Boolean.parseBoolean(preference.getState())) {
-					TextChannel channel = config.getSubmissionChannel();
-					channel.getThreadChannels().stream().filter(t -> t.getIdLong() == submission.getThreadId()).forEach(t -> {
-						if (t.getMessageCount() <= 1) {
-							t.sendMessageFormat("**Question of the Week Reminder**\nHey <@%s>! You still have some time left to submit your answer!", submission.getAuthorId())
-									.queue();
-						}
-					});
+				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthor().getIdLong(), Preference.QOTW_REMINDER);
+				if (Boolean.parseBoolean(preference.getState()) && submission.getThread().getMessageCount() <= 1) {
+					submission.getThread()
+							.sendMessageFormat("**Question of the Week Reminder**\nHey %s! You still have some time left to submit your answer!", submission.getAuthor().getAsMention())
+							.queue();
 				}
 			}
 		}

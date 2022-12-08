@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +31,14 @@ public class QOTWGuildNotificationService {
 	 * Sends the executed action, performed on a QOTW submission thread, to the {@link Guild}s log channel.
 	 *
 	 * @param reviewedBy       The user which reviewed the QOTW submission thread.
-	 * @param author           The submissions' author.
-	 * @param submissionThread The submission thread itself.
+	 * @param submission	   The {@link QOTWSubmission}.
 	 * @param status           The {@link SubmissionStatus}.
 	 */
-	public void sendSubmissionActionNotification(User reviewedBy, User author, ThreadChannel submissionThread, SubmissionStatus status) {
-		notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submissionThread, reviewedBy, status)));
-		log.info("{} {} {}'s QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag());
+	public void sendSubmissionActionNotification(User reviewedBy, QOTWSubmission submission, SubmissionStatus status) {
+		submission.retrieveAuthor(author -> {
+			notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submission.getThread(), reviewedBy, status)));
+			log.info("{} {} {}'s QOTW Submission", reviewedBy.getAsTag(), status.name().toLowerCase(), author.getAsTag());
+		});
 	}
 
 	private @NotNull MessageEmbed buildSubmissionActionEmbed(@NotNull User author, ThreadChannel thread, @NotNull User reviewedBy, @NotNull SubmissionStatus status) {
