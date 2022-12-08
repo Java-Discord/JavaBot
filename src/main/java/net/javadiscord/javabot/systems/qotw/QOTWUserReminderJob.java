@@ -37,18 +37,21 @@ public class QOTWUserReminderJob {
 	/**
 	 * Checks that there's a question in the QOTW queue ready for posting soon.
 	 */
-	@Scheduled(cron = "* 0 16 * * 5")//Friday 16:00
+	@Scheduled(cron = "0 0 16 * * 5")//Friday 16:00
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = botConfig.get(guild).getQotwConfig();
 			List<QOTWSubmission> submissions = new SubmissionManager(config, pointsService, questionQueueRepository, notificationService, asyncPool).getActiveSubmissions();
 			for (QOTWSubmission submission : submissions) {
-				UserPreference preference = userPreferenceService.getOrCreate(submission.getAuthor().getIdLong(), Preference.QOTW_REMINDER);
-				if (Boolean.parseBoolean(preference.getState()) && submission.getThread().getMessageCount() <= 1) {
-					submission.getThread()
-							.sendMessageFormat("**Question of the Week Reminder**\nHey %s! You still have some time left to submit your answer!", submission.getAuthor().getAsMention())
-							.queue();
-				}
+				submission.retrieveAuthor(author -> {
+					UserPreference preference = userPreferenceService.getOrCreate(author.getIdLong(), Preference.QOTW_REMINDER);
+					if (Boolean.parseBoolean(preference.getState()) && submission.getThread().getMessageCount() <= 2) {
+						submission.getThread()
+								.sendMessageFormat("**Question of the Week Reminder**\nHey %s! You still have some time left to submit your answer!", submission.getAuthor().getAsMention())
+								.queue();
+					}
+				});
+
 			}
 		}
 	}

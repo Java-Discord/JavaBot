@@ -6,7 +6,10 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
+
+import java.util.List;
 
 /**
  * Configuration for the guild's qotw system.
@@ -19,6 +22,7 @@ public class QOTWConfig extends GuildConfigItem {
 	private long submissionsForumChannelId;
 	private long questionRoleId;
 	private long qotwReviewRoleId;
+	private String submissionForumOngoingReviewTagName = "";
 
 	public NewsChannel getQuestionChannel() {
 		return this.getGuild().getNewsChannelById(this.questionChannelId);
@@ -38,5 +42,17 @@ public class QOTWConfig extends GuildConfigItem {
 
 	public Role getQOTWReviewRole() {
 		return this.getGuild().getRoleById(this.qotwReviewRoleId);
+	}
+
+	/**
+	 * Gets a {@link ForumTag} based on the specified name.
+	 *
+	 * @return The specified {@link ForumTag} or null if there is no tag matching the specified name.
+	 */
+	public ForumTag getSubmissionsForumOngoingReviewTag() {
+		ForumChannel forumChannel = getSubmissionsForumChannel();
+		if (forumChannel == null) return null;
+		List<ForumTag> tags = forumChannel.getAvailableTagsByName(this.submissionForumOngoingReviewTagName, true);
+		return tags.stream().findFirst().orElse(null);
 	}
 }

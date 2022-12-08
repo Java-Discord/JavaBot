@@ -18,6 +18,8 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -81,6 +83,14 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 				manager.acceptSubmission(event.getHook(), submissionThread, author, state.equals("ACCEPT_BEST"));
 			} else {
 				manager.declineSubmission(event.getHook(), submissionThread, author);
+			}
+			if (qotwConfig.getSubmissionChannel().getThreadChannels().size() - 1 <= 0) {
+				Optional<ThreadChannel> newestPostOptional = qotwConfig.getSubmissionsForumChannel().getThreadChannels()
+						.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
+				newestPostOptional.ifPresent(p -> {
+					p.getManager().setAppliedTags().queue();
+					notificationService.withGuild(qotwConfig.getGuild()).sendToModerationLog(log -> log.sendMessageFormat("All submissions have been reviewed!"));
+				});
 			}
 		});
 	}

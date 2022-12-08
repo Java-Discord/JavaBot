@@ -9,12 +9,10 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -30,7 +28,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +36,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -185,7 +181,8 @@ public class SubmissionManager {
 					WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh ->
 							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong()));
 				}
-			}).thenAccept(v -> newestPost.sendMessageEmbeds(buildAuthorEmbed(author)).queue());
+				newestPost.sendMessageEmbeds(buildAuthorEmbed(author, bestAnswer)).queue();
+			});
 		}
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
@@ -199,8 +196,7 @@ public class SubmissionManager {
 	 */
 	public void declineSubmission(InteractionHook hook, @NotNull ThreadChannel thread, User author) {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
-		// TODO: fix reason
-		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed("EMPTY_REASON");
+		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed();
 		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), SubmissionStatus.DECLINE);
 		thread.getManager().setLocked(true).setArchived(true).queue();
@@ -213,9 +209,10 @@ public class SubmissionManager {
 				.thenApply(list -> list.stream().filter(m -> m.getAuthor().equals(user)).toList());
 	}
 
-	private @NotNull MessageEmbed buildAuthorEmbed(User user) {
+	private @NotNull MessageEmbed buildAuthorEmbed(@NotNull User user, boolean bestAnswer) {
 		return new EmbedBuilder()
-				.setAuthor("Submission from " + user.getAsTag(), null, user.getAvatarUrl())
+				.setAuthor((bestAnswer ? "\u2B50 " : "") + "Submission from " + user.getAsTag(), null, user.getAvatarUrl())
+				.setColor(bestAnswer ? Responses.Type.WARN.getColor() : Responses.Type.DEFAULT.getColor())
 				.build();
 	}
 

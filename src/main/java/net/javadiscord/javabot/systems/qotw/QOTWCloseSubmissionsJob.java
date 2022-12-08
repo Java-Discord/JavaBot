@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
-import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.ForumPostAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class QOTWCloseSubmissionsJob {
-	private static final String SUBMISSION_PENDING = "\uD83D\uDD52";
+	private static final String SUBMISSION_PENDING = "\uD83D\uDD52 ";
 
 	private final JDA jda;
 	private final NotificationService notificationService;
@@ -65,11 +65,11 @@ public class QOTWCloseSubmissionsJob {
 			questionMessage.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
 			notificationService.withGuild(guild)
 					.sendToModerationLog(log ->
-							log.sendMessageFormat("%s%nIt's review time! There are %s threads to review:\n%s",
+							log.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review:%n%n%s",
 									qotwConfig.getQOTWReviewRole().getAsMention(),
 									qotwConfig.getSubmissionChannel().getThreadChannels().size(),
 									qotwConfig.getSubmissionChannel().getThreadChannels().stream()
-											.map(ThreadChannel::getAsMention)
+											.map(t -> "> %s (%d message(s))".formatted(t.getAsMention(), t.getMessageCount() - 2)) // NOTE: Subtract 2 messages which are send by the bot
 											.collect(Collectors.joining("\n")))
 					);
 			qotwConfig.getSubmissionChannel().getThreadChannels().forEach(t ->
@@ -82,11 +82,14 @@ public class QOTWCloseSubmissionsJob {
 					QOTWQuestion question = questionOptional.get();
 					try (MessageCreateData data = new MessageCreateBuilder()
 							.setEmbeds(buildQuestionEmbed(question)).build()) {
-							qotwConfig.getSubmissionsForumChannel()
-									.createForumPost(String.format("#%s — %s", question.getQuestionNumber(), question.getText()), data)
-									.queue(f -> f.getThreadChannel().getManager().setPinned(true).queue());
+						ForumPostAction action = qotwConfig.getSubmissionsForumChannel()
+								.createForumPost(String.format("Week %s — %s", question.getQuestionNumber(), question.getText().replace("*", "")), data);
+						if (qotwConfig.getSubmissionsForumOngoingReviewTag() != null) {
+							action.setTags(qotwConfig.getSubmissionsForumOngoingReviewTag());
 						}
+						action.queue(f -> f.getThreadChannel().getManager().setPinned(true).queue());
 					}
+				}
 			});
 		}
 	}
