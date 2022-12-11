@@ -139,6 +139,10 @@ public class SubmissionManager {
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		pointsService.increment(author.getIdLong());
 		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
+		if (bestAnswer) {
+			pointsService.increment(author.getIdLong());
+			notificationService.withQOTW(thread.getGuild(), author).sendBestAnswerNotification();
+		}
 		Responses.success(hook, "Submission Accepted",
 				"Successfully accepted submission by " + author.getAsMention()).queue();
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
