@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
@@ -113,22 +112,11 @@ public class SubmissionManager {
 	public void handleThreadDeletion(@NotNull ButtonInteractionEvent event) {
 		if (event.getChannelType() != ChannelType.GUILD_PRIVATE_THREAD) return;
 		ThreadChannel thread = event.getChannel().asThreadChannel();
-		getOrRetrieveAuthor(new QOTWSubmission(thread), author -> {
+		new QOTWSubmission(thread).retrieveAuthor(author -> {
 			if (event.getUser().getIdLong() == author.getIdLong()) {
 				thread.delete().queue();
 			}
 		});
-	}
-
-	private void getOrRetrieveAuthor(@NotNull QOTWSubmission submission, Consumer<User> onSuccess) {
-		if (submission.hasAuthor()) {
-			onSuccess.accept(submission.getAuthor());
-		} else {
-			submission.retrieveAuthor(author -> {
-				submission.setAuthor(author);
-				onSuccess.accept(author);
-			});
-		}
 	}
 
 	private boolean canCreateSubmissions(Member member) {
