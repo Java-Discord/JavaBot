@@ -1,1 +1,1 @@
-UPDATE qotw_points SET points = 0 WHERE user_id != 0;
+TRUNCATE TABLE QOTW_QUESTION;
