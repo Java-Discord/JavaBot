@@ -53,15 +53,6 @@ CREATE TABLE qotw_points
 	points  BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE qotw_submissions
-(
-	thread_id       BIGINT PRIMARY KEY,
-	question_number INTEGER NOT NULL,
-	guild_id        BIGINT  NOT NULL,
-	author_id       BIGINT  NOT NULL,
-	status          INTEGER NOT NULL DEFAULT 0
-);
-
 // Warn
 CREATE TABLE warn
 (

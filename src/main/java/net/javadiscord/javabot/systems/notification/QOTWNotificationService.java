@@ -8,14 +8,11 @@ import net.dv8tion.jda.api.entities.User;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
-import java.util.concurrent.ExecutorService;
 
 /**
  * An extension of {@link QOTWGuildNotificationService} which also handles user qotw
@@ -28,8 +25,8 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 	private final QOTWAccount account;
 	private final SystemsConfig systemsConfig;
 
-	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig, ExecutorService asyncPool, QOTWSubmissionRepository qotwSubmissionRepository) {
-		super(notificationService, guild, asyncPool, qotwSubmissionRepository);
+	QOTWNotificationService(NotificationService notificationService, QOTWPointsService pointsService,@NotNull User user, Guild guild, SystemsConfig systemsConfig) {
+		super(notificationService, guild);
 		this.user = user;
 		this.guild = guild;
 		QOTWAccount account;
@@ -51,8 +48,8 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildAccountIncrementEmbed(account.getPoints())));
 	}
 
-	public void sendSubmissionDeclinedEmbed(@Nonnull String reason) {
-		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed(reason)));
+	public void sendSubmissionDeclinedEmbed() {
+		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildSubmissionDeclinedEmbed()));
 	}
 
 	private @NotNull EmbedBuilder buildQOTWNotificationEmbed() {
@@ -83,16 +80,14 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 				.build();
 	}
 
-	private @NotNull MessageEmbed buildSubmissionDeclinedEmbed(String reasons) {
+	private @NotNull MessageEmbed buildSubmissionDeclinedEmbed() {
 		return this.buildQOTWNotificationEmbed()
 				.setColor(Responses.Type.ERROR.getColor())
 				.setDescription(String.format("""
 								Hey %s,
-								Your QOTW-Submission was **declined** for the following reasons:
-								**`%s`**
-
+								Your QOTW-Submission was **declined**.
 								However, you can try your luck again next week!""",
-						user.getAsMention(), reasons))
+						user.getAsMention()))
 				.build();
 	}
 }

@@ -1,31 +1,35 @@
 package net.javadiscord.javabot.systems.qotw;
 
+import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.ForumPostAction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.notification.NotificationService;
-import net.javadiscord.javabot.systems.qotw.submissions.SubmissionControlsManager;
-import net.javadiscord.javabot.systems.qotw.submissions.dao.QOTWSubmissionRepository;
-import net.javadiscord.javabot.systems.qotw.submissions.model.QOTWSubmission;
-import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 /**
  * Job which disables the Submission button.
@@ -33,18 +37,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class QOTWCloseSubmissionsJob {
+	private static final String SUBMISSION_PENDING = "\uD83D\uDD52 ";
+
 	private final JDA jda;
-	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
+	private final QuestionQueueRepository questionQueueRepository;
+	private final ExecutorService asyncPool;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
-	private final QOTWSubmissionRepository qotwSubmissionRepository;
 
 	/**
-	 * disable the Submission button.
+	 * Disables the submission button.
+	 *
 	 * @throws SQLException if an SQL error occurs
 	 */
-	@Scheduled(cron = "0 0 21 * * 7")//Sunday 21:00
+	@Scheduled(cron = "0 0 17 * * 7") // Sunday, 17:00 UTC
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			// Disable 'Submit your Answer' button on latest QOTW
@@ -55,23 +61,51 @@ public class QOTWCloseSubmissionsJob {
 					.queue();
 			if (config.getModerationConfig().getLogChannel() == null) continue;
 			if (qotwConfig.getSubmissionChannel() == null || qotwConfig.getQuestionChannel() == null) continue;
-			Message message = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
-			if (message == null) continue;
-			message.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
-			for (ThreadChannel thread : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				try (Connection con = dbHelper.getDataSource().getConnection()) {
-					Optional<QOTWSubmission> optionalSubmission = qotwSubmissionRepository.getSubmissionByThreadId(thread.getIdLong());
-					if (optionalSubmission.isEmpty()) continue;
-					new SubmissionControlsManager(botConfig.get(guild), optionalSubmission.get(), pointsService, notificationService).sendControls();
-				} catch (SQLException e) {
-					ExceptionLogger.capture(e, getClass().getSimpleName());
-					throw e;
+			Message questionMessage = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
+			questionMessage.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
+			notificationService.withGuild(guild)
+					.sendToModerationLog(log ->
+							log.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review:%n%n%s",
+									qotwConfig.getQOTWReviewRole().getAsMention(),
+									qotwConfig.getSubmissionChannel().getThreadChannels().size(),
+									qotwConfig.getSubmissionChannel().getThreadChannels().stream()
+											.map(t -> "> %s (%d message(s))".formatted(t.getAsMention(), t.getMessageCount() - 2)) // NOTE: Subtract 2 messages which are send by the bot
+											.collect(Collectors.joining("\n")))
+					);
+			qotwConfig.getSubmissionChannel().getThreadChannels().forEach(t ->
+					t.getManager().setName(SUBMISSION_PENDING + t.getName()).queue());
+			if (qotwConfig.getSubmissionsForumChannel() == null) continue;
+			asyncPool.execute(() -> {
+				MessageEmbed embed = questionMessage.getEmbeds().get(0);
+				Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(getQuestionNumberFromEmbed(embed));
+				if (questionOptional.isPresent()) {
+					QOTWQuestion question = questionOptional.get();
+					try (MessageCreateData data = new MessageCreateBuilder()
+							.setEmbeds(buildQuestionEmbed(question)).build()) {
+						ForumPostAction action = qotwConfig.getSubmissionsForumChannel()
+								.createForumPost(String.format("Week %s — %s", question.getQuestionNumber(), question.getText().replace("*", "")), data);
+						if (qotwConfig.getSubmissionsForumOngoingReviewTag() != null) {
+							action.setTags(qotwConfig.getSubmissionsForumOngoingReviewTag());
+						}
+						action.queue(f -> f.getThreadChannel().getManager().setPinned(true).queue());
+					}
 				}
-			}
+			});
 		}
 	}
 
-	private Message getLatestQOTWMessage(MessageChannel channel, QOTWConfig config, JDA jda) {
+	private @NotNull MessageEmbed buildQuestionEmbed(@NotNull QOTWQuestion question) {
+		return new EmbedBuilder()
+				.setTitle("Question of the Week #" + question.getQuestionNumber())
+				.setDescription(question.getText())
+				.build();
+	}
+
+	private int getQuestionNumberFromEmbed(@NotNull MessageEmbed embed) {
+		return embed.getTitle() == null ? 0 : Integer.parseInt(embed.getTitle().replaceAll("\\D+", ""));
+	}
+
+	private Message getLatestQOTWMessage(@NotNull MessageChannel channel, QOTWConfig config, JDA jda) {
 		MessageHistory history = channel.getHistory();
 		Message message = null;
 		while (message == null) {

@@ -42,18 +42,17 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 	}
 
 	@Override
-	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, long guildId) {
+	protected InteractionCallbackAction<?> handleCommand(@NotNull SlashCommandInteractionEvent event, long guildId) {
 		return event.replyModal(buildQuestionModal());
 	}
 
-	private Modal buildQuestionModal() {
+	private @NotNull Modal buildQuestionModal() {
 		TextInput priorityField = TextInput.create("priority", "Priority (Leave blank for default)", TextInputStyle.SHORT)
 				.setRequired(false)
 				.setValue("0")
 				.build();
-
 		TextInput questionField = TextInput.create("question", "Question Text", TextInputStyle.PARAGRAPH)
-				.setMaxLength(1024)
+				.setMaxLength(85)
 				.build();
 
 		return Modal.create("qotw-add-question", "Create QOTW Question")

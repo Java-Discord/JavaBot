@@ -28,7 +28,7 @@ public class QOTWPointsService {
 	 *
 	 * @param userId The user's id.
 	 * @return An {@link QOTWAccount} object.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	@Transactional
 	public QOTWAccount getOrCreateAccount(long userId) throws DataAccessException {

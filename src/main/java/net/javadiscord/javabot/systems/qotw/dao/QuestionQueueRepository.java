@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,11 +48,11 @@ public class QuestionQueueRepository {
 	 *
 	 * @param questionNumber The question's number.
 	 * @return The question as an {@link Optional}
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public Optional<QOTWQuestion> findByQuestionNumber(int questionNumber) throws DataAccessException {
 		try {
-			return Optional.of(jdbcTemplate.queryForObject("SELECT * FROM qotw_question WHERE question_number = ?", (rs, row)->this.read(rs),
+			return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM qotw_question WHERE question_number = ?", (rs, row)->this.read(rs),
 					questionNumber));
 		}catch (EmptyResultDataAccessException e) {
 			return Optional.empty();
@@ -71,19 +72,18 @@ public class QuestionQueueRepository {
 					FROM qotw_question
 					WHERE used = TRUE AND question_number IS NOT NULL
 					ORDER BY created_at DESC LIMIT 1""", (rs, row)->rs.getInt(1));
-		}catch (EmptyResultDataAccessException e) {
+		} catch (EmptyResultDataAccessException e) {
 			return 1;
 		}
-
 	}
 
 	/**
 	 * Marks a single {@link QOTWQuestion} as used.
 	 *
 	 * @param question The {@link QOTWQuestion} that should be marked as used.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
-	public void markUsed(QOTWQuestion question) throws DataAccessException {
+	public void markUsed(@NotNull QOTWQuestion question) throws DataAccessException {
 		if (question.getQuestionNumber() == null) {
 			throw new IllegalArgumentException("Cannot mark an unnumbered question as used.");
 		}
@@ -101,7 +101,7 @@ public class QuestionQueueRepository {
 	 * @param page    The page.
 	 * @param size    The amount of questions to return.
 	 * @return A {@link List} containing the specified amount of {@link QOTWQuestion}.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT ? OFFSET ?", (rs, row)-> this.read(rs),
@@ -115,7 +115,7 @@ public class QuestionQueueRepository {
 	 * @param page    The page.
 	 * @param size    The amount of questions to return.
 	 * @return A {@link List} containing the specified amount (or less) of {@link QOTWQuestion} matching the query.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWQuestion> getUsedQuestionsWithQuery(long guildId, String query, int page, int size) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM qotw_question WHERE guild_id = ? AND \"TEXT\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?", (rs, rows)->this.read(rs),
@@ -127,11 +127,11 @@ public class QuestionQueueRepository {
 	 *
 	 * @param guildId The current guild's id.
 	 * @return The next {@link QOTWQuestion} as an {@link Optional}
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public Optional<QOTWQuestion> getNextQuestion(long guildId) throws DataAccessException {
 		try {
-			return Optional.of(jdbcTemplate.queryForObject("""
+			return Optional.ofNullable(jdbcTemplate.queryForObject("""
 					SELECT *
 					FROM qotw_question
 					WHERE guild_id = ? AND used = FALSE
@@ -150,14 +150,14 @@ public class QuestionQueueRepository {
 	 * @param guildId The current guild's id.
 	 * @param id      The question's id.
 	 * @return Whether the {@link QOTWQuestion} was actually removed.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public boolean removeQuestion(long guildId, long id) throws DataAccessException {
 		return jdbcTemplate.update("DELETE FROM qotw_question WHERE guild_id = ? AND id = ?",
 				guildId, id) > 0;
 	}
 
-	private QOTWQuestion read(ResultSet rs) throws SQLException {
+	private @NotNull QOTWQuestion read(@NotNull ResultSet rs) throws SQLException {
 		QOTWQuestion question = new QOTWQuestion();
 		question.setId(rs.getLong("id"));
 		question.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());

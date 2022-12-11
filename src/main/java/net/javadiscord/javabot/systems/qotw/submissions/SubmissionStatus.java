@@ -1,23 +1,29 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
 /**
- * Enum class that represents the status of QOTW Submissions.
+ * Represents a submissions' status.
  */
 public enum SubmissionStatus {
 	/**
-	 * Used for submissions that were yet unreviewed.
+	 * The submission got accepted and was among the best answers for the current week.
 	 */
-	UNREVIEWED,
+	ACCEPT_BEST("accepted (best answer)"),
 	/**
-	 * Used for submissions that were accepted.
+	 * The submission got accepted but was not among the best answers for the current week.
 	 */
-	ACCEPTED,
+	ACCEPT("accepted"),
 	/**
-	 * Used for submissions that were declined.
+	 * The submission got declined.
 	 */
-	DECLINED,
-	/**
-	 * Used for submissions that were deleted.
-	 */
-	DELETED
+	DECLINE("declined");
+
+	private final String verb;
+
+	SubmissionStatus(String verb) {
+		this.verb = verb;
+	}
+
+	public String getVerb() {
+		return verb;
+	}
 }

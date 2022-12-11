@@ -8,7 +8,7 @@ import net.javadiscord.javabot.systems.qotw.commands.qotw_points.SetPointsSubcom
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.AddQuestionSubcommand;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.ListQuestionsSubcommand;
 import net.javadiscord.javabot.systems.qotw.commands.questions_queue.RemoveQuestionSubcommand;
-import net.javadiscord.javabot.systems.qotw.submissions.subcommands.MarkBestAnswerSubcommand;
+import net.javadiscord.javabot.systems.qotw.submissions.subcommands.QOTWReviewSubcommand;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 /**
@@ -24,17 +24,18 @@ public class QOTWAdminCommand extends SlashCommand {
 	 * @param removeQuestionSubcommand  /qotw-admin questions-queue remove
 	 * @param incrementPointsSubcommand /qotw-admin account increment
 	 * @param setPointsSubcommand       /qotw-admin account set
-	 * @param markBestAnswerSubcommand  /qotw-admin submissions mark-best
+	 * @param reviewSubcommand          /qotw-admin submissions review
 	 */
-	public QOTWAdminCommand(ListQuestionsSubcommand listQuestionsSubcommand, AddQuestionSubcommand addQuestionSubcommand, RemoveQuestionSubcommand removeQuestionSubcommand, IncrementPointsSubcommand incrementPointsSubcommand, SetPointsSubcommand setPointsSubcommand, MarkBestAnswerSubcommand markBestAnswerSubcommand) {
+	public QOTWAdminCommand(ListQuestionsSubcommand listQuestionsSubcommand, AddQuestionSubcommand addQuestionSubcommand, RemoveQuestionSubcommand removeQuestionSubcommand, IncrementPointsSubcommand incrementPointsSubcommand, SetPointsSubcommand setPointsSubcommand, QOTWReviewSubcommand reviewSubcommand) {
 		setCommandData(Commands.slash("qotw-admin", "Administrative tools for managing the Question of the Week.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
 		);
+		addSubcommands(reviewSubcommand);
 		addSubcommandGroups(
 				SubcommandGroup.of(new SubcommandGroupData("questions-queue", "Commands for interacting with the set of QOTW questions that are in queue."), listQuestionsSubcommand, addQuestionSubcommand, removeQuestionSubcommand),
 				SubcommandGroup.of(new SubcommandGroupData("account", "Commands for interaction with Users Question of the Week points."), incrementPointsSubcommand, setPointsSubcommand),
-				SubcommandGroup.of(new SubcommandGroupData("submissions", "Commands for managing QOTW Submissions."), markBestAnswerSubcommand)
+				SubcommandGroup.of(new SubcommandGroupData("submissions", "Commands for managing QOTW Submissions."), reviewSubcommand)
 		);
 	}
 }
