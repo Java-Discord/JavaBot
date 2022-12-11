@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -29,9 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -49,11 +48,6 @@ public class SubmissionManager {
 	public static final String THREAD_NAME = "%s — %s";
 	private static final String SUBMISSION_ACCEPTED = "\u2705";
 	private static final String SUBMISSION_DECLINED = "\u274C";
-	private static final Map<Long, QOTWSubmission> submissionCache;
-
-	static {
-		submissionCache = new HashMap<>();
-	}
 
 	private final QOTWConfig config;
 	private final QOTWPointsService pointsService;
@@ -72,11 +66,11 @@ public class SubmissionManager {
 	public WebhookMessageCreateAction<?> handleSubmission(@NotNull ButtonInteractionEvent event, int questionNumber) {
 		event.deferEdit().queue();
 		Member member = event.getMember();
-		if (!this.canCreateSubmissions(member)) {
+		if (!canCreateSubmissions(member)) {
 			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
 		}
 		config.getSubmissionChannel().createThreadChannel(
-				String.format(THREAD_NAME, questionNumber, member.getEffectiveName()), true).queue(
+				String.format(THREAD_NAME, questionNumber, member.getId()), true).queue(
 				thread -> {
 					thread.addThreadMember(member).queue();
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
@@ -91,7 +85,6 @@ public class SubmissionManager {
 										}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
 								QOTWSubmission submission = new QOTWSubmission(thread);
 								submission.setAuthor(member.getUser());
-								submissionCache.put(thread.getIdLong(), submission);
 							} else {
 								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
 										.queue();
@@ -109,7 +102,7 @@ public class SubmissionManager {
 	public List<QOTWSubmission> getActiveSubmissions() {
 		return config.getSubmissionChannel().getThreadChannels()
 				.stream()
-				.map(this::getOrRetrieveSubmission).toList();
+				.map(QOTWSubmission::new).toList();
 	}
 
 	/**
@@ -118,14 +111,13 @@ public class SubmissionManager {
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
 	 */
 	public void handleThreadDeletion(@NotNull ButtonInteractionEvent event) {
-		config.getSubmissionChannel().getThreadChannels()
-				.stream().filter(t -> t.getIdLong() == event.getChannel().getIdLong())
-				.map(this::getOrRetrieveSubmission)
-				.forEach(s -> getOrRetrieveAuthor(s, author -> {
-					if (event.getUser().getIdLong() == author.getIdLong()) {
-						s.getThread().delete().queue();
-					}
-				}));
+		if (event.getChannelType() != ChannelType.GUILD_PRIVATE_THREAD) return;
+		ThreadChannel thread = event.getChannel().asThreadChannel();
+		getOrRetrieveAuthor(new QOTWSubmission(thread), author -> {
+			if (event.getUser().getIdLong() == author.getIdLong()) {
+				thread.delete().queue();
+			}
+		});
 	}
 
 	private void getOrRetrieveAuthor(@NotNull QOTWSubmission submission, Consumer<User> onSuccess) {
@@ -134,26 +126,17 @@ public class SubmissionManager {
 		} else {
 			submission.retrieveAuthor(author -> {
 				submission.setAuthor(author);
-				submissionCache.put(submission.getThread().getIdLong(), submission);
 				onSuccess.accept(author);
 			});
-		}
-	}
-
-	private QOTWSubmission getOrRetrieveSubmission(@NotNull ThreadChannel thread) {
-		if (submissionCache.containsKey(thread.getIdLong())) {
-			return submissionCache.get(thread.getIdLong());
-		} else {
-			QOTWSubmission submission = new QOTWSubmission(thread);
-			submissionCache.put(thread.getIdLong(), submission);
-			return submission;
 		}
 	}
 
 	private boolean canCreateSubmissions(Member member) {
 		if (member == null) return false;
 		if (member.getUser().isBot() || member.getUser().isSystem()) return false;
-		return !member.isTimedOut() && !member.isPending();
+		if (member.isTimedOut() || member.isPending()) return false;
+		return config.getSubmissionChannel().getThreadChannels()
+				.stream().noneMatch(p -> p.getName().contains(member.getId()));
 	}
 
 	/**
@@ -170,7 +153,7 @@ public class SubmissionManager {
 		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
 		Responses.success(hook, "Submission Accepted",
 				"Successfully accepted submission by " + author.getAsMention()).queue();
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
 		Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
 				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 		if (newestPostOptional.isPresent()) {
@@ -204,7 +187,7 @@ public class SubmissionManager {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed();
 		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, getOrRetrieveSubmission(thread), SubmissionStatus.DECLINE);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), SubmissionStatus.DECLINE);
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
 
