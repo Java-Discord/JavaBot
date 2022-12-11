@@ -25,7 +25,6 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -73,25 +72,21 @@ public class SubmissionManager {
 				thread -> {
 					thread.addThreadMember(member).queue();
 					thread.getManager().setInvitable(false).setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK).queue();
-					try {
-						asyncPool.execute(() -> {
-							Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(questionNumber);
-							if (questionOptional.isPresent()) {
-								thread.sendMessage(member.getAsMention())
-										.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
-										.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
-										.queue(s -> {
-										}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
-								QOTWSubmission submission = new QOTWSubmission(thread);
-								submission.setAuthor(member.getUser());
-							} else {
-								thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
-										.queue();
-							}
-						});
-					} catch (DataAccessException e) {
-						ExceptionLogger.capture(e, getClass().getSimpleName());
-					}
+					asyncPool.execute(() -> {
+						Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(questionNumber);
+						if (questionOptional.isPresent()) {
+							thread.sendMessage(member.getAsMention())
+									.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
+									.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
+									.queue(s -> {
+									}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
+							QOTWSubmission submission = new QOTWSubmission(thread);
+							submission.setAuthor(member.getUser());
+						} else {
+							thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
+									.queue();
+						}
+					});
 				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
 		);
 		log.info("Opened new Submission Thread for User {}", member.getUser().getAsTag());
@@ -150,20 +145,19 @@ public class SubmissionManager {
 				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 		if (newestPostOptional.isPresent()) {
 			ThreadChannel newestPost = newestPostOptional.get();
-			getMessagesByUser(thread, author).thenAccept(messages -> {
-				for (Message message : messages) {
-					if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
-					WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh -> {
-						if (message.getContentRaw().length() > 2000) {
-							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong());
-							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong());
-						} else {
-							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
+			WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh ->
+					getMessagesByUser(thread, author).thenAccept(messages -> {
+						for (Message message : messages) {
+							if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
+							if (message.getContentRaw().length() > 2000) {
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong());
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong());
+							} else {
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
+							}
 						}
-					});
-				}
-				newestPost.sendMessageEmbeds(buildAuthorEmbed(author, bestAnswer)).queue();
-			});
+						newestPost.sendMessageEmbeds(buildAuthorEmbed(author, bestAnswer)).queue();
+					}));
 		}
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
