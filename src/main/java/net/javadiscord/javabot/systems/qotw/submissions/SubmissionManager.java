@@ -181,7 +181,7 @@ public class SubmissionManager {
 					WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh -> {
 						if (message.getContentRaw().length() > 2000) {
 							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong());
-							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2001), newestPost.getIdLong());
+							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong());
 						} else {
 							WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
 						}
