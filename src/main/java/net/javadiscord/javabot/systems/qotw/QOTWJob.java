@@ -55,7 +55,10 @@ public class QOTWJob {
 			} else {
 				QOTWQuestion question = nextQuestion.get();
 				QOTWConfig qotw = config.getQotwConfig();
-				qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> thread.getManager().setLocked(true).setArchived(true).queue());
+				qotw.getSubmissionChannel().getThreadChannels().forEach(thread -> {
+					notificationService.withGuild(guild).sendToModerationLog(log -> log.sendMessageFormat("Closed unreviewed submission thread %s", thread.getAsMention()));
+					thread.getManager().setLocked(true).setArchived(true).queue();
+				});
 				qotw.getSubmissionChannel().getManager()
 						.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
 						.queue();
