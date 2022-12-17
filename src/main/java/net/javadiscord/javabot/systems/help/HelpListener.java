@@ -47,10 +47,10 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	 * A static Map that holds all messages that was sent in a specific reserved forum channel.
 	 */
 	protected static final Map<Long, List<Message>> HELP_POST_MESSAGES = new HashMap<>();
-	private static final Set<Long> newPosts;
+	private static final Set<Long> newThreadChannels;
 
 	static {
-		newPosts = new HashSet<>();
+		newThreadChannels = new HashSet<>();
 	}
 
 	private final BotConfig botConfig;
@@ -62,7 +62,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 		// listen for the posts initial message. Why this has to be done is further described in
 		// https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354
-		if (newPosts.contains(event.getChannel().getIdLong())) {
+		if (newThreadChannels.contains(event.getChannel().getIdLong())) {
 			HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 			ThreadChannel post = event.getChannel().asThreadChannel();
 			// send post buttons
@@ -70,7 +70,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 					Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
 					Button.secondary(ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
 			)).queue(success -> post.sendMessageFormat(config.getReservedChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerId()).getAsMention(), config.getInactivityTimeoutMinutes()).queue());
-			newPosts.remove(event.getChannel().getIdLong());
+			newThreadChannels.remove(event.getChannel().getIdLong());
 			return;
 		}
 		if (event.getMessage().getAuthor().isSystem() || event.getMessage().getAuthor().isBot()) {
@@ -105,7 +105,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		}
 		// add thread id to a temporary cache to avoid potential missing author message
 		// more info on why this has to be done: https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354
-		newPosts.add(event.getChannel().getIdLong());
+		newThreadChannels.add(event.getChannel().getIdLong());
 	}
 
 	@Override
