@@ -35,7 +35,7 @@ public class HelpConfig extends GuildConfigItem {
 	 * The message that's sent as soon as a user asks a question in an open help
 	 * channel. This is only sent if it's not null.
 	 */
-	private String reservedChannelMessageTemplate = "`⌛` **This post has been reserved for your question.**\n> Hey %s! Please use `/close` or the 'Close Post' button above when you're finished. Please remember to follow the help guidelines. This post will be automatically closed after %s minutes of inactivity.\n\n**TIP:** Narrow down your issue to __simple__ and __precise__ questions to maximize the chance that others will reply in here.";
+	private String reservedChannelMessageTemplate = "`⌛` **This post has been reserved for your question.**\n> Hey %s! Please use `/close` or the `Close Post` button above when you're finished. Please remember to follow the help guidelines. This post will be automatically closed after %s minutes of inactivity.\n\n**TIP:** Narrow down your issue to __simple__ and __precise__ questions to maximize the chance that others will reply in here.";
 
 	/**
 	 * The message that's sent in a post to tell users that it
