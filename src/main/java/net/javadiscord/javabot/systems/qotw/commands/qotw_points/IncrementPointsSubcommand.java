@@ -51,7 +51,7 @@ public class IncrementPointsSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		event.deferReply().queue();
-		long points = pointsService.increment(member.getIdLong());
+		long points = pointsService.increment(member);
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
 		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 		notificationService.withQOTW(event.getGuild(), member.getUser()).sendAccountIncrementedNotification();

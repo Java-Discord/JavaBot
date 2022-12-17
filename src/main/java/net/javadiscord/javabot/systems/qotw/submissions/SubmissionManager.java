@@ -132,10 +132,10 @@ public class SubmissionManager {
 	 */
 	public void acceptSubmission(InteractionHook hook, @NotNull ThreadChannel thread, @NotNull User author, boolean bestAnswer) {
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
-		pointsService.increment(author.getIdLong());
+		pointsService.increment(thread.getGuild().getMember(author));
 		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
 		if (bestAnswer) {
-			pointsService.increment(author.getIdLong());
+			pointsService.increment(thread.getGuild().getMember(author));
 			notificationService.withQOTW(thread.getGuild(), author).sendBestAnswerNotification();
 		}
 		Responses.success(hook, "Submission Accepted",
