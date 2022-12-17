@@ -11,7 +11,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
-import net.javadiscord.javabot.systems.help.ForumHelpManager;
+import net.javadiscord.javabot.systems.help.HelpManager;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
@@ -55,7 +55,7 @@ public class UnreserveCommand extends SlashCommand {
 		if (postThread.getParentChannel().getType() != ChannelType.FORUM) {
 			replyInvalidChannel(event);
 		}
-		ForumHelpManager manager = new ForumHelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
+		HelpManager manager = new HelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
 		if (manager.isForumEligibleToBeUnreserved(event.getInteraction())) {
 			manager.close(event, event.getUser().getIdLong() == postThread.getOwnerIdLong(),
 					event.getOption("reason", null, OptionMapping::getAsString)

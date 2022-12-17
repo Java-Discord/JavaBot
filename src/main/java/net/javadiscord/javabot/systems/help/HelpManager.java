@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * Manages all interactions regarding the help forum system.
  */
 @RequiredArgsConstructor
-public class ForumHelpManager {
+public class HelpManager {
 	/**
 	 * The identifier used for all help thanks-related buttons.
 	 */
@@ -65,7 +65,7 @@ public class ForumHelpManager {
 
 	/**
 	 * Builds and replies {@link ActionRow}s with all members which helped the
-	 * owner of the {@link ForumHelpManager#postThread} forum post.
+	 * owner of the {@link HelpManager#postThread} forum post.
 	 *
 	 * @param callback The callback to reply to.
 	 * @param helpers  The list of helpers to thank.
@@ -91,7 +91,7 @@ public class ForumHelpManager {
 	}
 
 	/**
-	 * Closes the {@link ForumHelpManager#postThread}.
+	 * Closes the {@link HelpManager#postThread}.
 	 *
 	 * @param callback    The callback to reply to.
 	 * @param withHelpers Whether the help-thanks message should be displayed.
@@ -164,7 +164,7 @@ public class ForumHelpManager {
 	}
 
 	private @NotNull List<Member> getPostHelpers() {
-		List<Message> messages = ForumHelpListener.HELP_POST_MESSAGES.get(postThread.getIdLong());
+		List<Message> messages = HelpListener.HELP_POST_MESSAGES.get(postThread.getIdLong());
 		if (messages == null) return List.of();
 		return messages.stream()
 				.filter(m -> m.getMember() != null && m.getAuthor().getIdLong() != postThread.getOwnerIdLong())

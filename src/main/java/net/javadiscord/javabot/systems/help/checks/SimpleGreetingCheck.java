@@ -5,8 +5,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
-import net.javadiscord.javabot.systems.help.ChannelSemanticCheck;
-import net.javadiscord.javabot.systems.help.ChannelSemanticData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 

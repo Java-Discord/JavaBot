@@ -33,7 +33,6 @@ import org.springframework.dao.DataAccessException;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +42,8 @@ import java.util.Map;
  * Listens for all events releated to the forum help channel system.
  */
 @RequiredArgsConstructor
-@AutoDetectableComponentHandler({ForumHelpManager.HELP_THANKS_IDENTIFIER, ForumHelpManager.HELP_CLOSE_IDENTIFIER, ForumHelpManager.HELP_GUIDELINES_IDENTIFIER})
-public class ForumHelpListener extends ListenerAdapter implements ButtonHandler {
+@AutoDetectableComponentHandler({HelpManager.HELP_THANKS_IDENTIFIER, HelpManager.HELP_CLOSE_IDENTIFIER, HelpManager.HELP_GUIDELINES_IDENTIFIER})
+public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	/**
 	 * A static Map that holds all messages that was sent in a specific reserved forum channel.
@@ -52,7 +51,6 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 	public static final Map<Long, List<Message>> HELP_POST_MESSAGES = new HashMap<>();
 
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
 	private final UserPreferenceService userPreferenceService;
@@ -92,8 +90,8 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 		}
 		// send post buttons
 		post.sendMessageComponents(ActionRow.of(
-				Button.primary(ComponentIdBuilder.build(ForumHelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
-				Button.secondary(ComponentIdBuilder.build(ForumHelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
+				Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
+				Button.secondary(ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
 		)).queue(success -> {
 			// send /close reminder (if enabled)
 			UserPreference preference = userPreferenceService.getOrCreate(post.getOwnerIdLong(), Preference.FORUM_CLOSE_REMINDER);
@@ -113,11 +111,11 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 			return;
 		}
 		ThreadChannel post = event.getChannel().asThreadChannel();
-		ForumHelpManager manager = new ForumHelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
+		HelpManager manager = new HelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
 		switch (id[0]) {
-			case ForumHelpManager.HELP_THANKS_IDENTIFIER -> handleHelpThanksInteraction(event, manager, id);
-			case ForumHelpManager.HELP_GUIDELINES_IDENTIFIER -> handleReplyGuidelines(event, post.getParentChannel().asForumChannel());
-			case ForumHelpManager.HELP_CLOSE_IDENTIFIER -> handlePostClose(event, manager);
+			case HelpManager.HELP_THANKS_IDENTIFIER -> handleHelpThanksInteraction(event, manager, id);
+			case HelpManager.HELP_GUIDELINES_IDENTIFIER -> handleReplyGuidelines(event, post.getParentChannel().asForumChannel());
+			case HelpManager.HELP_CLOSE_IDENTIFIER -> handlePostClose(event, manager);
 		}
 	}
 
@@ -131,7 +129,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 		return config.getHelpForumChannelId() != forum.getIdLong();
 	}
 
-	private void handleHelpThanksInteraction(@NotNull ButtonInteractionEvent event, @NotNull ForumHelpManager manager, String @NotNull [] id) {
+	private void handleHelpThanksInteraction(@NotNull ButtonInteractionEvent event, @NotNull HelpManager manager, String @NotNull [] id) {
 		ThreadChannel post = manager.getPostThread();
 		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		if (event.getUser().getIdLong() != post.getOwnerIdLong()) {
@@ -148,7 +146,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 					// add experience
 					try {
 						HelpExperienceService service = new HelpExperienceService(botConfig, helpAccountRepository, helpTransactionRepository);
-						Map<Long, Double> experience = ForumHelpManager.calculateExperience(HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
+						Map<Long, Double> experience = HelpManager.calculateExperience(HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
 						for (Map.Entry<Long, Double> entry : experience.entrySet()) {
 							service.performTransaction(entry.getKey(), entry.getValue(), config.getGuild());
 						}
@@ -176,7 +174,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 				.queue();
 	}
 
-	private void handlePostClose(ButtonInteractionEvent event, @NotNull ForumHelpManager manager) {
+	private void handlePostClose(ButtonInteractionEvent event, @NotNull HelpManager manager) {
 		if (manager.isForumEligibleToBeUnreserved(event)) {
 			manager.close(event, event.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(), null);
 		} else {

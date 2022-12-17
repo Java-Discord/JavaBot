@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.annotations.PreRegisteredListener;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.systems.help.ChannelSemanticCheck;
+import net.javadiscord.javabot.systems.help.checks.ChannelSemanticCheck;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
