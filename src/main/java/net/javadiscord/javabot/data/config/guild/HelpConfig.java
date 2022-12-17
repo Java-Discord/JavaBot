@@ -50,12 +50,6 @@ public class HelpConfig extends GuildConfigItem {
 	private String helpThanksMessageTemplate = "Before your post will be closed, would you like to express your gratitude to any of the people who helped you? When you're done, click **I'm done here. Close this post!**.";
 
 	/**
-	 * The number of open help channels to maintain. If fewer than this many
-	 * open channels exist, the system will try to create more.
-	 */
-	private int preferredOpenChannelCount = 3;
-
-	/**
 	 * The number of minutes of inactivity before a channel is considered inactive.
 	 */
 	private int inactivityTimeoutMinutes = 300;
@@ -65,17 +59,6 @@ public class HelpConfig extends GuildConfigItem {
 	 * to a thanks question.
 	 */
 	private int removeThanksTimeoutMinutes = 10;
-
-	/**
-	 * The number of channels which can be reserved by a single user at any time.
-	 */
-	private int maxReservedChannelsPerUser = 3;
-
-	/**
-	 * The message which is sent to users who aren't allowed to reserve a help
-	 * channel.
-	 */
-	private String reservationNotAllowedMessage = "You are not allowed to reserve this help channel. Please try again later.";
 
 	/**
 	 * How often users may use the /help-ping command.
