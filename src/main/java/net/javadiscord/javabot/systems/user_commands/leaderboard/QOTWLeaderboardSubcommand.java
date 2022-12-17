@@ -197,7 +197,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 */
 	private @NotNull String getCacheName() {
 		try {
-			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints()
+			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints(QOTWPointsService.getCurrentMonth())
 					.stream()
 					.limit(DISPLAY_COUNT)
 					.toList();
