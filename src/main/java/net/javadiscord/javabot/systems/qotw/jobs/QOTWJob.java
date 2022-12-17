@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.qotw;
+package net.javadiscord.javabot.systems.qotw.jobs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
