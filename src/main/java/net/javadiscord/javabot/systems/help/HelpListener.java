@@ -79,7 +79,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	@Override
 	public void onChannelCreate(@NotNull ChannelCreateEvent event) {
-		if (event.getGuild() == null || isInvalidForumPost(event.getChannel())) {
+		if (isInvalidForumPost(event.getChannel())) {
 			return;
 		}
 		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
@@ -91,13 +91,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		post.sendMessageComponents(ActionRow.of(
 				Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
 				Button.secondary(ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
-		)).queue(success -> {
-			// send /close reminder (if enabled)
-			UserPreference preference = userPreferenceService.getOrCreate(post.getOwnerIdLong(), Preference.FORUM_CLOSE_REMINDER);
-			if (Boolean.parseBoolean(preference.getState())) {
-				post.sendMessageFormat(config.getDormantChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerIdLong()).getAsMention()).queue();
-			}
-		});
+		)).queue(success -> post.sendMessageFormat(config.getReservedChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerId()).getAsMention(), config.getInactivityTimeoutMinutes()).queue());
 	}
 
 	@Override

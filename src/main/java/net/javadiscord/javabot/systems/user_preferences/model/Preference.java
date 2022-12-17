@@ -7,11 +7,7 @@ public enum Preference {
 	/**
 	 * Enables/Disables QOTW reminders.
 	 */
-	QOTW_REMINDER("Question of the Week Reminder", "false", new BooleanPreference()),
-	/**
-	 * A boolean preference which enables/disables the close reminder in forum help posts.
-	 */
-	FORUM_CLOSE_REMINDER("Help Forum Close Reminder", "true", new BooleanPreference());
+	QOTW_REMINDER("Question of the Week Reminder", "false", new BooleanPreference());
 
 	private final String name;
 	private final String defaultState;

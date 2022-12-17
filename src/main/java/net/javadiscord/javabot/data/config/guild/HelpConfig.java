@@ -22,11 +22,6 @@ public class HelpConfig extends GuildConfigItem {
 	private long helpForumChannelId = 0;
 
 	/**
-	 * The id of the channel category that contains all open channels.
-	 */
-	private long openCategoryId;
-
-	/**
 	 * The id of the helper role.
 	 */
 	private long helperRoleId;
@@ -40,13 +35,13 @@ public class HelpConfig extends GuildConfigItem {
 	 * The message that's sent as soon as a user asks a question in an open help
 	 * channel. This is only sent if it's not null.
 	 */
-	private String reservedChannelMessageTemplate = "`⌛` **This channel has been reserved for your question.**\n> Please use `/close` when you're finished.";
+	private String reservedChannelMessageTemplate = "`⌛` **This post has been reserved for your question.**\n> Hey %s! Please use `/close` or the 'Close Post' button above when you're finished. Please remember to follow the help guidelines. This post will be automatically closed after %s minutes of inactivity.\n\n**TIP:** Narrow down your issue to __simple__ and __precise__ questions to maximize the chance that others will reply in here.";
 
 	/**
 	 * The message that's sent in a post to tell users that it
 	 * is now marked as dormant and no more messages can be sent.
 	 */
-	private String dormantChannelMessageTemplate = "`\uD83D\uDCA4` **Channel marked as dormant**\n> This post has been inactive for over %s minutes. It is no longer possible to send messages in this channel.\n> If your question was not answered yet, feel free to create a new post.";
+	private String dormantChannelMessageTemplate = "`\uD83D\uDCA4` **Post marked as dormant**\n> This post has been inactive for over %s minutes. It is no longer possible to send messages in this channel.\n> If your question was not answered yet, feel free to create a new post.";
 
 	/**
 	 * The message that's sent when a user unreserved a channel where other users
