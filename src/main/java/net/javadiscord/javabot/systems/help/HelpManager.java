@@ -17,7 +17,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
-import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
@@ -72,7 +71,7 @@ public class HelpManager {
 	 * @return The {@link ReplyCallbackAction}.
 	 */
 	public ReplyCallbackAction replyHelpThanks(IReplyCallback callback, @NotNull List<Member> helpers) {
-		HelpForumConfig config = botConfig.get(callback.getGuild()).getHelpForumConfig();
+		HelpConfig config = botConfig.get(callback.getGuild()).getHelpConfig();
 		List<ItemComponent> helperThanksButtons = new ArrayList<>(20);
 		for (Member helper : helpers.subList(0, Math.min(helpers.size(), 20))) {
 			helperThanksButtons.add(Button.success(ComponentIdBuilder.build(HELP_THANKS_IDENTIFIER, postThread.getId(), helper.getId()), helper.getEffectiveName())
@@ -86,7 +85,7 @@ public class HelpManager {
 		List<ActionRow> rows = new ArrayList<>();
 		rows.add(controlsRow);
 		rows.addAll(MessageActionUtils.toActionRows(helperThanksButtons));
-		return callback.reply(config.getHelpThanksText())
+		return callback.reply(config.getHelpThanksMessageTemplate())
 				.setComponents(rows);
 	}
 

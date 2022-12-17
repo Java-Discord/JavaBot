@@ -60,7 +60,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 		GuildConfig config = botConfig.get(guild);
 		ThreadChannel post = event.getChannel().asThreadChannel();
 		if (post.getParentChannel().getType() != ChannelType.FORUM ||
-				post.getParentChannel().getIdLong() != config.getHelpForumConfig().getHelpForumChannelId()
+				post.getParentChannel().getIdLong() != config.getHelpConfig().getHelpForumChannelId()
 		) {
 			Responses.error(event, WRONG_CHANNEL_MSG).queue();
 			return;

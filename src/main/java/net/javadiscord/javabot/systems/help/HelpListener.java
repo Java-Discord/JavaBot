@@ -19,7 +19,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
-import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
@@ -83,7 +82,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		if (event.getGuild() == null || isInvalidForumPost(event.getChannel())) {
 			return;
 		}
-		HelpForumConfig config = botConfig.get(event.getGuild()).getHelpForumConfig();
+		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		ThreadChannel post = event.getChannel().asThreadChannel();
 		if (isInvalidHelpForumChannel(post.getParentChannel().asForumChannel())) {
 			return;
@@ -96,7 +95,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			// send /close reminder (if enabled)
 			UserPreference preference = userPreferenceService.getOrCreate(post.getOwnerIdLong(), Preference.FORUM_CLOSE_REMINDER);
 			if (Boolean.parseBoolean(preference.getState())) {
-				post.sendMessageFormat(config.getCloseReminderText(), UserSnowflake.fromId(post.getOwnerIdLong()).getAsMention()).queue();
+				post.sendMessageFormat(config.getDormantChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerIdLong()).getAsMention()).queue();
 			}
 		});
 	}
@@ -125,7 +124,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	}
 
 	private boolean isInvalidHelpForumChannel(@NotNull ForumChannel forum) {
-		HelpForumConfig config = botConfig.get(forum.getGuild()).getHelpForumConfig();
+		HelpConfig config = botConfig.get(forum.getGuild()).getHelpConfig();
 		return config.getHelpForumChannelId() != forum.getIdLong();
 	}
 
