@@ -27,7 +27,7 @@ public class HelpForumUpdater {
 	/**
 	 * Updates all help channels.
 	 */
-	@Scheduled(cron = "0 * * * * *") // Hourly
+	@Scheduled(cron = "*/10 * * * *") // Run every 10 minutes
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			log.info("Updating help channels in {}", guild.getName());
