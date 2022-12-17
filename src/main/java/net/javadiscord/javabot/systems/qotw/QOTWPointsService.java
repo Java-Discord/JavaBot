@@ -91,6 +91,7 @@ public class QOTWPointsService {
 			List<QOTWAccount> accounts = pointsRepository.sortByPoints();
 			return accounts.stream()
 					.map(s -> new Pair<>(s, guild.getMemberById(s.getUserId())))
+					.filter(p->p.first().getPoints() > 0)
 					.filter(p -> p.second() != null)
 					.limit(n)
 					.toList();
