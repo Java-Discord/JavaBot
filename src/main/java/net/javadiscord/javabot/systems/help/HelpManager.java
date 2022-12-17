@@ -207,7 +207,7 @@ public class HelpManager {
 		if (messages == null || messages.isEmpty()) return Map.of();
 		for (User user : messages.stream().map(Message::getAuthor).collect(Collectors.toSet())) {
 			if (user.getIdLong() == ownerId) continue;
-			int xp = 0;
+			double xp = 0;
 			for (Message message : messages.stream()
 					.filter(f -> f.getAuthor().getIdLong() != ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
 				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(2));
