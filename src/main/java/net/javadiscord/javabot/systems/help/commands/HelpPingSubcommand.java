@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * helpers.
  */
 public class HelpPingSubcommand extends SlashCommand.Subcommand {
-	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **help forum posts.**.";
+	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **help forum posts**";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
 	private final Map<Long, Pair<Long, Guild>> lastPingTimes;
