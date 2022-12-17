@@ -50,8 +50,8 @@ public class HelpForumUpdater {
 			long minutesAgo = (Instant.now().getEpochSecond() - latest.getTimeCreated().toEpochSecond()) / 60;
 			if (minutesAgo > config.getInactivityTimeoutMinutes() || isThanksMessage(latest) && minutesAgo > config.getRemoveThanksTimeoutMinutes()) {
 				post.sendMessage(config.getDormantChannelMessageTemplate().formatted(config.getInactivityTimeoutMinutes())).queue(s -> {
-					post.getManager().setLocked(true).setArchived(true).queue();
-					log.info("Archived & locked forum thread '{}' (by {}) for inactivity (last message sent {} minutes ago)",
+					post.getManager().setArchived(true).queue();
+					log.info("Archived forum thread '{}' (by {}) for inactivity (last message sent {} minutes ago)",
 							post.getName(), post.getOwnerId(), minutesAgo);
 				});
 			}
