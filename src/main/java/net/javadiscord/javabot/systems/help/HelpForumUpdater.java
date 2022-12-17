@@ -48,7 +48,11 @@ public class HelpForumUpdater {
 	private void checkForumPost(@NotNull ThreadChannel post, HelpConfig config) {
 		post.retrieveMessageById(post.getLatestMessageId()).queue(latest -> {
 			long minutesAgo = (Instant.now().getEpochSecond() - latest.getTimeCreated().toEpochSecond()) / 60;
-			if (minutesAgo > config.getInactivityTimeoutMinutes() || isThanksMessage(latest) && minutesAgo > config.getRemoveThanksTimeoutMinutes()) {
+			boolean isThankMessage = isThanksMessage(latest);
+			if (minutesAgo > config.getInactivityTimeoutMinutes() || minutesAgo > config.getRemoveThanksTimeoutMinutes() && isThankMessage) {
+				if (isThankMessage) {
+					latest.delete().queue();
+				}
 				post.sendMessage(config.getDormantChannelMessageTemplate().formatted(config.getInactivityTimeoutMinutes())).queue(s -> {
 					post.getManager().setArchived(true).queue();
 					log.info("Archived forum thread '{}' (by {}) for inactivity (last message sent {} minutes ago)",
@@ -59,11 +63,7 @@ public class HelpForumUpdater {
 	}
 
 	private boolean isThanksMessage(@NotNull Message m) {
-		if (m.getAuthor().isBot() && !m.getButtons().isEmpty() &&
-				m.getButtons().stream().allMatch(b -> b.getId() != null && b.getId().contains(HelpManager.HELP_THANKS_IDENTIFIER))) {
-			m.delete().queue();
-			return true;
-		}
-		return false;
+		return m.getAuthor().isBot() && !m.getButtons().isEmpty() &&
+				m.getButtons().stream().allMatch(b -> b.getId() != null && b.getId().contains(HelpManager.HELP_THANKS_IDENTIFIER));
 	}
 }
