@@ -3,8 +3,6 @@ package net.javadiscord.javabot.systems.qotw;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
-import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -26,7 +24,6 @@ import java.util.Optional;
 @Service
 public class QOTWPointsService {
 	private final QuestionPointsRepository pointsRepository;
-	private final BotConfig botConfig;
 
 	/**
 	 * Creates a new QOTW Account if none exists.
@@ -124,33 +121,16 @@ public class QOTWPointsService {
 	/**
 	 * Increments a single user's QOTW-Points.
 	 *
-	 * @param member The {@link Member} whose points shall be incremented
+	 * @param userId The ID of the user whose points shall be incremented
 	 * @return The total points after the update.
 	 */
-	public long increment(Member member) {
-		long userId = member.getIdLong();
+	public long increment(long userId) {
 		try {
 			LocalDate date=LocalDate.now();
 			int points = pointsRepository.getPointsAtDate(userId, date)+1;
 			pointsRepository.setPointsAtDate(userId, date, points);
-			Role qotwChampionRole = botConfig.get(member.getGuild()).getQotwConfig().getQOTWChampionRole();
 			LocalDate month = getCurrentMonth();
 			long newScore = pointsRepository.getByUserId(userId, month).map(QOTWAccount::getPoints).orElse(0L);
-			if (qotwChampionRole != null) {
-				pointsRepository.getTopAccounts(month, 0, 1)
-					.stream()
-					.findFirst()
-					.ifPresent(best -> {
-						if (newScore >= best.getPoints()) {
-							member.getGuild().addRoleToMember(member, qotwChampionRole).queue();
-							for (Member m : member.getGuild().getMembersWithRoles(qotwChampionRole)) {
-								if (getOrCreateAccount(m.getIdLong()).getPoints() < best.getPoints()) {
-									m.getGuild().removeRoleFromMember(m, qotwChampionRole).queue();
-								}
-							}
-						}
-					});
-			}
 			return newScore;
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());

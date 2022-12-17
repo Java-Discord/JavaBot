@@ -83,7 +83,9 @@ public class QuestionPointsRepository {
 	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWAccount> sortByPoints(LocalDate startDate) throws DataAccessException {
-		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? GROUP BY user_id ORDER BY SUM(points) DESC", (rs, row)->this.read(rs), startDate);
+		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? GROUP BY user_id ORDER BY SUM(points) DESC",
+				(rs, row)->this.read(rs),
+				startDate);
 	}
 
 	/**
@@ -96,8 +98,21 @@ public class QuestionPointsRepository {
 	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWAccount> getTopAccounts(LocalDate startDate, int page, int size) throws DataAccessException {
-		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? AND points > 0  GROUP BY user_id ORDER BY SUM(points) DESC LIMIT ? OFFSET ?", (rs,row)->this.read(rs),
+		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? AND points > 0  GROUP BY user_id ORDER BY SUM(points) DESC LIMIT ? OFFSET ?",
+				(rs,row)->this.read(rs),
 				startDate, size, Math.max(0, (page * size) - size));
+	}
+
+	/**
+	 * Gets all users with a specific score starting from a specific date.
+	 * @param startDate the minimum date points are considered
+	 * @param score the score users should have in order to be considered
+	 * @return A {@link List} of all users with a specific total QOTW score
+	 */
+	public List<Long> getUsersWithSpecificScore(LocalDate startDate, long score){
+		return jdbcTemplate.query("SELECT user_id FROM qotw_points WHERE obtained_at >= ? GROUP BY user_id HAVING SUM(points)=?",
+				(rs,row)->rs.getLong(1),
+				startDate, score);
 	}
 
 	/**
