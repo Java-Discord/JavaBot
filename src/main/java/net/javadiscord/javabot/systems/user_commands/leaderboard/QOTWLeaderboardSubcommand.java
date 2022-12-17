@@ -107,7 +107,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
 				.setTitle("Question of the Week Leaderboard")
 				.setDescription(points == 0 ? "You are currently not ranked." :
-					String.format("You're currently in `%s` place with `%s` %s.", rank + rankSuffix, points, pointsText))
+					String.format("This month, you're in `%s` place with `%s` %s.", rank + rankSuffix, points, pointsText))
 				.setTimestamp(Instant.now())
 				.build();
 	}
