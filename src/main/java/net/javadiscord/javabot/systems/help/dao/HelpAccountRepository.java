@@ -101,7 +101,7 @@ public class HelpAccountRepository {
 	 * @param change The amount to subtract.
 	 * @param min The minimum amount to subtract.
 	 * @param max The maximum amount to subtract.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public void removeExperienceFromAllAccounts(double change, int min, int max) throws DataAccessException {
 		long rows = jdbcTemplate.execute("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (1 - ? / 100), ?), ?), 0)",new CallableStatementCallback<Long>() {

@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help.forum;
+package net.javadiscord.javabot.systems.help;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,6 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.util.ExceptionLogger;
