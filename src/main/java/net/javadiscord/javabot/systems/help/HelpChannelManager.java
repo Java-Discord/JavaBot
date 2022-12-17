@@ -21,7 +21,6 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
-import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
@@ -351,7 +350,7 @@ public class HelpChannelManager {
 					ChannelReservation reservation = reservationOptional.get();
 					Map<Long, Double> experience = calculateExperience(HelpChannelListener.reservationMessages.get(reservation.getId()), reservation.getUserId(), config);
 					for (Long recipient : experience.keySet()) {
-						helpExperienceService.performTransaction(recipient, experience.get(recipient), HelpTransactionMessage.HELPED, channel.getGuild());
+						helpExperienceService.performTransaction(recipient, experience.get(recipient), channel.getGuild());
 					}
 				}
 				try (PreparedStatement stmt = con.prepareStatement("DELETE FROM reserved_help_channels WHERE channel_id = ?")) {

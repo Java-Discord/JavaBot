@@ -23,7 +23,6 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
-import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
@@ -33,8 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 /**
  * Manages all interactions regarding the help forum system.
@@ -60,8 +57,6 @@ public class ForumHelpManager {
 	private final ThreadChannel postThread;
 	private final DbActions dbActions;
 	private final BotConfig botConfig;
-	private final DataSource dataSource;
-
 	private final HelpAccountRepository helpAccountRepository;
 
 	private final HelpTransactionRepository helpTransactionRepository;
@@ -130,9 +125,9 @@ public class ForumHelpManager {
 						helper.getIdLong()
 				);
 				HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
-				HelpExperienceService service = new HelpExperienceService(dataSource, botConfig, helpAccountRepository, helpTransactionRepository);
+				HelpExperienceService service = new HelpExperienceService(botConfig, helpAccountRepository, helpTransactionRepository);
 				// Perform experience transactions
-				service.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
+				service.performTransaction(helper.getIdLong(), config.getThankedExperience(), event.getGuild());
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				botConfig.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(

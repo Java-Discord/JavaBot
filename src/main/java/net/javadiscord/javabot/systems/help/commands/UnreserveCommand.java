@@ -55,7 +55,7 @@ public class UnreserveCommand extends SlashCommand {
 		if (postThread.getParentChannel().getType() != ChannelType.FORUM) {
 			replyInvalidChannel(event);
 		}
-		ForumHelpManager manager = new ForumHelpManager(postThread, dbActions, botConfig, dbActions.getDataSource(), helpAccountRepository, helpTransactionRepository);
+		ForumHelpManager manager = new ForumHelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
 		if (manager.isForumEligibleToBeUnreserved(event.getInteraction())) {
 			manager.close(event, event.getUser().getIdLong() == postThread.getOwnerIdLong(),
 					event.getOption("reason", null, OptionMapping::getAsString)

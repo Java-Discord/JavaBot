@@ -14,7 +14,6 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.model.ChannelReservation;
-import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -126,8 +125,8 @@ public class HelpChannelInteractionManager implements ButtonHandler {
 					event.getInteraction().getHook().sendMessageFormat("You thanked %s", helper.getAsTag()).setEphemeral(true).queue();
 					HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 					// Perform experience transactions
-					helpExperienceService.performTransaction(helper.getIdLong(), config.getThankedExperience(), HelpTransactionMessage.GOT_THANKED, event.getGuild());
-					helpExperienceService.performTransaction(owner.getIdLong(), config.getThankExperience(), HelpTransactionMessage.THANKED_USER, event.getGuild());
+					helpExperienceService.performTransaction(helper.getIdLong(), config.getThankedExperience(), event.getGuild());
+					helpExperienceService.performTransaction(owner.getIdLong(), config.getThankExperience(), event.getGuild());
 				} catch (DataAccessException|SQLException e) {
 					ExceptionLogger.capture(e, getClass().getSimpleName());
 					botConfig.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(

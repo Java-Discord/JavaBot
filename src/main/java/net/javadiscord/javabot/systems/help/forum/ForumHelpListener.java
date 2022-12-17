@@ -28,7 +28,6 @@ import net.javadiscord.javabot.systems.help.HelpChannelManager;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
-import net.javadiscord.javabot.systems.help.model.HelpTransactionMessage;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
@@ -115,7 +114,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 			return;
 		}
 		ThreadChannel post = event.getChannel().asThreadChannel();
-		ForumHelpManager manager = new ForumHelpManager(post, dbActions, botConfig, dataSource, helpAccountRepository, helpTransactionRepository);
+		ForumHelpManager manager = new ForumHelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
 		switch (id[0]) {
 			case ForumHelpManager.HELP_THANKS_IDENTIFIER -> handleHelpThanksInteraction(event, manager, id);
 			case ForumHelpManager.HELP_GUIDELINES_IDENTIFIER -> handleReplyGuidelines(event, post.getParentChannel().asForumChannel());
@@ -149,10 +148,10 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 					manager.close(event, false, null);
 					// add experience
 					try {
-						HelpExperienceService service = new HelpExperienceService(dataSource, botConfig, helpAccountRepository, helpTransactionRepository);
+						HelpExperienceService service = new HelpExperienceService(botConfig, helpAccountRepository, helpTransactionRepository);
 						Map<Long, Double> experience = HelpChannelManager.calculateExperience(HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
 						for (Map.Entry<Long, Double> entry : experience.entrySet()) {
-							service.performTransaction(entry.getKey(), entry.getValue(), HelpTransactionMessage.HELPED, config.getGuild());
+							service.performTransaction(entry.getKey(), entry.getValue(), config.getGuild());
 						}
 					} catch (DataAccessException e) {
 						ExceptionLogger.capture(e, getClass().getName());
