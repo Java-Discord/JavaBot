@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -15,6 +14,7 @@ import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.forum.ForumHelpManager;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 /**
  * A simple command that can be used inside reserved help channels to

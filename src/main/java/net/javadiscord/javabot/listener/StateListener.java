@@ -12,10 +12,8 @@ import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.annotations.PreRegisteredListener;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.ChannelSemanticCheck;
-import net.javadiscord.javabot.systems.help.HelpChannelUpdater;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
@@ -27,7 +25,6 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -53,14 +50,6 @@ public class StateListener extends ListenerAdapter {
 		log.info("Logged in as " + event.getJDA().getSelfUser().getAsTag());
 		log.info("Guilds: " + event.getJDA().getGuilds().stream().map(Guild::getName).collect(Collectors.joining(", ")));
 		for (Guild guild : event.getJDA().getGuilds()) {
-			// Schedule the help channel updater to run periodically for each guild.
-			HelpConfig helpConfig = botConfig.get(guild).getHelpConfig();
-			asyncPool.scheduleAtFixedRate(
-					new HelpChannelUpdater(guild, botConfig, dbActions, asyncPool, channelSemanticChecks, helpExperienceService),
-					5,
-					helpConfig.getUpdateIntervalSeconds(),
-					TimeUnit.SECONDS
-			);
 			notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildBootedUpEmbed()));
 		}
 		try {

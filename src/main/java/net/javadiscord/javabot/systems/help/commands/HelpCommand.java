@@ -1,7 +1,7 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 /**
  * Represents the `/help` command. This holds commands related to the help system.

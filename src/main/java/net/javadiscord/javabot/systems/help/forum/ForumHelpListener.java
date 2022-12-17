@@ -1,8 +1,5 @@
 package net.javadiscord.javabot.systems.help.forum;
 
-import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
-import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
-
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -22,9 +19,8 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
-import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.data.config.guild.HelpForumConfig;
-import net.javadiscord.javabot.systems.help.HelpChannelManager;
+import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
@@ -35,10 +31,14 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
-
-import java.util.*;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Listens for all events releated to the forum help channel system.
@@ -149,7 +149,7 @@ public class ForumHelpListener extends ListenerAdapter implements ButtonHandler 
 					// add experience
 					try {
 						HelpExperienceService service = new HelpExperienceService(botConfig, helpAccountRepository, helpTransactionRepository);
-						Map<Long, Double> experience = HelpChannelManager.calculateExperience(HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
+						Map<Long, Double> experience = ForumHelpManager.calculateExperience(HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
 						for (Map.Entry<Long, Double> entry : experience.entrySet()) {
 							service.performTransaction(entry.getKey(), entry.getValue(), config.getGuild());
 						}

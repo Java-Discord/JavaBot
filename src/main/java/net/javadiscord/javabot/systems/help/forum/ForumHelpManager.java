@@ -1,12 +1,11 @@
 package net.javadiscord.javabot.systems.help.forum;
 
-import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -28,10 +27,14 @@ import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Manages all interactions regarding the help forum system.
@@ -169,5 +172,28 @@ public class ForumHelpManager {
 				.map(Message::getMember)
 				.distinct()
 				.toList();
+	}
+
+	/**
+	 * Calculates the experience for each user, based on the messages they sent.
+	 *
+	 * @param messages The list of {@link Message}s.
+	 * @param ownerId The owner id.
+	 * @param config The {@link HelpConfig}, containing some static info for the calculation.
+	 * @return A {@link Map}, containing the users' id as the key, and the amount of xp as the value.
+	 */
+	public static Map<Long, Double> calculateExperience(List<Message> messages, long ownerId, HelpConfig config) {
+		Map<Long, Double> experience = new HashMap<>();
+		if (messages == null || messages.isEmpty()) return Map.of();
+		for (User user : messages.stream().map(Message::getAuthor).collect(Collectors.toSet())) {
+			if (user.getIdLong() == ownerId) continue;
+			int xp = 0;
+			for (Message message : messages.stream()
+					.filter(f -> f.getAuthor().getIdLong() != ownerId && f.getContentDisplay().length() > config.getMinimumMessageLength()).toList()) {
+				xp += config.getBaseExperience() + config.getPerCharacterExperience() * (Math.log(message.getContentDisplay().trim().length()) / Math.log(2));
+			}
+			experience.put(user.getIdLong(), Math.min(xp, config.getMaxExperiencePerChannel()));
+		}
+		return experience;
 	}
 }

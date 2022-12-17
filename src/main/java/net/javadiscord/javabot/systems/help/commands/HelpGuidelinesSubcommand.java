@@ -1,6 +1,5 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,6 +9,7 @@ import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringResourceCache;
 import org.jetbrains.annotations.NotNull;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 import java.util.stream.Collectors;
 

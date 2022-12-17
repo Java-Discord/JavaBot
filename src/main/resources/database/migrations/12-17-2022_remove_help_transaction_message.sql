@@ -1,1 +1,1 @@
-ALTER TABLE help_transaction DROP COLUMN messagetype
+ALTER TABLE help_transaction DROP COLUMN messagetype;
