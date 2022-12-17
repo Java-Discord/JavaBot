@@ -91,6 +91,7 @@ public class HelpExperienceService {
 		helpAccountRepository.update(account);
 		helpTransactionRepository.save(transaction);
 		checkExperienceRoles(guild, account);
+		log.info("Added {} help experience to {}'s help account", value, recipient);
 	}
 
 	private void checkExperienceRoles(@NotNull Guild guild, @NotNull HelpAccount account) {
