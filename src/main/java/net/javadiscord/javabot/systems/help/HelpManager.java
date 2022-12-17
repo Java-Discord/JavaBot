@@ -2,10 +2,13 @@ package net.javadiscord.javabot.systems.help;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -108,6 +111,17 @@ public class HelpManager {
 	}
 
 	/**
+	 * Closes the {@link HelpManager#postThread}.
+	 *
+	 * @param closedBy    The {@link UserSnowflake} that closed this post.
+	 * @param reason      The reason for closing this post.
+	 */
+	public void close(UserSnowflake closedBy, @Nullable String reason) {
+		postThread.sendMessageEmbeds(buildPostClosedEmbed(closedBy, reason))
+				.queue(s -> postThread.getManager().setLocked(true).setArchived(true).queue());
+	}
+
+	/**
 	 * Thanks a single user.
 	 *
 	 * @param event      The {@link ButtonInteractionEvent} that was fired.
@@ -152,6 +166,14 @@ public class HelpManager {
 		if (interaction.getGuild() == null) return false;
 		return interaction.getUser().getIdLong() == postThread.getOwnerIdLong() ||
 				hasMemberHelperRole(interaction.getGuild(), interaction.getMember()) || hasMemberStaffRole(interaction.getGuild(), interaction.getMember());
+	}
+
+	private @NotNull MessageEmbed buildPostClosedEmbed(@NotNull UserSnowflake closedBy, @Nullable String reason) {
+		return new EmbedBuilder()
+				.setTitle("Post Closed")
+				.setDescription("This post has been closed by %s%s".formatted(closedBy.getAsMention(), reason != null ? " for the following reason:\n> " + reason : "."))
+				.setColor(Responses.Type.INFO.getColor())
+				.build();
 	}
 
 	private boolean hasMemberStaffRole(@NotNull Guild guild, @Nullable Member member) {
