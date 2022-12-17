@@ -22,6 +22,7 @@ public class QOTWConfig extends GuildConfigItem {
 	private long submissionsForumChannelId;
 	private long questionRoleId;
 	private long qotwReviewRoleId;
+	private long qotwChampionRoleId;
 	private String submissionForumOngoingReviewTagName = "";
 
 	public NewsChannel getQuestionChannel() {
@@ -42,6 +43,10 @@ public class QOTWConfig extends GuildConfigItem {
 
 	public Role getQOTWReviewRole() {
 		return this.getGuild().getRoleById(this.qotwReviewRoleId);
+	}
+
+	public Role getQOTWChampionRole() {
+		return this.getGuild().getRoleById(this.qotwChampionRoleId);
 	}
 
 	/**

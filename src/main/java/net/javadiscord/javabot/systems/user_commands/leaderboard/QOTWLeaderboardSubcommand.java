@@ -106,8 +106,8 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		return new EmbedBuilder()
 				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
 				.setTitle("Question of the Week Leaderboard")
-				.setDescription(String.format("You're currently in `%s` place with `%s` %s.",
-						rank + rankSuffix, points, pointsText))
+				.setDescription(points == 0 ? "You are currently not ranked." :
+					String.format("This month, you're in `%s` place with `%s` %s.", rank + rankSuffix, points, pointsText))
 				.setTimestamp(Instant.now())
 				.build();
 	}
@@ -165,7 +165,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 		List<Pair<QOTWAccount, Member>> topMembers = pointsService.getTopMembers(DISPLAY_COUNT, guild);
 		int height = (logo.getHeight() + MARGIN * 3) +
-				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * (Math.min(DISPLAY_COUNT, topMembers.size()) / 2) + MARGIN;
+				(ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png").getHeight() + MARGIN) * ((int)Math.ceil(Math.min(DISPLAY_COUNT, topMembers.size()) / 2f)) + MARGIN;
 		BufferedImage image = new BufferedImage(WIDTH, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = image.createGraphics();
 		try {
@@ -197,7 +197,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 */
 	private @NotNull String getCacheName() {
 		try {
-			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints()
+			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints(QOTWPointsService.getCurrentMonth())
 					.stream()
 					.limit(DISPLAY_COUNT)
 					.toList();

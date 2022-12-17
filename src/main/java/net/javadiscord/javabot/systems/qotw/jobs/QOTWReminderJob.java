@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.qotw;
+package net.javadiscord.javabot.systems.qotw.jobs;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;

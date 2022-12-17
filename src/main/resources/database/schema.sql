@@ -50,6 +50,7 @@ CREATE TABLE qotw_question
 CREATE TABLE qotw_points
 (
 	user_id BIGINT PRIMARY KEY,
+	obtained_at DATE PRIMARY KEY DEFAULT CURRENT_TIMESTAMP(0),
 	points  BIGINT NOT NULL DEFAULT 0
 );
 
