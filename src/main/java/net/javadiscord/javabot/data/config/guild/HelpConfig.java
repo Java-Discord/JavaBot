@@ -64,7 +64,7 @@ public class HelpConfig extends GuildConfigItem {
 	 * The number of minutes to wait before closing a channel waiting for a response
 	 * to a thanks question.
 	 */
-	private int removeThanksTimeoutMinutes = 15;
+	private int removeThanksTimeoutMinutes = 10;
 
 	/**
 	 * The number of channels which can be reserved by a single user at any time.
