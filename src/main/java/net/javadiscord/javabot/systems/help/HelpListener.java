@@ -60,7 +60,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		// listen for the posts initial message. Why this has to be done is further described in
+		// listen for the posts initial message. Why this has to be done is further described in the JDA Discord:
 		// https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354
 		if (newThreadChannels.contains(event.getChannel().getIdLong())) {
 			HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
@@ -104,7 +104,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return;
 		}
 		// add thread id to a temporary cache to avoid potential missing author message
-		// more info on why this has to be done: https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354
+		// more info on why this has to be done: https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354 (JDA Discord)
 		newThreadChannels.add(event.getChannel().getIdLong());
 	}
 
