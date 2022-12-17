@@ -23,8 +23,6 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
-import net.javadiscord.javabot.systems.user_preferences.model.Preference;
-import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
