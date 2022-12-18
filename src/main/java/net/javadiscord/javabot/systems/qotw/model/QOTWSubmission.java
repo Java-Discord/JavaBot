@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.qotw.model;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.javadiscord.javabot.util.ExceptionLogger;
 
 import java.util.function.Consumer;
 
@@ -30,11 +31,6 @@ public class QOTWSubmission {
 			onSuccess.accept(author);
 			return;
 		}
-		thread.retrieveThreadMembers().queue(s -> s.forEach(m -> {
-			if (author == null && !m.getUser().isBot()) {
-				author = m.getUser();
-				onSuccess.accept(author);
-			}
-		}));
+		thread.getJDA().retrieveUserById(thread.getName().split(" - ")[1]).queue(onSuccess, e-> ExceptionLogger.capture(e, QOTWSubmission.class.getSimpleName()));
 	}
 }
