@@ -77,28 +77,27 @@ public class WebhookUtil {
 	 * the message
 	 */
 	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, @Nullable List<LayoutComponent> components, @Nullable List<MessageEmbed> embeds) {
-		try (JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
-				.setThreadId(threadId).buildJDA()) {
-			WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
-					.setAllowedMentions(AllowedMentions.none())
-					.setAvatarUrl(originalMessage.getMember().getEffectiveAvatarUrl())
-					.setUsername(originalMessage.getMember().getEffectiveName());
-			if (components != null && !components.isEmpty()) {
-				message.addComponents(components);
-			}
-			if (embeds != null && !embeds.isEmpty()) {
-				message.addEmbeds(embeds.stream().map(e -> WebhookEmbedBuilder.fromJDA(e).build()).toList());
-			}
-			List<Attachment> attachments = originalMessage.getAttachments();
-			@SuppressWarnings("unchecked")
-			CompletableFuture<?>[] futures = new CompletableFuture<?>[attachments.size()];
-			for (int i = 0; i < attachments.size(); i++) {
-				Attachment attachment = attachments.get(i);
-				futures[i] = attachment.getProxy().download().thenAccept(
-						is -> message.addFile((attachment.isSpoiler() ? "SPOILER_" : "") + attachment.getFileName(), is));
-			}
-			return CompletableFuture.allOf(futures).thenCompose(unused -> client.send(message.build()))
-					.whenComplete((result, err) -> client.close());
+		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
+				.setThreadId(threadId).buildJDA();
+		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
+				.setAllowedMentions(AllowedMentions.none())
+				.setAvatarUrl(originalMessage.getMember().getEffectiveAvatarUrl())
+				.setUsername(originalMessage.getMember().getEffectiveName());
+		if (components != null && !components.isEmpty()) {
+			message.addComponents(components);
 		}
+		if (embeds != null && !embeds.isEmpty()) {
+			message.addEmbeds(embeds.stream().map(e -> WebhookEmbedBuilder.fromJDA(e).build()).toList());
+		}
+		List<Attachment> attachments = originalMessage.getAttachments();
+		@SuppressWarnings("unchecked")
+		CompletableFuture<?>[] futures = new CompletableFuture<?>[attachments.size()];
+		for (int i = 0; i < attachments.size(); i++) {
+			Attachment attachment = attachments.get(i);
+			futures[i] = attachment.getProxy().download().thenAccept(
+					is -> message.addFile((attachment.isSpoiler() ? "SPOILER_" : "") + attachment.getFileName(), is));
+		}
+		return CompletableFuture.allOf(futures).thenCompose(unused -> client.send(message.build()))
+				.whenComplete((result, err) -> client.close());
 	}
 }
