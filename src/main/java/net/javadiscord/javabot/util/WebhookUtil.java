@@ -83,10 +83,10 @@ public class WebhookUtil {
 				.setAllowedMentions(AllowedMentions.none())
 				.setAvatarUrl(originalMessage.getMember().getEffectiveAvatarUrl())
 				.setUsername(originalMessage.getMember().getEffectiveName());
-		if (components != null) {
+		if (components != null && !components.isEmpty()) {
 			message.addComponents(components);
 		}
-		if (embeds != null) {
+		if (embeds != null && !embeds.isEmpty()) {
 			message.addEmbeds(embeds.stream().map(e -> WebhookEmbedBuilder.fromJDA(e).build()).toList());
 		}
 		List<Attachment> attachments = originalMessage.getAttachments();
