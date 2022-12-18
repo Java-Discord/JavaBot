@@ -96,7 +96,7 @@ public class HugListener extends ListenerAdapter {
 	}
 
 	private void sendWebhookMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId) {
-		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId)
+		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, null, null)
 				.thenAccept(unused -> originalMessage.delete().queue()).exceptionally(e -> {
 					log.error("replacing the content 'fuck' with 'hug' in an incoming message failed", e);
 					return null;
