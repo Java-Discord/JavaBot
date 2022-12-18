@@ -148,12 +148,13 @@ public class SubmissionManager {
 			WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh ->
 					getMessagesByUser(thread, author).thenAccept(messages -> {
 						for (Message message : messages) {
+							boolean lastMessage = messages.indexOf(message) + 1 == messages.size();
 							if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
 							if (message.getContentRaw().length() > 2000) {
 								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null);
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, List.of(buildAuthorEmbed(author, bestAnswer)));
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null);
 							} else {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, List.of(buildAuthorEmbed(author, bestAnswer)));
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null);
 							}
 						}
 					}));
