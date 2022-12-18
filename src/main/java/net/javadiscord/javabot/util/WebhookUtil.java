@@ -4,13 +4,16 @@ import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.AllowedMentions;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.send.component.LayoutComponent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +31,7 @@ public class WebhookUtil {
 	 * Makes sure that a writable webhook exists in a specific channel. if no
 	 * suitable webhook is found, one is created.
 	 *
-	 * @param channel  the {@link StandardGuildMessageChannel} the webhook should exist in
+	 * @param channel  the {@link IWebhookContainer} the webhook should exist in
 	 * @param callback an action that is executed once a webhook is
 	 *                 found/created
 	 */
@@ -40,7 +43,7 @@ public class WebhookUtil {
 	 * Makes sure that a writable webhook exists in a specific channel. if no
 	 * suitable webhook is found, one is created.
 	 *
-	 * @param channel         the {@link StandardGuildMessageChannel} the webhook should exist in
+	 * @param channel         the {@link IWebhookContainer} the webhook should exist in
 	 * @param callback        an action that is executed once a webhook is
 	 *                        found/created
 	 * @param failureCallback an action that is executed if the webhook
@@ -68,19 +71,23 @@ public class WebhookUtil {
 	 * @param newMessageContent the new (custom) content
 	 * @param threadId          the thread to send the message in or {@code 0} if the
 	 *                          message should be sent directly
-	 * @param components        An optional array of {@link LayoutComponent}s.
+	 * @param components        A nullable list of {@link LayoutComponent}s.
+	 * @param embeds            A nullable list of {@link MessageEmbed}s.
 	 * @return a {@link CompletableFuture} representing the action of sending
 	 * the message
 	 */
-	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, LayoutComponent @NotNull ... components) {
+	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, @Nullable List<LayoutComponent> components, @Nullable List<MessageEmbed> embeds) {
 		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
 				.setThreadId(threadId).buildJDA();
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
 				.setAllowedMentions(AllowedMentions.none())
 				.setAvatarUrl(originalMessage.getMember().getEffectiveAvatarUrl())
 				.setUsername(originalMessage.getMember().getEffectiveName());
-		if (components.length > 0) {
+		if (components != null) {
 			message.addComponents(components);
+		}
+		if (embeds != null) {
+			message.addEmbeds(embeds.stream().map(e -> WebhookEmbedBuilder.fromJDA(e).build()).toList());
 		}
 		List<Attachment> attachments = originalMessage.getAttachments();
 		@SuppressWarnings("unchecked")

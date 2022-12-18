@@ -15,6 +15,7 @@ import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +35,7 @@ public class MessageLinkListener extends ListenerAdapter {
 			Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
 			optional.ifPresent(action -> action.queue(
 					m -> WebhookUtil.ensureWebhookExists(event.getChannel().asTextChannel(),
-							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message")))
+							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, List.of(ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message"))), null)
 					), e -> ExceptionLogger.capture(e, getClass().getSimpleName())
 			));
 		}

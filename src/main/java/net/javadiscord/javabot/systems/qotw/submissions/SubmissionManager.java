@@ -150,13 +150,12 @@ public class SubmissionManager {
 						for (Message message : messages) {
 							if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
 							if (message.getContentRaw().length() > 2000) {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong());
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong());
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null);
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, List.of(buildAuthorEmbed(author, bestAnswer)));
 							} else {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong());
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, List.of(buildAuthorEmbed(author, bestAnswer)));
 							}
 						}
-						newestPost.sendMessageEmbeds(buildAuthorEmbed(author, bestAnswer)).queue();
 					}));
 		}
 		thread.getManager().setLocked(true).setArchived(true).queue();
