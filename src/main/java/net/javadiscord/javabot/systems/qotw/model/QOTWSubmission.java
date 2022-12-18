@@ -31,6 +31,9 @@ public class QOTWSubmission {
 			onSuccess.accept(author);
 			return;
 		}
-		thread.getJDA().retrieveUserById(thread.getName().split(" - ")[1]).queue(onSuccess, e-> ExceptionLogger.capture(e, QOTWSubmission.class.getSimpleName()));
+		thread
+			.getJDA()
+			.retrieveUserById(thread.getName().split(" - ")[1])
+			.queue(onSuccess, e -> ExceptionLogger.capture(e, QOTWSubmission.class.getSimpleName()));
 	}
 }
