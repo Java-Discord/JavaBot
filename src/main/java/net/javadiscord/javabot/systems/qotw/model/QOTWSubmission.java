@@ -33,7 +33,7 @@ public class QOTWSubmission {
 		}
 		thread
 			.getJDA()
-			.retrieveUserById(thread.getName().split(" - ")[1])
+			.retrieveUserById(thread.getName().split(" — ")[1])
 			.queue(onSuccess, e -> ExceptionLogger.capture(e, QOTWSubmission.class.getSimpleName()));
 	}
 }
