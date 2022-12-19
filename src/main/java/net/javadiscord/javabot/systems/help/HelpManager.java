@@ -118,7 +118,7 @@ public class HelpManager {
 	 */
 	public void close(UserSnowflake closedBy, @Nullable String reason) {
 		postThread.sendMessageEmbeds(buildPostClosedEmbed(closedBy, reason))
-				.queue(s -> postThread.getManager().setLocked(true).setArchived(true).queue());
+				.queue(s -> postThread.getManager().setArchived(true).queue());
 	}
 
 	/**
