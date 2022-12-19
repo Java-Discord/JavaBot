@@ -51,6 +51,7 @@ public class HelpForumUpdater {
 				log.error("Could not find messages in forum thread {}", post.getId());
 				return;
 			}
+			// Simply get the first one, as we only requested a singular message
 			Message latest = messages.get(0);
 			long minutesAgo = (Instant.now().getEpochSecond() - latest.getTimeCreated().toEpochSecond()) / 60;
 			boolean isThankMessage = isThanksMessage(latest);
@@ -64,7 +65,7 @@ public class HelpForumUpdater {
 							post.getName(), post.getOwnerId(), minutesAgo);
 				});
 			}
-		}, e -> log.error("Could not find latest message in forum thread {}", post.getId()));
+		}, e -> log.error("Could not find latest message in forum thread {}:", post.getId(), e));
 	}
 
 	private boolean isThanksMessage(@NotNull Message m) {
