@@ -1,0 +1,1 @@
+DROP TABLE reserved_help_channels;

@@ -3,11 +3,9 @@ package net.javadiscord.javabot.data.config.guild;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
-import net.javadiscord.javabot.systems.help.naming_strategies.*;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,21 +19,7 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private Map<String, Long> helpOverviewMessageIds = Map.of();
 
-	/**
-	 * The id of the channel category that contains all open channels.
-	 */
-	private long openCategoryId;
-
-	/**
-	 * The id of the channel category that contains all reserved channels.
-	 */
-	private long reservedCategoryId;
-
-	/**
-	 * The id of the channel category where dormant channels are put when they
-	 * aren't needed in the open category (due to preferred channel count).
-	 */
-	private long dormantCategoryId;
+	private long helpForumChannelId = 0;
 
 	/**
 	 * The id of the helper role.
@@ -48,88 +32,33 @@ public class HelpConfig extends GuildConfigItem {
 	private long helpPingRoleId;
 
 	/**
-	 * The strategy to use when naming help channels. This is only used when
-	 * {@link HelpConfig#recycleChannels} is set to false.
-	 */
-	private String channelNamingStrategy = "animal";
-
-	/**
-	 * If true, the system will manage a fixed set of help channels which are
-	 * created in advance. If false, the system will create and remove channels
-	 * as needed to maintain the {@link HelpConfig#preferredOpenChannelCount}.
-	 * Note that if this is true, the preferred open channel count is ignored.
-	 */
-	private boolean recycleChannels = false;
-
-	/**
-	 * The string which is shown as the 'topic' for open channels.
-	 */
-	private String openChannelTopic = "Ask your question here!";
-
-	/**
-	 * The message that's sent in a recycled help channel to tell users that it
-	 * is now open for someone to ask a question.
-	 */
-	private String reopenedChannelMessage = "`✅` **This channel is now available!**\n> This channel is no longer reserved. Feel free to ask your question here!";
-
-	/**
 	 * The message that's sent as soon as a user asks a question in an open help
 	 * channel. This is only sent if it's not null.
 	 */
-	private String reservedChannelMessage = "`⌛` **This channel has been reserved for your question.**\n> Please use `/unreserve` when you\u0027re finished.";
+	private String reservedChannelMessageTemplate = "`⌛` **This post has been reserved for your question.**\n> Hey %s! Please use `/close` or the `Close Post` button above when you're finished. Please remember to follow the help guidelines. This post will be automatically closed after %s minutes of inactivity.\n\n**TIP:** Narrow down your issue to __simple__ and __precise__ questions to maximize the chance that others will reply in here.";
 
 	/**
-	 * The message that's sent in a recycled help channel to tell users that it
+	 * The message that's sent in a post to tell users that it
 	 * is now marked as dormant and no more messages can be sent.
 	 */
-	private String dormantChannelMessage = "`\uD83D\uDCA4` **Channel marked as dormant**\n> It is no longer possible to send messages in this channel until it becomes available again.\n> If your question was not answered yet, feel free to claim a new available help channel.";
+	private String dormantChannelMessageTemplate = "`\uD83D\uDCA4` **Post marked as dormant**\n> This post has been inactive for over %s minutes, thus, it has been **archived**.\n> If your question was not answered yet, feel free to re-open this post or create a new one.";
 
 	/**
-	 * The number of open help channels to maintain. If fewer than this many
-	 * open channels exist, the system will try to create more.
+	 * The message that's sent when a user unreserved a channel where other users
+	 * participated in.
 	 */
-	private int preferredOpenChannelCount = 3;
-
-	/**
-	 * A list of successive timeouts (in minutes) to use when checking to see if
-	 * a help channel is still active. The bot waits X minutes since the last
-	 * human message before sending an activity check, and waits
-	 */
-	private List<Integer> inactivityTimeouts = List.of(30, 60, 120, 180);
+	private String helpThanksMessageTemplate = "Before your post will be closed, would you like to express your gratitude to any of the people who helped you? When you're done, click **I'm done here. Close this post!**.";
 
 	/**
 	 * The number of minutes of inactivity before a channel is considered inactive.
 	 */
-	private int inactivityTimeoutMinutes = 30;
-
-	/**
-	 * The number of minutes to wait before closing an inactive channel. An
-	 * inactive channel is one in which the most recent message is an unanswered
-	 * activity check that was sent by this bot.
-	 */
-	private int removeInactiveTimeoutMinutes = 60;
+	private int inactivityTimeoutMinutes = 300;
 
 	/**
 	 * The number of minutes to wait before closing a channel waiting for a response
 	 * to a thanks question.
 	 */
-	private int removeThanksTimeoutMinutes = 15;
-
-	/**
-	 * The number of seconds to wait between each help channel update check.
-	 */
-	private long updateIntervalSeconds = 60;
-
-	/**
-	 * The number of channels which can be reserved by a single user at any time.
-	 */
-	private int maxReservedChannelsPerUser = 3;
-
-	/**
-	 * The message which is sent to users who aren't allowed to reserve a help
-	 * channel.
-	 */
-	private String reservationNotAllowedMessage = "You are not allowed to reserve this help channel. Please try again later.";
+	private int removeThanksTimeoutMinutes = 10;
 
 	/**
 	 * How often users may use the /help-ping command.
@@ -176,33 +105,15 @@ public class HelpConfig extends GuildConfigItem {
 	 */
 	private Map<Long, Double> experienceRoles = Map.of(0L, 0.0);
 
-	public Category getOpenChannelCategory() {
-		return getGuild().getCategoryById(this.openCategoryId);
-	}
-
-	public Category getReservedChannelCategory() {
-		return getGuild().getCategoryById(this.reservedCategoryId);
-	}
-
-	public Category getDormantChannelCategory() {
-		return getGuild().getCategoryById(this.dormantCategoryId);
+	public ForumChannel getHelpForumChannel() {
+		return getGuild().getForumChannelById(helpForumChannelId);
 	}
 
 	public Role getHelperRole() {
-		return this.getGuild().getRoleById(this.helperRoleId);
+		return getGuild().getRoleById(helperRoleId);
 	}
 
 	public Role getHelpPingRole() {
-		return this.getGuild().getRoleById(this.helpPingRoleId);
-	}
-
-	public ChannelNamingStrategy getChannelNamingStrategy() {
-		return switch (this.channelNamingStrategy) {
-			case "alphabet" -> new AlphabetNamingStrategy();
-			case "greek" -> new GreekAlphabetNamingStrategy();
-			case "animal" -> new AnimalNamingStrategy();
-			case "coffee" -> new CoffeeNamingStrategy();
-			default -> throw new IllegalArgumentException("Invalid channel naming strategy.");
-		};
+		return getGuild().getRoleById(helpPingRoleId);
 	}
 }

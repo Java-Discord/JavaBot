@@ -1,8 +1,12 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,15 +14,15 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
-import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.systems.help.HelpChannelManager;
-import net.javadiscord.javabot.systems.help.HelpExperienceService;
-import net.javadiscord.javabot.systems.help.model.ChannelReservation;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,29 +32,21 @@ import java.util.concurrent.TimeUnit;
  * helpers.
  */
 public class HelpPingSubcommand extends SlashCommand.Subcommand {
-	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **reserved help channels** OR **help forum posts.**.";
+	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **help forum posts**";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
 	private final Map<Long, Pair<Long, Guild>> lastPingTimes;
 	private final BotConfig botConfig;
-	private final DbActions dbActions;
-	private final ScheduledExecutorService asyncPool;
-	private final HelpExperienceService helpExperienceService;
 
 	/**
 	 * Constructor that initializes and handles the cooldown map.
 	 * @param asyncPool The thread pool for asynchronous operations
 	 * @param botConfig The main configuration of the bot
-	 * @param helpExperienceService Service object that handles Help Experience Transactions.
-	 * @param dbActions A service object responsible for various operations on the main database
 	 */
-	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool, HelpExperienceService helpExperienceService, DbActions dbActions) {
+	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool) {
 		setCommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
 		this.botConfig = botConfig;
-		this.dbActions = dbActions;
-		this.asyncPool=asyncPool;
-		this.helpExperienceService = helpExperienceService;
 		asyncPool.scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
 	}
 
@@ -62,16 +58,9 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		GuildConfig config = botConfig.get(guild);
-		if (event.getChannelType() == ChannelType.TEXT) {
-			handleTextBasedHelpPing(event, config);
-		} else if (event.getChannelType() == ChannelType.GUILD_PUBLIC_THREAD) {
-			handleForumBasedHelpPing(event, config, event.getChannel().asThreadChannel());
-		}
-	}
-
-	private void handleForumBasedHelpPing(@NotNull SlashCommandInteractionEvent event, @NotNull GuildConfig config, @NotNull ThreadChannel post) {
+		ThreadChannel post = event.getChannel().asThreadChannel();
 		if (post.getParentChannel().getType() != ChannelType.FORUM ||
-				post.getParentChannel().getIdLong() != config.getHelpForumConfig().getHelpForumChannelId()
+				post.getParentChannel().getIdLong() != config.getHelpConfig().getHelpForumChannelId()
 		) {
 			Responses.error(event, WRONG_CHANNEL_MSG).queue();
 			return;
@@ -98,63 +87,10 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 		}
 	}
 
-	private void handleTextBasedHelpPing(@NotNull SlashCommandInteractionEvent event, @NotNull GuildConfig config) {
-		HelpChannelManager channelManager = new HelpChannelManager(botConfig, event.getGuild(), dbActions, asyncPool, helpExperienceService);
-		if (channelManager.isReserved(event.getChannel().asTextChannel())) {
-			Optional<ChannelReservation> optionalReservation = channelManager.getReservationForChannel(event.getChannel().getIdLong());
-			if (optionalReservation.isEmpty()) {
-				Responses.warning(event, "Could not fetch the channel reservation.").queue();
-				return;
-			}
-			ChannelReservation reservation = optionalReservation.get();
-			Member member = event.getMember();
-			if (member == null) {
-				Responses.warning(event, "No member information was available for this event.").queue();
-				return;
-			}
-			if (isHelpPingForbiddenForMember(reservation, member, config)) {
-				Responses.warning(event, "Sorry, but only the person who reserved this channel, or staff and helpers, may use this command.").queue();
-				return;
-			}
-			if (isHelpPingTimeoutElapsed(member.getIdLong(), config)) {
-				lastPingTimes.put(event.getMember().getIdLong(), new Pair<>(System.currentTimeMillis(), config.getGuild()));
-				Role role = channelManager.getConfig().getHelpPingRole();
-				event.getChannel().sendMessage(role.getAsMention())
-						.setAllowedMentions(EnumSet.of(Message.MentionType.ROLE))
-						.setEmbeds(buildAuthorEmbed(event.getUser()))
-						.queue();
-				event.replyFormat("Successfully pinged " + role.getAsMention()).setEphemeral(true).queue();
-			} else {
-				Responses.warning(event, "Sorry, but you can only use this command occasionally. Please try again later.").queue();
-			}
-		} else {
-			Responses.warning(event, WRONG_CHANNEL_MSG).queue();
-		}
-	}
-
 	private @NotNull MessageEmbed buildAuthorEmbed(@NotNull User author) {
 		return new EmbedBuilder()
 				.setTitle("Requested by " + author.getAsTag())
 				.build();
-	}
-
-	/**
-	 * Determines if a user is forbidden from sending a help-ping command due
-	 * to their status in the server.
-	 *
-	 * @param reservation The channel reservation for the channel they're
-	 *                    trying to send the command in.
-	 * @param member      The member.
-	 * @param config      The guild config.
-	 * @return True if the user is forbidden from sending the command.
-	 */
-	private boolean isHelpPingForbiddenForMember(@NotNull ChannelReservation reservation, @NotNull Member member, @NotNull GuildConfig config) {
-		Set<Role> allowedRoles = Set.of(config.getModerationConfig().getStaffRole(), config.getHelpConfig().getHelperRole());
-		return !(
-				reservation.getUserId() == member.getUser().getIdLong() ||
-						member.getRoles().stream().anyMatch(allowedRoles::contains) ||
-						member.isOwner()
-		);
 	}
 
 	/**

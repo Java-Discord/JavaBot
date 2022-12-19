@@ -1,4 +1,4 @@
-package net.javadiscord.javabot.systems.help;
+package net.javadiscord.javabot.systems.help.checks;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
