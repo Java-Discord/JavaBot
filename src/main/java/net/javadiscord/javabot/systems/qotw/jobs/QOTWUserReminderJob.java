@@ -1,10 +1,11 @@
-package net.javadiscord.javabot.systems.qotw;
+package net.javadiscord.javabot.systems.qotw.jobs;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;

@@ -12,6 +12,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,14 +35,13 @@ public class QOTWPointsService {
 	@Transactional
 	public QOTWAccount getOrCreateAccount(long userId) throws DataAccessException {
 		QOTWAccount account;
-		Optional<QOTWAccount> optional = pointsRepository.getByUserId(userId);
+		Optional<QOTWAccount> optional = pointsRepository.getByUserId(userId, getCurrentMonth());
 		if (optional.isPresent()) {
 			account = optional.get();
 		} else {
 			account = new QOTWAccount();
 			account.setUserId(userId);
 			account.setPoints(0);
-			pointsRepository.insert(account);
 		}
 		return account;
 	}
@@ -53,7 +54,7 @@ public class QOTWPointsService {
 	 */
 	public int getQOTWRank(long userId) {
 		try{
-			List<QOTWAccount> accounts = pointsRepository.sortByPoints();
+			List<QOTWAccount> accounts = pointsRepository.sortByPoints(getCurrentMonth());
 			return accounts.stream()
 					.map(QOTWAccount::getUserId)
 					.toList()
@@ -88,9 +89,10 @@ public class QOTWPointsService {
 	 */
 	public List<Pair<QOTWAccount, Member>> getTopMembers(int n, Guild guild) {
 		try {
-			List<QOTWAccount> accounts = pointsRepository.sortByPoints();
+			List<QOTWAccount> accounts = pointsRepository.sortByPoints(getCurrentMonth());
 			return accounts.stream()
 					.map(s -> new Pair<>(s, guild.getMemberById(s.getUserId())))
+					.filter(p->p.first().getPoints() > 0)
 					.filter(p -> p.second() != null)
 					.limit(n)
 					.toList();
@@ -109,7 +111,7 @@ public class QOTWPointsService {
 	 */
 	public List<QOTWAccount> getTopAccounts(int amount, int page) {
 		try {
-			return pointsRepository.getTopAccounts(page, amount);
+			return pointsRepository.getTopAccounts(getCurrentMonth(), page, amount);
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
@@ -119,21 +121,24 @@ public class QOTWPointsService {
 	/**
 	 * Increments a single user's QOTW-Points.
 	 *
-	 * @param userId The discord Id of the user.
+	 * @param userId The ID of the user whose points shall be incremented
 	 * @return The total points after the update.
 	 */
 	public long increment(long userId) {
 		try {
-			QOTWAccount account = getOrCreateAccount(userId);
-			account.setPoints(account.getPoints() + 1);
-			if (pointsRepository.update(account)) {
-				return account.getPoints();
-			} else {
-				return 0;
-			}
+			LocalDate date=LocalDate.now();
+			int points = pointsRepository.getPointsAtDate(userId, date)+1;
+			pointsRepository.setPointsAtDate(userId, date, points);
+			LocalDate month = getCurrentMonth();
+			long newScore = pointsRepository.getByUserId(userId, month).map(QOTWAccount::getPoints).orElse(0L);
+			return newScore;
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return 0;
 		}
+	}
+
+	public static LocalDate getCurrentMonth() {
+		return YearMonth.from(LocalDate.now()).atDay(1);
 	}
 }

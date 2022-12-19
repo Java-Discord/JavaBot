@@ -1,7 +1,6 @@
-package net.javadiscord.javabot.systems.qotw;
+package net.javadiscord.javabot.systems.qotw.jobs;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -29,7 +28,6 @@ import java.util.Set;
 /**
  * Job which posts a new question to the QOTW channel.
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QOTWJob {

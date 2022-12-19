@@ -159,7 +159,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
 			reportChannel.sendMessageEmbeds(embed.build()).queue(m -> createReportThread(m, target.getAuthor().getIdLong(), config.getModerationConfig(), thread->{
 				WebhookUtil.ensureWebhookExists(thread.getParentChannel().asStandardGuildMessageChannel(), wh->{
-					WebhookUtil.mirrorMessageToWebhook(wh, target, target.getContentRaw(), thread.getIdLong());
+					WebhookUtil.mirrorMessageToWebhook(wh, target, target.getContentRaw(), thread.getIdLong(), null, null);
 				});
 			}));
 			embed.setDescription("Successfully reported " + "`" + target.getAuthor().getAsTag() + "`!\nYour report has been send to our Moderators");

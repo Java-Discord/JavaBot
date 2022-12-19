@@ -65,7 +65,7 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 				.setDescription(String.format(
 						"""
 								Your submission was marked as the best answer!
-								You've been granted **`1 extra QOTW-Point`**! (total: %s)""", points))
+								You've been granted **`1 extra QOTW-Point`**! (monthly total: %s)""", points))
 				.build();
 	}
 
@@ -75,7 +75,7 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 				.setDescription(String.format(
 						"""
 								Your submission was accepted! %s
-								You've been granted **`1 QOTW-Point`**! (total: %s)""",
+								You've been granted **`1 QOTW-Point`**! (monthly total: %s)""",
 						systemsConfig.getEmojiConfig().getSuccessEmote(guild.getJDA()), points))
 				.build();
 	}
