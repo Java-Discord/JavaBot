@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.moderation;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -27,7 +28,10 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 /**
  * <h3>This class represents the /purge command.</h3>
@@ -60,7 +64,7 @@ public class PurgeCommand extends ModerateCommand {
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
 		ModerationConfig config = botConfig.get(event.getGuild()).getModerationConfig();
-		Long amount = (amountOption == null) ? null : amountOption.getAsLong();
+		Long amount = (amountOption == null) ? 1 : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
 		int maxAmount = config.getPurgeMaxMessageCount();
 		if (amount == null || amount < 1 || amount > maxAmount) {
@@ -87,7 +91,7 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param channel     The channel to remove messages from.
 	 * @param logChannel  The channel to write log messages to during the purge.
 	 */
-	private void purge(@Nullable Long amount, @Nullable User user, User initiatedBy, boolean archive, MessageChannel channel, TextChannel logChannel) {
+	private void purge(long amount, @Nullable User user, User initiatedBy, boolean archive, MessageChannel channel, TextChannel logChannel) {
 		MessageHistory history = channel.getHistory();
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 		String file = String.format("purge_%s_%s.txt", channel.getName(), timestamp);
@@ -97,10 +101,11 @@ public class PurgeCommand extends ModerateCommand {
 		long count = 0;
 		logChannel.sendMessageFormat("Starting purge of channel %s, initiated by %s", channel.getAsMention(), initiatedBy.getAsMention())
 				.queue();
+		int lastEmptyIterations = 0;
 		do {
-			messages = history.retrievePast(amount == null ? 100 : (int) Math.min(100, amount)).complete();
+			messages = history.retrievePast((int) Math.min(100, user==null ? amount : Math.max(amount, 10))).complete();
 			if (!messages.isEmpty()) {
-				int messagesRemoved = removeMessages(messages, user, archiveWriter);
+				int messagesRemoved = removeMessages(messages, user, archiveWriter, amount - count);
 				count += messagesRemoved;
 				logChannel.sendMessage(String.format(
 						"Removed **%d** messages from %s; a total of **%d** messages have been removed in this purge so far.",
@@ -108,8 +113,13 @@ public class PurgeCommand extends ModerateCommand {
 						channel.getAsMention(),
 						count
 				)).queue();
+				if (messagesRemoved == 0) {
+					lastEmptyIterations++;
+				}else {
+					lastEmptyIterations = 0;
+				}
 			}
-		} while (!messages.isEmpty() && (amount == null || amount > count));
+		} while (!messages.isEmpty() && amount > count && lastEmptyIterations <= 20);
 		if (archiveWriter != null) {
 			archiveWriter.close();
 		}
@@ -133,20 +143,27 @@ public class PurgeCommand extends ModerateCommand {
 	 * @param messages      The messages to remove.
 	 * @param user          The user to remove messages for.
 	 * @param archiveWriter The writer to write message archive info to.
+	 * @param max           The maximum number of messages to delete
 	 * @return The number of messages that were actually deleted.
 	 */
-	private int removeMessages(List<Message> messages, @Nullable User user, @Nullable PrintWriter archiveWriter) {
-		int messagesRemoved = 0;
-		for (Message msg : messages) {
-			if (user == null || msg.getAuthor().equals(user)) {
-				msg.delete().complete();
-				messagesRemoved++;
-				if (archiveWriter != null) {
+	private int removeMessages(List<Message> messages, @Nullable User user, @Nullable PrintWriter archiveWriter, long max) {
+		Map<MessageChannelUnion, List<Message>> toRemove = messages
+			.stream()
+			.filter(msg -> user == null || msg.getAuthor().equals(user))
+			.limit(max)
+			.collect(Collectors.groupingBy(Message::getChannel));
+		int count = 0;
+		if (archiveWriter != null) {
+			for (Entry<MessageChannelUnion, List<Message>> entry : toRemove.entrySet()) {
+				List<Message> msgs = entry.getValue();
+				count += msgs.size();
+				for (Message msg : msgs) {
 					archiveMessage(archiveWriter, msg);
 				}
+				entry.getKey().purgeMessages(messages);
 			}
 		}
-		return messagesRemoved;
+		return count;
 	}
 
 	/**
