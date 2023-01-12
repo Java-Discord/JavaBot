@@ -25,7 +25,7 @@ public class CloseCommand extends UnreserveCommand {
 	public CloseCommand(BotConfig botConfig, DbActions dbActions, HelpTransactionRepository helpTransactionRepository, HelpAccountRepository helpAccountRepository) {
 		super(botConfig, dbActions, helpTransactionRepository, helpAccountRepository);
 		setCommandData(
-				Commands.slash("close", "Unreserves this help channel so that others can use it.")
+				Commands.slash("close", "Unreserves this post marking your question/issue as resolved.")
 						.setGuildOnly(true).addOption(OptionType.STRING, "reason",
 								"The reason why you're unreserving this channel", false));
 	}
