@@ -1,13 +1,14 @@
-**1.** Don't ask questions like *"Can I ask ...?"* or *"Can someone help me?"*. It's easier for everyone involved if you provide a detailed description of your problem up-front; this makes it more likely for helpers to want to help, and more likely that you'll get an answer quickly. Please provide code snippets and error messages (if any) to help us help you!
+**1.** Don't ask questions like _"Can I ask ...?"_ or _"Can someone help me?"_. It's easier for everyone involved if you provide a detailed description of your problem up-front; this makes it more likely for helpers to want to help, and more likely that you'll get an answer quickly. Please provide code snippets and error messages (if any) to help us help you!
 
-**2.** Only ask questions in open help channels. Asking a question in someone else's reserved help channel is not polite, and your messages may be removed without notice. Doing this often will result in a ban.
+**2.** Please create a post in <#1023632039829831811> for your questions. Do not use other people's posts for your questions.
 
 **3.** You may use the `/help ping` command if your question is urgent.
 *__Abusing this will result in warnings and/or a ban.__*
 
 **4.** Do not ask for help with exams or homework. You may ask for help with understanding individual concepts and parts of a question, but homework and exam questions that show little effort on your part will most likely go unanswered and may be removed.
 
-**5.** Do not ask your question if you didn’t at least try to solve the problem yourself, are ignorant, or, instead of *trying* to improve, ask repeating, simple, questions.
+**5.** Do not ask your question if you didn't at least try to solve the problem yourself, are ignorant, or, instead of trying to improve, ask repeating, simple, questions.
 
 **6.** Format your code using [Discord's triple-backtick syntax](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-).
 
+**7.** For reasons similar to those of [Stack Overflow](https://meta.stackoverflow.com/questions/421831/temporary-policy-chatgpt-is-banned), we currently do not allow content created by ChatGPT while helping other people. You may still share its content, when you are not helping somebody and are not looking to deceive others, for example when discussing ChatGPT and its technology.
