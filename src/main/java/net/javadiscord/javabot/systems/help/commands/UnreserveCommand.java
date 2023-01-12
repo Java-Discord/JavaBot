@@ -38,7 +38,7 @@ public class UnreserveCommand extends SlashCommand {
 		this.dbActions = dbActions;
 		this.helpAccountRepository = helpAccountRepository;
 		this.helpTransactionRepository = helpTransactionRepository;
-		setCommandData(Commands.slash("unreserve", "Unreserves this help channel so that others can use it.")
+		setCommandData(Commands.slash("unreserve", "Unreserves this post marking your question/issue as resolved.")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
 		);
