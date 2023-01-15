@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -100,6 +101,52 @@ public class SubmissionManager {
 	}
 
 	/**
+	 * Handles a submission review using a {@link net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu}.
+	 *
+	 * @param event The {@link StringSelectInteractionEvent} that was fired.
+	 * @param threadId The submissions' thread-id.
+	 */
+	public void handleSelectReview(StringSelectInteractionEvent event, String threadId) {
+		if (event.getGuild() == null) {
+			Responses.replyGuildOnly(event).queue();
+			return;
+		}
+		final ThreadChannel submissionThread = event.getGuild().getThreadChannelById(threadId);
+		if (submissionThread == null) {
+			Responses.error(event, "Could not find submission thread!").queue();
+			return;
+		}
+		if (submissionThread.getParentChannel().getIdLong() != config.getSubmissionChannelId()) {
+			Responses.error(event, "The selected thread is not a submission channel!").queue();
+			return;
+		}
+		if (event.getValues().isEmpty() || event.getValues().size() > 1) {
+			Responses.error(event, "Please select an action!").queue();
+			return;
+		}
+		final SubmissionStatus status = SubmissionStatus.valueOf(event.getValues().get(0));
+		event.deferReply().queue();
+		final QOTWSubmission submission = new QOTWSubmission(submissionThread);
+		submission.retrieveAuthor(author -> {
+			switch (status) {
+				case ACCEPT_BEST -> acceptSubmission(event.getHook(), submissionThread, author, true);
+				case ACCEPT -> acceptSubmission(event.getHook(), submissionThread, author, false);
+				default -> declineSubmission(event.getHook(), submissionThread, author, status);
+			}
+			if (config.getSubmissionChannel().getThreadChannels().size() <= 1) {
+				Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
+						.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
+				newestPostOptional.ifPresent(p -> {
+					p.getManager().setAppliedTags().queue();
+					notificationService.withGuild(config.getGuild()).sendToModerationLog(log -> log.sendMessageFormat("All submissions have been reviewed!"));
+				});
+			}
+			event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())))).queue();
+			Responses.info(event, "Review done!", "Successfully reviewed %s! (`%s`)", submissionThread.getAsMention(), status).queue();
+		});
+	}
+
+	/**
 	 * Handles the "Delete Submission" Button.
 	 *
 	 * @param event The {@link ButtonInteractionEvent} that is fired upon use.
@@ -168,12 +215,13 @@ public class SubmissionManager {
 	 * @param hook   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
 	 * @param thread The submission's {@link ThreadChannel}.
 	 * @param author The submissions' author.
+	 * @param status The {@link SubmissionStatus}.
 	 */
-	public void declineSubmission(InteractionHook hook, @NotNull ThreadChannel thread, User author) {
+	public void declineSubmission(InteractionHook hook, @NotNull ThreadChannel thread, User author, SubmissionStatus status) {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
-		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed();
+		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed(status);
 		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), SubmissionStatus.DECLINE);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), status);
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
 

@@ -8,28 +8,35 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.requests.restaction.ForumPostAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
+import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
+import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 /**
  * Job which disables the Submission button.
@@ -65,15 +72,20 @@ public class QOTWCloseSubmissionsJob {
 			questionMessage.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
 			notificationService.withGuild(guild)
 					.sendToModerationLog(log ->
-							log.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review:%n%n%s",
+							log.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review",
 									qotwConfig.getQOTWReviewRole().getAsMention(),
-									qotwConfig.getSubmissionChannel().getThreadChannels().size(),
-									qotwConfig.getSubmissionChannel().getThreadChannels().stream()
-											.map(t -> "> %s (%d message(s))".formatted(t.getAsMention(), t.getMessageCount() - 2)) // NOTE: Subtract 2 messages which are send by the bot
-											.collect(Collectors.joining("\n")))
+									qotwConfig.getSubmissionChannel().getThreadChannels().size())
 					);
-			qotwConfig.getSubmissionChannel().getThreadChannels().forEach(t ->
-					t.getManager().setName(SUBMISSION_PENDING + t.getName()).queue());
+			for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {
+				notificationService.withGuild(guild).sendToModerationLog(log ->
+						log.sendMessage(submission.getAsMention())
+								.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
+				);
+				submission.getManager().setName(SUBMISSION_PENDING + submission.getName()).queue();
+				// remove the author
+				final QOTWSubmission s = new QOTWSubmission(submission);
+				s.retrieveAuthor(author -> submission.removeThreadMember(author).queue());
+			}
 			if (qotwConfig.getSubmissionsForumChannel() == null) continue;
 			asyncPool.execute(() -> {
 				MessageEmbed embed = questionMessage.getEmbeds().get(0);
@@ -92,6 +104,29 @@ public class QOTWCloseSubmissionsJob {
 				}
 			});
 		}
+	}
+
+	private @Nonnull StringSelectMenu buildSubmissionSelectMenu(JDA jda, long threadId) {
+		final SystemsConfig.EmojiConfig emojiConfig = botConfig.getSystems().getEmojiConfig();
+		return StringSelectMenu.create(ComponentIdBuilder.build("qotw-submission-select", "review", threadId))
+				.setPlaceholder("Select an action for this submission")
+				.addOptions(
+						SelectOption.of("Accept (Best Answer)", SubmissionStatus.ACCEPT_BEST.name())
+								.withDescription("The submission is correct and is considered to be among the \"best answers\"")
+								.withEmoji(emojiConfig.getSuccessEmote(jda)),
+						SelectOption.of("Accept", SubmissionStatus.ACCEPT.name())
+								.withDescription("The overall submission is correct")
+								.withEmoji(emojiConfig.getSuccessEmote(jda)),
+						SelectOption.of("Decline: Wrong Answer", SubmissionStatus.DECLINE.name() + ":1")
+								.withDescription("The submission is simply wrong or falsely explained")
+								.withEmoji(emojiConfig.getFailureEmote(jda)),
+						SelectOption.of("Decline: Too short", SubmissionStatus.DECLINE.name() + ":2")
+								.withDescription("The submission is way to short in comparison to other submissions")
+								.withEmoji(emojiConfig.getFailureEmote(jda)),
+						SelectOption.of("Decline: Empty Submission", SubmissionStatus.DECLINE.name() + ":3")
+								.withDescription("The submission was empty")
+								.withEmoji(emojiConfig.getFailureEmote(jda))
+				).build();
 	}
 
 	private @NotNull MessageEmbed buildQuestionEmbed(@NotNull QOTWQuestion question) {
