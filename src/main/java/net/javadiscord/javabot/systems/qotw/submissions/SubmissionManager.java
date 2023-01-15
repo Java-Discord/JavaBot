@@ -120,7 +120,7 @@ public class SubmissionManager {
 			Responses.error(event, "The selected thread is not a submission channel!").queue();
 			return;
 		}
-		if (event.getValues().isEmpty() || event.getValues().size() > 1) {
+		if (event.getValues().size() != 1) {
 			Responses.error(event, "Please select an action!").queue();
 			return;
 		}
