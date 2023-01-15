@@ -1,5 +1,7 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import xyz.dynxsty.dih4jda.interactions.components.StringSelectMenuHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 
@@ -13,6 +15,7 @@ import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -20,7 +23,7 @@ import java.util.concurrent.ExecutorService;
  */
 @AutoDetectableComponentHandler({"qotw-submission","qotw-submission-select"})
 @RequiredArgsConstructor
-public class SubmissionInteractionManager implements ButtonHandler {
+public class SubmissionInteractionManager implements ButtonHandler, StringSelectMenuHandler {
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
@@ -34,6 +37,15 @@ public class SubmissionInteractionManager implements ButtonHandler {
 		switch (id[1]) {
 			case "submit" -> manager.handleSubmission(event, Integer.parseInt(id[2])).queue();
 			case "delete" -> manager.handleThreadDeletion(event);
+		}
+	}
+
+	@Override
+	public void handleStringSelectMenu(@NotNull StringSelectInteractionEvent event, @NotNull List<String> values) {
+		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		switch (id[1]) {
+			case "review" -> manager.handleSelectReview(event, id[2]);
 		}
 	}
 }

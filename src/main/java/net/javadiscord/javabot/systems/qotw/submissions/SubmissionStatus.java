@@ -13,9 +13,17 @@ public enum SubmissionStatus {
 	 */
 	ACCEPT("accepted"),
 	/**
-	 * The submission got declined.
+	 * The submission got declined as it was simply wrong.
 	 */
-	DECLINE("declined");
+	DECLINE_WRONG_ANSWER("declined (wrong answer)"),
+	/**
+	 * The submission got declined as it was too short compared to other submissions.
+	 */
+	DECLINE_TOO_SHORT("declined (too short)"),
+	/**
+	 * The submission got declined as it was simply empty.
+	 */
+	DECLINE_EMPTY("declined (empty)");
 
 	private final String verb;
 

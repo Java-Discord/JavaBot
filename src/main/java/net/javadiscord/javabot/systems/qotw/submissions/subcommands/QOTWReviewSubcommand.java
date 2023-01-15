@@ -14,6 +14,7 @@ import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
@@ -82,7 +83,9 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 			if (state.contains("ACCEPT")) {
 				manager.acceptSubmission(event.getHook(), submissionThread, author, state.equals("ACCEPT_BEST"));
 			} else {
-				manager.declineSubmission(event.getHook(), submissionThread, author);
+				// just do a "wrong answer" for now. this command is going to be removed
+				// in the near future anyway
+				manager.declineSubmission(event.getHook(), submissionThread, author, SubmissionStatus.DECLINE_WRONG_ANSWER);
 			}
 			if (qotwConfig.getSubmissionChannel().getThreadChannels().size() <= 1) {
 				Optional<ThreadChannel> newestPostOptional = qotwConfig.getSubmissionsForumChannel().getThreadChannels()
