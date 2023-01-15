@@ -77,14 +77,16 @@ public class QOTWCloseSubmissionsJob {
 									qotwConfig.getSubmissionChannel().getThreadChannels().size())
 					);
 			for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				notificationService.withGuild(guild).sendToModerationLog(log ->
-						log.sendMessage(submission.getAsMention())
-								.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
-				);
 				submission.getManager().setName(SUBMISSION_PENDING + submission.getName()).queue();
 				// remove the author
 				final QOTWSubmission s = new QOTWSubmission(submission);
-				s.retrieveAuthor(author -> submission.removeThreadMember(author).queue());
+				s.retrieveAuthor(author -> {
+					submission.removeThreadMember(author).queue();
+					notificationService.withGuild(guild).sendToModerationLog(log ->
+							log.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
+									.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
+					);
+				});
 			}
 			if (qotwConfig.getSubmissionsForumChannel() == null) continue;
 			asyncPool.execute(() -> {
