@@ -117,13 +117,13 @@ public class QOTWCloseSubmissionsJob {
 						SelectOption.of("Accept", SubmissionStatus.ACCEPT.name())
 								.withDescription("The overall submission is correct")
 								.withEmoji(emojiConfig.getSuccessEmote(jda)),
-						SelectOption.of("Decline: Wrong Answer", SubmissionStatus.DECLINE.name() + ":1")
+						SelectOption.of("Decline: Wrong Answer", SubmissionStatus.DECLINE_WRONG_ANSWER.name())
 								.withDescription("The submission is simply wrong or falsely explained")
 								.withEmoji(emojiConfig.getFailureEmote(jda)),
-						SelectOption.of("Decline: Too short", SubmissionStatus.DECLINE.name() + ":2")
+						SelectOption.of("Decline: Too short", SubmissionStatus.DECLINE_TOO_SHORT.name())
 								.withDescription("The submission is way to short in comparison to other submissions")
 								.withEmoji(emojiConfig.getFailureEmote(jda)),
-						SelectOption.of("Decline: Empty Submission", SubmissionStatus.DECLINE.name() + ":3")
+						SelectOption.of("Decline: Empty Submission", SubmissionStatus.DECLINE_EMPTY.name())
 								.withDescription("The submission was empty")
 								.withEmoji(emojiConfig.getFailureEmote(jda))
 				).build();
