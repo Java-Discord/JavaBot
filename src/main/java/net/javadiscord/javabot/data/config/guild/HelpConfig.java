@@ -14,11 +14,6 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class HelpConfig extends GuildConfigItem {
-	/**
-	 * The id of the help overview channel.
-	 */
-	private Map<String, Long> helpOverviewMessageIds = Map.of();
-
 	private long helpForumChannelId = 0;
 
 	/**
