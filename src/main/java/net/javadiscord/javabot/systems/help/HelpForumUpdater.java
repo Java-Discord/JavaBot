@@ -46,7 +46,13 @@ public class HelpForumUpdater {
 	}
 
 	private void checkForumPost(@NotNull ThreadChannel post, HelpConfig config) {
-		post.retrieveMessageById(post.getLatestMessageId()).queue(latest -> {
+		post.getHistory().retrievePast(1).queue(messages -> {
+			if (messages.isEmpty()) {
+				log.error("Could not find messages in forum thread {}", post.getId());
+				return;
+			}
+			// Simply get the first one, as we only requested a singular message
+			Message latest = messages.get(0);
 			long minutesAgo = (Instant.now().getEpochSecond() - latest.getTimeCreated().toEpochSecond()) / 60;
 			boolean isThankMessage = isThanksMessage(latest);
 			if (minutesAgo > config.getInactivityTimeoutMinutes() || minutesAgo > config.getRemoveThanksTimeoutMinutes() && isThankMessage) {
@@ -59,7 +65,7 @@ public class HelpForumUpdater {
 							post.getName(), post.getOwnerId(), minutesAgo);
 				});
 			}
-		}, e -> log.error("Could not find message with id {}", post.getLatestMessageId()));
+		}, e -> log.error("Could not find latest message in forum thread {}:", post.getId(), e));
 	}
 
 	private boolean isThanksMessage(@NotNull Message m) {
