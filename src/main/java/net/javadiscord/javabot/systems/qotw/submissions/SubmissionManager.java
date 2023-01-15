@@ -198,10 +198,10 @@ public class SubmissionManager {
 							boolean lastMessage = messages.indexOf(message) + 1 == messages.size();
 							if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
 							if (message.getContentRaw().length() > 2000) {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null);
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null);
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null).join();
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null).join();
 							} else {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null);
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null).join();
 							}
 						}
 					}));
