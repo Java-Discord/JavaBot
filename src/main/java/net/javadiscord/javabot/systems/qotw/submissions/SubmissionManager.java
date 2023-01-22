@@ -141,7 +141,7 @@ public class SubmissionManager {
 					notificationService.withGuild(config.getGuild()).sendToModerationLog(log -> log.sendMessageFormat("All submissions have been reviewed!"));
 				});
 			}
-			event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())))).queue();
+			event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())).asDisabled())).queue();
 			Responses.info(event, "Review done!", "Successfully reviewed %s! (`%s`)", submissionThread.getAsMention(), status).queue();
 		});
 	}
