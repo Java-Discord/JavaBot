@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -21,7 +22,6 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
-import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
@@ -47,7 +47,6 @@ public class QOTWCloseSubmissionsJob {
 	private static final String SUBMISSION_PENDING = "\uD83D\uDD52 ";
 
 	private final JDA jda;
-	private final NotificationService notificationService;
 	private final QuestionQueueRepository questionQueueRepository;
 	private final ExecutorService asyncPool;
 	private final BotConfig botConfig;
@@ -66,28 +65,30 @@ public class QOTWCloseSubmissionsJob {
 			qotwConfig.getSubmissionChannel().getManager()
 					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS))
 					.queue();
-			if (config.getModerationConfig().getLogChannel() == null) continue;
+			TextChannel logChannel = config.getModerationConfig().getLogChannel();
+			if (logChannel == null) continue;
 			if (qotwConfig.getSubmissionChannel() == null || qotwConfig.getQuestionChannel() == null) continue;
 			Message questionMessage = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
 			questionMessage.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
-			notificationService.withGuild(guild)
-					.sendToModerationLog(log ->
-							log.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review",
+			logChannel
+				.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review",
 									qotwConfig.getQOTWReviewRole().getAsMention(),
 									qotwConfig.getSubmissionChannel().getThreadChannels().size())
-					);
-			for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-				submission.getManager().setName(SUBMISSION_PENDING + submission.getName()).queue();
-				// remove the author
-				final QOTWSubmission s = new QOTWSubmission(submission);
-				s.retrieveAuthor(author -> {
-					submission.removeThreadMember(author).queue();
-					notificationService.withGuild(guild).sendToModerationLog(log ->
-							log.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
-									.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
-					);
+				.flatMap(msg -> msg.createThreadChannel("QOTW review"))
+				.queue(thread -> {
+					for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {
+						submission.getManager().setName(SUBMISSION_PENDING + submission.getName()).queue();
+						// remove the author
+						final QOTWSubmission s = new QOTWSubmission(submission);
+						s.retrieveAuthor(author -> {
+							submission.removeThreadMember(author).queue();
+							thread
+								.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
+								.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
+								.queue();
+						});
+					}
 				});
-			}
 			if (qotwConfig.getSubmissionsForumChannel() == null) continue;
 			asyncPool.execute(() -> {
 				MessageEmbed embed = questionMessage.getEmbeds().get(0);

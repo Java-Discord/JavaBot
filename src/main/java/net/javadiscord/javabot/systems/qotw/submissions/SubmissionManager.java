@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
@@ -125,24 +125,31 @@ public class SubmissionManager {
 			return;
 		}
 		final SubmissionStatus status = SubmissionStatus.valueOf(event.getValues().get(0));
-		event.deferReply().queue();
+		event.deferEdit().queue();
 		final QOTWSubmission submission = new QOTWSubmission(submissionThread);
 		submission.retrieveAuthor(author -> {
 			switch (status) {
-				case ACCEPT_BEST -> acceptSubmission(event.getHook(), submissionThread, author, true);
-				case ACCEPT -> acceptSubmission(event.getHook(), submissionThread, author, false);
-				default -> declineSubmission(event.getHook(), submissionThread, author, status);
+				case ACCEPT_BEST -> acceptSubmission(submissionThread, author, true);
+				case ACCEPT -> acceptSubmission(submissionThread, author, false);
+				default -> declineSubmission(submissionThread, author, status);
 			}
 			if (config.getSubmissionChannel().getThreadChannels().size() <= 1) {
 				Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
 						.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 				newestPostOptional.ifPresent(p -> {
 					p.getManager().setAppliedTags().queue();
-					notificationService.withGuild(config.getGuild()).sendToModerationLog(log -> log.sendMessageFormat("All submissions have been reviewed!"));
+					MessageChannelUnion channel = event
+						.getChannel();
+					channel
+						.sendMessageFormat("All submissions have been reviewed!")
+						.queue(msg -> {
+							if(channel.getType().isThread()) {
+								channel.asThreadChannel().getManager().setLocked(true).queue();
+							}
+						});
 				});
 			}
-			event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())).asDisabled())).queue();
-			Responses.info(event, "Review done!", "Successfully reviewed %s! (`%s`)", submissionThread.getAsMention(), status).queue();
+			event.getHook().editOriginalComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())).asDisabled())).queue();
 		});
 	}
 
@@ -172,12 +179,11 @@ public class SubmissionManager {
 	/**
 	 * Accepts a submission.
 	 *
-	 * @param hook       The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
 	 * @param thread     The submission's {@link ThreadChannel}.
 	 * @param author     The submissions' author.
 	 * @param bestAnswer Whether the submission is among the best answers for this week.
 	 */
-	public void acceptSubmission(InteractionHook hook, @NotNull ThreadChannel thread, @NotNull User author, boolean bestAnswer) {
+	public void acceptSubmission(@NotNull ThreadChannel thread, @NotNull User author, boolean bestAnswer) {
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		pointsService.increment(author.getIdLong());
 		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
@@ -185,8 +191,6 @@ public class SubmissionManager {
 			pointsService.increment(author.getIdLong());
 			notificationService.withQOTW(thread.getGuild(), author).sendBestAnswerNotification();
 		}
-		Responses.success(hook, "Submission Accepted",
-				"Successfully accepted submission by " + author.getAsMention()).queue();
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
 		Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
 				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
@@ -212,15 +216,13 @@ public class SubmissionManager {
 	/**
 	 * Declines a submission.
 	 *
-	 * @param hook   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} that was fired.
 	 * @param thread The submission's {@link ThreadChannel}.
 	 * @param author The submissions' author.
 	 * @param status The {@link SubmissionStatus}.
 	 */
-	public void declineSubmission(InteractionHook hook, @NotNull ThreadChannel thread, User author, SubmissionStatus status) {
+	public void declineSubmission(@NotNull ThreadChannel thread, User author, SubmissionStatus status) {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed(status);
-		Responses.success(hook, "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), status);
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
