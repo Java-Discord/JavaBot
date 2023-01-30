@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
@@ -87,6 +88,9 @@ public class QOTWCloseSubmissionsJob {
 								.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
 								.queue();
 						});
+						for (Member member : guild.getMembersWithRoles(qotwConfig.getQOTWReviewRole())) {
+							thread.addThreadMember(member).queue();
+						}
 					}
 				});
 			if (qotwConfig.getSubmissionsForumChannel() == null) continue;
