@@ -148,6 +148,10 @@ public class SubmissionManager {
 							}
 						});
 				});
+				MessageChannelUnion reviewChannel = event.getChannel();
+				if (reviewChannel.getType().isThread()) {
+					reviewChannel.asThreadChannel().getManager().setArchived(true).queue();
+				}
 			}
 			event.getHook().editOriginalComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())).asDisabled())).queue();
 		});
