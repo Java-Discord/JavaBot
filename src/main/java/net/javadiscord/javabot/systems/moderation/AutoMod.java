@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 // TODO: Refactor this to be more efficient. Especially AutoMod#checkNewMessageAutomod
 public class AutoMod extends ListenerAdapter {
 
-	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg|com/invite)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 	private static final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
