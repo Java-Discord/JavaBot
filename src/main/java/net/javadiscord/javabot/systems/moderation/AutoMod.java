@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -38,7 +37,7 @@ import java.util.regex.Pattern;
 // TODO: Refactor this to be more efficient. Especially AutoMod#checkNewMessageAutomod
 public class AutoMod extends ListenerAdapter {
 
-	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg|com/invite)|sites\\.com)/.{0,4}|app\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
+	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|(?:app)?\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
 	private static final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
 					+ "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
@@ -47,7 +46,6 @@ public class AutoMod extends ListenerAdapter {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private List<String> spamUrls;
-	private final DbHelper dbHelper;
 	private final WarnRepository warnRepository;
 	private final ExecutorService asyncPool;
 
@@ -55,14 +53,12 @@ public class AutoMod extends ListenerAdapter {
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
 	 * @param notificationService The {@link QOTWPointsService}
 	 * @param botConfig The main configuration of the bot
-	 * @param dbHelper An object managing databse operations
 	 * @param asyncPool The main thread pool for asynchronous operations
 	 * @param warnRepository The main thread pool for asynchronous operations
 	 */
-	public AutoMod(NotificationService notificationService, BotConfig botConfig, DbHelper dbHelper, ExecutorService asyncPool, WarnRepository warnRepository) {
+	public AutoMod(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
-		this.dbHelper = dbHelper;
 		this.warnRepository = warnRepository;
 		this.asyncPool = asyncPool;
 		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
