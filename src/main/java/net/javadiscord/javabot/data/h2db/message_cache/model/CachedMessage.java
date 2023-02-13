@@ -1,7 +1,11 @@
 package net.javadiscord.javabot.data.h2db.message_cache.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 
 /**
  * Represents a cached Message.
@@ -11,6 +15,7 @@ public class CachedMessage {
 	private long messageId;
 	private long authorId;
 	private String messageContent;
+	private List<String> attachments=new ArrayList<>();
 
 	/**
 	 * Converts a {@link Message} object to a {@link CachedMessage}.
@@ -23,6 +28,11 @@ public class CachedMessage {
 		cachedMessage.setMessageId(message.getIdLong());
 		cachedMessage.setAuthorId(message.getAuthor().getIdLong());
 		cachedMessage.setMessageContent(message.getContentRaw().trim());
+		cachedMessage.attachments = message
+				.getAttachments()
+				.stream()
+				.map(Attachment::getProxyUrl)
+				.toList();
 		return cachedMessage;
 	}
 
