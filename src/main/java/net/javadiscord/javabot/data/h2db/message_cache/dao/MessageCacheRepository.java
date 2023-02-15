@@ -6,11 +6,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Dao class that represents the QOTW_POINTS SQL Table.
@@ -19,20 +22,6 @@ import java.util.List;
 @Repository
 public class MessageCacheRepository {
 	private final JdbcTemplate jdbcTemplate;
-
-	/**
-	 * Inserts a new {@link CachedMessage} object.
-	 *
-	 * @param message The Message to insert.
-	 * @return Whether there were rows affected by this process.
-	 * @throws SQLException If an error occurs.
-	 */
-	public boolean insert(CachedMessage message) throws DataAccessException {
-		int rows = jdbcTemplate.update(
-				"INSERT INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
-				message.getMessageId(), message.getAuthorId(), message.getMessageContent());
-		return rows > 0;
-	}
 
 	/**
 	 * Inserts a {@link List} of {@link CachedMessage} objects.
@@ -57,31 +46,30 @@ public class MessageCacheRepository {
 						return messages.size();
 					}
 				});
-	}
+		List<Map.Entry<CachedMessage, Integer>> attachments=new ArrayList<>();
+		for (CachedMessage msg : messages) {
+			for (int i = 0; i < msg.getAttachments().size(); i++) {
+				attachments.add(Map.entry(msg, i));
+			}
+		}
+		jdbcTemplate.batchUpdate("MERGE INTO message_cache_attachments (message_id, attachment_index, link) VALUES (?, ?, ?)",
+				new BatchPreparedStatementSetter() {
 
-	/**
-	 * Edit an existing {@link CachedMessage} object.
-	 *
-	 * @param message The new Message object.
-	 * @return Whether there were rows affected by this process.
-	 * @throws SQLException If an error occurs.
-	 */
-	public boolean update(@NotNull CachedMessage message) throws DataAccessException {
-		int rows = jdbcTemplate.update("UPDATE message_cache SET message_content = ? WHERE message_id = ?",
-				message.getMessageContent(), message.getMessageId());
-		return rows > 0;
-	}
+					@Override
+					public void setValues(PreparedStatement stmt, int i) throws SQLException {
+						Entry<CachedMessage, Integer> entry = attachments.get(i);
+						CachedMessage msg = entry.getKey();
+						Integer attachmentIndex = entry.getValue();
+						stmt.setLong(1, msg.getMessageId());
+						stmt.setInt(2, attachmentIndex);
+						stmt.setString(3, msg.getAttachments().get(attachmentIndex));
+					}
 
-	/**
-	 * Deletes a single {@link CachedMessage} object from the Message Cache.
-	 *
-	 * @param messageId The message's id.
-	 * @return Whether there were rows affected by this process.
-	 * @throws SQLException If an error occurs.
-	 */
-	public boolean delete(long messageId) throws DataAccessException {
-		int rows = jdbcTemplate.update("DELETE FROM message_cache WHERE message_id = ?", messageId);
-		return rows > 0;
+					@Override
+					public int getBatchSize() {
+						return attachments.size();
+					}
+				});
 	}
 
 	/**
@@ -91,7 +79,17 @@ public class MessageCacheRepository {
 	 * @throws SQLException If anything goes wrong.
 	 */
 	public List<CachedMessage> getAll() throws DataAccessException {
-		return jdbcTemplate.query("SELECT * FROM message_cache",(RowMapper<CachedMessage>) (rs, rowNum) -> this.read(rs));
+		List<CachedMessage> messagesWithLink = jdbcTemplate.query(
+				"SELECT * FROM message_cache LEFT JOIN message_cache_attachments ON message_cache.message_id = message_cache_attachments.message_id",
+				(rs, rowNum) -> this.read(rs));
+		Map<Long, CachedMessage> messages=new LinkedHashMap<>();
+		for (CachedMessage msg : messagesWithLink) {
+			CachedMessage previous = messages.putIfAbsent(msg.getMessageId(), msg);
+			if(previous!=null) {
+				previous.getAttachments().addAll(msg.getAttachments());
+			}
+		}
+		return new ArrayList<>(messages.values());
 	}
 
 	/**
@@ -103,14 +101,22 @@ public class MessageCacheRepository {
 	 */
 	public boolean delete(int amount) throws DataAccessException {
 		int rows = jdbcTemplate.update("DELETE FROM message_cache LIMIT ?", amount);
-		return rows > 0;
+		if(rows > 0){
+			jdbcTemplate.update("DELETE FROM message_cache_attachments WHERE message_id NOT IN (SELECT message_id FROM message_cache)");
+			return true;
+		}
+		return false;
 	}
 
 	private CachedMessage read(ResultSet rs) throws SQLException {
 		CachedMessage cachedMessage = new CachedMessage();
-		cachedMessage.setMessageId(rs.getLong("message_id"));
+		cachedMessage.setMessageId(rs.getLong("message_cache.message_id"));
 		cachedMessage.setAuthorId(rs.getLong("author_id"));
 		cachedMessage.setMessageContent(rs.getString("message_content"));
+		String attachment = rs.getString("link");
+		if(attachment!=null) {
+			cachedMessage.getAttachments().add(attachment);
+		}
 		return cachedMessage;
 	}
 }

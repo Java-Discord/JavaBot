@@ -3,6 +3,7 @@ package net.javadiscord.javabot.data.h2db.message_cache;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -108,7 +110,7 @@ public class MessageCache {
 	public void sendUpdatedMessageToLog(Message updated, CachedMessage before) {
 		MessageCacheConfig config = botConfig.get(updated.getGuild()).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
-		if (updated.getContentRaw().trim().equals(before.getMessageContent())) return;
+		if (updated.getContentRaw().trim().equals(before.getMessageContent()) && updated.getAttachments().size() == before.getAttachments().size()) return;
 		MessageCreateAction action = config.getMessageCacheLogChannel()
 				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
 				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
@@ -148,7 +150,7 @@ public class MessageCache {
 	}
 
 	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
-		return buildMessageCacheEmbed(channel, author, before)
+		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, before)
 				.setTitle("Message Edited")
 				.setColor(Responses.Type.WARN.getColor())
 				.addField("Before", before.getMessageContent().substring(0, Math.min(
@@ -156,18 +158,41 @@ public class MessageCache {
 						MessageEmbed.VALUE_MAX_LENGTH)), false)
 				.addField("After", after.getContentRaw().substring(0, Math.min(
 						after.getContentRaw().length(),
-						MessageEmbed.VALUE_MAX_LENGTH)), false)
+						MessageEmbed.VALUE_MAX_LENGTH)), false);
+		if(before.getAttachments().size() != after.getAttachments().size()) {
+			eb.addField("Deleted Attachments",
+					before
+						.getAttachments()
+						.stream()
+						.filter(attachment -> after//not present in 'after'
+								.getAttachments()
+								.stream()
+								.map(Attachment::getProxyUrl)
+								.noneMatch(attachment::equals))
+						.collect(Collectors.joining("\n")),
+						false);
+		}
+		return eb
 				.build();
 	}
 
 	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
-		return buildMessageCacheEmbed(channel, author, message)
+		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, message)
 				.setTitle("Message Deleted")
 				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Message Content",
 						message.getMessageContent().substring(0, Math.min(
 								message.getMessageContent().length(),
-								MessageEmbed.VALUE_MAX_LENGTH)), false)
+								MessageEmbed.VALUE_MAX_LENGTH)), false);
+		if (!message.getAttachments().isEmpty()) {
+			eb.addField("Attachments",
+					message
+						.getAttachments()
+						.stream()
+						.collect(Collectors.joining("\n")),
+					false);
+		}
+		return eb
 				.build();
 	}
 
