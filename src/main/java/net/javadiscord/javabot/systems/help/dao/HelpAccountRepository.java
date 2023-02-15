@@ -104,7 +104,7 @@ public class HelpAccountRepository {
 	 * @throws DataAccessException If an error occurs.
 	 */
 	public void removeExperienceFromAllAccounts(double change, int min, int max) throws DataAccessException {
-		long rows = jdbcTemplate.execute("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (1 - ? / 100), ?), ?), 0)",new CallableStatementCallback<Long>() {
+		long rows = jdbcTemplate.execute("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (? / 100), ?), ?), 0)",new CallableStatementCallback<Long>() {
 
 			@Override
 			public Long doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
