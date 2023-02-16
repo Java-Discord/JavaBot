@@ -31,7 +31,7 @@ public class CachedMessage {
 		cachedMessage.attachments = message
 				.getAttachments()
 				.stream()
-				.map(Attachment::getProxyUrl)
+				.map(Attachment::getUrl)
 				.toList();
 		return cachedMessage;
 	}

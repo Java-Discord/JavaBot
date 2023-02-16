@@ -167,7 +167,7 @@ public class MessageCache {
 						.filter(attachment -> after//not present in 'after'
 								.getAttachments()
 								.stream()
-								.map(Attachment::getProxyUrl)
+								.map(Attachment::getUrl)
 								.noneMatch(attachment::equals))
 						.collect(Collectors.joining("\n")),
 						false);
