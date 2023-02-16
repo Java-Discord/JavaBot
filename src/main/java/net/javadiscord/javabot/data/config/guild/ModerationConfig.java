@@ -3,6 +3,7 @@ package net.javadiscord.javabot.data.config.guild;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
@@ -19,6 +20,7 @@ public class ModerationConfig extends GuildConfigItem {
 	private long logChannelId = 0;
 	private long suggestionChannelId = 0;
 	private long jobChannelId = 0;
+	private long projectChannelId = 0;
 	private long staffRoleId = 0;
 	private long adminRoleId = 0;
 	private long expertRoleId = 0;
@@ -79,12 +81,16 @@ public class ModerationConfig extends GuildConfigItem {
 		return this.getGuild().getTextChannelById(this.suggestionChannelId);
 	}
 
-	public TextChannel getJobChannel() {
-		return this.getGuild().getTextChannelById(this.jobChannelId);
+	public ForumChannel getProjectChannel() {
+		return this.getGuild().getForumChannelById(this.projectChannelId);
 	}
 
-	public TextChannel getShareKnowledgeChannel() {
-		return this.getGuild().getTextChannelById(this.shareKnowledgeChannelId);
+	public ForumChannel getJobChannel() {
+		return this.getGuild().getForumChannelById(this.jobChannelId);
+	}
+
+	public ForumChannel getShareKnowledgeChannel() {
+		return this.getGuild().getForumChannelById(this.shareKnowledgeChannelId);
 	}
 
 	public Role getStaffRole() {

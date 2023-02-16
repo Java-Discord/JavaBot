@@ -2,7 +2,7 @@ package net.javadiscord.javabot.listener;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
  * on whether a message should stay in the channel.
  */
 @RequiredArgsConstructor
-public abstract class MessageVoteListener extends ListenerAdapter {
+public abstract class ForumPostVoteListener extends ListenerAdapter {
 	/**
 	 * The main configuration of the bot.
 	 */
@@ -36,7 +36,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * @param guild The guild to get the channel for.
 	 * @return The text channel that this vote listener should listen in.
 	 */
-	protected abstract TextChannel getChannel(Guild guild);
+	protected abstract ForumChannel getChannel(Guild guild);
 
 	/**
 	 * Gets the threshold needed to remove a message. If a message has <code>U</code>
@@ -54,17 +54,6 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 */
 	protected int getMessageDeleteVoteThreshold(Guild guild) {
 		return 5;
-	}
-
-	/**
-	 * Determines if a given message is eligible for voting. Only eligible
-	 * messages will have voting reactions applied.
-	 *
-	 * @param message The message to check.
-	 * @return True if the message is eligible for voting, or false if not.
-	 */
-	protected boolean isMessageEligibleForVoting(Message message) {
-		return true;
 	}
 
 	/**
@@ -127,9 +116,10 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem() || event.getMessage().getType() == MessageType.THREAD_CREATED) {
 			return false;
 		}
+		if (!event.isFromThread()) return false;
+		if (event.getMessageIdLong() != event.getChannel().getIdLong()) return false;
 		if (getChannel(event.getGuild()) == null) return false;
-		return event.getChannel().getId().equals(getChannel(event.getGuild()).getId()) &&
-				isMessageEligibleForVoting(event.getMessage());
+		return event.getChannel().asThreadChannel().getParentChannel().getId().equals(getChannel(event.getGuild()).getId());
 	}
 
 	/**
@@ -142,7 +132,9 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	 * proceed to check the votes on the message.
 	 */
 	private boolean isReactionEventValid(@NotNull GenericMessageReactionEvent event) {
-		if (!event.getChannel().getId().equals(getChannel(event.getGuild()).getId())) return false;
+		if (!event.isFromThread()) return false;
+		if (!event.getChannel().asThreadChannel().getParentChannel().getId().equals(getChannel(event.getGuild()).getId())) return false;
+		if (event.getMessageIdLong() != event.getChannel().getIdLong()) return false;
 		Emoji reaction = event.getEmoji();
 		if (
 				!reaction.equals(getUpvoteEmote(event.getJDA())) &&
@@ -151,7 +143,10 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 			return false;
 		}
 
-		User user = event.retrieveUser().complete();
+		User user = event.getUser();
+		if (user == null) {
+			user = event.retrieveUser().complete();
+		}
 		return !user.isBot() && !user.isSystem();
 	}
 
@@ -164,9 +159,7 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 	private void handleReactionEvent(GenericMessageReactionEvent event) {
 		if (isReactionEventValid(event)) {
 			Message message = event.retrieveMessage().complete();
-			if (isMessageEligibleForVoting(message)) {
-				checkVotes(message, event.getGuild());
-			}
+			checkVotes(message, event.getGuild());
 		}
 	}
 
@@ -179,10 +172,10 @@ public abstract class MessageVoteListener extends ListenerAdapter {
 		int downvoteDifference = downvotes - upvotes;
 
 		if (downvoteDifference >= getMessageDeleteVoteThreshold(guild)) {
-			msg.delete().queue();
+			msg.getChannel().asThreadChannel().getManager().setArchived(true).setLocked(true).queue();
 			msg.getAuthor().openPrivateChannel()
 					.queue(
-							s -> s.sendMessageFormat("Your message in %s has been removed due to community feedback.", getChannel(guild).getAsMention()).queue(),
+							s -> s.sendMessageFormat("Your post %s in %s has been closed due to community feedback.", msg.getChannel().getAsMention(), getChannel(guild).getAsMention()).queue(),
 							e -> {}
 					);
 		}
