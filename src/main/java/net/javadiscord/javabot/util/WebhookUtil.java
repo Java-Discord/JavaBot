@@ -51,14 +51,23 @@ public class WebhookUtil {
 	 */
 	public static void ensureWebhookExists(@NotNull IWebhookContainer channel, @NotNull Consumer<? super Webhook> callback, @NotNull Consumer<? super Throwable> failureCallback) {
 
+		Consumer<? super Webhook> safeCallback = wh -> {
+			try {
+				callback.accept(wh);
+				//CHECKSTYLE:OFF: IllegalCatch - This should make sure it is properly logged if anything bad happens
+			} catch (Exception e) {
+				//CHECKSTYLE:ON: IllegalCatch
+				failureCallback.accept(e);
+			}
+		};
 		channel.retrieveWebhooks().queue(webhooks -> {
 			Optional<Webhook> hook = webhooks.stream()
 					.filter(webhook -> webhook.getChannel().getIdLong() == channel.getIdLong())
 					.filter(wh -> wh.getToken() != null).findAny();
 			if (hook.isPresent()) {
-				callback.accept(hook.get());
+				safeCallback.accept(hook.get());
 			} else {
-				channel.createWebhook("JavaBot-webhook").queue(callback, failureCallback);
+				channel.createWebhook("JavaBot-webhook").queue(safeCallback, failureCallback);
 			}
 		}, failureCallback);
 	}
@@ -98,6 +107,11 @@ public class WebhookUtil {
 					is -> message.addFile((attachment.isSpoiler() ? "SPOILER_" : "") + attachment.getFileName(), is));
 		}
 		return CompletableFuture.allOf(futures).thenCompose(unused -> client.send(message.build()))
-				.whenComplete((result, err) -> client.close());
+				.whenComplete((result, err) -> {
+					client.close();
+					if( err != null) {
+						ExceptionLogger.capture(err, WebhookUtil.class.getSimpleName());
+					}
+				});
 	}
 }
