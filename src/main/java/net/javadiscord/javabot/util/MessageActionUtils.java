@@ -92,7 +92,12 @@ public class MessageActionUtils {
 						thread -> WebhookUtil.ensureWebhookExists(targetChannel, wh->{
 							CompletableFuture<ReadonlyMessage> future = CompletableFuture.completedFuture(null);
 							for (Message m : messages) {
-								future = future.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong(), null, null));
+								future = future
+										.thenCompose(unused -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), thread.getIdLong(), null, null))
+										.exceptionally(err -> {
+											ExceptionLogger.capture(err, MessageActionUtils.class.getSimpleName());
+											return null;
+										});
 							}
 							future.thenAccept(unused -> onFinish.accept(thread));
 						})

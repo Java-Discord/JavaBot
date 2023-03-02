@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.WebhookUtil;
 
 import javax.annotation.Nonnull;
@@ -77,7 +78,7 @@ public class HugListener extends ListenerAdapter {
 			sb.append(content.substring(indexBkp));
 			WebhookUtil.ensureWebhookExists(textChannel,
 					wh -> sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId),
-					e -> log.error("Webhook lookup/creation failed", e));
+					e -> ExceptionLogger.capture(e, getClass().getSimpleName()));
 		}
 	}
 
@@ -98,7 +99,7 @@ public class HugListener extends ListenerAdapter {
 	private void sendWebhookMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId) {
 		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, null, null)
 				.thenAccept(unused -> originalMessage.delete().queue()).exceptionally(e -> {
-					log.error("replacing the content 'fuck' with 'hug' in an incoming message failed", e);
+					ExceptionLogger.capture(e, getClass().getSimpleName());
 					return null;
 				});
 	}

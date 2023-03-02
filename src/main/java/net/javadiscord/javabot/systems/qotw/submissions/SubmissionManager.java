@@ -212,6 +212,9 @@ public class SubmissionManager {
 								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null).join();
 							}
 						}
+					}).exceptionally(err->{
+						ExceptionLogger.capture(err,getClass().getSimpleName());
+						return null;
 					}));
 		}
 		thread.getManager().setLocked(true).setArchived(true).queue();
