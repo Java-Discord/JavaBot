@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionComponent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
@@ -24,6 +23,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
@@ -112,15 +112,14 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		if(msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
 			for (String[] detector : closeSuggestionDetectors) {
 				if (doesMatchDetector(content, detector)) {
-					msg.reply(new MessageCreateBuilder()
-							.addContent("""
-									If you are finished with your post, please close your post.
-									If you are not, please ignore this message.
-									Note that you will not be able to send further messages after this post have been closed.
-									""")
-							.addActionRow(createCloseSuggestionButton(msg.getChannel().asThreadChannel()))
-							.build())
-						.queue();
+					msg.reply("""
+							If you are finished with your post, please close your post.
+							If you are not, please ignore this message.
+							Note that you will not be able to send further messages after this post have been closed.
+							""")
+							.addActionRow(createCloseSuggestionButton(msg.getChannel().asThreadChannel()),
+									Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"))
+							.queue();
 				}
 			}
 		}
