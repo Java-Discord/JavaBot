@@ -33,6 +33,7 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,13 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			{"problem","solv"},
 			{"issue","solv"},
 			{"thank"}
+	};
+	private final long SUGGEST_CLOSE_TIMEOUT = 5 * 60_000L;//5 minutes
+	private final Map<Long, Long> recentlyCloseSuggestedPosts = new LinkedHashMap<>(8, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<Long, Long> eldest) {
+			return System.currentTimeMillis() > eldest.getValue() || size() >= 32;
+		}
 	};
 
 	@Override
@@ -109,6 +117,10 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		if (content.contains("```")) {
 			return;
 		}
+		long postId = msg.getChannel().getIdLong();
+		if (recentlyCloseSuggestedPosts.containsKey(postId) && recentlyCloseSuggestedPosts.get(postId) > System.currentTimeMillis()) {
+			return;
+		}
 		if(msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
 			for (String[] detector : closeSuggestionDetectors) {
 				if (doesMatchDetector(content, detector)) {
@@ -120,6 +132,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 							.addActionRow(createCloseSuggestionButton(msg.getChannel().asThreadChannel()),
 									Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"))
 							.queue();
+					recentlyCloseSuggestedPosts.put(postId, System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT);
 				}
 			}
 		}
