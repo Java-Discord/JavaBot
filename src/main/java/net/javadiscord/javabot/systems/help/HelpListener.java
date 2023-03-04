@@ -106,6 +106,9 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	private void replyCloseSuggestionIfPatternMatches(Message msg) {
 		String content = msg.getContentRaw().toLowerCase();
+		if (content.contains("```")) {
+			return;
+		}
 		if(msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
 			for (String[] detector : closeSuggestionDetectors) {
 				if (doesMatchDetector(content, detector)) {
