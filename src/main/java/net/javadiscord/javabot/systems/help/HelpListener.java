@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionComponent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
@@ -57,6 +58,14 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
 	private final DbActions dbActions;
+	private final String[][] closeSuggestionDetectors = {
+			{"close", "post"},
+			{"close", "thread"},
+			{"close", "question"},
+			{"problem","solv"},
+			{"issue","solv"},
+			{"thank"}
+	};
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -67,7 +76,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			ThreadChannel post = event.getChannel().asThreadChannel();
 			// send post buttons
 			post.sendMessageComponents(ActionRow.of(
-					Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
+					createCloseSuggestionButton(post),
 					Button.secondary(ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
 			)).queue(success -> post.sendMessageFormat(config.getReservedChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerId()).getAsMention(), config.getInactivityTimeoutMinutes()).queue());
 			newThreadChannels.remove(event.getChannel().getIdLong());
@@ -91,6 +100,42 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			messages.addAll(HELP_POST_MESSAGES.get(post.getIdLong()));
 		}
 		HELP_POST_MESSAGES.put(post.getIdLong(), messages);
+		// suggest to close post on "problem solved"-messages
+		replyCloseSuggestionIfPatternMatches(event.getMessage());
+	}
+
+	private void replyCloseSuggestionIfPatternMatches(Message msg) {
+		String content = msg.getContentRaw().toLowerCase();
+		if(msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
+			for (String[] detector : closeSuggestionDetectors) {
+				if (doesMatchDetector(content, detector)) {
+					msg.reply(new MessageCreateBuilder()
+							.addContent("""
+									If you are finished with your post, please close your post.
+									If you are not, please ignore this message.
+									Note that you will not be able to send further messages after this post have been closed.
+									""")
+							.addActionRow(createCloseSuggestionButton(msg.getChannel().asThreadChannel()))
+							.build())
+						.queue();
+				}
+			}
+		}
+	}
+
+	private boolean doesMatchDetector(String content, String[] detector) {
+		int currentIndex = 0;
+		for (String keyword : detector) {
+			currentIndex = content.indexOf(keyword);
+			if (currentIndex == -1) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private Button createCloseSuggestionButton(ThreadChannel post) {
+		return Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post");
 	}
 
 	@Override
