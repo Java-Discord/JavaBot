@@ -23,6 +23,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
@@ -32,6 +33,7 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,6 +59,21 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
 	private final DbActions dbActions;
+	private final String[][] closeSuggestionDetectors = {
+			{"close", "post"},
+			{"close", "thread"},
+			{"close", "question"},
+			{"problem","solv"},
+			{"issue","solv"},
+			{"thank"}
+	};
+	private final long SUGGEST_CLOSE_TIMEOUT = 5 * 60_000L;//5 minutes
+	private final Map<Long, Long> recentlyCloseSuggestedPosts = new LinkedHashMap<>(8, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<Long, Long> eldest) {
+			return System.currentTimeMillis() > eldest.getValue() || size() >= 32;
+		}
+	};
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -67,7 +84,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			ThreadChannel post = event.getChannel().asThreadChannel();
 			// send post buttons
 			post.sendMessageComponents(ActionRow.of(
-					Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post"),
+					createCloseSuggestionButton(post),
 					Button.secondary(ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
 			)).queue(success -> post.sendMessageFormat(config.getReservedChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerId()).getAsMention(), config.getInactivityTimeoutMinutes()).queue());
 			newThreadChannels.remove(event.getChannel().getIdLong());
@@ -91,6 +108,49 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			messages.addAll(HELP_POST_MESSAGES.get(post.getIdLong()));
 		}
 		HELP_POST_MESSAGES.put(post.getIdLong(), messages);
+		// suggest to close post on "problem solved"-messages
+		replyCloseSuggestionIfPatternMatches(event.getMessage());
+	}
+
+	private void replyCloseSuggestionIfPatternMatches(Message msg) {
+		String content = msg.getContentRaw().toLowerCase();
+		if (content.contains("```")) {
+			return;
+		}
+		long postId = msg.getChannel().getIdLong();
+		if (recentlyCloseSuggestedPosts.containsKey(postId) && recentlyCloseSuggestedPosts.get(postId) > System.currentTimeMillis()) {
+			return;
+		}
+		if(msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
+			for (String[] detector : closeSuggestionDetectors) {
+				if (doesMatchDetector(content, detector)) {
+					msg.reply("""
+							If you are finished with your post, please close it.
+							If you are not, please ignore this message.
+							Note that you will not be able to send further messages here after this post have been closed but you will be able to create new posts.
+							""")
+							.addActionRow(createCloseSuggestionButton(msg.getChannel().asThreadChannel()),
+									Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"))
+							.queue();
+					recentlyCloseSuggestedPosts.put(postId, System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT);
+				}
+			}
+		}
+	}
+
+	private boolean doesMatchDetector(String content, String[] detector) {
+		int currentIndex = 0;
+		for (String keyword : detector) {
+			currentIndex = content.indexOf(keyword);
+			if (currentIndex == -1) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private Button createCloseSuggestionButton(ThreadChannel post) {
+		return Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post");
 	}
 
 	@Override
