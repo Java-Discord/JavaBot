@@ -347,7 +347,7 @@ public class ModerationService {
 		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
 				.setTitle("Timeout")
 				.setColor(Responses.Type.ERROR.getColor())
-				.addField("Until", String.format("<t:%d>", Instant.now().plus(duration).getEpochSecond()), true)
+				.addField("Ends", String.format("<t:%d:R>", Instant.now().plus(duration).getEpochSecond()), true)
 				.build();
 	}
 
