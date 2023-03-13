@@ -84,7 +84,7 @@ public class WarnsListCommand extends SlashCommand {
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
 		asyncPool.execute(() -> {
 			try {
-				event.getHook().sendMessageEmbeds(buildWarnsEmbed(warnRepository.getWarnsByUserId(user.getIdLong(), cutoff), user)).queue();
+				event.getHook().sendMessageEmbeds(buildWarnsEmbed(warnRepository.getActiveWarnsByUserId(user.getIdLong(), cutoff), user)).queue();
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, WarnsListCommand.class.getSimpleName());
 			}

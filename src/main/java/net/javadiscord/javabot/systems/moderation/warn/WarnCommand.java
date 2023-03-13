@@ -15,9 +15,10 @@ public class WarnCommand extends SlashCommand implements CommandModerationPermis
 	 * @param warnAddSubcommand /warn add
 	 * @param discardWarnByIdSubCommand /warn discard-by-id
 	 * @param discardAllWarnsSubcommand /warn discard-all
+	 * @param exportSubcommand /warn export
 	 */
-	public WarnCommand(WarnAddSubcommand warnAddSubcommand, DiscardWarnByIdSubCommand discardWarnByIdSubCommand, DiscardAllWarnsSubcommand discardAllWarnsSubcommand) {
+	public WarnCommand(WarnAddSubcommand warnAddSubcommand, DiscardWarnByIdSubCommand discardWarnByIdSubCommand, DiscardAllWarnsSubcommand discardAllWarnsSubcommand, WarnExportSubcommand exportSubcommand) {
 		setModerationSlashCommandData(Commands.slash("warn", "Administrative commands for managing user warns."));
-		addSubcommands(warnAddSubcommand, discardWarnByIdSubCommand, discardAllWarnsSubcommand);
+		addSubcommands(warnAddSubcommand, discardWarnByIdSubCommand, discardAllWarnsSubcommand, exportSubcommand);
 	}
 }

@@ -144,7 +144,7 @@ public class ModerationService {
 	}
 
 	/**
-	 * Gets all warns based on the user id.
+	 * Gets warns based on the user id.
 	 *
 	 * @param userId The user's id.
 	 * @return A {@link List} with all warns.
@@ -153,7 +153,23 @@ public class ModerationService {
 		try {
 			WarnRepository repo = warnRepository;
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays());
-			return repo.getWarnsByUserId(userId, cutoff);
+			return repo.getActiveWarnsByUserId(userId, cutoff);
+		} catch (DataAccessException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			return List.of();
+		}
+	}
+
+	/**
+	 * Gets all warns based on the user id.
+	 *
+	 * @param userId The user's id.
+	 * @return A {@link List} with all warns.
+	 */
+	public List<Warn> getAllWarns(long userId) {
+		try {
+			WarnRepository repo = warnRepository;
+			return repo.getAllWarnsByUserId(userId);
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return List.of();
