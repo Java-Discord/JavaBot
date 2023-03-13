@@ -85,13 +85,16 @@ public class WarnExportSubcommand extends SlashCommand.Subcommand {
 					.build())
 				.addFiles(FileUpload.fromData(pis, "warns"+target.getId()+".txt"))
 			.queue();
-			for (Iterator<Warn> it = warns.iterator(); it.hasNext();) {
+			for (Iterator<Warn> it = warns.iterator(); it.hasNext()) {
 				Warn warn = it.next();
 				pw.println("Reason: \"" + warn.getReason()+"\"");
 				pw.println("Severity: " + warn.getSeverity() + "(" + warn.getSeverityWeight() + ")");
 				pw.println("Warn ID: " + warn.getId());
 				pw.println("Warned by: " + warn.getWarnedBy());
 				pw.println("Warned at " + warn.getCreatedAt());
+				if (warn.isDiscarded()) {
+					pw.print("This warn has been discarded.");
+				}
 				if (it.hasNext()) {
 					pw.println();
 					pw.println("============");
