@@ -125,9 +125,20 @@ public class QOTWPointsService {
 	 * @return The total points after the update.
 	 */
 	public long increment(long userId) {
+		return increment(userId, 1);
+	}
+
+	/**
+	 * Increments a single user's QOTW-Points.
+	 *
+	 * @param userId The ID of the user whose points shall be incremented
+	 * @param incrementCount the number of points to increment
+	 * @return The total points after the update.
+	 */
+	public long increment(long userId, int incrementCount) {
 		try {
 			LocalDate date=LocalDate.now();
-			int points = pointsRepository.getPointsAtDate(userId, date)+1;
+			int points = pointsRepository.getPointsAtDate(userId, date) + incrementCount;
 			pointsRepository.setPointsAtDate(userId, date, points);
 			LocalDate month = getCurrentMonth();
 			long newScore = pointsRepository.getByUserId(userId, month).map(QOTWAccount::getPoints).orElse(0L);
