@@ -133,8 +133,13 @@ public class WarnRepository {
 	 * @param cutoff The time after which to look for warns.
 	 * @return A List with all Warns.
 	 */
-	public List<Warn> getWarnsByUserId(long userId, LocalDateTime cutoff) {
+	public List<Warn> getActiveWarnsByUserId(long userId, LocalDateTime cutoff) {
 		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?",(rs, row)->this.read(rs),
 				userId, Timestamp.valueOf(cutoff));
+	}
+
+	public List<Warn> getAllWarnsByUserId(long userId) {
+		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ?",(rs, row)->this.read(rs),
+				userId);
 	}
 }

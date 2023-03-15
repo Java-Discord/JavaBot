@@ -115,7 +115,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				data.setPreferences(preferences);
 				// User Warns
 				LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(guild).getModerationConfig().getWarnTimeoutDays());
-				data.setWarns(warnRepository.getWarnsByUserId(user.getIdLong(), cutoff));
+				data.setWarns(warnRepository.getActiveWarnsByUserId(user.getIdLong(), cutoff));
 				// Insert into cache
 				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
 			}

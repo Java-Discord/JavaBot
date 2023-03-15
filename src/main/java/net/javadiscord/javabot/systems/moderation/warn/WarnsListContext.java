@@ -51,7 +51,7 @@ public class WarnsListContext extends ContextCommand.User {
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(event.getGuild()).getModerationConfig().getWarnTimeoutDays());
 		asyncPool.execute(() -> {
 			try {
-				event.getHook().sendMessageEmbeds(WarnsListCommand.buildWarnsEmbed(warnRepository.getWarnsByUserId(event.getTarget().getIdLong(), cutoff), event.getTarget())).queue();
+				event.getHook().sendMessageEmbeds(WarnsListCommand.buildWarnsEmbed(warnRepository.getActiveWarnsByUserId(event.getTarget().getIdLong(), cutoff), event.getTarget())).queue();
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, WarnsListContext.class.getSimpleName());
 			}
