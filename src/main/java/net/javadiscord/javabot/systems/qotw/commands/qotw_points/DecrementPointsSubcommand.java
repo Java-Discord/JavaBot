@@ -12,21 +12,20 @@ import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
  * <h3>This class represents the /qotw account increment command.</h3>
  * This Subcommand allows staff-members to increment the QOTW-points of any user.
  */
-public class IncrementPointsSubcommand extends ChangePointsSubcommand {
+public class DecrementPointsSubcommand extends ChangePointsSubcommand {
 
-	public IncrementPointsSubcommand(QOTWPointsService pointsService, NotificationService notificationService) {
-		super(pointsService, notificationService, "increment", "Adds one point to the user's QOTW-Account");
+	public DecrementPointsSubcommand(QOTWPointsService pointsService, NotificationService notificationService) {
+		super(pointsService, notificationService, "decrement", "Removes one point to the user's QOTW-Account");
 	}
 
 	@Override
 	protected int getIncrementCount(SlashCommandInteractionEvent event) {
-		return 1;
+		return -1;
 	}
 
 	@Override
 	protected @NotNull EmbedBuilder createIncrementEmbedBuilder(User user, long points) {
 		return super.createIncrementEmbedBuilder(user, points)
-				.setTitle("QOTW Account incremented");
+				.setTitle("QOTW Account decremented");
 	}
-
 }
