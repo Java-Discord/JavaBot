@@ -4,7 +4,6 @@ import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.AllowedMentions;
-import club.minnced.discord.webhook.send.WebhookEmbed.EmbedField;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.send.component.LayoutComponent;
@@ -124,16 +123,7 @@ public class WebhookUtil {
 		return toTransform == null ? null : transformer.apply(toTransform);
 	}
 
-	private static List<EmbedField> transformFields(MessageEmbed embed) {
-		return embed
-			.getFields()
-			.stream()
-			.map(field -> new EmbedField(field.isInline(), field.getName(), field.getValue()))
-			.toList();
-	}
-
-	private static @NotNull CompletableFuture<ReadonlyMessage> sendMessage(JDAWebhookClient client,
-			WebhookMessageBuilder message) {
+	private static @NotNull CompletableFuture<ReadonlyMessage> sendMessage(JDAWebhookClient client, WebhookMessageBuilder message) {
 		if(message.isEmpty()) {
 			message.setContent("<empty message>");
 		}
