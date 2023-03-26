@@ -62,7 +62,7 @@ public class ModerationConfig extends GuildConfigItem {
 	private int timeoutSeverity = 50;
 
 	/**
-	 * The duration to timeout users when they exceeded {@link #timeoutSeverity}.
+	 * The duration (in hours) to timeout users when they exceeded {@link #timeoutSeverity}.
 	 */
 	private int warnTimeoutHours = 2;
 
