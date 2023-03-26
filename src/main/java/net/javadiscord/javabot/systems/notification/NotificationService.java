@@ -33,6 +33,11 @@ public class NotificationService {
 		return new UserNotificationService(user);
 	}
 
+	@Contract("_ -> new")
+	public @NotNull UserNotificationService withUser(User user, Guild guild) {
+		return new UserNotificationService(user, botConfig.get(guild).getModerationConfig());
+	}
+
 	public @NotNull QOTWGuildNotificationService withQOTW(Guild guild) {
 		return new QOTWGuildNotificationService(this, guild);
 	}
