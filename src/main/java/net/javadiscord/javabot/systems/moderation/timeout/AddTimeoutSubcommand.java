@@ -80,7 +80,7 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 			return Responses.error(event, "Could not timeout %s; they're already timed out.", member.getAsMention());
 		}
 		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
-		service.timeout(member, reasonOption.getAsString(), event.getMember(), duration, channel, quiet);
+		service.timeout(member.getUser(), reasonOption.getAsString(), event.getMember(), duration, channel, quiet);
 		return Responses.success(event, "User Timed Out", "%s has been timed out.", member.getAsMention());
 	}
 }
