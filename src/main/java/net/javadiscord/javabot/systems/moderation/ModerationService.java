@@ -88,7 +88,7 @@ public class ModerationService {
 				warnRepository.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
 				int totalSeverity = warnRepository.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
 				MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
-				notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
+				notificationService.withUser(user, warnedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
 				if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
 					channel.sendMessageEmbeds(warnEmbed).queue();
@@ -111,12 +111,12 @@ public class ModerationService {
 	 * @param user      The user to clear warns from.
 	 * @param clearedBy The user who cleared the warns.
 	 */
-	public void discardAllWarns(User user, User clearedBy) {
+	public void discardAllWarns(User user, Member clearedBy) {
 		asyncPool.execute(() -> {
 			try {
 				warnRepository.discardAll(user.getIdLong());
-				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
-				notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
+				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy.getUser());
+				notificationService.withUser(user, clearedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, ModerationService.class.getSimpleName());
@@ -192,7 +192,7 @@ public class ModerationService {
 	public void timeout(@Nonnull User user, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
 		MessageEmbed timeoutEmbed = buildTimeoutEmbed(user, timedOutBy, reason, duration);
 		timedOutBy.getGuild().timeoutFor(user, duration).queue(s -> {
-			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
+			notificationService.withUser(user, timedOutBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
 			notificationService.withGuild(timedOutBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 		}, ExceptionLogger::capture);
@@ -210,7 +210,7 @@ public class ModerationService {
 	public void removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
 		removedBy.getGuild().removeTimeout(member).queue(s -> {
-			notificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
+			notificationService.withUser(member.getUser(), removedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 		}, ExceptionLogger::capture);
@@ -227,7 +227,7 @@ public class ModerationService {
 	 */
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
-		user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessageEmbeds(banEmbed)).queue(success -> {
+		user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessageEmbeds(banEmbed).setContent(moderationConfig.getBanMessageText())).queue(success -> {
 			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
 		}, err-> {
 			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
