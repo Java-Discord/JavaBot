@@ -56,6 +56,12 @@ public class ModerationConfig extends GuildConfigItem {
 	private int maxWarnSeverity = 100;
 
 	/**
+	 * ID of the channel where direct user notifications should be sent to (using private threads).
+	 * @see net.javadiscord.javabot.systems.notification.UserNotificationService
+	 */
+	private long notificationThreadChannelId;
+
+	/**
 	 * Invite links AutoMod should exclude.
 	 */
 	private List<String> automodInviteExcludes = List.of();
@@ -103,5 +109,9 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public Role getExpertRole() {
 		return this.getGuild().getRoleById(this.expertRoleId);
+	}
+
+	public TextChannel getNotificationThreadChannel() {
+		return this.getGuild().getTextChannelById(this.notificationThreadChannelId);
 	}
 }

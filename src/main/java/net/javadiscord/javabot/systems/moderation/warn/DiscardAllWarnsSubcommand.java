@@ -54,7 +54,7 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		User target = userMapping.getAsUser();
-		new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool).discardAllWarns(target, event.getUser());
+		new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool).discardAllWarns(target, event.getMember());
 		Responses.success(event, "Warns Discarded", "Successfully discarded all warns from **%s**.", target.getAsTag()).queue();
 	}
 }

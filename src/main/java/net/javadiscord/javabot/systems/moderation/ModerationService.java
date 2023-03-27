@@ -88,7 +88,7 @@ public class ModerationService {
 				warnRepository.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
 				int totalSeverity = warnRepository.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
 				MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
-				notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
+				notificationService.withUser(user, warnedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
 				if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
 					channel.sendMessageEmbeds(warnEmbed).queue();
@@ -108,12 +108,12 @@ public class ModerationService {
 	 * @param user      The user to clear warns from.
 	 * @param clearedBy The user who cleared the warns.
 	 */
-	public void discardAllWarns(User user, User clearedBy) {
+	public void discardAllWarns(User user, Member clearedBy) {
 		asyncPool.execute(() -> {
 			try {
 				warnRepository.discardAll(user.getIdLong());
-				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy);
-				notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
+				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy.getUser());
+				notificationService.withUser(user, clearedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, ModerationService.class.getSimpleName());
@@ -189,7 +189,7 @@ public class ModerationService {
 	public void timeout(@Nonnull Member member, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
 		MessageEmbed timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
 		member.getGuild().timeoutFor(member, duration).queue(s -> {
-			notificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
+			notificationService.withUser(member.getUser(), timedOutBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
 			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 		}, ExceptionLogger::capture);
@@ -207,7 +207,7 @@ public class ModerationService {
 	public void removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
 		removedBy.getGuild().removeTimeout(member).queue(s -> {
-			notificationService.withUser(member.getUser()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
+			notificationService.withUser(member.getUser(), removedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(removeTimeoutEmbed).queue();
 		}, ExceptionLogger::capture);
