@@ -224,7 +224,7 @@ public class ModerationService {
 	 */
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
-		user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessageEmbeds(banEmbed)).queue(success -> {
+		user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessageEmbeds(banEmbed).setContent(moderationConfig.getBanMessageText())).queue(success -> {
 			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
 		}, err-> {
 			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
