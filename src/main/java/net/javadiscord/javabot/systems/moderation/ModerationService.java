@@ -93,6 +93,9 @@ public class ModerationService {
 				if (!quiet && channel.getIdLong() != moderationConfig.getLogChannelId()) {
 					channel.sendMessageEmbeds(warnEmbed).queue();
 				}
+				if (totalSeverity > moderationConfig.getTimeoutSeverity() && totalSeverity-severity.getWeight() <= moderationConfig.getTimeoutSeverity()) {
+					timeout(user, "Too many warns", warnedBy, Duration.ofHours(moderationConfig.getWarnTimeoutHours()), channel, quiet);
+				}
 				if (totalSeverity > moderationConfig.getMaxWarnSeverity()) {
 					ban(user, "Too many warns", warnedBy, channel, quiet);
 				}
@@ -179,18 +182,18 @@ public class ModerationService {
 	/**
 	 * Adds a Timeout to the member.
 	 *
-	 * @param member     The member to time out.
+	 * @param user       The user to time out.
 	 * @param reason     The reason for adding this Timeout.
 	 * @param timedOutBy The member who is responsible for adding this Timeout.
 	 * @param duration   How long the Timeout should last.
 	 * @param channel    The channel in which the Timeout was issued.
 	 * @param quiet      If true, don't send a message in the channel.
 	 */
-	public void timeout(@Nonnull Member member, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
-		MessageEmbed timeoutEmbed = buildTimeoutEmbed(member, timedOutBy, reason, duration);
-		member.getGuild().timeoutFor(member, duration).queue(s -> {
-			notificationService.withUser(member.getUser(), timedOutBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
-			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
+	public void timeout(@Nonnull User user, @Nonnull String reason, @Nonnull Member timedOutBy, @Nonnull Duration duration, @Nonnull MessageChannel channel, boolean quiet) {
+		MessageEmbed timeoutEmbed = buildTimeoutEmbed(user, timedOutBy, reason, duration);
+		timedOutBy.getGuild().timeoutFor(user, duration).queue(s -> {
+			notificationService.withUser(user, timedOutBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(timeoutEmbed));
+			notificationService.withGuild(timedOutBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(timeoutEmbed));
 			if (!quiet) channel.sendMessageEmbeds(timeoutEmbed).queue();
 		}, ExceptionLogger::capture);
 	}
@@ -359,8 +362,8 @@ public class ModerationService {
 				.build();
 	}
 
-	private @NotNull MessageEmbed buildTimeoutEmbed(@NotNull Member member, Member timedOutBy, String reason, Duration duration) {
-		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
+	private @NotNull MessageEmbed buildTimeoutEmbed(@NotNull User user, Member timedOutBy, String reason, Duration duration) {
+		return buildModerationEmbed(user, timedOutBy, reason)
 				.setTitle("Timeout")
 				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Ends", String.format("<t:%d:R>", Instant.now().plus(duration).getEpochSecond()), true)

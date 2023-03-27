@@ -184,7 +184,7 @@ public class AutoMod extends ListenerAdapter {
 		}
 		new ModerationService(notificationService, botConfig.get(member.getGuild()), warnRepository, asyncPool)
 				.timeout(
-						member,
+						member.getUser(),
 						"Automod: Spam",
 						msg.getGuild().getSelfMember(),
 						Duration.of(6, ChronoUnit.HOURS),

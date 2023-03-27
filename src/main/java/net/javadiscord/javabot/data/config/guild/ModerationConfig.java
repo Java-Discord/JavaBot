@@ -56,6 +56,17 @@ public class ModerationConfig extends GuildConfigItem {
 	private int maxWarnSeverity = 100;
 
 	/**
+	 * The maximum total severity that a user can accrue from warnings before
+	 * being timeouted in the server.
+	 */
+	private int timeoutSeverity = 50;
+
+	/**
+	 * The duration (in hours) to timeout users when they exceeded {@link #timeoutSeverity}.
+	 */
+	private int warnTimeoutHours = 2;
+	
+	/**
 	 * ID of the channel where direct user notifications should be sent to (using private threads).
 	 * @see net.javadiscord.javabot.systems.notification.UserNotificationService
 	 */
