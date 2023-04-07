@@ -81,12 +81,12 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 		submission.retrieveAuthor(author -> {
 			SubmissionManager manager = new SubmissionManager(qotwConfig, pointsService, questionQueueRepository, notificationService, asyncPool);
 			if (state.contains("ACCEPT")) {
-				manager.acceptSubmission(submissionThread, author, state.equals("ACCEPT_BEST"));
+				manager.acceptSubmission(submissionThread, author, event.getMember(), state.equals("ACCEPT_BEST"));
 				Responses.success(event.getHook(), "Submission Accepted", "Successfully accepted submission by " + author.getAsMention()).queue();
 			} else {
 				// just do a "wrong answer" for now. this command is going to be removed
 				// in the near future anyway
-				manager.declineSubmission(submissionThread, author, SubmissionStatus.DECLINE_WRONG_ANSWER);
+				manager.declineSubmission(submissionThread, author, event.getMember(), SubmissionStatus.DECLINE_WRONG_ANSWER);
 				Responses.success(event.getHook(), "Submission Declined", "Successfully declined submission by " + author.getAsMention()).queue();
 			}
 			if (qotwConfig.getSubmissionChannel().getThreadChannels().size() <= 1) {
