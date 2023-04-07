@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.qotw.commands.qotw_points;
 import org.jetbrains.annotations.NotNull;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -19,7 +20,7 @@ public class IncrementPointsSubcommand extends ChangePointsSubcommand {
 	}
 
 	@Override
-	protected int getIncrementCount(SlashCommandInteractionEvent event) {
+	protected int getIncrementCount(Member targetMember, SlashCommandInteractionEvent event) {
 		return 1;
 	}
 
