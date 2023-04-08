@@ -93,7 +93,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 					Collections.shuffle(members);
 					if(members.size()>0) {
 						post.addThreadMember(members.get(0)).queue();
-						event.getHook().sendMessage("Successfully added a user with the help-ping role to the post.").setEphemeral(true).queue();
+						event.getHook().sendMessage("Successfully added a user with the help-ping role to the post.").setEphemeral(false).queue();
 					}else {
 						event.getHook().sendMessage("Unfortunately, no available member with the help-ping role has been found.").queue();
 					}
