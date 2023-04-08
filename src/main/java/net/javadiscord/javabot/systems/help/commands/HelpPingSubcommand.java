@@ -1,12 +1,9 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -14,18 +11,21 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
-import java.util.EnumSet;
+import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Handler for the /help ping sub-command that allows users to occasionally ping
@@ -74,23 +74,42 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 			Responses.warning(event, "Sorry, but only the person who reserved this channel, or staff and helpers, may use this command.").queue();
 			return;
 		}
+		if (post.getTimeCreated().isAfter(OffsetDateTime.now().minusSeconds(config.getHelpConfig().getHelpPingTimeoutSeconds()))) {
+			Responses.warning(event, "Sorry, this command cannot be used directly after a post has been created.").queue();
+			return;
+		}
 		if (isHelpPingTimeoutElapsed(member.getIdLong(), config)) {
 			lastPingTimes.put(event.getMember().getIdLong(), new Pair<>(System.currentTimeMillis(), config.getGuild()));
 			Role role = config.getHelpConfig().getHelpPingRole();
-			event.getChannel().sendMessage(role.getAsMention())
-					.setAllowedMentions(EnumSet.of(Message.MentionType.ROLE))
-					.setEmbeds(buildAuthorEmbed(event.getUser()))
-					.queue();
-			event.replyFormat("Successfully pinged " + role.getAsMention()).setEphemeral(true).queue();
+			role.getGuild().findMembersWithRoles(role).onSuccess(members->{
+				post.retrieveThreadMembers().queue(threadMembers -> {
+					Set<Long> memberIds = threadMembers
+							.stream()
+							.map(m->m.getIdLong())
+							.collect(Collectors.toSet());
+					members.removeIf(m ->
+						m.getOnlineStatus() == OnlineStatus.OFFLINE ||
+						memberIds.contains(m.getIdLong()));
+					Collections.shuffle(members);
+					if(members.size()>0) {
+						post.addThreadMember(members.get(0)).queue();
+						event.getHook().sendMessage("Successfully added a user with the help-ping role to the post.").setEphemeral(true).queue();
+					}else {
+						event.getHook().sendMessage("Unfortunately, no available member with the help-ping role has been found.").queue();
+					}
+				}, err -> {
+					event.getHook().sendMessage("An error occured trying to find available members").queue();
+					ExceptionLogger.capture(err, HelpPingSubcommand.class.getName());
+				});
+
+			}).onError(err -> {
+				event.getHook().sendMessage("An error occured trying to find available members").queue();
+				ExceptionLogger.capture(err, HelpPingSubcommand.class.getName());
+			});
+			event.deferReply(true).queue();
 		} else {
 			Responses.warning(event, "Sorry, but you can only use this command occasionally. Please try again later.").queue();
 		}
-	}
-
-	private @NotNull MessageEmbed buildAuthorEmbed(@NotNull User author) {
-		return new EmbedBuilder()
-				.setTitle("Requested by " + author.getAsTag())
-				.build();
 	}
 
 	/**
