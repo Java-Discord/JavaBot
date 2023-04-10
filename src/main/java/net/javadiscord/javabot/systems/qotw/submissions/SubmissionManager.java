@@ -129,9 +129,9 @@ public class SubmissionManager {
 		final QOTWSubmission submission = new QOTWSubmission(submissionThread);
 		submission.retrieveAuthor(author -> {
 			switch (status) {
-				case ACCEPT_BEST -> acceptSubmission(submissionThread, author, true);
-				case ACCEPT -> acceptSubmission(submissionThread, author, false);
-				default -> declineSubmission(submissionThread, author, status);
+				case ACCEPT_BEST -> acceptSubmission(submissionThread, author, event.getMember(), true);
+				case ACCEPT -> acceptSubmission(submissionThread, author, event.getMember(), false);
+				default -> declineSubmission(submissionThread, author, event.getMember(), status);
 			}
 			if (config.getSubmissionChannel().getThreadChannels().size() <= 1) {
 				Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
@@ -185,9 +185,10 @@ public class SubmissionManager {
 	 *
 	 * @param thread     The submission's {@link ThreadChannel}.
 	 * @param author     The submissions' author.
+	 * @param reviewedBy The reviewer.
 	 * @param bestAnswer Whether the submission is among the best answers for this week.
 	 */
-	public void acceptSubmission(@NotNull ThreadChannel thread, @NotNull User author, boolean bestAnswer) {
+	public void acceptSubmission(@NotNull ThreadChannel thread, @NotNull User author, Member reviewedBy, boolean bestAnswer) {
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		pointsService.increment(author.getIdLong());
 		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
@@ -195,7 +196,7 @@ public class SubmissionManager {
 			pointsService.increment(author.getIdLong());
 			notificationService.withQOTW(thread.getGuild(), author).sendBestAnswerNotification();
 		}
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(reviewedBy.getUser(), new QOTWSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
 		Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
 				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 		if (newestPostOptional.isPresent()) {
@@ -225,12 +226,13 @@ public class SubmissionManager {
 	 *
 	 * @param thread The submission's {@link ThreadChannel}.
 	 * @param author The submissions' author.
+	 * @param reviewedBy The reviewer
 	 * @param status The {@link SubmissionStatus}.
 	 */
-	public void declineSubmission(@NotNull ThreadChannel thread, User author, SubmissionStatus status) {
+	public void declineSubmission(@NotNull ThreadChannel thread, User author, Member reviewedBy, SubmissionStatus status) {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
 		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed(status);
-		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(author, new QOTWSubmission(thread), status);
+		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(reviewedBy.getUser(), new QOTWSubmission(thread), status);
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}
 
