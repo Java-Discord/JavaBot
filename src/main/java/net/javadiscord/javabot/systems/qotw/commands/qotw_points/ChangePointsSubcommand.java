@@ -54,15 +54,15 @@ public abstract class ChangePointsSubcommand extends SlashCommand.Subcommand {
 		}
 		boolean quiet = event.getOption("quiet", () -> false, OptionMapping::getAsBoolean);
 		event.deferReply().queue();
-		long points = changePoints(event);
+		long points = changePoints(member, event);
 		sendNotifications(event, member, points, quiet);
 	}
 
-	private long changePoints(SlashCommandInteractionEvent event) {
-		return pointsService.increment(event.getMember().getIdLong(), getIncrementCount(event));
+	private long changePoints(Member targetMember, SlashCommandInteractionEvent event) {
+		return pointsService.increment(targetMember.getIdLong(), getIncrementCount(targetMember, event));
 	}
 
-	protected abstract int getIncrementCount(SlashCommandInteractionEvent event);
+	protected abstract int getIncrementCount(Member targetMember, SlashCommandInteractionEvent event);
 
 	private void sendNotifications(SlashCommandInteractionEvent event, Member member, long points, boolean quiet) {
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
