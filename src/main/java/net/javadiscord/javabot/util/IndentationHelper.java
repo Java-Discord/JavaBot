@@ -116,7 +116,7 @@ public class IndentationHelper {
 		IndentationState currentState = IndentationState.CODE;
 		for (int i = 0; i < text.length(); i++) {
 			char current = text.charAt(i);
-			if (startOfLine && current == ' ') {
+			if (startOfLine && Character.isWhitespace(current) && current != '\n') {
 				continue;
 			}
 			builder.append(current);
@@ -125,8 +125,11 @@ public class IndentationHelper {
 				startOfLine = true;
 			}
 			currentState = switch (currentState) {
-				case CODE ->
-					processTokenInCode(i, current);
+				case CODE -> {
+					IndentationState state = processTokenInCode(i,current);
+					i += state == IndentationState.MULTI_LINE_COMMENT ? 1:0;
+					yield state;
+				}
 				case STRING -> {
 					if (current == '\"' && !isEscaped(builder, builder.length() - 1)) {
 						yield IndentationState.CODE;
@@ -175,6 +178,7 @@ public class IndentationHelper {
 					if (text.charAt(i + 1) == '/') {
 						return IndentationState.SINGLE_LINE_COMMENT;
 					} else if (text.charAt(i + 1) == '*') {
+						builder.append(text.charAt(++i));
 						return IndentationState.MULTI_LINE_COMMENT;
 					}
 				}

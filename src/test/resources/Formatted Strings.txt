@@ -943,3 +943,19 @@ builder.append(current);
                       }
                          }
 ----
+/*/Should still be inside a multi line comment {{
+same indentation
+end of comment */
+----
+/*/Should still be inside a multi line comment {{
+same indentation
+end of comment */
+----
+/*/Should still be inside a multi line comment {{
+same indentation
+end of comment */
+----
+        /*/Should still be inside a multi line comment {{
+                same indentation
+     end of comment */
+----

@@ -47,7 +47,7 @@ public class FormatCodeCommand extends SlashCommand {
 								.addChoice("Swift", "swift")
 								.addChoice("TypeScript", "typescript")
 								.addChoice("XML", "xml"),
-						new OptionData(OptionType.STRING,"auto-indent","The type of indentation that should be applied to the message, does not automatically indent if left blank",false)
+						new OptionData(OptionType.STRING,"auto-indent","The type of indentation applied to the message, does not automatically indent if left blank.",false)
 								.addChoice("Four_Spaces","four")
 								.addChoice("Two_Spaces","two")
 								.addChoice("Tabs","tab")

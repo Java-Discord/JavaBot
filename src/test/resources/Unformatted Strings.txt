@@ -234,3 +234,8 @@ builder.append(current);
                return numberOfCharacters % 2 == 1;
                       }
                          }
+----
+        /*/Should still be inside a multi line comment {{
+                same indentation
+     end of comment */
+----
