@@ -104,13 +104,13 @@ public class IndentationHelper {
 		boolean startOfLine = true;
 		for (int i = 0; i < text.length(); i++) {
 			char current = text.charAt(i);
+			if (startOfLine && current == ' ') {
+				continue;
+			}
 			builder.append(current);
 			if (current == '\n') {
 				builder.append(type.getPattern().repeat(Math.max(numberOfBrackets, 0)));
 				startOfLine = true;
-			}
-			if (startOfLine && current == ' ') {
-				builder.deleteCharAt(builder.length() - 1);
 			}
 			switch (currentState) {
 				case CODE -> {
@@ -122,8 +122,12 @@ public class IndentationHelper {
 								builder.replace(builder.length() - type.getNumberOfChars() - 1, builder.length(), "}");
 							}
 						}
-						case '\'' -> currentState = IndentationState.CHARACTER;
-						case '\"' -> currentState = IndentationState.STRING;
+						case '\'' -> {
+							currentState = IndentationState.CHARACTER;
+						}
+						case '\"' -> {
+							currentState = IndentationState.STRING;
+						}
 						case '/' -> {
 							if (i + 1 < text.length()) {
 								if (text.charAt(i + 1) == '/') {
@@ -136,17 +140,13 @@ public class IndentationHelper {
 					}
 				}
 				case STRING -> {
-					if (current == '\"') {
-						if (!isEscaped(builder, builder.length() - 1)) {
-							currentState = IndentationState.CODE;
-						}
+					if (current == '\"' && !isEscaped(builder, builder.length() - 1)) {
+						currentState = IndentationState.CODE;
 					}
 				}
 				case CHARACTER -> {
-					if (current == '\'') {
-						if (!isEscaped(builder, builder.length() - 1)) {
-							currentState = IndentationState.CODE;
-						}
+					if (current == '\'' && !isEscaped(builder, builder.length() - 1)) {
+						currentState = IndentationState.CODE;
 					}
 				}
 				case SINGLE_LINE_COMMENT -> {

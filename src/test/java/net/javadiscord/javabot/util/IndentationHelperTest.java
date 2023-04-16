@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class IndentationHelperTest {
 	/**
-	 * Tests the {@link IndentationHelper#formatIndentation(String, IndentationHelper.IndentationType)} method
+	 * Tests the {@link IndentationHelper#formatIndentation(String, IndentationHelper.IndentationType)} method.
 	 */
 	@Test
 	public void testFormatIndentation() {
