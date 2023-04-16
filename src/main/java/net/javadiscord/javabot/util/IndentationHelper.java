@@ -86,6 +86,17 @@ public class IndentationHelper {
 		MULTI_LINE_COMMENT
 	}
 
+	private final String text;
+	private final IndentationType type;
+	private boolean startOfLine = true;
+	private int numberOfBrackets = 0;
+	private StringBuilder builder;
+
+	private IndentationHelper(String text, IndentationType type) {
+		this.text = text;
+		this.type = type;
+		this.builder = new StringBuilder((int) (text.length() * 1.25f));
+	}
 
 	/**
 	 * Aims to indent the given String using the pattern provided. Will return the String unchanged if {@link IndentationHelper.IndentationType#NULL} is passed as the IndentationType parameter.
@@ -95,13 +106,14 @@ public class IndentationHelper {
 	 * @return The indented String with the format specified.
 	 */
 	public static String formatIndentation(String text, IndentationType type) {
+		return new IndentationHelper(text, type).formatIndentation();
+	}
+
+	private String formatIndentation() {
 		if (type == IndentationType.NULL) {
 			return text;
 		}
-		int numberOfBrackets = 0;
-		StringBuilder builder = new StringBuilder((int) (text.length() * 1.25f));
 		IndentationState currentState = IndentationState.CODE;
-		boolean startOfLine = true;
 		for (int i = 0; i < text.length(); i++) {
 			char current = text.charAt(i);
 			if (startOfLine && current == ' ') {
@@ -112,61 +124,63 @@ public class IndentationHelper {
 				builder.append(type.getPattern().repeat(Math.max(numberOfBrackets, 0)));
 				startOfLine = true;
 			}
-			switch (currentState) {
-				case CODE -> {
-					switch (current) {
-						case '{' -> numberOfBrackets++;
-						case '}' -> {
-							numberOfBrackets--;
-							if (startOfLine && builder.length() - type.getNumberOfChars() - 1 >= 0) {
-								builder.replace(builder.length() - type.getNumberOfChars() - 1, builder.length(), "}");
-							}
-						}
-						case '\'' -> {
-							currentState = IndentationState.CHARACTER;
-						}
-						case '\"' -> {
-							currentState = IndentationState.STRING;
-						}
-						case '/' -> {
-							if (i + 1 < text.length()) {
-								if (text.charAt(i + 1) == '/') {
-									currentState = IndentationState.SINGLE_LINE_COMMENT;
-								} else if (text.charAt(i + 1) == '*') {
-									currentState = IndentationState.MULTI_LINE_COMMENT;
-								}
-							}
-						}
-					}
-				}
+			currentState = switch (currentState) {
+				case CODE ->
+					processTokenInCode(i, current);
 				case STRING -> {
 					if (current == '\"' && !isEscaped(builder, builder.length() - 1)) {
-						currentState = IndentationState.CODE;
+						yield IndentationState.CODE;
 					}
+					yield IndentationState.STRING;
 				}
 				case CHARACTER -> {
 					if (current == '\'' && !isEscaped(builder, builder.length() - 1)) {
-						currentState = IndentationState.CODE;
+						yield IndentationState.CODE;
 					}
+					yield IndentationState.CHARACTER;
 				}
-				case SINGLE_LINE_COMMENT -> {
-					if (current == '\n') {
-						currentState = IndentationState.CODE;
-					}
-				}
+				case SINGLE_LINE_COMMENT ->
+					current == '\n' ? IndentationState.CODE : IndentationState.SINGLE_LINE_COMMENT;
 				case MULTI_LINE_COMMENT -> {
-					if (current == '*' && i + 1 < text.length()) {
-						if (text.charAt(i + 1) == '/') {
-							currentState = IndentationState.CODE;
-						}
+					if (current == '*' && i + 1 < text.length() && text.charAt(i + 1) == '/') {
+						yield IndentationState.CODE;
 					}
+					yield IndentationState.MULTI_LINE_COMMENT;
 				}
-			}
+			};
 			if (!Character.isWhitespace(current) && startOfLine) {
 				startOfLine = false;
 			}
 		}
 		return builder.toString();
+	}
+
+	private IndentationState processTokenInCode(int i, char current) {
+		switch (current) {
+			case '{' -> numberOfBrackets++;
+			case '}' -> {
+				numberOfBrackets--;
+				if (startOfLine && builder.length() - type.getNumberOfChars() - 1 >= 0) {
+					builder.replace(builder.length() - type.getNumberOfChars() - 1, builder.length(), "}");
+				}
+			}
+			case '\'' -> {
+				return IndentationState.CHARACTER;
+			}
+			case '\"' -> {
+				return IndentationState.STRING;
+			}
+			case '/' -> {
+				if (i + 1 < text.length()) {
+					if (text.charAt(i + 1) == '/') {
+						return IndentationState.SINGLE_LINE_COMMENT;
+					} else if (text.charAt(i + 1) == '*') {
+						return IndentationState.MULTI_LINE_COMMENT;
+					}
+				}
+			}
+		}
+		return IndentationState.CODE;
 	}
 
 	/**
