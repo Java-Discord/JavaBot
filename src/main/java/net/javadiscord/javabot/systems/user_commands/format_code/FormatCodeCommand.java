@@ -48,9 +48,9 @@ public class FormatCodeCommand extends SlashCommand {
 								.addChoice("TypeScript", "typescript")
 								.addChoice("XML", "xml"),
 						new OptionData(OptionType.STRING,"auto-indent","The type of indentation applied to the message, does not automatically indent if left blank.",false)
-								.addChoice("Four_Spaces","four")
-								.addChoice("Two_Spaces","two")
-								.addChoice("Tabs","tab")
+								.addChoice("Four Spaces","FOUR_SPACES")
+								.addChoice("Two Spaces","TWO_SPACES")
+								.addChoice("Tabs","TABS")
 				)
 		);
 	}
@@ -65,7 +65,7 @@ public class FormatCodeCommand extends SlashCommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idOption = event.getOption("message-id");
 		String format = event.getOption("format", "java", OptionMapping::getAsString);
-		String indentation = event.getOption("auto-indent","null",OptionMapping::getAsString).toUpperCase();
+		String indentation = event.getOption("auto-indent","null",OptionMapping::getAsString);
 		event.deferReply().queue();
 		if (idOption == null) {
 			event.getChannel().getHistory()
