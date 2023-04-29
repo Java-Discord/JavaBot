@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands.format_code;
 
+import net.javadiscord.javabot.util.*;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -9,10 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.javadiscord.javabot.util.Checks;
-import net.javadiscord.javabot.util.InteractionUtils;
-import net.javadiscord.javabot.util.Responses;
-import net.javadiscord.javabot.util.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +46,11 @@ public class FormatCodeCommand extends SlashCommand {
 								.addChoice("SQL", "sql")
 								.addChoice("Swift", "swift")
 								.addChoice("TypeScript", "typescript")
-								.addChoice("XML", "xml")
+								.addChoice("XML", "xml"),
+						new OptionData(OptionType.STRING,"auto-indent","The type of indentation applied to the message, does not automatically indent if left blank.",false)
+								.addChoice("Four Spaces","FOUR_SPACES")
+								.addChoice("Two Spaces","TWO_SPACES")
+								.addChoice("Tabs","TABS")
 				)
 		);
 	}
@@ -64,6 +65,7 @@ public class FormatCodeCommand extends SlashCommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idOption = event.getOption("message-id");
 		String format = event.getOption("format", "java", OptionMapping::getAsString);
+		String indentation = event.getOption("auto-indent","null",OptionMapping::getAsString);
 		event.deferReply().queue();
 		if (idOption == null) {
 			event.getChannel().getHistory()
@@ -74,7 +76,7 @@ public class FormatCodeCommand extends SlashCommand {
 								.filter(m -> !m.getAuthor().isBot()).findFirst()
 								.orElse(null);
 						if (target != null) {
-							event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
+							event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()),IndentationHelper.IndentationType.valueOf(indentation)))
 									.setAllowedMentions(List.of())
 									.setComponents(buildActionRow(target))
 									.queue();
@@ -89,7 +91,7 @@ public class FormatCodeCommand extends SlashCommand {
 			}
 			long messageId = idOption.getAsLong();
 			event.getChannel().retrieveMessageById(messageId).queue(
-					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, StringUtils.standardSanitizer().compute(target.getContentRaw()))
+					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()), IndentationHelper.IndentationType.valueOf(indentation)))
 							.setAllowedMentions(List.of())
 							.setComponents(buildActionRow(target))
 							.queue(),
