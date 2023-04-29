@@ -65,7 +65,7 @@ public class FormatCodeCommand extends SlashCommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idOption = event.getOption("message-id");
 		String format = event.getOption("format", "java", OptionMapping::getAsString);
-		String indentation = event.getOption("auto-indent","null",OptionMapping::getAsString);
+		String indentation = event.getOption("auto-indent","NULL",OptionMapping::getAsString);
 		event.deferReply().queue();
 		if (idOption == null) {
 			event.getChannel().getHistory()
