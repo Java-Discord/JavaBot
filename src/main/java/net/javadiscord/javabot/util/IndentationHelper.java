@@ -196,13 +196,8 @@ public class IndentationHelper {
 	 */
 	private static boolean isEscaped(StringBuilder builder, int index) {
 		int numberOfCharacters = 0;
-		index--;
-		if (index >= builder.length()) {
-			return false;
-		}
-		while (index > 0 && builder.charAt(index) == '\\') {
+		for (--index;index > 0 && index < builder.length() && builder.charAt(index) == '\\'; index--) {
 			numberOfCharacters++;
-			index--;
 		}
 		return numberOfCharacters % 2 == 1;
 	}
