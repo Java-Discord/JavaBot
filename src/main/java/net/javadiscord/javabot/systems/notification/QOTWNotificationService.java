@@ -49,6 +49,10 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildAccountIncrementEmbed(account.getPoints())));
 	}
 
+	public void sendAccountDecrementedNotification() {
+		notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(buildAccountDecrementEmbed(account.getPoints())));
+	}
+
 	/**
 	 * Sends a "your submission was declined"-notification to the {@link QOTWNotificationService#user}.
 	 *
@@ -92,6 +96,17 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 				.build();
 	}
 
+	private @NotNull MessageEmbed buildAccountDecrementEmbed(long points) {
+		return buildQOTWNotificationEmbed()
+				.setColor(Responses.Type.WARN.getColor())
+				.setDescription(String.format(
+						"""
+								Your QOTW score has been decremented.
+								**`1 QOTW-Point`** has been deducted from your score! (monthly total: %s)
+								In case you want to know why exactly this happened, please contact our staff team.""", points))
+				.build();
+	}
+
 	private @NotNull MessageEmbed buildSubmissionDeclinedEmbed(String reason) {
 		return this.buildQOTWNotificationEmbed()
 				.setColor(Responses.Type.ERROR.getColor())
@@ -102,4 +117,5 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 						user.getAsMention(), reason))
 				.build();
 	}
+
 }

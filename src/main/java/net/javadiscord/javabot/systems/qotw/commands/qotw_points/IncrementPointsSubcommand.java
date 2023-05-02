@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 
 /**
@@ -28,6 +29,11 @@ public class IncrementPointsSubcommand extends ChangePointsSubcommand {
 	protected @NotNull EmbedBuilder createIncrementEmbedBuilder(User user, long points) {
 		return super.createIncrementEmbedBuilder(user, points)
 				.setTitle("QOTW Account incremented");
+	}
+
+	@Override
+	protected void sendUserNotification(@NotNull QOTWNotificationService notificationService) {
+		notificationService.sendAccountIncrementedNotification();
 	}
 
 }

@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.systems.notification.QOTWNotificationService;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -68,10 +69,13 @@ public abstract class ChangePointsSubcommand extends SlashCommand.Subcommand {
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
 		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 		if (!quiet) {
-			notificationService.withQOTW(event.getGuild(), member.getUser()).sendAccountIncrementedNotification();
+			sendUserNotification(notificationService.withQOTW(event.getGuild(), member.getUser()));
+
 		}
 		event.getHook().sendMessageEmbeds(embed).queue();
 	}
+
+	protected abstract void sendUserNotification(@NotNull QOTWNotificationService notificationService);
 
 	protected @NotNull MessageEmbed buildIncrementEmbed(@NotNull User user, long points) {
 		return createIncrementEmbedBuilder(user, points)
