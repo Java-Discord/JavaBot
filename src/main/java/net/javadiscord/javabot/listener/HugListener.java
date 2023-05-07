@@ -2,7 +2,8 @@ package net.javadiscord.javabot.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel;
@@ -34,10 +35,23 @@ public class HugListener extends ListenerAdapter {
 			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
 			String processedSuffix = switch(suffix.toLowerCase()) {
 				case "er", "ing" -> copyCase(suffix, 0, 'g') + suffix;
-				default -> suffix.startsWith("k") ? "g".repeat(suffix.length()) : "";
+				default -> suffix.toLowerCase().startsWith("k") ? copyCase(suffix, "g".repeat(suffix.length())) : "";
 			};
 			return processHug(theFuck) + processedSuffix;
 		});
+	}
+
+	private static String copyCase(String source, String toChange) {
+		if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < source.length(); i++) {
+			char a = source.charAt(i);
+			char b = toChange.charAt(i);
+			if (Character.isUpperCase(a)) b = Character.toUpperCase(b);
+			else b = Character.toLowerCase(b);
+			sb.append(b);
+		}
+		return sb.toString();
 	}
 
 	@Override
