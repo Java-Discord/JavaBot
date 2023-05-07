@@ -14,6 +14,8 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.WebhookUtil;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Replaces all occurrences of 'fuck' in incoming messages with 'hug'.
@@ -23,6 +25,20 @@ import javax.annotation.Nonnull;
 public class HugListener extends ListenerAdapter {
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
+
+	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|k+)?", Pattern.CASE_INSENSITIVE);
+
+	private static String processFuck(String str) {
+		return FUCKER.matcher(str).replaceAll(matchResult -> {
+			String theFuck = matchResult.group(1);
+			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
+			String processedSuffix = switch(suffix.toLowerCase()) {
+				case "er", "ing" -> copyCase(suffix, 0, 'g') + suffix;
+				default -> suffix.startsWith("k") ? "g".repeat(suffix.length()) : "";
+			};
+			return processHug(theFuck) + processedSuffix;
+		});
+	}
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
@@ -57,38 +73,22 @@ public class HugListener extends ListenerAdapter {
 		}
 		final TextChannel textChannel = tc;
 		String content = event.getMessage().getContentRaw();
-		String lowerCaseContent = content.toLowerCase();
-		if (lowerCaseContent.contains("fuck")) {
+		if (FUCKER.matcher(content).find()) {
 			long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
-			StringBuilder sb = new StringBuilder(content.length());
-			int index = 0;
-			int indexBkp = index;
-			while ((index = lowerCaseContent.indexOf("fuck", index)) != -1) {
-				sb.append(content.substring(indexBkp, index));
-				sb.append(loadHug(content, index));
-				indexBkp = index++ + 4;
-				if (content.length() >= indexBkp + 3 && "ing".equals(lowerCaseContent.substring(indexBkp, indexBkp + 3))) {
-					sb.append(copyCase(content, indexBkp-1, 'g'));
-					sb.append(content.substring(indexBkp, indexBkp + 3));
-					index+=3;
-					indexBkp+=3;
-				}
-			}
-
-			sb.append(content.substring(indexBkp));
 			WebhookUtil.ensureWebhookExists(textChannel,
-					wh -> sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId),
+					wh -> sendWebhookMessage(wh, event.getMessage(), processFuck(content), threadId),
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName()));
 		}
 	}
 
-	private String loadHug(String originalText, int startIndex) {
-		return copyCase(originalText, startIndex, 'h') + ""
-				+ copyCase(originalText, startIndex + 1, 'u') + ""
-				+ copyCase(originalText, startIndex + 3, 'g');
+	private static String processHug(String originalText) {
+		// FucK -> HuG, FuCk -> Hug
+		return String.valueOf(copyCase(originalText, 0, 'h'))
+			+ copyCase(originalText, 1, 'u')
+			+ copyCase(originalText, 3, 'g');
 	}
 
-	private char copyCase(String original, int index, char newChar) {
+	private static char copyCase(String original, int index, char newChar) {
 		if (Character.isUpperCase(original.charAt(index))) {
 			return Character.toUpperCase(newChar);
 		} else {
