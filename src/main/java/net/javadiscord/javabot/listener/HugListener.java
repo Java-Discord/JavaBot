@@ -29,31 +29,6 @@ public class HugListener extends ListenerAdapter {
 
 	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|k+)?", Pattern.CASE_INSENSITIVE);
 
-	private static String processFuck(String str) {
-		return FUCKER.matcher(str).replaceAll(matchResult -> {
-			String theFuck = matchResult.group(1);
-			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
-			String processedSuffix = switch(suffix.toLowerCase()) {
-				case "er", "ing" -> copyCase(suffix, 0, 'g') + suffix;
-				default -> suffix.toLowerCase().startsWith("k") ? copyCase(suffix, "g".repeat(suffix.length())) : "";
-			};
-			return processHug(theFuck) + processedSuffix;
-		});
-	}
-
-	private static String copyCase(String source, String toChange) {
-		if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < source.length(); i++) {
-			char a = source.charAt(i);
-			char b = toChange.charAt(i);
-			if (Character.isUpperCase(a)) b = Character.toUpperCase(b);
-			else b = Character.toLowerCase(b);
-			sb.append(b);
-		}
-		return sb.toString();
-	}
-
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		if (!event.isFromGuild()) {
@@ -85,12 +60,11 @@ public class HugListener extends ListenerAdapter {
 		if (tc == null) {
 			return;
 		}
-		final TextChannel textChannel = tc;
 		String content = event.getMessage().getContentRaw();
 		if (FUCKER.matcher(content).find()) {
 			long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
-			WebhookUtil.ensureWebhookExists(textChannel,
-					wh -> sendWebhookMessage(wh, event.getMessage(), processFuck(content), threadId),
+			WebhookUtil.ensureWebhookExists(tc,
+					wh -> sendWebhookMessage(wh, event.getMessage(), replaceFucks(content), threadId),
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName()));
 		}
 	}
@@ -100,6 +74,32 @@ public class HugListener extends ListenerAdapter {
 		return String.valueOf(copyCase(originalText, 0, 'h'))
 			+ copyCase(originalText, 1, 'u')
 			+ copyCase(originalText, 3, 'g');
+	}
+
+	private static String replaceFucks(String str) {
+		return FUCKER.matcher(str).replaceAll(matchResult -> {
+			String theFuck = matchResult.group(1);
+			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
+			String processedSuffix = switch(suffix.toLowerCase()) {
+				case "er", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker
+				case "" -> ""; // just fuck
+				default -> copyCase(suffix, "g".repeat(suffix.length())); // fuckkkkk...
+			};
+			return processHug(theFuck) + processedSuffix;
+		});
+	}
+
+	private static String copyCase(String source, String toChange) {
+		if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < source.length(); i++) {
+			char a = source.charAt(i);
+			char b = toChange.charAt(i);
+			if (Character.isUpperCase(a)) b = Character.toUpperCase(b);
+			else b = Character.toLowerCase(b);
+			sb.append(b);
+		}
+		return sb.toString();
 	}
 
 	private static char copyCase(String original, int index, char newChar) {
