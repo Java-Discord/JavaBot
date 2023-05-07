@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
-	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|k+)?", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|ed|k+)?", Pattern.CASE_INSENSITIVE);
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
 
@@ -80,7 +80,7 @@ public class HugListener extends ListenerAdapter {
 			String theFuck = matchResult.group(1);
 			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
 			String processedSuffix = switch(suffix.toLowerCase()) {
-				case "er", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker
+				case "er", "ed", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker
 				case "" -> ""; // just fuck
 				default -> copyCase(suffix, "g".repeat(suffix.length())); // fuckkkkk...
 			};
