@@ -24,10 +24,9 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
+	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|k+)?", Pattern.CASE_INSENSITIVE);
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
-
-	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|k+)?", Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
