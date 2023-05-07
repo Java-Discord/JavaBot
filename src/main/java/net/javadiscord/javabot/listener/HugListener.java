@@ -92,11 +92,7 @@ public class HugListener extends ListenerAdapter {
 		if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < source.length(); i++) {
-			char a = source.charAt(i);
-			char b = toChange.charAt(i);
-			if (Character.isUpperCase(a)) b = Character.toUpperCase(b);
-			else b = Character.toLowerCase(b);
-			sb.append(b);
+			sb.append(copyCase(source, i, toChange.charAt(i)));
 		}
 		return sb.toString();
 	}
