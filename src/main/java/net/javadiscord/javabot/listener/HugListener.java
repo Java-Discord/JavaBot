@@ -28,6 +28,17 @@ public class HugListener extends ListenerAdapter {
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
 
+	public static void main(String[] args) {
+		String str = """
+			this is FUCKED, Absolutely FuckEd
+			you FuckEr
+			FuckKkKkK
+			fuck
+			""".trim();
+		System.out.println(str);
+		System.out.println(replaceFucks(str));
+	}
+
 	@Override
 	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 		if (!event.isFromGuild()) {
@@ -80,7 +91,7 @@ public class HugListener extends ListenerAdapter {
 			String theFuck = matchResult.group(1);
 			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
 			String processedSuffix = switch(suffix.toLowerCase()) {
-				case "er", "ed", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker
+				case "er", "ed", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker, fucked
 				case "" -> ""; // just fuck
 				default -> copyCase(suffix, "g".repeat(suffix.length())); // fuckkkkk...
 			};
