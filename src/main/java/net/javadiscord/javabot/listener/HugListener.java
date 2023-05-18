@@ -2,7 +2,8 @@ package net.javadiscord.javabot.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel;
@@ -14,6 +15,8 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.WebhookUtil;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Replaces all occurrences of 'fuck' in incoming messages with 'hug'.
@@ -21,6 +24,7 @@ import javax.annotation.Nonnull;
 @Slf4j
 @RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
+	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|ed|k+)?", Pattern.CASE_INSENSITIVE);
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
 
@@ -55,40 +59,45 @@ public class HugListener extends ListenerAdapter {
 		if (tc == null) {
 			return;
 		}
-		final TextChannel textChannel = tc;
 		String content = event.getMessage().getContentRaw();
-		String lowerCaseContent = content.toLowerCase();
-		if (lowerCaseContent.contains("fuck")) {
+		if (FUCKER.matcher(content).find()) {
 			long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
-			StringBuilder sb = new StringBuilder(content.length());
-			int index = 0;
-			int indexBkp = index;
-			while ((index = lowerCaseContent.indexOf("fuck", index)) != -1) {
-				sb.append(content.substring(indexBkp, index));
-				sb.append(loadHug(content, index));
-				indexBkp = index++ + 4;
-				if (content.length() >= indexBkp + 3 && "ing".equals(lowerCaseContent.substring(indexBkp, indexBkp + 3))) {
-					sb.append(copyCase(content, indexBkp-1, 'g'));
-					sb.append(content.substring(indexBkp, indexBkp + 3));
-					index+=3;
-					indexBkp+=3;
-				}
-			}
-
-			sb.append(content.substring(indexBkp));
-			WebhookUtil.ensureWebhookExists(textChannel,
-					wh -> sendWebhookMessage(wh, event.getMessage(), sb.toString(), threadId),
+			WebhookUtil.ensureWebhookExists(tc,
+					wh -> sendWebhookMessage(wh, event.getMessage(), replaceFucks(content), threadId),
 					e -> ExceptionLogger.capture(e, getClass().getSimpleName()));
 		}
 	}
 
-	private String loadHug(String originalText, int startIndex) {
-		return copyCase(originalText, startIndex, 'h') + ""
-				+ copyCase(originalText, startIndex + 1, 'u') + ""
-				+ copyCase(originalText, startIndex + 3, 'g');
+	private static String processHug(String originalText) {
+		// FucK -> HuG, FuCk -> Hug
+		return String.valueOf(copyCase(originalText, 0, 'h'))
+			+ copyCase(originalText, 1, 'u')
+			+ copyCase(originalText, 3, 'g');
 	}
 
-	private char copyCase(String original, int index, char newChar) {
+	private static String replaceFucks(String str) {
+		return FUCKER.matcher(str).replaceAll(matchResult -> {
+			String theFuck = matchResult.group(1);
+			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
+			String processedSuffix = switch(suffix.toLowerCase()) {
+				case "er", "ed", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker, fucked
+				case "" -> ""; // just fuck
+				default -> copyCase(suffix, "g".repeat(suffix.length())); // fuckkkkk...
+			};
+			return processHug(theFuck) + processedSuffix;
+		});
+	}
+
+	private static String copyCase(String source, String toChange) {
+		if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < source.length(); i++) {
+			sb.append(copyCase(source, i, toChange.charAt(i)));
+		}
+		return sb.toString();
+	}
+
+	private static char copyCase(String original, int index, char newChar) {
 		if (Character.isUpperCase(original.charAt(index))) {
 			return Character.toUpperCase(newChar);
 		} else {
