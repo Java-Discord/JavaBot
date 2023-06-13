@@ -175,7 +175,8 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		return ActionRow.of(
 				Button.secondary(ComponentIdBuilder.build("resolve-report", threadId), "Mark as resolved"),
 				Button.danger(String.format(InteractionUtils.BAN_TEMPLATE, targetId), "Ban"),
-				Button.danger(String.format(InteractionUtils.KICK_TEMPLATE, targetId), "Kick")
+				Button.danger(String.format(InteractionUtils.KICK_TEMPLATE, targetId), "Kick"),
+				Button.primary(String.format(InteractionUtils.WARN_TEMPLATE, targetId), "Warn")
 		);
 	}
 
