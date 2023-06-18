@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.commands.qotw_points;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -90,7 +91,7 @@ public abstract class ChangePointsSubcommand extends SlashCommand.Subcommand {
 	 */
 	protected @NotNull EmbedBuilder createIncrementEmbedBuilder(User user, long points) {
 		return new EmbedBuilder()
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Account changed")
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.addField("Total QOTW-Points", "```" + points + "```", true)

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
@@ -195,8 +196,8 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				member -> {
 					User user = member.getUser();
 					MessageEmbed embed = new EmbedBuilder()
-							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for %s", user.getAsTag(), role.getName()))
+							.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
+							.setTitle(String.format("%s applied for %s", UserUtils.getUserTag(user), role.getName()))
 							.setColor(Responses.Type.SUCCESS.getColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
@@ -237,8 +238,8 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				member -> {
 					User user = member.getUser();
 					EmbedBuilder embed = new EmbedBuilder()
-							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for %s", user.getAsTag(), config.getExpertRole().getName()))
+							.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
+							.setTitle(String.format("%s applied for %s", UserUtils.getUserTag(user), config.getExpertRole().getName()))
 							.setColor(config.getExpertRole().getColor())
 							.addField("How much Java experience do you have?", experienceOption.getAsString(), false)
 							.addField("Present us a fitting Java Project", projectInfoOption.getAsString(), false)

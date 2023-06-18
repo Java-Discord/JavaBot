@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -37,14 +38,14 @@ public class QOTWGuildNotificationService {
 	public void sendSubmissionActionNotification(User reviewedBy, @NotNull QOTWSubmission submission, SubmissionStatus status) {
 		submission.retrieveAuthor(author -> {
 			notificationService.withGuild(guild).sendToModerationLog(c -> c.sendMessageEmbeds(buildSubmissionActionEmbed(author, submission.getThread(), reviewedBy, status)));
-			log.info("{} {} {}'s QOTW Submission", reviewedBy.getAsTag(), status.getVerb(), author.getAsTag());
+			log.info("{} {} {}'s QOTW Submission", UserUtils.getUserTag(reviewedBy), status.getVerb(), UserUtils.getUserTag(author));
 		});
 	}
 
 	private @NotNull MessageEmbed buildSubmissionActionEmbed(@NotNull User author, ThreadChannel thread, @NotNull User reviewedBy, @NotNull SubmissionStatus status) {
 		EmbedBuilder builder = new EmbedBuilder()
-				.setAuthor(reviewedBy.getAsTag(), null, reviewedBy.getEffectiveAvatarUrl())
-				.setTitle(String.format("%s %s %s's QOTW Submission", reviewedBy.getAsTag(), status.getVerb(), author.getAsTag()))
+				.setAuthor(UserUtils.getUserTag(reviewedBy), null, reviewedBy.getEffectiveAvatarUrl())
+				.setTitle(String.format("%s %s %s's QOTW Submission", UserUtils.getUserTag(reviewedBy), status.getVerb(), UserUtils.getUserTag(author)))
 				.setTimestamp(Instant.now());
 		if (thread != null) {
 			builder.addField("Thread", thread.getAsMention(), true);
