@@ -31,7 +31,7 @@ dependencies {
 
     // DIH4JDA (Command Framework) & JDA
     implementation("xyz.dynxsty:dih4jda:1.6.2")
-    implementation("net.dv8tion:JDA:5.0.0-beta.2") {
+    implementation("net.dv8tion:JDA:5.0.0-beta.10") {
         exclude(module = "opus-java")
     }
 
