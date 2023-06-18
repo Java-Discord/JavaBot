@@ -191,14 +191,11 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			return;
 		}
 		String reason = "None";
-		WarnSeverity severity=WarnSeverity.MEDIUM;
+		WarnSeverity severity = id.length > 3 ? WarnSeverity.valueOf(id[3]) : null;
 		
 		for (ModalMapping mapping : mappings) {
 			if ("reason".equals(mapping.getId())) {
 				reason = mapping.getAsString();
-			}
-			if ("severity".equals(mapping.getId())) {
-				severity=WarnSeverity.valueOf(mapping.getAsString());
 			}
 		}
 		
