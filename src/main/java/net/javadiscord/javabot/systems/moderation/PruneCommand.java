@@ -10,6 +10,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
@@ -77,7 +78,7 @@ public class PruneCommand extends ModerateCommand {
 						(before == null || member.getTimeJoined().isBefore(before)) &&
 						(after == null || member.getTimeJoined().isAfter(after));
 				if (shouldRemove) {
-					config.getLogChannel().sendMessage("Removing " + member.getUser().getAsTag() + " as part of prune.").queue();
+					config.getLogChannel().sendMessage("Removing " + UserUtils.getUserTag(member.getUser()) + " as part of prune.").queue();
 					member.ban(delDays, TimeUnit.DAYS).reason(reason).queue();
 				}
 			});

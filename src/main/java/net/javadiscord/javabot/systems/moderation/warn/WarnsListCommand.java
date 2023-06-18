@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nonnull;
 
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
@@ -60,7 +61,7 @@ public class WarnsListCommand extends SlashCommand {
 	 */
 	protected static @NotNull MessageEmbed buildWarnsEmbed(@Nonnull List<Warn> warns, @Nonnull User user) {
 		EmbedBuilder builder = new EmbedBuilder()
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
 				.setTitle("Recent Warns")
 				.setDescription(String.format("%s has `%s` active warns with a total of `%s` severity.\n",
 						user.getAsMention(), warns.size(), warns.stream().mapToInt(Warn::getSeverityWeight).sum()))

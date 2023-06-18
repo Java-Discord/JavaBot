@@ -10,6 +10,7 @@ import net.javadiscord.javabot.systems.qotw.commands.QOTWSubcommand;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 		}
 		List<QOTWQuestion> questions = questionQueueRepository.getQuestions(guildId, page, 10);
 		EmbedBuilder embedBuilder = new EmbedBuilder()
-				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(event.getUser()), null, event.getUser().getEffectiveAvatarUrl())
 				.setTitle("QOTW Questions Queue")
 				.setColor(Responses.Type.DEFAULT.getColor());
 		if (questions.isEmpty()) {

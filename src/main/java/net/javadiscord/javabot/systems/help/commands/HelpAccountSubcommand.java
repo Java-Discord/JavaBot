@@ -16,6 +16,7 @@ import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
@@ -66,7 +67,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 
 	private @NotNull MessageEmbed buildHelpAccountEmbed(HelpAccount account, @NotNull User user, Guild guild, long totalThanks, long weekThanks) {
 		return new EmbedBuilder()
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")

@@ -14,6 +14,7 @@ import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
@@ -291,12 +292,12 @@ public class ModerationService {
 
 	private @NotNull EmbedBuilder buildModerationEmbed(@NotNull User user, @NotNull Member moderator, String reason) {
 		return new EmbedBuilder()
-				.setAuthor(moderator.getUser().getAsTag(), null, moderator.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(moderator.getUser()), null, moderator.getEffectiveAvatarUrl())
 				.addField("Member", user.getAsMention(), true)
 				.addField("Moderator", moderator.getAsMention(), true)
 				.addField("Reason", reason, true)
 				.setTimestamp(Instant.now())
-				.setFooter(user.getAsTag(), user.getEffectiveAvatarUrl());
+				.setFooter(UserUtils.getUserTag(user), user.getEffectiveAvatarUrl());
 	}
 
 	private @NotNull MessageEmbed buildBanEmbed(User user, Member bannedBy, String reason) {
@@ -315,7 +316,7 @@ public class ModerationService {
 
 	private @NotNull MessageEmbed buildUnbanEmbed(long userId, String reason, @NotNull Member unbannedBy) {
 		return new EmbedBuilder()
-				.setAuthor(unbannedBy.getUser().getAsTag(), null, unbannedBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(unbannedBy.getUser()), null, unbannedBy.getEffectiveAvatarUrl())
 				.setTitle("Ban Revoked")
 				.setColor(Responses.Type.ERROR.getColor())
 				.addField("Moderator", unbannedBy.getAsMention(), true)
@@ -335,18 +336,18 @@ public class ModerationService {
 
 	private @NotNull MessageEmbed buildClearWarnsEmbed(@NotNull User user, @NotNull User clearedBy) {
 		return new EmbedBuilder()
-				.setAuthor(clearedBy.getAsTag(), null, clearedBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(clearedBy), null, clearedBy.getEffectiveAvatarUrl())
 				.setTitle("Warns Cleared")
 				.setColor(Responses.Type.WARN.getColor())
 				.setDescription("All warns have been cleared from " + user.getAsMention() + "'s record.")
 				.setTimestamp(Instant.now())
-				.setFooter(user.getAsTag(), user.getEffectiveAvatarUrl())
+				.setFooter(UserUtils.getUserTag(user), user.getEffectiveAvatarUrl())
 				.build();
 	}
 
 	private @NotNull MessageEmbed buildClearWarnsByIdEmbed(@NotNull Warn w, @NotNull User clearedBy) {
 		return new EmbedBuilder()
-				.setAuthor(clearedBy.getAsTag(), null, clearedBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(clearedBy), null, clearedBy.getEffectiveAvatarUrl())
 				.setTitle("Warn Cleared")
 				.setColor(Responses.Type.WARN.getColor())
 				.setDescription(String.format("""

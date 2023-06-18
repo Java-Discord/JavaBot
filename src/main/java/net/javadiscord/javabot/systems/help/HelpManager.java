@@ -26,6 +26,7 @@ import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
@@ -146,11 +147,11 @@ public class HelpManager {
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				botConfig.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
-						"Could not record user %s thanking %s for help in post %s: %s",
-						postThread.getOwner().getUser().getAsTag(),
-						helper.getAsTag(),
-						postThread.getAsMention(),
-						e.getMessage()
+					"Could not record user %s thanking %s for help in post %s: %s",
+					UserUtils.getUserTag(postThread.getOwner().getUser()),
+					UserUtils.getUserTag(helper),
+					postThread.getAsMention(),
+					e.getMessage()
 				).queue();
 			}
 		});
