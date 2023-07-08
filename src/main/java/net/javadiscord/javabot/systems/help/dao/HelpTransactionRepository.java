@@ -34,12 +34,13 @@ public class HelpTransactionRepository {
 	public HelpTransaction save(HelpTransaction transaction) throws DataAccessException {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
 		.withTableName("help_transaction")
-		.usingColumns("recipient","weight","messageType")
+		.usingColumns("recipient","weight","messageType", "channel")
 		.usingGeneratedKeyColumns("id");
 		Number key = simpleJdbcInsert.executeAndReturnKey(Map.of(
 					"recipient",transaction.getRecipient(),
 					"weight",transaction.getWeight(),
-					"messageType",transaction.getMessageType())
+					"messageType",transaction.getMessageType(),
+					"channel",transaction.getChannelId())
 				);
 		transaction.setId(key.longValue());
 		log.info("Inserted new Help Transaction: {}", transaction);
@@ -80,6 +81,20 @@ public class HelpTransactionRepository {
 		transaction.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 		transaction.setWeight(rs.getDouble("weight"));
 		transaction.setMessageType(rs.getInt("messageType"));
+		transaction.setChannelId(rs.getLong("channel"));
 		return transaction;
+	}
+
+	/**
+	 * Checks whether a transaction with a specific recipient exists in a specific channel.
+	 * @param recipient The ID of the recipient
+	 * @param channelId The ID of the channel
+	 * @return {@code true} if it exists, else {@code false}
+	 */
+	public boolean existsTransactionWithRecipientInChannel(long recipient, long channelId) {
+		return jdbcTemplate.queryForObject(
+				"SELECT count(*) FROM help_transaction WHERE recipient=? AND channel = ?",
+				Integer.class,
+				recipient, channelId) > 0;
 	}
 }

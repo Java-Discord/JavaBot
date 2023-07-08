@@ -39,6 +39,18 @@ public class HelpConfig extends GuildConfigItem {
 	private String dormantChannelMessageTemplate = "`\uD83D\uDCA4` **Post marked as dormant**\n> This post has been inactive for over %s minutes, thus, it has been **archived**.\n> If your question was not answered yet, feel free to re-open this post or create a new one.";
 
 	/**
+	 * The message that's sent in a post to tell users that it
+	 * is now marked as dormant and no more messages can be sent.
+	 */
+	private String dormantChannelPrivateMessageTemplate = """ 
+			Your post %s in %s has been inactive for over %s minutes, thus, it has been **archived**.
+			If your question was not answered yet, feel free to re-open this post by sending another message in that channel.
+			You can disable notifications like this using the `/preferences` command.
+			[Post link](%s)
+			""";
+	
+	
+	/**
 	 * The message that's sent when a user unreserved a channel where other users
 	 * participated in.
 	 */

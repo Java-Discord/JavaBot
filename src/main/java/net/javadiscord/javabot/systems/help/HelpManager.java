@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -28,6 +27,7 @@ import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import java.sql.SQLException;
@@ -120,16 +120,16 @@ public class HelpManager {
 		postThread.sendMessageEmbeds(buildPostClosedEmbed(closedBy, reason))
 				.queue(s -> postThread.getManager().setArchived(true).queue());
 	}
-
+	
 	/**
 	 * Thanks a single user.
 	 *
-	 * @param event      The {@link ButtonInteractionEvent} that was fired.
+	 * @param guild The {@link Guild} the helper is thanked in
 	 * @param postThread The {@link ThreadChannel} post.
 	 * @param helperId   The helpers' discord id.
 	 */
-	public void thankHelper(@NotNull ButtonInteractionEvent event, ThreadChannel postThread, long helperId) {
-		event.getJDA().retrieveUserById(helperId).queue(helper -> {
+	public void thankHelper(@NotNull Guild guild, ThreadChannel postThread, long helperId) {
+		guild.getJDA().retrieveUserById(helperId).queue(helper -> {
 			// First insert the new thanks data.
 			try {
 				dbActions.update(
@@ -139,13 +139,13 @@ public class HelpManager {
 						postThread.getIdLong(),
 						helper.getIdLong()
 				);
-				HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
+				HelpConfig config = botConfig.get(guild).getHelpConfig();
 				HelpExperienceService service = new HelpExperienceService(botConfig, helpAccountRepository, helpTransactionRepository);
 				// Perform experience transactions
-				service.performTransaction(helper.getIdLong(), config.getThankedExperience(), event.getGuild());
+				service.performTransaction(helper.getIdLong(), config.getThankedExperience(), guild, postThread.getIdLong());
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
-				botConfig.get(event.getGuild()).getModerationConfig().getLogChannel().sendMessageFormat(
+				botConfig.get(guild).getModerationConfig().getLogChannel().sendMessageFormat(
 						"Could not record user %s thanking %s for help in post %s: %s",
 						postThread.getOwner().getUser().getAsTag(),
 						helper.getAsTag(),

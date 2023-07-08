@@ -2,13 +2,18 @@ package net.javadiscord.javabot.systems.help;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
+import net.javadiscord.javabot.systems.user_preferences.model.Preference;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,6 +29,8 @@ import java.time.Instant;
 public class HelpForumUpdater {
 	private final JDA jda;
 	private final BotConfig botConfig;
+	private final UserPreferenceService preferenceService;
+	private final HelpExperienceService experienceService;
 
 	/**
 	 * Updates all help channels.
@@ -61,11 +68,40 @@ public class HelpForumUpdater {
 				}
 				post.sendMessage(config.getDormantChannelMessageTemplate().formatted(config.getInactivityTimeoutMinutes())).queue(s -> {
 					post.getManager().setArchived(true).queue();
+					sendDMDormantInfoIfEnabled(post, config);
+					experienceService.addMessageBasedHelpXP(post, false);
 					log.info("Archived forum thread '{}' (by {}) for inactivity (last message sent {} minutes ago)",
 							post.getName(), post.getOwnerId(), minutesAgo);
+					
 				});
 			}
 		}, e -> log.error("Could not find latest message in forum thread {}:", post.getId(), e));
+	}
+
+	private void sendDMDormantInfoIfEnabled(ThreadChannel post, HelpConfig config) {
+		if(Boolean.parseBoolean(preferenceService.getOrCreate(post.getOwnerIdLong(), Preference.PRIVATE_DORMANT_NOTIFICATIONS).getState())) {
+			post
+				.getOwner()
+				.getUser()
+				.openPrivateChannel()
+				.flatMap(c -> c.sendMessageEmbeds(createDMDormantInfo(post, config)))
+				.queue();
+		}
+	}
+
+	private MessageEmbed createDMDormantInfo(ThreadChannel post, HelpConfig config) {
+		return new EmbedBuilder()
+				.setTitle("Post marked as dormant")
+				.setDescription(
+						config
+						.getDormantChannelPrivateMessageTemplate()
+						.formatted(
+								post.getAsMention(),
+								post.getParentChannel().getAsMention(),
+								config.getInactivityTimeoutMinutes(),
+								"https://discord.com/channels/" + post.getGuild().getId() + "/" + post.getId()))
+				.build()
+				;
 	}
 
 	private boolean isThanksMessage(@NotNull Message m) {
