@@ -28,10 +28,10 @@ public class VotingRegulationListener extends ListenerAdapter{
 
 	private boolean doesAuthorMatch(long userId, Message msg) {
 		long suggestionChannelId = botConfig.get(msg.getGuild()).getModerationConfig().getSuggestionChannelId();
-		return msg.getAuthor().getIdLong()==userId||
+		return msg.getAuthor().getIdLong() == userId||
 				msg.getChannel().getIdLong() == suggestionChannelId &&
 				!msg.getEmbeds().isEmpty() &&
-				msg.getEmbeds().get(0).getFooter()!=null &&
+				msg.getEmbeds().get(0).getFooter() != null &&
 				String.valueOf(userId).equals(msg.getEmbeds().get(0).getFooter().getText());
 	}
 
