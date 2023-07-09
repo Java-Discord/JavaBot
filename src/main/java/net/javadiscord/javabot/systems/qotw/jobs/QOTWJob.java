@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Job which posts a new question to the QOTW channel.
  */
@@ -41,6 +43,7 @@ public class QOTWJob {
 	 * @throws SQLException if an SQL error occurs
 	 */
 	@Scheduled(cron = "0 0 9 * * 1") // Monday, 09:00  UTC
+	@PostConstruct
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			GuildConfig config = botConfig.get(guild);
@@ -79,7 +82,7 @@ public class QOTWJob {
 		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
-				.setDescription(String.format("%s%n%nClick the button below to submit your answer.%nYour answer will be checked by <t:%d:F>",
+				.setDescription(String.format("%s%n%nClick the button below to submit your answer.%nYour answer will be checked by <t:%d:F>%nUse of generative AI tools like ChatGPT is __not__ allowed",
 						question.getText(), checkTime.toEpochSecond()))
 				.build();
 	}
