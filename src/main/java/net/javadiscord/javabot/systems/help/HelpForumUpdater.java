@@ -99,7 +99,7 @@ public class HelpForumUpdater {
 								post.getAsMention(),
 								post.getParentChannel().getAsMention(),
 								config.getInactivityTimeoutMinutes(),
-								"https://discord.com/channels/" + post.getGuild().getId() + "/" + post.getId()))
+								post.getJumpUrl()))
 				.build()
 				;
 	}
