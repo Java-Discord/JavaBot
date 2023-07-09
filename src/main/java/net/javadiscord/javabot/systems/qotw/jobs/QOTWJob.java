@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 /**
  * Job which posts a new question to the QOTW channel.
  */
@@ -43,7 +41,6 @@ public class QOTWJob {
 	 * @throws SQLException if an SQL error occurs
 	 */
 	@Scheduled(cron = "0 0 9 * * 1") // Monday, 09:00  UTC
-	@PostConstruct
 	public void execute() throws SQLException {
 		for (Guild guild : jda.getGuilds()) {
 			GuildConfig config = botConfig.get(guild);
