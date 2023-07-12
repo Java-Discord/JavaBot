@@ -9,6 +9,7 @@ import java.util.List;
  * Creates diagrams.
  */
 public class Plotter {
+	private String title;
 	private final List<Pair<String, Double>> entries;
 	private int width=3000;
 	private int height=1500;
@@ -16,9 +17,11 @@ public class Plotter {
 	/**
 	 * Creates the plotter.
 	 * @param entries a list of all data points to plot, each represented as a {@link Pair} consisting of the name and value of the data point
+	 * @param title the title of the plot
 	 */
-	public Plotter(List<Pair<String, Double>> entries) {
-		this.entries=entries;
+	public Plotter(List<Pair<String, Double>> entries, String title) {
+		this.entries = entries;
+		this.title = title;
 	}
 	
 	/**
@@ -35,7 +38,7 @@ public class Plotter {
 		g2d.fillRect(0, 0, width, height);
 		g2d.setColor(Color.BLACK);
 		
-		centeredText(g2d, "gained help XP per month", width/2, 50);
+		centeredText(g2d, title, width/2, 50);
 		
 		plotEntries(g2d, 100, 100, width-200, height-200);
 		
@@ -43,7 +46,7 @@ public class Plotter {
 	}
 
 	private void plotEntries(Graphics2D g2d, int x, int y, int width, int height) {
-		double maxValue = entries.stream().mapToDouble(Pair::second).sum();
+		double maxValue = entries.stream().mapToDouble(Pair::second).max().orElse(0);
 		int stepSize = 2*(int)Math.pow(10,(int)Math.log10(maxValue)-1);
 		if (stepSize==0) {
 			stepSize=1;
