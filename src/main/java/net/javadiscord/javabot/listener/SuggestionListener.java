@@ -87,6 +87,7 @@ public class SuggestionListener extends ListenerAdapter {
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
 				.setDescription(message.getContentRaw())
+				.setFooter(message.getAuthor().getId())
 				.build();
 	}
 }
