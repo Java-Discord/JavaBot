@@ -264,8 +264,10 @@ public class SubmissionManager {
 				.addField("Note",
 						"""
 								To maximize your chances of getting this week's QOTW Point make sure to:
-								— Provide a **Code example** (if possible)
-								— Try to answer the question as detailed as possible.
+								- Provide a **Code example** (if possible)
+								- Try to answer the question as detailed as possible.
+								- Do not use generative AI tools like ChatGPT for answering the question.
+								- Make sure your answer is specific to Java.
 
 								Staff usually won't reply in here.""", false)
 				.setTimestamp(Instant.now())

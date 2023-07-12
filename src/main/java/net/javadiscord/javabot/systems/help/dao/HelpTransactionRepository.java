@@ -37,12 +37,13 @@ public class HelpTransactionRepository {
 	public HelpTransaction save(HelpTransaction transaction) throws DataAccessException {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
 		.withTableName("help_transaction")
-		.usingColumns("recipient","weight","messageType")
+		.usingColumns("recipient","weight","messageType", "channel")
 		.usingGeneratedKeyColumns("id");
 		Number key = simpleJdbcInsert.executeAndReturnKey(Map.of(
 					"recipient",transaction.getRecipient(),
 					"weight",transaction.getWeight(),
-					"messageType",transaction.getMessageType())
+					"messageType",transaction.getMessageType(),
+					"channel",transaction.getChannelId())
 				);
 		transaction.setId(key.longValue());
 		log.info("Inserted new Help Transaction: {}", transaction);
@@ -83,9 +84,10 @@ public class HelpTransactionRepository {
 		transaction.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 		transaction.setWeight(rs.getDouble("weight"));
 		transaction.setMessageType(rs.getInt("messageType"));
+		transaction.setChannelId(rs.getLong("channel"));
 		return transaction;
 	}
-	
+
 	/**
 	 * Gets the total earned XP of a user since a specific timestamp grouped by months.
 	 * @param userId the user to get XP from
@@ -96,5 +98,18 @@ public class HelpTransactionRepository {
 		return jdbcTemplate.query("SELECT SUM(weight) AS total, EXTRACT(MONTH FROM created_at) AS m, EXTRACT(YEAR FROM created_at) AS y FROM help_transaction WHERE recipient = ? AND created_at >= ? GROUP BY m, y ORDER BY y ASC, m ASC", 
 				(rs, row)-> new Pair<>(new Pair<>(rs.getInt("m"), rs.getInt("y")), rs.getDouble("total")), 
 				userId, start);
+	}
+
+	/**
+	 * Checks whether a transaction with a specific recipient exists in a specific channel.
+	 * @param recipient The ID of the recipient
+	 * @param channelId The ID of the channel
+	 * @return {@code true} if it exists, else {@code false}
+	 */
+	public boolean existsTransactionWithRecipientInChannel(long recipient, long channelId) {
+		return jdbcTemplate.queryForObject(
+				"SELECT count(*) FROM help_transaction WHERE recipient=? AND channel = ?",
+				Integer.class,
+				recipient, channelId) > 0;
 	}
 }

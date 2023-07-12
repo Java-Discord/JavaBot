@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,19 +104,6 @@ public class AutoMod extends ListenerAdapter {
 	 * @param message the {@link Message} that should be checked
 	 */
 	private void checkNewMessageAutomod(@Nonnull Message message) {
-		// mention spam
-		if (message.getMentions().getUsers().size() >= 5) {
-			new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
-					.warn(
-							message.getAuthor(),
-							WarnSeverity.MEDIUM,
-							"Automod: Mention Spam",
-							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getChannel(),
-							false
-					);
-		}
-
 		// spam
 		message.getChannel().getHistory().retrievePast(10).queue(messages -> {
 			int spamCount = (int) messages.stream().filter(msg -> !msg.equals(message))
@@ -138,37 +126,29 @@ public class AutoMod extends ListenerAdapter {
 	private void checkContentAutomod(@Nonnull Message message) {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
-			notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message: `%s`", message.getContentRaw()));
-			new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
-					.warn(
-							message.getAuthor(),
-							WarnSeverity.MEDIUM,
-							"Automod: Advertising",
-							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getChannel(),
-							isSuggestionsChannel(message.getChannel())
-					);
-			message.delete().queue(success -> {
-			}, error -> log.info("Message was deleted before Automod was able to handle it."));
-
-
+			doAutomodActions(message,"Advertising");
 		}
 
 		//Check for suspicious Links
 		if (hasSuspiciousLink(message)) {
-			notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Suspicious Link sent by: %s (`%s`)", message.getAuthor().getAsMention(), message.getContentRaw()));
-			new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
-					.warn(
-							message.getAuthor(),
-							WarnSeverity.MEDIUM,
-							"Automod: Suspicious Link",
-							message.getGuild().getMember(message.getJDA().getSelfUser()),
-							message.getChannel(),
-							isSuggestionsChannel(message.getChannel())
-					);
-			message.delete().queue(success -> {
-			}, error -> log.info("Message was deleted before Automod was able to handle it."));
+			doAutomodActions(message, "Suspicious Link");
 		}
+	}
+
+	private void doAutomodActions(Message message, String reason) {
+		notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message by %s: `%s`", message.getAuthor().getAsMention(), message.getContentRaw()));
+		new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
+				.warn(
+						message.getAuthor(),
+						WarnSeverity.MEDIUM,
+						"Automod: " + reason,
+						message.getGuild().getMember(message.getJDA().getSelfUser()),
+						message.getChannel(),
+						isSuggestionsChannel(message.getChannel())
+				);
+		message.delete().queue(success -> {
+		}, error -> log.info("Message was deleted before Automod was able to handle it."));
+		message.getMember().timeoutFor(30, TimeUnit.SECONDS).queue();
 	}
 
 	/**
