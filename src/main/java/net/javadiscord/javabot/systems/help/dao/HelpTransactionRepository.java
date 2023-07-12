@@ -3,6 +3,8 @@ package net.javadiscord.javabot.systems.help.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
+import net.javadiscord.javabot.util.Pair;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +86,18 @@ public class HelpTransactionRepository {
 		transaction.setMessageType(rs.getInt("messageType"));
 		transaction.setChannelId(rs.getLong("channel"));
 		return transaction;
+	}
+
+	/**
+	 * Gets the total earned XP of a user since a specific timestamp grouped by months.
+	 * @param userId the user to get XP from
+	 * @param start the start timestamp
+	 * @return a list consisting of month, year and the total XP earned that month
+	 */
+	public List<Pair<Pair<Integer, Integer>, Double>> getTotalTransactionWeightByMonth(long userId, LocalDateTime start) {
+		return jdbcTemplate.query("SELECT SUM(weight) AS total, EXTRACT(MONTH FROM created_at) AS m, EXTRACT(YEAR FROM created_at) AS y FROM help_transaction WHERE recipient = ? AND created_at >= ? GROUP BY m, y ORDER BY y ASC, m ASC", 
+				(rs, row)-> new Pair<>(new Pair<>(rs.getInt("m"), rs.getInt("y")), rs.getDouble("total")), 
+				userId, start);
 	}
 
 	/**
