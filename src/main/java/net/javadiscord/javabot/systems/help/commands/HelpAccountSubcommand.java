@@ -96,7 +96,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 		
 		try {
 			HelpAccount account = helpExperienceService.getOrCreateAccount(user.getIdLong());
-			WebhookMessageCreateAction<Message> reply = event.getHook().sendMessageEmbeds(buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks));
+			WebhookMessageCreateAction<Message> reply = event.getHook().sendMessageEmbeds(buildHelpAccountEmbed(account, user, event.getGuild(), totalThanks, weekThanks, upload));
 			if (upload!=null) {
 				reply.addFiles(upload);
 			}
@@ -129,7 +129,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 			plotData.add(new Pair<>(position.getMonth() + " " + position.getYear(), value));
 		}
 		
-		BufferedImage plt = new Plotter(plotData).plot();
+		BufferedImage plt = new Plotter(plotData, "gained help XP per month").plot();
 		try(ByteArrayOutputStream os = new ByteArrayOutputStream()){
 			ImageIO.write(plt, "png", os);
 			return FileUpload.fromData(os.toByteArray(), "image.png");
@@ -139,16 +139,19 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 		return null;
 	}
 
-	private @NotNull MessageEmbed buildHelpAccountEmbed(HelpAccount account, @NotNull User user, Guild guild, long totalThanks, long weekThanks) {
-		return new EmbedBuilder()
+	private @NotNull MessageEmbed buildHelpAccountEmbed(HelpAccount account, @NotNull User user, Guild guild, long totalThanks, long weekThanks, FileUpload upload) {
+		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")
 				.addField("Experience (BETA)", formatExperience(guild, account), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
-				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true)
-				.build();
+				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true);
+		if (upload != null) {
+			eb.setImage("attachment://"+upload.getName());
+		}
+		return eb.build();
 	}
 
 	private @NotNull String formatExperience(Guild guild, @NotNull HelpAccount account) {
