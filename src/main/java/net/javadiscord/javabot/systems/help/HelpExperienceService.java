@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -75,10 +78,11 @@ public class HelpExperienceService {
 	 * @param recipient The recipient's user id.
 	 * @param value     The transaction's value.
 	 * @param guild     The current guild.
+	 * @param channelId The ID of the channel the transaction should be performed in
 	 * @throws DataAccessException If an error occurs.
 	 */
 	@Transactional
-	public void performTransaction(long recipient, double value, Guild guild) throws DataAccessException {
+	public void performTransaction(long recipient, double value, Guild guild, long channelId) throws DataAccessException {
 		if (value == 0) {
 			log.error("Cannot make zero-value transactions");
 			return;
@@ -86,6 +90,7 @@ public class HelpExperienceService {
 		HelpTransaction transaction = new HelpTransaction();
 		transaction.setRecipient(recipient);
 		transaction.setWeight(value);
+		transaction.setChannelId(channelId);
 		HelpAccount account = getOrCreateAccount(recipient);
 		account.updateExperience(value);
 		helpAccountRepository.update(account);
@@ -108,5 +113,25 @@ public class HelpExperienceService {
 						}
 					}
 				}), e -> {});
+	}
+	
+	/**
+	 * add XP to all helpers depending on the messages they sent.
+	 * 
+	 * @param post The {@link ThreadChannel} post
+	 * @param allowIfXPAlreadyGiven {@code true} if XP should be awarded if XP have already been awarded
+	 */
+	public void addMessageBasedHelpXP(ThreadChannel post, boolean allowIfXPAlreadyGiven) {
+		HelpConfig config = botConfig.get(post.getGuild()).getHelpConfig();
+		try {
+			Map<Long, Double> experience = HelpManager.calculateExperience(HelpListener.HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
+			for (Map.Entry<Long, Double> entry : experience.entrySet()) {
+				if(entry.getValue()>0 && (allowIfXPAlreadyGiven||!helpTransactionRepository.existsTransactionWithRecipientInChannel(entry.getKey(), post.getIdLong()))) {
+					performTransaction(entry.getKey(), entry.getValue(), config.getGuild(), post.getIdLong());
+				}
+			}
+		} catch (DataAccessException e) {
+			ExceptionLogger.capture(e, getClass().getName());
+		}
 	}
 }

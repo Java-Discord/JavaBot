@@ -22,11 +22,9 @@ import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.dao.DataAccessException;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
@@ -48,7 +46,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	/**
 	 * A static Map that holds all messages that was sent in a specific reserved forum channel.
 	 */
-	protected static final Map<Long, List<Message>> HELP_POST_MESSAGES = new HashMap<>();
+	static final Map<Long, List<Message>> HELP_POST_MESSAGES = new HashMap<>();
 	private static final Set<Long> newThreadChannels;
 
 	static {
@@ -58,6 +56,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	private final BotConfig botConfig;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
+	private final HelpExperienceService experienceService;
 	private final DbActions dbActions;
 	private final String[][] closeSuggestionDetectors = {
 			{"close", "post"},
@@ -158,7 +157,6 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		if (isInvalidForumPost(event.getChannel())) {
 			return;
 		}
-		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		ThreadChannel post = event.getChannel().asThreadChannel();
 		if (isInvalidHelpForumChannel(post.getParentChannel().asForumChannel())) {
 			return;
@@ -229,20 +227,11 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		event.getMessage().delete().queue(s -> {
 			// close post
 			manager.close(event, false, null);
-			// add experience
-			try {
-				HelpExperienceService service = new HelpExperienceService(botConfig, helpAccountRepository, helpTransactionRepository);
-				Map<Long, Double> experience = HelpManager.calculateExperience(HELP_POST_MESSAGES.get(post.getIdLong()), post.getOwnerIdLong(), config);
-				for (Map.Entry<Long, Double> entry : experience.entrySet()) {
-					service.performTransaction(entry.getKey(), entry.getValue(), config.getGuild());
-				}
-			} catch (DataAccessException e) {
-				ExceptionLogger.capture(e, getClass().getName());
-			}
+			experienceService.addMessageBasedHelpXP(post, true);
 			// thank all helpers
 			buttons.stream().filter(ActionComponent::isDisabled)
 					.filter(b -> b.getId() != null)
-					.forEach(b -> manager.thankHelper(event, post, Long.parseLong(ComponentIdBuilder.split(b.getId())[2])));
+					.forEach(b -> manager.thankHelper(event.getGuild(), post, Long.parseLong(ComponentIdBuilder.split(b.getId())[2])));
 		});
 	}
 

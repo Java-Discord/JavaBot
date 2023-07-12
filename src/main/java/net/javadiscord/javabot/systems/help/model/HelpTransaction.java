@@ -14,4 +14,5 @@ public class HelpTransaction {
 	private LocalDateTime createdAt;
 	private double weight;
 	private int messageType;
+	private long channelId = -1;
 }
