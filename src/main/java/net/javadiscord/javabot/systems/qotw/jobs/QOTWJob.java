@@ -79,7 +79,7 @@ public class QOTWJob {
 		OffsetDateTime checkTime = OffsetDateTime.now().plusDays(6).withHour(22).withMinute(0).withSecond(0);
 		return new EmbedBuilder()
 				.setTitle("Question of the Week #" + question.getQuestionNumber())
-				.setDescription(String.format("%s%n%nClick the button below to submit your answer.%nYour answer will be checked by <t:%d:F>",
+				.setDescription(String.format("%s%n%nClick the button below to submit your answer.%nYour answer will be checked by <t:%d:F>%nUse of generative AI tools like ChatGPT is __not__ allowed",
 						question.getText(), checkTime.toEpochSecond()))
 				.build();
 	}
