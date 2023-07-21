@@ -91,12 +91,12 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			lastPingTimes.put(event.getMember().getIdLong(), new Pair<>(System.currentTimeMillis(), config.getGuild()));
 			TextChannel notifChannel = config.getHelpConfig().getHelpNotificationChannel();
 			notifChannel.sendMessageEmbeds(new EmbedBuilder().setDescription("""
-					%s requested help in post %s
+					%s requested help in %s
 					
 					Tags:
 					%s
 					
-					[Post link](%s)
+					[Click to view](%s)
 					"""
 					.formatted(
 							event.getUser().getAsMention(),
