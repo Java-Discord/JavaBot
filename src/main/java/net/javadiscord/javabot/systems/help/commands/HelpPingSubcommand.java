@@ -1,24 +1,32 @@
 package net.javadiscord.javabot.systems.help.commands;
 
-import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
-import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
+import java.awt.Color;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +39,8 @@ import java.util.stream.Collectors;
  * Handler for the /help ping sub-command that allows users to occasionally ping
  * helpers.
  */
-public class HelpPingSubcommand extends SlashCommand.Subcommand {
+@AutoDetectableComponentHandler("help-ping")
+public class HelpPingSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **help forum posts**";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
@@ -80,36 +89,59 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 		}
 		if (isHelpPingTimeoutElapsed(member.getIdLong(), config)) {
 			lastPingTimes.put(event.getMember().getIdLong(), new Pair<>(System.currentTimeMillis(), config.getGuild()));
-			Role role = config.getHelpConfig().getHelpPingRole();
-			role.getGuild().findMembersWithRoles(role).onSuccess(members->{
-				post.retrieveThreadMembers().queue(threadMembers -> {
-					Set<Long> memberIds = threadMembers
-							.stream()
-							.map(m->m.getIdLong())
-							.collect(Collectors.toSet());
-					members.removeIf(m ->
-						m.getOnlineStatus() == OnlineStatus.OFFLINE ||
-						memberIds.contains(m.getIdLong()));
-					Collections.shuffle(members);
-					if(members.size()>0) {
-						post.addThreadMember(members.get(0)).queue();
-						event.getHook().sendMessage("Successfully added a user with the help-ping role to the post.").queue();
-					}else {
-						event.getHook().sendMessage("Unfortunately, no available member with the help-ping role has been found.").queue();
-					}
-				}, err -> {
-					event.getHook().sendMessage("An error occured trying to find available members").queue();
-					ExceptionLogger.capture(err, HelpPingSubcommand.class.getName());
-				});
-
-			}).onError(err -> {
-				event.getHook().sendMessage("An error occured trying to find available members").queue();
-				ExceptionLogger.capture(err, HelpPingSubcommand.class.getName());
-			});
-			event.deferReply(false).queue();
+			TextChannel notifChannel = config.getHelpConfig().getHelpNotificationChannel();
+			notifChannel.sendMessageEmbeds(new EmbedBuilder().setDescription("""
+					%s requested help in post %s
+					
+					Tags:
+					%s
+					
+					[Post link](%s)
+					"""
+					.formatted(
+							event.getUser().getAsMention(),
+							post.getAsMention(),
+							getTagString(post),
+							post.getJumpUrl()
+					))
+					.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
+					.setFooter(event.getUser().getId())
+					.setColor(Color.YELLOW)
+					.build())
+				.addActionRow(createResolveButton())
+				.queue();
+			event.reply("""
+					Successfully requested help.
+					
+					Note that this does NOT gurantee that anybody here has the time and knowledge to help you.
+					Abusing this command might result in moderative action taken against you.
+					""")
+			.setEphemeral(true)
+			.queue();
 		} else {
 			Responses.warning(event, "Sorry, but you can only use this command occasionally. Please try again later.").queue();
 		}
+	}
+
+	private String getTagString(ThreadChannel post) {
+		String text = post
+			.getAppliedTags()
+			.stream()
+			.map(this::getForumTagText)
+			.map(tag -> "- " + tag)
+			.collect(Collectors.joining("\n"));
+		if(text.isEmpty()) {
+			text = "- <no tags>";
+		}
+		return text;
+	}
+
+	private Button createResolveButton() {
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "resolve"), "Mark as resolved");
+	}
+	
+	private Button createUnresolveButton() {
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unresolve"), "Mark as unresolved");
 	}
 
 	/**
@@ -160,5 +192,54 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand {
 		for (Long memberId : memberIdsToRemove) {
 			lastPingTimes.remove(memberId);
 		}
+	}
+
+	@Override
+	public void handleButton(ButtonInteractionEvent event, Button button) {
+		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		switch(id[1]) {
+		case "resolve" ->
+			resolveAction(event, true);
+		case "unresolve" -> 
+			resolveAction(event, false);
+		default -> event.reply("Unknown button").setEphemeral(true).queue();
+		}
+		
+	}
+
+	private void resolveAction(ButtonInteractionEvent event, boolean resolved) {
+		event.editMessageEmbeds(
+			event.getMessage()
+			.getEmbeds()
+			.stream()
+			.map(e->new EmbedBuilder(e)
+					.setColor(resolved ? Color.GREEN : Color.YELLOW)
+					.addField("marked as " + (resolved?"resolved":"unresolved") + " by",
+							event.getUser().getAsMention(), false))
+			.map(this::removeOldField)
+			.map(EmbedBuilder::build)
+			.toList())
+		.setActionRow(resolved?createUnresolveButton():createResolveButton())
+		.queue();
+	}
+
+	private String getForumTagText(ForumTag tag) {
+		EmojiUnion emoji = tag.getEmoji();
+		StringBuilder sb=new StringBuilder();
+		if(emoji!=null) {
+			sb
+				.append(emoji.getFormatted())
+				.append(" ");
+		}
+		sb.append(tag.getName());
+		
+		return sb.toString();
+	}
+
+	private EmbedBuilder removeOldField(EmbedBuilder eb) {
+		if(eb.getFields().size()>5) {
+			eb.getFields().remove(0);
+		}
+		return eb;
 	}
 }

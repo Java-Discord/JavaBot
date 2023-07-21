@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.javadiscord.javabot.data.config.GuildConfigItem;
 
 import java.util.Map;
@@ -24,7 +25,7 @@ public class HelpConfig extends GuildConfigItem {
 	/**
 	 * The id of the help-ping role.
 	 */
-	private long helpPingRoleId;
+	private long helpNotificationChannelId;
 
 	/**
 	 * The message that's sent as soon as a user asks a question in an open help
@@ -108,7 +109,7 @@ public class HelpConfig extends GuildConfigItem {
 		return getGuild().getRoleById(helperRoleId);
 	}
 
-	public Role getHelpPingRole() {
-		return getGuild().getRoleById(helpPingRoleId);
+	public TextChannel getHelpNotificationChannel() {
+		return getGuild().getTextChannelById(helpNotificationChannelId);
 	}
 }
