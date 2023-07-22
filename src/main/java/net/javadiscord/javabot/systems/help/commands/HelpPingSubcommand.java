@@ -199,15 +199,15 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch(id[1]) {
 		case "acknowledge" ->
-			resolveAction(event, true);
+			acknowledgeChangeAction(event, true);
 		case "unacknowledge" -> 
-			resolveAction(event, false);
+			acknowledgeChangeAction(event, false);
 		default -> event.reply("Unknown button").setEphemeral(true).queue();
 		}
 		
 	}
 
-	private void resolveAction(ButtonInteractionEvent event, boolean acknowledged) {
+	private void acknowledgeChangeAction(ButtonInteractionEvent event, boolean acknowledged) {
 		event.editMessageEmbeds(
 			event.getMessage()
 			.getEmbeds()
