@@ -108,7 +108,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 					.setFooter(event.getUser().getId())
 					.setColor(Color.YELLOW)
 					.build())
-				.addActionRow(createResolveButton())
+				.addActionRow(createAcknowledgementButton())
 				.queue();
 			event.reply("""
 					Successfully requested help.
@@ -136,12 +136,12 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 		return text;
 	}
 
-	private Button createResolveButton() {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge"), "Mark as resolved");
+	private Button createAcknowledgementButton() {
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge"), "Mark as acknowledged");
 	}
 	
-	private Button createUnresolveButton() {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge"), "Mark as unresolved");
+	private Button createUndoAcknowledgementButton() {
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge"), "Mark as unacknowledged");
 	}
 
 	/**
@@ -207,19 +207,19 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 		
 	}
 
-	private void resolveAction(ButtonInteractionEvent event, boolean resolved) {
+	private void resolveAction(ButtonInteractionEvent event, boolean acknowledged) {
 		event.editMessageEmbeds(
 			event.getMessage()
 			.getEmbeds()
 			.stream()
 			.map(e->new EmbedBuilder(e)
-					.setColor(resolved ? Color.GRAY : Color.YELLOW)
-					.addField("marked as " + (resolved?"acknowledged":"needs help") + " by",
+					.setColor(acknowledged ? Color.GRAY : Color.YELLOW)
+					.addField("marked as " + (acknowledged?"acknowledged":"needs help") + " by",
 							event.getUser().getAsMention(), false))
 			.map(this::removeOldField)
 			.map(EmbedBuilder::build)
 			.toList())
-		.setActionRow(resolved?createUnresolveButton():createResolveButton())
+		.setActionRow(acknowledged?createUndoAcknowledgementButton():createAcknowledgementButton())
 		.queue();
 	}
 
