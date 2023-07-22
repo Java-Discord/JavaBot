@@ -137,11 +137,11 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 	}
 
 	private Button createResolveButton() {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "resolve"), "Mark as resolved");
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge"), "Mark as resolved");
 	}
 	
 	private Button createUnresolveButton() {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unresolve"), "Mark as unresolved");
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge"), "Mark as unresolved");
 	}
 
 	/**
@@ -198,9 +198,9 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 	public void handleButton(ButtonInteractionEvent event, Button button) {
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch(id[1]) {
-		case "resolve" ->
+		case "acknowledge" ->
 			resolveAction(event, true);
-		case "unresolve" -> 
+		case "unacknowledge" -> 
 			resolveAction(event, false);
 		default -> event.reply("Unknown button").setEphemeral(true).queue();
 		}
@@ -213,8 +213,8 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			.getEmbeds()
 			.stream()
 			.map(e->new EmbedBuilder(e)
-					.setColor(resolved ? Color.GREEN : Color.YELLOW)
-					.addField("marked as " + (resolved?"resolved":"unresolved") + " by",
+					.setColor(resolved ? Color.GRAY : Color.YELLOW)
+					.addField("marked as " + (resolved?"acknowledged":"needs help") + " by",
 							event.getUser().getAsMention(), false))
 			.map(this::removeOldField)
 			.map(EmbedBuilder::build)
