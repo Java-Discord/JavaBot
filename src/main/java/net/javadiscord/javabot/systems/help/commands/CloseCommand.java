@@ -6,6 +6,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 
 /**
  * A simple command that can be used inside reserved help channels to immediately unreserve them,
@@ -21,9 +22,10 @@ public class CloseCommand extends UnreserveCommand {
 	 * @param dbActions A utility object providing various operations on the main database
 	 * @param helpTransactionRepository Dao object that represents the HELP_TRANSACTION SQL Table.
 	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
+	 * @param preferenceService Service for user preferences
 	 */
-	public CloseCommand(BotConfig botConfig, DbActions dbActions, HelpTransactionRepository helpTransactionRepository, HelpAccountRepository helpAccountRepository) {
-		super(botConfig, dbActions, helpTransactionRepository, helpAccountRepository);
+	public CloseCommand(BotConfig botConfig, DbActions dbActions, HelpTransactionRepository helpTransactionRepository, HelpAccountRepository helpAccountRepository, UserPreferenceService preferenceService) {
+		super(botConfig, dbActions, helpTransactionRepository, helpAccountRepository, preferenceService);
 		setCommandData(
 				Commands.slash("close", "Unreserves this post marking your question/issue as resolved.")
 						.setGuildOnly(true).addOption(OptionType.STRING, "reason",

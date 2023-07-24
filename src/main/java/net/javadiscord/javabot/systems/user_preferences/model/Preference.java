@@ -9,9 +9,14 @@ public enum Preference {
 	 */
 	QOTW_REMINDER("Question of the Week Reminder", "false", new BooleanPreference()),
 	/**
-	 * Enables/Disables DM notifications for dormant help post.
+	 * Enables/Disables DM notifications for dormant help posts.
 	 */
-	PRIVATE_DORMANT_NOTIFICATIONS("Send notifications about dormant help post via DM", "true", new BooleanPreference());
+	PRIVATE_DORMANT_NOTIFICATIONS("Send notifications about dormant help post via DM", "true", new BooleanPreference()),
+	
+	/**
+	 * Enables/Disables DM notifications for closed help posts.
+	 */
+	PRIVATE_CLOSE_NOTIFICATIONS("Send notifications about help posts closed by other users via DM", "true", new BooleanPreference());
 
 	private final String name;
 	private final String defaultState;

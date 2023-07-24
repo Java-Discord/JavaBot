@@ -17,6 +17,7 @@ import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements
 			return;
 		}
 		if (service.setOrCreate(event.getUser().getIdLong(), preference, state)) {
-			Responses.info(event, "Preference Updated", "Successfully set %s to `%s`!", preference, state).queue();
+			Responses.info(event, "Preference Updated", "Successfully set `%s` to `%s`!", preference, state).queue();
 		} else {
 			Responses.error(event, "Could not set %s to `%s`.", preference, state).queue();
 		}
@@ -66,16 +67,16 @@ public class PreferencesSetSubcommand extends SlashCommand.Subcommand implements
 
 	@Contract("_ -> new")
 	private Command.@NotNull Choice toChoice(@NotNull Preference preference) {
-		return new Command.Choice(preference.toString(), String.valueOf(preference.ordinal()));
+		return new Command.Choice(preference.toString(), preference.ordinal());
 	}
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		String preferenceString = event.getOption("preference", OptionMapping::getAsString);
-		if (preferenceString != null && Arrays.stream(Preference.values()).map(Preference::name).anyMatch(c -> c.equals(preferenceString))) {
-			Preference preference = Preference.valueOf(preferenceString);
+		int preferenceInt = event.getOption("preference",-1, OptionMapping::getAsInt);
+		if (preferenceInt > 0 && preferenceInt<Preference.values().length) {
+			Preference preference = Preference.values()[preferenceInt];
 			if (preference.getType().getDefaultChoices() != null && preference.getType().getDefaultChoices().length > 0) {
-				event.replyChoices(AutoCompleteUtils.filterChoices(event, List.of(preference.getType().getDefaultChoices()))).queue();
+				event.replyChoices(AutoCompleteUtils.filterChoices(event, new ArrayList<>(List.of(preference.getType().getDefaultChoices())))).queue();
 			}
 		}
 	}

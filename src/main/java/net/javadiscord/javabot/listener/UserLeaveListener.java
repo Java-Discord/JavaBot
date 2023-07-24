@@ -16,6 +16,7 @@ import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpManager;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 
 import java.util.function.Consumer;
 
@@ -31,6 +32,7 @@ public class UserLeaveListener extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
+	private final UserPreferenceService userPreferenceService;
 
 	@Override
 	public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
@@ -84,7 +86,7 @@ public class UserLeaveListener extends ListenerAdapter {
 	}
 
 	private void unreserveHelpChannel(ThreadChannel post) {
-		HelpManager manager = new HelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
+		HelpManager manager = new HelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, userPreferenceService);
 		manager.close(UserSnowflake.fromId(post.getGuild().getSelfMember().getIdLong()), "User left the server");
 	}
 }

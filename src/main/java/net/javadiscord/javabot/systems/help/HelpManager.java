@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.Interaction;
@@ -16,12 +17,15 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
+import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
@@ -64,6 +68,7 @@ public class HelpManager {
 	private final HelpAccountRepository helpAccountRepository;
 
 	private final HelpTransactionRepository helpTransactionRepository;
+	private final UserPreferenceService preferenceService;
 
 	/**
 	 * Builds and replies {@link ActionRow}s with all members which helped the
@@ -108,6 +113,31 @@ public class HelpManager {
 		Responses.info(callback, "Post Closed", "This post has been closed by %s%s", callback.getUser().getAsMention(), reason != null ? " for the following reason:\n> " + reason : ".")
 				.setEphemeral(false)
 				.queue(s -> postThread.getManager().setLocked(true).setArchived(true).queue());
+		if (callback.getMember().getIdLong() != postThread.getOwnerIdLong() &&
+				Boolean.parseBoolean(preferenceService.getOrCreate(postThread.getOwnerIdLong(), Preference.PRIVATE_CLOSE_NOTIFICATIONS).getState())) {
+			postThread.getOwner().getUser().openPrivateChannel()
+					.flatMap(c -> createDMCloseInfoEmbed(callback.getMember(), postThread, reason, c))
+					.queue(success -> {}, failure -> {});
+		}
+	}
+	
+	private RestAction<Message> createDMCloseInfoEmbed(Member closingMember, ThreadChannel postThread, String reason, PrivateChannel c) {
+		EmbedBuilder eb = new EmbedBuilder()
+			.setTitle("Post closed")
+			.setDescription(
+				"""
+				Your post %s has been closed by %s
+				
+				[Post link](%s)
+				"""
+				.formatted(postThread.getAsMention(), closingMember.getAsMention(), postThread.getJumpUrl()))
+			.addField("Deactivate", "You can deactivate notifications like this using the `/preferences` command.", false)
+			.setAuthor(closingMember.getEffectiveName(), null, closingMember.getEffectiveAvatarUrl());
+		if (reason != null) {
+			eb
+				.addField("Reason", reason, false);
+		}
+		return c.sendMessageEmbeds(eb.build());
 	}
 
 	/**

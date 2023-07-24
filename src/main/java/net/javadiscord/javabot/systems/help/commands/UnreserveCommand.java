@@ -11,6 +11,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.help.HelpManager;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -25,19 +26,22 @@ public class UnreserveCommand extends SlashCommand {
 	private final DbActions dbActions;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
+	private final UserPreferenceService preferenceService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param botConfig The main configuration of the bot
 	 * @param dbActions A utility object providing various operations on the main database
-	 * @param helpTransactionRepository Dao object that represents the HELP_TRANSACTION SQL Table.
-	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
+	 * @param helpTransactionRepository Dao object that represents the HELP_TRANSACTION SQL Table
+	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table
+	 * @param preferenceService Service for user preferences
 	 */
-	public UnreserveCommand(BotConfig botConfig, DbActions dbActions, HelpTransactionRepository helpTransactionRepository, HelpAccountRepository helpAccountRepository) {
+	public UnreserveCommand(BotConfig botConfig, DbActions dbActions, HelpTransactionRepository helpTransactionRepository, HelpAccountRepository helpAccountRepository, UserPreferenceService preferenceService) {
 		this.botConfig = botConfig;
 		this.dbActions = dbActions;
 		this.helpAccountRepository = helpAccountRepository;
 		this.helpTransactionRepository = helpTransactionRepository;
+		this.preferenceService = preferenceService;
 		setCommandData(Commands.slash("unreserve", "Unreserves this post marking your question/issue as resolved.")
 				.setGuildOnly(true)
 				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
@@ -55,11 +59,11 @@ public class UnreserveCommand extends SlashCommand {
 		if (postThread.getParentChannel().getType() != ChannelType.FORUM) {
 			replyInvalidChannel(event);
 		}
-		HelpManager manager = new HelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
+		HelpManager manager = new HelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, preferenceService);
 		if (manager.isForumEligibleToBeUnreserved(event.getInteraction())) {
-			manager.close(event, event.getUser().getIdLong() == postThread.getOwnerIdLong(),
-					event.getOption("reason", null, OptionMapping::getAsString)
-			);
+			manager.close(event,
+					event.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(),
+					event.getOption("reason", null, OptionMapping::getAsString));
 		} else {
 			Responses.warning(event, "Could not close this post", "You're not allowed to close this post.").queue();
 		}
