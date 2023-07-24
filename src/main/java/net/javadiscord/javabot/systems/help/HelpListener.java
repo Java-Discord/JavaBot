@@ -22,6 +22,7 @@ import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
+import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.Responses;
 import org.jetbrains.annotations.NotNull;
@@ -73,6 +74,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return System.currentTimeMillis() > eldest.getValue() || size() >= 32;
 		}
 	};
+	private final UserPreferenceService preferenceService;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -176,7 +178,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return;
 		}
 		ThreadChannel post = event.getChannel().asThreadChannel();
-		HelpManager manager = new HelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository);
+		HelpManager manager = new HelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, preferenceService);
 		switch (id[0]) {
 			case HelpManager.HELP_THANKS_IDENTIFIER -> handleHelpThanksInteraction(event, manager, id);
 			case HelpManager.HELP_GUIDELINES_IDENTIFIER ->
