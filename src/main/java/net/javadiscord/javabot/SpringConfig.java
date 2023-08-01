@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 
 import xyz.dynxsty.dih4jda.DIH4JDA;
 import xyz.dynxsty.dih4jda.DIH4JDABuilder;
-import xyz.dynxsty.dih4jda.DIH4JDALogger;
 import xyz.dynxsty.dih4jda.exceptions.DIH4JDAException;
 import xyz.dynxsty.dih4jda.interactions.commands.application.RegistrationType;
 
@@ -93,7 +92,8 @@ public class SpringConfig {
 	public DIH4JDA initializeDIH4JDA(JDA jda) throws DIH4JDAException {
 		DIH4JDA.setDefaultRegistrationType(RegistrationType.GLOBAL);
 		return DIH4JDABuilder.setJDA(jda)
-			.disableLogging(DIH4JDALogger.Type.SMART_QUEUE_IGNORED)
+			.setGlobalSmartQueue(false)
+			.setGuildSmartQueue(false)
 			.disableAutomaticCommandRegistration()
 			.build();
 	}
