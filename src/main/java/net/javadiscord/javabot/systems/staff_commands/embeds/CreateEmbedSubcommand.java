@@ -114,7 +114,7 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 				.setRequired(false)
 				.build();
 		return Modal.create(ComponentIdBuilder.build("embed-create", channel.getIdLong()), "Create an Embed Message")
-				.addActionRows(ActionRow.of(titleInput), ActionRow.of(descriptionInput), ActionRow.of(colorInput), ActionRow.of(imageInput))
+				.addComponents(ActionRow.of(titleInput), ActionRow.of(descriptionInput), ActionRow.of(colorInput), ActionRow.of(imageInput))
 				.build();
 	}
 

@@ -103,7 +103,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:staff:%s:%s", role.getId(), applicant.getId()), "Apply for " + role.getName())
-				.addActionRows(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
+				.addComponents(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
 				.build();
 		event.replyModal(modal).queue();
 	}
@@ -136,7 +136,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				.setRequired(true)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for " + role.getName())
-				.addActionRows(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
+				.addComponents(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
 				.build();
 		event.replyModal(modal).queue();
 	}

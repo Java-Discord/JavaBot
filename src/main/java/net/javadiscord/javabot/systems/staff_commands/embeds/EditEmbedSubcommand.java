@@ -170,7 +170,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 				.setRequired(false)
 				.build();
 		return Modal.create(ComponentIdBuilder.build(EDIT_EMBED_ID, AUTHOR_ID, messageId), "Edit Author")
-				.addActionRows(ActionRow.of(authorNameInput), ActionRow.of(authorUrlInput), ActionRow.of(authorIconUrlInput))
+				.addComponents(ActionRow.of(authorNameInput), ActionRow.of(authorUrlInput), ActionRow.of(authorIconUrlInput))
 				.build();
 	}
 
@@ -199,7 +199,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 				.setRequired(false)
 				.build();
 		return Modal.create(ComponentIdBuilder.build(EDIT_EMBED_ID, TITLE_DESC_COLOR_ID, messageId), "Edit Title, Title URL, Description & Color")
-				.addActionRows(ActionRow.of(titleInput), ActionRow.of(titleUrlInput), ActionRow.of(descriptionInput), ActionRow.of(colorInput))
+				.addComponents(ActionRow.of(titleInput), ActionRow.of(titleUrlInput), ActionRow.of(descriptionInput), ActionRow.of(colorInput))
 				.build();
 	}
 
@@ -217,7 +217,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 				.setRequired(false)
 				.build();
 		return Modal.create(ComponentIdBuilder.build(EDIT_EMBED_ID, IMG_THUMB_ID, messageId), "Edit Image & Thumbnail")
-				.addActionRows(ActionRow.of(imageUrlInput), ActionRow.of(thumbnailUrlInput))
+				.addComponents(ActionRow.of(imageUrlInput), ActionRow.of(thumbnailUrlInput))
 				.build();
 	}
 
@@ -241,7 +241,7 @@ public class EditEmbedSubcommand extends EmbedSubcommand implements ModalHandler
 				.setRequired(false)
 				.build();
 		return Modal.create(ComponentIdBuilder.build(EDIT_EMBED_ID, FOOTER_TIMESTAMP_ID, messageId), "Edit Footer & Timestamp")
-				.addActionRows(ActionRow.of(footerTextInput), ActionRow.of(footerIconUrlInput), ActionRow.of(timestampInput))
+				.addComponents(ActionRow.of(footerTextInput), ActionRow.of(footerIconUrlInput), ActionRow.of(timestampInput))
 				.build();
 	}
 

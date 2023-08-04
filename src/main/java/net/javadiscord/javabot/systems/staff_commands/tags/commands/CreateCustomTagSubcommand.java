@@ -80,7 +80,7 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 				.setRequired(true)
 				.build();
 		return Modal.create("tag-create", "Create Custom Tag")
-				.addActionRows(ActionRow.of(nameField), ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
+				.addComponents(ActionRow.of(nameField), ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
 				.build();
 	}
 

@@ -107,7 +107,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				.build();
 		return Modal.create(ComponentIdBuilder.build("tag-edit", tag.getName()),
 						String.format("Edit \"%s\"", tag.getName().length() > 90 ? tag.getName().substring(0, 87) + "..." : tag.getName()))
-				.addActionRows(ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
+				.addComponents(ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
 				.build();
 	}
 

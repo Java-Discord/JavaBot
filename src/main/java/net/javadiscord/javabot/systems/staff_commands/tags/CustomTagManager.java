@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +36,6 @@ public class CustomTagManager {
 		LOADED_TAGS = new HashMap<>();
 	}
 
-	private final DataSource dataSource;
 	private final CustomTagRepository customTagRepository;
 
 	/**
