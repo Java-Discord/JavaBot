@@ -110,7 +110,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		return Modal.create(ComponentIdBuilder.build("report", "message", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
-				.addComponents(ActionRow.of(messageInput))
+				.addActionRow(messageInput)
 				.build();
 	}
 
