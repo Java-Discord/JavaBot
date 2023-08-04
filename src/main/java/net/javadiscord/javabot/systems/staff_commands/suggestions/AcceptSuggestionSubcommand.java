@@ -11,6 +11,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -46,7 +47,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 				.setTitle("Suggestion Accepted")
 				.setDescription(embed.getDescription())
 				.setTimestamp(embed.getTimestamp())
-				.setFooter("Accepted by " + user.getAsTag())
+				.setFooter("Accepted by " + UserUtils.getUserTag(user))
 				.build();
 	}
 }

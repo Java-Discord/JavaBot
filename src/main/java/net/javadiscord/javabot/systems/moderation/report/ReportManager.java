@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.report;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
@@ -56,7 +57,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 		Responses.info(event.getHook(), "Report resolved", "Successfully resolved this report!").queue();
-		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("report-resolved", "Resolved by " + event.getUser().getAsTag()).asDisabled())).queue();
+		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("report-resolved", "Resolved by " + UserUtils.getUserTag(event.getUser())).asDisabled())).queue();
 		thread.sendMessage("This thread was resolved by " + event.getUser().getAsMention()).queue(
 				success -> thread.getManager()
 						.setName(String.format("[Resolved] %s", thread.getName()))
@@ -86,7 +87,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		TextInput messageInput = TextInput.create("reason", "Report Description", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
-		String title = "Report " + event.getTarget().getAsTag();
+		String title = "Report " + UserUtils.getUserTag(event.getTarget());
 		return Modal.create(ComponentIdBuilder.build("report", "user", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
 				.addActionRow(messageInput)
 				.build();
@@ -103,7 +104,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		String title = "Report message";
 		Member targetMember = event.getTarget().getMember();
 		if (targetMember != null) {
-			title += " from " + targetMember.getUser().getAsTag();
+			title += " from " + UserUtils.getUserTag(targetMember.getUser());
 		}
 		TextInput messageInput = TextInput.create("reason", "Report Description", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
@@ -136,7 +137,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			}
 			reportChannel.sendMessageEmbeds(embed.build())
 					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModerationConfig()));
-			embed.setDescription("Successfully reported " + "`" + target.getAsTag() + "`!\nYour report has been send to our Moderators");
+			embed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(target) + "`!\nYour report has been send to our Moderators");
 			hook.sendMessageEmbeds(embed.build()).queue();
 		}, failure -> {
 			Responses.error(hook, "The user to report seems not to exist any more.").queue();
@@ -162,7 +163,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 					WebhookUtil.mirrorMessageToWebhook(wh, target, target.getContentRaw(), thread.getIdLong(), null, null);
 				});
 			}));
-			embed.setDescription("Successfully reported " + "`" + target.getAuthor().getAsTag() + "`!\nYour report has been send to our Moderators");
+			embed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(target.getAuthor()) + "`!\nYour report has been send to our Moderators");
 			event.getHook().sendMessageEmbeds(embed.build()).queue();
 		}, failure -> {
 			Responses.error(event.getHook(), "The author of the message to report seems not to exist any more.").queue();
@@ -201,7 +202,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 
 	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, String reason, Channel channel) {
 		return new EmbedBuilder()
-				.setAuthor(reported.getAsTag(), null, reported.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(reported), null, reported.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Member", reported.getAsMention(), true)
 				.addField("Reported by", reportedBy.getAsMention(), true)
@@ -209,7 +210,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				.addField("Reported on", String.format("<t:%s:F>", Instant.now().getEpochSecond()), false)
 				.addField("ID", String.format("``` %s ```", reported.getId()), true)
 				.addField("Reason", String.format("``` %s ```", reason), false)
-				.setFooter(reportedBy.getAsTag(), reportedBy.getEffectiveAvatarUrl())
+				.setFooter(UserUtils.getUserTag(reportedBy), reportedBy.getEffectiveAvatarUrl())
 				.setTimestamp(Instant.now());
 	}
 }

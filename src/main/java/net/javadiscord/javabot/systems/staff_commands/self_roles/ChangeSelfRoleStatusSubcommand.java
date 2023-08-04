@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -57,7 +58,7 @@ public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
 
 	private @NotNull MessageEmbed buildSelfRoleStatusEmbed(@NotNull User changedBy, @NotNull Message message, boolean disabled) {
 		return new EmbedBuilder()
-				.setAuthor(changedBy.getAsTag(), message.getJumpUrl(), changedBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(changedBy), message.getJumpUrl(), changedBy.getEffectiveAvatarUrl())
 				.setTitle("Self Role " + (disabled ? "disabled" : "enabled"))
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", message.getChannel().getAsMention(), true)

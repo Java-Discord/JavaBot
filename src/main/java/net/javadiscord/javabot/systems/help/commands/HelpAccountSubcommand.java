@@ -23,6 +23,7 @@ import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Plotter;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.StringUtils;
+import net.javadiscord.javabot.util.UserUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -141,7 +142,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 
 	private @NotNull MessageEmbed buildHelpAccountEmbed(HelpAccount account, @NotNull User user, Guild guild, long totalThanks, long weekThanks, FileUpload upload) {
 		EmbedBuilder eb = new EmbedBuilder()
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
 				.setDescription("Here are some statistics about how you've helped others here.")

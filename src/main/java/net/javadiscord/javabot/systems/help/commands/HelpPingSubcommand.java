@@ -20,6 +20,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.HelpConfig;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;

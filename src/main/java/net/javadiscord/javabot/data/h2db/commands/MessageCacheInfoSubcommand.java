@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.data.h2db.commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -45,7 +46,7 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 		long messages = dbActions.count("SELECT count(*) FROM message_cache");
 		int maxMessages = config.getMessageCacheConfig().getMaxCachedMessages();
 		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
 				.setTitle("Message Cache Info")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Table Size", dbActions.getLogicalSize("message_cache") + " bytes", false)

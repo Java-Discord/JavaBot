@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -77,7 +78,7 @@ public class DeleteCustomTagSubcommand extends TagsSubcommand implements AutoCom
 
 	private @NotNull MessageEmbed buildDeleteCommandEmbed(@NotNull Member deletedBy, @NotNull CustomTag command) {
 		return new EmbedBuilder()
-				.setAuthor(deletedBy.getUser().getAsTag(), null, deletedBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(deletedBy.getUser()), null, deletedBy.getEffectiveAvatarUrl())
 				.setTitle("Custom Tag Deleted")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`%s`", command.getName()), true)

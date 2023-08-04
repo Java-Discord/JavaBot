@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -55,7 +56,7 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 		}
 		User target = userMapping.getAsUser();
 		new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool).discardAllWarns(target, event.getMember());
-		Responses.success(event, "Warns Discarded", "Successfully discarded all warns from **%s**.", target.getAsTag()).queue();
+		Responses.success(event, "Warns Discarded", "Successfully discarded all warns from **%s**.", UserUtils.getUserTag(target)).queue();
 	}
 }
 

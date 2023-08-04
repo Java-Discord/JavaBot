@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -38,7 +39,7 @@ public class AvatarCommand extends SlashCommand {
 	private @NotNull MessageEmbed buildAvatarEmbed(@NotNull User createdBy) {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(createdBy), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Avatar")
 				.setImage(createdBy.getEffectiveAvatarUrl() + "?size=4096")
 				.build();
