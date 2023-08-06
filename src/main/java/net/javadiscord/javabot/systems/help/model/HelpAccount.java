@@ -9,6 +9,8 @@ import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @Data
 @RequiredArgsConstructor
 public class HelpAccount {
+	@JsonIgnore
 	private final BotConfig botConfig;
 	private long userId;
 	private double experience;
