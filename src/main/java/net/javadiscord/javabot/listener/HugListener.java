@@ -22,86 +22,81 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
-    private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|ed|k+)?", Pattern.CASE_INSENSITIVE);
-    private final AutoMod autoMod;
-    private final BotConfig botConfig;
+	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|ed|k+)?", Pattern.CASE_INSENSITIVE);
+	private final AutoMod autoMod;
+	private final BotConfig botConfig;
 
-    private static String processHug(String originalText) {
-        // FucK -> HuG, FuCk -> Hug
-        return String.valueOf(copyCase(originalText, 0, 'h'))
-                + copyCase(originalText, 1, 'u')
-                + copyCase(originalText, 3, 'g');
-    }
+	private static String processHug(String originalText) {
+		// FucK -> HuG, FuCk -> Hug
+		return String.valueOf(copyCase(originalText, 0, 'h')) + copyCase(originalText, 1, 'u') + copyCase(originalText, 3, 'g');
+	}
 
-    private static String replaceFucks(String str) {
-        return FUCKER.matcher(str).replaceAll(matchResult -> {
-            String theFuck = matchResult.group(1);
-            String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
-            String processedSuffix = switch (suffix.toLowerCase()) {
-                case "er", "ed", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker, fucked
-                case "" -> ""; // just fuck
-                default -> copyCase(suffix, "g".repeat(suffix.length())); // fuckkkkk...
-            };
-            return processHug(theFuck) + processedSuffix;
-        });
-    }
+	private static String replaceFucks(String str) {
+		return FUCKER.matcher(str).replaceAll(matchResult -> {
+			String theFuck = matchResult.group(1);
+			String suffix = Objects.requireNonNullElse(matchResult.group(2), "");
+			String processedSuffix = switch (suffix.toLowerCase()) {
+				case "er", "ed", "ing" -> copyCase(suffix, 0, 'g') + suffix; // fucking, fucker, fucked
+				case "" -> ""; // just fuck
+				default -> copyCase(suffix, "g".repeat(suffix.length())); // fuckkkkk...
+			};
+			return processHug(theFuck) + processedSuffix;
+		});
+	}
 
-    private static String copyCase(String source, String toChange) {
-        if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < source.length(); i++) {
-            sb.append(copyCase(source, i, toChange.charAt(i)));
-        }
-        return sb.toString();
-    }
+	private static String copyCase(String source, String toChange) {
+		if (source.length() != toChange.length()) throw new IllegalArgumentException("lengths differ");
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < source.length(); i++) {
+			sb.append(copyCase(source, i, toChange.charAt(i)));
+		}
+		return sb.toString();
+	}
 
-    private static char copyCase(String original, int index, char newChar) {
-        if (Character.isUpperCase(original.charAt(index))) {
-            return Character.toUpperCase(newChar);
-        } else {
-            return newChar;
-        }
-    }
+	private static char copyCase(String original, int index, char newChar) {
+		if (Character.isUpperCase(original.charAt(index))) {
+			return Character.toUpperCase(newChar);
+		} else {
+			return newChar;
+		}
+	}
 
-    @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
-        if (!event.isFromGuild()) {
-            return;
-        }
-        if (autoMod.hasSuspiciousLink(event.getMessage()) || autoMod.hasAdvertisingLink(event.getMessage())) {
-            return;
-        }
-        if (!event.getMessage().getMentions().getUsers().isEmpty()) {
-            return;
-        }
-        if (event.isWebhookMessage()) {
-            return;
-        }
-        if (event.getChannel().getIdLong() == botConfig.get(event.getGuild()).getModerationConfig()
-                .getSuggestionChannelId()) {
-            return;
-        }
-        TextChannel tc = null;
-        if (event.isFromType(ChannelType.TEXT)) {
-            tc = event.getChannel().asTextChannel();
-        }
-        if (event.isFromThread()) {
-            StandardGuildChannel parentChannel = event.getChannel().asThreadChannel().getParentChannel().asStandardGuildChannel();
-            if (parentChannel instanceof TextChannel textChannel) {
-                tc = textChannel;
-            }
-        }
-        if (tc == null) {
-            return;
-        }
-        String content = event.getMessage().getContentRaw();
-        if (FUCKER.matcher(content).find()) {
-            long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
-            WebhookUtil.ensureWebhookExists(tc,
-                    wh -> WebhookUtil.replaceMemberMessage(wh, event.getMessage(), replaceFucks(content), threadId),
-                    e -> ExceptionLogger.capture(e, getClass().getSimpleName()));
-        }
-    }
+	@Override
+	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+		if (!event.isFromGuild()) {
+			return;
+		}
+		if (autoMod.hasSuspiciousLink(event.getMessage()) || autoMod.hasAdvertisingLink(event.getMessage())) {
+			return;
+		}
+		if (!event.getMessage().getMentions().getUsers().isEmpty()) {
+			return;
+		}
+		if (event.isWebhookMessage()) {
+			return;
+		}
+		if (event.getChannel().getIdLong() == botConfig.get(event.getGuild()).getModerationConfig().getSuggestionChannelId()) {
+			return;
+		}
+		TextChannel tc = null;
+		if (event.isFromType(ChannelType.TEXT)) {
+			tc = event.getChannel().asTextChannel();
+		}
+		if (event.isFromThread()) {
+			StandardGuildChannel parentChannel = event.getChannel().asThreadChannel().getParentChannel().asStandardGuildChannel();
+			if (parentChannel instanceof TextChannel textChannel) {
+				tc = textChannel;
+			}
+		}
+		if (tc == null) {
+			return;
+		}
+		String content = event.getMessage().getContentRaw();
+		if (FUCKER.matcher(content).find()) {
+			long threadId = event.isFromThread() ? event.getChannel().getIdLong() : 0;
+			WebhookUtil.ensureWebhookExists(tc, wh -> WebhookUtil.replaceMemberMessage(wh, event.getMessage(), replaceFucks(content), threadId), e -> ExceptionLogger.capture(e, getClass().getSimpleName()));
+		}
+	}
 
 
 }
