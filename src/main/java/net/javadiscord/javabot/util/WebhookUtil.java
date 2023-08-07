@@ -129,4 +129,11 @@ public class WebhookUtil {
 		}
 		return client.send(message.build());
 	}
+	public static void replaceMemberMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId, MessageEmbed... embeds) {
+		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, null, List.of(embeds))
+				.thenAccept(unused -> originalMessage.delete().queue()).exceptionally(e -> {
+					ExceptionLogger.capture(e, WebhookUtil.class.getSimpleName());
+					return null;
+				});
+	}
 }
