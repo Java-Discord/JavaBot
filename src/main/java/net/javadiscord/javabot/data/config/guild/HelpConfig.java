@@ -55,7 +55,7 @@ public class HelpConfig extends GuildConfigItem {
 	 * should use discord's code-formatting, provided the bot detects unformatted code.
 	 * Issued by {@link net.javadiscord.javabot.systems.help.AutoCodeFormatter}
 	 */
-	private String formatHintMessage = "> Please format your code to make it more readable. \n> For java, it should look like this: \n```\u200B`\u200B`\u200B`\u200Bjava\npublic void foo() {\n \n}\u200B`\u200B`\u200B`\u200B```";
+	private String formatHintMessage = "> Please format your code to make it more readable. \n> For java, it should look like this: \n```\u200B`\u200B`\u200B`\u200Bjava\npublic void foo() {\n \n}\n\u200B`\u200B`\u200B`\u200B```";
 
 	/**
 	 * The message that's sent when a user unreserved a channel where other users
@@ -103,7 +103,7 @@ public class HelpConfig extends GuildConfigItem {
 	 * The message-embed's footnote of an unformatted-code-replacement.
 	 * Issued by {@link net.javadiscord.javabot.systems.help.AutoCodeFormatter}
 	 */
-	private String autoformatInfoMessage = "This message has been formatted automatically.";
+	private String autoFormatInfoMessage = "This message has been formatted automatically.";
 
 	/**
 	 * The amount of experience points one gets for being thanked by the help channel owner.
