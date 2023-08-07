@@ -30,6 +30,7 @@ public class AutoCodeFormatter {
 	/**
 	 * Method responsible for finding a codeblock, if present.
 	 *
+	 * @param event a {@link MessageReceivedEvent}.
 	 * @return a MessageCodeblock instance, holding a startIndex, content and an endIndex
 	 */
 	@Nullable
@@ -45,16 +46,25 @@ public class AutoCodeFormatter {
 		return new CodeBlock(startIndex, endIndex);
 	}
 
+	/**
+	 * called by {@link HelpListener#onMessageReceived(MessageReceivedEvent)} on every message.
+	 * It is worth noting that this class can't register as an event handler itself due to there being no way of
+	 * setting its methods to be strictly called after {@link HelpListener}.
+	 *
+	 * @param event a {@link MessageReceivedEvent}
+	 */
 	public void handleMessageEvent(@Nonnull MessageReceivedEvent event) {
 		if (!event.isFromGuild()) return;
 		if (event.getAuthor().isBot() || event.getMessage().getAuthor().isSystem()) return;
 		if (autoMod.hasSuspiciousLink(event.getMessage()) || autoMod.hasAdvertisingLink(event.getMessage())) return;
 		if (event.isWebhookMessage()) return;
 		if (!event.isFromThread()) return;
-		if (event.getChannel().asThreadChannel().getParentChannel().getIdLong() != botConfig.get(event.getGuild()).getHelpConfig().getHelpForumChannelId())
+		if (event.getChannel().asThreadChannel().getParentChannel().getIdLong() != botConfig.get(event.getGuild()).getHelpConfig().getHelpForumChannelId()) {
 			return;
-		if (!Boolean.parseBoolean(preferenceService.getOrCreate(Objects.requireNonNull(event.getMember()).getIdLong(), Preference.FORMAT_UNFORMATTED_CODE).getState()))
+		}
+		if (!Boolean.parseBoolean(preferenceService.getOrCreate(Objects.requireNonNull(event.getMember()).getIdLong(), Preference.FORMAT_UNFORMATTED_CODE).getState())) {
 			return;
+		}
 
 
 		if (event.getMessage().getContentRaw().contains("```")) return; // exit if already contains codeblock
@@ -62,9 +72,9 @@ public class AutoCodeFormatter {
 		CodeBlock code = findCodeblock(event);
 		if (code == null) return;
 
-		if (event.getMessage().getMentions().getUsers().isEmpty() && event.getChannel().asThreadChannel().getTotalMessageCount() > 1)
+		if (event.getMessage().getMentions().getUsers().isEmpty() && event.getChannel().asThreadChannel().getTotalMessageCount() > 1) {
 			replaceUnformattedCode(event.getMessage().getContentRaw(), code.startIndex(), code.endIndex(), event);
-		else sendFormatHint(event);
+		} else sendFormatHint(event);
 	}
 
 	private void sendFormatHint(MessageReceivedEvent event) {
@@ -80,7 +90,7 @@ public class AutoCodeFormatter {
 		}
 		String messageContent = msg.substring(0, codeStartIndex) + " ```" + msg.substring(codeStartIndex, codeEndIndex) + " ```" + msg.substring(codeEndIndex);
 		EmbedBuilder autoformatInfo = new EmbedBuilder().setDescription(botConfig.get(event.getGuild()).getHelpConfig().getAutoformatInfoMessage());
-		WebhookUtil.ensureWebhookExists(event.getChannel().asThreadChannel().getParentChannel().asForumChannel(), (wh) -> WebhookUtil.replaceMemberMessage(wh, event.getMessage(), messageContent, event.getChannel().getIdLong(), autoformatInfo.build(), formatHintEmbed(event.getGuild())), (e) -> ExceptionLogger.capture(e, "Error creating webhook for UnformattedCodeListener"));
+		WebhookUtil.ensureWebhookExists(event.getChannel().asThreadChannel().getParentChannel().asForumChannel(), wh -> WebhookUtil.replaceMemberMessage(wh, event.getMessage(), messageContent, event.getChannel().getIdLong(), autoformatInfo.build(), formatHintEmbed(event.getGuild())), e -> ExceptionLogger.capture(e, "Error creating webhook for UnformattedCodeListener"));
 	}
 
 	private MessageEmbed formatHintEmbed(Guild guild) {

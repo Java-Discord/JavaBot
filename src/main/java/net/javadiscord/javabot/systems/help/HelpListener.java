@@ -64,6 +64,17 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	};
 	private final AutoCodeFormatter autoCodeFormatter;
 
+	/**
+	 * The constructor of this class, which is set corresponding to lombok.
+	 *
+	 * @param autoMod                   automod reference.
+	 * @param preferenceService         UserPreferenceService reference
+	 * @param botConfig                 BotConfig reference
+	 * @param helpTransactionRepository HelpAccountRepository reference
+	 * @param helpAccountRepository     HelpAccountRepository reference
+	 * @param dbActions                 DbActions reference
+	 * @param experienceService         ExperienceService reference
+	 */
 	public HelpListener(AutoMod autoMod, UserPreferenceService preferenceService, BotConfig botConfig, HelpAccountRepository helpAccountRepository, HelpTransactionRepository helpTransactionRepository, HelpExperienceService experienceService, DbActions dbActions) {
 		this.preferenceService = preferenceService;
 		this.botConfig = botConfig;
