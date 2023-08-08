@@ -103,7 +103,7 @@ public class HelpConfig extends GuildConfigItem {
 	 * The message-embed's footnote of an unformatted-code-replacement.
 	 * Issued by {@link net.javadiscord.javabot.systems.help.AutoCodeFormatter}
 	 */
-	private String autoFormatInfoMessage = "This message has been formatted automatically.";
+	private String autoFormatInfoMessage = "This message has been formatted automatically. You can disable this using ``/preferences``.";
 
 	/**
 	 * The amount of experience points one gets for being thanked by the help channel owner.

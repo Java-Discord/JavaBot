@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
 import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +28,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Component
 public class AutoCodeFormatter {
+	/**
+	 * The identifier used for all AutoCodeFormatter related buttons.
+	 */
+	static final String FORMAT_HINT_IDENTIFIER = "forum-formatter-removeHint";
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
 	private final UserPreferenceService preferenceService;
@@ -118,6 +125,9 @@ public class AutoCodeFormatter {
 	private void sendFormatHint(MessageReceivedEvent event) {
 		event.getMessage()
 				.replyEmbeds(formatHintEmbed(event.getGuild()))
+				.addActionRow(
+						Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️")
+				)
 				.queue();
 	}
 
@@ -142,10 +152,8 @@ public class AutoCodeFormatter {
 						wh,
 						event.getMessage(),
 						messageContent,
-						event.getChannel()
-								.getIdLong(),
-						autoformatInfo.build(),
-						formatHintEmbed(event.getGuild())
+						event.getChannel().getIdLong(),
+						autoformatInfo.build()
 				),
 				e -> ExceptionLogger.capture(
 						e,
@@ -158,6 +166,10 @@ public class AutoCodeFormatter {
 		return new EmbedBuilder().setDescription(botConfig.get(guild)
 				.getHelpConfig()
 				.getFormatHintMessage()).build();
+	}
+
+	private void handleDeleteHint(ButtonInteractionEvent event) {
+		event.getMessage().delete().queue();
 	}
 
 	private record CodeBlock(int startIndex, int endIndex) {}
