@@ -201,10 +201,11 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, @NotNull Button button) {
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
-		if (isInvalidForumPost(event.getChannel()) || isInvalidHelpForumChannel(event.getChannel()
-				.asThreadChannel()
-				.getParentChannel()
-				.asForumChannel())) {
+		if (isInvalidForumPost(event.getChannel()) ||
+				isInvalidHelpForumChannel(event.getChannel()
+						.asThreadChannel()
+						.getParentChannel()
+						.asForumChannel())) {
 			Responses.error(event, "This button may only be used inside help forum threads.")
 					.queue();
 			return;
@@ -261,9 +262,8 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 								!ComponentIdBuilder.split(b.getId())[2].equals("done") &&
 								!ComponentIdBuilder.split(b.getId())[2].equals("cancel"))
 						.toList();
-				if (thankButtons.stream()
-						.filter(Button::isDisabled)
-						.count() == thankButtons.size() - 1) {
+				if (thankButtons.stream().filter(Button::isDisabled).count() ==
+						thankButtons.size() - 1) {
 					handleThanksCloseButton(event, manager, post);
 				} else {
 					event.editButton(event.getButton().asDisabled()).queue();

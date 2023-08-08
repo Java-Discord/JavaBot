@@ -63,7 +63,7 @@ public class AutoCodeFormatter {
 	 * @param event          a {@link MessageReceivedEvent}
 	 * @param isFirstMessage flag that should be set if the message is a thread-opening one.
 	 */
-	protected void handleMessageEvent(@Nonnull MessageReceivedEvent event, boolean isFirstMessage) {
+	void handleMessageEvent(@Nonnull MessageReceivedEvent event, boolean isFirstMessage) {
 		if (!event.isFromGuild()) {
 			return;
 		}
