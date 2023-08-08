@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -166,10 +165,6 @@ public class AutoCodeFormatter {
 		return new EmbedBuilder().setDescription(botConfig.get(guild)
 				.getHelpConfig()
 				.getFormatHintMessage()).build();
-	}
-
-	private void handleDeleteHint(ButtonInteractionEvent event) {
-		event.getMessage().delete().queue();
 	}
 
 	private record CodeBlock(int startIndex, int endIndex) {}
