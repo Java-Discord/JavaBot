@@ -106,8 +106,8 @@ public class AutoCodeFormatter {
 		}
 
 		if (isFirstMessage || !event.getMessage().getMentions().getUsers().isEmpty() ||
-				!event.getMessage().getMentions().getRoles().isEmpty() ||
-				!event.getMessage().getMentions().mentionsEveryone()) {
+				event.getMessage().getMentions().getRoles().isEmpty() ||
+				event.getMessage().getMentions().mentionsEveryone()) {
 			sendFormatHint(event);
 		} else {
 			replaceUnformattedCode(event.getMessage()
