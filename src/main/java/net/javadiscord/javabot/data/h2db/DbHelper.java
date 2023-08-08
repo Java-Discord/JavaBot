@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,8 +37,6 @@ import javax.sql.DataSource;
 public class DbHelper {
 	@Getter
 	private final DataSource dataSource;
-	private final ExecutorService asyncPool;
-	private final BotConfig botConfig;
 
 	/**
 	 * Initializes the data source that'll be used throughout the bot to access

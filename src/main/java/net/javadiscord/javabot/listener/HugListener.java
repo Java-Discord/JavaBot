@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.listener;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -21,7 +20,6 @@ import java.util.regex.Pattern;
 /**
  * Replaces all occurrences of 'fuck' in incoming messages with 'hug'.
  */
-@Slf4j
 @RequiredArgsConstructor
 public class HugListener extends ListenerAdapter {
 	private static final Pattern FUCKER = Pattern.compile("(fuck)(ing|er|ed|k+)?", Pattern.CASE_INSENSITIVE);

@@ -12,9 +12,6 @@ import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.javadiscord.javabot.annotations.PreRegisteredListener;
 import net.javadiscord.javabot.data.config.BotConfig;
-import net.javadiscord.javabot.data.h2db.DbActions;
-import net.javadiscord.javabot.systems.help.checks.ChannelSemanticCheck;
-import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.notification.NotificationService;
 import net.javadiscord.javabot.systems.staff_commands.tags.CustomTagManager;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -23,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -36,11 +31,7 @@ import java.util.stream.Collectors;
 public class StateListener extends ListenerAdapter {
 	private final NotificationService notificationService;
 	private final CustomTagManager customTagManager;
-	private final List<ChannelSemanticCheck> channelSemanticChecks;
 	private final BotConfig botConfig;
-	private final ScheduledExecutorService asyncPool;
-	private final DbActions dbActions;
-	private final HelpExperienceService helpExperienceService;
 
 	@Override
 	public void onReady(@NotNull ReadyEvent event) {
