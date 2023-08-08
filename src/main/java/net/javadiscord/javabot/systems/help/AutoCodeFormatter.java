@@ -27,13 +27,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Component
 public class AutoCodeFormatter {
-	/**
-	 * The identifier used for all AutoCodeFormatter related buttons.
-	 */
-	static final String FORMAT_HINT_IDENTIFIER = "forum-formatter-removeHint";
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
 	private final UserPreferenceService preferenceService;
+
 
 	/**
 	 * Method responsible for finding a place to insert a codeblock, if present.
