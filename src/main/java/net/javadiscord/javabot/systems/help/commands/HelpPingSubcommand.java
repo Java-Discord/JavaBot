@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
@@ -26,6 +27,7 @@ import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import java.awt.Color;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -214,13 +216,17 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			.stream()
 			.map(e->new EmbedBuilder(e)
 					.setColor(acknowledged ? Color.GRAY : Color.YELLOW)
-					.addField("marked as " + (acknowledged?"acknowledged":"needs help") + " by",
-							event.getUser().getAsMention(), false))
+					.addField("marked as " + (acknowledged?"acknowledged":"needs help"),
+							"by " + event.getUser().getAsMention()+" at "+getCurrentFormattedTimestamp(), false))
 			.map(this::removeOldField)
 			.map(EmbedBuilder::build)
 			.toList())
 		.setActionRow(acknowledged?createUndoAcknowledgementButton():createAcknowledgementButton())
 		.queue();
+	}
+	
+	private String getCurrentFormattedTimestamp() {
+		return TimeFormat.DATE_TIME_SHORT.format(Instant.now().toEpochMilli());
 	}
 
 	private String getForumTagText(ForumTag tag) {
