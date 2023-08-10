@@ -55,7 +55,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 	 * @param botConfig The main configuration of the bot
 	 */
 	public HelpPingSubcommand(BotConfig botConfig, ScheduledExecutorService asyncPool) {
-		setCommandData(new SubcommandData("ping", "Notify those with the help-ping role that your question is urgent."));
+		setCommandData(new SubcommandData("ping", "Notify potential helpers that your question is urgent."));
 		lastPingTimes = new ConcurrentHashMap<>();
 		this.botConfig = botConfig;
 		asyncPool.scheduleWithFixedDelay(this::cleanTimeoutCache, CACHE_CLEANUP_DELAY, CACHE_CLEANUP_DELAY, TimeUnit.SECONDS);
