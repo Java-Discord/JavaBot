@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.annotation.PostConstruct;
-
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -46,7 +46,7 @@ import net.javadiscord.javabot.tasks.PresenceUpdater;
 )
 @EnableScheduling
 @RequiredArgsConstructor
-public class Bot {
+public class Bot implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final DIH4JDA dih4jda;
 	private final BotConfig config;
@@ -64,12 +64,12 @@ public class Bot {
 		}
 		dih4jda.getJDA().addEventListener(dih4jda);
 	}
-
+	
 	/**
 	 * Initializes Sentry, interactions and listeners.
 	 */
-	@PostConstruct
-	public void init() {
+	@Override
+	public void onApplicationEvent(ApplicationReadyEvent event) {
 		Sentry.init(options -> {
 			options.setDsn(config.getSystems().getSentryDsn());
 			options.setTracesSampleRate(1.0);

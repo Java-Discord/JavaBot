@@ -40,7 +40,7 @@ public class TomcatConfig {
 	 * @return The {@link TomcatServletWebServerFactory}.
 	 */
 	@Bean
-	public TomcatServletWebServerFactory servletContainer() {
+	TomcatServletWebServerFactory servletContainer() {
 		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
 		if (tomcatAjpEnabled) {
 			Connector ajpConnector = new Connector("org.apache.coyote.ajp.AjpNioProtocol");

@@ -38,27 +38,27 @@ import net.javadiscord.javabot.tasks.PresenceUpdater;
 @RequiredArgsConstructor
 public class SpringConfig {
 	@Bean
-	public PresenceUpdater standardActivityPresenceUpdater() {
+	PresenceUpdater standardActivityPresenceUpdater() {
 		return PresenceUpdater.standardActivities();
 	}
 
 	@Bean
-	public DataSource getDataSource(BotConfig config) {
+	DataSource getDataSource(BotConfig config) {
 		return DbHelper.initDataSource(config);
 	}
 
 	@Bean
-	public ScheduledExecutorService asyncPool(BotConfig config) {
+	ScheduledExecutorService asyncPool(BotConfig config) {
 		return Executors.newScheduledThreadPool(config.getSystems().getAsyncPoolSize());
 	}
 
 	@Bean
-	public BotConfig config() {
+	BotConfig config() {
 		return new BotConfig(Path.of("config"));
 	}
 
 	@Bean
-	public SystemsConfig systemsConfig(BotConfig botConfig) {
+	SystemsConfig systemsConfig(BotConfig botConfig) {
 		return botConfig.getSystems();
 	}
 
@@ -70,7 +70,7 @@ public class SpringConfig {
 	 * @throws LoginException if the token is invalid
 	 */
 	@Bean
-	public JDA jda(BotConfig botConfig, ApplicationContext ctx) throws LoginException {
+	JDA jda(BotConfig botConfig, ApplicationContext ctx) throws LoginException {
 		Collection<Object> listeners = ctx.getBeansWithAnnotation(PreRegisteredListener.class).values();
 		return JDABuilder.createDefault(botConfig.getSystems().getJdaBotToken())
 			.setStatus(OnlineStatus.DO_NOT_DISTURB)
@@ -89,7 +89,7 @@ public class SpringConfig {
 	 * @throws DIH4JDAException if an error occurs while initializing {@link DIH4JDA}
 	 */
 	@Bean
-	public DIH4JDA initializeDIH4JDA(JDA jda) throws DIH4JDAException {
+	DIH4JDA initializeDIH4JDA(JDA jda) throws DIH4JDAException {
 		DIH4JDA.setDefaultRegistrationType(RegistrationType.GLOBAL);
 		return DIH4JDABuilder.setJDA(jda)
 			.setGlobalSmartQueue(false)
@@ -99,7 +99,7 @@ public class SpringConfig {
 	}
 
 	@Bean
-	public BotConfig botConfig() {
+	BotConfig botConfig() {
 		return new BotConfig(Path.of("config"));
 	}
 }

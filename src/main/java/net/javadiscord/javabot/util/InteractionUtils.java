@@ -27,7 +27,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ModalCallbackAction;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
@@ -71,7 +70,6 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final DbHelper dbHelper;
 	private final WarnRepository warnRepository;
 	private final ExecutorService asyncPool;
 
