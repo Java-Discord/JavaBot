@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -122,7 +123,7 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 
 	private @NotNull MessageEmbed buildSelfRoleCreateEmbed(@NotNull User createdBy, @NotNull Role role, @NotNull Channel channel, String jumpUrl, String type) {
 		return new EmbedBuilder()
-				.setAuthor(createdBy.getAsTag(), jumpUrl, createdBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(createdBy), jumpUrl, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Self Role created")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Channel", channel.getAsMention(), true)

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -39,7 +40,7 @@ public class BotInfoCommand extends SlashCommand {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setThumbnail(jda.getSelfUser().getEffectiveAvatarUrl())
-				.setAuthor(jda.getSelfUser().getAsTag(), null, jda.getSelfUser().getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(jda.getSelfUser()), null, jda.getSelfUser().getEffectiveAvatarUrl())
 				.setTitle("Bot Information")
 				.addField("OS", MarkdownUtil.codeblock(StringUtils.getOperatingSystem()), true)
 				.addField("Uptime", MarkdownUtil.codeblock(StringUtils.formatUptime()), true)

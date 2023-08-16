@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands.leaderboard;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
@@ -90,7 +91,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 			Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(guild);
 			User user = guild.getJDA().getUserById(account.getUserId());
 			builder.addField(
-					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, user == null ? account.getUserId() : user.getAsTag()),
+					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, user == null ? account.getUserId() : UserUtils.getUserTag(user)),
 					String.format("%s`%.0f XP`\n", currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "", account.getExperience()),
 					false);
 		});

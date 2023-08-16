@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
@@ -48,7 +49,7 @@ public class SayCommand extends SlashCommand {
 			return;
 		}
 		String text = textMapping.getAsString();
-		log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), event.getUser().getAsTag());
+		log.info("Posted \"{}\" in \"#{}\" as requested by \"{}\"", text, event.getChannel().getName(), UserUtils.getUserTag(event.getUser()));
 		event.deferReply(true).queue();
 		event.getChannel().sendMessage(text)
 				.setAllowedMentions(Set.of(Message.MentionType.EMOJI, Message.MentionType.CHANNEL))

@@ -10,6 +10,7 @@ import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
@@ -70,7 +71,7 @@ public final class QOTWNotificationService extends QOTWGuildNotificationService 
 
 	private @NotNull EmbedBuilder buildQOTWNotificationEmbed() {
 		return new EmbedBuilder()
-				.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
 				.setTitle("QOTW Notification")
 				.setTimestamp(Instant.now());
 	}

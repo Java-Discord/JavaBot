@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -86,7 +87,7 @@ public class ProfileCommand extends SlashCommand {
 		double helpXP = helpExperienceService.getOrCreateAccount(member.getIdLong()).getExperience();
 		EmbedBuilder embed = new EmbedBuilder()
 				.setTitle("Profile")
-				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(member.getUser()), null, member.getEffectiveAvatarUrl())
 				.setDescription(getDescription(member))
 				.setColor(member.getColor())
 				.setThumbnail(member.getEffectiveAvatarUrl() + "?size=4096")

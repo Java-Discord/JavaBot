@@ -17,19 +17,17 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.javadiscord.javabot.data.config.guild.StarboardConfig;
-import net.javadiscord.javabot.data.h2db.DbHelper;
 import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-
-import javax.sql.DataSource;
 
 /**
  * Handles & manages all starboard interactions.
@@ -39,8 +37,6 @@ import javax.sql.DataSource;
 public class StarboardManager extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
-	private final DataSource dataSource;
-	private final DbHelper dbHelper;
 	private final StarboardRepository starboardRepository;
 
 	@Override
@@ -221,7 +217,7 @@ public class StarboardManager extends ListenerAdapter {
 	private @NotNull MessageEmbed buildStarboardEmbed(@NotNull Message message) {
 		User author = message.getAuthor();
 		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), message.getJumpUrl(), author.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(author), message.getJumpUrl(), author.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(message.getContentRaw())
 				.setFooter("#" + message.getChannel().getName())

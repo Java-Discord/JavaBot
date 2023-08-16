@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.imageio.ImageIO;
 
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
@@ -104,7 +105,7 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		long points = pointsService.getPoints(member.getIdLong());
 		String pointsText = points == 1 ? "point" : "points";
 		return new EmbedBuilder()
-				.setAuthor(member.getUser().getAsTag(), null, member.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(member.getUser()), null, member.getEffectiveAvatarUrl())
 				.setTitle("Question of the Week Leaderboard")
 				.setDescription(points == 0 ? "You are currently not ranked." :
 					String.format("This month, you're in `%s` place with `%s` %s.", rank + rankSuffix, points, pointsText))
@@ -124,9 +125,9 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	 */
 	private void drawUserCard(@NotNull Graphics2D g2d, @NotNull Member member, QOTWPointsService service, int y, boolean left) throws IOException {
 		BufferedImage card = ImageGenerationUtils.getResourceImage("assets/images/LeaderboardUserCard.png");
-		int x = left ? MARGIN * 5 : WIDTH - (MARGIN * 5) - card.getWidth();
+		int x = left ? MARGIN * 5 : WIDTH - MARGIN * 5 - card.getWidth();
 		g2d.drawImage(ImageGenerationUtils.getImageFromUrl(member.getEffectiveAvatarUrl() + "?size=4096"), x + 185, y + 43, 200, 200, null);
-		String displayName = member.getUser().getAsTag();
+		String displayName = UserUtils.getUserTag(member.getUser());
 		// draw card
 		g2d.drawImage(card, x, y, null);
 		g2d.setColor(PRIMARY_COLOR);

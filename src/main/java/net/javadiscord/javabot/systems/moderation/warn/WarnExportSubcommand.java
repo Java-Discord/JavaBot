@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.moderation.warn;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -76,7 +77,7 @@ public class WarnExportSubcommand extends SlashCommand.Subcommand {
 		PipedInputStream pis=new PipedInputStream();
 		try(PrintWriter pw=new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new PipedOutputStream(pis)), StandardCharsets.UTF_8))){
 			event.replyEmbeds(new EmbedBuilder()
-					.setAuthor(target.getAsTag(), null, target.getAvatarUrl())
+					.setAuthor(UserUtils.getUserTag(target), null, target.getAvatarUrl())
 					.setDescription("Export containing all warns of "+target.getAsMention())
 					.addField("Total number of warns", String.valueOf(warns.stream().count()), false)
 					.addField("Total number of non-discarded warns (includes expired warns)", String.valueOf(warns.stream().filter(w->!w.isDiscarded()).count()), false)

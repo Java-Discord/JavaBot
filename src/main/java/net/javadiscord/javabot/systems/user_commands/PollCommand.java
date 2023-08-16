@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -52,7 +53,7 @@ public class PollCommand extends SlashCommand {
 			return;
 		}
 		EmbedBuilder embed = new EmbedBuilder()
-				.setAuthor(event.getUser().getAsTag(), null, event.getUser().getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(event.getUser()), null, event.getUser().getEffectiveAvatarUrl())
 				.setTitle(titleOption.getAsString())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now());

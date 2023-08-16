@@ -118,7 +118,7 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 				.setRequired(true)
 				.build();
 		return Modal.create("quick-migrate", "Quick Migrate")
-				.addActionRows(ActionRow.of(sqlInput), ActionRow.of(confirmInput))
+				.addComponents(ActionRow.of(sqlInput), ActionRow.of(confirmInput))
 				.build();
 	}
 }

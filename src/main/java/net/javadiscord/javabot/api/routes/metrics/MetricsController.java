@@ -1,7 +1,6 @@
 package net.javadiscord.javabot.api.routes.metrics;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
@@ -9,7 +8,6 @@ import net.javadiscord.javabot.api.routes.CaffeineCache;
 import net.javadiscord.javabot.api.routes.metrics.model.MetricsData;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.MetricsConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Handles all GET-Requests on the guilds/{guild_id}/metrics/ route.
  */
-@Slf4j
 @RestController
 public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	private final JDA jda;
@@ -33,7 +30,6 @@ public class MetricsController extends CaffeineCache<Long, MetricsData> {
 	 * @param jda The {@link Autowired} {@link JDA} instance to use.
 	 * @param botConfig The main configuration of the bot
 	 */
-	@Autowired
 	public MetricsController(final JDA jda, BotConfig botConfig) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(15, TimeUnit.MINUTES)

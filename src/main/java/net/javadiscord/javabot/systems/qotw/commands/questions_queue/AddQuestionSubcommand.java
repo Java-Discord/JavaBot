@@ -56,7 +56,7 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 				.build();
 
 		return Modal.create("qotw-add-question", "Create QOTW Question")
-				.addActionRows(ActionRow.of(questionField), ActionRow.of(priorityField))
+				.addComponents(ActionRow.of(questionField), ActionRow.of(priorityField))
 				.build();
 	}
 
