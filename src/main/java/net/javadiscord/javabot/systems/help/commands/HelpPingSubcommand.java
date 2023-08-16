@@ -217,7 +217,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			.map(e->new EmbedBuilder(e)
 					.setColor(acknowledged ? Color.GRAY : Color.YELLOW)
 					.addField("marked as " + (acknowledged?"acknowledged":"needs help"),
-							"by " + event.getUser().getAsMention()+" at "+getCurrentFormattedTimestamp(), false))
+							"by " + event.getUser().getAsMention()+" "+getCurrentFormattedTimestamp(), false))
 			.map(this::removeOldField)
 			.map(EmbedBuilder::build)
 			.toList())
@@ -226,7 +226,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 	}
 	
 	private String getCurrentFormattedTimestamp() {
-		return TimeFormat.DATE_TIME_SHORT.format(Instant.now().toEpochMilli());
+		return TimeFormat.RELATIVE.format(Instant.now().toEpochMilli());
 	}
 
 	private String getForumTagText(ForumTag tag) {
