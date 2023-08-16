@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -34,7 +35,7 @@ public final class UserNotificationService extends NotificationService.MessageCh
 		user.openPrivateChannel().flatMap(function::apply).queue(
 				msg -> {},
 				error -> {
-					log.error("Could not open PrivateChannel with user " + user.getAsTag(), error);
+					log.error("Could not open PrivateChannel with user " + UserUtils.getUserTag(user), error);
 					if(config != null) {
 						TextChannel container = config.getNotificationThreadChannel();
 						if(container != null) {

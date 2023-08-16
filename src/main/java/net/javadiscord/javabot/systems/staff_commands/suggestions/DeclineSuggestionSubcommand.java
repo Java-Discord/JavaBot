@@ -12,6 +12,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -48,7 +49,7 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 				.setTitle("Suggestion Declined")
 				.setDescription(embed.getDescription())
 				.setTimestamp(embed.getTimestamp())
-				.setFooter("Declined by " + user.getAsTag());
+				.setFooter("Declined by " + UserUtils.getUserTag(user));
 		if (reason != null) builder.addField("Reason", reason, false);
 		return builder.build();
 	}

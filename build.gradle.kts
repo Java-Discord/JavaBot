@@ -30,8 +30,8 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
 
     // DIH4JDA (Command Framework) & JDA
-    implementation("xyz.dynxsty:dih4jda:1.6.2")
-    implementation("net.dv8tion:JDA:5.0.0-beta.2") {
+    implementation("com.github.DynxstyGIT:DIH4JDA:120a15ad2e")
+    implementation("net.dv8tion:JDA:5.0.0-beta.12") {
         exclude(module = "opus-java")
     }
 

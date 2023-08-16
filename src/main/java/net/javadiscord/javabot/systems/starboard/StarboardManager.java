@@ -21,6 +21,7 @@ import net.javadiscord.javabot.systems.starboard.dao.StarboardRepository;
 import net.javadiscord.javabot.systems.starboard.model.StarboardEntry;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
@@ -216,7 +217,7 @@ public class StarboardManager extends ListenerAdapter {
 	private @NotNull MessageEmbed buildStarboardEmbed(@NotNull Message message) {
 		User author = message.getAuthor();
 		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), message.getJumpUrl(), author.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(author), message.getJumpUrl(), author.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(message.getContentRaw())
 				.setFooter("#" + message.getChannel().getName())

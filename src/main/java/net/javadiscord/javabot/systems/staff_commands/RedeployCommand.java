@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -46,7 +47,7 @@ public class RedeployCommand extends SlashCommand {
 			Responses.replyAdminOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
-		log.warn("Redeploying... Requested by: " + event.getUser().getAsTag());
+		log.warn("Redeploying... Requested by: " + UserUtils.getUserTag(event.getUser()));
 		event.reply("**Redeploying...** This may take some time.").queue();
 		messageCache.synchronize();
 		System.exit(0);

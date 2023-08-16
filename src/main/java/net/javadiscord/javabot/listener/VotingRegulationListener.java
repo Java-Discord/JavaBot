@@ -17,6 +17,9 @@ public class VotingRegulationListener extends ListenerAdapter{
 
 	@Override
 	public void onMessageReactionAdd(MessageReactionAddEvent event) {
+		if (event.getUser().isBot() || event.getUser().isSystem()) {
+			return;
+		}
 		if(isCriticalEmoji(event)) {
 			event.retrieveMessage().queue(msg->{
 				if(doesAuthorMatch(event.getUserIdLong(), msg)) {
@@ -36,7 +39,7 @@ public class VotingRegulationListener extends ListenerAdapter{
 	}
 
 	private boolean isCriticalEmoji(MessageReactionAddEvent event) {
-		return getUpvoteEmoji(event).equals(event.getEmoji()) ||
+		return event.getEmoji().equals(getUpvoteEmoji(event)) ||
 				event.getEmoji().getType() == Emoji.Type.UNICODE &&
 				botConfig.get(event.getGuild()).getStarboardConfig().getEmojis().contains(event.getEmoji().asUnicode());
 	}

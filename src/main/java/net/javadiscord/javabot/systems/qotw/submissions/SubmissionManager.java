@@ -24,6 +24,7 @@ import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,9 +89,9 @@ public class SubmissionManager {
 									.queue();
 						}
 					});
-				}, e -> log.error("Could not create submission thread for member {}. ", member.getUser().getAsTag(), e)
+				}, e -> log.error("Could not create submission thread for member {}. ", UserUtils.getUserTag(member.getUser()), e)
 		);
-		log.info("Opened new Submission Thread for User {}", member.getUser().getAsTag());
+		log.info("Opened new Submission Thread for User {}", UserUtils.getUserTag(member.getUser()));
 		return Responses.success(event.getHook(), "Submission Thread created", "Successfully created a new private Thread for your submission.");
 	}
 
@@ -153,7 +154,7 @@ public class SubmissionManager {
 					reviewChannel.asThreadChannel().getManager().setArchived(true).queue();
 				}
 			}
-			event.getHook().editOriginalComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), event.getUser().getAsTag())).asDisabled())).queue();
+			event.getHook().editOriginalComponents(ActionRow.of(Button.secondary("dummy", "%s by %s".formatted(status.getVerb(), UserUtils.getUserTag(event.getUser()))).asDisabled())).queue();
 		});
 	}
 
@@ -245,7 +246,7 @@ public class SubmissionManager {
 
 	private @NotNull MessageEmbed buildAuthorEmbed(@NotNull User user, boolean bestAnswer) {
 		return new EmbedBuilder()
-				.setAuthor((bestAnswer ? "\u2B50 " : "") + "Submission from " + user.getAsTag(), null, user.getAvatarUrl())
+				.setAuthor((bestAnswer ? "\u2B50 " : "") + "Submission from " + UserUtils.getUserTag(user), null, user.getAvatarUrl())
 				.setColor(bestAnswer ? Responses.Type.WARN.getColor() : Responses.Type.DEFAULT.getColor())
 				.build();
 	}
@@ -253,7 +254,7 @@ public class SubmissionManager {
 	private @NotNull MessageEmbed buildSubmissionThreadEmbed(@NotNull User createdBy, @NotNull QOTWQuestion question, @NotNull QOTWConfig config) {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(createdBy), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle(String.format("Question of the Week #%s", question.getQuestionNumber()))
 				.setDescription(String.format("""
 								%s

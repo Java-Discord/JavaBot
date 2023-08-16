@@ -106,7 +106,7 @@ public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHan
 				.setRequired(true)
 				.build();
 		return Modal.create(ComponentIdBuilder.build("embed-addfield", messageId), "Add an Embed Field")
-				.addActionRows(ActionRow.of(titleInput), ActionRow.of(valueInput), ActionRow.of(inlineInput))
+				.addComponents(ActionRow.of(titleInput), ActionRow.of(valueInput), ActionRow.of(inlineInput))
 				.build();
 	}
 

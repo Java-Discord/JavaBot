@@ -17,6 +17,7 @@ import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.guild.ServerLockConfig;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -202,7 +203,11 @@ public class ServerLockManager extends ListenerAdapter {
 				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg ->
 						event.getMember().kick().queue()));
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
-		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("**%s** (%s old) tried to join this server.", event.getMember().getUser().getAsTag(), diff));
+		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageFormat(
+			"**%s** (%s old) tried to join this server.",
+			UserUtils.getUserTag(event.getMember().getUser()),
+			diff
+		));
 	}
 
 	/**
@@ -219,7 +224,11 @@ public class ServerLockManager extends ListenerAdapter {
 				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
 					member.kick().queue(
 							success -> {},
-							error -> notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Could not kick member %s%n> `%s`", member.getUser().getAsTag(), error.getMessage())));
+							error -> notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
+								"Could not kick member %s%n> `%s`",
+								UserUtils.getUserTag(member.getUser()),
+								error.getMessage()
+							)));
 				});
 			});
 		}
@@ -227,10 +236,10 @@ public class ServerLockManager extends ListenerAdapter {
 		String membersString = potentialRaiders.stream()
 				.sorted(Comparator.comparing(Member::getTimeJoined).reversed())
 				.map(m -> String.format(
-						"- **%s** joined at `%s`, account is `%s` old.",
-						m.getUser().getAsTag(),
-						m.getTimeJoined().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSS")),
-						TimeUtils.formatDuration(Duration.between(m.getTimeCreated(), OffsetDateTime.now()))
+					"- **%s** joined at `%s`, account is `%s` old.",
+					UserUtils.getUserTag(m.getUser()),
+					m.getTimeJoined().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSS")),
+					TimeUtils.formatDuration(Duration.between(m.getTimeCreated(), OffsetDateTime.now()))
 				))
 				.collect(Collectors.joining("\n"));
 
