@@ -28,7 +28,7 @@ At startup, the bot will initially start by loading just the global settings, an
 
 We're using [DIH4JDA](https://github.com/DynxstyGIT/DIH4JDA) as our Command/Interaction framework, which makes it quite easy to add new commands.
 
-[PingCommand.java](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/javadiscord/javabot/systems/commands/PingCommand.java)
+[PingCommand.java](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/javadiscord/javabot/systems/user_commands/PingCommand.java)
 ```java
 /**
  * <h3>This class represents the /ping command.</h3>
