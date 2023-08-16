@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.self_roles;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
@@ -103,7 +104,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:staff:%s:%s", role.getId(), applicant.getId()), "Apply for " + role.getName())
-				.addActionRows(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
+				.addComponents(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
 				.build();
 		event.replyModal(modal).queue();
 	}
@@ -136,7 +137,7 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				.setRequired(true)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for " + role.getName())
-				.addActionRows(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
+				.addComponents(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
 				.build();
 		event.replyModal(modal).queue();
 	}
@@ -195,8 +196,8 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				member -> {
 					User user = member.getUser();
 					MessageEmbed embed = new EmbedBuilder()
-							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for %s", user.getAsTag(), role.getName()))
+							.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
+							.setTitle(String.format("%s applied for %s", UserUtils.getUserTag(user), role.getName()))
 							.setColor(Responses.Type.SUCCESS.getColor())
 							.addField("Real Name", nameOption.getAsString(), false)
 							.addField("Age", ageOption.getAsString(), true)
@@ -237,8 +238,8 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 				member -> {
 					User user = member.getUser();
 					EmbedBuilder embed = new EmbedBuilder()
-							.setAuthor(user.getAsTag(), null, user.getEffectiveAvatarUrl())
-							.setTitle(String.format("%s applied for %s", user.getAsTag(), config.getExpertRole().getName()))
+							.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
+							.setTitle(String.format("%s applied for %s", UserUtils.getUserTag(user), config.getExpertRole().getName()))
 							.setColor(config.getExpertRole().getColor())
 							.addField("How much Java experience do you have?", experienceOption.getAsString(), false)
 							.addField("Present us a fitting Java Project", projectInfoOption.getAsString(), false)

@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -80,13 +81,13 @@ public class CreateCustomTagSubcommand extends TagsSubcommand implements ModalHa
 				.setRequired(true)
 				.build();
 		return Modal.create("tag-create", "Create Custom Tag")
-				.addActionRows(ActionRow.of(nameField), ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
+				.addComponents(ActionRow.of(nameField), ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
 				.build();
 	}
 
 	private @NotNull MessageEmbed buildCreateCommandEmbed(@NotNull User createdBy, @NotNull CustomTag command) {
 		return new EmbedBuilder()
-				.setAuthor(createdBy.getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(createdBy), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Custom Tag Created")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`%s`", command.getName()), true)

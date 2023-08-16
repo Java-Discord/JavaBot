@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.staff_commands.tags.commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
@@ -107,13 +108,13 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				.build();
 		return Modal.create(ComponentIdBuilder.build("tag-edit", tag.getName()),
 						String.format("Edit \"%s\"", tag.getName().length() > 90 ? tag.getName().substring(0, 87) + "..." : tag.getName()))
-				.addActionRows(ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
+				.addComponents(ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
 				.build();
 	}
 
 	private @NotNull MessageEmbed buildEditTagEmbed(@NotNull Member createdBy, @NotNull CustomTag command) {
 		return new EmbedBuilder()
-				.setAuthor(createdBy.getUser().getAsTag(), null, createdBy.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(createdBy.getUser()), null, createdBy.getEffectiveAvatarUrl())
 				.setTitle("Custom Tag Edited")
 				.addField("Id", String.format("`%s`", command.getId()), true)
 				.addField("Name", String.format("`%s`", command.getName()), true)

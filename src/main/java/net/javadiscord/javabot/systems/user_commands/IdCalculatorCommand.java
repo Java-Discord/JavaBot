@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -50,7 +51,7 @@ public class IdCalculatorCommand extends SlashCommand {
 
 	private @NotNull MessageEmbed buildIdCalcEmbed(@NotNull User author, long id, long unixTimestamp) {
 		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
 				.setTitle("ID Calculator")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Snowflake Input", String.format(MarkdownUtil.codeblock("%s"), id), false)

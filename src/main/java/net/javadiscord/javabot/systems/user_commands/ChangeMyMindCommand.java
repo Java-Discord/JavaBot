@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.user_commands;
 
+import net.javadiscord.javabot.util.UserUtils;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -56,7 +57,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 				try {
 					String imageUrl = hr.getBody().getObject().getString("message");
 					event.getHook().sendMessageEmbeds(new EmbedBuilder()
-							.setAuthor(event.getUser().getAsTag(), imageUrl, event.getUser().getEffectiveAvatarUrl())
+							.setAuthor(UserUtils.getUserTag(event.getUser()), imageUrl, event.getUser().getEffectiveAvatarUrl())
 							.setColor(Responses.Type.DEFAULT.getColor())
 							.setImage(imageUrl)
 							.setTimestamp(Instant.now())

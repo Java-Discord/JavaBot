@@ -16,6 +16,7 @@ import net.javadiscord.javabot.data.config.guild.ModerationConfig;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Responses;
 import net.javadiscord.javabot.util.TimeUtils;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.CheckReturnValue;
@@ -74,7 +75,7 @@ public class PurgeCommand extends ModerateCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(amount > 1 ? "Up to " + amount + " messages " : "1 message ");
 		if (user != null) {
-			sb.append("by the user ").append(user.getAsTag()).append(' ');
+			sb.append("by the user ").append(UserUtils.getUserTag(user)).append(' ');
 		}
 		sb.append("will be removed").append(archive ? " and placed in an archive." : '.');
 		return Responses.info(event, "Purge Started", sb.toString());
@@ -198,12 +199,12 @@ public class PurgeCommand extends ModerateCommand {
 	 */
 	private void archiveMessage(PrintWriter writer, Message message) {
 		writer.printf(
-				"%s : Removing message %s by %s which was sent at %s\n--- Text ---\n%s\n--- End Text ---\n\n",
-				OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-				message.getId(),
-				message.getAuthor().getAsTag(),
-				message.getTimeCreated().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-				message.getContentRaw()
+			"%s : Removing message %s by %s which was sent at %s\n--- Text ---\n%s\n--- End Text ---\n\n",
+			OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+			message.getId(),
+			UserUtils.getUserTag(message.getAuthor()),
+			message.getTimeCreated().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+			message.getContentRaw()
 		);
 	}
 }

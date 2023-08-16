@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import net.javadiscord.javabot.util.UserUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -142,7 +143,7 @@ public class MessageCache {
 	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage before) {
 		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
 		return new EmbedBuilder()
-				.setAuthor(author.getAsTag(), null, author.getEffectiveAvatarUrl())
+				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
 				.addField("Author", author.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
@@ -200,14 +201,14 @@ public class MessageCache {
 		DateTimeFormatter formatter = TimeUtils.STANDARD_FORMATTER.withZone(ZoneOffset.UTC);
 		Instant instant = Instant.ofEpochMilli(IdCalculatorCommand.getTimestampFromId(message.getMessageId()));
 		String in = String.format("""
-				Author: %s
-				ID: %s
-				Created at: %s
+			Author: %s
+			ID: %s
+			Created at: %s
 
-				--- Message Content ---
+			--- Message Content ---
 
-				%s
-				""", author.getAsTag(), message.getMessageId(), formatter.format(instant), message.getMessageContent());
+			%s
+			""", UserUtils.getUserTag(author), message.getMessageId(), formatter.format(instant), message.getMessageContent());
 		return new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));
 	}
 
@@ -215,18 +216,18 @@ public class MessageCache {
 		DateTimeFormatter formatter = TimeUtils.STANDARD_FORMATTER.withZone(ZoneOffset.UTC);
 		Instant instant = Instant.ofEpochMilli(IdCalculatorCommand.getTimestampFromId(before.getMessageId()));
 		String in = String.format("""
-				Author: %s
-				ID: %s
-				Created at: %s
+			Author: %s
+			ID: %s
+			Created at: %s
 
-				--- Message Content (before) ---
+			--- Message Content (before) ---
 
-				%s
+			%s
 
-				--- Message Content (after) ---
+			--- Message Content (after) ---
 
-				%s
-				""", author.getAsTag(), before.getMessageId(), formatter.format(instant), before.getMessageContent(), after.getContentRaw());
+			%s
+			""", UserUtils.getUserTag(author), before.getMessageId(), formatter.format(instant), before.getMessageContent(), after.getContentRaw());
 		return new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));
 	}
 }

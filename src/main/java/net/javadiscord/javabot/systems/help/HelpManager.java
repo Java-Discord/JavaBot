@@ -29,6 +29,7 @@ import net.javadiscord.javabot.systems.user_preferences.model.Preference;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.MessageActionUtils;
 import net.javadiscord.javabot.util.Responses;
+import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -177,8 +178,8 @@ public class HelpManager {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
 				botConfig.get(guild).getModerationConfig().getLogChannel().sendMessageFormat(
 						"Could not record user %s thanking %s for help in post %s: %s",
-						postThread.getOwner().getUser().getAsTag(),
-						helper.getAsTag(),
+						UserUtils.getUserTag(postThread.getOwner().getUser()),
+						UserUtils.getUserTag(helper),
 						postThread.getAsMention(),
 						e.getMessage()
 				).queue();
