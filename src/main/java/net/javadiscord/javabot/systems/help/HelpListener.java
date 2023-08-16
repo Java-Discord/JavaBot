@@ -29,19 +29,17 @@ import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Listens for all events related to the forum help channel system.
  */
 @RequiredArgsConstructor
-@AutoDetectableComponentHandler({HelpManager.HELP_THANKS_IDENTIFIER, HelpManager.HELP_CLOSE_IDENTIFIER, HelpManager.HELP_GUIDELINES_IDENTIFIER})
+@AutoDetectableComponentHandler({
+		HelpManager.HELP_THANKS_IDENTIFIER,
+		HelpManager.HELP_CLOSE_IDENTIFIER,
+		HelpManager.HELP_GUIDELINES_IDENTIFIER
+})
 public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	/**
@@ -54,27 +52,32 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		newThreadChannels = new HashSet<>();
 	}
 
+	private final UserPreferenceService preferenceService;
 	private final BotConfig botConfig;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
 	private final HelpExperienceService experienceService;
 	private final DbActions dbActions;
+	private final AutoCodeFormatter autoCodeFormatter;
 	private final String[][] closeSuggestionDetectors = {
 			{"close", "post"},
 			{"close", "thread"},
 			{"close", "question"},
-			{"problem","solv"},
-			{"issue","solv"},
+			{"problem", "solv"},
+			{"issue", "solv"},
 			{"thank"}
 	};
 	private final long SUGGEST_CLOSE_TIMEOUT = 5 * 60_000L;//5 minutes
-	private final Map<Long, Long> recentlyCloseSuggestedPosts = new LinkedHashMap<>(8, 0.75f, true) {
+	private final Map<Long, Long> recentlyCloseSuggestedPosts = new LinkedHashMap<>(
+			8,
+			0.75f,
+			true
+	) {
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<Long, Long> eldest) {
 			return System.currentTimeMillis() > eldest.getValue() || size() >= 32;
 		}
 	};
-	private final UserPreferenceService preferenceService;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -85,12 +88,26 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			ThreadChannel post = event.getChannel().asThreadChannel();
 			// send post buttons
 			post.sendMessageComponents(ActionRow.of(
-					createCloseSuggestionButton(post),
-					Button.secondary(ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER), "View Help Guidelines")
-			)).queue(success -> post.sendMessageFormat(config.getReservedChannelMessageTemplate(), UserSnowflake.fromId(post.getOwnerId()).getAsMention(), config.getInactivityTimeoutMinutes()).queue());
+							createCloseSuggestionButton(post),
+							Button.secondary(
+									ComponentIdBuilder.build(HelpManager.HELP_GUIDELINES_IDENTIFIER),
+									"View Help Guidelines"
+							)
+					))
+					.queue(message -> {
+						post.sendMessageFormat(
+								config.getReservedChannelMessageTemplate(),
+								UserSnowflake.fromId(post.getOwnerId())
+										.getAsMention(),
+								config.getInactivityTimeoutMinutes()
+						).queue(message1 -> {
+							autoCodeFormatter.handleMessageEvent(event, true);
+						});
+					});
 			newThreadChannels.remove(event.getChannel().getIdLong());
 			return;
 		}
+		autoCodeFormatter.handleMessageEvent(event, false);
 		if (event.getMessage().getAuthor().isSystem() || event.getMessage().getAuthor().isBot()) {
 			return;
 		}
@@ -113,27 +130,51 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		replyCloseSuggestionIfPatternMatches(event.getMessage());
 	}
 
+	@Override
+	public void onChannelCreate(@NotNull ChannelCreateEvent event) {
+		if (isInvalidForumPost(event.getChannel())) {
+			return;
+		}
+		ThreadChannel post = event.getChannel().asThreadChannel();
+		if (isInvalidHelpForumChannel(post.getParentChannel().asForumChannel())) {
+			return;
+		}
+		// add thread id to a temporary cache to avoid potential missing author message
+		// more info on why this has to be done: https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354 (JDA Discord)
+		newThreadChannels.add(event.getChannel().getIdLong());
+	}
+
 	private void replyCloseSuggestionIfPatternMatches(Message msg) {
 		String content = msg.getContentRaw().toLowerCase();
 		if (content.contains("```")) {
 			return;
 		}
 		long postId = msg.getChannel().getIdLong();
-		if (recentlyCloseSuggestedPosts.containsKey(postId) && recentlyCloseSuggestedPosts.get(postId) > System.currentTimeMillis()) {
+		if (recentlyCloseSuggestedPosts.containsKey(postId) &&
+				recentlyCloseSuggestedPosts.get(postId) > System.currentTimeMillis()) {
 			return;
 		}
-		if(msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
+		if (msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
 			for (String[] detector : closeSuggestionDetectors) {
 				if (doesMatchDetector(content, detector)) {
 					msg.reply("""
-							If you are finished with your post, please close it.
-							If you are not, please ignore this message.
-							Note that you will not be able to send further messages here after this post have been closed but you will be able to create new posts.
-							""")
-							.addActionRow(createCloseSuggestionButton(msg.getChannel().asThreadChannel()),
-									Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"))
+									If you are finished with your post, please close it.
+									If you are not, please ignore this message.
+									Note that you will not be able to send further messages here after this post have been closed but you will be able to create new posts.
+									""")
+							.addActionRow(
+									createCloseSuggestionButton(msg.getChannel()
+											.asThreadChannel()),
+									Button.secondary(
+											InteractionUtils.DELETE_ORIGINAL_TEMPLATE,
+											"\uD83D\uDDD1️"
+									)
+							)
 							.queue();
-					recentlyCloseSuggestedPosts.put(postId, System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT);
+					recentlyCloseSuggestedPosts.put(
+							postId,
+							System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT
+					);
 				}
 			}
 		}
@@ -151,36 +192,36 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	}
 
 	private Button createCloseSuggestionButton(ThreadChannel post) {
-		return Button.primary(ComponentIdBuilder.build(HelpManager.HELP_CLOSE_IDENTIFIER, post.getIdLong()), "Close Post");
-	}
-
-	@Override
-	public void onChannelCreate(@NotNull ChannelCreateEvent event) {
-		if (isInvalidForumPost(event.getChannel())) {
-			return;
-		}
-		ThreadChannel post = event.getChannel().asThreadChannel();
-		if (isInvalidHelpForumChannel(post.getParentChannel().asForumChannel())) {
-			return;
-		}
-		// add thread id to a temporary cache to avoid potential missing author message
-		// more info on why this has to be done: https://canary.discord.com/channels/125227483518861312/1053705384466059354/1053705384466059354 (JDA Discord)
-		newThreadChannels.add(event.getChannel().getIdLong());
+		return Button.primary(ComponentIdBuilder.build(
+				HelpManager.HELP_CLOSE_IDENTIFIER,
+				post.getIdLong()
+		), "Close Post");
 	}
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, @NotNull Button button) {
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		if (isInvalidForumPost(event.getChannel()) ||
-				isInvalidHelpForumChannel(event.getChannel().asThreadChannel().getParentChannel().asForumChannel())
-		) {
-			Responses.error(event, "This button may only be used inside help forum threads.").queue();
+				isInvalidHelpForumChannel(event.getChannel()
+						.asThreadChannel()
+						.getParentChannel()
+						.asForumChannel())) {
+			Responses.error(event, "This button may only be used inside help forum threads.")
+					.queue();
 			return;
 		}
 		ThreadChannel post = event.getChannel().asThreadChannel();
-		HelpManager manager = new HelpManager(post, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, preferenceService);
+		HelpManager manager = new HelpManager(
+				post,
+				dbActions,
+				botConfig,
+				helpAccountRepository,
+				helpTransactionRepository,
+				preferenceService
+		);
 		switch (id[0]) {
-			case HelpManager.HELP_THANKS_IDENTIFIER -> handleHelpThanksInteraction(event, manager, id);
+			case HelpManager.HELP_THANKS_IDENTIFIER ->
+					handleHelpThanksInteraction(event, manager, id);
 			case HelpManager.HELP_GUIDELINES_IDENTIFIER ->
 					handleReplyGuidelines(event, post.getParentChannel().asForumChannel());
 			case HelpManager.HELP_CLOSE_IDENTIFIER -> handlePostClose(event, manager);
@@ -190,7 +231,8 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	private boolean isInvalidForumPost(@NotNull Channel channel) {
 		return channel.getType() != ChannelType.GUILD_PUBLIC_THREAD ||
-				((ThreadChannel) channel).getParentChannel().getType() != ChannelType.FORUM;
+				((ThreadChannel) channel).getParentChannel()
+						.getType() != ChannelType.FORUM;
 	}
 
 	private boolean isInvalidHelpForumChannel(@NotNull ForumChannel forum) {
@@ -202,20 +244,27 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		ThreadChannel post = manager.getPostThread();
 		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		if (event.getUser().getIdLong() != post.getOwnerIdLong()) {
-			Responses.warning(event, "Sorry, only the person who reserved this channel can thank users.").queue();
+			Responses.warning(
+							event,
+							"Sorry, only the person who reserved this channel can thank users."
+					)
+					.queue();
 			return;
 		}
 		switch (id[2]) {
-			case "done" -> handleThanksCloseButton(event, manager, post, config);
+			case "done" -> handleThanksCloseButton(event, manager, post);
 			case "cancel" -> event.getMessage().delete().queue();
 			default -> {
-				List<Button> thankButtons = event.getMessage().getButtons().stream()
+				List<Button> thankButtons = event.getMessage()
+						.getButtons()
+						.stream()
 						.filter(b -> b.getId() != null &&
 								!ComponentIdBuilder.split(b.getId())[2].equals("done") &&
-								!ComponentIdBuilder.split(b.getId())[2].equals("cancel")
-						).toList();
-				if (thankButtons.stream().filter(Button::isDisabled).count() == thankButtons.size() - 1) {
-					handleThanksCloseButton(event, manager, post, config);
+								!ComponentIdBuilder.split(b.getId())[2].equals("cancel"))
+						.toList();
+				if (thankButtons.stream().filter(Button::isDisabled).count() ==
+						thankButtons.size() - 1) {
+					handleThanksCloseButton(event, manager, post);
 				} else {
 					event.editButton(event.getButton().asDisabled()).queue();
 				}
@@ -223,7 +272,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		}
 	}
 
-	private void handleThanksCloseButton(@NotNull ButtonInteractionEvent event, HelpManager manager, ThreadChannel post, HelpConfig config) {
+	private void handleThanksCloseButton(@NotNull ButtonInteractionEvent event, HelpManager manager, ThreadChannel post) {
 		List<Button> buttons = event.getMessage().getButtons();
 		// immediately delete the message
 		event.getMessage().delete().queue(s -> {
@@ -231,26 +280,34 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			manager.close(event, false, null);
 			experienceService.addMessageBasedHelpXP(post, true);
 			// thank all helpers
-			buttons.stream().filter(ActionComponent::isDisabled)
+			buttons.stream()
+					.filter(ActionComponent::isDisabled)
 					.filter(b -> b.getId() != null)
-					.forEach(b -> manager.thankHelper(event.getGuild(), post, Long.parseLong(ComponentIdBuilder.split(b.getId())[2])));
+					.forEach(b -> manager.thankHelper(
+							event.getGuild(),
+							post,
+							Long.parseLong(ComponentIdBuilder.split(b.getId())[2])
+					));
 		});
 	}
 
 	private void handleReplyGuidelines(@NotNull IReplyCallback callback, @NotNull ForumChannel channel) {
-		callback.replyEmbeds(new EmbedBuilder()
-						.setTitle("Help Guidelines")
-						.setDescription(channel.getTopic())
-						.build()
-				).setEphemeral(true)
-				.queue();
+		callback.replyEmbeds(new EmbedBuilder().setTitle("Help Guidelines")
+				.setDescription(channel.getTopic())
+				.build()).setEphemeral(true).queue();
 	}
 
 	private void handlePostClose(ButtonInteractionEvent event, @NotNull HelpManager manager) {
 		if (manager.isForumEligibleToBeUnreserved(event)) {
-			manager.close(event, event.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(), null);
+			manager.close(event, event.getUser().getIdLong() == manager.getPostThread()
+					.getOwnerIdLong(), null);
 		} else {
-			Responses.warning(event, "Could not close this post", "You're not allowed to close this post.").queue();
+			Responses.warning(
+							event,
+							"Could not close this post",
+							"You're not allowed to close this post."
+					)
+					.queue();
 		}
 	}
 }

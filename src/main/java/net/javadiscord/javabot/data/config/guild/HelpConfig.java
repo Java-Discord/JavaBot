@@ -49,8 +49,14 @@ public class HelpConfig extends GuildConfigItem {
 			You can disable notifications like this using the `/preferences` command.
 			[Post link](%s)
 			""";
-	
-	
+
+	/**
+	 * The message that is sent in a post to tell users that they
+	 * should use discord's code-formatting, provided the bot detects unformatted code.
+	 * Issued by {@link net.javadiscord.javabot.systems.help.AutoCodeFormatter}
+	 */
+	private String formatHintMessage = "> Please format your code to make it more readable. \n> For java, it should look like this: \n```\u200B`\u200B`\u200B`\u200Bjava\npublic void foo() {\n \n}\n\u200B`\u200B`\u200B`\u200B```";
+
 	/**
 	 * The message that's sent when a user unreserved a channel where other users
 	 * participated in.
@@ -92,6 +98,12 @@ public class HelpConfig extends GuildConfigItem {
 	 * The messages' minimum length.
 	 */
 	private int minimumMessageLength = 10;
+
+	/**
+	 * The message-embed's footnote of an unformatted-code-replacement.
+	 * Issued by {@link net.javadiscord.javabot.systems.help.AutoCodeFormatter}
+	 */
+	private String autoFormatInfoMessage = "This message has been formatted automatically. You can disable this using ``/preferences``.";
 
 	/**
 	 * The amount of experience points one gets for being thanked by the help channel owner.
