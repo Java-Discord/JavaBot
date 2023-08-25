@@ -9,6 +9,9 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -28,6 +31,7 @@ import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
+import net.javadiscord.javabot.systems.moderation.report.ReportManager;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -72,6 +76,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	private final BotConfig botConfig;
 	private final WarnRepository warnRepository;
 	private final ExecutorService asyncPool;
+	private final ReportManager reportManager;
 
 	/**
 	 * Deletes a message, only if the person deleting the message is the author
@@ -106,10 +111,11 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			return;
 		}
 		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
-		guild.retrieveMemberById(memberId).queue(
-				member -> {
-					service.kick(member.getUser(), reason, interaction.getMember(), interaction.getMessageChannel(), false);
+		guild.getJDA().retrieveUserById(memberId).queue(
+				user -> {
+					service.kick(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getMessage().editMessageComponents(ActionRow.of(Button.danger(interaction.getModalId(), "Kicked by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
+					resolveIfInReport(interaction.getChannel(), user);
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
@@ -120,10 +126,11 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			return;
 		}
 		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
-		guild.retrieveMemberById(memberId).queue(
-				member -> {
-					service.warn(member.getUser(), severity, reason, interaction.getMember(), interaction.getMessageChannel(), false);
+		guild.getJDA().retrieveUserById(memberId).queue(
+				user -> {
+					service.warn(user, severity, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getHook().editOriginalComponents(ActionRow.of(Button.primary(interaction.getModalId(), "Warned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
+					resolveIfInReport(interaction.getChannel(), user);
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
@@ -138,8 +145,20 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				user -> {
 					service.ban(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getMessage().editMessageComponents(ActionRow.of(Button.danger(interaction.getModalId(), "Banned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
+					resolveIfInReport(interaction.getChannel(), user);
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
+	}
+	
+	private void resolveIfInReport(MessageChannelUnion currentChannel, User actioner) {
+		if (!currentChannel.getType().isThread()) {
+			return;
+		}
+		ThreadChannel currentThread = currentChannel.asThreadChannel();
+		if (currentThread.getParentChannel().getIdLong() != botConfig.get(currentThread.getGuild()).getModerationConfig().getReportChannelId()) {
+			return;
+		}
+		reportManager.resolveReport(actioner, currentThread);
 	}
 
 	private void unban(ModalInteraction interaction, long memberId, String reason) {
