@@ -5,8 +5,12 @@ import club.minnced.discord.webhook.send.component.Button;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.IThreadContainerUnion;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -32,13 +36,32 @@ public class MessageLinkListener extends ListenerAdapter {
 		if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
 		Matcher matcher = MESSAGE_URL_PATTERN.matcher(event.getMessage().getContentRaw());
 		if (matcher.find()) {
-			Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
-			optional.ifPresent(action -> action.queue(
-					m -> WebhookUtil.ensureWebhookExists(event.getChannel().asTextChannel(),
-							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), 0, List.of(ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message"))), null)
-					), e -> ExceptionLogger.capture(e, getClass().getSimpleName())
-			));
+			MessageChannelUnion messageChannel = event.getChannel();
+			IWebhookContainer webhookChannel = getWebhookChannel(messageChannel);
+			if (webhookChannel != null) {
+				Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
+				optional.ifPresent(action -> action.queue(m -> {
+						WebhookUtil.ensureWebhookExists(webhookChannel,
+								wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), messageChannel.getType().isThread() ? messageChannel.getIdLong() : 0, List.of(ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message"))), null));
+					}, e -> ExceptionLogger.capture(e, getClass().getSimpleName())));
+			}
 		}
+	}
+
+	private IWebhookContainer getWebhookChannel(MessageChannelUnion channel) {
+		return switch (channel.getType()) {
+			case GUILD_PRIVATE_THREAD, GUILD_PUBLIC_THREAD -> getWebhookChannelFromParentChannel(channel);
+			case TEXT -> channel.asTextChannel();
+			default -> null;
+		};
+	}
+
+	private IWebhookContainer getWebhookChannelFromParentChannel(MessageChannelUnion childChannel) {
+		IThreadContainerUnion parentChannel = childChannel.asThreadChannel().getParentChannel();
+		if (parentChannel.getType() == ChannelType.FORUM) {
+			return parentChannel.asForumChannel();
+		}
+		return parentChannel.asStandardGuildMessageChannel();
 	}
 
 	/**
