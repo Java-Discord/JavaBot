@@ -34,6 +34,11 @@ public class ModerationConfig extends GuildConfigItem {
 	 * The threshold for deleting a message in #share-knowledge. Note that this should be strictly < 0.
 	 */
 	private int shareKnowledgeMessageDeleteThreshold;
+	
+	/**
+	 * ID of the channel storing staff activity information.
+	 */
+	private long staffActivityChannelId = 0;
 
 	/**
 	 * The threshold for deleting a message in #looking-for-programmer.
@@ -104,6 +109,10 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public ForumChannel getJobChannel() {
 		return this.getGuild().getForumChannelById(this.jobChannelId);
+	}
+	
+	public TextChannel getStaffActivityChannel() {
+		return this.getGuild().getTextChannelById(this.staffActivityChannelId);
 	}
 
 	public ForumChannel getShareKnowledgeChannel() {
