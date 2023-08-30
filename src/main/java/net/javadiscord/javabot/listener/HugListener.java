@@ -1,8 +1,6 @@
 package net.javadiscord.javabot.listener;
 
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel;
