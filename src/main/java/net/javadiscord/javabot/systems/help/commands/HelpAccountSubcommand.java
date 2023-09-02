@@ -145,8 +145,8 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 				.setAuthor(UserUtils.getUserTag(user), null, user.getEffectiveAvatarUrl())
 				.setTitle("Help Account")
 				.setThumbnail(user.getEffectiveAvatarUrl())
-				.setDescription("Here are some statistics about how you've helped others here.")
-				.addField("Experience (BETA)", formatExperience(guild, account), false)
+				.setDescription("Here are some statistics about how " + user.getAsMention() + " has helped others here.")
+				.addField("Experience", formatExperience(guild, account), false)
 				.addField("Total Times Thanked", String.format("**%s**", totalThanks), true)
 				.addField("Times Thanked This Week", String.format("**%s**", weekThanks), true);
 		if (upload != null) {
