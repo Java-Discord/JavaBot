@@ -155,29 +155,36 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return;
 		}
 		if (msg.getChannel().asThreadChannel().getOwnerIdLong() == msg.getAuthor().getIdLong()) {
-			for (String[] detector : closeSuggestionDetectors) {
-				if (doesMatchDetector(content, detector)) {
-					msg.reply("""
+			if(matchesAnyDetector(content)) {
+				msg.reply("""
 									If you are finished with your post, please close it.
 									If you are not, please ignore this message.
 									Note that you will not be able to send further messages here after this post have been closed but you will be able to create new posts.
 									""")
-							.addActionRow(
-									createCloseSuggestionButton(msg.getChannel()
-											.asThreadChannel()),
-									Button.secondary(
-											InteractionUtils.DELETE_ORIGINAL_TEMPLATE,
-											"\uD83D\uDDD1️"
-									)
-							)
-							.queue();
-					recentlyCloseSuggestedPosts.put(
-							postId,
-							System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT
-					);
-				}
+				.addActionRow(
+						createCloseSuggestionButton(msg.getChannel()
+								.asThreadChannel()),
+						Button.secondary(
+								InteractionUtils.DELETE_ORIGINAL_TEMPLATE,
+								"\uD83D\uDDD1️"
+								)
+						)
+				.queue();
+				recentlyCloseSuggestedPosts.put(
+						postId,
+						System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT
+						);
 			}
 		}
+	}
+
+	private boolean matchesAnyDetector(String content) {
+		for (String[] detector : closeSuggestionDetectors) {
+			if (doesMatchDetector(content, detector)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean doesMatchDetector(String content, String[] detector) {
