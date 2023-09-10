@@ -3,6 +3,7 @@ package net.javadiscord.javabot.systems.help.commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -94,24 +95,14 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			Responses.warning(event, "Sorry, this command cannot be used directly after a post has been created.").queue();
 			return;
 		}
+
+		String comment = event.getOption("comment", null, OptionMapping::getAsString);
+
 		if (isHelpPingTimeoutElapsed(member.getIdLong(), config)) {
 			lastPingTimes.put(event.getMember().getIdLong(), new Pair<>(System.currentTimeMillis(), config.getGuild()));
 			TextChannel notifChannel = config.getHelpConfig().getHelpNotificationChannel();
-			EmbedBuilder eb = new EmbedBuilder()
-					.setDescription("%s requested help in %s"
-						.formatted(
-								event.getUser().getAsMention(),
-								post.getAsMention()
-						))
-					.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
-					.setFooter(event.getUser().getId())
-					.setColor(Color.YELLOW);
 
-			appendComment(eb, event.getOption("comment", null, OptionMapping::getAsString));
-			appendTags(eb, post);
-			eb.appendDescription("\n\n[Click to view]("+post.getJumpUrl()+")");
-
-			notifChannel.sendMessageEmbeds(eb.build())
+			notifChannel.sendMessageEmbeds(createHelpEmbed(comment, post, member))
 				.addActionRow(createAcknowledgementButton())
 				.queue();
 			event.reply("""
@@ -125,6 +116,27 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 		} else {
 			Responses.warning(event, "Sorry, but you can only use this command occasionally. Please try again later.").queue();
 		}
+	}
+
+	private MessageEmbed createHelpEmbed(String comment, ThreadChannel post, Member member) {
+		EmbedBuilder eb = createBasicHelpEmbedBuilder(post, member);
+		appendComment(eb, comment);
+		appendTags(eb, post);
+		eb.appendDescription("\n\n[Click to view]("+post.getJumpUrl()+")");
+		return eb.build();
+	}
+
+	private EmbedBuilder createBasicHelpEmbedBuilder(ThreadChannel post, Member member) {
+		EmbedBuilder eb = new EmbedBuilder()
+				.setDescription("%s requested help in %s"
+					.formatted(
+							member.getAsMention(),
+							post.getAsMention()
+					))
+				.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
+				.setFooter(member.getId())
+				.setColor(Color.YELLOW);
+		return eb;
 	}
 
 	private void appendTags(EmbedBuilder eb, ThreadChannel post) {
