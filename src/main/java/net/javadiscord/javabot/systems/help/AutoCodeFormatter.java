@@ -47,6 +47,9 @@ public class AutoCodeFormatter {
 		if (closingBracket == -1 || openingBracket == -1) {
 			return null;
 		}
+		if (!msg.substring(openingBracket, closingBracket).contains("\n")) {
+			return null;
+		}
 		int startIndex = msg.lastIndexOf("\n", openingBracket);
 		int endIndex = msg.indexOf("\n", closingBracket);
 		if (startIndex == -1) {
@@ -99,7 +102,7 @@ public class AutoCodeFormatter {
 		}
 
 
-		if (event.getMessage().getContentRaw().contains("```")) {
+		if (event.getMessage().getContentRaw().contains("`")) {
 			return; // exit if already contains codeblock
 		}
 
