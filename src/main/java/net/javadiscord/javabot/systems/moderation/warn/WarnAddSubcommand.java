@@ -8,10 +8,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.systems.moderation.ModerateUserCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 import java.util.concurrent.ExecutorService;
@@ -66,13 +68,17 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
+		if(!Checks.hasStaffRole(botConfig, event.getMember())) {
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild()));
+			return;
+		}
 		User target = userMapping.getAsUser();
 		WarnSeverity severity = WarnSeverity.valueOf(severityMapping.getAsString().trim().toUpperCase());
 		if (target.isBot()) {
 			Responses.warning(event, "You cannot warn bots.").queue();
 			return;
 		}
-		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
+		boolean quiet = ModerateUserCommand.isQuiet(botConfig, event);
 		ModerationService service = new ModerationService(notificationService, botConfig, event, warnRepository, asyncPool);
 		service.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
 		Responses.success(event, "User Warned", "%s has been successfully warned.", target.getAsMention()).queue();

@@ -40,6 +40,7 @@ public class UnbanCommand extends ModerateCommand {
 		setModerationSlashCommandData(Commands.slash("unban", "Unbans a member")
 				.addOption(OptionType.STRING, "id", "The id of the user you want to unban", true)
 				.addOption(OptionType.STRING, "reason", "The reason for unbanning this user", true)
+				.addOption(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the unban is issued.", false)
 		);
 	}
 
@@ -51,7 +52,7 @@ public class UnbanCommand extends ModerateCommand {
 			return Responses.replyMissingArguments(event);
 		}
 		long id = idOption.getAsLong();
-		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
+		boolean quiet = ModerateUserCommand.isQuiet(botConfig, event);
 		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
 		if (service.unban(id, reasonOption.getAsString(), event.getMember(), event.getChannel(), quiet)) {
 			return Responses.success(event, "User Unbanned", "User with id `%s` has been unbanned.", id);
