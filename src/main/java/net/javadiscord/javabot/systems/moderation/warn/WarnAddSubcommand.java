@@ -69,7 +69,7 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		if(!Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.replyStaffOnly(event, botConfig.get(event.getGuild()));
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		User target = userMapping.getAsUser();
