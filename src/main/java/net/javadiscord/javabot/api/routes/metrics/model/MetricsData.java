@@ -12,6 +12,6 @@ import lombok.EqualsAndHashCode;
 public class MetricsData {
 	private long memberCount;
 	private long onlineCount;
-	private String weeklyMessages;
-	private String activeMembers;
+	private long weeklyMessages;
+	private long activeMembers;
 }
