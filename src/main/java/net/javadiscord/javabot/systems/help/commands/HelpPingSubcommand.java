@@ -103,7 +103,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			TextChannel notifChannel = config.getHelpConfig().getHelpNotificationChannel();
 
 			notifChannel.sendMessageEmbeds(createHelpEmbed(comment, post, member))
-				.addActionRow(createAcknowledgementButton())
+				.addActionRow(createAcknowledgementButton(post.getId()))
 				.queue();
 			event.reply("""
 					Successfully requested help.
@@ -160,12 +160,12 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 		}
 	}
 
-	private Button createAcknowledgementButton() {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge"), "Mark as acknowledged");
+	private Button createAcknowledgementButton(String postId) {
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge", postId), "Mark as acknowledged");
 	}
 
-	private Button createUndoAcknowledgementButton() {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge"), "Mark as unacknowledged");
+	private Button createUndoAcknowledgementButton(String postId) {
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge", postId), "Mark as unacknowledged");
 	}
 
 	/**
@@ -221,17 +221,40 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 	@Override
 	public void handleButton(ButtonInteractionEvent event, Button button) {
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		String postId = "";
+		if (id.length > 2) {
+			postId = id[2];
+		}
 		switch(id[1]) {
 		case "acknowledge" ->
-			acknowledgeChangeAction(event, true);
+			acknowledgeChangeAction(event, postId, true);
 		case "unacknowledge" ->
-			acknowledgeChangeAction(event, false);
+			handleUnacknowledge(event, postId);
 		default -> event.reply("Unknown button").setEphemeral(true).queue();
 		}
-
 	}
 
-	private void acknowledgeChangeAction(ButtonInteractionEvent event, boolean acknowledged) {
+	private void handleUnacknowledge(ButtonInteractionEvent event, String postId) {
+		if (postId.isEmpty() || isPostOpen(event.getGuild(), postId)) {
+			acknowledgeChangeAction(event, postId, false);
+		} else {
+			Responses.error(event, """
+					This post is closed or dormant.
+					If this post is dormant, you can mark it as active by sending a message in the post.
+					If it is closed and you still need help, please create a new post.
+					""").queue();
+		}
+	}
+
+	private boolean isPostOpen(Guild guild, String postId) {
+		ThreadChannel post = guild.getThreadChannelById(postId);
+		return post != null &&
+				post.getParentChannel().getIdLong() == botConfig.get(guild).getHelpConfig().getHelpForumChannelId() &&
+				!post.isArchived() &&
+				!post.isLocked();
+	}
+
+	private void acknowledgeChangeAction(ButtonInteractionEvent event, String postId, boolean acknowledged) {
 		event.editMessageEmbeds(
 			event.getMessage()
 			.getEmbeds()
@@ -243,7 +266,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			.map(this::removeOldField)
 			.map(EmbedBuilder::build)
 			.toList())
-		.setActionRow(acknowledged?createUndoAcknowledgementButton():createAcknowledgementButton())
+		.setActionRow(acknowledged?createUndoAcknowledgementButton(postId):createAcknowledgementButton(postId))
 		.queue();
 	}
 
