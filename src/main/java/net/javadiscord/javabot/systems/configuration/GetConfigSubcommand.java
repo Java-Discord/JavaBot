@@ -25,7 +25,6 @@ public class GetConfigSubcommand extends ConfigSubcommand {
 		setCommandData(new SubcommandData("get", "Get the current value of a configuration property.")
 				.addOption(OptionType.STRING, "property", "The name of a property.", true)
 		);
-		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
 
 	@Override

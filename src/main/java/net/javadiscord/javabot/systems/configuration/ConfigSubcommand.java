@@ -2,7 +2,7 @@ package net.javadiscord.javabot.systems.configuration;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.UnknownPropertyException;
@@ -44,5 +44,5 @@ public abstract class ConfigSubcommand extends SlashCommand.Subcommand {
 		}
 	}
 
-	protected abstract ReplyCallbackAction handleConfigSubcommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull GuildConfig config) throws UnknownPropertyException;
+	protected abstract InteractionCallbackAction<?> handleConfigSubcommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull GuildConfig config) throws UnknownPropertyException;
 }
