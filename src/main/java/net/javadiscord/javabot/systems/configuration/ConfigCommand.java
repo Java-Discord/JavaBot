@@ -17,7 +17,7 @@ public class ConfigCommand extends SlashCommand implements CommandModerationPerm
 	 * @param getConfigSubcommand /config get
 	 * @param setConfigSubcommand /config set
 	 */
-	public ConfigCommand(BotConfig botConfig, ExportConfigSubcommand exportConfigSubcommand, GetConfigSubcommand getConfigSubcommand, SetConfigSubcommand setConfigSubcommand) {
+	public ConfigCommand(BotConfig botConfig, ExportConfigSubcommand exportConfigSubcommand, GetConfigSubcommand getConfigSubcommand, ConfigSubcommand setConfigSubcommand) {
 		setModerationSlashCommandData(Commands.slash("config", "Administrative Commands for managing the bot's configuration."));
 		addSubcommands(exportConfigSubcommand, getConfigSubcommand, setConfigSubcommand);
 		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
