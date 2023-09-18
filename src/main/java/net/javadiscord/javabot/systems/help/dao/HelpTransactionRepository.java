@@ -95,9 +95,34 @@ public class HelpTransactionRepository {
 	 * @return a list consisting of month, year and the total XP earned that month
 	 */
 	public List<Pair<Pair<Integer, Integer>, Double>> getTotalTransactionWeightByMonth(long userId, LocalDateTime start) {
-		return jdbcTemplate.query("SELECT SUM(weight) AS total, EXTRACT(MONTH FROM created_at) AS m, EXTRACT(YEAR FROM created_at) AS y FROM help_transaction WHERE recipient = ? AND created_at >= ? GROUP BY m, y ORDER BY y ASC, m ASC", 
-				(rs, row)-> new Pair<>(new Pair<>(rs.getInt("m"), rs.getInt("y")), rs.getDouble("total")), 
+		return jdbcTemplate.query("SELECT SUM(weight) AS total, EXTRACT(MONTH FROM created_at) AS m, EXTRACT(YEAR FROM created_at) AS y FROM help_transaction WHERE recipient = ? AND created_at >= ? GROUP BY m, y ORDER BY y ASC, m ASC",
+				(rs, row)-> new Pair<>(new Pair<>(rs.getInt("m"), rs.getInt("y")), rs.getDouble("total")),
 				userId, start);
+	}
+
+	/**
+	 * Gets the number of users that earned help XP in the last 30 days.
+	 * This corresponds to the number of elements in {@link HelpTransactionRepository#getTotalTransactionWeightsInLastMonth(int, int)}
+	 * @return number of users earning help XP in the last 30 days
+	 */
+	public int getNumberOfUsersWithHelpXPInLastMonth() {
+		return jdbcTemplate.queryForObject("SELECT COUNT(DISTINCT recipient) FROM help_transaction WHERE created_at >= ?",
+				(rs, row) -> rs.getInt(1),
+				LocalDateTime.now().minusDays(30));
+	}
+
+	/**
+	 * Gets the total XP of users in the last 30 days in descending order of XP.
+	 * This query uses pagination.
+	 * @param page the page to request
+	 * @param pageSize the number of users
+	 * @return the requested user IDs as well as their XP counts
+	 * @see HelpTransactionRepository#getNumberOfUsersWithHelpXPInLastMonth()
+	 */
+	public List<Pair<Long, Integer>> getTotalTransactionWeightsInLastMonth(int page, int pageSize) {
+		return jdbcTemplate.query("SELECT recipient, SUM(weight) experience FROM help_transaction WHERE created_at >= ? GROUP BY recipient ORDER BY experience DESC LIMIT ? OFFSET ?",
+				(rs, row) -> new Pair<>(rs.getLong(1), rs.getInt(2)),
+				LocalDateTime.now().minusDays(30), pageSize, page);
 	}
 
 	/**
