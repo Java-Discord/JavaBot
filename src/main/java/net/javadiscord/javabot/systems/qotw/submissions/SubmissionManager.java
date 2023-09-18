@@ -1,5 +1,6 @@
 package net.javadiscord.javabot.systems.qotw.submissions;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -29,6 +30,7 @@ import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.Color;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -198,6 +200,14 @@ public class SubmissionManager {
 			notificationService.withQOTW(thread.getGuild(), author).sendBestAnswerNotification();
 		}
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(reviewedBy.getUser(), new QOTWSubmission(thread), bestAnswer ? SubmissionStatus.ACCEPT_BEST : SubmissionStatus.ACCEPT);
+		sendToQOTWAnswerArchive(thread, author, bestAnswer?AcceptedAnswerType.BEST_ANSWER:AcceptedAnswerType.ACCEPTED_ANSWER);
+	}
+
+	public void copySampleAnswerSubmission(@NotNull ThreadChannel thread, @NotNull User author) {
+		sendToQOTWAnswerArchive(thread, author, AcceptedAnswerType.SAMPLE_ANSWER);
+	}
+
+	private void sendToQOTWAnswerArchive(ThreadChannel thread, User author, AcceptedAnswerType type) {
 		Optional<ThreadChannel> newestPostOptional = config.getSubmissionsForumChannel().getThreadChannels()
 				.stream().max(Comparator.comparing(ThreadChannel::getTimeCreated));
 		if (newestPostOptional.isPresent()) {
@@ -209,9 +219,9 @@ public class SubmissionManager {
 							if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
 							if (message.getContentRaw().length() > 2000) {
 								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null).join();
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null).join();
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, type)) : null).join();
 							} else {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, bestAnswer)) : null).join();
+								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, type)) : null).join();
 							}
 						}
 					}).exceptionally(err->{
@@ -220,6 +230,15 @@ public class SubmissionManager {
 					}));
 		}
 		thread.getManager().setLocked(true).setArchived(true).queue();
+	}
+
+	@RequiredArgsConstructor
+	@Getter
+	private enum AcceptedAnswerType{
+		SAMPLE_ANSWER(Responses.Type.DEFAULT.getColor(), "\uD83D\uDCD6 Sample answer"), ACCEPTED_ANSWER(Responses.Type.DEFAULT.getColor(),"Submission"), BEST_ANSWER(Responses.Type.WARN.getColor(), "\u2B50 Submission");
+
+		private final Color color;
+		private final String prefix;
 	}
 
 	/**
@@ -244,10 +263,10 @@ public class SubmissionManager {
 				.thenApply(list -> list.stream().filter(m -> m.getAuthor().equals(user)).toList());
 	}
 
-	private @NotNull MessageEmbed buildAuthorEmbed(@NotNull User user, boolean bestAnswer) {
+	private @NotNull MessageEmbed buildAuthorEmbed(@NotNull User user, AcceptedAnswerType answerType) {
 		return new EmbedBuilder()
-				.setAuthor((bestAnswer ? "\u2B50 " : "") + "Submission from " + UserUtils.getUserTag(user), null, user.getAvatarUrl())
-				.setColor(bestAnswer ? Responses.Type.WARN.getColor() : Responses.Type.DEFAULT.getColor())
+				.setAuthor(answerType.getPrefix() + " from " + UserUtils.getUserTag(user), null, user.getAvatarUrl())
+				.setColor(answerType.getColor())
 				.build();
 	}
 

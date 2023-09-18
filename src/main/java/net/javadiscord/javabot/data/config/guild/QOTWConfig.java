@@ -23,6 +23,7 @@ public class QOTWConfig extends GuildConfigItem {
 	private long questionRoleId;
 	private long qotwReviewRoleId;
 	private long qotwChampionRoleId;
+	private long qotwSampleAnswerUserId;
 	private String submissionForumOngoingReviewTagName = "";
 
 	public NewsChannel getQuestionChannel() {
