@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -78,7 +78,11 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			return;
 		}
 		String[] id = ComponentIdBuilder.split(event.getModalId());
-		TextChannel channel = event.getGuild().getTextChannelById(id[1]);
+		String channelId = id[1];
+		MessageChannel channel = event.getGuild().getTextChannelById(channelId);
+		if (channel == null) {
+			channel = event.getGuild().getThreadChannelById(channelId);
+		}
 		if (channel == null) {
 			Responses.error(event.getHook(), "Please provide a valid text channel.").queue();
 			return;
