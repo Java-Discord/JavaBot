@@ -11,6 +11,7 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.Responses;
 
 import java.util.concurrent.ExecutorService;
@@ -52,6 +53,10 @@ public class DiscardAllWarnsSubcommand extends SlashCommand.Subcommand {
 		}
 		if (event.getGuild() == null) {
 			Responses.replyGuildOnly(event).queue();
+			return;
+		}
+		if(!Checks.hasStaffRole(botConfig, event.getMember())) {
+			Responses.replyStaffOnly(event, botConfig.get(event.getGuild())).queue();
 			return;
 		}
 		User target = userMapping.getAsUser();

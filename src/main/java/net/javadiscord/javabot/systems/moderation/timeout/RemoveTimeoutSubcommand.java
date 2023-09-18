@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.javadiscord.javabot.data.config.BotConfig;
+import net.javadiscord.javabot.systems.moderation.ModerateUserCommand;
 import net.javadiscord.javabot.systems.moderation.ModerationService;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.notification.NotificationService;
@@ -59,7 +60,7 @@ public class RemoveTimeoutSubcommand extends TimeoutSubcommand {
 		if (!channel.getType().isMessage()) {
 			return Responses.error(event, "This command can only be performed in a server message channel.");
 		}
-		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
+		boolean quiet = ModerateUserCommand.isQuiet(botConfig, event);
 		if (!member.isTimedOut()) {
 			return Responses.error(event, "Could not remove timeout from member %s; they're not timed out.", member.getAsMention());
 		}

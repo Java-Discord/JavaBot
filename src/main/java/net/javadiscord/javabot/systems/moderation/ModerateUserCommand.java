@@ -49,4 +49,33 @@ public abstract class ModerateUserCommand extends ModerateCommand {
 	}
 
 	protected abstract WebhookMessageCreateAction<Message> handleModerationUserCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Member commandUser, @Nonnull User target, @Nullable String reason);
+
+	/**
+	 * Determines whether this command is executed quitely.
+	 *
+	 * If it is, no (public) response should be sent in the current channel. This does not effect logging.
+	 *
+	 * By default, moderative actions in the log channel are quiet.
+	 * @param event The {@link SlashCommandInteractionEvent} corresponding to the executed command
+	 * @return {@code true} iff the command is quiet, else {@code false}
+	 */
+	protected boolean isQuiet(SlashCommandInteractionEvent event) {
+		return isQuiet(botConfig, event);
+	}
+
+	/**
+	 * Determines whether this command is executed quitely.
+	 *
+	 * If it is, no (public) response should be sent in the current channel. This does not effect logging.
+	 *
+	 * By default, moderative actions in the log channel are quiet.
+	 * @param botConfig the main configuration of the bot
+	 * @param event The {@link SlashCommandInteractionEvent} corresponding to the executed command
+	 * @return {@code true} iff the command is quiet, else {@code false}
+	 */
+	public static boolean isQuiet(BotConfig botConfig, SlashCommandInteractionEvent event) {
+		return event.getOption("quiet",
+				() -> event.getChannel().getIdLong() == botConfig.get(event.getGuild()).getModerationConfig().getLogChannelId(),
+				OptionMapping::getAsBoolean);
+	}
 }

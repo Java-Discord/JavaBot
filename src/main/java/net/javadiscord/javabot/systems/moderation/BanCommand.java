@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.javadiscord.javabot.data.config.BotConfig;
@@ -52,7 +51,7 @@ public class BanCommand extends ModerateUserCommand {
 		if (!Checks.hasPermission(event.getGuild(), Permission.BAN_MEMBERS)) {
 			return Responses.replyInsufficientPermissions(event.getHook(), Permission.BAN_MEMBERS);
 		}
-		boolean quiet = event.getOption("quiet", false, OptionMapping::getAsBoolean);
+		boolean quiet = isQuiet(event);
 		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
 		service.ban(target, reason, commandUser, event.getChannel(), quiet);
 		return Responses.success(event.getHook(), "User Banned", "%s has been banned.", target.getAsMention());
