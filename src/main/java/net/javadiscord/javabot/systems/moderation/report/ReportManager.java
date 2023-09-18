@@ -58,9 +58,20 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		}
 		Responses.info(event.getHook(), "Report resolved", "Successfully resolved this report!").queue();
 		event.getMessage().editMessageComponents(ActionRow.of(Button.secondary("report-resolved", "Resolved by " + UserUtils.getUserTag(event.getUser())).asDisabled())).queue();
-		thread.sendMessage("This thread was resolved by " + event.getUser().getAsMention()).queue(
-				success -> thread.getManager()
-						.setName(String.format("[Resolved] %s", thread.getName()))
+		resolveReport(event.getUser(), thread);
+	}
+
+	/**
+	 * Resolves a report thread.
+	 * This closes the current thread.
+	 * Tis method does not check whether the current thread is actually a report thread.
+	 * @param resolver the {@link User} responsible for resolving the report
+	 * @param reportThread the thread of the report to resolve
+	 */
+	public void resolveReport(User resolver, ThreadChannel reportThread) {
+		reportThread.sendMessage("This thread was resolved by " + resolver.getAsMention()).queue(
+				success -> reportThread.getManager()
+						.setName(String.format("[Resolved] %s", reportThread.getName()))
 						.setArchived(true)
 						.queue()
 		);
