@@ -23,9 +23,12 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.GuildConfig;
 import net.javadiscord.javabot.data.config.SystemsConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
+import net.javadiscord.javabot.systems.notification.NotificationService;
+import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.javadiscord.javabot.systems.qotw.model.QOTWQuestion;
 import net.javadiscord.javabot.systems.qotw.model.QOTWSubmission;
+import net.javadiscord.javabot.systems.qotw.submissions.SubmissionManager;
 import net.javadiscord.javabot.systems.qotw.submissions.SubmissionStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,6 +36,7 @@ import org.springframework.stereotype.Service;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import javax.annotation.Nonnull;
+
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +54,8 @@ public class QOTWCloseSubmissionsJob {
 	private final JDA jda;
 	private final QuestionQueueRepository questionQueueRepository;
 	private final ExecutorService asyncPool;
+	private final QOTWPointsService pointsService;
+	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 
 	/**
@@ -83,10 +89,15 @@ public class QOTWCloseSubmissionsJob {
 						final QOTWSubmission s = new QOTWSubmission(submission);
 						s.retrieveAuthor(author -> {
 							submission.removeThreadMember(author).queue();
-							thread
-								.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
-								.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
-								.queue();
+							if (author.getIdLong() == qotwConfig.getQotwSampleAnswerUserId()) {
+								SubmissionManager manager = new SubmissionManager(botConfig.get(guild).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
+								manager.copySampleAnswerSubmission(submission, author);
+							} else {
+								thread
+									.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
+									.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
+									.queue();
+							}
 						});
 						for (Member member : guild.getMembersWithRoles(qotwConfig.getQOTWReviewRole())) {
 							thread.addThreadMember(member).queue();
