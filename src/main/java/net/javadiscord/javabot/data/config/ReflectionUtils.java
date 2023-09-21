@@ -54,7 +54,7 @@ public class ReflectionUtils {
 	public static @Nullable Pair<Field, Object> resolveField(@NotNull String[] fieldNames, @NotNull Object parent) throws UnknownPropertyException {
 		if (fieldNames.length == 0) return null;
 		try {
-			Field field = parent.getClass().getDeclaredField(fieldNames[0]);
+			Field field = findDeclaredField(parent.getClass(), fieldNames[0]);
 			// Transient fields should not exist in the context of property resolution, treat them as unknown.
 			if (Modifier.isTransient(field.getModifiers())) {
 				throw new UnknownPropertyException(fieldNames[0], parent.getClass());
@@ -74,6 +74,19 @@ public class ReflectionUtils {
 			ExceptionLogger.capture(e, ReflectionUtils.class.getSimpleName());
 			log.warn("Reflection error occurred while resolving property " + Arrays.toString(fieldNames) + " of object of type " + parent.getClass().getSimpleName(), e);
 			return null;
+		}
+	}
+
+	private static Field findDeclaredField(Class<?> cl, String name) throws NoSuchFieldException {
+		try {
+			return cl.getDeclaredField(name);
+		} catch (NoSuchFieldException e) {
+			for (Field field : cl.getDeclaredFields()) {
+				if(field.getName().equalsIgnoreCase(name)) {
+					return field;
+				}
+			}
+			throw e;
 		}
 	}
 
