@@ -6,10 +6,9 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -18,6 +17,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
@@ -28,7 +29,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 
@@ -37,7 +40,12 @@ import java.util.function.BiFunction;
  */
 @AutoDetectableComponentHandler("experience-leaderboard")
 public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
-	private static final int PAGE_SIZE = 5;
+	/**
+	 * prefix contained in the image cache.
+	 */
+	public static final String CACHE_PREFIX = "xp_leaderboard";
+	private static final int PAGE_SIZE = 10;
+
 	private final ExecutorService asyncPool;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
@@ -90,23 +98,24 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 				if (page > maxPage) {
 					page = 1;
 				}
+				Pair<MessageEmbed, FileUpload> messageInfo = buildExperienceLeaderboard(event.getGuild(), page, type);
 				event.getHook()
-						.editOriginalEmbeds(buildExperienceLeaderboard(event.getGuild(), page, type))
+						.editOriginal(new MessageEditBuilder().setEmbeds(messageInfo.first()).setAttachments(messageInfo.second()).build())
 						.setComponents(buildPageControls(page, type)).queue();
-			} catch (DataAccessException e) {
+			} catch (DataAccessException | IOException e) {
 				ExceptionLogger.capture(e, ExperienceLeaderboardSubcommand.class.getSimpleName());
 			}
 		});
 	}
 
 
-	private @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, int page, LeaderboardType type) throws DataAccessException {
+	private @NotNull Pair<MessageEmbed, FileUpload> buildExperienceLeaderboard(Guild guild, int page, LeaderboardType type) throws DataAccessException, IOException {
 		return switch (type) {
 			case TOTAL -> buildGenericExperienceLeaderboard(page, helpAccountRepository.getTotalAccounts(),
 					"total Leaderboard of help experience",
 					helpAccountRepository::getAccounts, (position, account) -> {
 				Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(guild);
-				return buildEmbed(guild, position, account.getExperience(), account.getUserId(), currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "");
+				return createUserData(guild, position, account.getExperience(), account.getUserId(), currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "");
 			});
 			case MONTH -> buildGenericExperienceLeaderboard(page, helpTransactionRepository.getNumberOfUsersWithHelpXPInLastMonth(),
 					"""
@@ -114,34 +123,49 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 					This leaderboard does not include experience decay.
 					""",
 					helpTransactionRepository::getTotalTransactionWeightsInLastMonth, (position, xpInfo) -> {
-				return buildEmbed(guild, position, (double) xpInfo.second(), xpInfo.first(), "");
+				return createUserData(guild, position, (double) xpInfo.second(), xpInfo.first(), "");
 			});
 		};
 	}
 
-	private <T> @NotNull MessageEmbed buildGenericExperienceLeaderboard(int page, int totalAccounts, String description,
-			BiFunction<Integer, Integer, List<T>> accountsReader, BiFunction<Integer, T, MessageEmbed.Field> fieldExtractor) throws DataAccessException {
+	private <T> @NotNull Pair<MessageEmbed, FileUpload> buildGenericExperienceLeaderboard(int page, int totalAccounts, String description,
+			BiFunction<Integer, Integer, List<T>> accountsReader, BiFunction<Integer, T, UserData> fieldExtractor) throws DataAccessException, IOException {
+
 		int maxPage = totalAccounts / PAGE_SIZE;
 		int actualPage = Math.max(1, Math.min(page, maxPage));
 		List<T> accounts = accountsReader.apply(actualPage, PAGE_SIZE);
+
 		EmbedBuilder builder = new EmbedBuilder()
 				.setTitle("Experience Leaderboard")
 				.setDescription(description)
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setFooter(String.format("Page %s/%s", actualPage, maxPage));
-		for (int i = 0; i < accounts.size(); i++) {
-			int position = (i + 1) + (actualPage - 1) * PAGE_SIZE;
-			builder.addField(fieldExtractor.apply(position, accounts.get(i)));
-		}
-		return builder.build();
+
+		String pageCachePrefix = CACHE_PREFIX + "_" + page;
+		String cacheName = pageCachePrefix + "_" + accounts.hashCode();
+		byte[] bytes = LeaderboardCreator.attemptLoadFromCache(cacheName, ()->{
+			try (LeaderboardCreator creator = new LeaderboardCreator(accounts.size(), null)){
+				for (int i = 0; i < accounts.size(); i++) {
+					int position = (i + 1) + (actualPage - 1) * PAGE_SIZE;
+					UserData userInfo = fieldExtractor.apply(position, accounts.get(i));
+					creator.drawLeaderboardEntry(userInfo.member(), userInfo.displayName(), userInfo.xp(), position);
+				}
+				return creator.getImageBytes(cacheName, pageCachePrefix);
+			}
+		});
+		builder.setImage("attachment://leaderboard.png");
+		return new Pair<MessageEmbed, FileUpload>(builder.build(), FileUpload.fromData(bytes, "leaderboard.png"));
 	}
 
-	private Field buildEmbed(Guild guild, Integer position, double experience, long userId, String prefix) {
-		User user = guild.getJDA().getUserById(userId);
-		return new MessageEmbed.Field(
-				String.format("**%s.** %s", position, user == null ? userId : UserUtils.getUserTag(user)),
-				String.format("%s`%.0f XP`\n", prefix, experience),
-				false);
+	private UserData createUserData(Guild guild, Integer position, double experience, long userId, String prefix) {
+		Member member = guild.getMemberById(userId);
+		String displayName;
+		if (member == null) {
+			displayName = String.valueOf(userId);
+		} else {
+			displayName = UserUtils.getUserTag(member.getUser());
+		}
+		return new UserData(member, displayName, (long)experience);
 	}
 
 	@Contract("_ -> new")
@@ -159,10 +183,12 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		event.deferReply().queue();
 		asyncPool.execute(() -> {
 			try {
-				event.getHook().sendMessageEmbeds(buildExperienceLeaderboard(event.getGuild(), page, type))
+				Pair<MessageEmbed, FileUpload> messageInfo = buildExperienceLeaderboard(event.getGuild(), page, type);
+				event.getHook().sendMessageEmbeds(messageInfo.first())
+					.addFiles(messageInfo.second())
 					.setComponents(buildPageControls(page, type))
 					.queue();
-			}catch (DataAccessException e) {
+			}catch (DataAccessException | IOException e) {
 				ExceptionLogger.capture(e, ExperienceLeaderboardSubcommand.class.getSimpleName());
 			}
 		});
@@ -170,5 +196,11 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 
 	private enum LeaderboardType{
 		TOTAL, MONTH
+	}
+
+	private record UserData(Member member, String displayName, long xp) {
+		UserData {
+			Objects.requireNonNull(displayName);
+		}
 	}
 }
