@@ -1,8 +1,8 @@
-# JavaBot — General Utility Bot for the [JavaDiscord Community](https://join.javadiscord.net/)
+# JavaBot — General Utility Bot for the [Discord Java Community](https://join.discordjug.net/)
 
 ![Banner](https://user-images.githubusercontent.com/48297101/174893242-c8fc553a-e36b-4c5f-91d3-9c3bc659a7c9.png)
 
-# Usage 
+# Usage
 
 To start up, run the bot once, and it will generate a `config` directory. Stop the bot, and set the up **all of the following values**:
 - in `systems.json`
@@ -58,7 +58,7 @@ For more information on how this works, visit the [DIH4JDA Wiki!](https://github
 
 # API Documentation
 
-#### `GET` `guilds/{guild_id}/metrics` 
+#### `GET` `guilds/{guild_id}/metrics`
 - Responds with guild-specific metrics, such as the member- and (approximate) online count.
 
 #### `GET` `guilds/{guild_id}/users/{user_id}`
@@ -70,7 +70,7 @@ For more information on how this works, visit the [DIH4JDA Wiki!](https://github
 #### `GET` `guilds/{guild_id}/leaderboard/experience?page=1`
 - A paginated endpoint which responds with an ordered list of users, based on their help channel experience.
 
-You can try out the API yourself on `api.javadiscord.net`! 
+You can try out the API yourself on `api.javadiscord.net`!
 
 # Credits
 
