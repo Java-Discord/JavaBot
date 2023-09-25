@@ -113,7 +113,11 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	}
 
 	public static Button createDeleteButton(long senderId) {
-		return Button.secondary(DELETE_ORIGINAL_TEMPLATE.formatted(senderId), "\uD83D\uDDD1️");
+		return Button.secondary(createDeleteInteractionId(senderId), "\uD83D\uDDD1️");
+	}
+
+	public static String createDeleteInteractionId(long senderId) {
+		return DELETE_ORIGINAL_TEMPLATE.formatted(senderId);
 	}
 
 	private void kick(ModalInteraction interaction, @NotNull Guild guild, String memberId, String reason) {
