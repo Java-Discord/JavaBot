@@ -80,7 +80,7 @@ public class PresenceUpdater extends ListenerAdapter {
 	public static PresenceUpdater standardActivities() {
 		return new PresenceUpdater(List.of(
 				jda -> Activity.watching(String.format("%s members", jda.getGuilds().stream().mapToLong(Guild::getMemberCount).sum())),
-				jda -> Activity.watching("Use /report, 'Report User' or 'Report Message' to report disruptive behaviour!")
+				jda -> Activity.customStatus("Use /report, 'Report User' or 'Report Message' to report disruptive behaviour!")
 		), 35, TimeUnit.SECONDS);
 	}
 
