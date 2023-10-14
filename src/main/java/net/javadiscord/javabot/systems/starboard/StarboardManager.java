@@ -149,6 +149,10 @@ public class StarboardManager extends ListenerAdapter {
 					action.addFiles(FileUpload.fromData(a.getProxy().download().get(), a.getFileName()));
 				} catch (InterruptedException | ExecutionException e) {
 					action.addContent("Could not add Attachment: " + a.getFileName());
+					ExceptionLogger.capture(e);
+					if(e instanceof InterruptedException) {
+						Thread.currentThread().interrupt();
+					}
 				}
 			}
 		}
@@ -231,8 +235,6 @@ public class StarboardManager extends ListenerAdapter {
 				.setDescription(message.getContentRaw())
 				.setFooter("#" + message.getChannel().getName());
 		
-		boolean attachedImage = false;
-		
 		List<MessageEmbed> embeds = message.getEmbeds();
 		if(embeds.size() > 0) {
 			MessageEmbed firstEmbed = embeds.get(0);
@@ -242,15 +244,12 @@ public class StarboardManager extends ListenerAdapter {
 			ImageInfo image = firstEmbed.getImage();
 			if(image != null && image.getUrl() != null) {
 				builder.setImage(image.getUrl());
-				attachedImage = true;
 			}
 		}
 		
-		if(!attachedImage) {
-			List<Attachment> attachments = message.getAttachments();
-			if(attachments.size() == 1) {
-				builder.setImage(attachments.get(0).getUrl());
-			}
+		List<Attachment> attachments = message.getAttachments();
+		if(attachments.size() == 1) {
+			builder.setImage(attachments.get(0).getUrl());
 		}
 		
 		return builder.build();
