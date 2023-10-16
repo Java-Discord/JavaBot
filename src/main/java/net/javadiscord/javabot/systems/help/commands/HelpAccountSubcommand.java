@@ -18,7 +18,6 @@ import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository.MonthInYear;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Plotter;
@@ -74,11 +73,6 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
 		boolean plot = event.getOption("plot", false, OptionMapping::getAsBoolean);
-		
-		if (plot && user.getIdLong()!=event.getUser().getIdLong() && !Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.error(event, "You can only plot your own help XP history.").queue();
-			return;
-		}
 		
 		long totalThanks = dbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ?",
