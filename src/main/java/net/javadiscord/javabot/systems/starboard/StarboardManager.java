@@ -245,6 +245,9 @@ public class StarboardManager extends ListenerAdapter {
 			if(image != null && image.getUrl() != null) {
 				builder.setImage(image.getUrl());
 			}
+			String desc = message.getContentRaw();
+			if(desc == null || desc.isEmpty())
+			    builder.setDescription(firstEmbed.getDescription());
 		}
 		
 		List<Attachment> attachments = message.getAttachments();
