@@ -118,7 +118,7 @@ public class HelpAccountRepository {
 	}
 
 	private @NotNull HelpAccount read(@NotNull ResultSet rs) throws SQLException {
-		HelpAccount account = new HelpAccount(botConfig);
+		HelpAccount account = new HelpAccount();
 		account.setUserId(rs.getLong("user_id"));
 		account.setExperience(rs.getDouble("experience"));
 		return account;

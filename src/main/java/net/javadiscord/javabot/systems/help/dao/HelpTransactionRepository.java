@@ -2,6 +2,7 @@ package net.javadiscord.javabot.systems.help.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
 import net.javadiscord.javabot.util.Pair;
 
@@ -94,12 +95,23 @@ public class HelpTransactionRepository {
 	 * @param start the start timestamp
 	 * @return a list consisting of month, year and the total XP earned that month
 	 */
-	public List<Pair<Pair<Integer, Integer>, Double>> getTotalTransactionWeightByMonth(long userId, LocalDateTime start) {
+	public List<Pair<MonthInYear, Double>> getTotalTransactionWeightByMonth(long userId, LocalDateTime start) {
 		return jdbcTemplate.query("SELECT SUM(weight) AS total, EXTRACT(MONTH FROM created_at) AS m, EXTRACT(YEAR FROM created_at) AS y FROM help_transaction WHERE recipient = ? AND created_at >= ? GROUP BY m, y ORDER BY y ASC, m ASC", 
-				(rs, row)-> new Pair<>(new Pair<>(rs.getInt("m"), rs.getInt("y")), rs.getDouble("total")), 
+				(rs, row)-> new Pair<>(new MonthInYear(rs.getInt("m"), rs.getInt("y")), rs.getDouble("total")), 
 				userId, start);
 	}
-
+	
+	/**
+	 * Gets the total earned XP of a user since a specific timestamp grouped by months and users.
+	 * @param start the start timestamp
+	 * @return a list consisting of month, year, user and the total XP earned that month
+	 */
+	public List<Pair<MonthInYear, HelpAccount>> getTotalTransactionWeightByMonthAndUsers(LocalDateTime start) {
+		return jdbcTemplate.query("SELECT SUM(weight) AS total, EXTRACT(MONTH FROM created_at) AS m, EXTRACT(YEAR FROM created_at) AS y, recipient FROM help_transaction WHERE created_at >= ? GROUP BY m, y, recipient ORDER BY y ASC, m ASC, total DESC", 
+				(rs, row)-> new Pair<>(new MonthInYear(rs.getInt("m"), rs.getInt("y")), new HelpAccount(rs.getLong("recipient"), rs.getDouble("total"))),
+				start);
+	}
+	
 	/**
 	 * Checks whether a transaction with a specific recipient exists in a specific channel.
 	 * @param recipient The ID of the recipient
@@ -112,4 +124,11 @@ public class HelpTransactionRepository {
 				Integer.class,
 				recipient, channelId) > 0;
 	}
+
+	/**
+	 * Stores a given month in a specific year.
+	 * @param month the month in the year.
+	 * @param year the year.
+	 */
+	public record MonthInYear(int month, int year) {}
 }

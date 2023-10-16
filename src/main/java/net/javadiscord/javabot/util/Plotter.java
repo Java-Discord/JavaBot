@@ -3,14 +3,17 @@ package net.javadiscord.javabot.util;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Creates diagrams.
  */
 public class Plotter {
+	
 	private String title;
-	private final List<Pair<String, Double>> entries;
+	private final List<Pair<String, Bar>> entries;
 	private int width=3000;
 	private int height=1500;
 	
@@ -19,7 +22,7 @@ public class Plotter {
 	 * @param entries a list of all data points to plot, each represented as a {@link Pair} consisting of the name and value of the data point
 	 * @param title the title of the plot
 	 */
-	public Plotter(List<Pair<String, Double>> entries, String title) {
+	public Plotter(List<Pair<String, Bar>> entries, String title) {
 		this.entries = entries;
 		this.title = title;
 	}
@@ -46,7 +49,7 @@ public class Plotter {
 	}
 
 	private void plotEntries(Graphics2D g2d, int x, int y, int width, int height) {
-		double maxValue = entries.stream().mapToDouble(Pair::second).max().orElse(0);
+		double maxValue = entries.stream().<Bar>map(Pair::second).mapToDouble(Bar::sum).max().orElse(0);
 		int stepSize = 2*(int)Math.pow(10,(int)Math.log10(maxValue)-1);
 		if (stepSize==0) {
 			stepSize=1;
@@ -66,15 +69,27 @@ public class Plotter {
 		}
 		
 		boolean shift=false;
-		for (Pair<String, Double> entry : entries) {
+		for (Pair<String, Bar> entry : entries) {
 			int shiftNum = shift ? g2d.getFontMetrics().getHeight() : 0;
 			centeredText(g2d, entry.first(), currentX+(width/(2*numEntries)), this.height-y/2+shiftNum);
-			int entryHeight = (int)(height*entry.second()/maxValue);
-			g2d.setColor(Color.GRAY);
-			g2d.fillRect(currentX, this.height-y-entryHeight, width/numEntries, entryHeight);
-			g2d.setColor(Color.BLACK);
-			g2d.drawRect(currentX, this.height-y-entryHeight, width/numEntries, entryHeight);
-			centeredText(g2d, String.valueOf(entry.second()), currentX+(width/(2*numEntries)), this.height-y-entryHeight-10);
+			Bar bar = entry.second();
+			int totalBarHeight = 0;
+			
+			Map<String, Color> colors = new HashMap<>();
+			
+			double barSum = 0;
+			
+			for (Pair<Color, Double> barSquares : bar.elements()) {
+				int entryHeight = (int)(height*barSquares.second()/maxValue);
+				barSum += barSquares.second();
+				g2d.setColor(barSquares.first());
+				int start = this.height-y-entryHeight - totalBarHeight;
+				g2d.fillRect(currentX, start, width/numEntries, entryHeight);
+				g2d.setColor(Color.BLACK);
+				g2d.drawRect(currentX, start, width/numEntries, entryHeight);
+				totalBarHeight += entryHeight;
+			}
+			centeredText(g2d, String.valueOf(Math.round(barSum*100)/100.0), currentX+(width/(2*numEntries)), this.height-y-totalBarHeight-10);
 			shift=!shift;
 			currentX += width/numEntries;
 		}
@@ -82,5 +97,20 @@ public class Plotter {
 	
 	private void centeredText(Graphics2D g2d, String text, int x, int y) {
 		g2d.drawString(text, x-g2d.getFontMetrics().stringWidth(text)/2, y);
+	}
+	
+	/**
+	 * A single bar which should be plotted.
+	 * 
+	 * @param elements any number of the entries to plot
+	 */
+	public record Bar(List<Pair<Color,Double>> elements) {
+		public Bar(double singleElement) {
+			this(List.of(new Pair<>(Color.GRAY, singleElement)));
+		}
+		
+		private double sum() {
+			return elements.stream().mapToDouble(Pair::second).sum();
+		}
 	}
 }

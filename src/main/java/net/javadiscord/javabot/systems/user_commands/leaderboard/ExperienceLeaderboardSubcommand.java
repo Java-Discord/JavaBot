@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -35,15 +36,18 @@ import java.util.concurrent.ExecutorService;
 @AutoDetectableComponentHandler("experience-leaderboard")
 public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
 	private static final int PAGE_SIZE = 5;
+	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
 	private final HelpAccountRepository helpAccountRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig main configuration of the bot.
 	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
 	 * @param asyncPool the main thread pool for asynchronous operations
 	 */
-	public ExperienceLeaderboardSubcommand(HelpAccountRepository helpAccountRepository, ExecutorService asyncPool) {
+	public ExperienceLeaderboardSubcommand(BotConfig botConfig, HelpAccountRepository helpAccountRepository, ExecutorService asyncPool) {
+		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
 		this.helpAccountRepository = helpAccountRepository;
 		setCommandData(new SubcommandData("help-experience", "The Help Experience Leaderboard.")
@@ -80,7 +84,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		});
 	}
 
-	private static @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, @NotNull HelpAccountRepository dao, int page) throws DataAccessException {
+	private @NotNull MessageEmbed buildExperienceLeaderboard(Guild guild, @NotNull HelpAccountRepository dao, int page) throws DataAccessException {
 		int maxPage = dao.getTotalAccounts() / PAGE_SIZE;
 		List<HelpAccount> accounts = dao.getAccounts(Math.min(page, maxPage), PAGE_SIZE);
 		EmbedBuilder builder = new EmbedBuilder()
@@ -88,7 +92,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setFooter(String.format("Page %s/%s", Math.min(page, maxPage), maxPage));
 		accounts.forEach(account -> {
-			Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(guild);
+			Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(botConfig, guild);
 			User user = guild.getJDA().getUserById(account.getUserId());
 			builder.addField(
 					String.format("**%s.** %s", (accounts.indexOf(account) + 1) + (page - 1) * PAGE_SIZE, user == null ? account.getUserId() : UserUtils.getUserTag(user)),

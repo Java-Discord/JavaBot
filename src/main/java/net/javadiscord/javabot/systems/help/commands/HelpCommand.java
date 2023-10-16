@@ -12,11 +12,12 @@ public class HelpCommand extends SlashCommand {
 	 * @param helpAccountSubcommand /help account
 	 * @param helpPingSubcommand /help ping
 	 * @param helpGuidelinesSubcommand /help guidelines
+	 * @param helpStatisticsSubcommand /help stats
 	 */
-	public HelpCommand(HelpAccountSubcommand helpAccountSubcommand, HelpPingSubcommand helpPingSubcommand, HelpGuidelinesSubcommand helpGuidelinesSubcommand) {
+	public HelpCommand(HelpAccountSubcommand helpAccountSubcommand, HelpPingSubcommand helpPingSubcommand, HelpGuidelinesSubcommand helpGuidelinesSubcommand, HelpStatisticsSubcommand helpStatisticsSubcommand) {
 		setCommandData(Commands.slash("help", "Commands related to the help system.")
 				.setGuildOnly(true)
 		);
-		addSubcommands(helpAccountSubcommand, helpPingSubcommand, helpGuidelinesSubcommand);
+		addSubcommands(helpAccountSubcommand, helpPingSubcommand, helpGuidelinesSubcommand, helpStatisticsSubcommand);
 	}
 }
