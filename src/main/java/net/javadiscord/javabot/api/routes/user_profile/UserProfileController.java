@@ -88,7 +88,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 		try{
 			user = jda.retrieveUserById(userId).complete();
 		}catch (ErrorResponseException e) {
-			throw new InvalidEntityIdException(User.class, e.getMeaning());
+			throw new InvalidEntityIdException(User.class, "Cannot fetch user: " + e.getMeaning());
 		}
 		try (Connection con = dataSource.getConnection()) {
 			// Check Cache
