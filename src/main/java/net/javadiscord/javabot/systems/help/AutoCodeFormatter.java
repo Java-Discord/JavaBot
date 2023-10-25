@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.moderation.AutoMod;
 import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
@@ -124,9 +123,8 @@ public class AutoCodeFormatter {
 		event.getMessage()
 				.replyEmbeds(formatHintEmbed(event.getGuild()))
 				.addActionRow(
-						Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️")
-				)
-				.queue();
+						InteractionUtils.createDeleteButton(event.getAuthor().getIdLong())
+				).queue();
 	}
 
 	private void replaceUnformattedCode(String msg, int codeStartIndex, int codeEndIndex, MessageReceivedEvent event) {

@@ -27,7 +27,7 @@ public class FormatAndIndentCodeMessageContext extends ContextCommand.Message {
 	public void execute(@NotNull MessageContextInteractionEvent event) {
 		event.replyFormat("```java\n%s\n```", IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(event.getTarget().getContentRaw()), IndentationHelper.IndentationType.TABS))
 				.setAllowedMentions(List.of())
-				.setComponents(FormatCodeCommand.buildActionRow(event.getTarget()))
+				.setComponents(FormatCodeCommand.buildActionRow(event.getTarget(), event.getUser().getIdLong()))
 				.queue();
 	}
 }

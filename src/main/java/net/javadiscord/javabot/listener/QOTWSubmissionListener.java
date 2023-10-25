@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.config.guild.QOTWConfig;
 import net.javadiscord.javabot.util.InteractionUtils;
@@ -35,7 +34,7 @@ public class QOTWSubmissionListener extends ListenerAdapter {
 									Please keep in mind that messages **over 2000 characters** get split in half due to webhook limitations.
 									If you want to make sure that your submission is properly formatted, split your message into smaller chunks instead.""",
 							event.getAuthor().getAsMention())
-					.setActionRow(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"))
+					.setActionRow(InteractionUtils.createDeleteButton(event.getAuthor().getIdLong()))
 					.queue();
 		}
 	}

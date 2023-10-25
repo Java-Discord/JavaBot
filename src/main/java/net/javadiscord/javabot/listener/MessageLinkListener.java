@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.InteractionUtils;
 import net.javadiscord.javabot.util.WebhookUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +43,12 @@ public class MessageLinkListener extends ListenerAdapter {
 				Optional<RestAction<Message>> optional = parseMessageUrl(matcher.group(), event.getJDA());
 				optional.ifPresent(action -> action.queue(m -> {
 						WebhookUtil.ensureWebhookExists(webhookChannel,
-								wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(), messageChannel.getType().isThread() ? messageChannel.getIdLong() : 0, List.of(ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message"))), null));
+							wh -> WebhookUtil.mirrorMessageToWebhook(wh, m, m.getContentRaw(),
+									messageChannel.getType().isThread() ? messageChannel.getIdLong() : 0,
+									List.of(ActionRow.of(
+											Button.link(m.getJumpUrl(), "Jump to Message"),
+											Button.secondary(InteractionUtils.createDeleteInteractionId(m.getAuthor().getIdLong()), "\uD83D\uDDD1️"))),
+									null));
 					}, e -> ExceptionLogger.capture(e, getClass().getSimpleName())));
 			}
 		}

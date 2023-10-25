@@ -162,14 +162,9 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 									Note that you will not be able to send further messages here after this post have been closed but you will be able to create new posts.
 									""")
 				.addActionRow(
-						createCloseSuggestionButton(msg.getChannel()
-								.asThreadChannel()),
-						Button.secondary(
-								InteractionUtils.DELETE_ORIGINAL_TEMPLATE,
-								"\uD83D\uDDD1️"
-								)
-						)
-				.queue();
+						createCloseSuggestionButton(msg.getChannel().asThreadChannel()),
+						InteractionUtils.createDeleteButton(msg.getAuthor().getIdLong())
+				).queue();
 				recentlyCloseSuggestedPosts.put(
 						postId,
 						System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT

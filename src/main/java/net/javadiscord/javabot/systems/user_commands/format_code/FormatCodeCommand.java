@@ -56,8 +56,8 @@ public class FormatCodeCommand extends SlashCommand {
 	}
 
 	@Contract("_ -> new")
-	static @NotNull ActionRow buildActionRow(@NotNull Message target) {
-		return ActionRow.of(Button.secondary(InteractionUtils.DELETE_ORIGINAL_TEMPLATE, "\uD83D\uDDD1️"),
+	static @NotNull ActionRow buildActionRow(@NotNull Message target, long requesterId) {
+		return ActionRow.of(InteractionUtils.createDeleteButton(requesterId),
 				Button.link(target.getJumpUrl(), "View Original"));
 	}
 
@@ -78,7 +78,7 @@ public class FormatCodeCommand extends SlashCommand {
 						if (target != null) {
 							event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()),IndentationHelper.IndentationType.valueOf(indentation)))
 									.setAllowedMentions(List.of())
-									.setComponents(buildActionRow(target))
+									.setComponents(buildActionRow(target, event.getUser().getIdLong()))
 									.queue();
 						} else {
 							Responses.error(event.getHook(), "Could not find message; please specify a message id.").queue();
@@ -93,7 +93,7 @@ public class FormatCodeCommand extends SlashCommand {
 			event.getChannel().retrieveMessageById(messageId).queue(
 					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()), IndentationHelper.IndentationType.valueOf(indentation)))
 							.setAllowedMentions(List.of())
-							.setComponents(buildActionRow(target))
+							.setComponents(buildActionRow(target, event.getUser().getIdLong()))
 							.queue(),
 					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
 		}
