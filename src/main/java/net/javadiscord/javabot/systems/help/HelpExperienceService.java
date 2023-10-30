@@ -11,7 +11,9 @@ import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.help.model.HelpTransaction;
+import net.javadiscord.javabot.systems.user_commands.leaderboard.ExperienceLeaderboardSubcommand;
 import net.javadiscord.javabot.util.ExceptionLogger;
+import net.javadiscord.javabot.util.ImageCache;
 import net.javadiscord.javabot.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
@@ -97,6 +99,7 @@ public class HelpExperienceService {
 		helpTransactionRepository.save(transaction);
 		checkExperienceRoles(guild, account);
 		log.info("Added {} help experience to {}'s help account", value, recipient);
+		ImageCache.removeCachedImagesByKeyword(ExperienceLeaderboardSubcommand.CACHE_PREFIX);
 	}
 
 	private void checkExperienceRoles(@NotNull Guild guild, @NotNull HelpAccount account) {
@@ -114,10 +117,10 @@ public class HelpExperienceService {
 					}
 				}), e -> {});
 	}
-	
+
 	/**
 	 * add XP to all helpers depending on the messages they sent.
-	 * 
+	 *
 	 * @param post The {@link ThreadChannel} post
 	 * @param allowIfXPAlreadyGiven {@code true} if XP should be awarded if XP have already been awarded
 	 */

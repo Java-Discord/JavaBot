@@ -113,6 +113,31 @@ public class HelpTransactionRepository {
 	}
 	
 	/**
+	 * Gets the number of users that earned help XP in the last 30 days.
+	 * This corresponds to the number of elements in {@link HelpTransactionRepository#getTotalTransactionWeightsInLastMonth(int, int)}
+	 * @return number of users earning help XP in the last 30 days
+	 */
+	public int getNumberOfUsersWithHelpXPInLastMonth() {
+		return jdbcTemplate.queryForObject("SELECT COUNT(DISTINCT recipient) FROM help_transaction WHERE created_at >= ?",
+				(rs, row) -> rs.getInt(1),
+				LocalDateTime.now().minusDays(30));
+	}
+
+	/**
+	 * Gets the total XP of users in the last 30 days in descending order of XP.
+	 * This query uses pagination.
+	 * @param page the page to request
+	 * @param pageSize the number of users
+	 * @return the requested user IDs as well as their XP counts
+	 * @see HelpTransactionRepository#getNumberOfUsersWithHelpXPInLastMonth()
+	 */
+	public List<Pair<Long, Integer>> getTotalTransactionWeightsInLastMonth(int page, int pageSize) {
+		return jdbcTemplate.query("SELECT recipient, SUM(weight) experience FROM help_transaction WHERE created_at >= ? GROUP BY recipient ORDER BY experience DESC LIMIT ? OFFSET ?",
+				(rs, row) -> new Pair<>(rs.getLong(1), rs.getInt(2)),
+				LocalDateTime.now().minusDays(30), pageSize, page);
+	}
+
+	/**
 	 * Checks whether a transaction with a specific recipient exists in a specific channel.
 	 * @param recipient The ID of the recipient
 	 * @param channelId The ID of the channel

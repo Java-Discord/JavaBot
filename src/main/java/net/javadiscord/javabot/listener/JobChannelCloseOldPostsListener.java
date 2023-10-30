@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.util.InteractionUtils;
 
@@ -17,9 +16,9 @@ import net.javadiscord.javabot.util.InteractionUtils;
  */
 @RequiredArgsConstructor
 public class JobChannelCloseOldPostsListener extends ListenerAdapter {
-	
+
 	private final BotConfig botConfig;
-	
+
 	@Override
 	public void onChannelCreate(ChannelCreateEvent event) {
 		if (event.getChannel().getType() != ChannelType.GUILD_PUBLIC_THREAD) {
@@ -30,10 +29,10 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 				botConfig.get(event.getGuild()).getModerationConfig().getJobChannelId()) {
 			return;
 		}
-		
-		
+
+
 		boolean postClosed = false;
-		
+
 		for (ThreadChannel otherPost : post.getParentChannel().getThreadChannels()) {
 			if (otherPost.getOwnerIdLong() == post.getOwnerIdLong() &&
 					otherPost.getIdLong() != post.getIdLong() &&
@@ -56,9 +55,7 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 					.setDescription("Since only one open post is allowed per user, older posts have been closed")
 					.setColor(Color.YELLOW)
 					.build())
-				.addActionRow(Button.secondary(
-						InteractionUtils.DELETE_ORIGINAL_TEMPLATE,
-						"\uD83D\uDDD1️"))
+				.addActionRow(InteractionUtils.createDeleteButton(post.getOwnerIdLong()))
 				.queue();
 		}
 	}
