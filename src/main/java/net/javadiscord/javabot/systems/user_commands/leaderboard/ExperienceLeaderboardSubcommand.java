@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.javadiscord.javabot.annotations.AutoDetectableComponentHandler;
+import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.systems.help.dao.HelpAccountRepository;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
 import net.javadiscord.javabot.util.ExceptionLogger;
@@ -46,17 +47,20 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public static final String CACHE_PREFIX = "xp_leaderboard";
 	private static final int PAGE_SIZE = 10;
 
+	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param botConfig main configuration of the bot.
 	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
 	 * @param asyncPool the main thread pool for asynchronous operations
 	 * @param helpTransactionRepository Dao object that represents the HELP_TRANSACTIONS SQL Table.
 	 */
-	public ExperienceLeaderboardSubcommand(HelpAccountRepository helpAccountRepository, ExecutorService asyncPool, HelpTransactionRepository helpTransactionRepository) {
+	public ExperienceLeaderboardSubcommand(BotConfig botConfig, HelpAccountRepository helpAccountRepository, ExecutorService asyncPool, HelpTransactionRepository helpTransactionRepository) {
+		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
 		this.helpAccountRepository = helpAccountRepository;
 		this.helpTransactionRepository = helpTransactionRepository;
@@ -108,13 +112,12 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		});
 	}
 
-
 	private @NotNull Pair<MessageEmbed, FileUpload> buildExperienceLeaderboard(Guild guild, int page, LeaderboardType type) throws DataAccessException, IOException {
 		return switch (type) {
 			case TOTAL -> buildGenericExperienceLeaderboard(page, helpAccountRepository.getTotalAccounts(),
 					"total Leaderboard of help experience",
 					helpAccountRepository::getAccounts, (position, account) -> {
-				Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(guild);
+				Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(botConfig, guild);
 				return createUserData(guild, position, account.getExperience(), account.getUserId(), currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "");
 			});
 			case MONTH -> buildGenericExperienceLeaderboard(page, helpTransactionRepository.getNumberOfUsersWithHelpXPInLastMonth(),
@@ -139,7 +142,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 				.setTitle("Experience Leaderboard")
 				.setDescription(description)
 				.setColor(Responses.Type.DEFAULT.getColor())
-				.setFooter(String.format("Page %s/%s", actualPage, maxPage));
+				.setFooter(String.format("Page %s/%s", Math.min(page, maxPage), maxPage));
 
 		String pageCachePrefix = CACHE_PREFIX + "_" + page;
 		String cacheName = pageCachePrefix + "_" + accounts.hashCode();

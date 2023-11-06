@@ -109,7 +109,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				data.setQotwAccount(qotwAccount);
 				// Help Account
 				HelpAccount helpAccount = helpExperienceService.getOrCreateAccount(user.getIdLong());
-				data.setHelpAccount(HelpAccountData.of(helpAccount, guild));
+				data.setHelpAccount(HelpAccountData.of(botConfig, helpAccount, guild));
 				// User Preferences
 				List<UserPreference> preferences = Arrays.stream(Preference.values()).map(p -> preferenceService.getOrCreate(user.getIdLong(), p)).toList();
 				data.setPreferences(preferences);

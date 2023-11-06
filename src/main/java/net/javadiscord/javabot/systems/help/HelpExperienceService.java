@@ -50,7 +50,7 @@ public class HelpExperienceService {
 		if (optional.isPresent()) {
 			account = optional.get();
 		} else {
-			account = new HelpAccount(botConfig);
+			account = new HelpAccount();
 			account.setUserId(userId);
 			account.setExperience(0);
 			helpAccountRepository.insert(account);
@@ -105,7 +105,7 @@ public class HelpExperienceService {
 	private void checkExperienceRoles(@NotNull Guild guild, @NotNull HelpAccount account) {
 		guild.retrieveMemberById(account.getUserId()).queue(member ->
 				botConfig.get(guild).getHelpConfig().getExperienceRoles().forEach((key, value) -> {
-					Pair<Role, Double> role = account.getCurrentExperienceGoal(guild);
+					Pair<Role, Double> role = account.getCurrentExperienceGoal(botConfig, guild);
 					if (role.first() == null) return;
 					if (key.equals(role.first().getIdLong())) {
 						guild.addRoleToMember(member, role.first()).queue();
