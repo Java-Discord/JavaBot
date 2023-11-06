@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.entities.MessageEmbed.Field;
+import net.dv8tion.jda.api.entities.MessageEmbed.ImageInfo;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -25,6 +28,7 @@ import net.javadiscord.javabot.util.UserUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -137,13 +141,22 @@ public class StarboardManager extends ListenerAdapter {
 				.sendMessage(String.format("%s %s", config.getEmojis().get(0), stars))
 				.setActionRow(Button.link(message.getJumpUrl(), "Jump to Message"))
 				.setEmbeds(embed);
-		for (Message.Attachment a : message.getAttachments()) {
-			try {
-				action.addFiles(FileUpload.fromData(a.getProxy().download().get(), a.getFileName()));
-			} catch (InterruptedException | ExecutionException e) {
-				action.addContent("Could not add Attachment: " + a.getFileName());
+		List<Attachment> attachments = message.getAttachments();
+		
+		if(attachments.size() > 1) {
+			for (Message.Attachment a : attachments) {
+				try {
+					action.addFiles(FileUpload.fromData(a.getProxy().download().get(), a.getFileName()));
+				} catch (InterruptedException | ExecutionException e) {
+					action.addContent("Could not add Attachment: " + a.getFileName());
+					ExceptionLogger.capture(e);
+					if(e instanceof InterruptedException) {
+						Thread.currentThread().interrupt();
+					}
+				}
 			}
 		}
+		
 		action.queue(starboardMessage -> {
 				StarboardEntry entry = new StarboardEntry();
 				entry.setOriginalMessageId(message.getIdLong());
@@ -216,11 +229,33 @@ public class StarboardManager extends ListenerAdapter {
 
 	private @NotNull MessageEmbed buildStarboardEmbed(@NotNull Message message) {
 		User author = message.getAuthor();
-		return new EmbedBuilder()
+		EmbedBuilder builder = new EmbedBuilder()
 				.setAuthor(UserUtils.getUserTag(author), message.getJumpUrl(), author.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(message.getContentRaw())
-				.setFooter("#" + message.getChannel().getName())
-				.build();
+				.setFooter("#" + message.getChannel().getName());
+		
+		List<MessageEmbed> embeds = message.getEmbeds();
+		if(embeds.size() > 0) {
+			MessageEmbed firstEmbed = embeds.get(0);
+			for(Field field : firstEmbed.getFields()) {
+				builder.addField(field);
+			}
+			ImageInfo image = firstEmbed.getImage();
+			if(image != null && image.getUrl() != null) {
+				builder.setImage(image.getUrl());
+			}
+			String desc = message.getContentRaw();
+			if(desc == null || desc.isEmpty()) {
+				builder.setDescription(firstEmbed.getDescription());
+			}
+		}
+		
+		List<Attachment> attachments = message.getAttachments();
+		if(attachments.size() == 1) {
+			builder.setImage(attachments.get(0).getUrl());
+		}
+		
+		return builder.build();
 	}
 }

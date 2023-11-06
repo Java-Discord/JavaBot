@@ -52,10 +52,6 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class InteractionUtils implements ButtonHandler, ModalHandler, StringSelectMenuHandler {
 	/**
-	 * Template Interaction ID for deleting the original Message.
-	 */
-	public static final String DELETE_ORIGINAL_TEMPLATE = "utils:delete";
-	/**
 	 * Template Interaction ID for banning a single member from the current guild.
 	 */
 	public static final String BAN_TEMPLATE = "utils:ban:%s";
@@ -72,6 +68,11 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	 */
 	public static final String WARN_TEMPLATE = "utils:warn:%s";
 
+	/**
+	 * Template Interaction ID for deleting the original Message.
+	 */
+	private static final String DELETE_ORIGINAL_TEMPLATE = "utils:delete:%d";
+
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final WarnRepository warnRepository;
@@ -83,26 +84,40 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	 * of the message, a staff member, or the owner.
 	 *
 	 * @param interaction The button interaction.
+	 * @param componentId The split id of the interaction component.
 	 * @return the {@link ReplyCallbackAction} for responding to the request
 	 */
 	@CheckReturnValue
-	private InteractionCallbackAction<?> delete(@NotNull ButtonInteraction interaction) {
+	private InteractionCallbackAction<?> delete(@NotNull ButtonInteraction interaction, String[] componentId) {
 		Member member = interaction.getMember();
 		if (member == null) {
 			return Responses.warning(interaction, "Could not get member.");
 		}
 		GuildConfig config = botConfig.get(interaction.getGuild());
 		Message msg = interaction.getMessage();
-		if (
-				member.getUser().getIdLong() == msg.getAuthor().getIdLong() ||
-						member.getRoles().contains(config.getModerationConfig().getStaffRole()) ||
-						member.isOwner()
-		) {
+
+		String authorId = "";
+
+		if (componentId.length>1) {
+			authorId = componentId[1];
+		}
+
+		if (authorId.equals(member.getUser().getId()) ||
+				member.getRoles().contains(config.getModerationConfig().getStaffRole()) ||
+				member.isOwner()) {
 			msg.delete().queue();
 			return interaction.deferEdit();
 		} else {
 			return Responses.warning(interaction, "You don't have permission to delete this message.");
 		}
+	}
+
+	public static Button createDeleteButton(long senderId) {
+		return Button.secondary(createDeleteInteractionId(senderId), "\uD83D\uDDD1️");
+	}
+
+	public static String createDeleteInteractionId(long senderId) {
+		return DELETE_ORIGINAL_TEMPLATE.formatted(senderId);
 	}
 
 	private void kick(ModalInteraction interaction, @NotNull Guild guild, String memberId, String reason) {
@@ -119,7 +134,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
-	
+
 	private void warn(ModalInteraction interaction, @NotNull Guild guild, String memberId, WarnSeverity severity, String reason) {
 		if(!interaction.getMember().hasPermission(Permission.MODERATE_MEMBERS)) {
 			Responses.error(interaction.getHook(), "Missing permissions").queue();
@@ -149,7 +164,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
-	
+
 	private void resolveIfInReport(MessageChannelUnion currentChannel, User actioner) {
 		if (!currentChannel.getType().isThread()) {
 			return;
@@ -178,9 +193,9 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			Responses.error(event.getHook(), "This button may only be used in context of a server.").queue();
 			return;
 		}
-		
+
 		(switch (id[1]) {
-		case "delete" -> delete(event.getInteraction());
+		case "delete" -> delete(event.getInteraction(), id);
 		case "kick" -> generateModal(event, "Kick user");
 		case "ban" -> generateModal(event, "Ban user");
 		case "unban" -> generateModal(event, "Unban user");
@@ -209,7 +224,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 		}
 		String reason = "None";
 		WarnSeverity severity = WarnSeverity.MEDIUM;
-		
+
 		if (id.length > 3) {
 			try {
 				severity = WarnSeverity.valueOf(id[3]);
@@ -217,13 +232,13 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				ExceptionLogger.capture(e, "Cannot load warn severity");
 			}
 		}
-		
+
 		for (ModalMapping mapping : mappings) {
 			if ("reason".equals(mapping.getId())) {
 				reason = mapping.getAsString();
 			}
 		}
-		
+
 		switch (id[1]) {
 			case "kick" -> kick(event.getInteraction(), event.getGuild(), id[2], reason);
 			case "ban" -> ban(event.getInteraction(), event.getGuild(), id[2], reason);

@@ -16,8 +16,8 @@ import net.javadiscord.javabot.data.config.BotConfig;
 import net.javadiscord.javabot.data.h2db.DbActions;
 import net.javadiscord.javabot.systems.help.HelpExperienceService;
 import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository;
+import net.javadiscord.javabot.systems.help.dao.HelpTransactionRepository.MonthInYear;
 import net.javadiscord.javabot.systems.help.model.HelpAccount;
-import net.javadiscord.javabot.util.Checks;
 import net.javadiscord.javabot.util.ExceptionLogger;
 import net.javadiscord.javabot.util.Pair;
 import net.javadiscord.javabot.util.Plotter;
@@ -74,11 +74,6 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 		User user = event.getOption("user", event::getUser, OptionMapping::getAsUser);
 		boolean plot = event.getOption("plot", false, OptionMapping::getAsBoolean);
 		
-		if (plot && user.getIdLong()!=event.getUser().getIdLong() && !Checks.hasStaffRole(botConfig, event.getMember())) {
-			Responses.error(event, "You can only plot your own help XP history.").queue();
-			return;
-		}
-		
 		long totalThanks = dbActions.count(
 				"SELECT COUNT(id) FROM help_channel_thanks WHERE helper_id = ?",
 				s -> s.setLong(1, user.getIdLong())
@@ -109,25 +104,25 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	}
 
 	private FileUpload generatePlot(User user) {
-		List<Pair<Pair<Integer,Integer>,Double>> xpData = transactionRepository.getTotalTransactionWeightByMonth(user.getIdLong(), LocalDate.now().withDayOfMonth(1).minusYears(1).atStartOfDay());
+		List<Pair<MonthInYear,Double>> xpData = transactionRepository.getTotalTransactionWeightByMonth(user.getIdLong(), LocalDate.now().withDayOfMonth(1).minusYears(1).atStartOfDay());
 		
 		if (xpData.isEmpty()) {
 			return null;
 		}
 		
-		List<Pair<String, Double>> plotData = new ArrayList<>();
+		List<Pair<String, Plotter.Bar>> plotData = new ArrayList<>();
 		
 		int i = 0;
 		for(LocalDate position = LocalDate.now().minusYears(1); position.isBefore(LocalDate.now().plusDays(1)); position=position.plusMonths(1)) {
 			double value = 0.0;
 			if(i<xpData.size()) {
-				Pair<Pair<Integer, Integer>, Double> entry = xpData.get(i);
-				if(entry.first().first() == position.getMonthValue() && entry.first().second() == position.getYear()) {
-					value = Math.round(entry.second()*100)/100.0;
+				Pair<MonthInYear, Double> entry = xpData.get(i);
+				if(entry.first().month() == position.getMonthValue() && entry.first().year() == position.getYear()) {
+					value = entry.second();
 					i++;
 				}
 			}
-			plotData.add(new Pair<>(position.getMonth() + " " + position.getYear(), value));
+			plotData.add(new Pair<>(position.getMonth() + " " + position.getYear(), new Plotter.Bar(value)));
 		}
 		
 		BufferedImage plt = new Plotter(plotData, "gained help XP per month").plot();
@@ -156,9 +151,9 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 	}
 
 	private @NotNull String formatExperience(Guild guild, @NotNull HelpAccount account) {
-		Pair<Role, Double> previousRoleAndXp = account.getPreviousExperienceGoal(guild);
-		Pair<Role, Double> currentRoleAndXp = account.getCurrentExperienceGoal(guild);
-		Pair<Role, Double> nextRoleAndXp = account.getNextExperienceGoal(guild);
+		Pair<Role, Double> previousRoleAndXp = account.getPreviousExperienceGoal(botConfig, guild);
+		Pair<Role, Double> currentRoleAndXp = account.getCurrentExperienceGoal(botConfig, guild);
+		Pair<Role, Double> nextRoleAndXp = account.getNextExperienceGoal(botConfig, guild);
 		double currentXp = account.getExperience() - (previousRoleAndXp == null ? 0 : previousRoleAndXp.second());
 		double goalXp = nextRoleAndXp.second() - (previousRoleAndXp == null ? 0 : previousRoleAndXp.second());
 		StringBuilder sb = new StringBuilder();

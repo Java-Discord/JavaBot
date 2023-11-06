@@ -104,7 +104,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				data.setQotwAccount(qotwAccount);
 				// Help Account
 				HelpAccount helpAccount = helpExperienceService.getOrCreateAccount(user.getIdLong());
-				data.setHelpAccount(HelpAccountData.of(helpAccount, guild));
+				data.setHelpAccount(HelpAccountData.of(botConfig, helpAccount, guild));
 				// User Warns
 				LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(guild).getModerationConfig().getWarnTimeoutDays());
 				data.setWarns(warnRepository.getActiveWarnsByUserId(user.getIdLong(), cutoff));
