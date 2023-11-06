@@ -1,0 +1,67 @@
+package net.discordjug.javabot.data.h2db.commands;
+
+import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import net.discordjug.javabot.data.config.SystemsConfig;
+import net.discordjug.javabot.data.h2db.MigrationUtils;
+import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Stream;
+
+/**
+ * <h3>This class represents the /db-admin migrations-list command.</h3>
+ * This subcommand shows a list of all available migrations, and a short preview
+ * of their source code.
+ */
+public class MigrationsListSubcommand extends SlashCommand.Subcommand {
+	/**
+	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
+	 * @param systemsConfig Configuration for various systems
+	 */
+	public MigrationsListSubcommand(SystemsConfig systemsConfig) {
+		setCommandData(new SubcommandData("migrations-list", "(ADMIN ONLY) Shows a list with all available database migrations."));
+		setRequiredUsers(systemsConfig.getAdminConfig().getAdminUsers());
+		setRequiredPermissions(Permission.MANAGE_SERVER);
+	}
+
+	@Override
+	public void execute(SlashCommandInteractionEvent event) {
+		try (Stream<Path> s = Files.list(MigrationUtils.getMigrationsDirectory())) {
+			EmbedBuilder embedBuilder = new EmbedBuilder()
+					.setTitle("List of Runnable Migrations");
+			List<Path> paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
+			if (paths.isEmpty()) {
+				embedBuilder.setDescription("There are no migrations to run. Please add them to the `/migrations/` resource directory.");
+				event.replyEmbeds(embedBuilder.build()).queue();
+				return;
+			}
+			paths.forEach(path -> {
+				StringBuilder sb = new StringBuilder(150);
+				sb.append("```sql\n");
+				try {
+					String sql = Files.readString(path);
+					sb.append(sql, 0, Math.min(sql.length(), 100));
+					if (sql.length() > 100) sb.append("...");
+				} catch (IOException e) {
+					ExceptionLogger.capture(e, getClass().getSimpleName());
+					sb.append("Error: Could not read SQL: ").append(e.getMessage());
+				}
+				sb.append("\n```");
+				embedBuilder.addField(path.getFileName().toString(), sb.toString(), false);
+			});
+			event.replyEmbeds(embedBuilder.build()).queue();
+		} catch (IOException | URISyntaxException e) {
+			ExceptionLogger.capture(e, getClass().getSimpleName());
+			Responses.error(event, e.getMessage()).queue();
+		}
+	}
+}
