@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.javadiscord.javabot.api.exception.InternalServerException;
 import net.javadiscord.javabot.api.exception.InvalidEntityIdException;
 import net.javadiscord.javabot.api.routes.CaffeineCache;
@@ -15,9 +16,6 @@ import net.javadiscord.javabot.systems.help.model.HelpAccount;
 import net.javadiscord.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.javadiscord.javabot.systems.qotw.QOTWPointsService;
 import net.javadiscord.javabot.systems.qotw.model.QOTWAccount;
-import net.javadiscord.javabot.systems.user_preferences.UserPreferenceService;
-import net.javadiscord.javabot.systems.user_preferences.model.Preference;
-import net.javadiscord.javabot.systems.user_preferences.model.UserPreference;
 import net.javadiscord.javabot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -30,8 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -43,7 +39,6 @@ import javax.sql.DataSource;
 public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserProfileData> {
 	private final JDA jda;
 	private final QOTWPointsService qotwPointsService;
-	private final UserPreferenceService preferenceService;
 	private final DataSource dataSource;
 	private final BotConfig botConfig;
 	private final HelpExperienceService helpExperienceService;
@@ -54,21 +49,19 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 *
 	 * @param jda The {@link Autowired} {@link JDA} instance to use.
 	 * @param qotwPointsService The {@link QOTWPointsService}
-	 * @param preferenceService The {@link UserPreferenceService}
 	 * @param botConfig The main configuration of the bot
 	 * @param dataSource A factory for connections to the main database
 	 * @param helpExperienceService Service object that handles Help Experience Transactions.
 	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
 	 */
 	@Autowired
-	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService, UserPreferenceService preferenceService, BotConfig botConfig, DataSource dataSource, HelpExperienceService helpExperienceService, WarnRepository warnRepository) {
+	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService, BotConfig botConfig, DataSource dataSource, HelpExperienceService helpExperienceService, WarnRepository warnRepository) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
 		);
 		this.jda = jda;
 		this.qotwPointsService = qotwPointsService;
-		this.preferenceService = preferenceService;
 		this.dataSource = dataSource;
 		this.botConfig = botConfig;
 		this.helpExperienceService = helpExperienceService;
@@ -91,9 +84,11 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 		if (guild == null) {
 			throw new InvalidEntityIdException(Guild.class, "You've provided an invalid guild id!");
 		}
-		User user = jda.retrieveUserById(userId).complete();
-		if (user == null) {
-			throw new InvalidEntityIdException(User.class, "You've provided an invalid user id!");
+		User user;
+		try{
+			user = jda.retrieveUserById(userId).complete();
+		}catch (ErrorResponseException e) {
+			throw new InvalidEntityIdException(User.class, "Cannot fetch user: " + e.getMeaning());
 		}
 		try (Connection con = dataSource.getConnection()) {
 			// Check Cache
@@ -110,9 +105,6 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				// Help Account
 				HelpAccount helpAccount = helpExperienceService.getOrCreateAccount(user.getIdLong());
 				data.setHelpAccount(HelpAccountData.of(botConfig, helpAccount, guild));
-				// User Preferences
-				List<UserPreference> preferences = Arrays.stream(Preference.values()).map(p -> preferenceService.getOrCreate(user.getIdLong(), p)).toList();
-				data.setPreferences(preferences);
 				// User Warns
 				LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(guild).getModerationConfig().getWarnTimeoutDays());
 				data.setWarns(warnRepository.getActiveWarnsByUserId(user.getIdLong(), cutoff));
