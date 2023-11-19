@@ -28,7 +28,7 @@ At startup, the bot will initially start by loading just the global settings, an
 
 We're using [DIH4JDA](https://github.com/DynxstyGIT/DIH4JDA) as our Command/Interaction framework, which makes it quite easy to add new commands.
 
-[PingCommand.java](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/javadiscord/javabot/systems/user_commands/PingCommand.java)
+[PingCommand.java](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/discordjug/javabot/systems/user_commands/PingCommand.java)
 ```java
 /**
  * <h3>This class represents the /ping command.</h3>
@@ -76,5 +76,5 @@ You can try out the API yourself on `api.discordjug.net`!
 
 Inspiration we took from other communities:
 
-- We designed our [Help Channel System](https://github.com/Java-Discord/JavaBot/tree/main/src/main/java/net/javadiscord/javabot/systems/help) similar to the one on the [Python Discord](https://discord.gg/python).
-- [`/move-conversation`](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/javadiscord/javabot/systems/user_commands/MoveConversationCommand.java) is heavily inspired by the [Rust Programming Language Community Server](https://discord.gg/rust-lang-community)
+- We designed our [Help Channel System](https://github.com/Java-Discord/JavaBot/tree/main/src/main/java/net/discordjug/javabot/systems/help) similar to the one on the [Python Discord](https://discord.gg/python).
+- [`/move-conversation`](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/discordjug/javabot/systems/user_commands/MoveConversationCommand.java) is heavily inspired by the [Rust Programming Language Community Server](https://discord.gg/rust-lang-community)

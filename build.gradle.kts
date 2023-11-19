@@ -14,7 +14,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-group = "net.javadiscord"
+group = "net.discordjug"
 version = "1.0.0-SNAPSHOT"
 
 repositories {
@@ -70,7 +70,7 @@ dependencies {
 tasks.withType<Jar> {
     manifest {
         attributes["Manifest-Version"] = "1.0"
-        attributes["Main-Class"] = "net.javadiscord.javabot.Bot"
+        attributes["Main-Class"] = "net.discordjug.javabot.Bot"
     }
 }
 
