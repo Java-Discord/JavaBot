@@ -53,11 +53,6 @@ public class SpringConfig {
 	}
 
 	@Bean
-	BotConfig config() {
-		return new BotConfig(Path.of("config"));
-	}
-
-	@Bean
 	SystemsConfig systemsConfig(BotConfig botConfig) {
 		return botConfig.getSystems();
 	}
