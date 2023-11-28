@@ -210,7 +210,7 @@ public class ModerationService {
 	 * @param quiet     If true, don't send a message in the channel.
 	 */
 	public void removeTimeout(Member member, String reason, Member removedBy, MessageChannel channel, boolean quiet) {
-		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member, removedBy, reason);
+		MessageEmbed removeTimeoutEmbed = buildTimeoutRemovedEmbed(member.getUser(), removedBy, reason);
 		removedBy.getGuild().removeTimeout(member).queue(s -> {
 			notificationService.withUser(member.getUser(), removedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
 			notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(removeTimeoutEmbed));
@@ -289,6 +289,35 @@ public class ModerationService {
 			notificationService.withGuild(kickedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(kickEmbed));
 			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
 		}, ExceptionLogger::capture);
+	}
+
+	public void sendKickGuildNotification(User user, String reason, Member moderator) {
+		sendGuildNotification(moderator.getGuild(), buildKickEmbed(user, moderator, reason));
+	}
+
+	public void sendBanGuildNotification(User user, String reason, Member moderator) {
+		sendGuildNotification(moderator.getGuild(), buildBanEmbed(user, moderator, reason));
+	}
+
+	public void sendUnbanGuildNotification(User user, String reason, Member moderator) {
+		sendGuildNotification(moderator.getGuild(), buildUnbanEmbed(user.getIdLong(), reason, moderator));
+	}
+
+	public void sendTimeoutGuildNotification(User user, String reason, Member moderator, Duration duration) {
+		sendGuildNotification(moderator.getGuild(), buildTimeoutEmbed(user, moderator, reason, duration));
+	}
+
+	public void sendRemoveTimeoutGuildNotification(User user, String reason, Member moderator) {
+		sendGuildNotification(moderator.getGuild(), buildTimeoutRemovedEmbed(user, moderator, reason));
+	}
+
+	private void sendGuildNotification(Guild guild, MessageEmbed embed) {
+		MessageEmbed newEmbed = new EmbedBuilder(embed)
+				.addField("Source", "This action was executed manually without a bot command.", false)
+				.build();
+		notificationService
+			.withGuild(guild)
+			.sendToModerationLog(c -> c.sendMessageEmbeds(newEmbed));
 	}
 
 	private @NotNull EmbedBuilder buildModerationEmbed(@NotNull User user, @NotNull Member moderator, String reason) {
@@ -372,8 +401,8 @@ public class ModerationService {
 				.build();
 	}
 
-	private @NotNull MessageEmbed buildTimeoutRemovedEmbed(@NotNull Member member, Member timedOutBy, String reason) {
-		return buildModerationEmbed(member.getUser(), timedOutBy, reason)
+	private @NotNull MessageEmbed buildTimeoutRemovedEmbed(@NotNull User user, Member timedOutBy, String reason) {
+		return buildModerationEmbed(user, timedOutBy, reason)
 				.setTitle("Timeout Removed")
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.build();
