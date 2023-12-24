@@ -6,6 +6,7 @@ import net.discordjug.javabot.api.exception.InvalidEntityIdException;
 import net.discordjug.javabot.api.routes.CaffeineCache;
 import net.discordjug.javabot.api.routes.leaderboard.qotw.model.QOTWUserData;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
+import net.discordjug.javabot.systems.qotw.model.QOTWAccount;
 import net.discordjug.javabot.util.Pair;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 public class QOTWLeaderboardController extends CaffeineCache<Pair<Long, Integer>, List<QOTWUserData>> {
-	private static final int PAGE_AMOUNT = 8;
+	private static final int PAGE_AMOUNT = 10;
 	private final JDA jda;
 	private final QOTWPointsService pointsService;
 
@@ -65,8 +66,14 @@ public class QOTWLeaderboardController extends CaffeineCache<Pair<Long, Integer>
 		}
 		List<QOTWUserData> members = getCache().getIfPresent(new Pair<>(guild.getIdLong(), page));
 		if (members == null || members.isEmpty()) {
-			members = pointsService.getTopAccounts(PAGE_AMOUNT, page).stream()
-					.map(p -> QOTWUserData.of(p, jda.retrieveUserById(p.getUserId()).complete()))
+			List<QOTWAccount> topAccounts = pointsService.getTopAccounts(PAGE_AMOUNT, page);
+			members = topAccounts.stream()
+					.map(account -> QOTWUserData.of(
+								account,
+								jda.retrieveUserById(account.getUserId()).complete(),
+								//this can be inaccurate for later pages with multiple users having the same score on the previous page
+								//specifically, it counts all users on previous pages as strictly higher in the leaderboard
+								pointsService.getQOTWRank(account.getUserId(), topAccounts)+(page-1)*PAGE_AMOUNT))
 					.toList();
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);
 		}

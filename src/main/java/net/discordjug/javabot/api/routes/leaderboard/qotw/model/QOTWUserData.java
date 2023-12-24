@@ -17,15 +17,17 @@ import org.jetbrains.annotations.Nullable;
 @EqualsAndHashCode(callSuper = false)
 public class QOTWUserData extends UserData {
 	private QOTWAccount account;
+	private int rank;
 
 	/**
 	 * Creates a new {@link QOTWUserData} instance.
 	 *
 	 * @param account The {@link QOTWAccount} to use.
 	 * @param user A nullable {@link User}.
+	 * @param rank The position of the user in the QOTW leaderboard
 	 * @return The {@link QOTWUserData}.
 	 */
-	public static @NotNull QOTWUserData of(@NotNull QOTWAccount account, @Nullable User user) {
+	public static @NotNull QOTWUserData of(@NotNull QOTWAccount account, @Nullable User user, int rank) {
 		QOTWUserData data = new QOTWUserData();
 		data.setUserId(account.getUserId());
 		if (user != null) {
@@ -33,6 +35,7 @@ public class QOTWUserData extends UserData {
 			data.setDiscriminator(user.getDiscriminator());
 			data.setEffectiveAvatarUrl(user.getEffectiveAvatarUrl());
 		}
+		data.setRank(rank);
 		data.setAccount(account);
 		return data;
 	}

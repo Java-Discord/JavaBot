@@ -35,7 +35,7 @@ public class QOTWChampionJob {
 			LocalDate month=LocalDate.now().minusMonths(1);
 			Role qotwChampionRole = botConfig.get(guild).getQotwConfig().getQOTWChampionRole();
 			if (qotwChampionRole != null) {
-				pointsRepository.getTopAccounts(month, 0, 1)
+				pointsRepository.getTopAccounts(month, 1, 1)
 				.stream()
 				.findFirst()
 				.ifPresent(best -> {

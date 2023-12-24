@@ -11,13 +11,11 @@ import org.springframework.dao.DataAccessException;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
-import net.discordjug.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.discordjug.javabot.systems.qotw.model.QOTWAccount;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Pair;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -35,19 +33,16 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 
 	private final QOTWPointsService pointsService;
 	private final ExecutorService asyncPool;
-	private final QuestionPointsRepository qotwPointsRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param pointsService The {@link QOTWPointsService} managing {@link QOTWAccount}s
 	 * @param asyncPool The thread pool for asynchronous operations
-	 * @param qotwPointsRepository Dao object that represents the QOTW_POINTS SQL Table.
 	 */
-	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool, QuestionPointsRepository qotwPointsRepository) {
+	public QOTWLeaderboardSubcommand(QOTWPointsService pointsService, ExecutorService asyncPool) {
 		setCommandData(new SubcommandData("qotw", "The QOTW Points Leaderboard."));
 		this.pointsService=pointsService;
 		this.asyncPool = asyncPool;
-		this.qotwPointsRepository = qotwPointsRepository;
 	}
 
 	@Override
@@ -55,9 +50,10 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 		event.deferReply().queue();
 		asyncPool.submit(() -> {
 			try {
-				WebhookMessageCreateAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember()));
+				List<Pair<QOTWAccount,Member>> topMembers = pointsService.getTopMembers(DISPLAY_COUNT, event.getGuild());
+				WebhookMessageCreateAction<Message> action = event.getHook().sendMessageEmbeds(buildLeaderboardRankEmbed(event.getMember(), topMembers));
 				// check whether the image may already been cached
-				byte[] array = LeaderboardCreator.attemptLoadFromCache(getCacheName(), ()->generateLeaderboard(event.getGuild()));
+				byte[] array = LeaderboardCreator.attemptLoadFromCache(getCacheName(topMembers), ()->generateLeaderboard(topMembers));
 				action.addFiles(FileUpload.fromData(new ByteArrayInputStream(array), Instant.now().getEpochSecond() + ".png")).queue();
 			} catch (IOException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -68,11 +64,12 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * Builds the Leaderboard Rank {@link MessageEmbed}.
 	 *
+	 * @param topMembers the accounts with the top QOTW users
 	 * @param member  The member which executed the command.
 	 * @return A {@link MessageEmbed} object.
 	 */
-	private MessageEmbed buildLeaderboardRankEmbed(Member member) {
-		int rank = pointsService.getQOTWRank(member.getIdLong());
+	private MessageEmbed buildLeaderboardRankEmbed(Member member, List<Pair<QOTWAccount, Member>> topMembers) {
+		int rank = findRankOfMember(member, topMembers);
 		String rankSuffix = switch (rank % 10) {
 			case 1 -> "st";
 			case 2 -> "nd";
@@ -90,49 +87,53 @@ public class QOTWLeaderboardSubcommand extends SlashCommand.Subcommand {
 				.build();
 	}
 
+	private int findRankOfMember(Member member, List<Pair<QOTWAccount, Member>> topMembers) {
+		return pointsService.getQOTWRank(member.getIdLong(), 
+				topMembers
+				.stream()
+				.map(Pair::first)
+				.toList());
+	}
+
 	/**
 	 * Draws a single "user card".
 	 *
 	 * @param leaderboardCreator handling actual drawing.
 	 * @param member  The member.
 	 * @param service The {@link QOTWPointsService}.
+	 * @param topMembers the accounts with the top QOTW users
 	 * @throws IOException If an error occurs.
 	 */
-	private void drawUserCard(LeaderboardCreator leaderboardCreator, @NotNull Member member, QOTWPointsService service) throws IOException {
-		leaderboardCreator.drawLeaderboardEntry(member, UserUtils.getUserTag(member.getUser()), service.getPoints(member.getIdLong()), service.getQOTWRank(member.getIdLong()));
+	private void drawUserCard(LeaderboardCreator leaderboardCreator, @NotNull Member member, QOTWPointsService service, List<Pair<QOTWAccount, Member>> topMembers) throws IOException {
+		leaderboardCreator.drawLeaderboardEntry(member, UserUtils.getUserTag(member.getUser()), service.getPoints(member.getIdLong()), findRankOfMember(member, topMembers));
 	}
 
 	/**
 	 * Draws and constructs the leaderboard image.
 	 *
-	 * @param guild   The current guild.
+	 * @param topMembers the accounts with the top QOTW users
 	 * @return The finished image as a {@link ByteArrayInputStream}.
 	 * @throws IOException If an error occurs.
 	 */
-	private @NotNull byte[] generateLeaderboard(Guild guild) throws IOException {
-		List<Pair<QOTWAccount, Member>> topMembers = pointsService.getTopMembers(DISPLAY_COUNT, guild);
-
+	private @NotNull byte[] generateLeaderboard(List<Pair<QOTWAccount, Member>> topMembers) throws IOException {
 		try(LeaderboardCreator creator = new LeaderboardCreator(Math.min(DISPLAY_COUNT, topMembers.size()), "QuestionOfTheWeekHeader")){
 			for (Pair<QOTWAccount, Member> pair : topMembers) {
-				drawUserCard(creator, pair.second(), pointsService);
+				drawUserCard(creator, pair.second(), pointsService, topMembers);
 			}
-			return creator.getImageBytes(getCacheName(), "qotw_leaderboard");
+			return creator.getImageBytes(getCacheName(topMembers), "qotw_leaderboard");
 		}
 	}
 
 	/**
 	 * Builds the cached image's name.
 	 *
+	 * @param topMembers the accounts with the top QOTW users
 	 * @return The image's cache name.
 	 */
-	private @NotNull String getCacheName() {
+	private @NotNull String getCacheName(List<Pair<QOTWAccount, Member>> topMembers) {
 		try {
-			List<QOTWAccount> accounts = qotwPointsRepository.sortByPoints(QOTWPointsService.getCurrentMonth())
-					.stream()
-					.limit(DISPLAY_COUNT)
-					.toList();
 			StringBuilder sb = new StringBuilder("qotw_leaderboard_");
-			accounts.forEach(account -> sb.append(String.format(":%s:%s", account.getUserId(), account.getPoints())));
+			topMembers.forEach(account -> sb.append(String.format(":%s:%s", account.first().getUserId(), account.first().getPoints())));
 			return sb.toString();
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());

@@ -92,13 +92,13 @@ public class QuestionPointsRepository {
 	 * Gets a specified amount of {@link QOTWAccount}s.
 	 *
 	 * @param startDate the minimum date points are considered
-	 * @param page The page.
+	 * @param page The page, starting at 1.
 	 * @param size The amount of {@link QOTWAccount}s to return.
 	 * @return A {@link List} containing the specified amount of {@link QOTWAccount}s.
 	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWAccount> getTopAccounts(LocalDate startDate, int page, int size) throws DataAccessException {
-		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? AND points > 0  GROUP BY user_id ORDER BY SUM(points) DESC LIMIT ? OFFSET ?",
+		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? AND points > 0  GROUP BY user_id ORDER BY SUM(points) DESC, user_id ASC LIMIT ? OFFSET ?",
 				(rs,row)->this.read(rs),
 				startDate, size, Math.max(0, (page * size) - size));
 	}
