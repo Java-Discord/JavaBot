@@ -25,7 +25,7 @@ class QOTWPointsServiceTest {
 		assertEquals(2, pointsService.getQOTWRank(2, List.of(
 				createAccount(1, 2),
 				createAccount(2, 1)
-				)));
+		)));
 	}
 	
 	@Test
@@ -34,7 +34,7 @@ class QOTWPointsServiceTest {
 				createAccount(2, 2),
 				createAccount(3, 2),
 				createAccount(1, 1)
-				)));
+		)));
 	}
 	
 	@Test
@@ -43,12 +43,12 @@ class QOTWPointsServiceTest {
 				createAccount(2, 2),
 				createAccount(3, 1),
 				createAccount(1, 1)
-				)));
+		)));
 		assertEquals(2, pointsService.getQOTWRank(1, List.of(
 				createAccount(2, 2),
 				createAccount(1, 1),
 				createAccount(3, 1)
-				)));
+		)));
 	}
 
 	private QOTWAccount createAccount(long userId, int score) {

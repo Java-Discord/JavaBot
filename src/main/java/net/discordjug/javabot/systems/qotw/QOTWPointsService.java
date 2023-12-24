@@ -74,11 +74,11 @@ public class QOTWPointsService {
 		int currentRank = 1;
 		for (int i = 0; i < accounts.size(); i++) {
 			QOTWAccount account = accounts.get(i);
-			if(account.getPoints() != lastScore) {
+			if (account.getPoints() != lastScore) {
 				currentRank = i + 1;
 				lastScore = account.getPoints();
 			}
-			if(account.getUserId()==userId) {
+			if (account.getUserId() == userId) {
 				return currentRank;
 			}
 		}
