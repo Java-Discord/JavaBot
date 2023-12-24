@@ -10,6 +10,7 @@ import net.discordjug.javabot.systems.qotw.model.QOTWAccount;
 import net.discordjug.javabot.util.Pair;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,15 +69,21 @@ public class QOTWLeaderboardController extends CaffeineCache<Pair<Long, Integer>
 		if (members == null || members.isEmpty()) {
 			List<QOTWAccount> topAccounts = pointsService.getTopAccounts(PAGE_AMOUNT, page);
 			members = topAccounts.stream()
-					.map(account -> QOTWUserData.of(
-								account,
-								jda.retrieveUserById(account.getUserId()).complete(),
-								//this can be inaccurate for later pages with multiple users having the same score on the previous page
-								//specifically, it counts all users on previous pages as strictly higher in the leaderboard
-								pointsService.getQOTWRank(account.getUserId(), topAccounts)+(page-1)*PAGE_AMOUNT))
+					.map(account -> new Pair<>(account, jda.retrieveUserById(account.getUserId()).complete()))
+					.filter(pair -> guild.isMember(pair.second()))
+					.map(pair -> createAPIAccount(pair.first(), pair.second(), topAccounts, page))
 					.toList();
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);
 		}
 		return new ResponseEntity<>(members, HttpStatus.OK);
+	}
+
+	private QOTWUserData createAPIAccount(QOTWAccount account, User user, List<QOTWAccount> topAccounts, int page) {
+		return QOTWUserData.of(
+				account,
+				user,
+				//this can be inaccurate for later pages with multiple users having the same score on the previous page
+				//specifically, it counts all users on previous pages as strictly higher in the leaderboard
+				pointsService.getQOTWRank(account.getUserId(), topAccounts)+(page-1)*PAGE_AMOUNT);
 	}
 }
