@@ -76,5 +76,4 @@ You can try out the API yourself on `api.discordjug.net`!
 
 Inspiration we took from other communities:
 
-- We designed our [Help Channel System](https://github.com/Java-Discord/JavaBot/tree/main/src/main/java/net/discordjug/javabot/systems/help) similar to the one on the [Python Discord](https://discord.gg/python).
-- [`/move-conversation`](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/discordjug/javabot/systems/user_commands/MoveConversationCommand.java) is heavily inspired by the [Rust Programming Language Community Server](https://discord.gg/rust-lang-community)
+- Our [`/move-conversation`](https://github.com/Java-Discord/JavaBot/blob/main/src/main/java/net/discordjug/javabot/systems/user_commands/MoveConversationCommand.java) command is heavily inspired by the [Rust Programming Language Community Server](https://discord.gg/rust-lang-community)
