@@ -6,6 +6,7 @@ import net.discordjug.javabot.api.exception.InvalidEntityIdException;
 import net.discordjug.javabot.api.routes.CaffeineCache;
 import net.discordjug.javabot.api.routes.leaderboard.help_experience.model.ExperienceUserData;
 import net.discordjug.javabot.systems.help.HelpExperienceService;
+import net.discordjug.javabot.systems.help.model.HelpAccount;
 import net.discordjug.javabot.util.Pair;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 public class HelpExperienceLeaderboardController extends CaffeineCache<Pair<Long, Integer>, List<ExperienceUserData>> {
-	private static final int PAGE_AMOUNT = 8;
+	private static final int PAGE_AMOUNT = 10;
 	private final JDA jda;
 	private final HelpExperienceService helpExperienceService;
 
@@ -65,9 +67,13 @@ public class HelpExperienceLeaderboardController extends CaffeineCache<Pair<Long
 		}
 		List<ExperienceUserData> members = getCache().getIfPresent(new Pair<>(guild.getIdLong(), page));
 		if (members == null || members.isEmpty()) {
-			members = helpExperienceService.getTopAccounts(PAGE_AMOUNT, page).stream()
-					.map(p -> ExperienceUserData.of(p, jda.retrieveUserById(p.getUserId()).complete()))
-					.toList();
+			List<HelpAccount> topAccounts = helpExperienceService.getTopAccounts(PAGE_AMOUNT, page);
+			members = new ArrayList<>(topAccounts.size());
+			for (int i = 0; i < topAccounts.size(); i++) {
+				HelpAccount acc = topAccounts.get(i);
+				int rank = (page - 1) * PAGE_AMOUNT + 1 + i;
+				members.add(ExperienceUserData.of(acc, jda.retrieveUserById(acc.getUserId()).complete(), rank));
+			}
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);
 		}
 		return new ResponseEntity<>(members, HttpStatus.OK);
