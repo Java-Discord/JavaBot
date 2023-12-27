@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackA
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneOffset;
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 public class ListQuestionsSubcommand extends QOTWSubcommand {
 	private final ExecutorService asyncPool;
 	private final QuestionQueueRepository questionQueueRepository;
-
+	
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param questionQueueRepository Dao class that represents the QOTW_QUESTION SQL Table.
@@ -41,7 +40,6 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 	}
 
 	@Override
-	@Transactional
 	protected InteractionCallbackAction<?> handleCommand(@NotNull SlashCommandInteractionEvent event, long guildId) throws DataAccessException {
 		OptionMapping pageOption = event.getOption("page");
 		int page = 0;

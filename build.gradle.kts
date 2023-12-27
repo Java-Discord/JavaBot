@@ -4,8 +4,8 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("org.springframework.boot") version "2.7.3"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.0.15.RELEASE"
     checkstyle
 }
 
@@ -43,7 +43,6 @@ dependencies {
     implementation("com.google.re2j:re2j:1.6")
     implementation("commons-validator:commons-validator:1.7")
 
-    implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.mashape.unirest:unirest-java:1.4.9")
 
     // H2 Database
@@ -65,6 +64,12 @@ dependencies {
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+}
+
+configurations {
+    all {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
 }
 
 tasks.withType<Jar> {

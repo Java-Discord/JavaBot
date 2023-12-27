@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackA
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,6 @@ public class RemoveQuestionSubcommand extends QOTWSubcommand implements AutoComp
 	}
 
 	@Override
-	@Transactional
 	protected InteractionCallbackAction<?> handleCommand(SlashCommandInteractionEvent event, long guildId) throws DataAccessException {
 		OptionMapping idOption = event.getOption("id");
 		if (idOption == null) {
