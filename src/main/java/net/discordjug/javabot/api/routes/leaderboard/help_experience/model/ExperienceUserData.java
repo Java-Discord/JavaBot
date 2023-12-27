@@ -17,15 +17,17 @@ import org.jetbrains.annotations.Nullable;
 @EqualsAndHashCode(callSuper = false)
 public class ExperienceUserData extends UserData {
 	private HelpAccount account;
+	private int rank;
 
 	/**
 	 * Creates a new {@link ExperienceUserData} instance.
 	 *
 	 * @param account The {@link HelpAccount} to use.
 	 * @param user A nullable {@link User}.
+	 * @param rank The position of the user in the help leaderboard.
 	 * @return The {@link ExperienceUserData}.
 	 */
-	public static @NotNull ExperienceUserData of(@NotNull HelpAccount account, @Nullable User user) {
+	public static @NotNull ExperienceUserData of(@NotNull HelpAccount account, @Nullable User user, int rank) {
 		ExperienceUserData data = new ExperienceUserData();
 		data.setUserId(account.getUserId());
 		if (user != null) {
@@ -34,6 +36,7 @@ public class ExperienceUserData extends UserData {
 			data.setEffectiveAvatarUrl(user.getEffectiveAvatarUrl());
 		}
 		data.setAccount(account);
+		data.setRank(rank);
 		return data;
 	}
 }
