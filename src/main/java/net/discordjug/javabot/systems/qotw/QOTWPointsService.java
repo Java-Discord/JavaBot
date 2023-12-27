@@ -55,14 +55,34 @@ public class QOTWPointsService {
 	public int getQOTWRank(long userId) {
 		try{
 			List<QOTWAccount> accounts = pointsRepository.sortByPoints(getCurrentMonth());
-			return accounts.stream()
-					.map(QOTWAccount::getUserId)
-					.toList()
-					.indexOf(userId) + 1;
+			int currentRank = getQOTWRank(userId, accounts);
+			return currentRank;
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			return -1;
 		}
+	}
+
+	/**
+	 * Gets the given user's QOTW-Rank given a {@link List} of QOTW accounts.
+	 * @param userId The user whose rank should be returned.
+	 * @param accounts A list of QOTW accounts in descending order with respect to the score. This should at least contain the user (if they are ranked) and all users before them.
+	 * @return The QOTW-Rank as an integer.
+	 */
+	public int getQOTWRank(long userId, List<QOTWAccount> accounts) {
+		long lastScore = -1;
+		int currentRank = 1;
+		for (int i = 0; i < accounts.size(); i++) {
+			QOTWAccount account = accounts.get(i);
+			if (account.getPoints() != lastScore) {
+				currentRank = i + 1;
+				lastScore = account.getPoints();
+			}
+			if (account.getUserId() == userId) {
+				return currentRank;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -89,7 +109,7 @@ public class QOTWPointsService {
 	 */
 	public List<Pair<QOTWAccount, Member>> getTopMembers(int n, Guild guild) {
 		try {
-			List<QOTWAccount> accounts = pointsRepository.sortByPoints(getCurrentMonth());
+			List<QOTWAccount> accounts = pointsRepository.getTopAccounts(getCurrentMonth(),1,(int)Math.ceil(n*1.5));
 			return accounts.stream()
 					.map(s -> new Pair<>(s, guild.getMemberById(s.getUserId())))
 					.filter(p->p.first().getPoints() > 0)
@@ -106,7 +126,7 @@ public class QOTWPointsService {
 	 * Gets the specified amount of {@link QOTWAccount}s, sorted by their points.
 	 *
 	 * @param amount The amount to retrieve.
-	 * @param page The page to get.
+	 * @param page The page to get, starting at 1.
 	 * @return An unmodifiable {@link List} of {@link QOTWAccount}s.
 	 */
 	public List<QOTWAccount> getTopAccounts(int amount, int page) {
