@@ -256,7 +256,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		}
 		switch (id[2]) {
 			case "done" -> handleThanksCloseButton(event, manager, post);
-			case "cancel" -> event.getMessage().delete().queue();
+			case "cancel" -> event.deferEdit().flatMap(h -> event.getMessage().delete()).queue();
 			default -> {
 				List<Button> thankButtons = event.getMessage()
 						.getButtons()
@@ -277,10 +277,10 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	private void handleThanksCloseButton(@NotNull ButtonInteractionEvent event, HelpManager manager, ThreadChannel post) {
 		List<Button> buttons = event.getMessage().getButtons();
-		// immediately delete the message
+		// close post
+		manager.close(event, false, null);
+		// delete the message
 		event.getMessage().delete().queue(s -> {
-			// close post
-			manager.close(event, false, null);
 			experienceService.addMessageBasedHelpXP(post, true);
 			// thank all helpers
 			buttons.stream()
