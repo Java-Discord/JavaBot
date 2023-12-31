@@ -130,7 +130,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				user -> {
 					service.kick(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getMessage().editMessageComponents(ActionRow.of(Button.danger(interaction.getModalId(), "Kicked by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
-					resolveIfInReport(interaction.getChannel(), user);
+					resolveIfInReport(interaction.getChannel(), interaction.getUser());
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
@@ -145,7 +145,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				user -> {
 					service.warn(user, severity, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getHook().editOriginalComponents(ActionRow.of(Button.primary(interaction.getModalId(), "Warned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
-					resolveIfInReport(interaction.getChannel(), user);
+					resolveIfInReport(interaction.getChannel(), interaction.getUser());
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
@@ -160,7 +160,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 				user -> {
 					service.ban(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getMessage().editMessageComponents(ActionRow.of(Button.danger(interaction.getModalId(), "Banned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
-					resolveIfInReport(interaction.getChannel(), user);
+					resolveIfInReport(interaction.getChannel(), interaction.getUser());
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
 		);
 	}
