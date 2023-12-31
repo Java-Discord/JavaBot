@@ -51,7 +51,7 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 				post.sendMessageEmbeds(
 						new EmbedBuilder()
 						.setTitle("Post closed")
-						.setDescription("This post has been closed because you have created other recent posts.\nPlease do not spam posts.")
+						.setDescription("This post has been blocked because you have created other recent posts.\nPlease do not spam posts.")
 						.build())
 				.setContent(post.getOwner().getAsMention())
 				.flatMap(msg -> post.getManager().setArchived(true).setLocked(true))
