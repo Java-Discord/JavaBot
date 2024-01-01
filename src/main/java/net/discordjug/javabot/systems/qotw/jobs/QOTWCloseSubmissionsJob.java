@@ -27,6 +27,8 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.managers.channel.concrete.ThreadChannelManager;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.ForumPostAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -36,6 +38,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 import java.sql.SQLException;
@@ -113,16 +116,39 @@ public class QOTWCloseSubmissionsJob {
 					QOTWQuestion question = questionOptional.get();
 					try (MessageCreateData data = new MessageCreateBuilder()
 							.setEmbeds(buildQuestionEmbed(question)).build()) {
-						ForumPostAction action = qotwConfig.getSubmissionsForumChannel()
-								.createForumPost(String.format("Week %s — %s", question.getQuestionNumber(), question.getText().replace("*", "")), data);
-						if (qotwConfig.getSubmissionsForumOngoingReviewTag() != null) {
-							action.setTags(qotwConfig.getSubmissionsForumOngoingReviewTag());
-						}
-						action.queue(f -> f.getThreadChannel().getManager().setPinned(true).queue());
+						createPinnedAnswerForum(qotwConfig, question, data);
 					}
 				}
 			});
 		}
+	}
+
+	private void createPinnedAnswerForum(QOTWConfig qotwConfig, QOTWQuestion question, MessageCreateData data) {
+		ForumPostAction createAnswerForumAction = qotwConfig.getSubmissionsForumChannel()
+				.createForumPost(String.format("Week %s — %s", question.getQuestionNumber(), question.getText().replace("*", "")), data);
+		if (qotwConfig.getSubmissionsForumOngoingReviewTag() != null) {
+			createAnswerForumAction.setTags(qotwConfig.getSubmissionsForumOngoingReviewTag());
+		}
+		
+		createAnswerForumAction.flatMap(f -> changeForumPin(f.getThreadChannel())).queue();
+	}
+
+	/**
+	 * Removes the current pin in a forum channel and pins a new post.
+	 * @param toPin the forum channel to pin
+	 * @return a {@link RestAction} performing the pin change
+	 */
+	@CheckReturnValue
+	private RestAction<Void> changeForumPin(ThreadChannel toPin) {
+		ThreadChannelManager setPinned = toPin.getManager().setPinned(true);
+		return toPin.getParentChannel()
+				.getThreadChannels()
+				.stream()
+				.filter(ThreadChannel::isPinned)
+				.findAny()
+				.map(c->c.getManager().setPinned(false))
+				.map(a -> a.flatMap(result -> setPinned))
+				.orElse(setPinned);
 	}
 
 	private @Nonnull StringSelectMenu buildSubmissionSelectMenu(JDA jda, long threadId) {
