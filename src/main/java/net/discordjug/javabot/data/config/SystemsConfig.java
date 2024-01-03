@@ -66,7 +66,7 @@ public class SystemsConfig {
 		private String clientSecret = "";
 		private String redirectUrl = "";
 		private String[] scopes = new String[]{};
-		private String ajpSecret = "";
+		private String ajpSecret = "secret";
 	}
 
 	/**
