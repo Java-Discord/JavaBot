@@ -43,8 +43,9 @@ public class SpringConfig {
 
 	@Bean
 	DataSource dataSource(BotConfig config) {
-		if (config.getSystems().getJdaBotToken().isEmpty())
+		if (config.getSystems().getJdaBotToken().isEmpty()) {
 			throw new RuntimeException("JDA Token not set. Stopping Bot...");
+		}
 		return DbHelper.initDataSource(config);
 	}
 
