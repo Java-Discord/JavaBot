@@ -1,8 +1,10 @@
 package net.discordjug.javabot.systems.help;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 /**
  * Automatically delete old help notifications.
@@ -46,12 +49,27 @@ public class ClearOldHelpNotificationJob {
 			if (deleteMore) {
 				deleteOldMessagesInChannel(helpNotificationChannel, history, foundSoFar);
 			}else {
+				if (foundSoFar.size() > 50) {
+					String messageInfo = foundSoFar
+							.stream()
+							.map(msg -> convertMessageToString(msg))
+							.collect(Collectors.joining("\n\n===============\n\n"));
+					botConfig.get(helpNotificationChannel.getGuild()).getModerationConfig().getLogChannel()
+						.sendMessageFormat("Warning: deleting %d messages in help notification channel, this might be due to help notification spam", foundSoFar.size())
+						.addFiles(FileUpload.fromData(messageInfo.getBytes(StandardCharsets.UTF_8), "messages.txt"))
+						.queue();
+				}
 				helpNotificationChannel.purgeMessages(foundSoFar);
 			}
 		}, e -> {
 			ExceptionLogger.capture(e, getClass().getName());
 			helpNotificationChannel.purgeMessages(foundSoFar);
 		});
+	}
+
+	private String convertMessageToString(Message msg) {
+		return msg.getContentRaw()+"\n"+
+		msg.getEmbeds().stream().map(e->e.toData().toString()).collect(Collectors.joining("\n"));
 	}
 
 	private boolean addMessagesToDelete(List<Message> toDelete, List<Message> msgs) {
