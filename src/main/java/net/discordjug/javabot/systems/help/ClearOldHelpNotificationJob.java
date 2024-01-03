@@ -46,7 +46,7 @@ public class ClearOldHelpNotificationJob {
 	private void deleteOldMessagesInChannel(TextChannel helpNotificationChannel, MessageHistory history, List<Message> foundSoFar) {
 		history.retrievePast(50).queue(msgs -> {
 			foundSoFar.addAll(
-					msgs
+				msgs
 					.stream()
 					.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
 					.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(5)))
