@@ -45,8 +45,14 @@ public class ClearOldHelpNotificationJob {
 
 	private void deleteOldMessagesInChannel(TextChannel helpNotificationChannel, MessageHistory history, List<Message> foundSoFar) {
 		history.retrievePast(50).queue(msgs -> {
-			boolean deleteMore = addMessagesToDelete(foundSoFar, msgs);
-			if (deleteMore) {
+			foundSoFar.addAll(
+					msgs
+					.stream()
+					.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
+					.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(5)))
+					.toList()
+			);
+			if (!msgs.isEmpty()) {
 				deleteOldMessagesInChannel(helpNotificationChannel, history, foundSoFar);
 			}else {
 				if (foundSoFar.size() > 50) {
@@ -70,22 +76,5 @@ public class ClearOldHelpNotificationJob {
 	private String convertMessageToString(Message msg) {
 		return msg.getContentRaw()+"\n"+
 		msg.getEmbeds().stream().map(e->e.toData().toString()).collect(Collectors.joining("\n"));
-	}
-
-	private boolean addMessagesToDelete(List<Message> toDelete, List<Message> msgs) {
-		for (Message message : msgs) {
-			if (message.getAuthor().getIdLong() == message.getJDA().getSelfUser().getIdLong() &&
-					//only delete messages older than 5 days
-					message.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(5))) {
-				
-				//only messages sent within the past two weeks can be deleted
-				//stop when messages near that are found
-				if (message.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(13))) {
-					return false;
-				}
-				toDelete.add(message);
-			}
-		}
-		return true;
 	}
 }
