@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 
 import org.springframework.context.ApplicationContext;
@@ -43,7 +42,9 @@ public class SpringConfig {
 	}
 
 	@Bean
-	DataSource getDataSource(BotConfig config) {
+	DataSource dataSource(BotConfig config) {
+		if (config.getSystems().getJdaBotToken().isEmpty())
+			throw new RuntimeException("JDA Token not set. Stopping Bot...");
 		return DbHelper.initDataSource(config);
 	}
 
@@ -62,10 +63,9 @@ public class SpringConfig {
 	 * @param botConfig the main configuration of the bot
 	 * @param ctx the Spring application context used for obtaining all listeners
 	 * @return the initialized {@link JDA} object
-	 * @throws LoginException if the token is invalid
 	 */
 	@Bean
-	JDA jda(BotConfig botConfig, ApplicationContext ctx) throws LoginException {
+	JDA jda(BotConfig botConfig, ApplicationContext ctx) {
 		Collection<Object> listeners = ctx.getBeansWithAnnotation(PreRegisteredListener.class).values();
 		return JDABuilder.createDefault(botConfig.getSystems().getJdaBotToken())
 			.setStatus(OnlineStatus.DO_NOT_DISTURB)

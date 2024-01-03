@@ -4,7 +4,7 @@
 
 # Usage
 
-To start up, run the bot once, and it will generate a `config` directory. Stop the bot, and set the up **all of the following values**:
+To start up, run the bot once, and it will generate a `config` directory. Stop the bot, and set the up **all the following values**:
 - in `systems.json`
   - `jdaBotToken` to your bot's token
   - (some `adminUsers` which, e.g., can manipulate the database)
@@ -13,6 +13,8 @@ To start up, run the bot once, and it will generate a `config` directory. Stop t
   - `moderation.staffRoleId` to a roleId
   - `moderation.adminRoleId` to a roleId
   - `jam.adminRoleId` to a roleId
+
+NOTE: Don't forget to enable the Presence Intent, Server Members Intent and Message Content Intent on the Discord Developer Portal!
 
 Note that this is just what is required for the bot to start. Certain features may require other values to be set.
 

@@ -1,5 +1,5 @@
 // Help System
-CREATE TABLE reserved_help_channels
+CREATE TABLE IF NOT EXISTS reserved_help_channels
 (
 	id          BIGINT PRIMARY KEY AUTO_INCREMENT,
 	channel_id  BIGINT       NOT NULL UNIQUE,
@@ -8,7 +8,7 @@ CREATE TABLE reserved_help_channels
 	timeout     INT          NOT NULL DEFAULT 60
 );
 
-CREATE TABLE help_channel_thanks
+CREATE TABLE IF NOT EXISTS help_channel_thanks
 (
 	id             BIGINT PRIMARY KEY AUTO_INCREMENT,
 	reservation_id BIGINT       NOT NULL,
@@ -19,13 +19,13 @@ CREATE TABLE help_channel_thanks
 	CONSTRAINT help_channel_thanks_unique UNIQUE (reservation_id, helper_id)
 );
 
-CREATE TABLE help_account
+CREATE TABLE IF NOT EXISTS help_account
 (
 	user_id    BIGINT PRIMARY KEY,
 	experience DOUBLE NOT NULL
 );
 
-CREATE TABLE help_transaction
+CREATE TABLE IF NOT EXISTS help_transaction
 (
 	id          BIGINT PRIMARY KEY AUTO_INCREMENT,
 	recipient   BIGINT       NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE help_transaction
 );
 
 // Question of the Week
-CREATE TABLE qotw_question
+CREATE TABLE IF NOT EXISTS qotw_question
 (
 	id              BIGINT PRIMARY KEY AUTO_INCREMENT,
 	created_at      TIMESTAMP(0)  NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
@@ -47,15 +47,16 @@ CREATE TABLE qotw_question
 	priority        INTEGER       NOT NULL DEFAULT 0
 );
 
-CREATE TABLE qotw_points
+CREATE TABLE IF NOT EXISTS qotw_points
 (
-	user_id BIGINT PRIMARY KEY,
-	obtained_at DATE PRIMARY KEY DEFAULT CURRENT_TIMESTAMP(0),
-	points  BIGINT NOT NULL DEFAULT 0
+	user_id BIGINT,
+	obtained_at DATE DEFAULT CURRENT_TIMESTAMP(0),
+	points  BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, obtained_at)
 );
 
 // Warn
-CREATE TABLE warn
+CREATE TABLE IF NOT EXISTS warn
 (
 	id              BIGINT PRIMARY KEY AUTO_INCREMENT,
 	user_id         BIGINT        NOT NULL,
@@ -68,7 +69,7 @@ CREATE TABLE warn
 );
 
 // Custom Tags
-CREATE TABLE custom_tags
+CREATE TABLE IF NOT EXISTS custom_tags
 (
 	id         BIGINT PRIMARY KEY AUTO_INCREMENT,
 	guild_id   BIGINT        NOT NULL,
@@ -80,7 +81,7 @@ CREATE TABLE custom_tags
 );
 
 // Starboard
-CREATE TABLE starboard
+CREATE TABLE IF NOT EXISTS starboard
 (
 	original_message_id  BIGINT PRIMARY KEY,
 	guild_id             BIGINT NOT NULL,
@@ -90,21 +91,22 @@ CREATE TABLE starboard
 );
 
 // Message Cache
-CREATE TABLE message_cache
+CREATE TABLE IF NOT EXISTS message_cache
 (
 	message_id      BIGINT PRIMARY KEY,
 	author_id       BIGINT        NOT NULL,
 	message_content VARCHAR(4000) NOT NULL
 );
-CREATE TABLE message_cache_attachments (
+
+CREATE TABLE IF NOT EXISTS message_cache_attachments (
 	message_id     		BIGINT NOT NULL,
 	attachment_index	INT NOT NULL,
 	link				VARCHAR(255),
 	PRIMARY KEY(message_id, attachment_index)
-)
+);
 
 // User Preferences
-CREATE TABLE user_preferences
+CREATE TABLE IF NOT EXISTS user_preferences
 (
 	user_id BIGINT  NOT NULL,
 	ordinal INTEGER NOT NULL,

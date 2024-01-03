@@ -32,11 +32,11 @@ import javax.sql.DataSource;
 /**
  * Class that provides helper methods for dealing with the database.
  */
+@Getter
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DbHelper {
-	@Getter
 	private final DataSource dataSource;
 
 	/**
@@ -108,6 +108,7 @@ public class DbHelper {
 				for (String rawQuery : queries) {
 					String query = rawQuery.lines()
 							.map(s -> s.strip().stripIndent())
+							.filter(s -> !s.startsWith("//"))
 							.collect(Collectors.joining(""));
 					try (Statement stmt = c.createStatement()) {
 						stmt.executeUpdate(query);
