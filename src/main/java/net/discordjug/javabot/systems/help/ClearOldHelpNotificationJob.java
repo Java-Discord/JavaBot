@@ -49,7 +49,7 @@ public class ClearOldHelpNotificationJob {
 				msgs
 					.stream()
 					.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
-					.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(5)))
+					.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(3)))
 					.toList()
 			);
 			if (!msgs.isEmpty()) {
