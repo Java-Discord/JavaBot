@@ -1,4 +1,4 @@
-package net.discordjug.javabot.systems.help.commands;
+package net.discordjug.javabot.systems.help.commands.notify;
 
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.data.config.BotConfig;

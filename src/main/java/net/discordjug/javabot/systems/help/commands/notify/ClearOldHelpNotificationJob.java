@@ -1,4 +1,4 @@
-package net.discordjug.javabot.systems.help;
+package net.discordjug.javabot.systems.help.commands.notify;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
