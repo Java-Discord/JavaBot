@@ -50,6 +50,10 @@ public class ClearOldHelpNotificationJob {
 					.stream()
 					.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
 					.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(3)))
+					.filter(msg -> msg
+						.getButtons()
+						.stream()
+						.anyMatch(button -> "Mark as unacknowledged".equals(button.getLabel())))
 					.toList()
 			);
 			if (!msgs.isEmpty()) {
