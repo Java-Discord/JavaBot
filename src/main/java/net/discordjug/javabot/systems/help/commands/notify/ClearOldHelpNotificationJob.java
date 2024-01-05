@@ -45,17 +45,17 @@ public class ClearOldHelpNotificationJob {
 
 	private void deleteOldMessagesInChannel(TextChannel helpNotificationChannel, MessageHistory history, List<Message> foundSoFar) {
 		history.retrievePast(50).queue(msgs -> {
-			foundSoFar.addAll(
-				msgs
+			List<Message> toDelete = msgs
+				.stream()
+				.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
+				.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(3)))
+				.filter(msg -> msg
+					.getButtons()
 					.stream()
-					.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
-					.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(3)))
-					.filter(msg -> msg
-						.getButtons()
-						.stream()
-						.anyMatch(button -> "Mark as unacknowledged".equals(button.getLabel())))
-					.toList()
-			);
+					.anyMatch(button -> "Mark as unacknowledged".equals(button.getLabel())))
+				.toList();
+			helpNotificationChannel.purgeMessages(toDelete);
+			foundSoFar.addAll(toDelete);
 			if (!msgs.isEmpty()) {
 				deleteOldMessagesInChannel(helpNotificationChannel, history, foundSoFar);
 			}else {
@@ -69,7 +69,6 @@ public class ClearOldHelpNotificationJob {
 						.addFiles(FileUpload.fromData(messageInfo.getBytes(StandardCharsets.UTF_8), "messages.txt"))
 						.queue();
 				}
-				helpNotificationChannel.purgeMessages(foundSoFar);
 			}
 		}, e -> {
 			ExceptionLogger.capture(e, getClass().getName());
