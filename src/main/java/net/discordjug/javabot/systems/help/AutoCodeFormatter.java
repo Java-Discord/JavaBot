@@ -131,11 +131,11 @@ public class AutoCodeFormatter {
 	private void replaceUnformattedCode(String msg, int codeStartIndex, int codeEndIndex, MessageReceivedEvent event) {
 		// default case: a "normal", non-ping containing, non first message of a forum-thread containing "{" and "}".
 		// user must also have set their preferences to allow this.
-		if (msg.length() > 1992) { // can't exceed discord's char limit
+		if (msg.length() > 1988) { // can't exceed discord's char limit
 			sendFormatHint(event);
 			return;
 		}
-		String messageContent = msg.substring(0, codeStartIndex) + " ```" +
+		String messageContent = msg.substring(0, codeStartIndex) + " ```java" +
 				msg.substring(codeStartIndex, codeEndIndex) + " ```" + msg.substring(codeEndIndex);
 		EmbedBuilder autoformatInfo = new EmbedBuilder().setDescription(botConfig.get(event.getGuild())
 				.getHelpConfig()
