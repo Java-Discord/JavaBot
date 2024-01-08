@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
@@ -48,7 +49,11 @@ public class RunScheduledTaskCommand extends SlashCommand implements AutoComplet
 	
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		String name = event.getOption("name").getAsString();
+		String name = event.getOption("name", "", OptionMapping::getAsString);
+		if (name.isEmpty()) {
+			Responses.replyMissingArguments(event).queue();
+			return;
+		}
 		taskHolder
 			.getScheduledTasks()
 			.stream()
