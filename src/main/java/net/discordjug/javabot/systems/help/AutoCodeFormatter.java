@@ -10,6 +10,7 @@ import net.discordjug.javabot.util.InteractionUtils;
 import net.discordjug.javabot.util.WebhookUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -131,7 +132,7 @@ public class AutoCodeFormatter {
 	private void replaceUnformattedCode(String msg, int codeStartIndex, int codeEndIndex, MessageReceivedEvent event) {
 		// default case: a "normal", non-ping containing, non first message of a forum-thread containing "{" and "}".
 		// user must also have set their preferences to allow this.
-		if (msg.length() > 1988) { // can't exceed discord's char limit
+		if (msg.length() > Message.MAX_CONTENT_LENGTH - 12) { // can't exceed discord's char limit
 			sendFormatHint(event);
 			return;
 		}
