@@ -245,7 +245,6 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 
 	private void handleHelpThanksInteraction(@NotNull ButtonInteractionEvent event, @NotNull HelpManager manager, String @NotNull [] id) {
 		ThreadChannel post = manager.getPostThread();
-		HelpConfig config = botConfig.get(event.getGuild()).getHelpConfig();
 		if (event.getUser().getIdLong() != post.getOwnerIdLong()) {
 			Responses.warning(
 							event,
@@ -301,16 +300,14 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 	}
 
 	private void handlePostClose(ButtonInteractionEvent event, @NotNull HelpManager manager) {
-		if (manager.isForumEligibleToBeUnreserved(event)) {
-			manager.close(event, event.getUser().getIdLong() == manager.getPostThread()
-					.getOwnerIdLong(), null);
-		} else {
+		if (event.getUser().getIdLong() != manager.getPostThread().getOwnerIdLong()) {
 			Responses.warning(
 							event,
-							"Could not close this post",
-							"You're not allowed to close this post."
+							"Sorry, but only the original poster can close this post using these buttons."
 					)
 					.queue();
+			return;
 		}
+		manager.close(event, true, null);
 	}
 }

@@ -62,9 +62,14 @@ public class UnreserveCommand extends SlashCommand {
 		}
 		HelpManager manager = new HelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, preferenceService);
 		if (manager.isForumEligibleToBeUnreserved(event.getInteraction())) {
+			String reason = event.getOption("reason", null, OptionMapping::getAsString);
+			if (event.getUser().getIdLong() != postThread.getOwnerIdLong() && reason == null) {
+				Responses.warning(event, "Could not close this post", "Closing a post of another user requires a reason to be set.").queue();
+				return;
+			}
 			manager.close(event,
 					event.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(),
-					event.getOption("reason", null, OptionMapping::getAsString));
+					reason);
 		} else {
 			Responses.warning(event, "Could not close this post", "You're not allowed to close this post.").queue();
 		}
