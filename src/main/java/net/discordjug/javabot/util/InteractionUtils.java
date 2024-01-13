@@ -98,7 +98,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 
 		String authorId = "";
 
-		if (componentId.length>2) {
+		if (componentId.length > 2) {
 			authorId = componentId[2];
 		}
 
