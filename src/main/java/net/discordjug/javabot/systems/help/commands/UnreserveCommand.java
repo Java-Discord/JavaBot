@@ -39,6 +39,7 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 @AutoDetectableComponentHandler(UnreserveCommand.UNRESERVE_ID)
 public class UnreserveCommand extends SlashCommand implements ModalHandler {
 	static final String UNRESERVE_ID = "unreserve";
+	private static final int MINIMUM_REASON_LENGTH = 11;
 	private static final String REASON_ID = "reason";
 	private final BotConfig botConfig;
 	private final DbActions dbActions;
@@ -72,9 +73,9 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 		onCloseRequest(event, event, event.getChannel(), reason, ()->{
 			TextInput reasonInput = TextInput
 				.create(REASON_ID, "Reason", TextInputStyle.SHORT)
-				.setRequiredRange(11, 100)
+				.setRequiredRange(MINIMUM_REASON_LENGTH, 100)
 				.setRequired(true)
-				.setPlaceholder("Please enter the reason you are closing this post here")
+				.setPlaceholder(reason == null ? "Please enter the reason you are closing this post here" : reason)
 				.build();
 			Modal modal = Modal
 					.create(ComponentIdBuilder.build(UNRESERVE_ID), "Close post")
@@ -91,13 +92,14 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 			.stream()
 			.filter(mapping -> REASON_ID.equals(mapping.getId()))
 			.map(mapping -> mapping.getAsString())
+			.filter(reason -> !isReasonInvalid(reason))
 			.findAny()
 			.ifPresentOrElse(reason -> {
 				onCloseRequest(event, event, event.getChannel(), reason, ()->{
-					Responses.error(event, "An error occured - The reason field is missing.").queue();
+					Responses.error(event, "The provided reason is missing or not valid").queue();
 					ExceptionLogger.capture(new IllegalStateException("A reason was expected but not present"), getClass().getName());
 				});
-			}, () -> Responses.warning(event, "A reason must be provided").queue());
+			}, () -> Responses.warning(event, "A valid reason must be provided").queue());
 		
 	}
 
@@ -115,7 +117,7 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 		}
 		HelpManager manager = new HelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, preferenceService);
 		if (manager.isForumEligibleToBeUnreserved(interaction)) {
-			if (replyCallback.getUser().getIdLong() != postThread.getOwnerIdLong() && reason == null) {
+			if (replyCallback.getUser().getIdLong() != postThread.getOwnerIdLong() && isReasonInvalid(reason)) {
 				noReasonHandler.run();
 				return;
 			}
@@ -125,6 +127,10 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 		} else {
 			Responses.warning(replyCallback, "Could not close this post", "You're not allowed to close this post.").queue();
 		}
+	}
+
+	private boolean isReasonInvalid(String reason) {
+		return reason == null || reason.length() < MINIMUM_REASON_LENGTH;
 	}
 
 	private void replyInvalidChannel(IReplyCallback replyCallback) {
