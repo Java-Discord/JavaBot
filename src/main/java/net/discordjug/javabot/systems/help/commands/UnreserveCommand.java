@@ -38,7 +38,7 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
  */
 @AutoDetectableComponentHandler(UnreserveCommand.UNRESERVE_ID)
 public class UnreserveCommand extends SlashCommand implements ModalHandler {
-	private static final String UNRESERVE_ID = "unreserve";
+	static final String UNRESERVE_ID = "unreserve";
 	private static final String REASON_ID = "reason";
 	private final BotConfig botConfig;
 	private final DbActions dbActions;
