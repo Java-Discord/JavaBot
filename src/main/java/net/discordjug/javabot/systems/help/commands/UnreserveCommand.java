@@ -1,28 +1,45 @@
 package net.discordjug.javabot.systems.help.commands;
 
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
+import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.h2db.DbActions;
 import net.discordjug.javabot.systems.help.HelpManager;
 import net.discordjug.javabot.systems.help.dao.HelpAccountRepository;
 import net.discordjug.javabot.systems.help.dao.HelpTransactionRepository;
 import net.discordjug.javabot.systems.user_preferences.UserPreferenceService;
+import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
+import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 /**
  * A simple command that can be used inside reserved help channels to
  * immediately unreserve them, instead of waiting for a timeout.
  */
-public class UnreserveCommand extends SlashCommand {
+@AutoDetectableComponentHandler(UnreserveCommand.UNRESERVE_ID)
+public class UnreserveCommand extends SlashCommand implements ModalHandler {
+	private static final String UNRESERVE_ID = "unreserve";
+	private static final String REASON_ID = "reason";
 	private final BotConfig botConfig;
 	private final DbActions dbActions;
 	private final HelpAccountRepository helpAccountRepository;
@@ -43,40 +60,75 @@ public class UnreserveCommand extends SlashCommand {
 		this.helpAccountRepository = helpAccountRepository;
 		this.helpTransactionRepository = helpTransactionRepository;
 		this.preferenceService = preferenceService;
-		setCommandData(Commands.slash("unreserve", "Unreserves this post marking your question/issue as resolved.")
+		setCommandData(Commands.slash(UNRESERVE_ID, "Unreserves this post marking your question/issue as resolved.")
 				.setGuildOnly(true)
-				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false)
+				.addOption(OptionType.STRING, REASON_ID, "The reason why you're unreserving this channel", false)
 		);
 	}
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
+		String reason = event.getOption(REASON_ID, null, OptionMapping::getAsString);
+		onCloseRequest(event, event, event.getChannel(), reason, ()->{
+			TextInput reasonInput = TextInput
+				.create(REASON_ID, "Reason", TextInputStyle.SHORT)
+				.setRequiredRange(11, 100)
+				.setRequired(true)
+				.setPlaceholder("Please enter the reason you are closing this post here")
+				.build();
+			Modal modal = Modal
+					.create(ComponentIdBuilder.build(UNRESERVE_ID), "Close post")
+					.addComponents(ActionRow.of(
+						reasonInput))
+					.build();
+			event.replyModal(modal).queue();
+		});
+	}
+	
+	@Override
+	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+		values
+			.stream()
+			.filter(mapping -> REASON_ID.equals(mapping.getId()))
+			.map(mapping -> mapping.getAsString())
+			.findAny()
+			.ifPresentOrElse(reason -> {
+				onCloseRequest(event, event, event.getChannel(), reason, ()->{
+					Responses.error(event, "An error occured - The reason field is missing.").queue();
+					ExceptionLogger.capture(new IllegalStateException("A reason was expected but not present"), getClass().getName());
+				});
+			}, () -> Responses.warning(event, "A reason must be provided").queue());
+		
+	}
+
+	private void onCloseRequest(Interaction interaction, IReplyCallback replyCallback, MessageChannelUnion channel, String reason, Runnable noReasonHandler) {
+		ChannelType channelType = channel.getType();
 		// check whether the channel type is either text or thread (possible forum post?)
-		if (event.getChannelType() != ChannelType.TEXT && event.getChannelType() != ChannelType.GUILD_PUBLIC_THREAD) {
-			replyInvalidChannel(event);
+		if (channelType != ChannelType.TEXT && channelType != ChannelType.GUILD_PUBLIC_THREAD) {
+			replyInvalidChannel(replyCallback);
 			return;
 		}
-		ThreadChannel postThread = event.getChannel().asThreadChannel();
+		ThreadChannel postThread = channel.asThreadChannel();
 		if (postThread.getParentChannel().getType() != ChannelType.FORUM) {
-			replyInvalidChannel(event);
+			replyInvalidChannel(replyCallback);
+			return;
 		}
 		HelpManager manager = new HelpManager(postThread, dbActions, botConfig, helpAccountRepository, helpTransactionRepository, preferenceService);
-		if (manager.isForumEligibleToBeUnreserved(event.getInteraction())) {
-			String reason = event.getOption("reason", null, OptionMapping::getAsString);
-			if (event.getUser().getIdLong() != postThread.getOwnerIdLong() && reason == null) {
-				Responses.warning(event, "Could not close this post", "Closing a post of another user requires a reason to be set.").queue();
+		if (manager.isForumEligibleToBeUnreserved(interaction)) {
+			if (replyCallback.getUser().getIdLong() != postThread.getOwnerIdLong() && reason == null) {
+				noReasonHandler.run();
 				return;
 			}
-			manager.close(event,
-					event.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(),
+			manager.close(replyCallback,
+					replyCallback.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(),
 					reason);
 		} else {
-			Responses.warning(event, "Could not close this post", "You're not allowed to close this post.").queue();
+			Responses.warning(replyCallback, "Could not close this post", "You're not allowed to close this post.").queue();
 		}
 	}
 
-	private void replyInvalidChannel(CommandInteraction interaction) {
-		Responses.warning(interaction, "Invalid Channel",
+	private void replyInvalidChannel(IReplyCallback replyCallback) {
+		Responses.warning(replyCallback, "Invalid Channel",
 						"This command may only be used in either the text-channel-based help system, or in our new forum help system.")
 				.queue();
 	}
