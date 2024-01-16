@@ -33,7 +33,7 @@ public class HelpExperienceJob {
 			try {
 				helpAccountRepository.removeExperienceFromAllAccounts(
 						// just get the config for the first guild the bot is in, as it's not designed to work in multiple guilds anyway
-						botConfig.get(jda.getGuilds().get(0)).getHelpConfig().getDailyExperienceSubtraction(), 5, 50);
+						botConfig.get(jda.getGuilds().get(0)).getHelpConfig().getDailyExperienceSubtraction(), 1, 50);
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			}
