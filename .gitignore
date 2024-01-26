@@ -6,6 +6,7 @@ build/
 /config
 /purgeArchives
 /logs
+/db
 
 # Eclipse settings
 .classpath
@@ -14,6 +15,6 @@ build/
 bin/
 
 # H2 Database
-/*.mv.db
-/*.trace.db
-/*.lock.db
+*.mv.db
+*.trace.db
+*.lock.db
