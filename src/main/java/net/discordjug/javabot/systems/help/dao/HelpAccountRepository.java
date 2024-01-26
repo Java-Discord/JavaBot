@@ -2,7 +2,6 @@ package net.discordjug.javabot.systems.help.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.help.model.HelpAccount;
 
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +25,6 @@ import java.util.Optional;
 @Repository
 public class HelpAccountRepository {
 	private final JdbcTemplate jdbcTemplate;
-	private final BotConfig botConfig;
 
 	/**
 	 * Inserts a new {@link HelpAccount}.
@@ -105,7 +103,7 @@ public class HelpAccountRepository {
 	 * @throws DataAccessException If an error occurs.
 	 */
 	public void removeExperienceFromAllAccounts(double change, int min, int max) throws DataAccessException {
-		long rows = jdbcTemplate.execute("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST(experience * (? / 100), ?), ?), 0)",new CallableStatementCallback<Long>() {
+		long rows = jdbcTemplate.execute("UPDATE help_account SET experience = GREATEST(experience - LEAST(GREATEST((experience * ?) / 100, ?), ?), 0)",new CallableStatementCallback<Long>() {
 
 			@Override
 			public Long doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {

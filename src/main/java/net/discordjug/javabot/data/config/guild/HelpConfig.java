@@ -116,7 +116,17 @@ public class HelpConfig extends GuildConfigItem {
 	private double thankExperience = 3;
 
 	/**
-	 * The amount that should be subtracted from every Help Account each day.
+	 * The minimum total amount of XP that should be subtracted from every Help Account each day.
+	 */
+	private int minDailyExperienceSubtraction = 1;
+	
+	/**
+	 * The maximum total amount of XP that should be subtracted from every Help Account each day.
+	 */
+	private int maxDailyExperienceSubtraction = 50;
+	
+	/**
+	 * The percentage of XP that should be subtracted from every Help Account each day.
 	 */
 	private double dailyExperienceSubtraction = 5;
 
