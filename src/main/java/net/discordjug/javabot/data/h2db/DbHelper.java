@@ -99,7 +99,13 @@ public class DbHelper {
 		return shouldInitSchema;
 	}
 
-	private static void initializeSchema(HikariDataSource dataSource) throws IOException, SQLException {
+	/**
+	 * Initializes the schema of the database by running all SQL statements from the schema.sql script.
+	 * @param dataSource the {@link DataSource} to connect to the DB
+	 * @throws IOException if an error happened while loading the schema.sql
+	 * @throws SQLException if any SQL error happened
+	 */
+	public static void initializeSchema(DataSource dataSource) throws IOException, SQLException {
 		try (InputStream is = DbHelper.class.getClassLoader().getResourceAsStream("database/schema.sql")) {
 			if (is == null) throw new IOException("Could not load schema.sql.");
 			List<String> queries = Arrays.stream(new String(is.readAllBytes()).split(";"))

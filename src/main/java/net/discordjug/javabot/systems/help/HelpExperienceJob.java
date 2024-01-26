@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.help;
 
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.data.config.guild.HelpConfig;
 import net.discordjug.javabot.data.h2db.DbHelper;
 import net.discordjug.javabot.systems.help.dao.HelpAccountRepository;
 import net.discordjug.javabot.util.ExceptionLogger;
@@ -31,9 +32,12 @@ public class HelpExperienceJob {
 	public void execute() {
 		asyncPool.execute(() -> {
 			try {
+				// just get the config for the first guild the bot is in, as it's not designed to work in multiple guilds anyway
+				HelpConfig helpConfig = botConfig.get(jda.getGuilds().get(0)).getHelpConfig();
 				helpAccountRepository.removeExperienceFromAllAccounts(
-						// just get the config for the first guild the bot is in, as it's not designed to work in multiple guilds anyway
-						botConfig.get(jda.getGuilds().get(0)).getHelpConfig().getDailyExperienceSubtraction(), 5, 50);
+						helpConfig.getDailyExperienceSubtraction(),
+						helpConfig.getMinDailyExperienceSubtraction(),
+						helpConfig.getMaxDailyExperienceSubtraction());
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, DbHelper.class.getSimpleName());
 			}
