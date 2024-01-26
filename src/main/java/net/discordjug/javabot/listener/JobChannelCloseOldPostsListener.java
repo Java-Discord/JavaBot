@@ -1,9 +1,12 @@
 package net.discordjug.javabot.listener;
 
 import java.awt.Color;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.util.InteractionUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -24,19 +27,41 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 		if (event.getChannel().getType() != ChannelType.GUILD_PUBLIC_THREAD) {
 			return;
 		}
+		
 		ThreadChannel post = event.getChannel().asThreadChannel();
-		if (post.getParentChannel().getIdLong() !=
-				botConfig.get(event.getGuild()).getModerationConfig().getJobChannelId()) {
+		ModerationConfig moderationConfig = botConfig.get(event.getGuild()).getModerationConfig();
+		long jobChannelId = moderationConfig.getJobChannelId();
+		long projectChannelId = moderationConfig.getProjectChannelId();
+		long parentChannelId = post.getParentChannel().getIdLong();
+		
+		if (parentChannelId != jobChannelId && parentChannelId != projectChannelId) {
 			return;
 		}
 
-
-		boolean postClosed = false;
-
-		for (ThreadChannel otherPost : post.getParentChannel().getThreadChannels()) {
-			if (otherPost.getOwnerIdLong() == post.getOwnerIdLong() &&
-					otherPost.getIdLong() != post.getIdLong() &&
-					!otherPost.isPinned()) {
+		List<ThreadChannel> threadChannels = post.getParentChannel()
+				.getThreadChannels()
+				.stream()
+				.filter(c -> c.getOwnerIdLong() == post.getOwnerIdLong())
+				.filter(otherPost -> otherPost.getIdLong() != post.getIdLong())
+				.filter(c -> !c.isPinned())
+				.collect(Collectors.toList());
+		
+		for (ThreadChannel otherPost : threadChannels) {
+			if(otherPost.getTimeCreated().plusDays(7).isAfter(post.getTimeCreated())) {
+				post.sendMessageEmbeds(
+						new EmbedBuilder()
+						.setTitle("Post closed")
+						.setDescription("This post has been blocked because you have created other recent posts.\nPlease do not spam posts.")
+						.build())
+				.setContent(post.getOwner().getAsMention())
+				.flatMap(msg -> post.getManager().setArchived(true).setLocked(true))
+				.queue();
+				return;
+			}
+		}
+		
+		if(parentChannelId == jobChannelId && !threadChannels.isEmpty()) {
+			for (ThreadChannel otherPost : threadChannels) {
 				otherPost.sendMessageEmbeds(
 						new EmbedBuilder()
 							.setTitle("Post closed")
@@ -45,10 +70,7 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 							.build())
 					.flatMap(msg -> otherPost.getManager().setArchived(true).setLocked(true))
 					.queue();
-				postClosed = true;
 			}
-		}
-		if (postClosed) {
 			post.sendMessageEmbeds(
 					new EmbedBuilder()
 					.setTitle("Posts closed")
