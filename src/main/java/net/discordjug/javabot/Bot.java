@@ -112,10 +112,12 @@ public class Bot implements ApplicationListener<ApplicationReadyEvent> {
 		List<IdMapping<StringSelectMenuHandler>> stringSelectMappings = new ArrayList<>();
 		for (Object handler : interactionHandlers.values()) {
 			AutoDetectableComponentHandler annotation = handler.getClass().getAnnotation(AutoDetectableComponentHandler.class);
-			String[] keys = annotation.value();
-			addComponentHandler(buttonMappings, keys, handler, ButtonHandler.class);
-			addComponentHandler(modalMappings, keys, handler, ModalHandler.class);
-			addComponentHandler(stringSelectMappings, keys, handler, StringSelectMenuHandler.class);
+			if (annotation != null) {//superclasses are annotated, ignore
+				String[] keys = annotation.value();
+				addComponentHandler(buttonMappings, keys, handler, ButtonHandler.class);
+				addComponentHandler(modalMappings, keys, handler, ModalHandler.class);
+				addComponentHandler(stringSelectMappings, keys, handler, StringSelectMenuHandler.class);
+			}
 		}
 		dih4jda.addButtonMappings(buttonMappings.toArray(IdMapping[]::new));
 		dih4jda.addModalMappings(modalMappings.toArray(IdMapping[]::new));

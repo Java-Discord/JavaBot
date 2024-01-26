@@ -117,9 +117,23 @@ public class HelpManager {
 				.queue(s -> postThread.getManager().setLocked(true).setArchived(true).queue());
 		if (callback.getMember().getIdLong() != postThread.getOwnerIdLong() &&
 				Boolean.parseBoolean(preferenceService.getOrCreate(postThread.getOwnerIdLong(), Preference.PRIVATE_CLOSE_NOTIFICATIONS).getState())) {
+
 			postThread.getOwner().getUser().openPrivateChannel()
 					.flatMap(c -> createDMCloseInfoEmbed(callback.getMember(), postThread, reason, c))
 					.queue(success -> {}, failure -> {});
+			
+			botConfig.get(callback.getGuild())
+				.getModerationConfig()
+				.getLogChannel()
+				.sendMessageEmbeds(new EmbedBuilder()
+						.setTitle("Post closed by non-original poster")
+						.setDescription("The post " + postThread.getAsMention() +
+								" has been closed by " + callback.getMember().getAsMention() + ".\n\n" +
+								"[Post link](" + postThread.getJumpUrl() + ")")
+						.addField("Reason", reason, false)
+						.setAuthor(callback.getMember().getEffectiveName(), null, callback.getMember().getEffectiveAvatarUrl())
+						.build())
+				.queue();
 		}
 	}
 	
