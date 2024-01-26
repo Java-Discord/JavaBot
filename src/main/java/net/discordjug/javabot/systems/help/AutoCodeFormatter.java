@@ -10,6 +10,7 @@ import net.discordjug.javabot.util.InteractionUtils;
 import net.discordjug.javabot.util.WebhookUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -27,6 +28,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Component
 public class AutoCodeFormatter {
+	private static final String CODEBLOCK_PREFIX = " ```java";
+	private static final String CODEBLOCK_SUFFIX = " ```";
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
 	private final UserPreferenceService preferenceService;
@@ -128,15 +131,16 @@ public class AutoCodeFormatter {
 				).queue();
 	}
 
+	
 	private void replaceUnformattedCode(String msg, int codeStartIndex, int codeEndIndex, MessageReceivedEvent event) {
 		// default case: a "normal", non-ping containing, non first message of a forum-thread containing "{" and "}".
 		// user must also have set their preferences to allow this.
-		if (msg.length() > 1992) { // can't exceed discord's char limit
+		if (msg.length() > Message.MAX_CONTENT_LENGTH - CODEBLOCK_PREFIX.length() - CODEBLOCK_SUFFIX.length()) { // can't exceed discord's char limit
 			sendFormatHint(event);
 			return;
 		}
-		String messageContent = msg.substring(0, codeStartIndex) + " ```" +
-				msg.substring(codeStartIndex, codeEndIndex) + " ```" + msg.substring(codeEndIndex);
+		String messageContent = msg.substring(0, codeStartIndex) + CODEBLOCK_PREFIX +
+				msg.substring(codeStartIndex, codeEndIndex) + CODEBLOCK_SUFFIX + msg.substring(codeEndIndex);
 		EmbedBuilder autoformatInfo = new EmbedBuilder().setDescription(botConfig.get(event.getGuild())
 				.getHelpConfig()
 				.getAutoFormatInfoMessage());
