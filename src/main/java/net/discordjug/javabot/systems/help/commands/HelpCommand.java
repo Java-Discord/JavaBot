@@ -1,5 +1,6 @@
 package net.discordjug.javabot.systems.help.commands;
 
+import net.discordjug.javabot.systems.help.commands.notify.HelpPingSubcommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
