@@ -20,6 +20,10 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -137,7 +141,21 @@ public class MessageCache {
 				action.addFiles(FileUpload.fromData(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt"));
 			}
 			action.queue();
+			requestMessageAttachments(message);
 		});
+	}
+
+	/**
+	 * Requests each attachment from Discord's CDN.
+	 * This is done in order to prevent Discord from deleting the attachment too quickly.
+	 * @param message the cached message
+	 */
+	private void requestMessageAttachments(CachedMessage message) {
+		HttpClient client = HttpClient.newHttpClient();
+		for (String attachment : message.getAttachments()) {
+			HttpRequest request = HttpRequest.newBuilder(URI.create(attachment)).build();
+			client.sendAsync(request, BodyHandlers.discarding());
+		}
 	}
 
 	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage before) {
