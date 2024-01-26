@@ -1,6 +1,8 @@
 package net.discordjug.javabot.systems.help;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -87,6 +89,21 @@ public class HelpExperienceSubtractionTest {
 		//should be inside [1,50] hence neither minimum nor maximum is active
 		repo.removeExperienceFromAllAccounts(10, 1, 50);
 		assertEquals(81, repo.getByUserId(1).get().getExperience());
+	}
+	
+	@Test
+	void testXPHalfLife() {
+		int startXP = 1_000;
+		int half = startXP/2;
+		repo.insert(new HelpAccount(1, startXP));
+		for (int i = 0; i < 55; i++) {
+			repo.removeExperienceFromAllAccounts(1.25, 0, 1_000);
+			double actualXP = repo.getByUserId(1).get().getExperience();
+			assertTrue(actualXP > half, "In iteration "+i+", XP have decayed by more than 50%, user has "+actualXP+"XP after iteration");
+		}
+		repo.removeExperienceFromAllAccounts(1.25, 0, 1_000);
+		double actualXP = repo.getByUserId(1).get().getExperience();
+		assertFalse(actualXP > half, "After all iterations, XP have not decayed by more than 50%, user has "+actualXP+"XP at the end");
 	}
 	
 	@Test
