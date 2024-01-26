@@ -2,12 +2,15 @@ package net.discordjug.javabot.systems.moderation;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.notification.NotificationService;
+import net.discordjug.javabot.util.ExceptionLogger;
+import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogChange;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.events.guild.GuildAuditLogEntryCreateEvent;
@@ -26,13 +29,15 @@ public class DiscordModerationLogListener extends ListenerAdapter{
 
 	@Override
 	public void onGuildAuditLogEntryCreate(GuildAuditLogEntryCreateEvent event) {
-		
 		ModerationService moderationService = new ModerationService(notificationService, botConfig.get(event.getGuild()), warnRepository, asyncPool);
 		
 		AuditLogEntry entry = event.getEntry();
 		long targetUserId = entry.getTargetIdLong();
 		long moderatorUserId = entry.getUserIdLong();
 		if (moderatorUserId == event.getJDA().getSelfUser().getIdLong()) {
+			return;
+		}
+		if (!EnumSet.of(ActionType.KICK, ActionType.BAN, ActionType.UNBAN, ActionType.MEMBER_UPDATE).contains(entry.getType())) {
 			return;
 		}
 		event.getJDA().retrieveUserById(targetUserId).queue(targetUser -> {
@@ -56,11 +61,9 @@ public class DiscordModerationLogListener extends ListenerAdapter{
 						}
 					}
 				}
-				default -> {}
+				default -> ExceptionLogger.capture(new IllegalStateException("Unexpected audit log entry: "+entry.getType()), getClass().getName());
 				}
-			});
-		});
-		
+			}, e -> ExceptionLogger.capture(e, getClass().getName()));
+		}, e -> ExceptionLogger.capture(e, getClass().getName()));
 	}
-	
 }
