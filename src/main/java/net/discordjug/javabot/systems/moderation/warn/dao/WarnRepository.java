@@ -61,25 +61,7 @@ public class WarnRepository {
 			return Optional.empty();
 		}
 	}
-
-	/**
-	 * Gets the total severity weight of all warns for the given user, which
-	 * were created after the given cutoff, and haven't been discarded.
-	 *
-	 * @param userId The id of the user.
-	 * @param cutoff The time after which to look for warns.
-	 * @return The total weight of all warn severities.
-	 * @throws SQLException If an error occurs.
-	 */
-	public int getTotalSeverityWeight(long userId, LocalDateTime cutoff) throws DataAccessException {
-		try {
-			return jdbcTemplate.queryForObject("SELECT SUM(severity_weight) FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?", (rs, rows)->rs.getInt(1),
-					userId, Timestamp.valueOf(cutoff));
-		}catch (EmptyResultDataAccessException e) {
-			return 0;
-		}
-	}
-
+	
 	/**
 	 * Discards all warnings that have been issued to a given user.
 	 *
@@ -135,12 +117,12 @@ public class WarnRepository {
 	 * @return A List with all Warns.
 	 */
 	public List<Warn> getActiveWarnsByUserId(long userId, LocalDateTime cutoff) {
-		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ?",(rs, row)->this.read(rs),
+		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ? AND discarded = FALSE AND created_at > ? ORDER BY created_at DESC",(rs, row)->this.read(rs),
 				userId, Timestamp.valueOf(cutoff));
 	}
 
 	public List<Warn> getAllWarnsByUserId(long userId) {
-		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ?",(rs, row)->this.read(rs),
+		return jdbcTemplate.query("SELECT * FROM warn WHERE user_id = ?",(rs, row) -> this.read(rs),
 				userId);
 	}
 }

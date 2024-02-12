@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -88,7 +89,7 @@ public class ModerationService {
 		asyncPool.execute(() -> {
 			try {
 				warnRepository.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
-				int totalSeverity = warnRepository.getTotalSeverityWeight(user.getIdLong(), LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays()));
+				long totalSeverity = getTotalSeverityWeight(user.getIdLong()).totalSeverity();
 				MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
 				notificationService.withUser(user, warnedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
@@ -106,7 +107,46 @@ public class ModerationService {
 			}
 		});
 	}
-
+	
+	/**
+	 * Gets the total warn severity weight of a given user.
+	 * @implSpec
+	 * 	Only warns from the last {@link ModerationConfig#getMaxWarnValidityDays()} days are checked.
+	 * 	Every {@link ModerationConfig#getWarnDecayDays()} days, {@link ModerationConfig#getWarnDecayAmount()} of severity are subtracted from the total severity of the user.
+	 * 	This method does not allow negative severities at any point in time.
+	 * 	The oldest considered warn decides on the amount of severity to subtract.
+	 * 	Hence, all warns that would (together) not increase the severity due to being too old are ignored.
+	 * @implNote
+	 * 	The total severity is calculated per warn by considering the severity of all warns after the given warn and subtracting the discount subtrahend corresponding to the given (oldest) warn from the severity.
+	 * 	Then, the maximum discounted severity over all warns is chosen.
+	 * @param userId the ID of the user to check
+	 * @return the accumulated warn severity weight of the user along with all warns contributing to it.
+	 * @see SeverityInformation
+	 */
+	public SeverityInformation getTotalSeverityWeight(long userId) {
+		LocalDateTime now = LocalDateTime.now();
+		List<Warn> activeWarns = warnRepository.getActiveWarnsByUserId(userId, now.minusDays(moderationConfig.getMaxWarnValidityDays()));
+		int accumulatedUndiscountedSeverity = 0;
+		long maxSeverity = 0;
+		long usedSeverityDiscount = 0;
+		List<Warn> contributingWarns = Collections.emptyList();
+		
+		for (int i = 0; i < activeWarns.size(); i++) {
+			Warn warn = activeWarns.get(i);
+			accumulatedUndiscountedSeverity += warn.getSeverityWeight();
+			long daysSinceWarn = Duration.between(warn.getCreatedAt(), now).toDays();
+			long discountAmount = moderationConfig.getWarnDecayAmount() * (daysSinceWarn / moderationConfig.getWarnDecayDays());
+			long currentSeverity = accumulatedUndiscountedSeverity - discountAmount;
+			if (currentSeverity > maxSeverity) {
+				maxSeverity = currentSeverity;
+				contributingWarns = activeWarns.subList(0, i + 1);
+				usedSeverityDiscount = discountAmount;
+			}
+		}
+		
+		return new SeverityInformation(maxSeverity, usedSeverityDiscount, Collections.unmodifiableList(contributingWarns));
+	}
+	
 	/**
 	 * Clears warns from the given user by discarding all warns.
 	 *
@@ -157,7 +197,7 @@ public class ModerationService {
 	public List<Warn> getWarns(long userId) {
 		try {
 			WarnRepository repo = warnRepository;
-			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getWarnTimeoutDays());
+			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getMaxWarnValidityDays());
 			return repo.getActiveWarnsByUserId(userId, cutoff);
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -356,7 +396,7 @@ public class ModerationService {
 				.build();
 	}
 
-	private @NotNull MessageEmbed buildWarnEmbed(User user, Member warnedBy, @NotNull WarnSeverity severity, int totalSeverity, String reason) {
+	private @NotNull MessageEmbed buildWarnEmbed(User user, Member warnedBy, @NotNull WarnSeverity severity, long totalSeverity, String reason) {
 		return buildModerationEmbed(user, warnedBy, reason)
 				.setTitle(String.format("Warn Added (%d/%d)", totalSeverity, moderationConfig.getMaxWarnSeverity()))
 				.setColor(Responses.Type.WARN.getColor())
@@ -407,4 +447,13 @@ public class ModerationService {
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.build();
 	}
+	
+	/**
+	 * Records information about the total severity of a user as well as the warns contributing to it.
+	 * @param totalSeverity the total severity of the user
+	 * @param severityDiscount the amount the severity was reduced due to warn decay
+	 * @param contributingWarns the (active) warns contributing to that severity
+	 * @see ModerationService#getTotalSeverityWeight(long)
+	 */
+	public record SeverityInformation(long totalSeverity, long severityDiscount, List<Warn> contributingWarns) {}
 }

@@ -10,6 +10,7 @@ import net.discordjug.javabot.api.routes.user_profile.model.UserProfileData;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.help.HelpExperienceService;
 import net.discordjug.javabot.systems.help.model.HelpAccount;
+import net.discordjug.javabot.systems.moderation.ModerationService;
 import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.model.QOTWAccount;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -108,8 +108,8 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				HelpAccount helpAccount = helpExperienceService.getOrCreateAccount(user.getIdLong());
 				data.setHelpAccount(HelpAccountData.of(botConfig, helpAccount, guild));
 				// User Warns
-				LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(guild).getModerationConfig().getWarnTimeoutDays());
-				data.setWarns(warnRepository.getActiveWarnsByUserId(user.getIdLong(), cutoff));
+				ModerationService moderationService = new ModerationService(null, botConfig.get(guild), warnRepository, null);
+				data.setWarns(moderationService.getTotalSeverityWeight(user.getIdLong()).contributingWarns());
 				// Insert into cache
 				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
 			}
