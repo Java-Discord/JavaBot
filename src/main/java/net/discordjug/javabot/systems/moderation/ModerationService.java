@@ -97,12 +97,17 @@ public class ModerationService {
 	 */
 	public SeverityInformation getTotalSeverityWeight(Guild guild, long userId) {
 		ModerationConfig moderationConfig = botConfig.get(guild).getModerationConfig();
-		LocalDateTime now = LocalDateTime.now();
-		List<Warn> activeWarns = warnRepository.getActiveWarnsByUserId(userId, now.minusDays(moderationConfig.getMaxWarnValidityDays()));
+		List<Warn> activeWarns = warnRepository.getActiveWarnsByUserId(userId, LocalDateTime.now().minusDays(moderationConfig.getMaxWarnValidityDays()));
+		return calculateSeverityWeight(moderationConfig, activeWarns);
+	}
+
+	static SeverityInformation calculateSeverityWeight(ModerationConfig moderationConfig, List<Warn> activeWarns) {
 		int accumulatedUndiscountedSeverity = 0;
 		long maxSeverity = 0;
 		long usedSeverityDiscount = 0;
 		List<Warn> contributingWarns = Collections.emptyList();
+		
+		LocalDateTime now = LocalDateTime.now();
 		
 		for (int i = 0; i < activeWarns.size(); i++) {
 			Warn warn = activeWarns.get(i);
