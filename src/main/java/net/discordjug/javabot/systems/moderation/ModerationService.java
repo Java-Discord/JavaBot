@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.moderation;
 
 import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.moderation.warn.model.Warn;
@@ -13,11 +12,13 @@ import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -34,46 +35,15 @@ import java.util.concurrent.TimeUnit;
  * This service provides methods for performing moderation actions, like banning
  * or warning users.
  */
+@Service
+@RequiredArgsConstructor
 public class ModerationService {
 	private static final int BAN_DELETE_DAYS = 7;
 
 	private final NotificationService notificationService;
-	private final ModerationConfig moderationConfig;
+	private final BotConfig botConfig;
 	private final WarnRepository warnRepository;
 	private final ExecutorService asyncPool;
-
-	/**
-	 * Constructs the service.
-	 *
-	 * @param config The {@link GuildConfig} to use.
-	 * @param notificationService The {@link NotificationService}
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
-	 * @param asyncPool The main thread pool for asynchronous operations
-	 */
-	public ModerationService(NotificationService notificationService,@NotNull GuildConfig config, WarnRepository warnRepository, ExecutorService asyncPool) {
-		this.notificationService = notificationService;
-		this.moderationConfig = config.getModerationConfig();
-		this.warnRepository = warnRepository;
-		this.asyncPool = asyncPool;
-	}
-
-	/**
-	 * Constructs the service using information obtained from an interaction.
-	 *
-	 * @param interaction The interaction to use.
-	 * @param notificationService The {@link NotificationService}
-	 * @param botConfig The main configuration of the bot
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
-	 * @param asyncPool The main thread pool for asynchronous operations
-	 */
-	public ModerationService(NotificationService notificationService,BotConfig botConfig, @NotNull Interaction interaction, WarnRepository warnRepository, ExecutorService asyncPool) {
-		this(
-				notificationService,
-				botConfig.get(interaction.getGuild()),
-				warnRepository,
-				asyncPool
-		);
-	}
 
 	/**
 	 * Issues a warning for the given user.
@@ -88,8 +58,9 @@ public class ModerationService {
 	public void warn(User user, WarnSeverity severity, String reason, Member warnedBy, MessageChannel channel, boolean quiet) {
 		asyncPool.execute(() -> {
 			try {
+				ModerationConfig moderationConfig = getModerationConfig(warnedBy);
 				warnRepository.insert(new Warn(user.getIdLong(), warnedBy.getIdLong(), severity, reason));
-				long totalSeverity = getTotalSeverityWeight(user.getIdLong()).totalSeverity();
+				long totalSeverity = getTotalSeverityWeight(warnedBy.getGuild(), user.getIdLong()).totalSeverity();
 				MessageEmbed warnEmbed = buildWarnEmbed(user, warnedBy, severity, totalSeverity, reason);
 				notificationService.withUser(user, warnedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(warnEmbed));
 				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(warnEmbed));
@@ -119,11 +90,13 @@ public class ModerationService {
 	 * @implNote
 	 * 	The total severity is calculated per warn by considering the severity of all warns after the given warn and subtracting the discount subtrahend corresponding to the given (oldest) warn from the severity.
 	 * 	Then, the maximum discounted severity over all warns is chosen.
+	 * @param guild The guild of the user
 	 * @param userId the ID of the user to check
 	 * @return the accumulated warn severity weight of the user along with all warns contributing to it.
 	 * @see SeverityInformation
 	 */
-	public SeverityInformation getTotalSeverityWeight(long userId) {
+	public SeverityInformation getTotalSeverityWeight(Guild guild, long userId) {
+		ModerationConfig moderationConfig = botConfig.get(guild).getModerationConfig();
 		LocalDateTime now = LocalDateTime.now();
 		List<Warn> activeWarns = warnRepository.getActiveWarnsByUserId(userId, now.minusDays(moderationConfig.getMaxWarnValidityDays()));
 		int accumulatedUndiscountedSeverity = 0;
@@ -159,7 +132,7 @@ public class ModerationService {
 				warnRepository.discardAll(user.getIdLong());
 				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy.getUser());
 				notificationService.withUser(user, clearedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
-				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
+				notificationService.withGuild(clearedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, ModerationService.class.getSimpleName());
 			}
@@ -173,13 +146,13 @@ public class ModerationService {
 	 * @param clearedBy The user who cleared the warn.
 	 * @return Whether the Warn was discarded or not.
 	 */
-	public boolean discardWarnById(long id, User clearedBy) {
+	public boolean discardWarnById(long id, Member clearedBy) {
 		try {
 			Optional<Warn> warnOptional = warnRepository.findById(id);
 			if (warnOptional.isPresent()) {
 				Warn warn = warnOptional.get();
 				warnRepository.discardById(warn.getId());
-				notificationService.withGuild(moderationConfig.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(buildClearWarnsByIdEmbed(warn, clearedBy)));
+				notificationService.withGuild(clearedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(buildClearWarnsByIdEmbed(warn, clearedBy.getUser())));
 				return true;
 			}
 		} catch (DataAccessException e) {
@@ -191,11 +164,13 @@ public class ModerationService {
 	/**
 	 * Gets warns based on the user id.
 	 *
+	 * @param guild The guild to check
 	 * @param userId The user's id.
 	 * @return A {@link List} with all warns.
 	 */
-	public List<Warn> getWarns(long userId) {
+	public List<Warn> getWarns(Guild guild, long userId) {
 		try {
+			ModerationConfig moderationConfig = botConfig.get(guild).getModerationConfig();
 			WarnRepository repo = warnRepository;
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getMaxWarnValidityDays());
 			return repo.getActiveWarnsByUserId(userId, cutoff);
@@ -269,6 +244,7 @@ public class ModerationService {
 	 */
 	public void ban(User user, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed banEmbed = buildBanEmbed(user, bannedBy, reason);
+		ModerationConfig moderationConfig = getModerationConfig(bannedBy);
 		user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessageEmbeds(banEmbed).setContent(moderationConfig.getBanMessageText())).queue(success -> {
 			banAndSendGuildNotifications(user, reason, bannedBy, channel, quiet, banEmbed);
 		}, err-> {
@@ -298,6 +274,7 @@ public class ModerationService {
 	public boolean unban(long userId, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed unbanEmbed = this.buildUnbanEmbed(userId, reason, bannedBy);
 		boolean isBanned = isBanned(bannedBy.getGuild(), userId);
+		ModerationConfig moderationConfig = getModerationConfig(bannedBy);
 		if (isBanned) {
 			bannedBy.getGuild().unban(User.fromId(userId)).queue(s -> {
 				moderationConfig.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
@@ -397,6 +374,7 @@ public class ModerationService {
 	}
 
 	private @NotNull MessageEmbed buildWarnEmbed(User user, Member warnedBy, @NotNull WarnSeverity severity, long totalSeverity, String reason) {
+		ModerationConfig moderationConfig = getModerationConfig(warnedBy);
 		return buildModerationEmbed(user, warnedBy, reason)
 				.setTitle(String.format("Warn Added (%d/%d)", totalSeverity, moderationConfig.getMaxWarnSeverity()))
 				.setColor(Responses.Type.WARN.getColor())
@@ -446,6 +424,10 @@ public class ModerationService {
 				.setTitle("Timeout Removed")
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.build();
+	}
+	
+	private ModerationConfig getModerationConfig(Member member) {
+		return botConfig.get(member.getGuild()).getModerationConfig();
 	}
 	
 	/**

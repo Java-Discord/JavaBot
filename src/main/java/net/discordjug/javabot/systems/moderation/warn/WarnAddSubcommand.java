@@ -4,9 +4,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.ModerateUserCommand;
 import net.discordjug.javabot.systems.moderation.ModerationService;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.entities.User;
@@ -16,8 +14,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
-import java.util.concurrent.ExecutorService;
-
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -25,23 +21,17 @@ import org.jetbrains.annotations.NotNull;
  * This Subcommand allows staff-members to add a single warn to any user.
  */
 public class WarnAddSubcommand extends SlashCommand.Subcommand {
-	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
+	private final ModerationService moderationService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository DAO for interacting with the set of {@link net.discordjug.javabot.systems.moderation.warn.model.Warn} objects.
+	 * @param moderationService Service object for moderating members
 	 */
-	public WarnAddSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
-		this.notificationService = notificationService;
+	public WarnAddSubcommand(BotConfig botConfig, ModerationService moderationService) {
 		this.botConfig = botConfig;
-		this.warnRepository = warnRepository;
-		this.asyncPool = asyncPool;
+		this.moderationService = moderationService;
 		setCommandData(new SubcommandData("add", "Sends a warning to a user, and increases their warn severity rating.")
 				.addOptions(
 						new OptionData(OptionType.USER, "user", "The user to warn.", true),
@@ -79,8 +69,7 @@ public class WarnAddSubcommand extends SlashCommand.Subcommand {
 			return;
 		}
 		boolean quiet = ModerateUserCommand.isQuiet(botConfig, event);
-		ModerationService service = new ModerationService(notificationService, botConfig, event, warnRepository, asyncPool);
-		service.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
+		moderationService.warn(target, severity, reasonMapping.getAsString(), event.getMember(), event.getChannel(), quiet);
 		Responses.success(event, "User Warned", "%s has been successfully warned.", target.getAsMention()).queue();
 	}
 }

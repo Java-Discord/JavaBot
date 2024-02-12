@@ -11,11 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
-import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.ModerationService;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.moderation.warn.model.Warn;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
@@ -32,23 +29,17 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
  * This Command allows users to see all their active warns.
  */
 public class WarnsListCommand extends SlashCommand {
-	private final BotConfig botConfig;
-	private final WarnRepository warnRepository;
 	private final ExecutorService asyncPool;
-	private final NotificationService notificationService;
+	private final ModerationService moderationService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
-	 * @param botConfig The main configuration of the bot
 	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
-	 * @param notificationService service object for notifying users
+	 * @param moderationService Service object for moderating members
 	 */
-	public WarnsListCommand(BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository, NotificationService notificationService) {
-		this.botConfig = botConfig;
-		this.warnRepository = warnRepository;
+	public WarnsListCommand(ExecutorService asyncPool, ModerationService moderationService) {
 		this.asyncPool = asyncPool;
-		this.notificationService = notificationService;
+		this.moderationService = moderationService;
 		setCommandData(Commands.slash("warns", "Shows a list of all recent warning.")
 				.addOption(OptionType.USER, "user", "If given, shows the recent warns of the given user instead.", false)
 				.setGuildOnly(true)
@@ -98,10 +89,9 @@ public class WarnsListCommand extends SlashCommand {
 			return;
 		}
 		event.deferReply(false).queue();
-		ModerationService moderationService = new ModerationService(notificationService, botConfig, event, warnRepository, asyncPool);
 		asyncPool.execute(() -> {
 			try {
-				event.getHook().sendMessageEmbeds(buildWarnsEmbed(moderationService.getTotalSeverityWeight(user.getIdLong()), user)).queue();
+				event.getHook().sendMessageEmbeds(buildWarnsEmbed(moderationService.getTotalSeverityWeight(event.getGuild(), user.getIdLong()), user)).queue();
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, WarnsListCommand.class.getSimpleName());
 			}

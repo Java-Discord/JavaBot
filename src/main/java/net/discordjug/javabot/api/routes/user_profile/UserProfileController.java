@@ -11,7 +11,6 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.help.HelpExperienceService;
 import net.discordjug.javabot.systems.help.model.HelpAccount;
 import net.discordjug.javabot.systems.moderation.ModerationService;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.model.QOTWAccount;
 import net.discordjug.javabot.util.Pair;
@@ -44,7 +43,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	private final DataSource dataSource;
 	private final BotConfig botConfig;
 	private final HelpExperienceService helpExperienceService;
-	private final WarnRepository warnRepository;
+	private final ModerationService moderationService;
 
 	/**
 	 * The constructor of this class which initializes the {@link Caffeine} cache.
@@ -54,10 +53,10 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 	 * @param botConfig The main configuration of the bot
 	 * @param dataSource A factory for connections to the main database
 	 * @param helpExperienceService Service object that handles Help Experience Transactions.
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
+	 * @param moderationService Service object for moderating members
 	 */
 	@Autowired
-	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService, BotConfig botConfig, DataSource dataSource, HelpExperienceService helpExperienceService, WarnRepository warnRepository) {
+	public UserProfileController(final JDA jda, QOTWPointsService qotwPointsService, BotConfig botConfig, DataSource dataSource, HelpExperienceService helpExperienceService, ModerationService moderationService) {
 		super(Caffeine.newBuilder()
 				.expireAfterWrite(10, TimeUnit.MINUTES)
 				.build()
@@ -67,7 +66,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 		this.dataSource = dataSource;
 		this.botConfig = botConfig;
 		this.helpExperienceService = helpExperienceService;
-		this.warnRepository = warnRepository;
+		this.moderationService = moderationService;
 	}
 
 	/**
@@ -108,8 +107,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				HelpAccount helpAccount = helpExperienceService.getOrCreateAccount(user.getIdLong());
 				data.setHelpAccount(HelpAccountData.of(botConfig, helpAccount, guild));
 				// User Warns
-				ModerationService moderationService = new ModerationService(null, botConfig.get(guild), warnRepository, null);
-				data.setWarns(moderationService.getTotalSeverityWeight(user.getIdLong()).contributingWarns());
+				data.setWarns(moderationService.getTotalSeverityWeight(guild, user.getIdLong()).contributingWarns());
 				// Insert into cache
 				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
 			}

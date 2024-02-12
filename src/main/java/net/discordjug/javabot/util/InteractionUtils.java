@@ -10,9 +10,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.systems.moderation.ModerationService;
 import net.discordjug.javabot.systems.moderation.report.ReportManager;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -38,7 +36,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ModalCallbackAction;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -73,11 +70,9 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	 */
 	private static final String DELETE_ORIGINAL_TEMPLATE = "utils:delete:%d";
 
-	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
 	private final ReportManager reportManager;
+	private final ModerationService moderationService;
 
 	/**
 	 * Deletes a message, only if the person deleting the message is the author
@@ -125,10 +120,9 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			Responses.error(interaction.getHook(), "Missing permissions").queue();
 			return;
 		}
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
 		guild.getJDA().retrieveUserById(memberId).queue(
 				user -> {
-					service.kick(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
+					moderationService.kick(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getMessage().editMessageComponents(ActionRow.of(Button.danger(interaction.getModalId(), "Kicked by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
 					resolveIfInReport(interaction.getChannel(), interaction.getUser());
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
@@ -140,10 +134,9 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			Responses.error(interaction.getHook(), "Missing permissions").queue();
 			return;
 		}
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
 		guild.getJDA().retrieveUserById(memberId).queue(
 				user -> {
-					service.warn(user, severity, reason, interaction.getMember(), interaction.getMessageChannel(), false);
+					moderationService.warn(user, severity, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getHook().editOriginalComponents(ActionRow.of(Button.primary(interaction.getModalId(), "Warned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
 					resolveIfInReport(interaction.getChannel(), interaction.getUser());
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
@@ -155,10 +148,9 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			Responses.error(interaction.getHook(), "Missing permissions").queue();
 			return;
 		}
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
 		guild.getJDA().retrieveUserById(memberId).queue(
 				user -> {
-					service.ban(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
+					moderationService.ban(user, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 					interaction.getMessage().editMessageComponents(ActionRow.of(Button.danger(interaction.getModalId(), "Banned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
 					resolveIfInReport(interaction.getChannel(), interaction.getUser());
 				}, error -> Responses.error(interaction.getHook(), "Could not find member: " + error.getMessage()).queue()
@@ -181,8 +173,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 			Responses.error(interaction.getHook(), "Missing permissions").queue();
 			return;
 		}
-		ModerationService service = new ModerationService(notificationService, botConfig, interaction, warnRepository, asyncPool);
-		service.unban(memberId, reason, interaction.getMember(), interaction.getMessageChannel(), false);
+		moderationService.unban(memberId, reason, interaction.getMember(), interaction.getMessageChannel(), false);
 		interaction.getMessage().editMessageComponents(ActionRow.of(Button.secondary(interaction.getModalId(), "Unbanned by " + UserUtils.getUserTag(interaction.getUser())).asDisabled())).queue();
 	}
 

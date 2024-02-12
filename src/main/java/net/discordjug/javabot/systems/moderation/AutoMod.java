@@ -2,7 +2,6 @@ package net.discordjug.javabot.systems.moderation;
 
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
@@ -27,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,21 +46,18 @@ public class AutoMod extends ListenerAdapter {
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private List<String> spamUrls;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
+	private final ModerationService moderationService;
 
 	/**
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
 	 * @param notificationService The {@link QOTWPointsService}
 	 * @param botConfig The main configuration of the bot
-	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository The main thread pool for asynchronous operations
+	 * @param moderationService Service object for moderating members
 	 */
-	public AutoMod(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
+	public AutoMod(NotificationService notificationService, BotConfig botConfig, ModerationService moderationService) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
-		this.warnRepository = warnRepository;
-		this.asyncPool = asyncPool;
+		this.moderationService = moderationService;
 		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
@@ -138,7 +133,7 @@ public class AutoMod extends ListenerAdapter {
 
 	private void doAutomodActions(Message message, String reason) {
 		notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message by %s: `%s`", message.getAuthor().getAsMention(), message.getContentRaw()));
-		new ModerationService(notificationService, botConfig.get(message.getGuild()), warnRepository, asyncPool)
+		moderationService
 				.warn(
 						message.getAuthor(),
 						WarnSeverity.MEDIUM,
@@ -163,7 +158,7 @@ public class AutoMod extends ListenerAdapter {
 		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
 			return;
 		}
-		new ModerationService(notificationService, botConfig.get(member.getGuild()), warnRepository, asyncPool)
+		moderationService
 				.timeout(
 						member.getUser(),
 						"Automod: Spam",
