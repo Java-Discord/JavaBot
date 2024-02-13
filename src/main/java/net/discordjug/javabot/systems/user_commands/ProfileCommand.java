@@ -5,9 +5,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.systems.help.HelpExperienceService;
 import net.discordjug.javabot.systems.moderation.ModerationService;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
 import net.discordjug.javabot.systems.moderation.warn.model.Warn;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
@@ -26,35 +24,28 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 /**
  * <h3>This class represents the /profile command.</h3>
  */
 public class ProfileCommand extends SlashCommand {
 	private final QOTWPointsService qotwPointsService;
-	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final HelpExperienceService helpExperienceService;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
+	private final ModerationService moderationService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param qotwPointsService The {@link QOTWPointsService}
-	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
 	 * @param helpExperienceService Service object that handles Help Experience Transactions.
-	 * @param warnRepository DAO for interacting with the set of {@link Warn} objects.
-	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param moderationService Service object for moderating members
 	 */
-	public ProfileCommand(QOTWPointsService qotwPointsService, NotificationService notificationService, BotConfig botConfig, HelpExperienceService helpExperienceService, WarnRepository warnRepository, ExecutorService asyncPool) {
+	public ProfileCommand(QOTWPointsService qotwPointsService, BotConfig botConfig, HelpExperienceService helpExperienceService, ModerationService moderationService) {
 		this.qotwPointsService = qotwPointsService;
-		this.notificationService = notificationService;
 		this.botConfig = botConfig;
 		this.helpExperienceService = helpExperienceService;
-		this.warnRepository = warnRepository;
-		this.asyncPool = asyncPool;
+		this.moderationService = moderationService;
 		setCommandData(Commands.slash("profile", "Shows your server profile.")
 				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)
 				.setGuildOnly(true)
@@ -81,7 +72,7 @@ public class ProfileCommand extends SlashCommand {
 
 	private @NotNull MessageEmbed buildProfileEmbed(@NotNull Member member) throws SQLException {
 		GuildConfig config = botConfig.get(member.getGuild());
-		List<Warn> warns = new ModerationService(notificationService, config, warnRepository, asyncPool).getWarns(member.getIdLong());
+		List<Warn> warns = moderationService.getWarns(member.getGuild(), member.getIdLong());
 		long points = qotwPointsService.getPoints(member.getIdLong());
 		List<Role> roles = member.getRoles();
 		String status = member.getOnlineStatus().name();
