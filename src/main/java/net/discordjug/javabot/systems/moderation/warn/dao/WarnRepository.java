@@ -63,16 +63,18 @@ public class WarnRepository {
 	}
 	
 	/**
-	 * Discards all warnings that have been issued to a given user.
+	 * Discards all warnings that have been issued to a given user after a given timestamp.
 	 *
 	 * @param userId The id of the user to discard warnings for.
+	 * @param cutoff timestamp specifying which warns should be discarded. Only warns after the cutoff are discarded.
 	 * @throws SQLException If an error occurs.
 	 */
-	public void discardAll(long userId) throws DataAccessException {
+	public void discardAll(long userId, LocalDateTime cutoff) throws DataAccessException {
 		jdbcTemplate.update("""
 				UPDATE warn SET discarded = TRUE
-				WHERE user_id = ?""",
-				userId);
+				WHERE user_id = ?
+				AND created_at > ?""",
+				userId, Timestamp.valueOf(cutoff));
 	}
 
 	/**

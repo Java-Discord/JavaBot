@@ -97,7 +97,7 @@ public class ModerationService {
 	 */
 	public SeverityInformation getTotalSeverityWeight(Guild guild, long userId) {
 		ModerationConfig moderationConfig = botConfig.get(guild).getModerationConfig();
-		List<Warn> activeWarns = warnRepository.getActiveWarnsByUserId(userId, LocalDateTime.now().minusDays(moderationConfig.getMaxWarnValidityDays()));
+		List<Warn> activeWarns = warnRepository.getActiveWarnsByUserId(userId, getEarliestActiveWarnTimestamp(moderationConfig));
 		return calculateSeverityWeight(moderationConfig, activeWarns);
 	}
 
@@ -132,9 +132,10 @@ public class ModerationService {
 	 * @param clearedBy The user who cleared the warns.
 	 */
 	public void discardAllWarns(User user, Member clearedBy) {
+		ModerationConfig moderationConfig = getModerationConfig(clearedBy);
 		asyncPool.execute(() -> {
 			try {
-				warnRepository.discardAll(user.getIdLong());
+				warnRepository.discardAll(user.getIdLong(), getEarliestActiveWarnTimestamp(moderationConfig));
 				MessageEmbed embed = buildClearWarnsEmbed(user, clearedBy.getUser());
 				notificationService.withUser(user, clearedBy.getGuild()).sendDirectMessage(c -> c.sendMessageEmbeds(embed));
 				notificationService.withGuild(clearedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
@@ -142,6 +143,10 @@ public class ModerationService {
 				ExceptionLogger.capture(e, ModerationService.class.getSimpleName());
 			}
 		});
+	}
+
+	private LocalDateTime getEarliestActiveWarnTimestamp(ModerationConfig moderationConfig) {
+		return LocalDateTime.now().minusDays(moderationConfig.getMaxWarnValidityDays());
 	}
 
 	/**
@@ -177,7 +182,7 @@ public class ModerationService {
 		try {
 			ModerationConfig moderationConfig = botConfig.get(guild).getModerationConfig();
 			WarnRepository repo = warnRepository;
-			LocalDateTime cutoff = LocalDateTime.now().minusDays(moderationConfig.getMaxWarnValidityDays());
+			LocalDateTime cutoff = getEarliestActiveWarnTimestamp(moderationConfig);
 			return repo.getActiveWarnsByUserId(userId, cutoff);
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
