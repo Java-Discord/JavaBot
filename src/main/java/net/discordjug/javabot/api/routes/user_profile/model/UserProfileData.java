@@ -4,6 +4,7 @@ import lombok.Data;
 import net.discordjug.javabot.systems.moderation.warn.model.Warn;
 import net.discordjug.javabot.systems.qotw.model.QOTWAccount;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -19,4 +20,7 @@ public class UserProfileData {
 	private QOTWAccount qotwAccount;
 	private HelpAccountData helpAccount;
 	private List<Warn> warns;
+	private boolean isGuildMember;
+	private OffsetDateTime guildJoinedDateTime;
+
 }

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -100,6 +101,10 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				data.setUserId(user.getIdLong());
 				data.setUserName(user.getName());
 				data.setDiscriminator(user.getDiscriminator());
+				data.setGuildMember(guild.isMember(user));
+				if(data.isGuildMember()){
+					data.setGuildJoinedDateTime(Objects.requireNonNull(guild.getMember(user)).getTimeJoined());
+				}
 				data.setEffectiveAvatarUrl(user.getEffectiveAvatarUrl());
 				// Question of the Week Account
 				QOTWAccount qotwAccount = qotwPointsService.getOrCreateAccount(user.getIdLong());
@@ -110,6 +115,7 @@ public class UserProfileController extends CaffeineCache<Pair<Long, Long>, UserP
 				// User Warns
 				LocalDateTime cutoff = LocalDateTime.now().minusDays(botConfig.get(guild).getModerationConfig().getWarnTimeoutDays());
 				data.setWarns(warnRepository.getActiveWarnsByUserId(user.getIdLong(), cutoff));
+
 				// Insert into cache
 				getCache().put(new Pair<>(guild.getIdLong(), user.getIdLong()), data);
 			}
