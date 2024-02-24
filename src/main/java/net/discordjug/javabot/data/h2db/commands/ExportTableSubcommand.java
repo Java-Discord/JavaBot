@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 
 import javax.sql.DataSource;
@@ -71,9 +71,9 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 		}
 		event.deferReply(false).queue();
 		asyncPool.submit(() -> {
-			try (Connection con = dataSource.getConnection()) {
-				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s' TABLE %s;", includeData ? "COLUMNS" : "NODATA", TABLE_FILE, tableOption.getAsString()));
-				boolean success = stmt.execute();
+			try (Connection con = dataSource.getConnection();
+					Statement stmt = con.createStatement()) {
+				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s' TABLE %s;", includeData ? "COLUMNS" : "NODATA", TABLE_FILE, tableOption.getAsString()));
 				if (!success) {
 					event.getHook().sendMessage("Exporting the table was not successful.").queue();
 				} else {

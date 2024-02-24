@@ -83,10 +83,8 @@ public class SubmissionManager {
 							thread.sendMessage(member.getAsMention())
 									.setEmbeds(buildSubmissionThreadEmbed(event.getUser(), questionOptional.get(), config))
 									.setComponents(ActionRow.of(Button.danger("qotw-submission:delete", "Delete Submission")))
-									.queue(s -> {
-									}, err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
-							QOTWSubmission submission = new QOTWSubmission(thread);
-							submission.setAuthor(member.getUser());
+									.queue(s -> {},
+											err -> ExceptionLogger.capture(err, getClass().getSimpleName()));
 						} else {
 							thread.sendMessage("Could not retrieve current QOTW Question. Please contact an Administrator if you think that this is a mistake.")
 									.queue();
