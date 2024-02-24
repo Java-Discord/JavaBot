@@ -50,7 +50,7 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 				.setTitle("Message Cache Info")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Table Size", dbActions.getLogicalSize("message_cache") + " bytes", false)
-				.addField("Message Count", String.valueOf(messageCache.messageCount), true)
+				.addField("Message Count", String.valueOf(messageCache.getMessageCount()), true)
 				.addField("Cached (Memory)", String.format("%s/%s (%.2f%%)", messageCache.cache.size(), maxMessages, ((float) messageCache.cache.size() / maxMessages) * 100), true)
 				.addField("Cached (Database)", String.format("%s/%s (%.2f%%)", messages, maxMessages, ((float) messages / maxMessages) * 100), true)
 				.build();

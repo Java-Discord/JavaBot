@@ -24,18 +24,18 @@ public class StringResourceCache {
 	 * @return The resources' content as a String.
 	 */
 	public static String load(String resourceName) {
-		String sql = CACHE.get(resourceName);
-		if (sql == null) {
-			InputStream is = StringResourceCache.class.getResourceAsStream(resourceName);
-			if (is == null) throw new RuntimeException("Could not load " + resourceName);
-			try {
-				sql = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-			} catch (IOException e) {
+		String content = CACHE.get(resourceName);
+		if (content == null) {
+			try(InputStream is = StringResourceCache.class.getResourceAsStream(resourceName)){
+				if (is == null) throw new RuntimeException("Could not load " + resourceName);
+				content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+			}catch (IOException e) {
 				ExceptionLogger.capture(e, StringResourceCache.class.getSimpleName());
 				throw new UncheckedIOException(e);
 			}
-			CACHE.put(resourceName, sql);
+			
+			CACHE.put(resourceName, content);
 		}
-		return sql;
+		return content;
 	}
 }

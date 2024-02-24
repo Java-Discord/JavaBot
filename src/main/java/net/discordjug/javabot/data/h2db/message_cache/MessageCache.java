@@ -1,5 +1,6 @@
 package net.discordjug.javabot.data.h2db.message_cache;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
@@ -48,7 +49,8 @@ public class MessageCache {
 	 * If a certain threshold is reached, messages will be synchronized to reduce the chances of loosing
 	 * messages during an unexpected shutdown.
 	 */
-	public int messageCount = 0;
+	@Getter
+	private int messageCount = 0;
 
 	private final ExecutorService asyncPool;
 	private final BotConfig botConfig;

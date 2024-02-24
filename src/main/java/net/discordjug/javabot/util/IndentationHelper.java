@@ -199,6 +199,6 @@ public class IndentationHelper {
 		for (--index;index > 0 && index < builder.length() && builder.charAt(index) == '\\'; index--) {
 			numberOfCharacters++;
 		}
-		return numberOfCharacters % 2 == 1;
+		return numberOfCharacters % 2 != 0;
 	}
 }

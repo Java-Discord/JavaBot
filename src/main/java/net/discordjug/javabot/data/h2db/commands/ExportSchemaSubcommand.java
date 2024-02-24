@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 
 import javax.sql.DataSource;
@@ -51,9 +51,9 @@ public class ExportSchemaSubcommand extends SlashCommand.Subcommand {
 		boolean includeData = event.getOption("include-data", false, OptionMapping::getAsBoolean);
 		event.deferReply(false).queue();
 		asyncPool.submit(() -> {
-			try (Connection con = dataSource.getConnection()) {
-				PreparedStatement stmt = con.prepareStatement(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
-				boolean success = stmt.execute();
+			try (Connection con = dataSource.getConnection();
+					Statement stmt = con.createStatement()) {
+				boolean success = stmt.execute(String.format("SCRIPT %s TO '%s';", includeData ? "" : "NODATA", SCHEMA_FILE));
 				if (!success) {
 					event.getHook().sendMessage("Exporting the schema was not successful.").queue();
 				} else {
