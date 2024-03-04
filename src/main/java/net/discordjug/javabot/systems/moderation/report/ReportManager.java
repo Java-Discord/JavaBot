@@ -51,14 +51,13 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
-		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		if ("resolve-report".equals(id[0])) {
 			handleResolveReportButton(event, id);
 		} else if (REPORT_INTERACTION_NAME.equals(id[0])&&"create-thread".equals(id[1])) {
 			createReportUserThread(event, id);
 		}else {
-			Responses.error(event.getHook(), "Unexpected button").queue();
+			Responses.error(event, "Unexpected button").queue();
 		}
 	}
 
@@ -67,6 +66,10 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			.getModerationConfig()
 			.getReportUserThreadHolder();
 		ThreadChannel reportThread = event.getGuild().getThreadChannelById(id[2]);
+		if(reportThread==null) {
+			Responses.error(event, "This report has been handled already.").queue();
+			return;
+		}
 		List<MessageEmbed> reportEmbeds = event.getMessage().getEmbeds();
 		String title;
 		if (reportEmbeds.isEmpty()) {
@@ -84,7 +87,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 							+ "Messages sent in this thread can be seen by staff members but not other users.")
 					.addEmbeds(reportEmbeds)
 					.queue();
-				reportThread.addThreadMember(event.getUser()).queue();
+				reporterThread.addThreadMember(event.getUser()).queue();
 				reportThread
 					.sendMessageEmbeds(
 							new EmbedBuilder()
@@ -92,11 +95,15 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 							.setDescription("The reporter created a thread for additional information: " + reporterThread.getAsMention() + "\n\n[thread link](" + reporterThread.getJumpUrl() + ")")
 						.build())
 					.queue();
-				Responses.info(event.getHook(), "Information thread created", "The thread "+reporterThread.getAsMention()+" has been created for you. You can provide additional details related to your report there.").queue();
+				event.editComponents(ActionRow.of(event.getComponent().asDisabled())).queue(success -> {
+					Responses.info(event.getHook(), "Information thread created", "The thread "+reporterThread.getAsMention()+" has been created for you. You can provide additional details related to your report there.").queue();
+				});
+				
 			});
 	}
 
 	private void handleResolveReportButton(ButtonInteractionEvent event, String[] id) {
+		event.deferReply(true).queue();
 		ThreadChannel thread = event.getGuild().getThreadChannelById(id[1]);
 		if (thread == null) {
 			Responses.error(event.getHook(), "Could not find the corresponding thread channel.").queue();
