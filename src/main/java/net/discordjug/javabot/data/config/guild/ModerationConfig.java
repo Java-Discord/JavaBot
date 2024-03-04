@@ -16,6 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class ModerationConfig extends GuildConfigItem {
 	private long reportChannelId = 0;
+	private long reportUserThreadHolderId = 0;
 	private long applicationChannelId = 0;
 	private long logChannelId = 0;
 	private long suggestionChannelId = 0;
@@ -89,6 +90,10 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public TextChannel getReportChannel() {
 		return this.getGuild().getTextChannelById(this.reportChannelId);
+	}
+	
+	public TextChannel getReportUserThreadHolder() {
+		return this.getGuild().getTextChannelById(this.reportUserThreadHolderId);
 	}
 
 	public TextChannel getApplicationChannel() {
