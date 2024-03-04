@@ -254,10 +254,6 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		);
 	}
 
-	private void createReportThread(Message message, long targetId, ModerationConfig config) {
-		createReportThread(message, targetId, config, thread->{});
-	}
-
 	private void createReportThread(Message message, long targetId, ModerationConfig config, Consumer<ThreadChannel> onSuccess) {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
 				thread -> {
@@ -268,10 +264,6 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				}
 		);
 	}
-
-
-
-
 
 	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, String reason, Channel channel) {
 		return new EmbedBuilder()
