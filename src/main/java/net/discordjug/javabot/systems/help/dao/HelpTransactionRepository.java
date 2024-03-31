@@ -134,7 +134,7 @@ public class HelpTransactionRepository {
 	public List<Pair<Long, Integer>> getTotalTransactionWeightsInLastMonth(int page, int pageSize) {
 		return jdbcTemplate.query("SELECT recipient, SUM(weight) experience FROM help_transaction WHERE created_at >= ? GROUP BY recipient ORDER BY experience DESC LIMIT ? OFFSET ?",
 				(rs, row) -> new Pair<>(rs.getLong(1), rs.getInt(2)),
-				LocalDateTime.now().minusDays(30), pageSize, page);
+				LocalDateTime.now().minusDays(30), pageSize, Math.max(0, (page * pageSize) - pageSize));
 	}
 
 	/**
