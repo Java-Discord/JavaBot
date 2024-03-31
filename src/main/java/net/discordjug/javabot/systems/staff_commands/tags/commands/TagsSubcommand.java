@@ -37,7 +37,7 @@ public abstract class TagsSubcommand extends SlashCommand.Subcommand {
 			handleCustomTagsSubcommand(event).queue();
 		} catch (SQLException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
-			Responses.error(event, "An error occurred while executing this command.");
+			Responses.error(event, "An error occurred while executing this command.").queue();
 		}
 	}
 

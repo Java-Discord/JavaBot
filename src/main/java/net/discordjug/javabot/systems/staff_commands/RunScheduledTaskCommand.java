@@ -67,7 +67,10 @@ public class RunScheduledTaskCommand extends SlashCommand implements AutoComplet
 					//CHECKSTYLE:OFF This is a handler for all sort of failures that could possibly happen
 				}catch (RuntimeException e) {
 					//CHECKSTYLE:ON
-					Responses.error(event, "Task failed with an exception", e.getClass().getName() + (e.getMessage() == null ? "" : ": "+e.getMessage()));
+					Responses.error(event,
+							"Task failed with an exception: %s",
+							e.getClass().getName() + (e.getMessage() == null ? "" : ": "+e.getMessage()))
+						.queue();
 				}
 			}, () -> {
 				Responses.error(event, "Cannot find task `%s`", name).queue();

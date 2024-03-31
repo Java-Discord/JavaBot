@@ -3,9 +3,7 @@ package net.discordjug.javabot.util;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Creates diagrams.
@@ -74,8 +72,6 @@ public class Plotter {
 			centeredText(g2d, entry.first(), currentX+(width/(2*numEntries)), this.height-y/2+shiftNum);
 			Bar bar = entry.second();
 			int totalBarHeight = 0;
-			
-			Map<String, Color> colors = new HashMap<>();
 			
 			double barSum = 0;
 			
