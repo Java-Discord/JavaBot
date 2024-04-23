@@ -48,6 +48,8 @@ import java.util.stream.Collectors;
  */
 @AutoDetectableComponentHandler("help-ping")
 public class HelpPingSubcommand extends SlashCommand.Subcommand implements ButtonHandler {
+	static final String MARK_UNACKNOWLEDGED_BUTTON_TEXT = "Mark as unacknowledged";
+	static final String MARK_ACKNOWLEDGED_BUTTON_TEXT = "Mark as acknowledged";
 	private static final String WRONG_CHANNEL_MSG = "This command can only be used in **help forum posts**";
 	private static final long CACHE_CLEANUP_DELAY = 60L;
 
@@ -161,11 +163,11 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 	}
 
 	private Button createAcknowledgementButton(String postId) {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge", postId), "Mark as acknowledged");
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "acknowledge", postId), MARK_ACKNOWLEDGED_BUTTON_TEXT);
 	}
 
 	private Button createUndoAcknowledgementButton(String postId) {
-		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge", postId), "Mark as unacknowledged");
+		return Button.of(ButtonStyle.SECONDARY, ComponentIdBuilder.build("help-ping", "unacknowledge", postId), MARK_UNACKNOWLEDGED_BUTTON_TEXT);
 	}
 
 	/**
