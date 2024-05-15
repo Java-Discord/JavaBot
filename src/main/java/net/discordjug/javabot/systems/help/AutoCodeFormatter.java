@@ -28,7 +28,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Component
 public class AutoCodeFormatter {
-	private static final String CODEBLOCK_PREFIX = " ```java";
+	private static final String CODEBLOCK_PREFIX = " ```java\n";
 	private static final String CODEBLOCK_SUFFIX = " ```";
 	private final AutoMod autoMod;
 	private final BotConfig botConfig;
