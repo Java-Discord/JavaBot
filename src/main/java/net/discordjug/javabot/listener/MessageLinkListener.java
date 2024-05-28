@@ -48,7 +48,7 @@ public class MessageLinkListener extends ListenerAdapter {
 									messageChannel.getType().isThread() ? messageChannel.getIdLong() : 0,
 									List.of(ActionRow.of(
 											Button.link(m.getJumpUrl(), "Jump to Message"),
-											Button.secondary(InteractionUtils.createDeleteInteractionId(event.getAuthor().getIdLong()), "\uD83D\uDDD1️"))),
+											Button.secondary(InteractionUtils.createDeleteInteractionId(event.getAuthor().getIdLong(), m.getAuthor().getIdLong()), "\uD83D\uDDD1️"))),
 									null));
 					}, e -> ExceptionLogger.capture(e, getClass().getSimpleName())));
 			}

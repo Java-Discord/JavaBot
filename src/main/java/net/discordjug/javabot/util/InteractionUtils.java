@@ -72,6 +72,11 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	 * Template Interaction ID for deleting the original Message.
 	 */
 	private static final String DELETE_ORIGINAL_TEMPLATE = "utils:delete:%d";
+	
+	/**
+	 * Template Interaction ID for deleting the original Message.
+	 */
+	private static final String DELETE_ORIGINAL_TEMPLATE_MULTIPLE_DELETERS = "utils:delete:%d:%d";
 
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
@@ -93,23 +98,25 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 		if (member == null) {
 			return Responses.warning(interaction, "Could not get member.");
 		}
-		GuildConfig config = botConfig.get(interaction.getGuild());
+		
 		Message msg = interaction.getMessage();
 
-		String authorId = "";
-
-		if (componentId.length > 2) {
-			authorId = componentId[2];
-		}
-
-		if (authorId.equals(member.getUser().getId()) ||
-				member.getRoles().contains(config.getModerationConfig().getStaffRole()) ||
-				member.isOwner()) {
+		if (canDeleteUsingButton(member, componentId)) {
 			msg.delete().queue();
 			return interaction.deferEdit();
 		} else {
 			return Responses.warning(interaction, "You don't have permission to delete this message.");
 		}
+	}
+
+	private boolean canDeleteUsingButton(Member member, String[] componentId) {
+		for(int i=2; i < componentId.length; i++) {
+			if(componentId[i].equals(member.getUser().getId())) {
+				return true;
+			}
+		}
+		GuildConfig config = botConfig.get(member.getGuild());
+		return member.getRoles().contains(config.getModerationConfig().getStaffRole()) || member.isOwner();
 	}
 
 	public static Button createDeleteButton(long senderId) {
@@ -118,6 +125,10 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 
 	public static String createDeleteInteractionId(long senderId) {
 		return DELETE_ORIGINAL_TEMPLATE.formatted(senderId);
+	}
+	
+	public static String createDeleteInteractionId(long senderId, long secondDeleterId) {
+		return DELETE_ORIGINAL_TEMPLATE_MULTIPLE_DELETERS.formatted(senderId, secondDeleterId);
 	}
 
 	private void kick(ModalInteraction interaction, @NotNull Guild guild, String memberId, String reason) {
