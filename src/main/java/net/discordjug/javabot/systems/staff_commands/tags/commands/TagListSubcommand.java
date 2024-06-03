@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
- * <h3>This class represents the /tags command.</h3>
+ * <h3>This class represents the /tag list command.</h3>
  */
 public class TagListSubcommand extends TagsSubcommand {
 	private final ExecutorService asyncPool;
@@ -43,11 +43,16 @@ public class TagListSubcommand extends TagsSubcommand {
 		asyncPool.execute(()->{
 			try {
 				List<CustomTag> tags = customTagRepository.getCustomTagsByGuildId(event.getGuild().getIdLong());
-				String tagList = tags.stream().map(CustomTag::getName).map(MarkdownUtil::monospace).collect(Collectors.joining(", "));
+				String tagList = tags
+						.stream()
+						.map(CustomTag::getName)
+						.map(MarkdownUtil::monospace)
+						.collect(Collectors.joining(", "));
 				Responses.info(event.getHook(), "Custom Tag List",
 								String.format(tagList.length() > 0 ? tagList : "No Custom Tags created yet.")).queue();
 			} catch (DataAccessException e) {
 				ExceptionLogger.capture(e, TagListSubcommand.class.getSimpleName());
+				Responses.error(event.getHook(), "An error occured trying to list tags").queue();
 			}
 		});
 		return event.deferReply(false);

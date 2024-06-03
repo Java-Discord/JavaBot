@@ -84,13 +84,13 @@ public class CustomTagManager {
 		Set<RestAction<?>> actions = new HashSet<>();
 		if (tag.isEmbed()) {
 			if (tag.isReply()) {
-				actions.add(event.getHook().sendMessageEmbeds(tag.toEmbed()));
+				actions.add(event.replyEmbeds(tag.toEmbed()));
 			} else {
 				actions.add(event.getChannel().sendMessageEmbeds(tag.toEmbed()));
 			}
 		} else {
 			if (tag.isReply()) {
-				actions.add(event.getHook().sendMessage(tag.getResponse()).setAllowedMentions(List.of()));
+				actions.add(event.reply(tag.getResponse()).setAllowedMentions(List.of()));
 			} else {
 				actions.add(event.getChannel().sendMessage(tag.getResponse()).setAllowedMentions(List.of()));
 			}
