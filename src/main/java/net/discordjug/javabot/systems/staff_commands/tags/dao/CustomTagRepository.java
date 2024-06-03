@@ -117,7 +117,7 @@ public class CustomTagRepository {
 	 * @return A List with all custom commands.
 	 */
 	public List<CustomTag> getCustomTagsByGuildId(long guildId) {
-		return jdbcTemplate.query("SELECT * FROM custom_tags WHERE guild_id = ?", (rs, row)->this.read(rs),
+		return jdbcTemplate.query("SELECT * FROM custom_tags WHERE guild_id = ? ORDER BY name", (rs, row)->this.read(rs),
 				guildId);
 	}
 
