@@ -17,6 +17,7 @@ import net.discordjug.javabot.util.WebhookUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -43,14 +44,66 @@ import java.util.function.Consumer;
  */
 @Slf4j
 @RequiredArgsConstructor
-@AutoDetectableComponentHandler({"resolve-report","report"})
+@AutoDetectableComponentHandler({"resolve-report", ReportManager.REPORT_INTERACTION_NAME})
 public class ReportManager implements ButtonHandler, ModalHandler {
+	static final String REPORT_INTERACTION_NAME = "report";
 	private final BotConfig botConfig;
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
-		event.deferReply(true).queue();
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
+		if ("resolve-report".equals(id[0])) {
+			handleResolveReportButton(event, id);
+		} else if (REPORT_INTERACTION_NAME.equals(id[0])&&"create-thread".equals(id[1])) {
+			createReportUserThread(event, id);
+		}else {
+			Responses.error(event, "Unexpected button").queue();
+		}
+	}
+
+	private void createReportUserThread(ButtonInteractionEvent event, String[] id) {
+		TextChannel reportUserChannel = botConfig.get(event.getGuild())
+			.getModerationConfig()
+			.getReportUserThreadHolder();
+		ThreadChannel reportThread = event.getGuild().getThreadChannelById(id[2]);
+		if(reportThread==null) {
+			Responses.error(event, "This report has been handled already.").queue();
+			return;
+		}
+		List<MessageEmbed> reportEmbeds = event.getMessage().getEmbeds();
+		String title;
+		if (reportEmbeds.isEmpty()) {
+			title = "report information";
+		} else {
+			title = reportEmbeds.get(0).getTitle();
+		}
+		reportUserChannel
+			.createThreadChannel(title, true)
+			.queue(reporterThread -> {
+				reporterThread.getManager().setInvitable(false).queue();
+				reporterThread
+					.sendMessage(event.getUser().getAsMention() + 
+							"\nYou can provide additional information regarding your report here.\n"
+							+ "Messages sent in this thread can be seen by staff members but not other users.")
+					.addEmbeds(reportEmbeds)
+					.queue();
+				reporterThread.addThreadMember(event.getUser()).queue();
+				reportThread
+					.sendMessageEmbeds(
+							new EmbedBuilder()
+							.setTitle("Additional information from reporter")
+							.setDescription("The reporter created a thread for additional information: " + reporterThread.getAsMention() + "\n\n[thread link](" + reporterThread.getJumpUrl() + ")")
+						.build())
+					.queue();
+				event.editComponents(ActionRow.of(event.getComponent().asDisabled())).queue(success -> {
+					Responses.info(event.getHook(), "Information thread created", "The thread "+reporterThread.getAsMention()+" has been created for you. You can provide additional details related to your report there.").queue();
+				});
+				
+			});
+	}
+
+	private void handleResolveReportButton(ButtonInteractionEvent event, String[] id) {
+		event.deferReply(true).queue();
 		ThreadChannel thread = event.getGuild().getThreadChannelById(id[1]);
 		if (thread == null) {
 			Responses.error(event.getHook(), "Could not find the corresponding thread channel.").queue();
@@ -64,7 +117,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	/**
 	 * Resolves a report thread.
 	 * This closes the current thread.
-	 * Tis method does not check whether the current thread is actually a report thread.
+	 * This method does not check whether the current thread is actually a report thread.
 	 * @param resolver the {@link User} responsible for resolving the report
 	 * @param reportThread the thread of the report to resolve
 	 */
@@ -99,7 +152,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		String title = "Report " + UserUtils.getUserTag(event.getTarget());
-		return Modal.create(ComponentIdBuilder.build("report", "user", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
+		return Modal.create(ComponentIdBuilder.build(REPORT_INTERACTION_NAME, "user", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
 				.addActionRow(messageInput)
 				.build();
 	}
@@ -120,7 +173,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		TextInput messageInput = TextInput.create("reason", "Report Description", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
-		return Modal.create(ComponentIdBuilder.build("report", "message", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
+		return Modal.create(ComponentIdBuilder.build(REPORT_INTERACTION_NAME, "message", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
 				.addActionRow(messageInput)
 				.build();
 	}
@@ -133,7 +186,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	 * @param targetId The targeted user's id.
 	 * @return The {@link WebhookMessageCreateAction}.
 	 */
-	protected WebhookMessageCreateAction<Message> handleUserReport(InteractionHook hook, @NotNull String reason, String targetId) {
+	WebhookMessageCreateAction<Message> handleUserReport(InteractionHook hook, @NotNull String reason, String targetId) {
 		if (reason.isBlank()) {
 			return Responses.error(hook, "No report reason was provided.");
 		}
@@ -147,14 +200,24 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				return;
 			}
 			reportChannel.sendMessageEmbeds(embed.build())
-					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModerationConfig()));
-			embed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(target) + "`!\nYour report has been send to our Moderators");
-			hook.sendMessageEmbeds(embed.build()).queue();
+					.queue(m -> this.createReportThread(m, target.getIdLong(), config.getModerationConfig(),
+							reportThread -> {
+								sendReportResponse(hook, target, embed, reportThread);
+							}));
 		}, failure -> {
 			Responses.error(hook, "The user to report seems not to exist any more.").queue();
 			log.warn("Cannot retrieve user {} when reporting them", targetId, failure);
 		});
 		return null;
+	}
+
+	private void sendReportResponse(InteractionHook hook, User targetUser, EmbedBuilder reportEmbed, ThreadChannel reportThread) {
+		reportEmbed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(targetUser) + "`!\nYour report has been send to our Moderators.\nIn case you want to supply additional details, please use the \"Create thread\" button below.");
+		hook.sendMessageEmbeds(reportEmbed.build())
+			.addActionRow(Button.secondary(
+					ComponentIdBuilder.build(REPORT_INTERACTION_NAME, "create-thread", reportThread.getId()),
+					"Create thread for providing further details"))
+			.queue();
 	}
 
 	private void handleMessageReport(ModalInteractionEvent event, String messageId) {
@@ -170,12 +233,11 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 			embed.addField("Message", String.format("[Jump to Message](%s)", target.getJumpUrl()), false);
 			MessageChannel reportChannel = config.getModerationConfig().getReportChannel();
 			reportChannel.sendMessageEmbeds(embed.build()).queue(m -> createReportThread(m, target.getAuthor().getIdLong(), config.getModerationConfig(), thread->{
+				sendReportResponse(event.getHook(), target.getAuthor(), embed, thread);
 				WebhookUtil.ensureWebhookExists(thread.getParentChannel().asStandardGuildMessageChannel(), wh->{
 					WebhookUtil.mirrorMessageToWebhook(wh, target, target.getContentRaw(), thread.getIdLong(), null, null);
 				});
 			}));
-			embed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(target.getAuthor()) + "`!\nYour report has been send to our Moderators");
-			event.getHook().sendMessageEmbeds(embed.build()).queue();
 		}, failure -> {
 			Responses.error(event.getHook(), "The author of the message to report seems not to exist any more.").queue();
 			log.info("Cannot retrieve reported message {} in channel {} - the message might have been deleted", messageId, event.getChannel(), failure);
@@ -192,10 +254,6 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		);
 	}
 
-	private void createReportThread(Message message, long targetId, ModerationConfig config) {
-		createReportThread(message, targetId, config, thread->{});
-	}
-
 	private void createReportThread(Message message, long targetId, ModerationConfig config, Consumer<ThreadChannel> onSuccess) {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
 				thread -> {
@@ -206,10 +264,6 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 				}
 		);
 	}
-
-
-
-
 
 	private EmbedBuilder buildReportEmbed(User reported, User reportedBy, String reason, Channel channel) {
 		return new EmbedBuilder()
