@@ -3,8 +3,6 @@ package net.discordjug.javabot.systems.moderation.warn;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.ModerationService;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -12,31 +10,23 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
-import java.util.concurrent.ExecutorService;
-
 import org.jetbrains.annotations.NotNull;
 
 /**
  * <h3>This class represents the /warn discard-by-id command.</h3>
  */
 public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
-	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
+	private final ModerationService moderationService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param warnRepository DAO for interacting with the set of {@link net.discordjug.javabot.systems.moderation.warn.model.Warn} objects.
-	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param moderationService Service object for moderating members
 	 */
-	public DiscardWarnByIdSubCommand(NotificationService notificationService, BotConfig botConfig, WarnRepository warnRepository, ExecutorService asyncPool) {
-		this.notificationService = notificationService;
+	public DiscardWarnByIdSubCommand(BotConfig botConfig, ModerationService moderationService) {
 		this.botConfig = botConfig;
-		this.warnRepository = warnRepository;
-		this.asyncPool = asyncPool;
+		this.moderationService = moderationService;
 		setCommandData(new SubcommandData("discard-by-id", "Discards a single warn, based on its id.")
 				.addOption(OptionType.INTEGER, "id", "The warn's unique identifier.", true)
 		);
@@ -58,8 +48,7 @@ public class DiscardWarnByIdSubCommand extends SlashCommand.Subcommand {
 			return;
 		}
 		int id = idMapping.getAsInt();
-		ModerationService service = new ModerationService(notificationService, botConfig, event, warnRepository, asyncPool);
-		if (service.discardWarnById(id, event.getUser())) {
+		if (moderationService.discardWarnById(id, event.getMember())) {
 			Responses.success(event, "Warn Discarded", "Successfully discarded the specified warn with id `%s`", id).queue();
 		} else {
 			Responses.error(event, "Could not find and/or discard warn with id `%s`", id).queue();
