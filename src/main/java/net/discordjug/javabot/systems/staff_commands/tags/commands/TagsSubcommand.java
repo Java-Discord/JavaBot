@@ -8,7 +8,7 @@ import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -45,5 +45,5 @@ public abstract class TagsSubcommand extends SlashCommand.Subcommand {
 		this.requireStaff = requireStaff;
 	}
 
-	protected abstract InteractionCallbackAction<?> handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) throws SQLException;
+	protected abstract RestAction<?> handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) throws SQLException;
 }

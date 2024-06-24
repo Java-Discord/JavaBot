@@ -117,8 +117,22 @@ public class CustomTagRepository {
 	 * @return A List with all custom commands.
 	 */
 	public List<CustomTag> getCustomTagsByGuildId(long guildId) {
-		return jdbcTemplate.query("SELECT * FROM custom_tags WHERE guild_id = ?", (rs, row)->this.read(rs),
+		return jdbcTemplate.query("SELECT * FROM custom_tags WHERE guild_id = ? ORDER BY name", (rs, row)->this.read(rs),
 				guildId);
+	}
+	
+	/**
+	 * Gets all custom commands for the given guild matching a specified query.
+	 * A tag matches the query if the name or reply contains the query.
+	 *
+	 * @param guildId The id of the guild.
+	 * @param query The search query.
+	 * @return A List with all custom commands.
+	 */
+	public List<CustomTag> search(long guildId, String query) {
+		String enhancedQuery = "%" + query + "%";
+		return jdbcTemplate.query("SELECT * FROM custom_tags WHERE guild_id = ? AND (name LIKE ? OR response LIKE ?) ORDER BY name", (rs, row)->this.read(rs),
+				guildId, enhancedQuery, enhancedQuery);
 	}
 
 	/**

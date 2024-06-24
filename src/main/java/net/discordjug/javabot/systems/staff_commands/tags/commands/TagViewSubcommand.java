@@ -11,14 +11,14 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 /**
- * <h3>This class represents the /tag command.</h3>
+ * <h3>This class represents the /tag view command.</h3>
  */
 public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable {
 	private final CustomTagManager tagManager;
@@ -38,18 +38,17 @@ public class TagViewSubcommand extends TagsSubcommand implements AutoCompletable
 	}
 
 	@Override
-	public ReplyCallbackAction handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) {
+	public RestAction<?> handleCustomTagsSubcommand(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping nameMapping = event.getOption("name");
 		if (nameMapping == null) {
 			return Responses.replyMissingArguments(event);
 		}
 		Optional<CustomTag> tagOptional = tagManager.getByName(event.getGuild().getIdLong(), nameMapping.getAsString());
 		if (tagOptional.isPresent()) {
-			CustomTagManager.handleCustomTag(event, tagOptional.get()).queue();
+			return CustomTagManager.handleCustomTag(event, tagOptional.get());
 		} else {
-			Responses.error(event.getHook(), "Could not find Custom Tag with name `%s`.", nameMapping.getAsString()).queue();
+			return Responses.error(event, "Could not find Custom Tag with name `%s`.", nameMapping.getAsString());
 		}
-		return event.deferReply(false);
 	}
 
 	@Override
