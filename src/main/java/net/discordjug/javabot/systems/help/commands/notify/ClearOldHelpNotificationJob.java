@@ -49,10 +49,9 @@ public class ClearOldHelpNotificationJob {
 				.stream()
 				.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
 				.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(3)))
-				.filter(msg -> msg
-					.getButtons()
-					.stream()
-					.anyMatch(button -> "Mark as unacknowledged".equals(button.getLabel())))
+				.filter(msg ->
+					isOldUnresolvedNotification(msg) ||
+					isResolvedNotification(msg))
 				.toList();
 			helpNotificationChannel.purgeMessages(toDelete);
 			foundSoFar.addAll(toDelete);
@@ -74,6 +73,27 @@ public class ClearOldHelpNotificationJob {
 			ExceptionLogger.capture(e, getClass().getName());
 			helpNotificationChannel.purgeMessages(foundSoFar);
 		});
+	}
+
+	private boolean isOldUnresolvedNotification(Message msg) {
+		return getLastInteractionTimestamp(msg)
+			.isBefore(OffsetDateTime.now().minusDays(7)) &&
+			hasButtonWithText(msg, HelpPingSubcommand.MARK_ACKNOWLEDGED_BUTTON_TEXT);
+	}
+
+	private OffsetDateTime getLastInteractionTimestamp(Message msg) {
+		OffsetDateTime timeEdited = msg.getTimeEdited();
+		return timeEdited == null ? msg.getTimeCreated() : timeEdited;
+	}
+
+	private boolean isResolvedNotification(Message msg) {
+		return hasButtonWithText(msg, HelpPingSubcommand.MARK_UNACKNOWLEDGED_BUTTON_TEXT);
+	}
+
+	private boolean hasButtonWithText(Message msg, String expectedText) {
+		return msg.getButtons()
+			.stream()
+			.anyMatch(button -> expectedText.equals(button.getLabel()));
 	}
 
 	private String convertMessageToString(Message msg) {
