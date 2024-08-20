@@ -53,7 +53,17 @@ public class ModerationConfig extends GuildConfigItem {
 	 * being removed from the server. Warnings older than this are still kept,
 	 * but ignored.
 	 */
-	private int warnTimeoutDays = 30;
+	private int maxWarnValidityDays = 30;
+	
+	/**
+	 * The number of days it takes to remove a certain amount of severity weights from the warns of a user.
+	 */
+	private int warnDecayDays = maxWarnValidityDays;
+	
+	/**
+	 * The total severity weight removed from a user after {@link ModerationConfig#warnDecayDays} passed.
+	 */
+	private int warnDecayAmount = 0;
 
 	/**
 	 * The maximum total severity that a user can accrue from warnings before

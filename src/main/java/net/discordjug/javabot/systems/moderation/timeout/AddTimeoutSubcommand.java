@@ -1,11 +1,8 @@
 package net.discordjug.javabot.systems.moderation.timeout;
 
-
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.ModerateUserCommand;
 import net.discordjug.javabot.systems.moderation.ModerationService;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -20,26 +17,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Subcommand that allows staff-members to add timeouts to a single users.
  */
 public class AddTimeoutSubcommand extends TimeoutSubcommand {
 
-	private final NotificationService notificationService;
 	private final BotConfig botConfig;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
+	private final ModerationService moderationService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param notificationService The {@link NotificationService}
 	 * @param botConfig The main configuration of the bot
-	 * @param asyncPool The main thread pool for asynchronous operations
-	 * @param warnRepository DAO for interacting with the set of {@link net.discordjug.javabot.systems.moderation.warn.model.Warn} objects.
+	 * @param moderationService Service object for moderating members
 	 */
-	public AddTimeoutSubcommand(NotificationService notificationService, BotConfig botConfig, ExecutorService asyncPool, WarnRepository warnRepository) {
+	public AddTimeoutSubcommand(BotConfig botConfig, ModerationService moderationService) {
 		setCommandData(new SubcommandData("add", "Adds a timeout to the specified server member.")
 				.addOptions(
 						new OptionData(OptionType.USER, "member", "The member that should be timed out.", true),
@@ -54,10 +46,8 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 						new OptionData(OptionType.BOOLEAN, "quiet", "If true, don't send a message in the server channel where the timeout is issued.", false)
 				)
 		);
-		this.notificationService=notificationService;
 		this.botConfig = botConfig;
-		this.warnRepository = warnRepository;
-		this.asyncPool = asyncPool;
+		this.moderationService = moderationService;
 	}
 
 	@Override
@@ -81,8 +71,7 @@ public class AddTimeoutSubcommand extends TimeoutSubcommand {
 		if (member.isTimedOut()) {
 			return Responses.error(event, "Could not timeout %s; they're already timed out.", member.getAsMention());
 		}
-		ModerationService service = new ModerationService(notificationService, botConfig, event.getInteraction(), warnRepository, asyncPool);
-		service.timeout(member.getUser(), reasonOption.getAsString(), event.getMember(), duration, channel, quiet);
+		moderationService.timeout(member.getUser(), reasonOption.getAsString(), event.getMember(), duration, channel, quiet);
 		return Responses.success(event, "User Timed Out", "%s has been timed out.", member.getAsMention());
 	}
 }

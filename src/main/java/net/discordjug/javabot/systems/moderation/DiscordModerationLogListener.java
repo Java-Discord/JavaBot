@@ -3,14 +3,11 @@ package net.discordjug.javabot.systems.moderation;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.EnumSet;
-import java.util.concurrent.ExecutorService;
 
 import lombok.RequiredArgsConstructor;
-import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.systems.moderation.warn.dao.WarnRepository;
-import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.audit.ActionType;
+
 import net.dv8tion.jda.api.audit.AuditLogChange;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.events.guild.GuildAuditLogEntryCreateEvent;
@@ -22,15 +19,10 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 @RequiredArgsConstructor
 public class DiscordModerationLogListener extends ListenerAdapter{
 	
-	private final NotificationService notificationService;
-	private final BotConfig botConfig;
-	private final WarnRepository warnRepository;
-	private final ExecutorService asyncPool;
+	private final ModerationService moderationService;
 
 	@Override
 	public void onGuildAuditLogEntryCreate(GuildAuditLogEntryCreateEvent event) {
-		ModerationService moderationService = new ModerationService(notificationService, botConfig.get(event.getGuild()), warnRepository, asyncPool);
-		
 		AuditLogEntry entry = event.getEntry();
 		long targetUserId = entry.getTargetIdLong();
 		long moderatorUserId = entry.getUserIdLong();
