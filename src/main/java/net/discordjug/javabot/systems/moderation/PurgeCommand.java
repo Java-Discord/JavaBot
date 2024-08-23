@@ -251,6 +251,9 @@ public class PurgeCommand extends ModerateCommand {
 	}
 	
 	private record RunningPurge(long id, AtomicBoolean cancelled) {
-		
+		@Override
+		public final int hashCode() {
+			return (int) id;
+		}
 	}
 }
