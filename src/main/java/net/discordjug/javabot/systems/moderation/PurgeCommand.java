@@ -31,11 +31,12 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ public class PurgeCommand extends ModerateCommand {
 	private static final Path ARCHIVE_DIR = Path.of("purgeArchives");
 	private final ExecutorService asyncPool;
 	
-	private final Map<Long, List<RunningPurge>> currentPurges = Collections.synchronizedMap(new HashMap<>());
+	private final Map<Long, Set<RunningPurge>> currentPurges = Collections.synchronizedMap(new HashMap<>());
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
@@ -80,7 +81,7 @@ public class PurgeCommand extends ModerateCommand {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
 		if (amount == 0) {
-			List<RunningPurge> purges = currentPurges.get(event.getGuild().getIdLong());
+			Set<RunningPurge> purges = currentPurges.get(event.getGuild().getIdLong());
 			if (purges == null) {
 				return Responses.warning(event, "Cannot stop purge as no purge is currently running.");
 			} else {
@@ -98,7 +99,7 @@ public class PurgeCommand extends ModerateCommand {
 				() -> this.purge(amount, user, event.getUser(), archive, event.getChannel(), config.getLogChannel(), runningPurge.cancelled()),
 			asyncPool);
 		currentPurges
-			.computeIfAbsent(event.getGuild().getIdLong(), l -> new CopyOnWriteArrayList<>())
+			.computeIfAbsent(event.getGuild().getIdLong(), l -> Collections.synchronizedSet(new HashSet<>()))
 			.add(runningPurge);
 		future.whenComplete((success, failure) -> 
 				currentPurges.get(event.getGuild().getIdLong())
