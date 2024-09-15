@@ -6,6 +6,7 @@ import net.discordjug.javabot.data.config.GuildConfigItem;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 
 import java.util.List;
 
@@ -92,6 +93,11 @@ public class ModerationConfig extends GuildConfigItem {
 	 * Invite links AutoMod should exclude.
 	 */
 	private List<String> automodInviteExcludes = List.of();
+	
+	/**
+	 * The ID of the voice channel template that lets users create their own voice channels.
+	 */
+	private long customVoiceChannelId;
 
 	/**
 	 * Text that is sent to users when they're banned.
@@ -148,5 +154,9 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public TextChannel getNotificationThreadChannel() {
 		return this.getGuild().getTextChannelById(this.notificationThreadChannelId);
+	}
+	
+	public VoiceChannel getCustomVoiceChannel() {
+		return this.getGuild().getVoiceChannelById(customVoiceChannelId);
 	}
 }
