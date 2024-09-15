@@ -58,8 +58,7 @@ public class CustomVCButtonHandler implements ButtonHandler {
 			.asVoiceChannel()
 			.upsertPermissionOverride(event.getGuild().getPublicRole());
 		permissionModifier.accept(permissionOverrideAction, Permission.VIEW_CHANNEL);
-		permissionOverrideAction
-			.queue();
+		permissionOverrideAction.queue();
 		event
 			.editButton(newButton)
 			.flatMap(edited -> {
