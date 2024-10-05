@@ -5,12 +5,11 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.MessageUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReference;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.entities.messages.MessageSnapshot;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -134,7 +133,7 @@ public class AutoMod extends ListenerAdapter {
 	}
 
 	private void doAutomodActions(Message message, String reason) {
-		notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message by %s: `%s`", message.getAuthor().getAsMention(), getMessageContent(message)));
+		notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message by %s: `%s`", message.getAuthor().getAsMention(), MessageUtils.getMessageContent(message)));
 		moderationService
 				.warn(
 						message.getAuthor(),
@@ -190,7 +189,7 @@ public class AutoMod extends ListenerAdapter {
 	 * @return True if a link is found and False if not.
 	 */
 	public boolean hasSuspiciousLink(@NotNull Message message) {
-		final String messageRaw = getMessageContent(message);
+		final String messageRaw = MessageUtils.getMessageContent(message);
 		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
@@ -219,7 +218,7 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	public boolean hasAdvertisingLink(@NotNull Message message) {
 		// Advertising
-		Matcher matcher = INVITE_URL.matcher(cleanString(getMessageContent(message)));
+		Matcher matcher = INVITE_URL.matcher(cleanString(MessageUtils.getMessageContent(message)));
 		int start = 0;
 		while (matcher.find(start)) {
 			if (botConfig.get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(matcher.group()::contains)) {
@@ -235,15 +234,4 @@ public class AutoMod extends ListenerAdapter {
 				channel.getIdLong() == botConfig.get(channel.asGuildMessageChannel().getGuild()).getModerationConfig().getSuggestionChannel().getIdLong();
 	}
 	
-	private String getMessageContent(Message msg) {
-		//see https://github.com/discord-jda/JDA/releases/tag/v5.1.2
-		MessageReference messageReference = msg.getMessageReference();
-		if (messageReference != null && messageReference.getType() == MessageReference.MessageReferenceType.FORWARD) {
-			MessageSnapshot snapshot = msg.getMessageSnapshots().get(0);
-			if (snapshot != null) {
-				return snapshot.getContentRaw();
-			}
-		}
-		return msg.getContentRaw();
-	}
 }
