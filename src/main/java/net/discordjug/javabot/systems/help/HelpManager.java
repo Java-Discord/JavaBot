@@ -117,10 +117,11 @@ public class HelpManager {
 				.queue(s -> postThread.getManager().setLocked(true).setArchived(true).queue());
 		if (callback.getMember().getIdLong() != postThread.getOwnerIdLong() &&
 				Boolean.parseBoolean(preferenceService.getOrCreate(postThread.getOwnerIdLong(), Preference.PRIVATE_CLOSE_NOTIFICATIONS).getState())) {
-
-			postThread.getOwner().getUser().openPrivateChannel()
-					.flatMap(c -> createDMCloseInfoEmbed(callback.getMember(), postThread, reason, c))
-					.queue(success -> {}, failure -> {});
+			postThread
+				.getJDA()
+				.openPrivateChannelById(postThread.getOwnerIdLong())
+				.flatMap(c -> createDMCloseInfoEmbed(callback.getMember(), postThread, reason, c))
+				.queue(success -> {}, failure -> {});
 			
 			botConfig.get(callback.getGuild())
 				.getModerationConfig()
@@ -191,13 +192,15 @@ public class HelpManager {
 				service.performTransaction(helper.getIdLong(), config.getThankedExperience(), guild, postThread.getIdLong());
 			} catch (SQLException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
-				botConfig.get(guild).getModerationConfig().getLogChannel().sendMessageFormat(
-						"Could not record user %s thanking %s for help in post %s: %s",
-						UserUtils.getUserTag(postThread.getOwner().getUser()),
-						UserUtils.getUserTag(helper),
-						postThread.getAsMention(),
-						e.getMessage()
-				).queue();
+				guild.getJDA().retrieveUserById(postThread.getOwnerIdLong()).queue(owner -> {
+					botConfig.get(guild).getModerationConfig().getLogChannel().sendMessageFormat(
+							"Could not record user %s thanking %s for help in post %s: %s",
+							UserUtils.getUserTag(owner),
+							UserUtils.getUserTag(helper),
+							postThread.getAsMention(),
+							e.getMessage()
+							).queue();
+				});
 			}
 		});
 	}

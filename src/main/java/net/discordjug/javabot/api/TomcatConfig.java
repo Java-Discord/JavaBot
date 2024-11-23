@@ -7,6 +7,8 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.InetAddress;
+
 import net.discordjug.javabot.data.config.SystemsConfig;
 
 
@@ -18,6 +20,7 @@ import net.discordjug.javabot.data.config.SystemsConfig;
 public class TomcatConfig {
 
 	private final int ajpPort;
+	private final InetAddress ajpAddress;
 	private final boolean tomcatAjpEnabled;
 	private final SystemsConfig systemsConfig;
 
@@ -26,11 +29,13 @@ public class TomcatConfig {
 	 * @param ajpPort The port to run AJP under
 	 * @param tomcatAjpEnabled <code>true</code> if AJP is enabled, else <code>false</code>
 	 * @param systemsConfig an object representing the configuration of various systems
+	 * @param ajpAddress the listen address for AJP
 	 */
-	public TomcatConfig(@Value("${tomcat.ajp.port}") int ajpPort, @Value("${tomcat.ajp.enabled}") boolean tomcatAjpEnabled, SystemsConfig systemsConfig) {
+	public TomcatConfig(@Value("${tomcat.ajp.port}") int ajpPort, @Value("${tomcat.ajp.enabled}") boolean tomcatAjpEnabled, @Value("${tomcat.ajp.address}") InetAddress ajpAddress, SystemsConfig systemsConfig) {
 		this.ajpPort = ajpPort;
 		this.tomcatAjpEnabled = tomcatAjpEnabled;
 		this.systemsConfig = systemsConfig;
+		this.ajpAddress = ajpAddress;
 	}
 
 	/**
@@ -46,6 +51,7 @@ public class TomcatConfig {
 			Connector ajpConnector = new Connector("org.apache.coyote.ajp.AjpNioProtocol");
 			AjpNioProtocol protocol= (AjpNioProtocol) ajpConnector.getProtocolHandler();
 			protocol.setSecret(systemsConfig.getApiConfig().getAjpSecret());
+			protocol.setAddress(ajpAddress);
 			ajpConnector.setPort(ajpPort);
 			ajpConnector.setSecure(true);
 			tomcat.addAdditionalTomcatConnectors(ajpConnector);

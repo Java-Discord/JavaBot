@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
-import net.dv8tion.jda.api.interactions.components.ActionComponent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
@@ -254,7 +253,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return;
 		}
 		switch (id[2]) {
-			case "done" -> handleThanksCloseButton(event, manager, post);
+			case "done" -> handleThanksCloseButton(event, manager, post, "");
 			case "cancel" -> event.deferEdit().flatMap(h -> event.getMessage().delete()).queue();
 			default -> {
 				List<Button> thankButtons = event.getMessage()
@@ -266,7 +265,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 						.toList();
 				if (thankButtons.stream().filter(Button::isDisabled).count() ==
 						thankButtons.size() - 1) {
-					handleThanksCloseButton(event, manager, post);
+					handleThanksCloseButton(event, manager, post, event.getButton().getId());
 				} else {
 					event.editButton(event.getButton().asDisabled()).queue();
 				}
@@ -274,7 +273,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		}
 	}
 
-	private void handleThanksCloseButton(@NotNull ButtonInteractionEvent event, HelpManager manager, ThreadChannel post) {
+	private void handleThanksCloseButton(@NotNull ButtonInteractionEvent event, HelpManager manager, ThreadChannel post, String additionalButtonId) {
 		List<Button> buttons = event.getMessage().getButtons();
 		// close post
 		manager.close(event, false, null);
@@ -283,8 +282,8 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			experienceService.addMessageBasedHelpXP(post, true);
 			// thank all helpers
 			buttons.stream()
-					.filter(ActionComponent::isDisabled)
 					.filter(b -> b.getId() != null)
+					.filter(b -> b.isDisabled() || (b.getId().equals(additionalButtonId)))
 					.forEach(b -> manager.thankHelper(
 							event.getGuild(),
 							post,

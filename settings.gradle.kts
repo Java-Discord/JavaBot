@@ -1,2 +1,2 @@
-rootProject.name = "JavaBot"
+rootProject.name = "javabot"
 

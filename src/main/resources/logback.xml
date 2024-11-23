@@ -11,23 +11,8 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/log-${timeOnLaunch}.log</file>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>DEBUG</level>
-        </filter>
-        <immediateFlush>true</immediateFlush>
-        <append>true</append>
-        <encoder>
-            <pattern>%d{dd.MM.yyyy HH:mm:ss} %-34.-34thread %10.10X{jda.shard} %-15.-15logger{0} %-6level %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
 
-    <logger name="com.zaxxer.hikari">
-        <appender-ref ref="FILE" />
-    </logger>
 </configuration>

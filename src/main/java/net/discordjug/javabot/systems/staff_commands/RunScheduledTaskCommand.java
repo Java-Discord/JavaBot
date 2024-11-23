@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 
 import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -67,7 +68,8 @@ public class RunScheduledTaskCommand extends SlashCommand implements AutoComplet
 					//CHECKSTYLE:OFF This is a handler for all sort of failures that could possibly happen
 				}catch (RuntimeException e) {
 					//CHECKSTYLE:ON
-					Responses.error(event,
+					ExceptionLogger.capture(e, getClass().getName());
+					Responses.error(event.getHook(),
 							"Task failed with an exception: %s",
 							e.getClass().getName() + (e.getMessage() == null ? "" : ": "+e.getMessage()))
 						.queue();

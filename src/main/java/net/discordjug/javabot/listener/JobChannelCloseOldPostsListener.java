@@ -9,6 +9,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.util.InteractionUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
@@ -53,7 +54,7 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 						.setTitle("Post closed")
 						.setDescription("This post has been blocked because you have created other recent posts.\nPlease do not spam posts.")
 						.build())
-				.setContent(post.getOwner().getAsMention())
+				.setContent(UserSnowflake.fromId(post.getOwnerIdLong()).getAsMention())
 				.flatMap(msg -> post.getManager().setArchived(true).setLocked(true))
 				.queue();
 				return;

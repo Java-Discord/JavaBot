@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
+import net.discordjug.javabot.systems.qotw.dao.QOTWChampionRepository;
 import net.discordjug.javabot.systems.qotw.dao.QuestionPointsRepository;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -24,6 +25,7 @@ public class QOTWChampionJob {
 	private final BotConfig botConfig;
 	private final QOTWPointsService pointsService;
 	private final QuestionPointsRepository pointsRepository;
+	private final QOTWChampionRepository qotwChampionRepository;
 	private final JDA jda;
 
 	/**
@@ -39,17 +41,23 @@ public class QOTWChampionJob {
 				.stream()
 				.findFirst()
 				.ifPresent(best -> {
-					for (Member member : guild.getMembersWithRoles(qotwChampionRole)) {
-						if (pointsService.getOrCreateAccount(member.getIdLong()).getPoints() < best.getPoints()) {
-							member.getGuild().removeRoleFromMember(member, qotwChampionRole).queue();
-						}
-					}
-					for (Long userId : pointsRepository.getUsersWithSpecificScore(month, best.getPoints())) {
-						Member member = guild.getMemberById(userId);
-						if(member != null) {
-							guild.addRoleToMember(member, qotwChampionRole).queue();
-						}
-					}
+					guild
+						.retrieveMembersByIds(qotwChampionRepository.getCurrentQOTWChampions(guild.getIdLong()))
+						.onSuccess(membersToRemove -> {
+							for (Member member : membersToRemove) {
+								if (pointsService.getOrCreateAccount(member.getIdLong()).getPoints() < best.getPoints()) {
+									member.getGuild().removeRoleFromMember(member, qotwChampionRole).queue();
+								}
+							}
+							guild
+								.retrieveMembersByIds(
+									pointsRepository.getUsersWithSpecificScore(month, best.getPoints())
+								).onSuccess(membersToAdd -> {
+									for (Member member : membersToAdd) {
+										guild.addRoleToMember(member, qotwChampionRole).queue();
+									}
+								});
+						});
 				});
 			}
 		}

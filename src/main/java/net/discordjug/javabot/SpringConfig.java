@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.context.annotation.ImportRuntimeHints;
 import xyz.dynxsty.dih4jda.DIH4JDA;
 import xyz.dynxsty.dih4jda.DIH4JDABuilder;
 import xyz.dynxsty.dih4jda.exceptions.DIH4JDAException;
@@ -34,6 +34,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
  * This class holds all configuration settings and {@link Bean}s.
  */
 @Configuration
+@ImportRuntimeHints(RuntimeHintsConfiguration.class)
 @RequiredArgsConstructor
 public class SpringConfig {
 	@Bean
@@ -71,7 +72,7 @@ public class SpringConfig {
 		return JDABuilder.createDefault(botConfig.getSystems().getJdaBotToken())
 			.setStatus(OnlineStatus.DO_NOT_DISTURB)
 			.setChunkingFilter(ChunkingFilter.ALL)
-			.setMemberCachePolicy(MemberCachePolicy.ALL)
+			.setMemberCachePolicy(MemberCachePolicy.NONE)
 			.enableCache(CacheFlag.ACTIVITY)
 			.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.MESSAGE_CONTENT)
 			.addEventListeners(listeners.toArray())

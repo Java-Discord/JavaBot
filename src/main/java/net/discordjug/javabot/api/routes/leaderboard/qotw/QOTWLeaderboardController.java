@@ -69,9 +69,9 @@ public class QOTWLeaderboardController extends CaffeineCache<Pair<Long, Integer>
 		if (members == null || members.isEmpty()) {
 			List<QOTWAccount> topAccounts = pointsService.getTopAccounts(PAGE_AMOUNT, page);
 			members = topAccounts.stream()
-					.map(account -> new Pair<>(account, jda.retrieveUserById(account.getUserId()).complete()))
-					.filter(pair -> guild.isMember(pair.second()))
-					.map(pair -> createAPIAccount(pair.first(), pair.second(), topAccounts, page))
+					.map(account -> new Pair<>(account, guild.retrieveMemberById(account.getUserId()).complete()))
+					.filter(pair -> pair.second() != null)
+					.map(pair -> createAPIAccount(pair.first(), pair.second().getUser(), topAccounts, page))
 					.toList();
 			getCache().put(new Pair<>(guild.getIdLong(), page), members);
 		}

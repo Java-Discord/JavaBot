@@ -2,6 +2,7 @@ package net.discordjug.javabot.tasks;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.discordjug.javabot.annotations.PreRegisteredListener;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.MetricsConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
@@ -25,6 +26,7 @@ import java.util.function.Function;
  */
 @Slf4j
 @RequiredArgsConstructor
+@PreRegisteredListener
 public class MetricsUpdater extends ListenerAdapter {
 	private static final Map<String, Function<Guild, String>> TEXT_VARIABLES = Map.of(
 			"{!member_count}", g -> String.valueOf(g.getMemberCount()),
@@ -38,6 +40,7 @@ public class MetricsUpdater extends ListenerAdapter {
 	public void onReady(@NotNull ReadyEvent event) {
 		asyncPool.scheduleWithFixedDelay(() -> {
 			for (Guild guild : event.getJDA().getGuilds()) {
+				log.info("for guild: {}", guild);
 				MetricsConfig config = botConfig.get(guild).getMetricsConfig();
 				if (config.getMetricsCategory() == null || config.getMetricsMessageTemplate().isEmpty()) {
 					continue;
