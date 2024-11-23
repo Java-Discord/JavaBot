@@ -7,6 +7,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.GuildConfigItem;
 import net.discordjug.javabot.data.config.SystemsConfig;
+import net.discordjug.javabot.data.config.SystemsConfig.ApiConfig;
 import net.discordjug.javabot.data.config.guild.HelpConfig;
 import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
 import net.discordjug.javabot.data.config.guild.MetricsConfig;
@@ -32,14 +33,18 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.io.ClassPathResource;
 
 /**
  * Configure classes and resources to be accessible from native-image.
  */
+@Configuration
+@ImportRuntimeHints(RuntimeHintsConfiguration.class)
 @RegisterReflectionForBinding({
 		//register config classes for reflection
-		BotConfig.class, GuildConfig.class, GuildConfigItem.class,SystemsConfig.class,
+		BotConfig.class, GuildConfig.class, GuildConfigItem.class, SystemsConfig.class, ApiConfig.class,
 		HelpConfig.class, MessageCacheConfig.class, MetricsConfig.class, ModerationConfig.class, QOTWConfig.class, ServerLockConfig.class, StarboardConfig.class,
 		
 		//ensure JDA can create necessary caches
