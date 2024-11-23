@@ -40,7 +40,6 @@ public class MetricsUpdater extends ListenerAdapter {
 	public void onReady(@NotNull ReadyEvent event) {
 		asyncPool.scheduleWithFixedDelay(() -> {
 			for (Guild guild : event.getJDA().getGuilds()) {
-				log.info("for guild: {}", guild);
 				MetricsConfig config = botConfig.get(guild).getMetricsConfig();
 				if (config.getMetricsCategory() == null || config.getMetricsMessageTemplate().isEmpty()) {
 					continue;
