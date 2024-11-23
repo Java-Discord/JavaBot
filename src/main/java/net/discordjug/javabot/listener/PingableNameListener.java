@@ -6,7 +6,7 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.StringUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.io.IOException;
@@ -46,20 +46,19 @@ public class PingableNameListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		checkNickname(event.getMember(), null);
+		checkNickname(event.getMember());
 	}
-
+	
 	@Override
-	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
-		checkNickname(event.getMember(), event.getNewNickname());
+	public void onGuildMemberUpdate(GuildMemberUpdateEvent event) {
+		checkNickname(event.getMember());
 	}
 
 	/**
 	 * Checks whether the given {@link Member}'s nickname should be changed.
 	 * @param member The {@link Member} to check.
-	 * @param nickname The {@link Member}'s new Nickname, null if that does not exist.
 	 */
-	private void checkNickname(Member member, String nickname) {
+	private void checkNickname(Member member) {
 		if (!isPingable(member.getEffectiveName()) && !canBypassCheck(member)) {
 			changeName(member);
 		}
