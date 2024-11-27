@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -94,7 +95,7 @@ public class ServerLockManager extends ListenerAdapter {
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setDescription(String.format("""
 						Unfortunately, this server is currently locked. Please try to join again later.
-						Contact the server owner, %s, for more info.""", guild.getOwner().getAsMention())
+						Contact the server owner, %s, for more info.""", UserSnowflake.fromId(guild.getOwnerIdLong()).getAsMention())
 				).build();
 	}
 
@@ -200,9 +201,12 @@ public class ServerLockManager extends ListenerAdapter {
 	 * @param event The user who joined.
 	 */
 	private void rejectUserDuringRaid(@NotNull GuildMemberJoinEvent event) {
-		event.getUser().openPrivateChannel().queue(c ->
-				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(event.getGuild())).queue(msg ->
-						event.getMember().kick().queue()));
+		event.getUser().openPrivateChannel().flatMap(c ->
+				c.sendMessage(Constants.INVITE_URL)
+					.setEmbeds(buildServerLockEmbed(event.getGuild())))
+			.queue(msg -> kickMemberForServerlock(event.getGuild(), event.getMember()),
+					//in case of error, still kick the user
+					err -> kickMemberForServerlock(event.getGuild(), event.getMember()));
 		String diff = new TimeUtils().formatDurationToNow(event.getMember().getTimeCreated());
 		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageFormat(
 			"**%s** (%s old) tried to join this server.",
@@ -221,17 +225,13 @@ public class ServerLockManager extends ListenerAdapter {
 	 */
 	public void lockServer(Guild guild, @NotNull Collection<Member> potentialRaiders, @Nullable User lockedBy) {
 		for (Member member : potentialRaiders) {
-			member.getUser().openPrivateChannel().queue(c -> {
-				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(guild)).queue(msg -> {
-					member.kick().queue(
-							success -> {},
-							error -> notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
-								"Could not kick member %s%n> `%s`",
-								UserUtils.getUserTag(member.getUser()),
-								error.getMessage()
-							)));
-				});
-			});
+			member.getUser().openPrivateChannel().flatMap(c -> 
+				c.sendMessage(Constants.INVITE_URL).setEmbeds(buildServerLockEmbed(guild))
+			).queue(msg -> 
+				kickMemberForServerlock(guild, member),
+				//if message cannot be sent, still kick them
+				e -> kickMemberForServerlock(guild, member)
+				);
 		}
 
 		String membersString = potentialRaiders.stream()
@@ -261,6 +261,15 @@ public class ServerLockManager extends ListenerAdapter {
 		} else {
 			notification.sendToModerationLog(c -> c.sendMessage("Server locked by " + lockedBy.getAsMention()));
 		}
+	}
+
+	private void kickMemberForServerlock(Guild guild, Member member) {
+		member.kick().queue(
+				success -> {},
+				error -> notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
+					"Could not kick member %s%n> `%s`",
+					UserUtils.getUserTag(member.getUser()),
+					error.getMessage())));
 	}
 
 	/**

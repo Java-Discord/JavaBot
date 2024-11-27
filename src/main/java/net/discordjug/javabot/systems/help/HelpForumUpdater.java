@@ -81,9 +81,8 @@ public class HelpForumUpdater {
 	private void sendDMDormantInfoIfEnabled(ThreadChannel post, HelpConfig config) {
 		if(Boolean.parseBoolean(preferenceService.getOrCreate(post.getOwnerIdLong(), Preference.PRIVATE_DORMANT_NOTIFICATIONS).getState())) {
 			post
-				.getOwner()
-				.getUser()
-				.openPrivateChannel()
+				.getJDA()
+				.openPrivateChannelById(post.getOwnerIdLong())
 				.flatMap(c -> c.sendMessageEmbeds(createDMDormantInfo(post, config)))
 				.queue();
 		}

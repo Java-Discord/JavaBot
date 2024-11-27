@@ -4,8 +4,9 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.0.15.RELEASE"
+    id("org.springframework.boot") version "3.3.5"
+    id("io.spring.dependency-management") version "1.1.6"
+    id("org.graalvm.buildtools.native") version "0.10.3"
     checkstyle
 }
 
@@ -64,6 +65,9 @@ dependencies {
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    
+    //required for registering native hints
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
 }
 
 configurations {
@@ -101,4 +105,27 @@ tasks.withType<ShadowJar> {
 checkstyle {
     toolVersion = "9.1"
     configDirectory.set(File("checkstyle"))
+}
+
+tasks.withType<Checkstyle>() {
+    exclude("**/generated/**")
+}
+
+tasks.checkstyleAot {
+	isEnabled = false
+}
+tasks.processTestAot {
+	isEnabled = false
+}
+
+graalvmNative {
+	binaries {
+		named("main") {
+			if (hasProperty("prod")) {
+				buildArgs.add("-O3")
+			} else {
+				quickBuild.set(true)
+			}
+		}
+	}
 }

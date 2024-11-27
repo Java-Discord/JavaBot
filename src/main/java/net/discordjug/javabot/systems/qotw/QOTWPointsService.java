@@ -7,15 +7,18 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Pair;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Service class which is used to get and manipulate other {@link QOTWAccount}s.
@@ -110,10 +113,18 @@ public class QOTWPointsService {
 	public List<Pair<QOTWAccount, Member>> getTopMembers(int n, Guild guild) {
 		try {
 			List<QOTWAccount> accounts = pointsRepository.getTopAccounts(getCurrentMonth(),1,(int)Math.ceil(n*1.5));
-			return accounts.stream()
-					.map(s -> new Pair<>(s, guild.getMemberById(s.getUserId())))
-					.filter(p->p.first().getPoints() > 0)
-					.filter(p -> p.second() != null)
+			Map<Long, QOTWAccount> accountPerId = accounts
+					.stream()
+					.collect(Collectors.toMap(
+							QOTWAccount::getUserId, 
+							Function.identity()));
+			
+			return guild.retrieveMembersByIds(accountPerId.keySet())
+					.get()
+					.stream()
+					.map(m -> new Pair<>(accountPerId.get(m.getIdLong()), m))
+					.sorted(Comparator.comparingLong(pair -> -pair.first().getPoints()))
+					.filter(p -> p.first().getPoints() > 0)
 					.limit(n)
 					.toList();
 		} catch (DataAccessException e) {

@@ -157,7 +157,6 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 		update.setReply(Boolean.parseBoolean(replyMapping.getAsString()));
 		update.setEmbed(Boolean.parseBoolean(embedMapping.getAsString()));
 
-		event.deferReply(true).queue();
 		asyncPool.execute(()->{
 			try {
 				Optional<CustomTag> tagOptional = customTagRepository.findByName(event.getGuild().getIdLong(), update.getName());

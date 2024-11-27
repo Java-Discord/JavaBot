@@ -65,8 +65,8 @@ public class WebhookUtil {
 		channel.retrieveWebhooks().queue(webhooks -> {
 			Optional<Webhook> hook = webhooks.stream()
 					.filter(webhook -> webhook.getChannel().getIdLong() == channel.getIdLong())
-					.filter(wh -> wh.getOwner() != null)
-					.filter(wh -> wh.getOwner().getIdLong() == channel.getJDA().getSelfUser().getIdLong())
+					.filter(wh -> wh.getOwnerAsUser() != null)
+					.filter(wh -> wh.getOwnerAsUser().getIdLong() == channel.getJDA().getSelfUser().getIdLong())
 					.filter(wh -> wh.getToken() != null)
 					.findAny();
 			if (hook.isPresent()) {
@@ -91,12 +91,23 @@ public class WebhookUtil {
 	 * the message
 	 */
 	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, @Nullable List<LayoutComponent> components, @Nullable List<MessageEmbed> embeds) {
-		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken()).setThreadId(threadId)
-				.buildJDA();
+		return originalMessage
+				.getGuild()
+				.retrieveMember(originalMessage.getAuthor())
+				.submit()
+				.exceptionally(e -> null)//if the member cannot be found, use no member information
+				.thenCompose(member -> 
+					mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, components, embeds, member));
+	}
+
+	private static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, Message originalMessage, String newMessageContent, long threadId,
+			List<LayoutComponent> components, List<MessageEmbed> embeds, Member member) {
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
 				.setAllowedMentions(AllowedMentions.none())
-				.setAvatarUrl(transformOrNull(originalMessage.getMember(), Member::getEffectiveAvatarUrl))
-				.setUsername(transformOrNull(originalMessage.getMember(), Member::getEffectiveName));
+				.setAvatarUrl(transformOrNull(member, Member::getEffectiveAvatarUrl))
+				.setUsername(transformOrNull(member, Member::getEffectiveName));
+		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken()).setThreadId(threadId)
+				.buildJDA();
 		if (components != null && !components.isEmpty()) {
 			message.addComponents(components);
 		}

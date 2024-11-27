@@ -112,4 +112,11 @@ CREATE TABLE IF NOT EXISTS user_preferences
 	ordinal INTEGER NOT NULL,
 	state   VARCHAR NOT NULL DEFAULT '',
 	PRIMARY KEY (user_id, ordinal)
-)
+);
+
+//QOTW champion
+CREATE TABLE qotw_champion (
+        guild_id        BIGINT NOT NULL,
+        user_id         BIGINT NOT NULL,
+        PRIMARY KEY(guild_id, user_id)
+);

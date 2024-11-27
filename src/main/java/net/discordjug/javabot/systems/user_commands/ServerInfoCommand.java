@@ -5,6 +5,7 @@ import net.discordjug.javabot.util.Constants;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -33,11 +34,18 @@ public class ServerInfoCommand extends SlashCommand {
 			Responses.replyGuildOnly(event).queue();
 			return;
 		}
-		event.replyEmbeds(buildServerInfoEmbed(event.getGuild()))
-				.addActionRow(Button.link(Constants.WEBSITE_LINK, "Website")).queue();
+		event.deferReply().queue();
+		event.getGuild().retrieveOwner().queue(owner -> 
+			event
+				.getHook()
+				.sendMessageEmbeds(
+					buildServerInfoEmbed(event.getGuild(), owner))
+						.addActionRow(Button.link(Constants.WEBSITE_LINK, "Website")
+				).queue()
+		);
 	}
 
-	private @NotNull MessageEmbed buildServerInfoEmbed(@NotNull Guild guild) {
+	private @NotNull MessageEmbed buildServerInfoEmbed(@NotNull Guild guild, Member owner) {
 		long categories = guild.getCategories().size();
 		long channels = guild.getChannels().size() - categories;
 		return new EmbedBuilder()
@@ -45,7 +53,7 @@ public class ServerInfoCommand extends SlashCommand {
 				.setThumbnail(guild.getIconUrl())
 				.setAuthor(guild.getName(), null, guild.getIconUrl())
 				.setTitle("Server Information")
-				.addField("Owner", guild.getOwner().getAsMention(), true)
+				.addField("Owner", owner.getAsMention(), true)
 				.addField("Member Count", guild.getMemberCount() + " members", true)
 				.addField("Roles", String.format("%s Roles", guild.getRoles().size() - 1L), true)
 				.addField("ID", String.format("```%s```", guild.getIdLong()), false)

@@ -162,7 +162,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	}
 
 	private UserData createUserData(Guild guild, Integer position, double experience, long userId, String prefix) {
-		Member member = guild.getMemberById(userId);
+		Member member = guild.retrieveMemberById(userId).onErrorMap(e -> null).complete();
 		String displayName;
 		if (member == null) {
 			displayName = String.valueOf(userId);
