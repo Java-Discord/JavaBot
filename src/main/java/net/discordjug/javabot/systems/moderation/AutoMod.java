@@ -5,6 +5,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.MessageUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -132,7 +133,7 @@ public class AutoMod extends ListenerAdapter {
 	}
 
 	private void doAutomodActions(Message message, String reason) {
-		notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message by %s: `%s`", message.getAuthor().getAsMention(), message.getContentRaw()));
+		notificationService.withGuild(message.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Message by %s: `%s`", message.getAuthor().getAsMention(), MessageUtils.getMessageContent(message)));
 		moderationService
 				.warn(
 						message.getAuthor(),
@@ -188,7 +189,7 @@ public class AutoMod extends ListenerAdapter {
 	 * @return True if a link is found and False if not.
 	 */
 	public boolean hasSuspiciousLink(@NotNull Message message) {
-		final String messageRaw = message.getContentRaw();
+		final String messageRaw = MessageUtils.getMessageContent(message);
 		Matcher urlMatcher = URL_PATTERN.matcher(messageRaw);
 		if (messageRaw.contains("http://") || messageRaw.contains("https://")) {
 			// only do it for a links, so it won't iterate for each message
@@ -217,7 +218,7 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	public boolean hasAdvertisingLink(@NotNull Message message) {
 		// Advertising
-		Matcher matcher = INVITE_URL.matcher(cleanString(message.getContentRaw()));
+		Matcher matcher = INVITE_URL.matcher(cleanString(MessageUtils.getMessageContent(message)));
 		int start = 0;
 		while (matcher.find(start)) {
 			if (botConfig.get(message.getGuild()).getModerationConfig().getAutomodInviteExcludes().stream().noneMatch(matcher.group()::contains)) {
@@ -232,4 +233,5 @@ public class AutoMod extends ListenerAdapter {
 		return channel.getType().isGuild() &&
 				channel.getIdLong() == botConfig.get(channel.asGuildMessageChannel().getGuild()).getModerationConfig().getSuggestionChannel().getIdLong();
 	}
+	
 }

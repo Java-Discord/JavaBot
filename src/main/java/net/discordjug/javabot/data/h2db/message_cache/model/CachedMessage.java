@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
+import net.discordjug.javabot.util.MessageUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 
@@ -27,7 +28,7 @@ public class CachedMessage {
 		CachedMessage cachedMessage = new CachedMessage();
 		cachedMessage.setMessageId(message.getIdLong());
 		cachedMessage.setAuthorId(message.getAuthor().getIdLong());
-		cachedMessage.setMessageContent(message.getContentRaw().trim());
+		cachedMessage.setMessageContent(MessageUtils.getMessageContent(message).trim());
 		cachedMessage.attachments = message
 				.getAttachments()
 				.stream()
@@ -35,5 +36,4 @@ public class CachedMessage {
 				.toList();
 		return cachedMessage;
 	}
-
 }
