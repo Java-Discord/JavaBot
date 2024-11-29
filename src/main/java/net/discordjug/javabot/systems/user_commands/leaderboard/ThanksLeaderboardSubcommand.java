@@ -97,7 +97,7 @@ public class ThanksLeaderboardSubcommand extends SlashCommand.Subcommand {
 						while (rs.next()) {
 							long count = rs.getLong(1);
 							long userId = rs.getLong(2);
-							Member member = guild.retrieveMemberById(userId).complete();
+							Member member = guild.retrieveMemberById(userId).onErrorMap(e -> null).complete();
 							if (member == null) continue;
 							memberData.add(new Pair<>(member, count));
 						}
