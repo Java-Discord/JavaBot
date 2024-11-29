@@ -6,7 +6,7 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.StringUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.io.IOException;
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +26,7 @@ public class PingableNameListener extends ListenerAdapter {
 
 	private static final String ADJECTIVES_URL = "https://gist.githubusercontent.com/karlbright/f91229b8c5ac6f4291dc/raw/4a69c2c50b88ee4559b021c443fee899535adc60/adjectives.txt";
 	private static final String NOUNS_URL = "https://raw.githubusercontent.com/hugsy/stuff/main/random-word/english-nouns.txt";
+	private static final Pattern PINGABLE_NAME_PATTERN = Pattern.compile("(\\W*\\w){3,}\\W*");
 	private static final Random random = new Random();
 	private final NotificationService notificationService;
 	private final List<String> nouns;
@@ -44,21 +46,20 @@ public class PingableNameListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		checkNickname(event.getMember(), null);
+		checkNickname(event.getMember());
 	}
-
+	
 	@Override
-	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
-		checkNickname(event.getMember(), event.getNewNickname());
+	public void onGuildMemberUpdate(GuildMemberUpdateEvent event) {
+		checkNickname(event.getMember());
 	}
 
 	/**
 	 * Checks whether the given {@link Member}'s nickname should be changed.
 	 * @param member The {@link Member} to check.
-	 * @param nickname The {@link Member}'s new Nickname, null if that does not exist.
 	 */
-	private void checkNickname(Member member, String nickname) {
-		if (!(nickname==null||isPingable(nickname)) && !isPingable(member.getUser().getName()) && !canBypassCheck(member)) {
+	private void checkNickname(Member member) {
+		if (!isPingable(member.getEffectiveName()) && !canBypassCheck(member)) {
 			changeName(member);
 		}
 	}
@@ -72,9 +73,9 @@ public class PingableNameListener extends ListenerAdapter {
 		String newName = generateRandomName();
 		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
-				.flatMap(channel -> channel.sendMessageFormat("Your nickname has been set to `%s` since both your user- and nickname's first three characters were deemed as not-pingable.", newName))
+				.flatMap(channel -> channel.sendMessageFormat("Your display name in %s has been set to `%s` since your previous name was deemed as non-pingable.", member.getGuild().getName(), newName))
 				.queue();
-		notificationService.withGuild(member.getGuild()).sendToModerationLog(c -> c.sendMessageFormat("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName));
+		notificationService.withGuild(member.getGuild()).sendToMessageLog(c -> c.sendMessageFormat("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName));
 	}
 
 	/**
@@ -83,15 +84,7 @@ public class PingableNameListener extends ListenerAdapter {
 	 * @return True if first three characters contain invalid characters, False if not.
 	 */
 	private boolean isPingable(String name) {
-		if (name == null) return true;
-		char[] nameChars = name.toCharArray();
-		for (int i = 0; i < Math.min(2,name.length()); i++) {
-			char c = nameChars[i];
-			if (c < 32 || c > 126) {
-				return false;
-			}
-		}
-		return true;
+		return PINGABLE_NAME_PATTERN.matcher(name).matches();
 	}
 
 	/**
@@ -101,8 +94,7 @@ public class PingableNameListener extends ListenerAdapter {
 	private String generateRandomName() {
 		String noun = nouns.get(random.nextInt(nouns.size()));
 		String adjective = adjectives.get(random.nextInt(adjectives.size()));
-		int number = random.nextInt(10000);
-		return StringUtils.capitalize(adjective) + StringUtils.capitalize(noun) + number;
+		return StringUtils.capitalize(adjective) + StringUtils.capitalize(noun);
 	}
 
 	/**
@@ -130,6 +122,6 @@ public class PingableNameListener extends ListenerAdapter {
 	 * @return Whether the Member can bypass name-checks or not.
 	 */
 	private static boolean canBypassCheck(Member member) {
-		return member.getUser().isBot() || member.getUser().isSystem() || member.getGuild().getSelfMember().canInteract(member);
+		return member.getUser().isBot() || member.getUser().isSystem() || !member.getGuild().getSelfMember().canInteract(member);
 	}
 }
