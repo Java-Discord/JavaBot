@@ -12,6 +12,7 @@ import net.discordjug.javabot.systems.qotw.model.QOTWQuestion;
 import net.discordjug.javabot.systems.qotw.model.QOTWSubmission;
 import net.discordjug.javabot.systems.qotw.submissions.SubmissionManager;
 import net.discordjug.javabot.systems.qotw.submissions.SubmissionStatus;
+import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -45,6 +46,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -81,46 +83,58 @@ public class QOTWCloseSubmissionsJob {
 			if (qotwConfig.getSubmissionChannel() == null || qotwConfig.getQuestionChannel() == null) continue;
 			Message questionMessage = getLatestQOTWMessage(qotwConfig.getQuestionChannel(), qotwConfig, jda);
 			questionMessage.editMessageComponents(ActionRow.of(Button.secondary("qotw-submission:closed", "Submissions closed").asDisabled())).queue();
-			logChannel
-				.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review",
-									qotwConfig.getQOTWReviewRole().getAsMention(),
-									qotwConfig.getSubmissionChannel().getThreadChannels().size())
-				.flatMap(msg -> msg.createThreadChannel("QOTW review"))
-				.queue(thread -> {
-					for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {
-						submission.getManager().setName(SUBMISSION_PENDING + submission.getName()).queue();
-						// remove the author
-						final QOTWSubmission s = new QOTWSubmission(submission);
-						s.retrieveAuthor(author -> {
-							submission.removeThreadMember(author).queue();
-							if (author.getIdLong() == qotwConfig.getQotwSampleAnswerUserId()) {
-								SubmissionManager manager = new SubmissionManager(botConfig.get(guild).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
-								manager.copySampleAnswerSubmission(submission, author);
-							} else {
-								thread
-									.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
-									.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
-									.queue();
-							}
-						});
-						for (Member member : guild.getMembersWithRoles(qotwConfig.getQOTWReviewRole())) {
-							thread.addThreadMember(member).queue();
+			if (qotwConfig.getSubmissionsForumChannel() == null) {
+				sendReviewInformation(guild, qotwConfig, logChannel);
+			} else {
+				CompletableFuture.runAsync(() -> {
+					
+					MessageEmbed embed = questionMessage.getEmbeds().get(0);
+					Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(getQuestionNumberFromEmbed(embed));
+					if (questionOptional.isPresent()) {
+						QOTWQuestion question = questionOptional.get();
+						try (MessageCreateData data = new MessageCreateBuilder()
+								.setEmbeds(buildQuestionEmbed(question)).build()) {
+							createPinnedAnswerForum(qotwConfig, question, data);
 						}
 					}
+				}, asyncPool).whenComplete((success, ex) -> {
+					if (ex != null) {
+						ExceptionLogger.capture(ex, getClass().getName());
+					}
+					sendReviewInformation(guild, qotwConfig, logChannel);
 				});
-			if (qotwConfig.getSubmissionsForumChannel() == null) continue;
-			asyncPool.execute(() -> {
-				MessageEmbed embed = questionMessage.getEmbeds().get(0);
-				Optional<QOTWQuestion> questionOptional = questionQueueRepository.findByQuestionNumber(getQuestionNumberFromEmbed(embed));
-				if (questionOptional.isPresent()) {
-					QOTWQuestion question = questionOptional.get();
-					try (MessageCreateData data = new MessageCreateBuilder()
-							.setEmbeds(buildQuestionEmbed(question)).build()) {
-						createPinnedAnswerForum(qotwConfig, question, data);
+			}
+		}
+	}
+
+	private void sendReviewInformation(Guild guild, QOTWConfig qotwConfig, TextChannel logChannel) {
+		logChannel
+			.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review",
+								qotwConfig.getQOTWReviewRole().getAsMention(),
+								qotwConfig.getSubmissionChannel().getThreadChannels().size())
+			.flatMap(msg -> msg.createThreadChannel("QOTW review"))
+			.queue(thread -> {
+				for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {
+					submission.getManager().setName(SUBMISSION_PENDING + submission.getName()).queue();
+					// remove the author
+					final QOTWSubmission s = new QOTWSubmission(submission);
+					s.retrieveAuthor(author -> {
+						submission.removeThreadMember(author).queue();
+						if (author.getIdLong() == qotwConfig.getQotwSampleAnswerUserId()) {
+							SubmissionManager manager = new SubmissionManager(botConfig.get(guild).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
+							manager.copySampleAnswerSubmission(submission, author);
+						} else {
+							thread
+								.sendMessage("%s by %s".formatted(submission.getAsMention(), author.getAsMention()))
+								.addActionRow(buildSubmissionSelectMenu(jda, submission.getIdLong()))
+								.queue();
+						}
+					});
+					for (Member member : guild.getMembersWithRoles(qotwConfig.getQOTWReviewRole())) {
+						thread.addThreadMember(member).queue();
 					}
 				}
 			});
-		}
 	}
 
 	private void createPinnedAnswerForum(QOTWConfig qotwConfig, QOTWQuestion question, MessageCreateData data) {
