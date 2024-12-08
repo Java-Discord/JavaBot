@@ -2,8 +2,7 @@ package net.discordjug.javabot.data.h2db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
-import lombok.Getter;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
@@ -12,6 +11,7 @@ import net.discordjug.javabot.util.ExceptionLogger;
 
 import org.h2.tools.Server;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -32,12 +32,12 @@ import javax.sql.DataSource;
 /**
  * Class that provides helper methods for dealing with the database.
  */
-@Getter
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DbHelper {
-	private final DataSource dataSource;
+	private Server server;
+	private HikariDataSource ds;
 
 	/**
 	 * Initializes the data source that'll be used throughout the bot to access
@@ -48,12 +48,12 @@ public class DbHelper {
 	 * @throws IllegalStateException If an error occurs and we're unable to
 	 *                               start the database.
 	 */
-	public static @NotNull HikariDataSource initDataSource(@NotNull BotConfig config) {
+	@Bean
+	DataSource initDataSource(@NotNull BotConfig config) {
 		// Determine if we need to initialize the schema, before starting up the server.
 		boolean shouldInitSchema = shouldInitSchema(config.getSystems().getHikariConfig().getJdbcUrl());
 
 		// Now that we have remembered whether we need to initialize the schema, start up the server.
-		Server server;
 		try {
 			System.setProperty("h2.bindAddress", "127.0.0.1");
 			server = Server.createTcpServer("-tcpPort", "9122", "-ifNotExists").start();
@@ -66,12 +66,8 @@ public class DbHelper {
 		hikariConfig.setJdbcUrl(hikariConfigSource.getJdbcUrl());
 		hikariConfig.setMaximumPoolSize(hikariConfigSource.getMaximumPoolSize());
 		hikariConfig.setLeakDetectionThreshold(hikariConfigSource.getLeakDetectionThreshold());
-		HikariDataSource ds = new HikariDataSource(hikariConfig);
+		ds = new HikariDataSource(hikariConfig);
 		// Add a shutdown hook to close down the datasource and server when the JVM terminates.
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			ds.close();
-			server.stop();
-		}));
 		if (shouldInitSchema) {
 			try {
 				initializeSchema(ds);
@@ -122,6 +118,19 @@ public class DbHelper {
 				}
 			}
 			log.info("Successfully initialized H2 database.");
+		}
+	}
+	
+	/**
+	 * Closes the database (server) when the application is shut down.
+	 */
+	@PreDestroy
+	public void stop() {
+		if (ds != null) {
+			ds.close();
+		}
+		if (server != null) {
+			server.stop();
 		}
 	}
 }
