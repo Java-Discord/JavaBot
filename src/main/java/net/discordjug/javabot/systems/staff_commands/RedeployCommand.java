@@ -1,6 +1,10 @@
 package net.discordjug.javabot.systems.staff_commands;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
@@ -12,6 +16,8 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <h3>This class represents the /redeploy command.</h3>
@@ -26,15 +32,21 @@ import org.jetbrains.annotations.NotNull;
 public class RedeployCommand extends SlashCommand {
 	private final MessageCache messageCache;
 	private final BotConfig botConfig;
+	private final ScheduledExecutorService asyncPool;
+	private final ConfigurableApplicationContext applicationContext;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
 	 * @param messageCache A service managing recent messages
 	 * @param botConfig The main configuration of the bot
+	 * @param asyncPool The thread pool used for asynchronous operations
+	 * @param applicationContext The spring application context
 	 */
-	public RedeployCommand(MessageCache messageCache, BotConfig botConfig) {
+	public RedeployCommand(MessageCache messageCache, BotConfig botConfig, ScheduledExecutorService asyncPool, ConfigurableApplicationContext applicationContext) {
 		this.messageCache = messageCache;
 		this.botConfig=botConfig;
+		this.asyncPool = asyncPool;
+		this.applicationContext = applicationContext;
 		setCommandData(Commands.slash("redeploy", "(ADMIN-ONLY) Makes the bot redeploy.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 				.setGuildOnly(true)
@@ -51,6 +63,14 @@ public class RedeployCommand extends SlashCommand {
 		log.warn("Redeploying... Requested by: " + UserUtils.getUserTag(event.getUser()));
 		event.reply("**Redeploying...** This may take some time.").queue();
 		messageCache.synchronize();
-		System.exit(0);
+		asyncPool.shutdownNow();
+		try {
+			asyncPool.awaitTermination(3, TimeUnit.SECONDS);
+			event.getJDA().shutdown();
+			event.getJDA().awaitShutdown(3, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		SpringApplication.exit(applicationContext, () -> 0);
 	}
 }

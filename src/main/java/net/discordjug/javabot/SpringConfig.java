@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.sql.DataSource;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.annotations.PreRegisteredListener;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.SystemsConfig;
-import net.discordjug.javabot.data.h2db.DbHelper;
 import net.discordjug.javabot.tasks.PresenceUpdater;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -36,16 +33,8 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 @RequiredArgsConstructor
 public class SpringConfig {
 	@Bean
-	PresenceUpdater standardActivityPresenceUpdater() {
-		return PresenceUpdater.standardActivities();
-	}
-
-	@Bean
-	DataSource dataSource(BotConfig config) {
-		if (config.getSystems().getJdaBotToken().isEmpty()) {
-			throw new RuntimeException("JDA Token not set. Stopping Bot...");
-		}
-		return DbHelper.initDataSource(config);
+	PresenceUpdater standardActivityPresenceUpdater(ScheduledExecutorService threadPool) {
+		return PresenceUpdater.standardActivities(threadPool);
 	}
 
 	@Bean
@@ -95,6 +84,10 @@ public class SpringConfig {
 
 	@Bean
 	BotConfig botConfig() {
-		return new BotConfig(Path.of("config"));
+		BotConfig botConfig = new BotConfig(Path.of("config"));
+		if (botConfig.getSystems().getJdaBotToken().isEmpty()) {
+			throw new RuntimeException("JDA Token not set. Stopping Bot...");
+		}
+		return botConfig;
 	}
 }
