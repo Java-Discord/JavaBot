@@ -98,7 +98,7 @@ public class QuestionPointsRepository {
 	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<QOTWAccount> getTopAccounts(LocalDate startDate, int page, int size) throws DataAccessException {
-		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? AND points > 0  GROUP BY user_id ORDER BY SUM(points) DESC, user_id ASC LIMIT ? OFFSET ?",
+		return jdbcTemplate.query("SELECT user_id, SUM(points) FROM qotw_points WHERE obtained_at >= ? GROUP BY user_id HAVING SUM(points) > 0 ORDER BY SUM(points) DESC, user_id ASC LIMIT ? OFFSET ?",
 				(rs,row)->this.read(rs),
 				startDate, size, Math.max(0, (page * size) - size));
 	}
