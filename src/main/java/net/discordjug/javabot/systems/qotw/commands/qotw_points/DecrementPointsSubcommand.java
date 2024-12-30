@@ -32,7 +32,7 @@ public class DecrementPointsSubcommand extends ChangePointsSubcommand {
 	}
 
 	@Override
-	protected void sendUserNotification(@NotNull QOTWNotificationService notificationService) {
+	protected void sendUserNotification(@NotNull QOTWNotificationService notificationService, Member member) {
 		notificationService.sendAccountDecrementedNotification();
 	}
 }

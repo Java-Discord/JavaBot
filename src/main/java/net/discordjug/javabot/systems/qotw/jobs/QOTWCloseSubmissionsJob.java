@@ -184,6 +184,9 @@ public class QOTWCloseSubmissionsJob {
 								.withEmoji(emojiConfig.getFailureEmote(jda)),
 						SelectOption.of("Decline: Empty Submission", SubmissionStatus.DECLINE_EMPTY.name())
 								.withDescription("The submission was empty")
+								.withEmoji(emojiConfig.getFailureEmote(jda)),
+						SelectOption.of("Decline: Plagiarism/AI content", SubmissionStatus.DECLINE_PLAGIARISM.name())
+								.withDescription("The submission is plagiarized and/or AI content")
 								.withEmoji(emojiConfig.getFailureEmote(jda))
 				).build();
 	}
