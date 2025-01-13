@@ -18,14 +18,18 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <h3>This class represents the /prune command.</h3>
  * This command will systematically ban users from the server if they match
  * certain criteria.
  */
+@Slf4j
 public class PruneCommand extends ModerateCommand {
 	private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -39,8 +43,6 @@ public class PruneCommand extends ModerateCommand {
 				.addOption(OptionType.STRING, "pattern", "A regular expression pattern to use, to remove members whose contains a match with the pattern.", false)
 				.addOption(OptionType.STRING, "before", "Remove only users before the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
 				.addOption(OptionType.STRING, "after", "Remove only users after the given timestamp. Format is yyyy-MM-dd HH:mm:ss, in UTC.", false)
-				.addOption(OptionType.STRING, "reason", "The reason for issuing the prune command. This will be provided as the reason for each ban.", false)
-				.addOption(OptionType.INTEGER, "delete-days-of-history", "The number of days of the banned users' chat history to remove, between 0 and 7. Defaults to 0.", false)
 		);
 	}
 
@@ -54,36 +56,46 @@ public class PruneCommand extends ModerateCommand {
 		OptionMapping patternOption = event.getOption("pattern");
 		OptionMapping beforeOption = event.getOption("before");
 		OptionMapping afterOption = event.getOption("after");
-		OptionMapping reasonOption = event.getOption("reason");
-		OptionMapping delDaysOption = event.getOption("delete-days-of-history");
 
 		final Pattern pattern = patternOption == null ? null : Pattern.compile(patternOption.getAsString());
 		final OffsetDateTime before = beforeOption == null ? null : LocalDateTime.parse(beforeOption.getAsString(), TIMESTAMP_FORMATTER).atOffset(ZoneOffset.UTC);
 		final OffsetDateTime after = afterOption == null ? null : LocalDateTime.parse(afterOption.getAsString(), TIMESTAMP_FORMATTER).atOffset(ZoneOffset.UTC);
-		final int delDays = delDaysOption == null ? 0 : (int) delDaysOption.getAsLong();
-		final String reason = reasonOption == null ? null : reasonOption.getAsString();
 
 		if (pattern == null && before == null && after == null) {
 			return Responses.warning(event, "At least one filter parameter must be given; cannot remove every user from the server.");
 		}
-		if (delDays < 0 || delDays > 7) {
-			return Responses.warning(event, "The number of days of history to delete must not be less than 0, or greater than 7.");
-		}
-		if (reason != null && reason.length() > 512) {
-			return Responses.warning(event, "The reason for the prune cannot be more than 512 characters.");
-		}
-
-		event.getGuild().loadMembers().onSuccess(members -> {
-			members.forEach(member -> {
-				boolean shouldRemove = (pattern == null || pattern.matcher(member.getUser().getName()).find()) &&
-						(before == null || member.getTimeJoined().isBefore(before)) &&
-						(after == null || member.getTimeJoined().isAfter(after));
-				if (shouldRemove) {
-					config.getLogChannel().sendMessage("Removing " + UserUtils.getUserTag(member.getUser()) + " as part of prune.").queue();
-					member.ban(delDays, TimeUnit.DAYS).reason(reason).queue();
+		String pruneRoleName = "prune-" + LocalDateTime.now();
+		event.getGuild().createRole().setName(pruneRoleName).queue(role -> {
+			event.getGuild().loadMembers().onSuccess(members -> {
+				AtomicInteger count = new AtomicInteger(0);
+				members.forEach(member -> {
+					boolean shouldRemove = (pattern == null || pattern.matcher(member.getUser().getName()).find()) &&
+							(before == null || member.getTimeJoined().isBefore(before)) &&
+							(after == null || member.getTimeJoined().isAfter(after));
+					if (shouldRemove) {
+						if(member.getUser().isBot() || !moderator.canInteract(member) || Checks.hasStaffRole(botConfig, member)) {
+							config.getLogChannel()
+								.sendMessage("# WARNING\nPrune by " + moderator.getAsMention() + " would affect " + UserUtils.getUserTag(member.getUser()) + " who is a privileged user! This is likely not intentional.")
+								.queue();
+							return;
+						}
+						log.info("Marking " + UserUtils.getUserTag(member.getUser()) + " with " + pruneRoleName +" as part of prune.");
+						config.getLogChannel()
+							.sendMessage("Marking " + member.getAsMention() + " (" + UserUtils.getUserTag(member.getUser()) + ") with " + role.getAsMention() +" as part of prune.")
+							.setAllowedMentions(List.of())
+							.queue();
+						event.getGuild().addRoleToMember(member, role).queue();
+						count.incrementAndGet();
+					}
+				});
+				int finalCount = count.get();
+				config.getLogChannel().sendMessage("Prune by "+ moderator.getAsMention() +" complete - the role " + pruneRoleName + " is being assigned to " + finalCount + " members.").queue();
+				if (finalCount > members.size()/10) {
+					config.getLogChannel().sendMessage("# WARNING\nThis prune affects a significant portion of all members!").queue();
 				}
 			});
 		});
+
 		return Responses.success(event, "Prune Started", "The prune action has started. Please check the log channel for information on the status of the prune.");
 
 	}
