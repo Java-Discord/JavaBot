@@ -69,7 +69,7 @@ public class PingableNameListener extends ListenerAdapter {
 	 * @param member The Member whose name should be changed.
 	 */
 	private void changeName(Member member) {
-		String oldName = member.getNickname();
+		String oldName = member.getEffectiveName();
 		String newName = generateRandomName();
 		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
