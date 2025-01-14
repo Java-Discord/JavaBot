@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -32,7 +31,7 @@ public class PresenceUpdater extends ListenerAdapter {
 	 * The executor that is responsible for the scheduled updates of the bot's
 	 * presence data.
 	 */
-	private final ScheduledExecutorService threadPool = Executors.newSingleThreadScheduledExecutor();
+	private final ScheduledExecutorService threadPool;
 
 	/**
 	 * A list of functions that take a reference to the bot's JDA client, and
@@ -64,24 +63,27 @@ public class PresenceUpdater extends ListenerAdapter {
 	 * @param activities The list of activity-producing functions.
 	 * @param delay      The amount of time the updater should wait before updating the activity.
 	 * @param delayUnit  The unit of time that {@link PresenceUpdater#delay} is counted in.
+	 * @param threadPool The thread pool to use for updating presences
 	 */
-	public PresenceUpdater(List<Function<JDA, Activity>> activities, long delay, TimeUnit delayUnit) {
+	public PresenceUpdater(List<Function<JDA, Activity>> activities, long delay, TimeUnit delayUnit, ScheduledExecutorService threadPool) {
 		this.activities = new CopyOnWriteArrayList<>(activities);
 		this.delay = delay;
 		this.delayUnit = delayUnit;
+		this.threadPool = threadPool;
 	}
 
 	/**
 	 * A list of standard Activities.
 	 *
+	 * @param threadPool The thread pool to use for updating activities
 	 * @return A pre-built implementation of the {@link PresenceUpdater} that
 	 * has all the necessary properties defined to reasonable defaults.
 	 */
-	public static PresenceUpdater standardActivities() {
+	public static PresenceUpdater standardActivities(ScheduledExecutorService threadPool) {
 		return new PresenceUpdater(List.of(
 				jda -> Activity.watching(String.format("%s members", jda.getGuilds().stream().mapToLong(Guild::getMemberCount).sum())),
 				jda -> Activity.customStatus("Use /report, 'Report User' or 'Report Message' to report disruptive behaviour!")
-		), 35, TimeUnit.SECONDS);
+		), 35, TimeUnit.SECONDS, threadPool);
 	}
 
 	/**
