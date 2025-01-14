@@ -193,7 +193,7 @@ public class SubmissionManager {
 	public void acceptSubmission(@NotNull ThreadChannel thread, @NotNull User author, Member reviewedBy, boolean bestAnswer) {
 		thread.getManager().setName(SUBMISSION_ACCEPTED + thread.getName().substring(1)).queue();
 		pointsService.increment(author.getIdLong());
-		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification();
+		notificationService.withQOTW(thread.getGuild(), author).sendAccountIncrementedNotification(config.getSubmissionsForumChannel());
 		if (bestAnswer) {
 			pointsService.increment(author.getIdLong());
 			notificationService.withQOTW(thread.getGuild(), author).sendBestAnswerNotification();
@@ -250,7 +250,7 @@ public class SubmissionManager {
 	 */
 	public void declineSubmission(@NotNull ThreadChannel thread, User author, Member reviewedBy, SubmissionStatus status) {
 		thread.getManager().setName(SUBMISSION_DECLINED + thread.getName().substring(1)).queue();
-		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed(status);
+		notificationService.withQOTW(thread.getGuild(), author).sendSubmissionDeclinedEmbed(status, config.getSubmissionsForumChannel());
 		notificationService.withQOTW(thread.getGuild()).sendSubmissionActionNotification(reviewedBy.getUser(), new QOTWSubmission(thread), status);
 		thread.getManager().setLocked(true).setArchived(true).queue();
 	}

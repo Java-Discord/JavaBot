@@ -71,13 +71,13 @@ public abstract class ChangePointsSubcommand extends SlashCommand.Subcommand {
 		MessageEmbed embed = buildIncrementEmbed(member.getUser(), points);
 		notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));
 		if (!quiet) {
-			sendUserNotification(notificationService.withQOTW(event.getGuild(), member.getUser()));
+			sendUserNotification(notificationService.withQOTW(event.getGuild(), member.getUser()), member);
 
 		}
 		event.getHook().sendMessageEmbeds(embed).queue();
 	}
 
-	protected abstract void sendUserNotification(@NotNull QOTWNotificationService notificationService);
+	protected abstract void sendUserNotification(@NotNull QOTWNotificationService notificationService, Member member);
 
 	protected @NotNull MessageEmbed buildIncrementEmbed(@NotNull User user, long points) {
 		return createIncrementEmbedBuilder(user, points)
@@ -88,7 +88,7 @@ public abstract class ChangePointsSubcommand extends SlashCommand.Subcommand {
 	 * Creates an {@link EmbedBuilder} for the notification embed.
 	 * @param user The user whose account is incremented
 	 * @param points The new total number of points of the user
-	 * @return The created {@link EmbedBuilder} for creating the noticiation embed
+	 * @return The created {@link EmbedBuilder} for creating the notification embed
 	 */
 	protected @NotNull EmbedBuilder createIncrementEmbedBuilder(User user, long points) {
 		return new EmbedBuilder()

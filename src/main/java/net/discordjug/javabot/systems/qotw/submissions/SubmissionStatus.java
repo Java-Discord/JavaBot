@@ -23,7 +23,11 @@ public enum SubmissionStatus {
 	/**
 	 * The submission got declined as it was simply empty.
 	 */
-	DECLINE_EMPTY("declined (empty)");
+	DECLINE_EMPTY("declined (empty)"),
+	/**
+	 * The submission got declined as it was simply empty.
+	 */
+	DECLINE_PLAGIARISM("declined (plagiarism/AI)");
 
 	private final String verb;
 
