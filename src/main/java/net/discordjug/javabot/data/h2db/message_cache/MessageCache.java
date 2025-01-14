@@ -214,11 +214,11 @@ public class MessageCache {
 	private void addAttachmentsToMessageBuilder(CachedMessage message, EmbedBuilder eb) {
 		StringBuilder attachmentBuilder = new StringBuilder();
 		for (String attachment : message.getAttachments()) {
-			if(attachmentBuilder.length() + attachment.length() >= MessageEmbed.VALUE_MAX_LENGTH - 1) {
+			if (attachmentBuilder.length() + attachment.length() >= MessageEmbed.VALUE_MAX_LENGTH - 1) {
 				eb.addField("Attachments", attachmentBuilder.toString(),false);
 				attachmentBuilder.setLength(0);
 				
-			}else {
+			} else {
 				attachmentBuilder.append('\n');
 			}
 			attachmentBuilder.append(attachment);
