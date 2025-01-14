@@ -206,15 +206,24 @@ public class MessageCache {
 								message.getMessageContent().length(),
 								MessageEmbed.VALUE_MAX_LENGTH)), false);
 		if (!message.getAttachments().isEmpty()) {
-			eb.addField("Attachments",
-					message
-						.getAttachments()
-						.stream()
-						.collect(Collectors.joining("\n")),
-					false);
+			addAttachmentsToMessageBuilder(message, eb);
 		}
-		return eb
-				.build();
+		return eb.build();
+	}
+
+	private void addAttachmentsToMessageBuilder(CachedMessage message, EmbedBuilder eb) {
+		StringBuilder attachmentBuilder = new StringBuilder();
+		for (String attachment : message.getAttachments()) {
+			if (attachmentBuilder.length() + attachment.length() >= MessageEmbed.VALUE_MAX_LENGTH - 1) {
+				eb.addField("Attachments", attachmentBuilder.toString(),false);
+				attachmentBuilder.setLength(0);
+				
+			} else {
+				attachmentBuilder.append('\n');
+			}
+			attachmentBuilder.append(attachment);
+		}
+		eb.addField("Attachments", attachmentBuilder.toString(), false);
 	}
 
 	private InputStream buildDeletedMessageFile(User author, CachedMessage message) {
