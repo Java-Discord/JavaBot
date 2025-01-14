@@ -52,7 +52,7 @@ import org.springframework.core.io.ClassPathResource;
 		//needs to be serialized for channel managers etc
 		PermOverrideData.class,
 		//ensure that webhook embed authors can be serialized
-		WebhookEmbed.EmbedAuthor.class
+		WebhookEmbed.EmbedAuthor.class, WebhookEmbed.EmbedField.class, WebhookEmbed.EmbedFooter.class, WebhookEmbed.EmbedTitle.class
 	})
 public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 	
