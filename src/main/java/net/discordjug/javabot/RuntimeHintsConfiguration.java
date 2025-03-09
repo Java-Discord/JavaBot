@@ -50,9 +50,7 @@ import org.springframework.core.io.ClassPathResource;
 		//ensure JDA can create necessary caches
 		User[].class, Guild[].class, Member[].class, Role[].class, Channel[].class, AudioManager[].class, ScheduledEvent[].class, ThreadMember[].class, ForumTag[].class, RichCustomEmoji[].class, GuildSticker[].class, MemberPresenceImpl[].class,
 		//needs to be serialized for channel managers etc
-		PermOverrideData.class,
-		//ensure that webhook embed authors can be serialized
-		WebhookEmbed.EmbedAuthor.class, WebhookEmbed.EmbedField.class, WebhookEmbed.EmbedFooter.class, WebhookEmbed.EmbedTitle.class
+		PermOverrideData.class
 	})
 public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 	
@@ -74,5 +72,9 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		
 		// caffeine
 		hints.reflection().registerTypeIfPresent(getClass().getClassLoader(), "com.github.benmanes.caffeine.cache.SSW", MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+		
+		for (Class<?> cl : WebhookEmbed.class.getClasses()) {
+			hints.reflection().registerType(cl,  MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_PUBLIC_METHODS);
+		}
 	}
 }

@@ -3,10 +3,10 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 
 plugins {
     java
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
-    id("org.graalvm.buildtools.native") version "0.10.3"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.springframework.boot") version "3.4.3"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("org.graalvm.buildtools.native") version "0.10.5"
     checkstyle
 }
 
@@ -25,42 +25,42 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
-    compileOnly("org.jetbrains:annotations:23.0.0")
+    compileOnly("org.jetbrains:annotations:26.0.2")
 
     // DIH4JDA (Command Framework) & JDA
     implementation("com.github.DynxstyGIT:DIH4JDA:120a15ad2e")
-    implementation("net.dv8tion:JDA:5.1.2") {
+    implementation("net.dv8tion:JDA:5.3.0") {
         exclude(module = "opus-java")
     }
 
     // Caffeine (Caching Library)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.1")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 
-    implementation("com.google.code.gson:gson:2.9.0")
-    implementation("org.yaml:snakeyaml:1.30")
-    implementation("com.google.re2j:re2j:1.6")
-    implementation("commons-validator:commons-validator:1.7")
+    implementation("com.google.code.gson:gson:2.12.0")
+    implementation("org.yaml:snakeyaml:2.4")
+    implementation("com.google.re2j:re2j:1.8")
+    implementation("commons-validator:commons-validator:1.9.0")
 
     implementation("com.mashape.unirest:unirest-java:1.4.9")
 
     // H2 Database
-    implementation("com.h2database:h2:2.1.212")
-    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation("com.h2database:h2:2.3.232")
+    implementation("com.zaxxer:HikariCP")
 
     // Webhooks
     implementation("com.github.DynxstyGIT:discord-webhooks:74301a46a0")
 
     // Lombok Annotations
-    compileOnly("org.projectlombok:lombok:1.18.30")
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
     testCompileOnly("org.projectlombok:lombok:1.18.30")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 
     // Sentry
-    implementation("io.sentry:sentry:6.3.0")
+    implementation("io.sentry:sentry:8.3.0")
 
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-web")
