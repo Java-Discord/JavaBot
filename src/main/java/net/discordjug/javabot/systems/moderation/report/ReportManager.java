@@ -87,7 +87,8 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 							+ "Messages sent in this thread can be seen by staff members but not other users.")
 					.addEmbeds(reportEmbeds)
 					.queue();
-				reporterThread.addThreadMember(event.getUser()).queue();
+				reporterThread.addThreadMember(event.getUser()).queue(success ->
+					reporterThread.getManager().setInvitable(false).queue());
 				reportThread
 					.sendMessageEmbeds(
 							new EmbedBuilder()
