@@ -1,8 +1,13 @@
 package net.discordjug.javabot.systems.staff_activity;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,7 @@ import net.dv8tion.jda.api.utils.TimeFormat;
 public class StaffActivityService {
 	private final BotConfig botConfig;
 	private final StaffActivityMessageRepository repository;
+	private final Map<StaffActivityKey, Instant> lastActivities = new ConcurrentHashMap<>();
 	
 	/**
 	 * Updates the staff activity message or creates it if necessary.
@@ -43,6 +49,17 @@ public class StaffActivityService {
 		if (staffActivityChannel == null) {
 			return;
 		}
+		Instant now = Instant.now();
+		Instant merged = lastActivities.merge(new StaffActivityKey(member.getGuild().getIdLong(), member.getIdLong(), type), now, (oldValue, currentInstant) -> {
+			if (timeDifferenceIsBelowRateLimit(oldValue, currentInstant)) {
+				// less than 5 minutes since insertion
+				return oldValue;
+			}
+			return currentInstant;
+		});
+		if (!merged.equals(now)) {
+			return;
+		}
 		Long msgId = repository.getMessageId(staffActivityChannel.getGuild().getIdLong(), member.getIdLong());
 		if (msgId != null) {
 			staffActivityChannel
@@ -53,6 +70,12 @@ public class StaffActivityService {
 		} else {
 			createNewMessage(staffActivityChannel, member, type, timestamp);
 		}
+		lastActivities.entrySet()
+			.removeIf(e -> !timeDifferenceIsBelowRateLimit(e.getValue(),now));
+	}
+
+	private boolean timeDifferenceIsBelowRateLimit(Instant oldValue, Instant currentInstant) {
+		return Duration.between(oldValue, currentInstant).minus(Duration.of(5, ChronoUnit.MINUTES)).isNegative();
 	}
 	
 	private void replaceActivityMessage(StaffActivityType type, TemporalAccessor timestamp, Message activityMessage, Member member) {
@@ -96,4 +119,6 @@ public class StaffActivityService {
 				.setFooter(member.getId())
 				.build();
 	}
+	
+	private record StaffActivityKey(long guildId, long memberId, StaffActivityType type) {}
 }
