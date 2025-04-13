@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -59,7 +58,11 @@ public class QOTWJob {
 					thread.getManager().setLocked(true).setArchived(true).queue();
 				});
 				qotw.getSubmissionChannel().getManager()
-						.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Collections.singleton(Permission.MESSAGE_SEND))
+						.putRolePermissionOverride(guild.getIdLong(), Set.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND_IN_THREADS), Set.of(
+								Permission.MESSAGE_SEND,
+								Permission.CREATE_PRIVATE_THREADS,
+								Permission.CREATE_PUBLIC_THREADS,
+								Permission.MESSAGE_ADD_REACTION))
 						.queue();
 				if (question.getQuestionNumber() == null) {
 					question.setQuestionNumber(questionQueueRepository.getNextQuestionNumber());

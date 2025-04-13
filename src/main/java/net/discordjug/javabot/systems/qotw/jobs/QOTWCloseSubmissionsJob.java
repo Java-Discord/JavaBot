@@ -46,6 +46,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
@@ -76,7 +77,11 @@ public class QOTWCloseSubmissionsJob {
 			GuildConfig config = botConfig.get(guild);
 			QOTWConfig qotwConfig = config.getQotwConfig();
 			qotwConfig.getSubmissionChannel().getManager()
-					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Collections.singleton(Permission.MESSAGE_SEND_IN_THREADS))
+					.putRolePermissionOverride(guild.getIdLong(), Collections.emptySet(), Set.of(Permission.MESSAGE_SEND_IN_THREADS,
+							Permission.MESSAGE_SEND,
+							Permission.CREATE_PRIVATE_THREADS,
+							Permission.CREATE_PUBLIC_THREADS,
+							Permission.MESSAGE_ADD_REACTION))
 					.queue();
 			TextChannel logChannel = config.getModerationConfig().getLogChannel();
 			if (logChannel == null) continue;
