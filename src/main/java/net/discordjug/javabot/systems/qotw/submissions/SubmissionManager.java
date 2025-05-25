@@ -189,7 +189,6 @@ public class SubmissionManager {
 				.orElse(new CreateSubmissionResult(true, ""));
 	}
 	
-	record CreateSubmissionResult(boolean canCreateSubmissions, String errorMessage) {}
 
 	/**
 	 * Accepts a submission.
@@ -301,4 +300,6 @@ public class SubmissionManager {
 				.setTimestamp(Instant.now())
 				.build();
 	}
+	
+	private record CreateSubmissionResult(boolean canCreateSubmissions, String errorMessage) {}
 }
