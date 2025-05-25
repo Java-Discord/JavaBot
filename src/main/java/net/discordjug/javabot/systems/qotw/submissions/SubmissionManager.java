@@ -69,8 +69,9 @@ public class SubmissionManager {
 	public WebhookMessageCreateAction<?> handleSubmission(@NotNull ButtonInteractionEvent event, int questionNumber) {
 		event.deferEdit().queue();
 		Member member = event.getMember();
-		if (!canCreateSubmissions(member)) {
-			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread.");
+		CreateSubmissionResult createSubmissionCheckResult = canCreateSubmissions(member);
+		if (!createSubmissionCheckResult.canCreateSubmissions()) {
+			return Responses.warning(event.getHook(), "You're not eligible to create a new submission thread because " + createSubmissionCheckResult.errorMessage());
 		}
 		config.getSubmissionChannel().createThreadChannel(
 				String.format(THREAD_NAME, questionNumber, member.getId()), true).queue(
@@ -174,13 +175,21 @@ public class SubmissionManager {
 		});
 	}
 
-	private boolean canCreateSubmissions(Member member) {
-		if (member == null) return false;
-		if (member.getUser().isBot() || member.getUser().isSystem()) return false;
-		if (member.isTimedOut() || member.isPending()) return false;
-		return config.getSubmissionChannel().getThreadChannels()
-				.stream().noneMatch(p -> p.getName().contains(member.getId()));
+	private CreateSubmissionResult canCreateSubmissions(Member member) {
+		if (member == null) return new CreateSubmissionResult(false, "your user cannot be found in this server - please try again later or contact staff members.");
+		if (member.getUser().isBot() || member.getUser().isSystem()) return new CreateSubmissionResult(false, "your account seems to be marked as a bot.");
+		if (member.isTimedOut() || member.isPending()) return new CreateSubmissionResult(false, "you are timed out or have not accepted the rules");
+		
+		Optional<ThreadChannel> existingSubmissionThread = config.getSubmissionChannel().getThreadChannels()
+		.stream().filter(p -> p.getName().contains(member.getId())).findAny();
+		
+		return existingSubmissionThread
+				.map(thread -> new CreateSubmissionResult(false, 
+						"you already have a submission thread: " + existingSubmissionThread.get().getJumpUrl()))
+				.orElse(new CreateSubmissionResult(true, ""));
 	}
+	
+	record CreateSubmissionResult(boolean canCreateSubmissions, String errorMessage) {}
 
 	/**
 	 * Accepts a submission.
