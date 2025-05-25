@@ -185,7 +185,7 @@ public class SubmissionManager {
 		
 		return existingSubmissionThread
 				.map(thread -> new CreateSubmissionResult(false, 
-						"you already have a submission thread: " + existingSubmissionThread.get().getJumpUrl()))
+						"you already have one: " + existingSubmissionThread.get().getJumpUrl()))
 				.orElse(new CreateSubmissionResult(true, ""));
 	}
 	
