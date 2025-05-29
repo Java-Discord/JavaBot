@@ -4,9 +4,9 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.springframework.boot") version "3.4.3"
+    id("org.springframework.boot") version "3.5.0"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.graalvm.buildtools.native") version "0.10.5"
+    id("org.graalvm.buildtools.native") version "0.10.6"
     checkstyle
 }
 
@@ -32,14 +32,14 @@ dependencies {
 
     // DIH4JDA (Command Framework) & JDA
     implementation("com.github.DynxstyGIT:DIH4JDA:120a15ad2e")
-    implementation("net.dv8tion:JDA:5.3.0") {
+    implementation("net.dv8tion:JDA:5.5.1") {
         exclude(module = "opus-java")
     }
 
     // Caffeine (Caching Library)
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 
-    implementation("com.google.code.gson:gson:2.12.0")
+    implementation("com.google.code.gson:gson:2.13.1")
     implementation("org.yaml:snakeyaml:2.4")
     implementation("com.google.re2j:re2j:1.8")
     implementation("commons-validator:commons-validator:1.9.0")
@@ -54,13 +54,13 @@ dependencies {
     implementation("com.github.DynxstyGIT:discord-webhooks:74301a46a0")
 
     // Lombok Annotations
-    compileOnly("org.projectlombok:lombok:1.18.36")
-    annotationProcessor("org.projectlombok:lombok:1.18.36")
-    testCompileOnly("org.projectlombok:lombok:1.18.30")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
+    testCompileOnly("org.projectlombok:lombok:1.18.38")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 
     // Sentry
-    implementation("io.sentry:sentry:8.3.0")
+    implementation("io.sentry:sentry:8.13.2")
 
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-web")
