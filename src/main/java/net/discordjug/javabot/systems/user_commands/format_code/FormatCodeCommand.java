@@ -86,7 +86,7 @@ public class FormatCodeCommand extends SlashCommand {
 					});
 		} else {
 			if (Checks.isInvalidLongInput(idOption)) {
-				Responses.error(event, "Please provide a valid message id!").queue();
+				Responses.error(event.getHook(), "Please provide a valid message id!").queue();
 				return;
 			}
 			long messageId = idOption.getAsLong();
