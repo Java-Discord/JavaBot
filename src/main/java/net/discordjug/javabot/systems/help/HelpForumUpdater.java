@@ -38,7 +38,7 @@ public class HelpForumUpdater {
 	@Scheduled(cron = "0 */10 * * * *") // Run every 10 minutes
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
-			log.info("Checking for inactive forum posts in {}", guild.getName());
+			log.debug("Checking for inactive forum posts in {}", guild.getName());
 			HelpConfig config = botConfig.get(guild).getHelpConfig();
 			ForumChannel forum = config.getHelpForumChannel();
 			if (forum != null) {

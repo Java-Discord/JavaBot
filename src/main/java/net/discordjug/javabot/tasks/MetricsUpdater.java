@@ -48,7 +48,7 @@ public class MetricsUpdater extends ListenerAdapter {
 				for (Map.Entry<String, Function<Guild, String>> entry : TEXT_VARIABLES.entrySet()) {
 					text = text.replace(entry.getKey(), entry.getValue().apply(guild));
 				}
-				config.getMetricsCategory().getManager().setName(text).queue(s -> log.info("Successfully updated Metrics"), t -> ExceptionLogger.capture(t, getClass().getSimpleName()));
+				config.getMetricsCategory().getManager().setName(text).queue(s -> log.debug("Successfully updated Metrics"), t -> ExceptionLogger.capture(t, getClass().getSimpleName()));
 			}
 		}, 0, 20, TimeUnit.MINUTES);
 	}
