@@ -73,8 +73,10 @@ public class PingableNameListener extends ListenerAdapter {
 		String newName = generateRandomName();
 		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
-				.flatMap(channel -> channel.sendMessageFormat("Your display name in %s has been set to `%s` since your previous name was deemed as non-pingable.", member.getGuild().getName(), newName))
-				.queue();
+				.flatMap(channel ->
+					channel.sendMessageFormat("Your display name in %s has been set to `%s` since your previous name was deemed as non-pingable.",
+							member.getGuild().getName(), newName))
+				.queue(success -> {}, err -> {});//ignore closed DMs
 		notificationService.withGuild(member.getGuild()).sendToMessageLog(c -> c.sendMessageFormat("Changed %s's nickname from `%s` to `%s`.", member.getAsMention(), oldName, newName));
 	}
 
