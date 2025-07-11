@@ -137,6 +137,59 @@ public class WebhookUtil {
 				});
 	}
 
+	/**
+	 * Resends a specific message using a webhook with a custom content.
+	 *
+	 * @param webhook           the webhook used for sending the message
+	 * @param originalMessage   the message to copy
+	 * @param newMessageContent the new (custom) content
+	 * @param threadId          the thread to send the message in or {@code 0} if the
+	 *                          message should be sent directly
+	 * @param components        A nullable list of {@link LayoutComponent}s.
+	 * @param attachments            A list of {@link Message.Attachment}s.
+	 * @return a {@link CompletableFuture} representing the action of sending
+	 * the message
+	 */
+	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhookWithAttachments(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, @Nullable List<LayoutComponent> components, List<Message.Attachment> attachments) {
+		return originalMessage
+				.getGuild()
+				.retrieveMember(originalMessage.getAuthor())
+				.submit()
+				.exceptionally(e -> null)//if the member cannot be found, use no member information
+				.thenCompose(member ->
+						mirrorMessageToWebhookWithAttachments(webhook, originalMessage, newMessageContent, threadId, components, attachments, member));
+	}
+
+	private static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhookWithAttachments(@NotNull Webhook webhook, Message originalMessage, String newMessageContent, long threadId,
+																							List<LayoutComponent> components, List<Message.Attachment> attachments, Member member) {
+		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
+				.setAllowedMentions(AllowedMentions.none())
+				.setAvatarUrl(transformOrNull(member, Member::getEffectiveAvatarUrl))
+				.setUsername(transformOrNull(member, Member::getEffectiveName));
+		JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken()).setThreadId(threadId)
+				.buildJDA();
+		if (components != null && !components.isEmpty()) {
+			message.addComponents(components);
+		}
+
+		@SuppressWarnings("unchecked")
+		CompletableFuture<?>[] futures = new CompletableFuture<?>[attachments.size()];
+		for (int i = 0; i < attachments.size(); i++) {
+			Attachment attachment = attachments.get(i);
+			futures[i] = attachment.getProxy()
+					.download()
+					.thenAccept(is -> message.addFile((attachment.isSpoiler() ? "SPOILER_" : "") + attachment.getFileName(), is));
+		}
+		return CompletableFuture.allOf(futures)
+				.thenCompose(unused -> sendMessage(client, message))
+				.whenComplete((result, err) -> {
+					client.close();
+					if (err != null) {
+						ExceptionLogger.capture(err, WebhookUtil.class.getSimpleName());
+					}
+				});
+	}
+
 	private static <T, R> R transformOrNull(T toTransform, Function<T, R> transformer) {
 		return toTransform == null ? null : transformer.apply(toTransform);
 	}
@@ -159,6 +212,24 @@ public class WebhookUtil {
 	 */
 	public static void replaceMemberMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId, MessageEmbed... embeds) {
 		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, null, List.of(embeds))
+				.thenAccept(unused -> originalMessage.delete().queue())
+				.exceptionally(e -> {
+					ExceptionLogger.capture(e, WebhookUtil.class.getSimpleName());
+					return null;
+				});
+	}
+
+	/**
+	 * Method for replacing a user's guild message through a webhook while also replacing the attachments.
+	 *
+	 * @param webhook           a reference to a webhook
+	 * @param originalMessage   a reference to the {@link Message} object that should be replaced
+	 * @param newMessageContent a String containing the new message's content
+	 * @param threadId          id of the thread in which the message should be replaced
+	 * @param attachments            attachments to be added to the message
+	 */
+	public static void replaceMemberMessageWithAttachments(Webhook webhook, Message originalMessage, String newMessageContent, long threadId, List<Message.Attachment> attachments) {
+		WebhookUtil.mirrorMessageToWebhookWithAttachments(webhook, originalMessage, newMessageContent, threadId, null, attachments)
 				.thenAccept(unused -> originalMessage.delete().queue())
 				.exceptionally(e -> {
 					ExceptionLogger.capture(e, WebhookUtil.class.getSimpleName());
