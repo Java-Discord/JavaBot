@@ -47,7 +47,7 @@ public class HelpTransactionRepository {
 					"channel",transaction.getChannelId())
 				);
 		transaction.setId(key.longValue());
-		log.info("Inserted new Help Transaction: {}", transaction);
+		log.debug("Inserted new Help Transaction: {}", transaction);
 		return transaction;
 	}
 
