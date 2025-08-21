@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -91,17 +92,35 @@ public class WebhookUtil {
 	 * the message
 	 */
 	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, @Nullable List<LayoutComponent> components, @Nullable List<MessageEmbed> embeds) {
+		return mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, components, null, embeds);
+	}
+
+	/**
+	 * Resends a specific message using a webhook with a custom content.
+	 *
+	 * @param webhook           the webhook used for sending the message
+	 * @param originalMessage   the message to copy
+	 * @param newMessageContent the new (custom) content
+	 * @param threadId          the thread to send the message in or {@code 0} if the
+	 *                          message should be sent directly
+	 * @param components        A nullable list of {@link LayoutComponent}s.
+	 * @param embeds            A nullable list of {@link MessageEmbed}s.
+	 * @param attachments		A nullable list of {@link Attachment}s.
+	 * @return a {@link CompletableFuture} representing the action of sending
+	 * the message
+	 */
+	public static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, @NotNull Message originalMessage, String newMessageContent, long threadId, @Nullable List<LayoutComponent> components, @Nullable List<Message.Attachment> attachments, @Nullable List<MessageEmbed> embeds) {
 		return originalMessage
 				.getGuild()
 				.retrieveMember(originalMessage.getAuthor())
 				.submit()
 				.exceptionally(e -> null)//if the member cannot be found, use no member information
-				.thenCompose(member -> 
-					mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, components, embeds, member));
+				.thenCompose(member ->
+						mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, components, attachments, embeds, member));
 	}
 
-	private static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, Message originalMessage, String newMessageContent, long threadId,
-			List<LayoutComponent> components, List<MessageEmbed> embeds, Member member) {
+	private static CompletableFuture<ReadonlyMessage> mirrorMessageToWebhook(@NotNull Webhook webhook, Message originalMessage, String newMessageContent, long threadId, List<LayoutComponent> components,
+																				List<Message.Attachment> attachments, List<MessageEmbed> embeds, Member member) {
 		WebhookMessageBuilder message = new WebhookMessageBuilder().setContent(newMessageContent)
 				.setAllowedMentions(AllowedMentions.none())
 				.setAvatarUrl(transformOrNull(member, Member::getEffectiveAvatarUrl))
@@ -118,11 +137,11 @@ public class WebhookUtil {
 		message.addEmbeds(embeds.stream()
 				.map(e -> WebhookEmbedBuilder.fromJDA(e).build())
 				.toList());
-		List<Attachment> attachments = originalMessage.getAttachments();
+		List<Attachment> newAttachments = Objects.requireNonNullElse(attachments, originalMessage.getAttachments());
 		@SuppressWarnings("unchecked")
-		CompletableFuture<?>[] futures = new CompletableFuture<?>[attachments.size()];
-		for (int i = 0; i < attachments.size(); i++) {
-			Attachment attachment = attachments.get(i);
+		CompletableFuture<?>[] futures = new CompletableFuture<?>[newAttachments.size()];
+		for (int i = 0; i < newAttachments.size(); i++) {
+			Attachment attachment = newAttachments.get(i);
 			futures[i] = attachment.getProxy()
 					.download()
 					.thenAccept(is -> message.addFile((attachment.isSpoiler() ? "SPOILER_" : "") + attachment.getFileName(), is));
@@ -156,13 +175,18 @@ public class WebhookUtil {
 	 * @param newMessageContent a String containing the new message's content
 	 * @param threadId          id of the thread in which the message should be replaced
 	 * @param embeds            optional additional embeds to be added
+	 * @param attachments		optional additional attachments to be added
 	 */
-	public static void replaceMemberMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId, MessageEmbed... embeds) {
-		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, null, List.of(embeds))
+	public static void replaceMemberMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId, List<Message.Attachment> attachments, List<MessageEmbed> embeds) {
+		WebhookUtil.mirrorMessageToWebhook(webhook, originalMessage, newMessageContent, threadId, null, attachments, embeds)
 				.thenAccept(unused -> originalMessage.delete().queue())
 				.exceptionally(e -> {
 					ExceptionLogger.capture(e, WebhookUtil.class.getSimpleName());
 					return null;
 				});
+	}
+
+	public static void replaceMemberMessage(Webhook webhook, Message originalMessage, String newMessageContent, long threadId, MessageEmbed... embeds) {
+		replaceMemberMessage(webhook, originalMessage, newMessageContent, threadId, null, List.of(embeds));
 	}
 }
