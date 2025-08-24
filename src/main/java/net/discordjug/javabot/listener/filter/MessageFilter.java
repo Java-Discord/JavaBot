@@ -9,7 +9,7 @@ package net.discordjug.javabot.listener.filter;
 public interface MessageFilter {
 
 	/**
-	 * When a message is received, it is processed on the registered filters.
+	 * When a message is received, it is processed by the registered filters.
 	 *
 	 * @param content The content of the new message that will be reposted instead of the received message
 	 * if at least one filter returns {@link MessageModificationStatus#MODIFIED}
