@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import java.util.List;
 
 /**
- * A class storing different parameters of a message sent.
- * @param event 		The event associated with the message
+ * A class containing modifiable content of a message that has been received.
+ * @param event 		The event associated with receiving the message
  * @param messageText 	The text associated with the message
  * @param attachments 	The attachments associated with the message
  * @param embeds 		The embeds associated with the message

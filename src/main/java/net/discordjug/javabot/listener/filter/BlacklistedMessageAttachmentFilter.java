@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * This {@link MessageFilter} blocks attachments blacklisted using {@link GuildConfig#getBlacklistedMessageExtensions()}.
+ * This {@link MessageFilter} blocks attachments blacklisted using {@link GuildConfig}.
  */
 @Component
 @RequiredArgsConstructor

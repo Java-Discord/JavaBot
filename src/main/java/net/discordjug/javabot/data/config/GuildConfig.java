@@ -38,7 +38,7 @@ public class GuildConfig {
 	private StarboardConfig starboardConfig;
 	private MessageCacheConfig messageCacheConfig;
 	private ServerLockConfig serverLockConfig;
-	private List<String> blacklistedMessageExtensions;
+	private List<String> blacklistedMessageExtensions = List.of("jar", "exe", "zip");
 
 	/**
 	 * Constructor that initializes all Config classes.
@@ -56,7 +56,6 @@ public class GuildConfig {
 		this.starboardConfig = new StarboardConfig();
 		this.messageCacheConfig = new MessageCacheConfig();
 		this.serverLockConfig = new ServerLockConfig();
-		this.blacklistedMessageExtensions = List.of("jar", "exe", "zip");
 		this.setGuild(guild);
 	}
 
