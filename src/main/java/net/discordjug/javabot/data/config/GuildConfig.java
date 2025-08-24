@@ -18,6 +18,7 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,6 +38,7 @@ public class GuildConfig {
 	private StarboardConfig starboardConfig;
 	private MessageCacheConfig messageCacheConfig;
 	private ServerLockConfig serverLockConfig;
+	private List<String> blacklistedMessageExtensions = List.of("jar", "exe", "zip");
 
 	/**
 	 * Constructor that initializes all Config classes.
