@@ -1,7 +1,7 @@
 package net.discordjug.javabot.listener.filter;
 
 /**
- * This enum describes the result of an {@link MessageFilter} execution and what should be done with the message.
+ * This enum describes the result of a {@link MessageFilter} execution and what should be done with the message.
  */
 public enum MessageModificationStatus {
 	/**
