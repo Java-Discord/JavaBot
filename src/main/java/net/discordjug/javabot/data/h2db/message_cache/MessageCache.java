@@ -1,24 +1,5 @@
 package net.discordjug.javabot.data.h2db.message_cache;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
-import net.discordjug.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
-import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
-import net.discordjug.javabot.systems.user_commands.IdCalculatorCommand;
-import net.discordjug.javabot.util.ExceptionLogger;
-import net.discordjug.javabot.util.Responses;
-import net.discordjug.javabot.util.TimeUtils;
-import net.discordjug.javabot.util.UserUtils;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
-import net.dv8tion.jda.api.utils.FileUpload;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
@@ -36,6 +17,28 @@ import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
+import net.discordjug.javabot.data.h2db.message_cache.dao.MessageCacheRepository;
+import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
+import net.discordjug.javabot.systems.user_commands.IdCalculatorCommand;
+import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.Responses;
+import net.discordjug.javabot.util.TimeUtils;
+import net.discordjug.javabot.util.UserUtils;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 /**
  * Listens for Incoming Messages and stores them in the Message Cache.
@@ -105,7 +108,9 @@ public class MessageCache {
 			synchronize();
 		}
 		messageCount++;
-		cache.add(CachedMessage.of(message));
+		CachedMessage cachedMessage = CachedMessage.of(message);
+		cache.add(cachedMessage);
+		requestMessageAttachments(cachedMessage);
 	}
 
 	/**
