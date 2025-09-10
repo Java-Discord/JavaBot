@@ -1,0 +1,327 @@
+package net.discordjug.javabot.systems.staff_commands.forms.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+
+/**
+ * Dao class that represents the FORMS database.
+ */
+@RequiredArgsConstructor
+@Repository
+public class FormsRepository {
+	private final Gson gson;
+	private final JdbcTemplate jdbcTemplate;
+
+	/**
+	 * Add a field to a form.
+	 *
+	 * @param form  form to add field to
+	 * @param field field to add
+	 * @param index insertion index, or -1 to append
+	 */
+	public void addField(FormData form, FormField field, int index) {
+		Objects.requireNonNull(field);
+		List<FormField> fields = new ArrayList<>(form.getFields());
+		if (index != -1) {
+			fields.add(index, field);
+		} else {
+			fields.add(field);
+		}
+		updateFormData(form, fields);
+	}
+
+	/**
+	 * Attaches a form to a message.
+	 *
+	 * @param form    form to attach
+	 * @param message message to attach the form to
+	 * @param channel channel of the message
+	 */
+	public void attachForm(FormData form, MessageChannel channel, Message message) {
+		Objects.requireNonNull(form);
+		Objects.requireNonNull(channel);
+		Objects.requireNonNull(message);
+		jdbcTemplate.update("update `forms` set `message_id` = ?, `message_channel` = ? where `form_id` = ?",
+				message.getId(), channel.getId(), form.getId());
+	}
+
+	/**
+	 * Set this form's closed state to true.
+	 *
+	 * @param form form to close
+	 */
+	public void closeForm(FormData form) {
+		jdbcTemplate.update("update `forms` set `closed` = true where `form_id` = ?", form.getId());
+	}
+
+	/**
+	 * Deletes a form from the database.
+	 *
+	 * @param form form to delete
+	 */
+	public void deleteForm(FormData form) {
+		jdbcTemplate.update("delete from `forms` where `form_id` = ?", form.getId());
+		deleteSubmissions(form);
+	}
+
+	/**
+	 * Deletes all submissions for this form.
+	 *
+	 * @param form form to delete submissions for.
+	 */
+	public void deleteSubmissions(FormData form) {
+		Objects.requireNonNull(form);
+		jdbcTemplate.update("delete from `form_submissions` where `form_id` = ?", form.getId());
+	}
+
+	/**
+	 * Deletes user's submissions from this form.
+	 *
+	 * @param form form to delete submissions for
+	 * @param user user to delete submissions for
+	 * @return number of deleted submissions
+	 */
+	public int deleteSubmissions(FormData form, String user) {
+		Objects.requireNonNull(form);
+		Objects.requireNonNull(user);
+		return jdbcTemplate.update("delete from `form_submissions` where `form_id` = ? and `user_id` = ?", form.getId(),
+				user);
+	}
+
+	/**
+	 * Detaches a form from a message.
+	 *
+	 * @param form form to detach
+	 */
+	public void detachForm(FormData form) {
+		Objects.requireNonNull(form);
+		jdbcTemplate.update("update `forms` set `message_id` = NULL, `message_channel` = NULL where `form_id` = ?",
+				form.getId());
+	}
+
+	/**
+	 * Get all forms from the database.
+	 *
+	 * @return A list of forms
+	 */
+	public List<FormData> getAllForms() {
+		return jdbcTemplate.query("select * from `forms`", (rs, rowNum) -> read(rs));
+	}
+
+	/**
+	 * Get all forms matching given closed state.
+	 *
+	 * @param closed the closed state
+	 * @return A list of forms matching the closed state
+	 */
+	public List<FormData> getAllForms(boolean closed) {
+		return jdbcTemplate.query(con -> {
+			PreparedStatement statement = con.prepareStatement("select * from `forms` where `closed` = ?");
+			statement.setBoolean(1, closed);
+			return statement;
+		}, (rs, rowNum) -> read(rs));
+	}
+
+	/**
+	 * Get all submissions of this form in an user -> count map.
+	 *
+	 * @param form a form to get submissions for
+	 * @return a map of users and the number of their submissions
+	 */
+	public Map<FormUser, Integer> getAllSubmissions(FormData form) {
+		Objects.requireNonNull(form);
+		List<FormUser> users = jdbcTemplate.query("select * from `form_submissions` where `form_id` = ?",
+				(rs, rowNum) -> new FormUser(rs.getLong("user_id"), rs.getString("user_name")), form.getId());
+		Map<FormUser, Integer> map = new HashMap<>();
+		for (FormUser user : users) {
+			map.compute(user, (t, u) -> u == null ? 1 : u + 1);
+		}
+		return Collections.unmodifiableMap(map);
+	}
+
+	/**
+	 * Get a form for given ID.
+	 *
+	 * @param formId form ID to query
+	 * @return optional containing the form, or empty if the form was not found.
+	 */
+	public Optional<FormData> getForm(long formId) {
+		try {
+			return Optional.of(jdbcTemplate.queryForObject("select * from `forms` where `form_id` = ?",
+					(RowMapper<FormData>) (rs, rowNum) -> read(rs), formId));
+		} catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
+		}
+	}
+
+	/**
+	 * Get a count of logged submissions for the given form.
+	 *
+	 * @param form form to get submission for
+	 * @return A total number of logged submission
+	 */
+	public int getTotalSubmissionsCount(FormData form) {
+		Objects.requireNonNull(form);
+		return jdbcTemplate.queryForObject("select count(*) from `form_submissions` where `form_id` = ?",
+				(rs, rowNum) -> rs.getInt(1), form.getId());
+	}
+
+	/**
+	 * Checks if an user already submitted the form.
+	 *
+	 * @param user user to check
+	 * @param form form to check on
+	 * @return true if the user has submitted at leas one submission, false
+	 *         otherwise
+	 */
+	public boolean hasSubmitted(User user, FormData form) {
+		try {
+			return jdbcTemplate.queryForObject(
+					"select * from `form_submissions` where `user_id` = ? and `form_id` = ? limit 1",
+					(rs, rowNum) -> true, user.getId(), form.getId());
+		} catch (EmptyResultDataAccessException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Create a new form entry in the database.
+	 *
+	 * @param data form data to insert.
+	 */
+	public void insertForm(@NonNull FormData data) {
+		Objects.requireNonNull(data);
+		jdbcTemplate.update(new PreparedStatementCreator() {
+
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement statement = con.prepareStatement(
+						"merge into `forms` (form_id, form_data, title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ? ,?, ?)");
+				statement.setLong(1, data.getId());
+				statement.setString(2, gson.toJson(data.getFields()));
+				statement.setString(3, data.getTitle());
+				statement.setString(4, data.getSubmitMessage());
+				statement.setString(5, data.getSubmitChannel());
+				statement.setString(6, data.getMessageId());
+				statement.setString(7, data.getMessageChannel());
+				statement.setLong(8, data.getExpiration());
+				statement.setBoolean(9, data.isOnetime());
+				return statement;
+			}
+		});
+	}
+
+	/**
+	 * Log an user form submission in database.
+	 *
+	 * @param user user to log
+	 * @param form form to log on
+	 */
+	public void logSubmission(User user, FormData form) {
+		Objects.requireNonNull(user);
+		Objects.requireNonNull(form);
+		jdbcTemplate.update(con -> {
+			PreparedStatement statement = con.prepareStatement(
+					"merge into `form_submissions` (\"timestamp\", `user_id`, `form_id`, `user_name`) values (?, ?, ?, ?)");
+			statement.setLong(1, System.currentTimeMillis());
+			statement.setString(2, user.getId());
+			statement.setLong(3, form.getId());
+			statement.setString(4, user.getName());
+			return statement;
+		});
+	}
+
+	/**
+	 * Remove a field from a form. Fails silently if the index is out of bounds.
+	 *
+	 * @param form  form to remove the field from
+	 * @param index index of the field to remove
+	 */
+	public void removeField(FormData form, int index) {
+		List<FormField> fields = new ArrayList<>(form.getFields());
+		if (index < 0 || index >= fields.size()) return;
+		fields.remove(index);
+		updateFormData(form, fields);
+	}
+
+	/**
+	 * Set this form's closed state to false.
+	 *
+	 * @param form form to re-open
+	 */
+	public void reopenForm(FormData form) {
+		jdbcTemplate.update("update `forms` set `closed` = false where `form_id` = ?", form.getId());
+	}
+
+	/**
+	 * Synchronizes form object's values with fields in database.
+	 *
+	 * @param newData new form data. A form with matching ID will be updated in the
+	 *                database.
+	 */
+	public void updateForm(FormData newData) {
+		Objects.requireNonNull(newData);
+		jdbcTemplate.update(con -> {
+			PreparedStatement statement = con.prepareStatement(
+					"update `forms` set `title` = ?, `submit_channel` = ?, `submit_message` = ?, `expiration` = ?, `onetime` = ? where `form_id` = ?");
+			statement.setString(1, newData.getTitle());
+			statement.setString(2, newData.getSubmitChannel());
+			statement.setString(3, newData.getSubmitMessage());
+			statement.setLong(4, newData.getExpiration());
+			statement.setBoolean(5, newData.isOnetime());
+			statement.setLong(6, newData.getId());
+			return statement;
+		});
+	}
+
+	private FormData read(ResultSet rs) throws SQLException {
+		List<FormField> fields = new ArrayList<>();
+		for (JsonElement element : JsonParser.parseString(rs.getString("form_data")).getAsJsonArray()) {
+			fields.add(gson.fromJson(element, FormField.class));
+		}
+		return new FormData(rs.getLong("form_id"), fields, rs.getString("title"), rs.getString("submit_channel"),
+				rs.getString("submit_message"), rs.getString("message_id"), rs.getString("message_channel"),
+				rs.getLong("expiration"), rs.getBoolean("closed"), rs.getBoolean("onetime"));
+	}
+
+	private void updateFormData(FormData form, List<FormField> fields) {
+		Objects.requireNonNull(form);
+		Objects.requireNonNull(fields);
+		String json = gson.toJson(fields);
+		jdbcTemplate.update(con -> {
+			PreparedStatement statement = con
+					.prepareStatement("update `forms` set `form_data` = ? where `form_id` = ?");
+			statement.setString(1, json);
+			statement.setLong(2, form.getId());
+			return statement;
+		});
+	}
+}
