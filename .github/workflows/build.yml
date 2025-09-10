@@ -8,6 +8,8 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -23,6 +25,8 @@ jobs:
         run: ./gradlew test
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: build
     if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     steps:
