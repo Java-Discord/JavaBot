@@ -1,10 +1,10 @@
 CREATE TABLE forms (
     form_id BIGINT NOT NULL AUTO_INCREMENT,
     title VARCHAR NOT NULL,
-    submit_message VARCHAR,
+    submit_message VARCHAR DEFAULT NULL,
     submit_channel VARCHAR NOT NULL,
-    message_id VARCHAR,
-    message_channel VARCHAR,
+    message_id VARCHAR DEFAULT NULL,
+    message_channel VARCHAR DEFAULT NULL,
     expiration BIGINT NOT NULL DEFAULT -1,
     closed BOOLEAN NOT NULL DEFAULT FALSE,
     onetime BOOLEAN NOT NULL DEFAULT FALSE,
