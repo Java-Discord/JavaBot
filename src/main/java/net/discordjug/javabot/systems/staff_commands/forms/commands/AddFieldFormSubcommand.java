@@ -66,7 +66,7 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 			return;
 		}
 
-		formsRepo.addField(form, createFormFieldFromEvent(event), index);
+		formsRepo.addField(form, createFormFieldFromEvent(event));
 		event.getHook().sendMessage("Added a new field to the form.").queue();
 	}
 
@@ -98,6 +98,6 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 		});
 		String value = e.getOption("value", OptionMapping::getAsString);
 
-		return new FormField(label, max, min, placeholder, required, style.name(), value);
+		return new FormField(label, max, min, placeholder, required, style, value, 0);
 	}
 }

@@ -7,12 +7,13 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
  * Represents a form field.
  */
 public class FormField {
+	private final long id;
 	private final String label;
 	private final int max;
 	private final int min;
 	private final String placeholder;
 	private final boolean required;
-	private final String style;
+	private final TextInputStyle style;
 	private final String value;
 
 	/**
@@ -26,8 +27,11 @@ public class FormField {
 	 * @param style       text field style. One of {@link TextInputStyle} values.
 	 *                    Case insensitive.
 	 * @param value       initial value of this text field.
+	 * @param id          unique ID of this field.
 	 */
-	public FormField(String label, int max, int min, String placeholder, boolean required, String style, String value) {
+	public FormField(String label, int max, int min, String placeholder, boolean required, TextInputStyle style,
+			String value, long id) {
+		this.id = id;
 		this.label = label;
 		this.max = max;
 		this.min = min;
@@ -48,6 +52,15 @@ public class FormField {
 				.setPlaceholder(getPlaceholder()).setRequired(isRequired()).setValue(getValue()).build();
 	}
 
+	/**
+	 * Get this field's unique ID.
+	 *
+	 * @return unique ID of the field.
+	 */
+	public long getId() {
+		return id;
+	}
+
 	public String getLabel() {
 		return label;
 	}
@@ -65,17 +78,12 @@ public class FormField {
 	}
 
 	/**
-	 * Get a parsed style of this field's text input.
-	 * 
-	 * @return one of {@link TextInputStyle} values. Defaults to
-	 *         {@link TextInputStyle#SHORT} if the stored value is invalid.
+	 * Get the style of this field's text input.
+	 *
+	 * @return one of {@link TextInputStyle} values.
 	 */
 	public TextInputStyle getStyle() {
-		try {
-			return style == null ? TextInputStyle.SHORT : TextInputStyle.valueOf(style.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			return TextInputStyle.SHORT;
-		}
+		return style;
 	}
 
 	public String getValue() {

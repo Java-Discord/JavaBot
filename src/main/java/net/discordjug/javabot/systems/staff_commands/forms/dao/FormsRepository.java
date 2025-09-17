@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +17,6 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -30,6 +25,7 @@ import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 /**
  * Dao class that represents the FORMS database.
@@ -37,7 +33,6 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 @RequiredArgsConstructor
 @Repository
 public class FormsRepository {
-	private final Gson gson;
 	private final JdbcTemplate jdbcTemplate;
 
 	/**
@@ -45,17 +40,13 @@ public class FormsRepository {
 	 *
 	 * @param form  form to add field to
 	 * @param field field to add
-	 * @param index insertion index, or -1 to append
 	 */
-	public void addField(FormData form, FormField field, int index) {
-		Objects.requireNonNull(field);
-		List<FormField> fields = new ArrayList<>(form.getFields());
-		if (index != -1) {
-			fields.add(index, field);
-		} else {
-			fields.add(field);
-		}
-		updateFormData(form, fields);
+	public void addField(FormData form, FormField field) {
+		jdbcTemplate.update(
+				"INSERT INTO FORM_FIELDS (FORM_ID, LABEL, MIN, MAX, PLACEHOLDER, REQUIRED, \"style\", INITIAL) "
+						+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+				form.getId(), field.getLabel(), field.getMin(), field.getMax(), field.getPlaceholder(),
+				field.isRequired(), field.getStyle().name(), field.getValue());
 	}
 
 	/**
@@ -133,7 +124,7 @@ public class FormsRepository {
 	 * @return A list of forms
 	 */
 	public List<FormData> getAllForms() {
-		return jdbcTemplate.query("select * from `forms`", (rs, rowNum) -> read(rs));
+		return jdbcTemplate.query("select * from `forms`", (rs, rowNum) -> read(rs, readFormFields(rowNum)));
 	}
 
 	/**
@@ -147,7 +138,7 @@ public class FormsRepository {
 			PreparedStatement statement = con.prepareStatement("select * from `forms` where `closed` = ?");
 			statement.setBoolean(1, closed);
 			return statement;
-		}, (rs, rowNum) -> read(rs));
+		}, (rs, rowNum) -> read(rs, readFormFields(rowNum)));
 	}
 
 	/**
@@ -176,7 +167,7 @@ public class FormsRepository {
 	public Optional<FormData> getForm(long formId) {
 		try {
 			return Optional.of(jdbcTemplate.queryForObject("select * from `forms` where `form_id` = ?",
-					(RowMapper<FormData>) (rs, rowNum) -> read(rs), formId));
+					(RowMapper<FormData>) (rs, rowNum) -> read(rs, readFormFields(formId)), formId));
 		} catch (EmptyResultDataAccessException e) {
 			return Optional.empty();
 		}
@@ -224,16 +215,14 @@ public class FormsRepository {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement statement = con.prepareStatement(
-						"merge into `forms` (form_id, form_data, title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ? ,?, ?)");
-				statement.setLong(1, data.getId());
-				statement.setString(2, gson.toJson(data.getFields()));
-				statement.setString(3, data.getTitle());
-				statement.setString(4, data.getSubmitMessage());
-				statement.setString(5, data.getSubmitChannel());
-				statement.setString(6, data.getMessageId());
-				statement.setString(7, data.getMessageChannel());
-				statement.setLong(8, data.getExpiration());
-				statement.setBoolean(9, data.isOnetime());
+						"insert into `forms` (title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ?)");
+				statement.setString(1, data.getTitle());
+				statement.setString(2, data.getSubmitMessage());
+				statement.setString(3, data.getSubmitChannel());
+				statement.setString(4, data.getMessageId());
+				statement.setString(5, data.getMessageChannel());
+				statement.setLong(6, data.getExpiration());
+				statement.setBoolean(7, data.isOnetime());
 				return statement;
 			}
 		});
@@ -266,10 +255,9 @@ public class FormsRepository {
 	 * @param index index of the field to remove
 	 */
 	public void removeField(FormData form, int index) {
-		List<FormField> fields = new ArrayList<>(form.getFields());
+		List<FormField> fields = form.getFields();
 		if (index < 0 || index >= fields.size()) return;
-		fields.remove(index);
-		updateFormData(form, fields);
+		jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).getId());
 	}
 
 	/**
@@ -302,26 +290,20 @@ public class FormsRepository {
 		});
 	}
 
-	private FormData read(ResultSet rs) throws SQLException {
-		List<FormField> fields = new ArrayList<>();
-		for (JsonElement element : JsonParser.parseString(rs.getString("form_data")).getAsJsonArray()) {
-			fields.add(gson.fromJson(element, FormField.class));
-		}
+	private List<FormField> readFormFields(long formId) {
+		return jdbcTemplate.query("select * from `form_fields` where `form_id` = ?", (rs, rowNum) -> readField(rs),
+				formId);
+	}
+
+	private static FormData read(ResultSet rs, List<FormField> fields) throws SQLException {
 		return new FormData(rs.getLong("form_id"), fields, rs.getString("title"), rs.getString("submit_channel"),
 				rs.getString("submit_message"), rs.getString("message_id"), rs.getString("message_channel"),
 				rs.getLong("expiration"), rs.getBoolean("closed"), rs.getBoolean("onetime"));
 	}
 
-	private void updateFormData(FormData form, List<FormField> fields) {
-		Objects.requireNonNull(form);
-		Objects.requireNonNull(fields);
-		String json = gson.toJson(fields);
-		jdbcTemplate.update(con -> {
-			PreparedStatement statement = con
-					.prepareStatement("update `forms` set `form_data` = ? where `form_id` = ?");
-			statement.setString(1, json);
-			statement.setLong(2, form.getId());
-			return statement;
-		});
+	private static FormField readField(ResultSet rs) throws SQLException {
+		return new FormField(rs.getString("label"), rs.getInt("max"), rs.getInt("min"), rs.getString("placeholder"),
+				rs.getBoolean("required"), TextInputStyle.valueOf(rs.getString("style").toUpperCase()),
+				rs.getString("initial"), rs.getInt("id"));
 	}
 }
