@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -29,11 +30,9 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 	 */
 	public SubmissionsDeleteFormSubcommand(FormsRepository formsRepo) {
 		this.formsRepo = formsRepo;
-		setCommandData(
-				new SubcommandData("submissions-delete", "Deletes submissions of an user in the form").addOptions(
-						new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for", true,
-								true),
-						new OptionData(OptionType.STRING, "user-id", "User to delete submissions of", true, true)));
+		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of an user in the form")
+				.addOptions(new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for",
+						true, true), new OptionData(OptionType.USER, "user", "User to delete submissions of", true)));
 	}
 
 	@Override
@@ -45,7 +44,7 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 			return;
 		}
 
-		String user = event.getOption("user-id", OptionMapping::getAsString);
+		User user = event.getOption("user", OptionMapping::getAsUser);
 		FormData form = formOpt.get();
 
 		int count = formsRepo.deleteSubmissions(form, user);
@@ -54,24 +53,8 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		switch (target.getName()) {
-			case "user-id" -> {
-				Long formId = event.getOption("form-id", OptionMapping::getAsLong);
-				if (formId != null) {
-					Optional<FormData> form = formsRepo.getForm(formId);
-					if (form.isPresent()) {
-						event.replyChoices(formsRepo.getAllSubmissions(form.get()).keySet().stream()
-								.map(user -> new Choice(user.getUsername(), Long.toString(user.getId()))).toList())
-								.queue();
-						return;
-					}
-				}
-				event.replyChoices().queue();
-			}
-			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
-					.queue();
-			default -> {}
-		}
+		event.replyChoices(
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+				.queue();
 	}
 }

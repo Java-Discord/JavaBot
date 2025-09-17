@@ -80,17 +80,6 @@ public class FormsRepository {
 	 */
 	public void deleteForm(FormData form) {
 		jdbcTemplate.update("delete from `forms` where `form_id` = ?", form.getId());
-		deleteSubmissions(form);
-	}
-
-	/**
-	 * Deletes all submissions for this form.
-	 *
-	 * @param form form to delete submissions for.
-	 */
-	public void deleteSubmissions(FormData form) {
-		Objects.requireNonNull(form);
-		jdbcTemplate.update("delete from `form_submissions` where `form_id` = ?", form.getId());
 	}
 
 	/**
@@ -100,11 +89,11 @@ public class FormsRepository {
 	 * @param user user to delete submissions for
 	 * @return number of deleted submissions
 	 */
-	public int deleteSubmissions(FormData form, String user) {
+	public int deleteSubmissions(FormData form, User user) {
 		Objects.requireNonNull(form);
 		Objects.requireNonNull(user);
 		return jdbcTemplate.update("delete from `form_submissions` where `form_id` = ? and `user_id` = ?", form.getId(),
-				user);
+				user.getIdLong());
 	}
 
 	/**
@@ -197,7 +186,7 @@ public class FormsRepository {
 		try {
 			return jdbcTemplate.queryForObject(
 					"select * from `form_submissions` where `user_id` = ? and `form_id` = ? limit 1",
-					(rs, rowNum) -> true, user.getId(), form.getId());
+					(rs, rowNum) -> true, user.getIdLong(), form.getId());
 		} catch (EmptyResultDataAccessException e) {
 			return false;
 		}
@@ -231,17 +220,18 @@ public class FormsRepository {
 	/**
 	 * Log an user form submission in database.
 	 *
-	 * @param user user to log
-	 * @param form form to log on
+	 * @param user    user to log
+	 * @param form    form to log on
+	 * @param message message containing details about this user's submission
 	 */
-	public void logSubmission(User user, FormData form) {
+	public void logSubmission(User user, FormData form, Message message) {
 		Objects.requireNonNull(user);
 		Objects.requireNonNull(form);
 		jdbcTemplate.update(con -> {
 			PreparedStatement statement = con.prepareStatement(
-					"merge into `form_submissions` (\"timestamp\", `user_id`, `form_id`, `user_name`) values (?, ?, ?, ?)");
-			statement.setLong(1, System.currentTimeMillis());
-			statement.setString(2, user.getId());
+					"insert into `form_submissions` (`message_id`, `user_id`, `form_id`, `user_name`) values (?, ?, ?, ?)");
+			statement.setLong(1, message.getIdLong());
+			statement.setLong(2, user.getIdLong());
 			statement.setLong(3, form.getId());
 			statement.setString(4, user.getName());
 			return statement;

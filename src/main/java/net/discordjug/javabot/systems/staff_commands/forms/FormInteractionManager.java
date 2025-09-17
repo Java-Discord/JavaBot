@@ -149,8 +149,9 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 
-		channel.sendMessageEmbeds(createSubmissionEmbed(form, values, event.getMember())).queue();
-		formsRepo.logSubmission(event.getUser(), form);
+		channel.sendMessageEmbeds(createSubmissionEmbed(form, values, event.getMember())).queue(msg -> {
+			formsRepo.logSubmission(event.getUser(), form, msg);
+		});
 
 		event.getHook()
 				.sendMessage(
