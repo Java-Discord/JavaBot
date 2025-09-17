@@ -30,7 +30,7 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 	 */
 	public SubmissionsDeleteFormSubcommand(FormsRepository formsRepo) {
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of an user in the form")
+		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of a user in the form")
 				.addOptions(new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for",
 						true, true), new OptionData(OptionType.USER, "user", "User to delete submissions of", true)));
 	}

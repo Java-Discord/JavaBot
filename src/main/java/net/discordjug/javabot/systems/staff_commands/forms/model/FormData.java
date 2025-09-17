@@ -78,7 +78,7 @@ public class FormData {
 	/**
 	 * Creates text components for use in the submission modal.
 	 *
-	 * @return Lsit of layout components for use in the submission modal.
+	 * @return List of layout components for use in the submission modal.
 	 */
 	public LayoutComponent[] createComponents() {
 		LayoutComponent[] array = new LayoutComponent[fields.size()];

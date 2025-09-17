@@ -129,7 +129,7 @@ public class FormsRepository {
 	}
 
 	/**
-	 * Get all submissions of this form in an user -> count map.
+	 * Get all submissions of this form in a user -> count map.
 	 *
 	 * @param form a form to get submissions for
 	 * @return a map of users and the number of their submissions

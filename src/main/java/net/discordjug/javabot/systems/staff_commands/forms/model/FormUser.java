@@ -3,7 +3,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.model;
 import java.util.Objects;
 
 /**
- * Represents an user who submitted a form.
+ * Represents a user who submitted a form.
  */
 public class FormUser {
 	private final long id;
