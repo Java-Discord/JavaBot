@@ -1,6 +1,5 @@
 package net.discordjug.javabot.systems.staff_commands.forms.dao;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +12,6 @@ import java.util.Optional;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -136,13 +134,13 @@ public class FormsRepository {
 	 * @param form a form to get submissions for
 	 * @return a map of users and the number of their submissions
 	 */
-	public Map<FormUser, Integer> getAllSubmissions(FormData form) {
+	public Map<FormUser, Integer> getSubmissionsCountPerUser(FormData form) {
 		Objects.requireNonNull(form);
 		List<FormUser> users = jdbcTemplate.query("select * from `form_submissions` where `form_id` = ?",
 				(rs, rowNum) -> new FormUser(rs.getLong("user_id"), rs.getString("user_name")), form.getId());
 		Map<FormUser, Integer> map = new HashMap<>();
 		for (FormUser user : users) {
-			map.compute(user, (t, u) -> u == null ? 1 : u + 1);
+			map.merge(user, 1, Integer::sum);
 		}
 		return Collections.unmodifiableMap(map);
 	}
@@ -151,7 +149,7 @@ public class FormsRepository {
 	 * Get a form for given ID.
 	 *
 	 * @param formId form ID to query
-	 * @return optional containing the form, or empty if the form was not found.
+	 * @return optional form
 	 */
 	public Optional<FormData> getForm(long formId) {
 		try {
@@ -175,7 +173,7 @@ public class FormsRepository {
 	}
 
 	/**
-	 * Checks if an user already submitted the form.
+	 * Checks if a user already submitted the form.
 	 *
 	 * @param user user to check
 	 * @param form form to check on
@@ -199,32 +197,28 @@ public class FormsRepository {
 	 */
 	public void insertForm(@NonNull FormData data) {
 		Objects.requireNonNull(data);
-		jdbcTemplate.update(new PreparedStatementCreator() {
-
-			@Override
-			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-				PreparedStatement statement = con.prepareStatement(
-						"insert into `forms` (title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ?)");
-				statement.setString(1, data.getTitle());
-				statement.setString(2, data.getSubmitMessage());
-				statement.setLong(3, data.getSubmitChannel());
-				statement.setObject(4, data.getMessageId().orElse(null));
-				statement.setObject(5, data.getMessageChannel().orElse(null));
-				statement.setLong(6, data.getExpiration());
-				statement.setBoolean(7, data.isOnetime());
-				return statement;
-			}
+		jdbcTemplate.update(con -> {
+			PreparedStatement statement = con.prepareStatement(
+					"insert into `forms` (title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ?)");
+			statement.setString(1, data.getTitle());
+			statement.setString(2, data.getSubmitMessage());
+			statement.setLong(3, data.getSubmitChannel());
+			statement.setObject(4, data.getMessageId().orElse(null));
+			statement.setObject(5, data.getMessageChannel().orElse(null));
+			statement.setLong(6, data.getExpiration());
+			statement.setBoolean(7, data.isOnetime());
+			return statement;
 		});
 	}
 
 	/**
-	 * Log an user form submission in database.
+	 * Add a user form submission to the database.
 	 *
 	 * @param user    user to log
 	 * @param form    form to log on
 	 * @param message message containing details about this user's submission
 	 */
-	public void logSubmission(User user, FormData form, Message message) {
+	public void addSubmission(User user, FormData form, Message message) {
 		Objects.requireNonNull(user);
 		Objects.requireNonNull(form);
 		jdbcTemplate.update(con -> {

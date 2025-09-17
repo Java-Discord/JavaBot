@@ -55,7 +55,7 @@ public class SubmissionsExportFormSubcommand extends Subcommand implements AutoC
 		}
 
 		FormData form = formOpt.get();
-		Map<FormUser, Integer> submissions = formsRepo.getAllSubmissions(form);
+		Map<FormUser, Integer> submissions = formsRepo.getSubmissionsCountPerUser(form);
 		JsonObject root = new JsonObject();
 		JsonObject details = new JsonObject();
 		JsonArray users = new JsonArray();
