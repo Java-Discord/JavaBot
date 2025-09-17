@@ -43,8 +43,8 @@ public class FormsRepository {
 		jdbcTemplate.update(
 				"INSERT INTO FORM_FIELDS (FORM_ID, LABEL, MIN, MAX, PLACEHOLDER, REQUIRED, \"style\", INITIAL) "
 						+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-				form.getId(), field.getLabel(), field.getMin(), field.getMax(), field.getPlaceholder(),
-				field.isRequired(), field.getStyle().name(), field.getValue());
+				form.getId(), field.label(), field.min(), field.max(), field.placeholder(), field.required(),
+				field.style().name(), field.value());
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class FormsRepository {
 	public void removeField(FormData form, int index) {
 		List<FormField> fields = form.getFields();
 		if (index < 0 || index >= fields.size()) return;
-		jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).getId());
+		jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).id());
 	}
 
 	/**

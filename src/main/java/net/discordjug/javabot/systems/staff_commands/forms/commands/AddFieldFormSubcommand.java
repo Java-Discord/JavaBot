@@ -40,8 +40,7 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 				.addOption(OptionType.BOOLEAN, "required",
 						"Whether or not the user has to input data in this field. Default: false")
 				.addOption(OptionType.STRING, "style", "Input style. Default: SHORT", false, true)
-				.addOption(OptionType.STRING, "value", "Initial field value")
-				.addOption(OptionType.INTEGER, "index", "Index to insert the field at"));
+				.addOption(OptionType.STRING, "value", "Initial field value"));
 	}
 
 	@Override
@@ -57,12 +56,6 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 
 		if (form.getFields().size() >= 5) {
 			event.getHook().sendMessage("Can't add more than 5 components to a form").queue();
-			return;
-		}
-
-		int index = event.getOption("index", -1, OptionMapping::getAsInt);
-		if (index < -1 || index >= form.getFields().size()) {
-			event.getHook().sendMessage("Field index out of bounds").queue();
 			return;
 		}
 

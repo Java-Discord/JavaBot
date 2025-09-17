@@ -61,7 +61,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 
 		formsRepo.removeField(form, index);
 
-		event.getHook().sendMessage("Removed field `" + form.getFields().get(index).getLabel() + "` from the form.")
+		event.getHook().sendMessage("Removed field `" + form.getFields().get(index).label() + "` from the form.")
 				.queue();
 	}
 
@@ -79,7 +79,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 						List<Choice> choices = new ArrayList<>();
 						List<FormField> fields = form.get().getFields();
 						for (int i = 0; i < fields.size(); i++) {
-							choices.add(new Choice(fields.get(i).getLabel(), i));
+							choices.add(new Choice(fields.get(i).label(), i));
 						}
 						event.replyChoices(choices).queue();
 						return;
