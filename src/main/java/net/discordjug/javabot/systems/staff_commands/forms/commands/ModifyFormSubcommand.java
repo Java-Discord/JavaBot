@@ -56,8 +56,7 @@ public class ModifyFormSubcommand extends Subcommand implements AutoCompletable 
 		FormData oldForm = formOpt.get();
 
 		String title = event.getOption("title", oldForm.getTitle(), OptionMapping::getAsString);
-		String submitChannel = event.getOption("submit-channel", oldForm.getSubmitChannel(),
-				OptionMapping::getAsString);
+		long submitChannel = event.getOption("submit-channel", oldForm.getSubmitChannel(), OptionMapping::getAsLong);
 		String submitMessage = event.getOption("submit-message", oldForm.getSubmitMessage(),
 				OptionMapping::getAsString);
 		long expiration;
@@ -72,7 +71,8 @@ public class ModifyFormSubcommand extends Subcommand implements AutoCompletable 
 		boolean onetime = event.getOption("onetime", oldForm.isOnetime(), OptionMapping::getAsBoolean);
 
 		FormData newForm = new FormData(oldForm.getId(), oldForm.getFields(), title, submitChannel, submitMessage,
-				oldForm.getMessageId(), oldForm.getMessageChannel(), expiration, oldForm.isClosed(), onetime);
+				oldForm.getMessageId().orElse(null), oldForm.getMessageChannel().orElse(null), expiration,
+				oldForm.isClosed(), onetime);
 
 		formsRepo.updateForm(newForm);
 

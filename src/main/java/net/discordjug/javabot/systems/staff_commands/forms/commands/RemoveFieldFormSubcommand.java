@@ -52,7 +52,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 			return;
 		}
 
-		if (form.getMessageChannel() != null && form.getMessageId() != null && form.getFields().size() <= 1) {
+		if (form.isAttached() && form.getFields().size() <= 1) {
 			event.getHook().sendMessage(
 					"Can't remove the last field from an attached form. Detach the form before removing the field")
 					.queue();

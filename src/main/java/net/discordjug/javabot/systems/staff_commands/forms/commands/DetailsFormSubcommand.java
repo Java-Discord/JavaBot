@@ -80,11 +80,10 @@ public class DetailsFormSubcommand extends Subcommand implements AutoCompletable
 		addCodeblockField(builder, "State", form.isClosed() ? "Closed" : form.hasExpired() ? "Expired" : "Open", false);
 
 		builder.addField("Attached in",
-				form.getMessageChannel() == null ? "*Not attached*" : "<#" + form.getMessageChannel() + ">", true);
+				form.isAttached() ? "<#" + form.getMessageChannel().get() + ">" : "*Not attached*", true);
 		builder.addField("Attached to",
-				form.getMessageChannel() == null || form.getMessageId() == null ? "*Not attached*"
-						: String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
-								form.getMessageChannel(), form.getMessageId()),
+				form.isAttached() ? String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
+						form.getMessageChannel().get(), form.getMessageId().get()) : "*Not attached*",
 				true);
 
 		builder.addField("Submissions channel", "<#" + form.getSubmitChannel() + ">", true);

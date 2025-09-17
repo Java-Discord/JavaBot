@@ -218,9 +218,9 @@ public class FormsRepository {
 						"insert into `forms` (title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ?)");
 				statement.setString(1, data.getTitle());
 				statement.setString(2, data.getSubmitMessage());
-				statement.setString(3, data.getSubmitChannel());
-				statement.setString(4, data.getMessageId());
-				statement.setString(5, data.getMessageChannel());
+				statement.setLong(3, data.getSubmitChannel());
+				statement.setObject(4, data.getMessageId().orElse(null));
+				statement.setObject(5, data.getMessageChannel().orElse(null));
 				statement.setLong(6, data.getExpiration());
 				statement.setBoolean(7, data.isOnetime());
 				return statement;
@@ -281,7 +281,7 @@ public class FormsRepository {
 			PreparedStatement statement = con.prepareStatement(
 					"update `forms` set `title` = ?, `submit_channel` = ?, `submit_message` = ?, `expiration` = ?, `onetime` = ? where `form_id` = ?");
 			statement.setString(1, newData.getTitle());
-			statement.setString(2, newData.getSubmitChannel());
+			statement.setLong(2, newData.getSubmitChannel());
 			statement.setString(3, newData.getSubmitMessage());
 			statement.setLong(4, newData.getExpiration());
 			statement.setBoolean(5, newData.isOnetime());
@@ -296,9 +296,13 @@ public class FormsRepository {
 	}
 
 	private static FormData read(ResultSet rs, List<FormField> fields) throws SQLException {
-		return new FormData(rs.getLong("form_id"), fields, rs.getString("title"), rs.getString("submit_channel"),
-				rs.getString("submit_message"), rs.getString("message_id"), rs.getString("message_channel"),
-				rs.getLong("expiration"), rs.getBoolean("closed"), rs.getBoolean("onetime"));
+		Long messageId = rs.getLong("message_id");
+		if (rs.wasNull()) messageId = null;
+		Long messageChannel = rs.getLong("message_channel");
+		if (rs.wasNull()) messageChannel = null;
+		return new FormData(rs.getLong("form_id"), fields, rs.getString("title"), rs.getLong("submit_channel"),
+				rs.getString("submit_message"), messageId, messageChannel, rs.getLong("expiration"),
+				rs.getBoolean("closed"), rs.getBoolean("onetime"));
 	}
 
 	private static FormField readField(ResultSet rs) throws SQLException {

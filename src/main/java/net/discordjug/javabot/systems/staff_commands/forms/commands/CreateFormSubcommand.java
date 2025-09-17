@@ -52,7 +52,7 @@ public class CreateFormSubcommand extends Subcommand {
 
 		long formId = System.currentTimeMillis();
 		FormData form = new FormData(formId, List.of(), event.getOption("title", OptionMapping::getAsString),
-				event.getOption("submit-channel", OptionMapping::getAsChannel).getId(),
+				event.getOption("submit-channel", OptionMapping::getAsChannel).getIdLong(),
 				event.getOption("submit-message", null, OptionMapping::getAsString), null, null, expiration, false,
 				event.getOption("onetime", false, OptionMapping::getAsBoolean));
 

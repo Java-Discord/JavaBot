@@ -76,9 +76,9 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	public void closeForm(Guild guild, FormData form) {
 		formsRepo.closeForm(form);
 
-		if (form.getMessageChannel() != null && form.getMessageId() != null) {
-			TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel());
-			formChannel.retrieveMessageById(form.getMessageId()).queue(msg -> {
+		if (form.isAttached()) {
+			TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
+			formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
 				mapFormMessageButtons(msg, btn -> {
 					String cptId = btn.getId();
 					String[] split = ComponentIdBuilder.split(cptId);
@@ -190,9 +190,9 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	public void reopenForm(Guild guild, FormData form) {
 		formsRepo.reopenForm(form);
 
-		if (form.getMessageChannel() != null && form.getMessageId() != null) {
-			TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel());
-			formChannel.retrieveMessageById(form.getMessageId()).queue(msg -> {
+		if (form.isAttached()) {
+			TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
+			formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
 				mapFormMessageButtons(msg, btn -> {
 					String cptId = btn.getId();
 					String[] split = ComponentIdBuilder.split(cptId);

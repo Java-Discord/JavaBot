@@ -54,7 +54,7 @@ public class DetachFormSubcommand extends Subcommand implements AutoCompletable 
 		}
 		FormData form = formOpt.get();
 
-		if (form.getMessageChannel() == null && form.getMessageId() == null) {
+		if (!form.isAttached()) {
 			event.getHook().sendMessage("This form doesn't seem to be attached to a message").queue();
 			return;
 		}
@@ -80,8 +80,9 @@ public class DetachFormSubcommand extends Subcommand implements AutoCompletable 
 	 * @param guild guild this form is contained in
 	 */
 	public static void detachFromMessage(FormData form, Guild guild) {
-		TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel());
-		formChannel.retrieveMessageById(form.getMessageId()).queue(msg -> {
+		if(!form.isAttached()) return;
+		TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
+		formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
 			List<ActionRow> components = msg.getActionRows().stream().map(row -> {
 				ItemComponent[] cpts = row.getComponents().stream().filter(cpt -> {
 					if (cpt instanceof Button btn) {

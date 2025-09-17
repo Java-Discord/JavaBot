@@ -48,8 +48,9 @@ public class DeleteFormSubcommand extends Subcommand implements AutoCompletable 
 		FormData form = formOpt.get();
 		formsRepo.deleteForm(form);
 
-		if (form.getMessageChannel() != null && form.getMessageId() != null) {
+		if (form.isAttached()) {
 			DetachFormSubcommand.detachFromMessage(form, event.getGuild());
+			// TODO send a warning
 		}
 
 		event.getHook().sendMessage("Form deleted!").queue();

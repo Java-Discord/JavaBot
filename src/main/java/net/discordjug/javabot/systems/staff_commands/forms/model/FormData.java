@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -24,10 +25,10 @@ public class FormData {
 	private final long expiration;
 	private final List<FormField> fields;
 	private final long id;
-	private final String messageId;
-	private final String messageChannel;
+	private final Long messageId;
+	private final Long messageChannel;
 	private final boolean onetime;
-	private final String submitChannel;
+	private final long submitChannel;
 	private final String submitMessage;
 	private final String title;
 
@@ -56,18 +57,22 @@ public class FormData {
 	 * @param onetime        Whether or not this form accepts one submission per
 	 *                       user.
 	 */
-	public FormData(long id, List<FormField> fields, String title, String submitChannel, String submitMessage,
-			String messageId, String messageChannel, long expiration, boolean closed, boolean onetime) {
+	public FormData(long id, List<FormField> fields, String title, long submitChannel, String submitMessage,
+			Long messageId, Long messageChannel, long expiration, boolean closed, boolean onetime) {
 		this.id = id;
 		this.fields = Objects.requireNonNull(fields);
 		this.title = Objects.requireNonNull(title);
-		this.submitChannel = Objects.requireNonNull(submitChannel);
+		this.submitChannel = submitChannel;
 		this.submitMessage = submitMessage;
 		this.messageId = messageId;
 		this.messageChannel = messageChannel;
 		this.expiration = expiration;
 		this.closed = closed;
 		this.onetime = onetime;
+	}
+
+	public boolean isAttached() {
+		return messageChannel != null && messageId != null;
 	}
 
 	/**
@@ -95,15 +100,15 @@ public class FormData {
 		return id;
 	}
 
-	public String getMessageChannel() {
-		return messageChannel;
+	public Optional<Long> getMessageChannel() {
+		return Optional.ofNullable(messageChannel);
 	}
 
-	public String getMessageId() {
-		return messageId;
+	public Optional<Long> getMessageId() {
+		return Optional.ofNullable(messageId);
 	}
 
-	public String getSubmitChannel() {
+	public long getSubmitChannel() {
 		return submitChannel;
 	}
 
