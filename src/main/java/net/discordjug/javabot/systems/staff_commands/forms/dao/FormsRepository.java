@@ -28,7 +28,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 /**
- * Dao class that represents the FORMS database.
+ * Dao class that represents the FORMS table.
  */
 @RequiredArgsConstructor
 @Repository
