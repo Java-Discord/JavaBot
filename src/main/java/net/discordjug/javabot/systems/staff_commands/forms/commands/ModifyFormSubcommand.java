@@ -1,5 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
@@ -55,24 +56,28 @@ public class ModifyFormSubcommand extends Subcommand implements AutoCompletable 
 		}
 		FormData oldForm = formOpt.get();
 
-		String title = event.getOption("title", oldForm.getTitle(), OptionMapping::getAsString);
-		long submitChannel = event.getOption("submit-channel", oldForm.getSubmitChannel(), OptionMapping::getAsLong);
-		String submitMessage = event.getOption("submit-message", oldForm.getSubmitMessage(),
-				OptionMapping::getAsString);
-		long expiration;
+		String title = event.getOption("title", oldForm.title(), OptionMapping::getAsString);
+		long submitChannel = event.getOption("submit-channel", oldForm.submitChannel(), OptionMapping::getAsLong);
+		String submitMessage = event.getOption("submit-message", oldForm.submitMessage(), OptionMapping::getAsString);
+		Instant expiration;
 		if (event.getOption("expiration") == null) {
-			expiration = oldForm.getExpiration();
+			expiration = oldForm.expiration();
 		} else {
-			Optional<Long> expirationOpt = FormInteractionManager.parseExpiration(event);
-			if (expirationOpt.isEmpty()) return;
-			expiration = expirationOpt.get();
+			Optional<Instant> expirationOpt;
+			try {
+				expirationOpt = FormInteractionManager.parseExpiration(event);
+			} catch (IllegalArgumentException e) {
+				event.getHook().sendMessage(e.getMessage()).queue();
+				return;
+			}
+			expiration = expirationOpt.orElse(oldForm.expiration());
 		}
 
-		boolean onetime = event.getOption("onetime", oldForm.isOnetime(), OptionMapping::getAsBoolean);
+		boolean onetime = event.getOption("onetime", oldForm.onetime(), OptionMapping::getAsBoolean);
 
-		FormData newForm = new FormData(oldForm.getId(), oldForm.getFields(), title, submitChannel, submitMessage,
+		FormData newForm = new FormData(oldForm.id(), oldForm.fields(), title, submitChannel, submitMessage,
 				oldForm.getMessageId().orElse(null), oldForm.getMessageChannel().orElse(null), expiration,
-				oldForm.isClosed(), onetime);
+				oldForm.closed(), onetime);
 
 		formsRepo.updateForm(newForm);
 
@@ -82,8 +87,7 @@ public class ModifyFormSubcommand extends Subcommand implements AutoCompletable 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
-				.queue();
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
 	}
 
 }

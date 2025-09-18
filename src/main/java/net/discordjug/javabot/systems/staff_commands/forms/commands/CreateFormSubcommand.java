@@ -1,5 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,14 +45,17 @@ public class CreateFormSubcommand extends Subcommand {
 
 		event.deferReply().setEphemeral(true).queue();
 		String expirationStr = event.getOption("expiration", null, OptionMapping::getAsString);
-		Optional<Long> expirationOpt = FormInteractionManager.parseExpiration(event);
+		Optional<Instant> expirationOpt;
+		try {
+			expirationOpt = FormInteractionManager.parseExpiration(event);
+		} catch (IllegalArgumentException e) {
+			event.getHook().sendMessage(e.getMessage()).queue();
+			return;
+		}
 
-		if (expirationOpt.isEmpty()) return;
+		Instant expiration = expirationOpt.orElse(null);
 
-		long expiration = expirationOpt.get();
-
-		long formId = System.currentTimeMillis();
-		FormData form = new FormData(formId, List.of(), event.getOption("title", OptionMapping::getAsString),
+		FormData form = new FormData(0, List.of(), event.getOption("title", OptionMapping::getAsString),
 				event.getOption("submit-channel", OptionMapping::getAsChannel).getIdLong(),
 				event.getOption("submit-message", null, OptionMapping::getAsString), null, null, expiration, false,
 				event.getOption("onetime", false, OptionMapping::getAsBoolean));

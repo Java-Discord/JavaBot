@@ -70,7 +70,7 @@ public class AttachFormSubcommand extends Subcommand implements AutoCompletable 
 			return;
 		}
 
-		if (form.getFields().isEmpty()) {
+		if (form.fields().isEmpty()) {
 			event.getHook().sendMessage("You can't attach a form with no fields.").queue();
 			return;
 		}
@@ -111,7 +111,7 @@ public class AttachFormSubcommand extends Subcommand implements AutoCompletable 
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		switch (target.getName()) {
 			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 					.queue();
 			case "button-style" -> event.replyChoices(
 					Set.of(ButtonStyle.DANGER, ButtonStyle.PRIMARY, ButtonStyle.SECONDARY, ButtonStyle.SUCCESS).stream()
@@ -125,9 +125,9 @@ public class AttachFormSubcommand extends Subcommand implements AutoCompletable 
 		List<ActionRow> rows = new ArrayList<>(message.getActionRows());
 
 		Button button = Button.of(style,
-				ComponentIdBuilder.build(FormInteractionManager.FORM_COMPONENT_ID, form.getId()), buttonLabel);
+				ComponentIdBuilder.build(FormInteractionManager.FORM_COMPONENT_ID, form.id()), buttonLabel);
 
-		if (form.isClosed() || form.hasExpired()) {
+		if (form.closed() || form.hasExpired()) {
 			button = button.asDisabled();
 		}
 

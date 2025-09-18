@@ -50,7 +50,7 @@ public class CloseFormSubcommand extends Subcommand implements AutoCompletable {
 		}
 		FormData form = formOpt.get();
 
-		if (form.isClosed()) {
+		if (form.closed()) {
 			event.reply("This form is already closed").setEphemeral(true).queue();
 			return;
 		}
@@ -65,7 +65,7 @@ public class CloseFormSubcommand extends Subcommand implements AutoCompletable {
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms(false).stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+				formsRepo.getAllForms(false).stream().map(form -> new Choice(form.toString(), form.id())).toList())
 				.queue();
 	}
 }

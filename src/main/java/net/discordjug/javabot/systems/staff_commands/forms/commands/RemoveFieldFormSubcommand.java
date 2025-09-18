@@ -47,12 +47,12 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 			return;
 		}
 		FormData form = formOpt.get();
-		if (index < 0 || index >= form.getFields().size()) {
+		if (index < 0 || index >= form.fields().size()) {
 			event.getHook().sendMessage("Field index out of bounds.").queue();
 			return;
 		}
 
-		if (form.isAttached() && form.getFields().size() <= 1) {
+		if (form.isAttached() && form.fields().size() <= 1) {
 			event.getHook().sendMessage(
 					"Can't remove the last field from an attached form. Detach the form before removing the field")
 					.queue();
@@ -61,7 +61,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 
 		formsRepo.removeField(form, index);
 
-		event.getHook().sendMessage("Removed field `" + form.getFields().get(index).label() + "` from the form.")
+		event.getHook().sendMessage("Removed field `" + form.fields().get(index).label() + "` from the form.")
 				.queue();
 	}
 
@@ -69,7 +69,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		switch (target.getName()) {
 			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 					.queue();
 			case "field" -> {
 				Long formId = event.getOption("form-id", OptionMapping::getAsLong);
@@ -77,7 +77,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 					Optional<FormData> form = formsRepo.getForm(formId);
 					if (form.isPresent()) {
 						List<Choice> choices = new ArrayList<>();
-						List<FormField> fields = form.get().getFields();
+						List<FormField> fields = form.get().fields();
 						for (int i = 0; i < fields.size(); i++) {
 							choices.add(new Choice(fields.get(i).label(), i));
 						}

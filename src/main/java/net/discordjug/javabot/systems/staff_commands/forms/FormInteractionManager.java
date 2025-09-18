@@ -83,7 +83,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 					String cptId = btn.getId();
 					String[] split = ComponentIdBuilder.split(cptId);
 					if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)
-							&& split[1].equals(Long.toString(form.getId()))) {
+							&& split[1].equals(Long.toString(form.id()))) {
 						return btn.asDisabled();
 					}
 					return btn;
@@ -103,13 +103,13 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 		FormData form = formOpt.get();
 		if (!checkNotClosed(form)) {
 			event.reply("This form is not accepting new submissions.").setEphemeral(true).queue();
-			if (!form.isClosed()) {
+			if (!form.closed()) {
 				closeForm(event.getGuild(), form);
 			}
 			return;
 		}
 
-		if (form.isOnetime() && formsRepo.hasSubmitted(event.getUser(), form)) {
+		if (form.onetime() && formsRepo.hasSubmitted(event.getUser(), form)) {
 			event.reply("You have already submitted this form").setEphemeral(true).queue();
 			return;
 		}
@@ -136,12 +136,12 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 
-		if (form.isOnetime() && formsRepo.hasSubmitted(event.getUser(), form)) {
+		if (form.onetime() && formsRepo.hasSubmitted(event.getUser(), form)) {
 			event.getHook().sendMessage("You have already submitted this form").queue();
 			return;
 		}
 
-		TextChannel channel = event.getGuild().getTextChannelById(form.getSubmitChannel());
+		TextChannel channel = event.getGuild().getTextChannelById(form.submitChannel());
 		if (channel == null) {
 			event.getHook()
 					.sendMessage("We couldn't receive your submission due to an error. Please contact server staff.")
@@ -154,8 +154,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 		});
 
 		event.getHook()
-				.sendMessage(
-						form.getSubmitMessage() == null ? "Your submission was received!" : form.getSubmitMessage())
+				.sendMessage(form.submitMessage() == null ? "Your submission was received!" : form.submitMessage())
 				.queue();
 	}
 
@@ -198,7 +197,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 					String cptId = btn.getId();
 					String[] split = ComponentIdBuilder.split(cptId);
 					if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)
-							&& split[1].equals(Long.toString(form.getId()))) {
+							&& split[1].equals(Long.toString(form.id()))) {
 						return btn.asEnabled();
 					}
 					return btn;
@@ -214,7 +213,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	 * @return submission modal to be presented to the user.
 	 */
 	public static Modal createFormModal(FormData form) {
-		Modal modal = Modal.create(ComponentIdBuilder.build(FORM_COMPONENT_ID, form.getId()), form.getTitle())
+		Modal modal = Modal.create(ComponentIdBuilder.build(FORM_COMPONENT_ID, form.id()), form.title())
 				.addComponents(form.createComponents()).build();
 		return modal;
 	}
@@ -226,32 +225,31 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	 * @return an optional containing expiration time,
 	 *         {@link FormData#EXPIRATION_PERMANENT} if none given, or an empty
 	 *         optional if it's invalid.
+	 * @throws IllegalArgumentException if the date doesn't follow the format.
 	 */
-	public static Optional<Long> parseExpiration(SlashCommandInteractionEvent event) {
+	public static Optional<Instant> parseExpiration(SlashCommandInteractionEvent event)
+			throws IllegalArgumentException {
 		String expirationStr = event.getOption("expiration", null, OptionMapping::getAsString);
-		Optional<Long> expiration;
+		Optional<Instant> expiration;
 		if (expirationStr == null) {
-			expiration = Optional.of(FormData.EXPIRATION_PERMANENT);
+			expiration = Optional.empty();
 		} else {
 			try {
-				expiration = Optional.of(FormInteractionManager.DATE_FORMAT.parse(expirationStr).getTime());
+				expiration = Optional.of(FormInteractionManager.DATE_FORMAT.parse(expirationStr).toInstant());
 			} catch (ParseException e) {
-				event.getHook().sendMessage("Invalid date. You should follow the format `"
-						+ FormInteractionManager.DATE_FORMAT_STRING + "`.").setEphemeral(true).queue();
-				expiration = Optional.empty();
+				throw new IllegalArgumentException("Invalid date. You should follow the format `"
+						+ FormInteractionManager.DATE_FORMAT_STRING + "`.");
 			}
 		}
 
-		if (expiration.isPresent() && expiration.get() != FormData.EXPIRATION_PERMANENT
-				&& expiration.get() < System.currentTimeMillis()) {
-			event.getHook().sendMessage("The expiration date shouldn't be in the past").setEphemeral(true).queue();
-			return Optional.empty();
+		if (expiration.isPresent() && expiration.get().isBefore(Instant.now())) {
+			throw new IllegalArgumentException("The expiration date shouldn't be in the past");
 		}
 		return expiration;
 	}
 
 	private static boolean checkNotClosed(FormData data) {
-		if (data.isClosed() || data.hasExpired()) {
+		if (data.closed() || data.hasExpired()) {
 			return false;
 		}
 
@@ -261,12 +259,12 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	private static MessageEmbed createSubmissionEmbed(FormData form, List<ModalMapping> values, Member author) {
 		EmbedBuilder builder = new EmbedBuilder().setTitle("New form submission received")
 				.setAuthor(author.getEffectiveName(), null, author.getEffectiveAvatarUrl()).setTimestamp(Instant.now());
-		builder.addField("Sender", author.getAsMention(), true).addField("Title", form.getTitle(), true);
+		builder.addField("Sender", author.getAsMention(), true).addField("Title", form.title(), true);
 
-		int len = Math.min(values.size(), form.getFields().size());
+		int len = Math.min(values.size(), form.fields().size());
 		for (int i = 0; i < len; i++) {
 			ModalMapping mapping = values.get(i);
-			FormField field = form.getFields().get(i);
+			FormField field = form.fields().get(i);
 			String value = mapping.getAsString();
 			builder.addField(field.label(), value == null ? "*Empty*" : "```\n" + value + "\n```", false);
 		}

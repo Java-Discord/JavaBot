@@ -59,7 +59,7 @@ public class DeleteFormSubcommand extends Subcommand implements AutoCompletable 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 				.queue();
 	}
 }

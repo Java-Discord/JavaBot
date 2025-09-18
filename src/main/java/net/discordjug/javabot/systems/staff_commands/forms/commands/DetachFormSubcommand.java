@@ -68,7 +68,7 @@ public class DetachFormSubcommand extends Subcommand implements AutoCompletable 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 				.queue();
 	}
 
@@ -89,7 +89,7 @@ public class DetachFormSubcommand extends Subcommand implements AutoCompletable 
 						String cptId = btn.getId();
 						String[] split = ComponentIdBuilder.split(cptId);
 						if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)) {
-							return !split[1].equals(Long.toString(form.getId()));
+							return !split[1].equals(Long.toString(form.id()));
 						}
 					}
 					return true;

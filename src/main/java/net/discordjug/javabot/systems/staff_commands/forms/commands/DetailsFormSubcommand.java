@@ -61,37 +61,40 @@ public class DetailsFormSubcommand extends Subcommand implements AutoCompletable
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
-				.queue();
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
 	}
 
 	private EmbedBuilder createFormDetailsEmbed(FormData form, Guild guild) {
 		EmbedBuilder builder = new EmbedBuilder().setTitle("Form details");
 
-		long id = form.getId();
+		long id = form.id();
 
 		addCodeblockField(builder, "ID", id, true);
 		builder.addField("Created at", String.format("<t:%s>", id / 1000L), true);
 
 		String expiration;
 		builder.addField("Expires at",
-				form.hasExpirationTime() ? String.format("<t:%s>", form.getExpiration() / 1000L) : "`Never`", true);
+				form.hasExpirationTime() ? String.format("<t:%s>", form.expiration().toEpochMilli() / 1000L)
+						: "`Never`",
+				true);
 
-		addCodeblockField(builder, "State", form.isClosed() ? "Closed" : form.hasExpired() ? "Expired" : "Open", false);
+		addCodeblockField(builder, "State", form.closed() ? "Closed" : form.hasExpired() ? "Expired" : "Open", false);
 
 		builder.addField("Attached in",
 				form.isAttached() ? "<#" + form.getMessageChannel().get() + ">" : "*Not attached*", true);
 		builder.addField("Attached to",
-				form.isAttached() ? String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
-						form.getMessageChannel().get(), form.getMessageId().get()) : "*Not attached*",
+				form.isAttached()
+						? String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
+								form.getMessageChannel().get(), form.getMessageId().get())
+						: "*Not attached*",
 				true);
 
-		builder.addField("Submissions channel", "<#" + form.getSubmitChannel() + ">", true);
-		builder.addField("Is one-time", form.isOnetime() ? ":white_check_mark:" : ":x:", true);
+		builder.addField("Submissions channel", "<#" + form.submitChannel() + ">", true);
+		builder.addField("Is one-time", form.onetime() ? ":white_check_mark:" : ":x:", true);
 		addCodeblockField(builder, "Submission message",
-				form.getSubmitMessage() == null ? "Default" : form.getSubmitMessage(), true);
+				form.submitMessage() == null ? "Default" : form.submitMessage(), true);
 
-		addCodeblockField(builder, "Number of fields", form.getFields().size(), true);
+		addCodeblockField(builder, "Number of fields", form.fields().size(), true);
 		addCodeblockField(builder, "Number of submissions", formsRepo.getTotalSubmissionsCount(form), true);
 
 		return builder;

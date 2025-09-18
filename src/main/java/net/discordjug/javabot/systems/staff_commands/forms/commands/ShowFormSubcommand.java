@@ -43,7 +43,7 @@ public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
 			return;
 		}
 		FormData form = formOpt.get();
-		if (form.getFields().isEmpty()) {
+		if (form.fields().isEmpty()) {
 			event.reply("You can't open a form with no fields").setEphemeral(true).queue();
 			return;
 		}
@@ -53,7 +53,7 @@ public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 				.queue();
 	}
 }

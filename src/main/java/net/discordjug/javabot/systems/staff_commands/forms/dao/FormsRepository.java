@@ -3,6 +3,8 @@ package net.discordjug.javabot.systems.staff_commands.forms.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,9 +43,9 @@ public class FormsRepository {
 	 */
 	public void addField(FormData form, FormField field) {
 		jdbcTemplate.update(
-				"INSERT INTO FORM_FIELDS (FORM_ID, LABEL, MIN, MAX, PLACEHOLDER, REQUIRED, \"style\", INITIAL) "
+				"INSERT INTO form_fields (form_id, label, min, max, placeholder, \"required\", \"style\", initial) "
 						+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-				form.getId(), field.label(), field.min(), field.max(), field.placeholder(), field.required(),
+				form.id(), field.label(), field.min(), field.max(), field.placeholder(), field.required(),
 				field.style().name(), field.value());
 	}
 
@@ -59,7 +61,7 @@ public class FormsRepository {
 		Objects.requireNonNull(channel);
 		Objects.requireNonNull(message);
 		jdbcTemplate.update("update `forms` set `message_id` = ?, `message_channel` = ? where `form_id` = ?",
-				message.getId(), channel.getId(), form.getId());
+				message.getId(), channel.getId(), form.id());
 	}
 
 	/**
@@ -68,7 +70,7 @@ public class FormsRepository {
 	 * @param form form to close
 	 */
 	public void closeForm(FormData form) {
-		jdbcTemplate.update("update `forms` set `closed` = true where `form_id` = ?", form.getId());
+		jdbcTemplate.update("update `forms` set `closed` = true where `form_id` = ?", form.id());
 	}
 
 	/**
@@ -77,7 +79,7 @@ public class FormsRepository {
 	 * @param form form to delete
 	 */
 	public void deleteForm(FormData form) {
-		jdbcTemplate.update("delete from `forms` where `form_id` = ?", form.getId());
+		jdbcTemplate.update("delete from `forms` where `form_id` = ?", form.id());
 	}
 
 	/**
@@ -90,7 +92,7 @@ public class FormsRepository {
 	public int deleteSubmissions(FormData form, User user) {
 		Objects.requireNonNull(form);
 		Objects.requireNonNull(user);
-		return jdbcTemplate.update("delete from `form_submissions` where `form_id` = ? and `user_id` = ?", form.getId(),
+		return jdbcTemplate.update("delete from `form_submissions` where `form_id` = ? and `user_id` = ?", form.id(),
 				user.getIdLong());
 	}
 
@@ -102,7 +104,7 @@ public class FormsRepository {
 	public void detachForm(FormData form) {
 		Objects.requireNonNull(form);
 		jdbcTemplate.update("update `forms` set `message_id` = NULL, `message_channel` = NULL where `form_id` = ?",
-				form.getId());
+				form.id());
 	}
 
 	/**
@@ -137,7 +139,7 @@ public class FormsRepository {
 	public Map<FormUser, Integer> getSubmissionsCountPerUser(FormData form) {
 		Objects.requireNonNull(form);
 		List<FormUser> users = jdbcTemplate.query("select * from `form_submissions` where `form_id` = ?",
-				(rs, rowNum) -> new FormUser(rs.getLong("user_id"), rs.getString("user_name")), form.getId());
+				(rs, rowNum) -> new FormUser(rs.getLong("user_id"), rs.getString("user_name")), form.id());
 		Map<FormUser, Integer> map = new HashMap<>();
 		for (FormUser user : users) {
 			map.merge(user, 1, Integer::sum);
@@ -169,7 +171,7 @@ public class FormsRepository {
 	public int getTotalSubmissionsCount(FormData form) {
 		Objects.requireNonNull(form);
 		return jdbcTemplate.queryForObject("select count(*) from `form_submissions` where `form_id` = ?",
-				(rs, rowNum) -> rs.getInt(1), form.getId());
+				(rs, rowNum) -> rs.getInt(1), form.id());
 	}
 
 	/**
@@ -184,7 +186,7 @@ public class FormsRepository {
 		try {
 			return jdbcTemplate.queryForObject(
 					"select * from `form_submissions` where `user_id` = ? and `form_id` = ? limit 1",
-					(rs, rowNum) -> true, user.getIdLong(), form.getId());
+					(rs, rowNum) -> true, user.getIdLong(), form.id());
 		} catch (EmptyResultDataAccessException e) {
 			return false;
 		}
@@ -200,13 +202,14 @@ public class FormsRepository {
 		jdbcTemplate.update(con -> {
 			PreparedStatement statement = con.prepareStatement(
 					"insert into `forms` (title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ?)");
-			statement.setString(1, data.getTitle());
-			statement.setString(2, data.getSubmitMessage());
-			statement.setLong(3, data.getSubmitChannel());
+			statement.setString(1, data.title());
+			statement.setString(2, data.submitMessage());
+			statement.setLong(3, data.submitChannel());
 			statement.setObject(4, data.getMessageId().orElse(null));
 			statement.setObject(5, data.getMessageChannel().orElse(null));
-			statement.setLong(6, data.getExpiration());
-			statement.setBoolean(7, data.isOnetime());
+			statement.setTimestamp(6,
+					data.hasExpirationTime() ? new Timestamp(data.expiration().toEpochMilli()) : null);
+			statement.setBoolean(7, data.onetime());
 			return statement;
 		});
 	}
@@ -226,7 +229,7 @@ public class FormsRepository {
 					"insert into `form_submissions` (`message_id`, `user_id`, `form_id`, `user_name`) values (?, ?, ?, ?)");
 			statement.setLong(1, message.getIdLong());
 			statement.setLong(2, user.getIdLong());
-			statement.setLong(3, form.getId());
+			statement.setLong(3, form.id());
 			statement.setString(4, user.getName());
 			return statement;
 		});
@@ -239,7 +242,7 @@ public class FormsRepository {
 	 * @param index index of the field to remove
 	 */
 	public void removeField(FormData form, int index) {
-		List<FormField> fields = form.getFields();
+		List<FormField> fields = form.fields();
 		if (index < 0 || index >= fields.size()) return;
 		jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).id());
 	}
@@ -250,7 +253,7 @@ public class FormsRepository {
 	 * @param form form to re-open
 	 */
 	public void reopenForm(FormData form) {
-		jdbcTemplate.update("update `forms` set `closed` = false where `form_id` = ?", form.getId());
+		jdbcTemplate.update("update `forms` set `closed` = false where `form_id` = ?", form.id());
 	}
 
 	/**
@@ -264,12 +267,13 @@ public class FormsRepository {
 		jdbcTemplate.update(con -> {
 			PreparedStatement statement = con.prepareStatement(
 					"update `forms` set `title` = ?, `submit_channel` = ?, `submit_message` = ?, `expiration` = ?, `onetime` = ? where `form_id` = ?");
-			statement.setString(1, newData.getTitle());
-			statement.setLong(2, newData.getSubmitChannel());
-			statement.setString(3, newData.getSubmitMessage());
-			statement.setLong(4, newData.getExpiration());
-			statement.setBoolean(5, newData.isOnetime());
-			statement.setLong(6, newData.getId());
+			statement.setString(1, newData.title());
+			statement.setLong(2, newData.submitChannel());
+			statement.setString(3, newData.submitMessage());
+			statement.setTimestamp(4,
+					newData.hasExpirationTime() ? new Timestamp(newData.expiration().toEpochMilli()) : null);
+			statement.setBoolean(5, newData.onetime());
+			statement.setLong(6, newData.id());
 			return statement;
 		});
 	}
@@ -284,9 +288,11 @@ public class FormsRepository {
 		if (rs.wasNull()) messageId = null;
 		Long messageChannel = rs.getLong("message_channel");
 		if (rs.wasNull()) messageChannel = null;
+		Timestamp timestamp = rs.getTimestamp("expiration");
+		Instant expiration = timestamp == null ? null : timestamp.toInstant();
 		return new FormData(rs.getLong("form_id"), fields, rs.getString("title"), rs.getLong("submit_channel"),
-				rs.getString("submit_message"), messageId, messageChannel, rs.getLong("expiration"),
-				rs.getBoolean("closed"), rs.getBoolean("onetime"));
+				rs.getString("submit_message"), messageId, messageChannel, expiration, rs.getBoolean("closed"),
+				rs.getBoolean("onetime"));
 	}
 
 	private static FormField readField(ResultSet rs) throws SQLException {

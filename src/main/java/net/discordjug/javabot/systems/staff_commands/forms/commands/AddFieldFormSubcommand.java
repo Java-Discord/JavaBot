@@ -54,7 +54,7 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 		}
 		FormData form = formOpt.get();
 
-		if (form.getFields().size() >= 5) {
+		if (form.fields().size() >= 5) {
 			event.getHook().sendMessage("Can't add more than 5 components to a form").queue();
 			return;
 		}
@@ -67,7 +67,7 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		switch (target.getName()) {
 			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 					.queue();
 			case "style" ->
 				event.replyChoices(Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)

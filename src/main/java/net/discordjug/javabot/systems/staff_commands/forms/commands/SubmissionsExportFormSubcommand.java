@@ -69,13 +69,13 @@ public class SubmissionsExportFormSubcommand extends Subcommand implements AutoC
 		root.add("users", users);
 		root.add("details", details);
 		event.getHook().sendFiles(FileUpload.fromData(gson.toJson(root).getBytes(StandardCharsets.UTF_8),
-				"submissions_" + form.getId() + ".json")).queue();
+				"submissions_" + form.id() + ".json")).queue();
 	}
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.getId())).toList())
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
 				.queue();
 	}
 }
