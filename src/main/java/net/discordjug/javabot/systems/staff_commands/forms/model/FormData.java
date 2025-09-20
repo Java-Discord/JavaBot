@@ -12,6 +12,26 @@ import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 
 /**
  * Class containing information about a form.
+ * 
+ * @param id             the form ID.
+ * @param fields         a list of text input fields associated with this form.
+ *                       A form can only hold a maximum of 5 fields at a time.
+ * @param title          form title used in the modal displayed to the user.
+ * @param submitChannel  ID of the channel the form submissions are sent to.
+ * @param submitMessage  message displayed to the user once they submit the
+ *                       form.
+ * @param messageId      ID of the message this form is attached to. null if the
+ *                       form is not attached to any message.
+ * @param messageChannel channel of the message this form is attached to. null
+ *                       if the form is not attached to any message.
+ * @param expiration     time after which this user won't accept any further
+ *                       submissions. null to indicate that the form has no
+ *                       expiration date.
+ * @param closed         closed state of this form. If the form is closed, it
+ *                       doesn't accept further submissions, even if it's
+ *                       expired.
+ * @param onetime        onetime state of this form. If it's true, the form only
+ *                       accepts one submission per user.
  */
 // TODO `Optional` getter for the submit message
 public record FormData(long id, List<FormField> fields, String title, long submitChannel, String submitMessage,
@@ -23,9 +43,15 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 	 */
 	public static final long EXPIRATION_PERMANENT = -1;
 
+	/**
+	 * The main constructor.
+	 */
 	public FormData {
 		Objects.requireNonNull(title);
 		fields = List.copyOf(fields);
+		if (fields.size() > 5) {
+			throw new IllegalArgumentException("fields.size() > 5");
+		}
 	}
 
 	public boolean isAttached() {
