@@ -5,7 +5,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
 /**
- * The `/form` command.
+ * The {@code /form} command. This is the base command. It holds subcommands
+ * used to manage forms and their submissions.
  */
 public class FormCommand extends SlashCommand {
 
