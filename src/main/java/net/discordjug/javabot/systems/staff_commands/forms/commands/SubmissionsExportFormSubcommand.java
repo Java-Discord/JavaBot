@@ -61,10 +61,10 @@ public class SubmissionsExportFormSubcommand extends Subcommand implements AutoC
 		JsonArray users = new JsonArray();
 		for (Entry<FormUser, Integer> entry : submissions.entrySet()) {
 			JsonObject uobj = new JsonObject();
-			uobj.addProperty("username", entry.getKey().getUsername());
+			uobj.addProperty("username", entry.getKey().username());
 			uobj.addProperty("submissions", entry.getValue());
-			details.add(Long.toString(entry.getKey().getId()), uobj);
-			users.add(entry.getKey().getUsername());
+			details.add(Long.toString(entry.getKey().id()), uobj);
+			users.add(entry.getKey().username());
 		}
 		root.add("users", users);
 		root.add("details", details);
