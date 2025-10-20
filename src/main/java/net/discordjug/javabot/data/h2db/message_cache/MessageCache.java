@@ -106,7 +106,9 @@ public class MessageCache {
 			synchronize();
 		}
 		messageCount++;
-		cache.add(CachedMessage.of(message));
+		CachedMessage cachedMessage = CachedMessage.of(message);
+		cache.add(cachedMessage);
+		requestMessageAttachments(cachedMessage);
 	}
 
 	/**
