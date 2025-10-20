@@ -11,8 +11,8 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import org.jetbrains.annotations.NotNull;
 

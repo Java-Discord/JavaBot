@@ -12,6 +12,13 @@ import net.discordjug.javabot.systems.moderation.ModerationService;
 import net.discordjug.javabot.systems.moderation.report.ReportManager;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.selections.SelectOption;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -21,16 +28,10 @@ import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ModalCallbackAction;
 
@@ -212,7 +213,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 
 	private ModalCallbackAction generateModal(ButtonInteractionEvent event, String title) {
 		return event.replyModal(Modal.create(event.getComponentId(), title)
-				.addActionRow(TextInput.create("reason", "Reason", TextInputStyle.SHORT).setRequired(true).build())
+				.addComponents(Label.of("Reason", TextInput.create("reason", TextInputStyle.SHORT).setRequired(true).build()))
 				.build());
 	}
 
@@ -236,7 +237,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 		}
 
 		for (ModalMapping mapping : mappings) {
-			if ("reason".equals(mapping.getId())) {
+			if ("reason".equals(mapping.getCustomId())) {
 				reason = mapping.getAsString();
 			}
 		}
@@ -252,7 +253,7 @@ public class InteractionUtils implements ButtonHandler, ModalHandler, StringSele
 	@Override
 	public void handleStringSelectMenu(@Nonnull StringSelectInteractionEvent event, @Nonnull List<String> options) {
 		event.replyModal(Modal.create(event.getComponentId()+":"+options.get(0), "Warn user")
-				.addActionRow(TextInput.create("reason", "Reason", TextInputStyle.SHORT).setRequired(true).build())
+				.addComponents(Label.of("Reason", TextInput.create("reason", TextInputStyle.SHORT).setRequired(true).build()))
 				.build())
 			.queue();
 	}

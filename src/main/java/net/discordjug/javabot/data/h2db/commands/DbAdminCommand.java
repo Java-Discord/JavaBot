@@ -4,6 +4,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.RegistrationType;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
@@ -27,7 +28,7 @@ public class DbAdminCommand extends SlashCommand {
 		setRegistrationType(RegistrationType.GUILD);
 		setCommandData(Commands.slash("db-admin", "(ADMIN ONLY) Administrative Commands for managing the bot's database.")
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		addSubcommands(exportSchemaSubcommand, exportTableSubcommand, migrationsListSubcommand, migrateSubcommand, quickMigrateSubcommand);
 		addSubcommandGroups(SubcommandGroup.of(

@@ -9,6 +9,7 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.InteractionUtils;
 import net.discordjug.javabot.util.WebhookUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+
 import java.util.Objects;
 
 /**
@@ -126,9 +128,9 @@ public class AutoCodeFormatter {
 	private void sendFormatHint(MessageReceivedEvent event) {
 		event.getMessage()
 				.replyEmbeds(formatHintEmbed(event.getGuild()))
-				.addActionRow(
+				.addComponents(ActionRow.of(
 						InteractionUtils.createDeleteButton(event.getAuthor().getIdLong())
-				).queue();
+				)).queue();
 	}
 
 	

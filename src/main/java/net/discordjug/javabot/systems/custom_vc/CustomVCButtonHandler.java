@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.PermissionOverrideAction;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
@@ -40,7 +40,7 @@ public class CustomVCButtonHandler implements ButtonHandler {
 			Responses.error(event, "Only the VC owner can use this.").queue();
 			return;
 		}
-		String[] id = ComponentIdBuilder.split(button.getId());
+		String[] id = ComponentIdBuilder.split(button.getCustomId());
 		switch (id[1]) {
 		case MAKE_PRIVATE_ID -> changeVisibility(event, createMakePublicButton(), "This voice channel is now private.",
 				PermissionOverrideAction::setDenied);

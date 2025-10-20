@@ -8,6 +8,7 @@ import net.discordjug.javabot.systems.user_preferences.UserPreferenceService;
 import net.discordjug.javabot.systems.user_preferences.model.Preference;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -104,7 +105,7 @@ public class HelpForumUpdater {
 	}
 
 	private boolean isThanksMessage(@NotNull Message m) {
-		return m.getAuthor().isBot() && !m.getButtons().isEmpty() &&
-				m.getButtons().stream().allMatch(b -> b.getId() != null && b.getId().contains(HelpManager.HELP_THANKS_IDENTIFIER));
+		return m.getAuthor().isBot() && !m.getComponents().isEmpty() &&
+				m.getComponents().stream().allMatch(c -> c instanceof Button b && b.getCustomId() != null && b.getCustomId().contains(HelpManager.HELP_THANKS_IDENTIFIER));
 	}
 }

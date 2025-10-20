@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.user_preferences.commands;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -14,7 +15,7 @@ public class PreferencesCommand extends SlashCommand {
 	 */
 	public PreferencesCommand(PreferencesListSubcommand preferencesListSubcommand, PreferencesSetSubcommand preferencesSetSubcommand) {
 		setCommandData(Commands.slash("preferences", "Contains commands for managing user preferences.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		addSubcommands(preferencesListSubcommand, preferencesSetSubcommand);
 	}

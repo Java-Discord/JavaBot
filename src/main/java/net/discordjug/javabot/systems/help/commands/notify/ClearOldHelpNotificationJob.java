@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
@@ -48,7 +50,7 @@ public class ClearOldHelpNotificationJob {
 			List<Message> toDelete = msgs
 				.stream()
 				.filter(msg -> msg.getAuthor().getIdLong() == msg.getJDA().getSelfUser().getIdLong())
-				.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(3)))
+				.filter(msg -> msg.getTimeCreated().isBefore(OffsetDateTime.now().minusDays(0)))
 				.filter(msg ->
 					isOldUnresolvedNotification(msg) ||
 					isResolvedNotification(msg))
@@ -91,8 +93,9 @@ public class ClearOldHelpNotificationJob {
 	}
 
 	private boolean hasButtonWithText(Message msg, String expectedText) {
-		return msg.getButtons()
+		return msg.getComponents()
 			.stream()
+			.flatMap(component -> component instanceof ActionRow ar ? ar.getButtons().stream() : Stream.of())
 			.anyMatch(button -> expectedText.equals(button.getLabel()));
 	}
 

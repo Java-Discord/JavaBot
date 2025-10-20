@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.embeds;
 
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+import net.dv8tion.jda.api.modals.Modal;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
@@ -10,7 +11,12 @@ import net.discordjug.javabot.util.Pair;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
@@ -20,11 +26,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import org.jetbrains.annotations.NotNull;
@@ -94,32 +95,32 @@ public class CreateEmbedSubcommand extends SlashCommand.Subcommand implements Mo
 			return;
 		}
 		channel.sendMessageEmbeds(pair.second().build()).queue(
-				s -> event.getHook().sendMessage("Done!").addActionRow(Button.link(s.getJumpUrl(), "Jump to Embed")).queue(),
+				s -> event.getHook().sendMessage("Done!").addComponents(ActionRow.of(Button.link(s.getJumpUrl(), "Jump to Embed"))).queue(),
 				e -> Responses.error(event.getHook(), "Could not send embed: %s", e.getMessage()).queue()
 		);
 	}
 
 	private @NotNull Modal buildBasicEmbedCreateModal(@NotNull Channel channel) {
-		TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
+		TextInput titleInput = TextInput.create("title", TextInputStyle.SHORT)
 				.setPlaceholder(String.format("Choose a fitting title. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.TITLE_MAX_LENGTH)
 				.setRequired(false)
 				.build();
-		TextInput descriptionInput = TextInput.create("description", "Description", TextInputStyle.PARAGRAPH)
+		TextInput descriptionInput = TextInput.create("description", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("Choose a description for your embed.")
 				.setRequired(false)
 				.build();
-		TextInput colorInput = TextInput.create("color", "Hex Color (optional)", TextInputStyle.SHORT)
+		TextInput colorInput = TextInput.create("color", TextInputStyle.SHORT)
 				.setPlaceholder("#FFFFFF")
 				.setMaxLength(7)
 				.setRequired(false)
 				.build();
-		TextInput imageInput = TextInput.create("image", "Image URL (optional)", TextInputStyle.SHORT)
+		TextInput imageInput = TextInput.create("image", TextInputStyle.SHORT)
 				.setPlaceholder("https://example.com/example.png")
 				.setRequired(false)
 				.build();
 		return Modal.create(ComponentIdBuilder.build("embed-create", channel.getIdLong()), "Create an Embed Message")
-				.addComponents(ActionRow.of(titleInput), ActionRow.of(descriptionInput), ActionRow.of(colorInput), ActionRow.of(imageInput))
+				.addComponents(net.dv8tion.jda.api.components.label.Label.of("Title", titleInput), Label.of("Description", descriptionInput), Label.of("Hex Color (optional)", colorInput), Label.of("Image URL (optional)", imageInput))
 				.build();
 	}
 

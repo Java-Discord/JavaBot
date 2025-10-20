@@ -12,10 +12,11 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.TimeUtils;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 
@@ -120,7 +121,7 @@ public class MessageCache {
 		if (updated.getContentRaw().trim().equals(before.getMessageContent()) && updated.getAttachments().size() == before.getAttachments().size()) return;
 		MessageCreateAction action = config.getMessageCacheLogChannel()
 				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
-				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
+				.addComponents(ActionRow.of(Button.link(updated.getJumpUrl(), "Jump to Message")));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 			action.addFiles(FileUpload.fromData(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt"));
 		}

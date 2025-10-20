@@ -6,6 +6,7 @@ import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -41,7 +42,7 @@ public class PollCommand extends SlashCommand {
 						new OptionData(OptionType.STRING, "option-9", ADD_OPTION, false),
 						new OptionData(OptionType.STRING, "option-10", ADD_OPTION, false)
 				)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

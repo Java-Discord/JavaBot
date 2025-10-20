@@ -8,6 +8,7 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -34,7 +35,7 @@ public class SayCommand extends SlashCommand {
 		setCommandData(Commands.slash("say", "Let the bot say everything you want!")
 				.addOption(OptionType.STRING, "text", "The text that should be mirrored.", true)
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

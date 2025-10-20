@@ -4,6 +4,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.ContextCommand;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -19,7 +20,7 @@ public class ReportUserContext extends ContextCommand.User {
 	public ReportUserContext(BotConfig botConfig) {
 		this.botConfig = botConfig;
 		setCommandData(Commands.user("Report User")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

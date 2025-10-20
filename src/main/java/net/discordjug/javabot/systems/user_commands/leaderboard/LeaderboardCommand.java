@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.user_commands.leaderboard;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -15,7 +16,7 @@ public class LeaderboardCommand extends SlashCommand {
 	 */
 	public LeaderboardCommand(QOTWLeaderboardSubcommand qotwLeaderboardSubcommand, ThanksLeaderboardSubcommand thanksLeaderboardSubcommand, ExperienceLeaderboardSubcommand experienceLeaderboardSubcommand) {
 		setCommandData(Commands.slash("leaderboard", "Command for all leaderboards.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		addSubcommands(qotwLeaderboardSubcommand, thanksLeaderboardSubcommand, experienceLeaderboardSubcommand);
 	}

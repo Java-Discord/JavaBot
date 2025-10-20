@@ -14,15 +14,15 @@ import net.discordjug.javabot.util.Constants;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.apache.commons.validator.routines.EmailValidator;
@@ -84,28 +84,28 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 			event.reply("You already have Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
 		}
-		TextInput name = TextInput.create("name", "Real Name", TextInputStyle.SHORT)
+		TextInput name = TextInput.create("name", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("John Doe")
 				.build();
-		TextInput age = TextInput.create("age", "Age", TextInputStyle.SHORT)
+		TextInput age = TextInput.create("age", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("24")
 				.setRequiredRange(1, 2)
 				.build();
-		TextInput email = TextInput.create("email", "Email", TextInputStyle.SHORT)
+		TextInput email = TextInput.create("email", TextInputStyle.SHORT)
 				.setRequired(true)
 				.setPlaceholder("moontm@discordjug.net")
 				.setMaxLength(254)
 				.build();
-		TextInput timezone = TextInput.create("timezone", "Timezone", TextInputStyle.SHORT)
+		TextInput timezone = TextInput.create("timezone", TextInputStyle.SHORT)
 				.setRequired(true)
 				.build();
-		TextInput extraRemarks = TextInput.create("extra-remarks", "Anything else?", TextInputStyle.PARAGRAPH)
+		TextInput extraRemarks = TextInput.create("extra-remarks", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:staff:%s:%s", role.getId(), applicant.getId()), "Apply for " + role.getName())
-				.addComponents(ActionRow.of(name), ActionRow.of(age), ActionRow.of(email), ActionRow.of(timezone), ActionRow.of(extraRemarks))
+				.addComponents(Label.of("Real Name", name), Label.of("Age", age), Label.of("Email", email), Label.of("Timezone", timezone), Label.of("Anything else?", extraRemarks))
 				.build();
 		event.replyModal(modal).queue();
 	}
@@ -122,23 +122,23 @@ public class SelfRoleInteractionManager implements ButtonHandler, ModalHandler {
 			event.reply("You already have the Expert Role: " + role.getAsMention()).setEphemeral(true).queue();
 			return;
 		}
-		TextInput experience = TextInput.create("java-experience", "How much Java experience do you have?", TextInputStyle.PARAGRAPH)
+		TextInput experience = TextInput.create("java-experience", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("How much experience do you have with the Java Programming Language?")
 				.setRequired(true)
 				.build();
-		TextInput projectInfo = TextInput.create("project-info", "Present us a fitting Java Project", TextInputStyle.PARAGRAPH)
+		TextInput projectInfo = TextInput.create("project-info", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("Choose a fitting Java Project you've done yourself and present it to us.")
 				.setRequired(true)
 				.build();
-		TextInput projectLinks = TextInput.create("project-links", "Please provide a link to your project", TextInputStyle.SHORT)
+		TextInput projectLinks = TextInput.create("project-links", TextInputStyle.SHORT)
 				.setPlaceholder(Constants.GITHUB_LINK)
 				.setRequired(true)
 				.build();
-		TextInput reason = TextInput.create("reason", "Why should we accept this submission?", TextInputStyle.PARAGRAPH)
+		TextInput reason = TextInput.create("reason", TextInputStyle.PARAGRAPH)
 				.setRequired(true)
 				.build();
 		Modal modal = Modal.create(String.format("self-role:expert:%s", applicant.getId()), "Apply for " + role.getName())
-				.addComponents(ActionRow.of(experience), ActionRow.of(projectInfo), ActionRow.of(projectLinks), ActionRow.of(reason))
+				.addComponents(Label.of("How much Java experience do you have?", experience), Label.of("Present us a fitting Java Project", projectInfo), Label.of("Please provide a link to your project", projectLinks), Label.of("Why should we accept this submission?", reason))
 				.build();
 		event.replyModal(modal).queue();
 	}

@@ -5,16 +5,18 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 
@@ -42,7 +44,7 @@ public class MoveConversationCommand extends SlashCommand {
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "Where should the current conversation be continued?", true)
 								.setChannelTypes(ChannelType.TEXT, ChannelType.GUILD_NEWS_THREAD, ChannelType.GUILD_PRIVATE_THREAD, ChannelType.GUILD_PUBLIC_THREAD, ChannelType.VOICE, ChannelType.STAGE)
-				).setGuildOnly(true)
+				).setContexts(InteractionContextType.GUILD)
 		);
 	}
 
@@ -117,7 +119,7 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private @NotNull MessageEditAction editMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
 		return movedTo.editMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), movedFrom.getJumpUrl())
-				.setActionRow(Button.link(movedFrom.getJumpUrl(), "Jump to Message"))
+				.setComponents(ActionRow.of(Button.link(movedFrom.getJumpUrl(), "Jump to Message")))
 				.setAllowedMentions(Collections.emptySet());
 	}
 }

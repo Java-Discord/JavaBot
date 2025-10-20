@@ -2,14 +2,15 @@ package net.discordjug.javabot.systems.user_commands.format_code;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.util.*;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +26,7 @@ public class FormatCodeCommand extends SlashCommand {
 	 */
 	public FormatCodeCommand() {
 		setCommandData(Commands.slash("format-code", "Format unformatted code from a message")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "Message to be formatted, last message used if left blank.", false),
 						new OptionData(OptionType.STRING, "format", "The language used to format the code, defaults to Java if left blank.", false)

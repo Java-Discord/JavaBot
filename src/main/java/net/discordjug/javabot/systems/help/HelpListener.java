@@ -11,6 +11,8 @@ import net.discordjug.javabot.systems.user_preferences.UserPreferenceService;
 import net.discordjug.javabot.util.InteractionUtils;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.Channel;
@@ -22,14 +24,13 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import org.jetbrains.annotations.NotNull;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Listens for all events related to the forum help channel system.
@@ -161,10 +162,10 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 									If you are not, please ignore this message.
 									Note that you will not be able to send further messages here after this post have been closed but you will be able to create new posts.
 									""")
-				.addActionRow(
+				.addComponents(ActionRow.of(
 						createCloseSuggestionButton(msg.getChannel().asThreadChannel()),
 						InteractionUtils.createDeleteButton(msg.getAuthor().getIdLong())
-				).queue();
+				)).queue();
 				recentlyCloseSuggestedPosts.put(
 						postId,
 						System.currentTimeMillis() + SUGGEST_CLOSE_TIMEOUT
@@ -256,16 +257,16 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			case "done" -> handleThanksCloseButton(event, manager, post, "");
 			case "cancel" -> event.deferEdit().flatMap(h -> event.getMessage().delete()).queue();
 			default -> {
-				List<Button> thankButtons = event.getMessage()
-						.getButtons()
-						.stream()
-						.filter(b -> b.getId() != null &&
-								!ComponentIdBuilder.split(b.getId())[2].equals("done") &&
-								!ComponentIdBuilder.split(b.getId())[2].equals("cancel"))
+				List<Button> thankButtons = getButtonStream(event.getMessage())
+						.map(c -> (Button)c)
+						.filter(b -> 
+								b.getCustomId() != null &&
+								!ComponentIdBuilder.split(b.getCustomId())[2].equals("done") &&
+								!ComponentIdBuilder.split(b.getCustomId())[2].equals("cancel"))
 						.toList();
 				if (thankButtons.stream().filter(Button::isDisabled).count() ==
 						thankButtons.size() - 1) {
-					handleThanksCloseButton(event, manager, post, event.getButton().getId());
+					handleThanksCloseButton(event, manager, post, event.getButton().getCustomId());
 				} else {
 					event.editButton(event.getButton().asDisabled()).queue();
 				}
@@ -273,21 +274,30 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		}
 	}
 
+	private Stream<Button> getButtonStream(Message message) {
+		return message
+				.getComponents()
+				.stream()
+				.flatMap(component -> component instanceof ActionRow row ?
+						row.getButtons().stream() :
+						Stream.of())
+				.filter(c -> c instanceof Button);
+	}
+
 	private void handleThanksCloseButton(@NotNull ButtonInteractionEvent event, HelpManager manager, ThreadChannel post, String additionalButtonId) {
-		List<Button> buttons = event.getMessage().getButtons();
 		// close post
 		manager.close(event, false, null);
 		// delete the message
 		event.getMessage().delete().queue(s -> {
 			experienceService.addMessageBasedHelpXP(post, true);
 			// thank all helpers
-			buttons.stream()
-					.filter(b -> b.getId() != null)
-					.filter(b -> b.isDisabled() || (b.getId().equals(additionalButtonId)))
+			getButtonStream(event.getMessage())
+					.filter(b -> b.getCustomId() != null)
+					.filter(b -> b.isDisabled() || (b.getCustomId().equals(additionalButtonId)))
 					.forEach(b -> manager.thankHelper(
 							event.getGuild(),
 							post,
-							Long.parseLong(ComponentIdBuilder.split(b.getId())[2])
+							Long.parseLong(ComponentIdBuilder.split(b.getCustomId())[2])
 					));
 		});
 	}

@@ -4,9 +4,10 @@ import xyz.dynxsty.dih4jda.util.Pair;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.InteractionUtils;
 import net.discordjug.javabot.util.StringUtils;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 			if (!content.getFirst().isBlank() && !content.getSecond().isBlank()) {
 				event.getMessage().reply(String.format("```%s\n%s\n```", content.getSecond(), StringUtils.standardSanitizer().compute(content.getFirst())))
 						.setAllowedMentions(List.of())
-						.setActionRow(InteractionUtils.createDeleteButton(event.getAuthor().getIdLong()), Button.link(matcher.group(), "View on GitHub"))
+						.addComponents(ActionRow.of(InteractionUtils.createDeleteButton(event.getAuthor().getIdLong()), Button.link(matcher.group(), "View on GitHub")))
 						.queue();
 			}
 		}
@@ -56,7 +57,7 @@ public class GitHubLinkListener extends ListenerAdapter {
 		String[] segments = Arrays.copyOfRange(arr, 3, arr.length);
 		// The file name, split by "."
 		String[] file = segments[segments.length - 1].split("\\.");
-		Integer[] lines = Arrays.stream(file[1].split("L"))
+		Integer[] lines = Arrays.stream(file[file.length-1].split("L"))
 				.map(line -> line.replace("-", ""))
 				.filter(line -> line.matches("-?\\d+")) // check if the given link is a number
 				.map(Integer::valueOf).sorted().toArray(Integer[]::new);

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
@@ -25,7 +26,7 @@ public class ReportCommand extends ModerateUserCommand {
 		setCommandData(Commands.slash("report", "Reports a member.")
 				.addOption(OptionType.USER, "user", "The user you want to report", true)
 				.addOption(OptionType.STRING, "reason", "The reason", true)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		setRequireStaff(false);
 	}

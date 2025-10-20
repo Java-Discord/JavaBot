@@ -5,6 +5,7 @@ import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public class SearchWebMessageContext extends ContextCommand.Message {
 	public SearchWebMessageContext(SystemsConfig systemsConfig) {
 		this.systemsConfig = systemsConfig;
 		setCommandData(Commands.message("Search the Web")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 
