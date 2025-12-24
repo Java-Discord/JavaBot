@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.moderation;
 
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
@@ -25,7 +26,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
  * This class checks all incoming messages for potential spam/advertising and warns or mutes the potential offender.
  */
 @Slf4j
-// TODO: Refactor this to be more efficient. Especially AutoMod#checkNewMessageAutomod
 public class AutoMod extends ListenerAdapter {
 
 	private static final Pattern INVITE_URL = Pattern.compile("discord(?:(\\.(?:me|io|gg)|sites\\.com)/.{0,4}|(?:app)?\\.com.{1,4}(?:invite|oauth2).{0,5}/)\\w+");
@@ -48,17 +47,20 @@ public class AutoMod extends ListenerAdapter {
 	private final BotConfig botConfig;
 	private List<String> spamUrls;
 	private final ModerationService moderationService;
+	private final MessageCache messageCache;
 
 	/**
 	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
 	 * @param notificationService The {@link QOTWPointsService}
 	 * @param botConfig The main configuration of the bot
 	 * @param moderationService Service object for moderating members
+	 * @param messageCache service for retrieving cached messages
 	 */
-	public AutoMod(NotificationService notificationService, BotConfig botConfig, ModerationService moderationService) {
+	public AutoMod(NotificationService notificationService, BotConfig botConfig, ModerationService moderationService, MessageCache messageCache) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
 		this.moderationService = moderationService;
+		this.messageCache = messageCache;
 		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
@@ -102,15 +104,20 @@ public class AutoMod extends ListenerAdapter {
 	 */
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// spam
-		message.getChannel().getHistory().retrievePast(10).queue(messages -> {
-			int spamCount = (int) messages.stream().filter(msg -> !msg.equals(message))
-					// filter for spam
-					.filter(msg -> msg.getAuthor().equals(message.getAuthor()) && !msg.getAuthor().isBot())
-					.filter(msg -> (message.getTimeCreated().toEpochSecond() - msg.getTimeCreated().toEpochSecond()) < 6).count();
-			if (spamCount > 5) {
-				handleSpam(message, message.getMember());
-			}
-		});
+		long spamCount = messageCache.getMessagesAfter(message.getTimeCreated().minusSeconds(6))
+			.stream()
+			.filter(cached -> cached.getMessageId() != message.getIdLong()) // exclude new/current message
+			.filter(cached -> cached.getAuthorId() == message.getAuthor().getIdLong())
+			.filter(cached -> 
+				// only java files -> not spam
+				cached.getAttachments().isEmpty() || 
+				cached.getAttachments().stream()
+					.anyMatch(attachment -> !attachment.contains(".java?")))
+			.count() + 1; // include new message
+			
+		if (spamCount >= 5) {
+			handleSpam(message, message.getMember());
+		}
 
 		checkContentAutomod(message);
 	}
@@ -149,16 +156,12 @@ public class AutoMod extends ListenerAdapter {
 	}
 
 	/**
-	 * Handles potential spam messages.
+	 * Handles detected spam messages.
 	 *
-	 * @param msg    the message
+	 * @param msg    the (last) spam message
 	 * @param member the member to be potentially warned
 	 */
 	private void handleSpam(@Nonnull Message msg, Member member) {
-		// java files -> not spam
-		if (!msg.getAttachments().isEmpty() && msg.getAttachments().stream().allMatch(a -> Objects.equals(a.getFileExtension(), "java"))) {
-			return;
-		}
 		moderationService
 				.timeout(
 						member.getUser(),
@@ -168,6 +171,7 @@ public class AutoMod extends ListenerAdapter {
 						msg.getChannel(),
 						false
 				);
+		msg.delete().queue();
 	}
 
 	/**

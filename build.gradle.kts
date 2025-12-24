@@ -11,8 +11,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 group = "net.discordjug"
@@ -121,6 +121,7 @@ tasks.processTestAot {
 graalvmNative {
 	binaries {
 		named("main") {
+			buildArgs.add("-H:+ForeignAPISupport")//needed for AWT/plotting, see https://bugs.openjdk.org/browse/JDK-8337237
 			if (hasProperty("prod")) {
 				buildArgs.add("-O3")
 			} else {
