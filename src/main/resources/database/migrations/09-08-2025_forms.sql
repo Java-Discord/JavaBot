@@ -1,0 +1,38 @@
+CREATE TABLE forms (
+    form_id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR NOT NULL,
+    submit_message VARCHAR DEFAULT NULL,
+    submit_channel BIGINT NOT NULL,
+    message_id BIGINT DEFAULT NULL,
+    message_channel BIGINT DEFAULT NULL,
+    expiration TIMESTAMP DEFAULT NULL,
+    closed BOOLEAN NOT NULL DEFAULT FALSE,
+    onetime BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (form_id)
+);
+
+CREATE TABLE form_fields (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    form_id BIGINT NOT NULL,
+    label VARCHAR NOT NULL,
+    min INTEGER DEFAULT 0 NOT NULL,
+    max INTEGER DEFAULT 16 NOT NULL,
+    placeholder VARCHAR,
+    "required" BOOLEAN DEFAULT FALSE NOT NULL,
+    "style" ENUM('SHORT', 'PARAGRAPH') DEFAULT 'SHORT' NOT NULL,
+    initial VARCHAR DEFAULT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (form_id) REFERENCES forms(form_id) ON DELETE CASCADE ON UPDATE RESTRICT
+);
+
+CREATE TABLE form_submissions (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    message_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    form_id BIGINT NOT NULL,
+    user_name VARCHAR NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (form_id) REFERENCES FORMS(form_id) ON DELETE CASCADE ON UPDATE RESTRICT
+);
+
+CREATE INDEX FORM_SUBMISSIONS_USER_ID_IDX ON form_submissions (user_id,form_id);
