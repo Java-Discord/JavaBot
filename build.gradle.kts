@@ -4,15 +4,16 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.springframework.boot") version "3.5.5"
+    id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.graalvm.buildtools.native") version "0.11.0"
+    id("org.graalvm.buildtools.native") version "0.11.3"
     checkstyle
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(25)
+  }
 }
 
 group = "net.discordjug"
@@ -65,17 +66,13 @@ dependencies {
     implementation("io.sentry:sentry:8.20.0")
 
     // Spring
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     
     //required for registering native hints
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-}
-
-configurations {
-    all {
-        exclude(group = "commons-logging", module = "commons-logging")
-    }
+    
+    implementation("org.slf4j:jcl-over-slf4j")
 }
 
 tasks.withType<Jar> {
