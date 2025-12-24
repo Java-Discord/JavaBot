@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,16 +34,15 @@ public class MessageCacheListener extends ListenerAdapter {
 	@Override
 	public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
 		if (this.ignoreMessageCache(event.getMessage())) return;
-		List<CachedMessage> cache = messageCache.cache;
+		Deque<CachedMessage> cache = messageCache.cache;
 		Optional<CachedMessage> optional = cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
 		CachedMessage before;
 		if (optional.isPresent()) {
-			before = optional.get();
-			cache.set(cache.indexOf(before), CachedMessage.of(event.getMessage()));
+			CachedMessage inCache= optional.get();
+			before = new CachedMessage(inCache.getMessageId(), inCache.getAuthorId(), inCache.getMessageContent(), inCache.getAttachments());
+			inCache.init(event.getMessage());
 		} else {
-			before = new CachedMessage();
-			before.setMessageId(event.getMessageIdLong());
-			before.setMessageContent("[unknown content]");
+			before = new CachedMessage(event.getMessageIdLong(), event.getAuthor().getIdLong(), "[unknown content]", List.of());
 			messageCache.cache(event.getMessage());
 		}
 		messageCache.sendUpdatedMessageToLog(event.getMessage(), before);

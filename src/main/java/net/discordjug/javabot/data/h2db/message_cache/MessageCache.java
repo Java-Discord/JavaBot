@@ -28,9 +28,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -47,7 +50,7 @@ public class MessageCache {
 	/**
 	 * A memory-cache (list) of sent Messages, wrapped to a {@link CachedMessage} object.
 	 */
-	public List<CachedMessage> cache = new ArrayList<>();
+	public Deque<CachedMessage> cache = new ArrayDeque<>();
 	/**
 	 * Amount of messages since the last synchronization.
 	 * <p>
@@ -72,12 +75,11 @@ public class MessageCache {
 		this.botConfig = botConfig;
 		this.cacheRepository = cacheRepository;
 		try {
-			cache = cacheRepository.getAll();
+			cache = new ArrayDeque<>(cacheRepository.getAll());
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
-
 	}
 
 	/**
@@ -86,7 +88,7 @@ public class MessageCache {
 	public void synchronize() {
 		asyncPool.execute(()->{
 			cacheRepository.delete(cache.size());
-			cacheRepository.insertList(cache);
+			cacheRepository.insertList(new ArrayList<>(cache));
 			messageCount = 0;
 			log.info("Synchronized Database with local Cache.");
 		});
@@ -148,6 +150,22 @@ public class MessageCache {
 			action.queue();
 			requestMessageAttachments(message);
 		});
+	}
+	
+	/**
+	 * Retrieves all cached messages that were sent after a passed timestamp.
+	 * @param timestamp the timestamp since when messages should be received
+	 * @return the messages sent after the given timestamp as a {@link List}
+	 */
+	public List<CachedMessage> getMessagesAfter(OffsetDateTime timestamp) {
+		List<CachedMessage> cachedMessages = new ArrayList<>();
+		for (CachedMessage msg : this.cache.reversed()) {
+			if (UserSnowflake.fromId(msg.getMessageId()).getTimeCreated().isBefore(timestamp)) {
+				return cachedMessages.reversed();
+			}
+			cachedMessages.add(msg);
+		}
+		return cachedMessages.reversed();
 	}
 
 	/**

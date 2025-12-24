@@ -110,14 +110,15 @@ public class MessageCacheRepository {
 	}
 
 	private CachedMessage read(ResultSet rs) throws SQLException {
-		CachedMessage cachedMessage = new CachedMessage();
-		cachedMessage.setMessageId(rs.getLong("message_cache.message_id"));
-		cachedMessage.setAuthorId(rs.getLong("author_id"));
-		cachedMessage.setMessageContent(rs.getString("message_content"));
+		List<String> attachments = new ArrayList<>();
 		String attachment = rs.getString("link");
-		if(attachment!=null) {
-			cachedMessage.getAttachments().add(attachment);
+		if(attachment != null) {
+			attachments.add(attachment);
 		}
-		return cachedMessage;
+		return new CachedMessage(
+				rs.getLong("message_cache.message_id"),
+				rs.getLong("author_id"),
+				rs.getString("message_content"),
+				attachments);
 	}
 }
