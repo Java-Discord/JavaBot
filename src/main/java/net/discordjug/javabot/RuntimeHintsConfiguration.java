@@ -63,7 +63,7 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		hints.reflection().registerTypeIfPresent(getClass().getClassLoader(), "com.github.benmanes.caffeine.cache.SSW", MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		
 		for (Class<?> cl : WebhookEmbed.class.getClasses()) {
-			hints.reflection().registerType(cl,  MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_PUBLIC_METHODS);
+			hints.reflection().registerType(cl,  MemberCategory.ACCESS_DECLARED_FIELDS, MemberCategory.INVOKE_PUBLIC_METHODS);
 		}
 		
 		hints.reflection().registerType(GuildVoiceStateImpl[].class, MemberCategory.UNSAFE_ALLOCATED);
