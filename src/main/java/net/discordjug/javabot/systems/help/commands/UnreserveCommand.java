@@ -13,21 +13,22 @@ import net.discordjug.javabot.systems.help.dao.HelpTransactionRepository;
 import net.discordjug.javabot.systems.user_preferences.UserPreferenceService;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
@@ -62,7 +63,7 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 		this.helpTransactionRepository = helpTransactionRepository;
 		this.preferenceService = preferenceService;
 		setCommandData(Commands.slash(UNRESERVE_ID, "Unreserves this post marking your question/issue as resolved.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 				.addOption(OptionType.STRING, REASON_ID, "The reason why you're unreserving this channel", false)
 		);
 	}
@@ -72,15 +73,14 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 		String reason = event.getOption(REASON_ID, null, OptionMapping::getAsString);
 		onCloseRequest(event, event, event.getChannel(), reason, ()->{
 			TextInput reasonInput = TextInput
-				.create(REASON_ID, "Reason", TextInputStyle.SHORT)
+				.create(REASON_ID, TextInputStyle.SHORT)
 				.setRequiredRange(MINIMUM_REASON_LENGTH, 100)
 				.setRequired(true)
 				.setPlaceholder(reason == null ? "Please enter the reason you are closing this post here" : reason)
 				.build();
 			Modal modal = Modal
 					.create(ComponentIdBuilder.build(UNRESERVE_ID), "Close post")
-					.addComponents(ActionRow.of(
-						reasonInput))
+					.addComponents(Label.of("Reason", reasonInput))
 					.build();
 			event.replyModal(modal).queue();
 		});
@@ -90,7 +90,7 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
 		values
 			.stream()
-			.filter(mapping -> REASON_ID.equals(mapping.getId()))
+			.filter(mapping -> REASON_ID.equals(mapping.getCustomId()))
 			.map(mapping -> mapping.getAsString())
 			.filter(reason -> !isReasonInvalid(reason))
 			.findAny()

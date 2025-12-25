@@ -1,7 +1,5 @@
 package net.discordjug.javabot;
 
-import java.nio.channels.Channel;
-
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import com.zaxxer.hikari.HikariConfig;
 import net.discordjug.javabot.data.config.BotConfig;
@@ -16,19 +14,8 @@ import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
 import net.discordjug.javabot.data.config.guild.ServerLockConfig;
 import net.discordjug.javabot.data.config.guild.StarboardConfig;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.ScheduledEvent;
-import net.dv8tion.jda.api.entities.ThreadMember;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
-import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
-import net.dv8tion.jda.api.entities.sticker.GuildSticker;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.internal.entities.GuildVoiceStateImpl;
-import net.dv8tion.jda.internal.entities.MemberPresenceImpl;
 import net.dv8tion.jda.internal.requests.restaction.PermOverrideData;
 import org.h2.server.TcpServer;
 import org.springframework.aot.hint.MemberCategory;
@@ -49,8 +36,6 @@ import org.springframework.core.io.ClassPathResource;
 		BotConfig.class, GuildConfig.class, GuildConfigItem.class, SystemsConfig.class, ApiConfig.class,
 		HelpConfig.class, MessageCacheConfig.class, MetricsConfig.class, ModerationConfig.class, QOTWConfig.class, ServerLockConfig.class, StarboardConfig.class,
 		
-		//ensure JDA can create necessary caches
-		User[].class, Guild[].class, Member[].class, Role[].class, Channel[].class, AudioManager[].class, ScheduledEvent[].class, ThreadMember[].class, ForumTag[].class, RichCustomEmoji[].class, GuildSticker[].class, MemberPresenceImpl[].class,
 		//needs to be serialized for channel managers etc
 		PermOverrideData.class,
 		
@@ -78,7 +63,7 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		hints.reflection().registerTypeIfPresent(getClass().getClassLoader(), "com.github.benmanes.caffeine.cache.SSW", MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		
 		for (Class<?> cl : WebhookEmbed.class.getClasses()) {
-			hints.reflection().registerType(cl,  MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_PUBLIC_METHODS);
+			hints.reflection().registerType(cl,  MemberCategory.ACCESS_DECLARED_FIELDS, MemberCategory.INVOKE_PUBLIC_METHODS);
 		}
 		
 		hints.reflection().registerType(GuildVoiceStateImpl[].class, MemberCategory.UNSAFE_ALLOCATED);

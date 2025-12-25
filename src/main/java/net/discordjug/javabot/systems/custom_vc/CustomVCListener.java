@@ -7,6 +7,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
@@ -62,7 +63,7 @@ public class CustomVCListener extends ListenerAdapter {
 								""")
 						.build())
 				.addContent(event.getMember().getAsMention())
-				.addActionRow(buttonHandler.createMakePrivateButton())
+				.addComponents(ActionRow.of(buttonHandler.createMakePrivateButton()))
 				.queue();
 			});
 	}

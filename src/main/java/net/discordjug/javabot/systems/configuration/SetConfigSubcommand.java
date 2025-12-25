@@ -5,6 +5,9 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.UnknownPropertyException;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -12,10 +15,8 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
@@ -58,9 +59,9 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 			}
 			return event.replyModal(
 					Modal.create(ComponentIdBuilder.build("config-set", property), "Change configuration value")
-					.addActionRow(TextInput.create("value", "new value", TextInputStyle.PARAGRAPH)
+					.addComponents(Label.of("new value", TextInput.create("value", TextInputStyle.PARAGRAPH)
 							.setValue(String.valueOf(resolved))
-							.build())
+							.build()))
 				.build());
 		}
 		String valueString = valueOption.getAsString().trim();

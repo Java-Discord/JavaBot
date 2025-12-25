@@ -14,6 +14,9 @@ import net.discordjug.javabot.util.MessageActionUtils;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -25,9 +28,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
@@ -82,7 +82,7 @@ public class HelpManager {
 	 */
 	public ReplyCallbackAction replyHelpThanks(IReplyCallback callback, @NotNull List<Member> helpers) {
 		HelpConfig config = botConfig.get(callback.getGuild()).getHelpConfig();
-		List<ItemComponent> helperThanksButtons = new ArrayList<>(20);
+		List<ActionRowChildComponent> helperThanksButtons = new ArrayList<>(20);
 		for (Member helper : helpers.subList(0, Math.min(helpers.size(), 20))) {
 			helperThanksButtons.add(Button.success(ComponentIdBuilder.build(HELP_THANKS_IDENTIFIER, postThread.getId(), helper.getId()), helper.getEffectiveName())
 					.withEmoji(Emoji.fromUnicode("❤"))

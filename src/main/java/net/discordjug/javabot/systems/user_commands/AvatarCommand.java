@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -23,7 +24,7 @@ public class AvatarCommand extends SlashCommand {
 	public AvatarCommand() {
 		setCommandData(Commands.slash("avatar", "Shows your or someone else's profile picture")
 				.addOption(OptionType.USER, "user", "If given, shows the profile picture of the given user", false)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

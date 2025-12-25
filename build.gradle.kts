@@ -4,15 +4,16 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.springframework.boot") version "3.5.0"
+    id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.graalvm.buildtools.native") version "0.10.6"
+    id("org.graalvm.buildtools.native") version "0.11.3"
     checkstyle
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(25)
+  }
 }
 
 group = "net.discordjug"
@@ -27,22 +28,24 @@ repositories {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("org.jetbrains:annotations:26.0.2")
 
     // DIH4JDA (Command Framework) & JDA
-    implementation("com.github.DynxstyGIT:DIH4JDA:a64b5a9dc5")
-    implementation("net.dv8tion:JDA:5.5.1") {
+    implementation("com.github.jasonlessenich:DIH4JDA:1.7.0")
+    //implementation("xyz.dynxsty:dih4jda:1.7.0")
+    implementation("net.dv8tion:JDA:6.2.0") {
         exclude(module = "opus-java")
     }
 
     // Caffeine (Caching Library)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
 
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("org.yaml:snakeyaml:2.4")
     implementation("com.google.re2j:re2j:1.8")
-    implementation("commons-validator:commons-validator:1.9.0")
+    implementation("commons-validator:commons-validator:1.10.0")
 
     implementation("com.mashape.unirest:unirest-java:1.4.9")
 
@@ -60,20 +63,16 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 
     // Sentry
-    implementation("io.sentry:sentry:8.13.2")
+    implementation("io.sentry:sentry:8.20.0")
 
     // Spring
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     
     //required for registering native hints
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-}
-
-configurations {
-    all {
-        exclude(group = "commons-logging", module = "commons-logging")
-    }
+    
+    implementation("org.slf4j:jcl-over-slf4j")
 }
 
 tasks.withType<Jar> {

@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.user_commands.format_code;
 import xyz.dynxsty.dih4jda.interactions.commands.application.ContextCommand;
 import net.discordjug.javabot.util.StringUtils;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class FormatCodeMessageContext extends ContextCommand.Message {
 	 */
 	public FormatCodeMessageContext() {
 		setCommandData(Commands.message("Format Code")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

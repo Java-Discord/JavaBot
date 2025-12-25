@@ -1,5 +1,6 @@
 package net.discordjug.javabot.data.h2db.commands;
 
+import net.dv8tion.jda.api.modals.Modal;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
@@ -7,14 +8,13 @@ import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import org.jetbrains.annotations.NotNull;
@@ -105,7 +105,7 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 	}
 
 	private @NotNull Modal buildQuickMigrateModal() {
-		TextInput sqlInput = TextInput.create("sql", "SQL-Statement (H2)", TextInputStyle.PARAGRAPH)
+		TextInput sqlInput = TextInput.create("sql", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("""
 						CREATE TABLE my_table (
 							thread_id BIGINT PRIMARY KEY,
@@ -114,12 +114,12 @@ public class QuickMigrateSubcommand extends SlashCommand.Subcommand implements M
 						""")
 				.setRequired(true)
 				.build();
-		TextInput confirmInput = TextInput.create("confirmation", "Confirmation", TextInputStyle.SHORT)
+		TextInput confirmInput = TextInput.create("confirmation", TextInputStyle.SHORT)
 				.setPlaceholder("Type 'CONFIRM' to confirm this action")
 				.setRequired(true)
 				.build();
 		return Modal.create("quick-migrate", "Quick Migrate")
-				.addComponents(ActionRow.of(sqlInput), ActionRow.of(confirmInput))
+				.addComponents(Label.of("SQL-Statement (H2)", sqlInput), Label.of("Confirmation", confirmInput))
 				.build();
 	}
 }

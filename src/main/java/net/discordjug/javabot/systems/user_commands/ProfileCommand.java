@@ -14,6 +14,7 @@ import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -48,7 +49,7 @@ public class ProfileCommand extends SlashCommand {
 		this.moderationService = moderationService;
 		setCommandData(Commands.slash("profile", "Shows your server profile.")
 				.addOption(OptionType.USER, "user", "If given, shows the profile of the user instead.", false)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

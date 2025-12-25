@@ -15,6 +15,11 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.discordjug.javabot.util.WebhookUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -25,12 +30,8 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -149,12 +150,12 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	 * @return the built {@link Modal}
 	 */
 	protected Modal buildUserReportModal(@NotNull UserContextInteractionEvent event) {
-		TextInput messageInput = TextInput.create("reason", "Report Description", TextInputStyle.PARAGRAPH)
+		TextInput messageInput = TextInput.create("reason", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		String title = "Report " + UserUtils.getUserTag(event.getTarget());
 		return Modal.create(ComponentIdBuilder.build(REPORT_INTERACTION_NAME, "user", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
-				.addActionRow(messageInput)
+				.addComponents(Label.of("Report Description", messageInput))
 				.build();
 	}
 
@@ -171,11 +172,11 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		if (targetMember != null) {
 			title += " from " + UserUtils.getUserTag(targetMember.getUser());
 		}
-		TextInput messageInput = TextInput.create("reason", "Report Description", TextInputStyle.PARAGRAPH)
+		TextInput messageInput = TextInput.create("reason", TextInputStyle.PARAGRAPH)
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.build();
 		return Modal.create(ComponentIdBuilder.build(REPORT_INTERACTION_NAME, "message", event.getTarget().getId()), title.substring(0, Math.min(title.length(), Modal.MAX_TITLE_LENGTH)))
-				.addActionRow(messageInput)
+				.addComponents(Label.of("Report Description", messageInput))
 				.build();
 	}
 
@@ -215,10 +216,11 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	private void sendReportResponse(InteractionHook hook, User targetUser, EmbedBuilder reportEmbed, ThreadChannel reportThread) {
 		reportEmbed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(targetUser) + "`!\nYour report has been send to our Moderators.\nIn case you want to supply additional details, please use the \"Create thread\" button below.");
 		hook.sendMessageEmbeds(reportEmbed.build())
-			.addActionRow(Button.secondary(
+			.addComponents(ActionRow.of(
+					Button.secondary(
 					ComponentIdBuilder.build(REPORT_INTERACTION_NAME, "create-thread", reportThread.getId()),
-					"Create thread for providing further details"))
-			.queue();
+					"Create thread for providing further details"
+			))).queue();
 	}
 
 	private void handleMessageReport(ModalInteractionEvent event, String messageId) {

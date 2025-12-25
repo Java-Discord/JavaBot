@@ -6,13 +6,13 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.jetbrains.annotations.NotNull;

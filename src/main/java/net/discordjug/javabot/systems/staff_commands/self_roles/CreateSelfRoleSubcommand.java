@@ -6,6 +6,9 @@ import net.discordjug.javabot.util.MessageActionUtils;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.MessageTopLevelComponentUnion;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -13,8 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -92,8 +93,10 @@ public class CreateSelfRoleSubcommand extends SlashCommand.Subcommand {
 	private void addSelfRoleButton(SlashCommandInteractionEvent event, Message message, @NotNull String type, Role role, boolean permanent, String label) {
 		if (!type.equals("NONE")) {
 			List<Button> buttons = new ArrayList<>();
-			for (ActionRow actionRow : message.getActionRows()) {
-				buttons.addAll(actionRow.getButtons());
+			for (MessageTopLevelComponentUnion topLevelComponent : message.getComponents()) {
+				if (topLevelComponent instanceof ActionRow actionRow) {
+					buttons.addAll(actionRow.getButtons());
+				}
 			}
 			buttons.add(Button.secondary(this.buildButtonId(type, role, permanent), label));
 			message.editMessageComponents(MessageActionUtils.toActionRows(buttons)).queue();
