@@ -86,15 +86,22 @@ public class MessageCache {
 	}
 
 	/**
-	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
+	 * Synchronizes Messages saved in the Database with what is currently stored in memory. This action is executed in the background.
 	 */
 	public void synchronize() {
 		asyncPool.execute(()->{
-			cacheRepository.delete(cache.size());
-			cacheRepository.insertList(new ArrayList<>(cache));
-			messageCount = 0;
-			log.info("Synchronized Database with local Cache.");
+			synchronizeNow();
 		});
+	}
+	
+	/**
+	 * Synchronizes Messages saved in the Database with what is currently stored in memory and wait until the synchronization finishes.
+	 */
+	public void synchronizeNow() {
+		cacheRepository.delete(cache.size());
+		cacheRepository.insertList(new ArrayList<>(cache));
+		messageCount = 0;
+		log.info("Synchronized Database with local Cache.");
 	}
 
 	/**
