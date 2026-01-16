@@ -63,7 +63,7 @@ public class RedeployCommand extends SlashCommand {
 		}
 		log.warn("Redeploying... Requested by: " + UserUtils.getUserTag(event.getUser()));
 		event.reply("**Redeploying...** This may take some time.").queue();
-		messageCache.synchronize();
+		messageCache.synchronizeNow();
 		asyncPool.shutdownNow();
 		try {
 			asyncPool.awaitTermination(3, TimeUnit.SECONDS);
