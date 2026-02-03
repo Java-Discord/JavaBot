@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -98,11 +99,16 @@ public class ModerationConfig extends GuildConfigItem {
 	 * The ID of the voice channel template that lets users create their own voice channels.
 	 */
 	private long customVoiceChannelId;
-
+	
 	/**
 	 * Text that is sent to users when they're banned.
 	 */
 	private String banMessageText = "Looks like you've been banned from the Java Discord. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
+
+	/**
+	 * A list of rules that can result in a message being blocked or similar
+	 */
+	private List<MessageRule> messageRules = new ArrayList<>();
 
 	public TextChannel getReportChannel() {
 		return this.getGuild().getTextChannelById(this.reportChannelId);
