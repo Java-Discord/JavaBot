@@ -24,11 +24,11 @@ import net.discordjug.javabot.data.config.guild.MessageRule.MessageAction;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
 import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
+import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,7 +58,7 @@ public class MessageRuleFilter implements MessageFilter {
         }
         MessageModificationStatus status = MessageModificationStatus.NOT_MODIFIED;
         if (ruleToExecute != null) {
-            if (ruleToExecute.getAction() == MessageAction.BLOCK) {
+            if (ruleToExecute.getAction() == MessageAction.BLOCK && !Checks.hasStaffRole(botConfig, content.event().getMember())) {
                 content.event().getMessage().delete()
                 	.flatMap(_ -> content.event().getChannel().sendMessage(content.event().getAuthor().getAsMention() + " Your message has been deleted for moderative reasons. If you believe this happened by mistake, please contact the server staff."))
                 	.delay(Duration.ofSeconds(60))
