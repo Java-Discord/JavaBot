@@ -8,6 +8,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
+/**
+ * A gson {@link TypeAdapter} that allows serializing and deserializing regex {@link Pattern}s.
+ */
 public class PatternTypeAdapter extends TypeAdapter<Pattern> {
 
 	@Override

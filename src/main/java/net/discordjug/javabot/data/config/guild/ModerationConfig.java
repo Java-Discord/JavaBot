@@ -106,7 +106,7 @@ public class ModerationConfig extends GuildConfigItem {
 	private String banMessageText = "Looks like you've been banned from the Java Discord. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
 
 	/**
-	 * A list of rules that can result in a message being blocked or similar
+	 * A list of rules that can result in a message being blocked or similar.
 	 */
 	private List<MessageRule> messageRules = new ArrayList<>();
 

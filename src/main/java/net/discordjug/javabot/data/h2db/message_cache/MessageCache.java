@@ -188,16 +188,24 @@ public class MessageCache {
 		}
 	}
 
-	public EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage before, String contentFieldName) {
-		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
+	/**
+	 * Creates an {@link EmbedBuilder} with information about a cached message.
+	 * @param channel The channel the message was sent in.
+	 * @param author The author of the message.
+	 * @param message The message to extract the information from as a {@link CachedMessage}.
+	 * @param contentFieldName the name of the field containing the message content in the embed.
+	 * @return an {@link EmbedBuilder} with information about the message.
+	 */
+	public EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage message, String contentFieldName) {
+		long epoch = IdCalculatorCommand.getTimestampFromId(message.getMessageId()) / 1000;
 		return new EmbedBuilder()
 				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
 				.addField("Author", author.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
-				.setFooter("ID: " + before.getMessageId())
+				.setFooter("ID: " + message.getMessageId())
 				.addField(contentFieldName,
-						before.getMessageContent().substring(0, Math.min(before.getMessageContent().length(), MessageEmbed.VALUE_MAX_LENGTH)),
+						message.getMessageContent().substring(0, Math.min(message.getMessageContent().length(), MessageEmbed.VALUE_MAX_LENGTH)),
 						false);
 	}
 

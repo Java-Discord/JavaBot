@@ -34,10 +34,13 @@ public class MessageRule {
 	private Set<String> attachmentSHAs = new HashSet<>();
 	
 	/**
-	 * The action to execute on the message
+	 * The action to execute on the message.
 	 */
 	private MessageAction action = MessageAction.LOG;
 	
+	/**
+	 * Enum for actions that can be performed on messages based on rules.
+	 */
 	public enum MessageAction {
 		/**
 		 * The message is logged to a channel.
