@@ -117,6 +117,7 @@ public class QOTWCloseSubmissionsJob {
 			.sendMessageFormat("%s%nIt's review time! There are **%s** threads to review",
 								qotwConfig.getQOTWReviewRole().getAsMention(),
 								qotwConfig.getSubmissionChannel().getThreadChannels().size())
+			.mention(qotwConfig.getQOTWReviewRole())
 			.flatMap(msg -> msg.createThreadChannel("QOTW review"))
 			.queue(thread -> {
 				for (ThreadChannel submission : qotwConfig.getSubmissionChannel().getThreadChannels()) {

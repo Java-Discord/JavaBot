@@ -40,7 +40,7 @@ public class QOTWReviewReminderJob {
 						channel
 							.sendMessageFormat("%s\n**Reminder**\nThe QOTW has not been reviewed yet.",
 									guildConfig.getQotwConfig().getQOTWReviewRole().getAsMention())
-							.setAllowedMentions(EnumSet.of(Message.MentionType.ROLE))
+							.mention(guildConfig.getQotwConfig().getQOTWReviewRole())
 					);
 			}
 		}

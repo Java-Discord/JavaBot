@@ -3,6 +3,7 @@ package net.discordjug.javabot.util;
 import java.awt.Color;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.CheckReturnValue;
@@ -120,17 +121,17 @@ public final class Responses {
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyCannotInteract(IReplyCallback event, @NotNull IMentionable mentionable) {
-		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
+		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention()).setAllowedMentions(List.of());
 	}
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyStaffOnly(IReplyCallback event, GuildConfig guildConfig) {
-		return error(event, "This command may only be used by staff members. (%s)", guildConfig.getModerationConfig().getStaffRole().getAsMention());
+		return error(event, "This command may only be used by staff members. (%s)", guildConfig.getModerationConfig().getStaffRole().getAsMention()).setAllowedMentions(List.of());
 	}
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyAdminOnly(IReplyCallback event, GuildConfig guildConfig) {
-		return error(event, "This command may only be used by admins. (%s)", guildConfig.getModerationConfig().getAdminRole().getAsMention());
+		return error(event, "This command may only be used by admins. (%s)", guildConfig.getModerationConfig().getAdminRole().getAsMention()).setAllowedMentions(List.of());
 	}
 
 	/**
