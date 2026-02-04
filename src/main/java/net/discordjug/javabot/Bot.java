@@ -101,7 +101,7 @@ public class Bot implements ApplicationListener<ApplicationReadyEvent> {
 	 */
 	public static void main(String[] args) throws Exception {
 		TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
-		MessageRequest.setDefaultMentions(EnumSet.of(Message.MentionType.ROLE, Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOJI));
+		MessageRequest.setDefaultMentions(EnumSet.of(Message.MentionType.CHANNEL, Message.MentionType.USER, Message.MentionType.EMOJI));
 		SpringApplication.run(Bot.class, args);
 	}
 

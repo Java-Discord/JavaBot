@@ -49,7 +49,7 @@ public class QOTWJob {
 			}
 			Optional<QOTWQuestion> nextQuestion = questionQueueRepository.getNextQuestion(guild.getIdLong());
 			if (nextQuestion.isEmpty()) {
-				notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()));
+				notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat("Warning! %s No available next question for QOTW!", config.getQotwConfig().getQOTWReviewRole().getAsMention()).mention(config.getQotwConfig().getQOTWReviewRole()));
 			} else {
 				QOTWQuestion question = nextQuestion.get();
 				QOTWConfig qotw = config.getQotwConfig();
@@ -70,6 +70,7 @@ public class QOTWJob {
 				NewsChannel questionChannel = qotw.getQuestionChannel();
 				if (questionChannel != null) {
 					questionChannel.sendMessage(qotw.getQOTWRole().getAsMention())
+							.mention(qotw.getQOTWRole())
 							.setEmbeds(this.buildQuestionEmbed(question))
 							.setComponents(ActionRow.of(Button.success("qotw-submission:submit:" + question.getQuestionNumber(), "Submit your Answer")))
 							.queue(msg -> questionChannel.crosspostMessageById(msg.getIdLong()).queue());

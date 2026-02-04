@@ -257,7 +257,7 @@ public class ServerLockManager extends ListenerAdapter {
 					config.getModerationConfig().getStaffRole().getAsMention(),
 					potentialRaiders.size(),
 					membersString
-			));
+			).mention(config.getModerationConfig().getStaffRole()));
 		} else {
 			notification.sendToModerationLog(c -> c.sendMessage("Server locked by " + lockedBy.getAsMention()));
 		}
