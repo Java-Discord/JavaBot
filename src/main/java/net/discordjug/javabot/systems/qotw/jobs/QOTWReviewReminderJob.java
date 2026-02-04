@@ -6,9 +6,6 @@ import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-
-import java.util.EnumSet;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
