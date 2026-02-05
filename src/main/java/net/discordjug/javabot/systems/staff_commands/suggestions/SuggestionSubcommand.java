@@ -54,12 +54,12 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 		long messageId = messageIdMapping.getAsLong();
 		event.deferReply(true).queue();
 		event.getMessageChannel().retrieveMessageById(messageId).queue(
-				message -> message.clearReactions().queue(s -> handleSuggestionCommand(event, message, config).queue()),
+				message -> message.clearReactions().queue(s -> handleSuggestionCommand(event, message).queue()),
 				e -> Responses.error(event.getHook(), "Could not find suggestion message with id " + messageId).queue());
 
 	}
 
-	protected abstract WebhookMessageCreateAction<Message> handleSuggestionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Message message, GuildConfig config);
+	protected abstract WebhookMessageCreateAction<Message> handleSuggestionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Message message);
 
 	protected ActionRow getJumpButton(@NotNull Message m) {
 		return ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message"));

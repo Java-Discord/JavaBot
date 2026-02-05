@@ -33,7 +33,7 @@ public class HelpTransactionRepository {
 	 *
 	 * @param transaction The transaction that should be inserted.
 	 * @return The inserted {@link HelpTransaction}.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public HelpTransaction save(HelpTransaction transaction) throws DataAccessException {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -56,7 +56,7 @@ public class HelpTransactionRepository {
 	 *
 	 * @param id The transaction's id.
 	 * @return A {@link HelpTransaction} object.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public Optional<HelpTransaction> getTransaction(long id) throws DataAccessException {
 		try {
@@ -72,7 +72,7 @@ public class HelpTransactionRepository {
 	 * @param userId The user's id.
 	 * @param count  The count of transactions that should be retrieved.
 	 * @return A List with all {@link HelpTransaction}s.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<HelpTransaction> getTransactions(long userId, int count) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM help_transaction WHERE recipient = ? ORDER BY created_at DESC LIMIT ?", (rs, rowNumber) -> this.read(rs), userId, count);

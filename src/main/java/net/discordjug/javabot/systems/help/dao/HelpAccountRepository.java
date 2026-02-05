@@ -30,7 +30,7 @@ public class HelpAccountRepository {
 	 * Inserts a new {@link HelpAccount}.
 	 *
 	 * @param account The account that should be inserted.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public void insert(HelpAccount account) throws DataAccessException {
 
@@ -44,7 +44,7 @@ public class HelpAccountRepository {
 	 * Updates a single {@link HelpAccount}.
 	 *
 	 * @param account The account that should be updated.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public void update(HelpAccount account) throws DataAccessException {
 		jdbcTemplate.update("UPDATE help_account SET experience = ? WHERE user_id = ?",
@@ -57,7 +57,7 @@ public class HelpAccountRepository {
 	 *
 	 * @param userId The user's id.
 	 * @return An {@link HelpAccount} object, as an {@link Optional}.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public Optional<HelpAccount> getByUserId(long userId) throws DataAccessException {
 		try {
@@ -73,7 +73,7 @@ public class HelpAccountRepository {
 	 * @param page    The page.
 	 * @param size    The amount of {@link HelpAccount}s to return.
 	 * @return A {@link List} containing the specified amount of {@link HelpAccount}s.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public List<HelpAccount> getAccounts(int page, int size) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM help_account WHERE experience > 0 ORDER BY experience DESC LIMIT ? OFFSET ?", (rs, row)->this.read(rs),
@@ -84,7 +84,7 @@ public class HelpAccountRepository {
 	 * Gets the total amount of {@link HelpAccount}s stored in the database, that have more than 0 experience.
 	 *
 	 * @return The amount, as an {@link Integer}.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public int getTotalAccounts() throws DataAccessException {
 		try {

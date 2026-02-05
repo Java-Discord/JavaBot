@@ -64,12 +64,11 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 	}
 
 	/**
-	 * Replies with all available migrations to run.
+	 * Finds all all available migrations to run.
 	 *
-	 * @param event The {@link CommandAutoCompleteInteractionEvent} that was fired.
 	 * @return A {@link List} with all Option Choices.
 	 */
-	public static @NotNull List<Command.Choice> replyMigrations(CommandAutoCompleteInteractionEvent event) {
+	public static @NotNull List<Command.Choice> getAvailableMigrations() {
 		List<Command.Choice> choices = new ArrayList<>(25);
 		try (Stream<Path> s = Files.list(MigrationUtils.getMigrationsDirectory())) {
 			List<Path> paths = s.filter(path -> path.getFileName().toString().endsWith(".sql")).toList();
@@ -134,6 +133,6 @@ public class MigrateSubcommand extends SlashCommand.Subcommand implements AutoCo
 
 	@Override
 	public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event, @NotNull AutoCompleteQuery target) {
-		event.replyChoices(AutoCompleteUtils.filterChoices(event, replyMigrations(event))).queue();
+		event.replyChoices(AutoCompleteUtils.filterChoices(event, getAvailableMigrations())).queue();
 	}
 }

@@ -125,7 +125,7 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 					replyCallback.getUser().getIdLong() == manager.getPostThread().getOwnerIdLong(),
 					reason);
 		} else {
-			Responses.warning(replyCallback, "Could not close this post", "You're not allowed to close this post.").queue();
+			Responses.warnin(replyCallback, "Could not close this post", "You're not allowed to close this post.").queue();
 		}
 	}
 
@@ -134,7 +134,7 @@ public class UnreserveCommand extends SlashCommand implements ModalHandler {
 	}
 
 	private void replyInvalidChannel(IReplyCallback replyCallback) {
-		Responses.warning(replyCallback, "Invalid Channel",
+		Responses.warnin(replyCallback, "Invalid Channel",
 						"This command may only be used in either the text-channel-based help system, or in our new forum help system.")
 				.queue();
 	}
