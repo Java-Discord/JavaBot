@@ -74,10 +74,10 @@ public class PurgeCommand extends ModerateCommand {
 		boolean archive = event.getOption("archive", true, OptionMapping::getAsBoolean);
 
 		ModerationConfig config = botConfig.get(event.getGuild()).getModerationConfig();
-		Long amount = (amountOption == null) ? 1 : amountOption.getAsLong();
+		long amount = (amountOption == null) ? 1 : amountOption.getAsLong();
 		User user = (userOption == null) ? null : userOption.getAsUser();
 		int maxAmount = config.getPurgeMaxMessageCount();
-		if (amount == null || amount > maxAmount) {
+		if (amount < 1 || amount > maxAmount) {
 			return Responses.warning(event, "Invalid amount. Should be between 1 and " + maxAmount + ", inclusive.");
 		}
 		if (amount == 0) {

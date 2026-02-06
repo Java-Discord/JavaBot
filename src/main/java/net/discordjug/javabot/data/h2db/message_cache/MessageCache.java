@@ -109,7 +109,7 @@ public class MessageCache {
 	public void cache(Message message) {
 		MessageCacheConfig config = botConfig.get(message.getGuild()).getMessageCacheConfig();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
-			cache.remove(0);
+			cache.removeFirst();
 		}
 		if (messageCount >= config.getMessageSynchronizationInterval()) {
 			synchronize();
@@ -131,7 +131,7 @@ public class MessageCache {
 		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent()) && updated.getAttachments().size() == before.getAttachments().size()) return;
 		MessageCreateAction action = config.getMessageCacheLogChannel()
-				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
+				.sendMessageEmbeds(buildMessageEditEmbed(updated.getAuthor(), updated.getChannel(), before, updated))
 				.addComponents(ActionRow.of(Button.link(updated.getJumpUrl(), "Jump to Message")));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 			action.addFiles(FileUpload.fromData(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt"));
@@ -150,7 +150,7 @@ public class MessageCache {
 		MessageCacheConfig config = botConfig.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-			MessageCreateAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
+			MessageCreateAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(author, channel, message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 				action.addFiles(FileUpload.fromData(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt"));
 			}
@@ -209,7 +209,7 @@ public class MessageCache {
 						false);
 	}
 
-	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
+	private MessageEmbed buildMessageEditEmbed(User author, MessageChannel channel, CachedMessage before, Message after) {
 		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, before, "Before")
 				.setTitle("Message Edited")
 				.setColor(Responses.Type.WARN.getColor())
@@ -233,7 +233,7 @@ public class MessageCache {
 				.build();
 	}
 
-	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
+	private MessageEmbed buildMessageDeleteEmbed(User author, MessageChannel channel, CachedMessage message) {
 		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, message, "Message Content")
 				.setTitle("Message Deleted")
 				.setColor(Responses.Type.ERROR.getColor());

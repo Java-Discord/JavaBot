@@ -34,7 +34,7 @@ public class SearchWebMessageContext extends ContextCommand.Message {
 	public void execute(@NotNull MessageContextInteractionEvent event) {
 		String query = event.getTarget().getContentDisplay();
 		if (query.isEmpty() || query.isBlank()) {
-			Responses.warning(event, "No Content", "The message doesn't have any content to search for").queue();
+			Responses.warnin(event, "No Content", "The message doesn't have any content to search for").queue();
 			return;
 		}
 		event.deferReply().queue();

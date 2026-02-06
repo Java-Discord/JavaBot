@@ -4,7 +4,6 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
-import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.help.dao.HelpAccountRepository;
 import net.discordjug.javabot.systems.help.dao.HelpTransactionRepository;
 import net.discordjug.javabot.util.ExceptionLogger;
@@ -17,7 +16,6 @@ import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -36,6 +34,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * <h3>This class represents the /leaderboard help-experience command.</h3>
@@ -48,20 +47,17 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 	public static final String CACHE_PREFIX = "xp_leaderboard";
 	private static final int PAGE_SIZE = 10;
 
-	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
 	private final HelpAccountRepository helpAccountRepository;
 	private final HelpTransactionRepository helpTransactionRepository;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
-	 * @param botConfig main configuration of the bot.
 	 * @param helpAccountRepository Dao object that represents the HELP_ACCOUNT SQL Table.
 	 * @param asyncPool the main thread pool for asynchronous operations
 	 * @param helpTransactionRepository Dao object that represents the HELP_TRANSACTIONS SQL Table.
 	 */
-	public ExperienceLeaderboardSubcommand(BotConfig botConfig, HelpAccountRepository helpAccountRepository, ExecutorService asyncPool, HelpTransactionRepository helpTransactionRepository) {
-		this.botConfig = botConfig;
+	public ExperienceLeaderboardSubcommand(HelpAccountRepository helpAccountRepository, ExecutorService asyncPool, HelpTransactionRepository helpTransactionRepository) {
 		this.asyncPool = asyncPool;
 		this.helpAccountRepository = helpAccountRepository;
 		this.helpTransactionRepository = helpTransactionRepository;
@@ -96,7 +92,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 					case MONTH -> helpTransactionRepository.getNumberOfUsersWithHelpXPInLastMonth();
 					case TOTAL -> helpAccountRepository.getTotalAccounts();
 				};
-				int maxPage = totalAccounts / PAGE_SIZE;
+				int maxPage = getMaxPage(totalAccounts);
 				if (page <= 0) {
 					page = maxPage;
 				}
@@ -113,29 +109,32 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		});
 	}
 
+	private int getMaxPage(int totalAccounts) {
+		return (int)Math.ceil(totalAccounts / (double)PAGE_SIZE);
+	}
+
 	private @NotNull Pair<MessageEmbed, FileUpload> buildExperienceLeaderboard(Guild guild, int page, LeaderboardType type) throws DataAccessException, IOException {
 		return switch (type) {
 			case TOTAL -> buildGenericExperienceLeaderboard(page, helpAccountRepository.getTotalAccounts(),
 					"total Leaderboard of help experience",
-					helpAccountRepository::getAccounts, (position, account) -> {
-				Pair<Role, Double> currentRole = account.getCurrentExperienceGoal(botConfig, guild);
-				return createUserData(guild, position, account.getExperience(), account.getUserId(), currentRole.first() != null ? currentRole.first().getAsMention() + ": " : "");
+					helpAccountRepository::getAccounts, account -> {
+				return createUserData(guild, account.getExperience(), account.getUserId());
 			});
 			case MONTH -> buildGenericExperienceLeaderboard(page, helpTransactionRepository.getNumberOfUsersWithHelpXPInLastMonth(),
 					"""
 					help experience leaderboard from the last 30 days
 					This leaderboard does not include experience decay.
 					""",
-					helpTransactionRepository::getTotalTransactionWeightsInLastMonth, (position, xpInfo) -> {
-				return createUserData(guild, position, (double) xpInfo.second(), xpInfo.first(), "");
+					helpTransactionRepository::getTotalTransactionWeightsInLastMonth, xpInfo -> {
+				return createUserData(guild, (double) xpInfo.second(), xpInfo.first());
 			});
 		};
 	}
 
 	private <T> @NotNull Pair<MessageEmbed, FileUpload> buildGenericExperienceLeaderboard(int page, int totalAccounts, String description,
-			BiFunction<Integer, Integer, List<T>> accountsReader, BiFunction<Integer, T, UserData> fieldExtractor) throws DataAccessException, IOException {
+			BiFunction<Integer, Integer, List<T>> accountsReader, Function<T, UserData> fieldExtractor) throws DataAccessException, IOException {
 
-		int maxPage = totalAccounts / PAGE_SIZE;
+		int maxPage = getMaxPage(totalAccounts);
 		int actualPage = Math.max(1, Math.min(page, maxPage));
 		List<T> accounts = accountsReader.apply(actualPage, PAGE_SIZE);
 
@@ -151,7 +150,7 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 			try (LeaderboardCreator creator = new LeaderboardCreator(accounts.size(), null)){
 				for (int i = 0; i < accounts.size(); i++) {
 					int position = (i + 1) + (actualPage - 1) * PAGE_SIZE;
-					UserData userInfo = fieldExtractor.apply(position, accounts.get(i));
+					UserData userInfo = fieldExtractor.apply(accounts.get(i));
 					creator.drawLeaderboardEntry(userInfo.member(), userInfo.displayName(), userInfo.xp(), position);
 				}
 				return creator.getImageBytes(cacheName, pageCachePrefix);
@@ -161,8 +160,8 @@ public class ExperienceLeaderboardSubcommand extends SlashCommand.Subcommand imp
 		return new Pair<MessageEmbed, FileUpload>(builder.build(), FileUpload.fromData(bytes, "leaderboard.png"));
 	}
 
-	private UserData createUserData(Guild guild, Integer position, double experience, long userId, String prefix) {
-		Member member = guild.retrieveMemberById(userId).onErrorMap(e -> null).complete();
+	private UserData createUserData(Guild guild, double experience, long userId) {
+		Member member = guild.retrieveMemberById(userId).onErrorMap(_ -> null).complete();
 		String displayName;
 		if (member == null) {
 			displayName = String.valueOf(userId);

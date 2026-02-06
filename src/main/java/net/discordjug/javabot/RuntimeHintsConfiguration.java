@@ -63,6 +63,15 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		// caffeine
 		hints.reflection().registerTypeIfPresent(getClass().getClassLoader(), "com.github.benmanes.caffeine.cache.SSW", MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		
+		try {
+			// These classes are necessary on X11 but may not be loaded on Wayland when generating native hints
+			for(Class<?> cl : getClass().getClassLoader().loadClass("sun.font.FontConfigManager").getDeclaredClasses()) {
+				hints.jni().registerType(cl, MemberCategory.ACCESS_DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			}
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		
 		for (Class<?> cl : WebhookEmbed.class.getClasses()) {
 			hints.reflection().registerType(cl,  MemberCategory.ACCESS_DECLARED_FIELDS, MemberCategory.INVOKE_PUBLIC_METHODS);
 		}

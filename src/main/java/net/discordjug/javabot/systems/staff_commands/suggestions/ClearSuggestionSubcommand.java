@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.suggestions;
 
 import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -30,9 +29,9 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	}
 
 	@Override
-	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
+	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message) {
 		MessageEmbed embed = message.getEmbeds().get(0);
-		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed, config);
+		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed);
 		SystemsConfig.EmojiConfig emojiConfig = botConfig.getSystems().getEmojiConfig();
 		message.editMessageEmbeds(clearEmbed).queue(
 				edit -> {
@@ -44,7 +43,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 				.setComponents(getJumpButton(message));
 	}
 
-	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull MessageEmbed embed, @NotNull GuildConfig config) {
+	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull MessageEmbed embed) {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())

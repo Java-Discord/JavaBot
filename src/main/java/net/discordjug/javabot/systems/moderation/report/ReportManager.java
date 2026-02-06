@@ -261,6 +261,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 		message.createThreadChannel(message.getEmbeds().get(0).getTitle()).queue(
 				thread -> {
 					thread.sendMessage(config.getStaffRole().getAsMention())
+						.mention(config.getStaffRole())
 						.setComponents(setComponents(targetId, thread.getIdLong()))
 						.queue();
 					onSuccess.accept(thread);
