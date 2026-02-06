@@ -87,7 +87,7 @@ public class MessageRuleFilter implements MessageFilter {
 		if (!content.attachments().isEmpty()) {
 			embed.addField("Attachment hashes", computeAttachmentDescription(content.attachments()), false);
 		}
-		content.event().getChannel().sendMessageEmbeds(embed.build()).queue();
+		moderationConfig.getLogChannel().sendMessageEmbeds(embed.build()).queue();
 	}
 
 	private boolean matches(MessageContent content, MessageRule rule) {
