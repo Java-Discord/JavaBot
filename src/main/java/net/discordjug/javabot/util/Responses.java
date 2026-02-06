@@ -56,6 +56,11 @@ public final class Responses {
 	public static @NotNull ReplyCallbackAction error(IReplyCallback event, String message, Object... args) {
 		return reply(event, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
+	
+	@CheckReturnValue
+	public static @NotNull ReplyCallbackAction errorWithTitle(IReplyCallback event, String title, String message, Object... args) {
+		return reply(event, title, String.format(message, args), Type.ERROR.getColor(), true);
+	}
 
 	@CheckReturnValue
 	public static @NotNull WebhookMessageCreateAction<Message> error(InteractionHook hook, String message, Object... args) {
@@ -64,7 +69,7 @@ public final class Responses {
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String message, Object... args) {
-		return warning(event, null, String.format(message, args));
+		return warnin(event, null, String.format(message, args));
 	}
 
 	@CheckReturnValue
@@ -73,7 +78,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction warnin(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 

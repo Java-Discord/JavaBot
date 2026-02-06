@@ -121,7 +121,7 @@ public class CustomTagManager {
 	 *
 	 * @param guildId The guilds' id.
 	 * @return A {@link Set} of all {@link CustomTag}s for the current guild.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	@Contract("_ -> new")
 	private @NotNull Set<CustomTag> getCustomTags(long guildId) throws DataAccessException {
@@ -176,7 +176,7 @@ public class CustomTagManager {
 	 * @param guildId The guilds' id.
 	 * @param tag     The {@link CustomTag} to delete.
 	 * @return Whether the command was successfully deleted.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public boolean removeCommand(long guildId, @NotNull CustomTag tag) throws DataAccessException {
 		if (!doesTagExist(guildId, tag.getName())) {
@@ -195,7 +195,7 @@ public class CustomTagManager {
 	 * @param old     The "old" {@link CustomTag}.
 	 * @param update  The "new" and updated {@link CustomTag} object.
 	 * @return Whether the command was successfully edited.
-	 * @throws SQLException If an error occurs.
+	 * @throws DataAccessException If an error occurs.
 	 */
 	public boolean editCommand(long guildId, @NotNull CustomTag old, @NotNull CustomTag update) throws DataAccessException {
 		if (!doesTagExist(guildId, old.getName())) {

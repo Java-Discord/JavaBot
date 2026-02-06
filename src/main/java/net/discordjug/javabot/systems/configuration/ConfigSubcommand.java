@@ -50,7 +50,7 @@ public abstract class ConfigSubcommand extends SlashCommand.Subcommand {
 		try {
 			handleConfigSubcommand(event, botConfig.get(event.getGuild())).queue();
 		} catch (UnknownPropertyException e) {
-			Responses.warning(event, "Unknown Property", "The provided property could not be found.")
+			Responses.warnin(event, "Unknown Property", "The provided property could not be found.")
 					.queue();
 		}
 	}

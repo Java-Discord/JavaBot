@@ -61,19 +61,19 @@ public class MoveConversationCommand extends SlashCommand {
 		}
 		GuildMessageChannel channel = channelMapping.getAsChannel().asGuildMessageChannel();
 		if (event.getChannel().getIdLong() == channel.getIdLong()) {
-			Responses.warning(event, "Invalid Channel", "You cannot move the conversation to the same channel!").queue();
+			Responses.warnin(event, "Invalid Channel", "You cannot move the conversation to the same channel!").queue();
 			return;
 		}
 		if (channelMapping.getAsChannel().getType() == ChannelType.TEXT && channelMapping.getAsChannel().asTextChannel().getSlowmode() > 0) {
-			Responses.warning(event, "Invalid Channel", "You cannot move the conversation to a channel that has slowmode enabled!").queue();
+			Responses.warnin(event, "Invalid Channel", "You cannot move the conversation to a channel that has slowmode enabled!").queue();
 			return;
 		}
 		if (isInvalidChannel(event.getMember(), channel)) {
-			Responses.warning(event, "Invalid Channel", "You're not allowed to move the conversation to %s", channel.getAsMention()).queue();
+			Responses.warnin(event, "Invalid Channel", "You're not allowed to move the conversation to %s", channel.getAsMention()).queue();
 			return;
 		}
 		if (isInvalidChannel(event.getGuild().getSelfMember(), channel)) {
-			Responses.error(event, "Insufficient Permissions", "I'm not allowed to sent messages to %s", channel.getAsMention()).queue();
+			Responses.errorWithTitle(event, "Insufficient Permissions", "I'm not allowed to sent messages to %s", channel.getAsMention()).queue();
 			return;
 		}
 		event.deferReply(true).queue();
