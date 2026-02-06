@@ -9,6 +9,7 @@ import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.data.config.SystemsConfig.ApiConfig;
 import net.discordjug.javabot.data.config.guild.HelpConfig;
 import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
+import net.discordjug.javabot.data.config.guild.MessageRule;
 import net.discordjug.javabot.data.config.guild.MetricsConfig;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
@@ -34,7 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 @RegisterReflectionForBinding({
 		//register config classes for reflection
 		BotConfig.class, GuildConfig.class, GuildConfigItem.class, SystemsConfig.class, ApiConfig.class,
-		HelpConfig.class, MessageCacheConfig.class, MetricsConfig.class, ModerationConfig.class, QOTWConfig.class, ServerLockConfig.class, StarboardConfig.class,
+		HelpConfig.class, MessageCacheConfig.class, MetricsConfig.class, ModerationConfig.class, QOTWConfig.class, ServerLockConfig.class, StarboardConfig.class,MessageRule.class, MessageRule.MessageAction.class,
 		
 		//needs to be serialized for channel managers etc
 		PermOverrideData.class,

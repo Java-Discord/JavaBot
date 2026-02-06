@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * A collection of guild-specific configuration items, each of which represents
@@ -70,7 +71,9 @@ public class GuildConfig {
 	 * @throws UncheckedIOException if an IO error occurs.
 	 */
 	public static GuildConfig loadOrCreate(Guild guild, Path file) {
-		Gson gson = new GsonBuilder().create();
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+				.create();
 		GuildConfig config;
 		if (Files.exists(file)) {
 			try (BufferedReader reader = Files.newBufferedReader(file)) {
@@ -115,7 +118,11 @@ public class GuildConfig {
 	 * Saves this config to its file path.
 	 */
 	public synchronized void flush() {
-		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+		Gson gson = new GsonBuilder()
+				.serializeNulls()
+				.setPrettyPrinting()
+				.registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+				.create();
 		try (BufferedWriter writer = Files.newBufferedWriter(this.file)) {
 			gson.toJson(this, writer);
 			writer.flush();
