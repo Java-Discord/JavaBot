@@ -13,7 +13,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.MessageRule;
@@ -23,6 +22,7 @@ import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
 import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.GsonUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.Message;
@@ -38,7 +38,6 @@ public class MessageRuleFilter implements MessageFilter {
 
 	private final BotConfig botConfig;
 	private final MessageCache messageCache;
-	private final Gson gson;
 
 	@Override
 	public MessageModificationStatus processMessage(MessageContent content) {
@@ -76,7 +75,7 @@ public class MessageRuleFilter implements MessageFilter {
 				content.event().getMessage().getAuthor(),
 				CachedMessage.of(content.event().getMessage()), "Message content")
 			.setTitle("Message rule triggered")
-			.addField("Rule description", "```\n" + gson.toJson(ruleToExecute) + "\n```", false);
+			.addField("Rule description", "```\n" + GsonUtils.toJson(ruleToExecute) + "\n```", false);
 		if (!content.attachments().isEmpty()) {
 			embed.addField("Attachment hashes", computeAttachmentDescription(content.attachments()), false);
 		}

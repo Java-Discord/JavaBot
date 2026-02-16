@@ -1,9 +1,8 @@
 package net.discordjug.javabot.data.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  * Utility class for resolving JSON files.
@@ -24,24 +22,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ReflectionUtils {
 	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
-	private static final Gson gson = new GsonBuilder()
-			.serializeNulls()
-			.setPrettyPrinting()
-			.registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
-			.create();
-
-	static {
-		propertyTypeParsers.put(Integer.class, Integer::parseInt);
-		propertyTypeParsers.put(int.class, Integer::parseInt);
-		propertyTypeParsers.put(Long.class, Long::parseLong);
-		propertyTypeParsers.put(long.class, Long::parseLong);
-		propertyTypeParsers.put(Float.class, Float::parseFloat);
-		propertyTypeParsers.put(float.class, Float::parseFloat);
-		propertyTypeParsers.put(Double.class, Double::parseDouble);
-		propertyTypeParsers.put(double.class, Double::parseDouble);
-		propertyTypeParsers.put(Boolean.class, Boolean::parseBoolean);
-		propertyTypeParsers.put(String.class, s -> s);
-	}
 
 	private ReflectionUtils() {
 	}
@@ -134,11 +114,12 @@ public class ReflectionUtils {
 	 * @param field  The field to set.
 	 * @param parent The object whose property value to set.
 	 * @param s      The string representation of the value.
-	 * @return Returns the edited {@link Field}.
+	 * @return Returns the new value.
 	 * @throws IllegalAccessException If the field cannot be set.
 	 */
-	public static Field set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
-		field.set(parent, gson.fromJson(s, field.getType()));
-		return field;
+	public static Object set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
+		Object value = GsonUtils.fromJson(s, field.getType());
+		field.set(parent, value);
+		return value;
 	}
 }

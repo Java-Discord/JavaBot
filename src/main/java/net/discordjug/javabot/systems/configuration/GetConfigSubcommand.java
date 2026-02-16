@@ -1,9 +1,9 @@
 package net.discordjug.javabot.systems.configuration;
 
-import com.google.gson.Gson;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.UnknownPropertyException;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -20,20 +20,15 @@ import javax.annotation.Nonnull;
  * Subcommand that allows staff-members to get a single property variable from the guild config.
  */
 public class GetConfigSubcommand extends ConfigSubcommand implements AutoCompletable {
-
-	private final Gson gson;
-
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
 	 * @param botConfig The main configuration of the bot
-	 * @param gson Mapper used for displaying config as json
 	 */
-	public GetConfigSubcommand(BotConfig botConfig, Gson gson) {
+	public GetConfigSubcommand(BotConfig botConfig) {
 		super(botConfig);
 		setCommandData(new SubcommandData("get", "Get the current value of a configuration property.")
 				.addOption(OptionType.STRING, "property", "The name of a property.", true, true)
 		);
-		this.gson = gson;
 	}
 
 	@Override
@@ -44,7 +39,7 @@ public class GetConfigSubcommand extends ConfigSubcommand implements AutoComplet
 		}
 		String property = propertyOption.getAsString().trim();
 		Object value = config.resolve(property);
-		String json = gson.toJson(value);
+		String json = GsonUtils.toJson(value);
 		return Responses.info(event, "Configuration Property", "The value of the property `%s` is:\n```\n%s\n```", property, json);
 	}
 

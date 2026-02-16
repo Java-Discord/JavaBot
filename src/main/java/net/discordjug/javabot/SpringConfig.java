@@ -4,11 +4,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.regex.Pattern;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import net.discordjug.javabot.data.config.PatternTypeAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -93,14 +89,5 @@ public class SpringConfig {
 			throw new RuntimeException("JDA Token not set. Stopping Bot...");
 		}
 		return botConfig;
-	}
-
-	@Bean
-	Gson gson() {
-		return new GsonBuilder()
-				.serializeNulls()
-				.setPrettyPrinting()
-				.registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
-				.create();
 	}
 }
