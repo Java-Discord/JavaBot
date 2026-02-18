@@ -118,7 +118,7 @@ public class ReflectionUtils {
 	 * @throws IllegalAccessException If the field cannot be set.
 	 */
 	public static Object set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
-		Object value = GsonUtils.fromJson(s, field.getType());
+		Object value = GsonUtils.fromJson(s, field.getGenericType());
 		field.set(parent, value);
 		return value;
 	}

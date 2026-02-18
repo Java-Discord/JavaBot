@@ -1,5 +1,6 @@
 package net.discordjug.javabot.systems.configuration;
 
+import com.google.gson.JsonSyntaxException;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
@@ -80,8 +81,8 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 		try {
 			guildConfig.set(property, valueString);
 			Responses.success(event, "Configuration Updated", "The property `%s` has been set to `%s`.", property, valueString).queue();
-		} catch (UnknownPropertyException e) {
-			Responses.error(event, "Property not found: %s", property).queue();
+		} catch (UnknownPropertyException | JsonSyntaxException e) {
+			Responses.error(event, "Error while setting new value").queue();
 		}
 	}
 

@@ -6,6 +6,7 @@ import net.discordjug.javabot.data.config.PatternTypeAdapter;
 
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.util.regex.Pattern;
 
 /**
@@ -20,11 +21,11 @@ public class GsonUtils {
 			.enableComplexMapKeySerialization()
 			.create();
 
-	public static <T> T fromJson(String json, Class<T> type) {
+	public static <T> T fromJson(Reader json, Class<T> type) {
 		return gson.fromJson(json, type);
 	}
 
-	public static <T> T fromJson(Reader json, Class<T> type) {
+	public static String fromJson(String json, Type type) {
 		return gson.fromJson(json, type);
 	}
 
@@ -35,5 +36,4 @@ public class GsonUtils {
 	public static void toJson(Object object, Writer writer) {
 		gson.toJson(object, writer);
 	}
-
 }
