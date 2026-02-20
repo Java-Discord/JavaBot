@@ -11,18 +11,13 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Utility class for resolving JSON files.
  */
 @Slf4j
 public class ReflectionUtils {
-	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
-
 	private ReflectionUtils() {
 	}
 
@@ -80,36 +75,7 @@ public class ReflectionUtils {
 	}
 
 	/**
-	 * Gets a mapping of properties and their type, recursively for the given
-	 * type.
-	 *
-	 * @param parentPropertyName The root property name to append child field
-	 *                           names to. This is null for the base case.
-	 * @param parentClass        The class to search for properties in.
-	 * @return The map of properties and their types.
-	 * @throws IllegalAccessException If a field cannot have its value obtained.
-	 */
-	public static @NotNull Map<String, Class<?>> getFields(@NotNull String parentPropertyName, @NotNull Class<?> parentClass) throws IllegalAccessException {
-		Map<String, Class<?>> fieldsMap = new HashMap<>();
-		for (Field field : parentClass.getDeclaredFields()) {
-			// Skip transient fields.
-			if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
-			field.setAccessible(true);
-			String fieldPropertyName = parentPropertyName == null ? field.getName() : parentPropertyName + "." + field.getName();
-			// Check if the field represents a "leaf" property, one which does not have any children.
-			if (propertyTypeParsers.containsKey(field.getType())) {
-				fieldsMap.put(fieldPropertyName, field.getType());
-			} else {
-				Map<String, Class<?>> childFieldsMap = getFields(fieldPropertyName, field.getType());
-				fieldsMap.putAll(childFieldsMap);
-			}
-		}
-		return fieldsMap;
-	}
-
-	/**
-	 * Sets the value of a field to a certain value, using {@link ReflectionUtils#propertyTypeParsers}
-	 * to try and parse the correct value.
+	 * Sets the value of a field to a new value.
 	 *
 	 * @param field  The field to set.
 	 * @param parent The object whose property value to set.
