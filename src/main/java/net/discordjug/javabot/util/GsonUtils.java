@@ -25,7 +25,7 @@ public class GsonUtils {
 		return gson.fromJson(json, type);
 	}
 
-	public static String fromJson(String json, Type type) {
+	public static Object fromJson(String json, Type type) {
 		return gson.fromJson(json, type);
 	}
 
