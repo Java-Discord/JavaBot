@@ -1,10 +1,9 @@
 package net.discordjug.javabot.data.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.GsonUtils;
 import net.dv8tion.jda.api.entities.Guild;
 
 import org.jetbrains.annotations.NotNull;
@@ -64,11 +63,10 @@ public class BotConfig {
 			}
 		}
 		this.guilds = new ConcurrentHashMap<>();
-		Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 		Path systemsFile = dir.resolve(SYSTEMS_FILE);
 		if (Files.exists(systemsFile)) {
 			try (BufferedReader reader = Files.newBufferedReader(systemsFile)) {
-				this.systemsConfig = gson.fromJson(reader, SystemsConfig.class);
+				this.systemsConfig = GsonUtils.fromJson(reader, SystemsConfig.class);
 				log.info("Loaded systems config from {}", systemsFile);
 			} catch (JsonSyntaxException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -133,10 +131,9 @@ public class BotConfig {
 	 * Flushes all configuration to the disk.
 	 */
 	public void flush() {
-		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 		Path systemsFile = this.dir.resolve(SYSTEMS_FILE);
 		try (BufferedWriter writer = Files.newBufferedWriter(systemsFile)) {
-			gson.toJson(this.systemsConfig, writer);
+			GsonUtils.toJson(this.systemsConfig, writer);
 			writer.flush();
 		} catch (IOException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());

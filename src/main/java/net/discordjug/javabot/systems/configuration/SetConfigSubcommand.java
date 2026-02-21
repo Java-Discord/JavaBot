@@ -1,9 +1,11 @@
 package net.discordjug.javabot.systems.configuration;
 
+import com.google.gson.JsonSyntaxException;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.UnknownPropertyException;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.components.textinput.TextInput;
@@ -57,10 +59,16 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 			if (resolved == null) {
 				return Responses.error(event, "Config `%s` not found", property);
 			}
+			String value;
+			if (resolved instanceof String s) {
+				value = s;
+			} else {
+				value = GsonUtils.toJson(resolved);
+			}
 			return event.replyModal(
 					Modal.create(ComponentIdBuilder.build("config-set", property), "Change configuration value")
 					.addComponents(Label.of("new value", TextInput.create("value", TextInputStyle.PARAGRAPH)
-							.setValue(String.valueOf(resolved))
+							.setValue(value)
 							.build()))
 				.build());
 		}
@@ -78,8 +86,8 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 		try {
 			guildConfig.set(property, valueString);
 			Responses.success(event, "Configuration Updated", "The property `%s` has been set to `%s`.", property, valueString).queue();
-		} catch (UnknownPropertyException e) {
-			Responses.error(event, "Property not found: %s", property).queue();
+		} catch (UnknownPropertyException | JsonSyntaxException e) {
+			Responses.error(event, "Error while setting new value").queue();
 		}
 	}
 

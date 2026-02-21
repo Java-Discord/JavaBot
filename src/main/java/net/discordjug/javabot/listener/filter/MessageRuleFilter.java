@@ -11,14 +11,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.data.config.PatternTypeAdapter;
 import net.discordjug.javabot.data.config.guild.MessageRule;
 import net.discordjug.javabot.data.config.guild.MessageRule.MessageAction;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
@@ -26,6 +22,7 @@ import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
 import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.GsonUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.Message;
@@ -73,17 +70,12 @@ public class MessageRuleFilter implements MessageFilter {
 	}
 
 	private void log(MessageContent content, MessageRule ruleToExecute, ModerationConfig moderationConfig) {
-		Gson gson = new GsonBuilder()
-				.serializeNulls()
-				.setPrettyPrinting()
-				.registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
-				.create();
 		EmbedBuilder embed = messageCache.buildMessageCacheEmbed(
 				content.event().getMessage().getChannel(),
 				content.event().getMessage().getAuthor(),
 				CachedMessage.of(content.event().getMessage()), "Message content")
 			.setTitle("Message rule triggered")
-			.addField("Rule description", "```\n" + gson.toJson(ruleToExecute) + "\n```", false);
+			.addField("Rule description", "```\n" + GsonUtils.toJson(ruleToExecute) + "\n```", false);
 		if (!content.attachments().isEmpty()) {
 			embed.addField("Attachment hashes", computeAttachmentDescription(content.attachments()), false);
 		}

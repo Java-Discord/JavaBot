@@ -68,8 +68,8 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 			for(Class<?> cl : getClass().getClassLoader().loadClass("sun.font.FontConfigManager").getDeclaredClasses()) {
 				hints.jni().registerType(cl, MemberCategory.ACCESS_DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			}
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+		} catch (ClassNotFoundException _) {
+            // FontConfigManager is only supported on Linux
 		}
 		
 		for (Class<?> cl : WebhookEmbed.class.getClasses()) {
