@@ -60,11 +60,11 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 				return Responses.error(event, "Config `%s` not found", property);
 			}
 			String value;
-            if (resolved instanceof String s) {
-                value = s;
-            } else {
-                value = GsonUtils.toJson(resolved);
-            }
+			if (resolved instanceof String s) {
+				value = s;
+			} else {
+				value = GsonUtils.toJson(resolved);
+			}
 			return event.replyModal(
 					Modal.create(ComponentIdBuilder.build("config-set", property), "Change configuration value")
 					.addComponents(Label.of("new value", TextInput.create("value", TextInputStyle.PARAGRAPH)
