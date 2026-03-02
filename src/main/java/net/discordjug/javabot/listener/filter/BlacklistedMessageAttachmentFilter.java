@@ -38,4 +38,9 @@ public class BlacklistedMessageAttachmentFilter implements MessageFilter {
 			return MessageModificationStatus.NOT_MODIFIED;
 		}
 	}
+	
+	@Override
+	public int getOrder() {
+		return -10;//should run earlier than normal because it is automod-related but other automod filters are more important
+	}
 }

@@ -1,7 +1,6 @@
 package net.discordjug.javabot.listener.filter;
 
 import lombok.RequiredArgsConstructor;
-import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.moderation.AutoMod;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.WebhookUtil;
@@ -29,7 +28,6 @@ public class MessageFilterHandler extends ListenerAdapter {
 
 	private final List<MessageFilter> filters;
 	private final AutoMod autoMod;
-	private final BotConfig botConfig;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -88,11 +86,6 @@ public class MessageFilterHandler extends ListenerAdapter {
 		}
 		if (autoMod.hasSuspiciousLink(event.getMessage()) ||
 				autoMod.hasAdvertisingLink(event.getMessage())) {
-			return false;
-		}
-		if (event.getChannel().getIdLong() == botConfig.get(event.getGuild())
-				.getModerationConfig()
-				.getSuggestionChannelId()) {
 			return false;
 		}
 		return true;

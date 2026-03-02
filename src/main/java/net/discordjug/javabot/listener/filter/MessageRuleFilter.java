@@ -123,4 +123,9 @@ public class MessageRuleFilter implements MessageFilter {
 			return "";
 		}
 	}
+	
+	@Override
+	public int getOrder() {
+		return -100;//automod should run early
+	}
 }

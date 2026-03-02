@@ -1,54 +1,50 @@
-package net.discordjug.javabot.listener;
+package net.discordjug.javabot.listener.filter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.SystemsConfig;
-import net.discordjug.javabot.systems.moderation.AutoMod;
 import net.discordjug.javabot.util.MessageActionUtils;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
 /**
- * Listens for {@link MessageReceivedEvent}s in the
- * {@link net.discordjug.javabot.data.config.guild.ModerationConfig#getSuggestionChannel()} channel.
+ * When a message is created in the {@link net.discordjug.javabot.data.config.guild.ModerationConfig#getSuggestionChannel()} channel, it is decorated as a suggestion.
  */
+@Component
 @Slf4j
 @RequiredArgsConstructor
-public class SuggestionListener extends ListenerAdapter {
-	private final AutoMod autoMod;
+public class SuggestionFilter implements MessageFilter {
 	private final BotConfig botConfig;
-
+	
 	@Override
-	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-		if (!canCreateSuggestion(event)) return;
-		if (autoMod.hasSuspiciousLink(event.getMessage()) || autoMod.hasAdvertisingLink(event.getMessage())) {
-			event.getMessage().delete().queue();
-			return;
-		}
-		MessageEmbed embed = buildSuggestionEmbed(event.getMessage());
-		MessageActionUtils.addAttachmentsAndSend(event.getMessage(), event.getChannel().sendMessageEmbeds(embed)).thenAccept(message -> {
+	public MessageModificationStatus processMessage(MessageContent content) {
+		if (!canCreateSuggestion(content.event())) return MessageModificationStatus.NOT_MODIFIED;
+		MessageEmbed embed = buildSuggestionEmbed(content.messageText().toString(), content.event().getMember());
+		MessageActionUtils.addAttachmentsAndSend(content.attachments(), content.event().getChannel().sendMessageEmbeds(embed))
+			.thenAccept(message -> {
 					addReactions(message).queue();
-					event.getMessage().delete().queue();
-					message.createThreadChannel(String.format("%s — Suggestion", event.getAuthor().getName()))
-							.flatMap(thread -> thread.addThreadMember(event.getAuthor()))
+					content.event().getMessage().delete().queue();
+					message.createThreadChannel(String.format("%s — Suggestion", content.event().getAuthor().getName()))
+							.flatMap(thread -> thread.addThreadMember(content.event().getAuthor()))
 							.queue();
 				}
 		).exceptionally(e -> {
 			log.error("Could not send Submission Embed", e);
 			return null;
 		});
+		return MessageModificationStatus.STOP_PROCESSING;
 	}
-
+	
 	/**
 	 * Decides whether the message author is eligible to create new suggestions.
 	 *
@@ -76,10 +72,7 @@ public class SuggestionListener extends ListenerAdapter {
 		);
 	}
 
-
-
-	private MessageEmbed buildSuggestionEmbed(Message message) {
-		Member member = message.getMember();
+	private MessageEmbed buildSuggestionEmbed(String messageContent, Member member) {
 		// Note: member will never be null in practice. This is to satisfy code analysis tools.
 		if (member == null) throw new IllegalStateException("Member was null when building suggestion embed.");
 		return new EmbedBuilder()
@@ -87,8 +80,13 @@ public class SuggestionListener extends ListenerAdapter {
 				.setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setTimestamp(Instant.now())
-				.setDescription(message.getContentRaw())
-				.setFooter(message.getAuthor().getId())
+				.setDescription(messageContent)
+				.setFooter(member.getId())
 				.build();
+	}
+	
+	@Override
+	public int getOrder() {
+		return LOWEST_PRECEDENCE;
 	}
 }
