@@ -17,7 +17,9 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
- * The `/form modify` command. Modifies attributes of an existing form.
+ * The `/form modify` command. Modifies attributes of an existing form. For
+ * modifying form fields see {@link AddFieldFormSubcommand} and
+ * {@link RemoveFieldFormSubcommand}
  * 
  * @see FormData
  */
