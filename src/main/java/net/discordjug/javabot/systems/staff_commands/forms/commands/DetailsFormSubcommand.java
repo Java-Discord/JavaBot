@@ -7,6 +7,7 @@ import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -14,15 +15,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
  * The `/form details` command. Displays information about the specified form.
  * The information is sent as a non-ephemeral embed in the same channel this
  * command is executed in.
- * 
+ *
  * @see FormData
  */
 public class DetailsFormSubcommand extends FormSubcommand implements AutoCompletable {
@@ -56,9 +56,7 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 		EmbedBuilder embedBuilder = createFormDetailsEmbed(form, event.getGuild());
 		embedBuilder.setAuthor(event.getMember().getEffectiveName(), null, event.getMember().getEffectiveAvatarUrl());
 
-		MessageCreateData builder = new MessageCreateBuilder().addEmbeds(embedBuilder.build()).build();
-
-		event.getHook().sendMessage(builder).queue();
+		event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
 	}
 
 	@Override
@@ -75,22 +73,37 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 		builder.addField("Created at", String.format("<t:%s>", id / 1000L), true);
 
 		builder.addField("Expires at",
-				form.hasExpirationTime() ? String.format("<t:%s>", form.expiration().toEpochMilli() / 1000L)
+				form.hasExpirationTime() ? TimeFormat.DATE_TIME_LONG.format(form.expiration().toEpochMilli())
 						: "`Never`",
 				true);
 
 		addCodeblockField(builder, "State", form.closed() ? "Closed" : form.hasExpired() ? "Expired" : "Open", false);
 
-		builder.addField("Attached in",
-				form.isAttached() ? "<#" + form.getMessageChannel().get() + ">" : "*Not attached*", true);
-		builder.addField("Attached to",
-				form.isAttached()
-						? String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
-								form.getMessageChannel().get(), form.getMessageId().get())
-						: "*Not attached*",
-				true);
+		String channelMention;
+		String messageLink;
+		if (form.isAttached()) {
+			long channelId = form.getMessageChannel().get();
+			TextChannel channel = guild.getTextChannelById(channelId);
+			channelMention = channel != null ? channel.getAsMention() : "`" + channelId + "`";
+			messageLink = String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
+					form.getMessageChannel().get(), form.getMessageId().get());
+		} else {
+			channelMention = "*Not attached*";
+			messageLink = "*Not attached*";
+		}
 
-		builder.addField("Submissions channel", "<#" + form.submitChannel() + ">", true);
+		String submissionsChannelMention;
+		TextChannel submissionsChannel = guild.getTextChannelById(form.submitChannel());
+		if (submissionsChannel != null) {
+			submissionsChannelMention = submissionsChannel.getAsMention();
+		} else {
+			submissionsChannelMention = "`" + form.submitChannel();
+		}
+
+		builder.addField("Attached in", channelMention, true);
+		builder.addField("Attached to", messageLink, true);
+
+		builder.addField("Submissions channel", submissionsChannelMention, true);
 		builder.addField("Is one-time", form.onetime() ? ":white_check_mark:" : ":x:", true);
 		addCodeblockField(builder, "Submission message",
 				form.submitMessage() == null ? "Default" : form.submitMessage(), true);
