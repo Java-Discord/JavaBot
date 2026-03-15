@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.Function;
+
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
@@ -100,7 +101,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 		FormData form = formOpt.get();
-		if (!checkNotClosed(form)) {
+		if (!isOpen(form)) {
 			event.reply("This form is not accepting new submissions.").setEphemeral(true).queue();
 			if (!form.closed()) {
 				closeForm(event.getGuild(), form);
@@ -130,7 +131,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 
 		FormData form = formOpt.get();
 
-		if (!checkNotClosed(form)) {
+		if (!isOpen(form)) {
 			event.getHook().sendMessage("This form is not accepting new submissions.").queue();
 			return;
 		}
@@ -248,7 +249,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 		return expiration;
 	}
 
-	private static boolean checkNotClosed(FormData data) {
+	private static boolean isOpen(FormData data) {
 		if (data.closed() || data.hasExpired()) {
 			return false;
 		}
