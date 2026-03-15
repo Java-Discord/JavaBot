@@ -52,7 +52,7 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 	public AttachFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("attach", "Attach a form to a message").addOptions(
+		setCommandData(new SubcommandData("attach", "Add a button for bringing up the form to a message").addOptions(
 				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to attach", true, true),
 				new OptionData(OptionType.STRING, "message-id", "ID of the message to attach the form to", true),
 				new OptionData(OptionType.CHANNEL, "channel",

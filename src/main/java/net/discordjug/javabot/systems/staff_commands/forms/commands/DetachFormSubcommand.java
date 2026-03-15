@@ -44,7 +44,8 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 	public DetachFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("detach", "Detach a form from a message")
+		setCommandData(new SubcommandData("detach",
+				"Remove any buttons that could be used to bring the form's input modal")
 				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to attach", true, true)));
 	}
 
