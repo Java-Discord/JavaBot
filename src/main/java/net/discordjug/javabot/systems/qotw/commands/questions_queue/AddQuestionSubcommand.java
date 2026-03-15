@@ -7,14 +7,14 @@ import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
 import net.discordjug.javabot.systems.qotw.model.QOTWQuestion;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -48,16 +48,16 @@ public class AddQuestionSubcommand extends QOTWSubcommand implements ModalHandle
 	}
 
 	private @NotNull Modal buildQuestionModal() {
-		TextInput priorityField = TextInput.create("priority", "Priority (Leave blank for default)", TextInputStyle.SHORT)
+		TextInput priorityField = TextInput.create("priority", TextInputStyle.SHORT)
 				.setRequired(false)
 				.setValue("0")
 				.build();
-		TextInput questionField = TextInput.create("question", "Question Text", TextInputStyle.PARAGRAPH)
+		TextInput questionField = TextInput.create("question", TextInputStyle.PARAGRAPH)
 				.setMaxLength(85)
 				.build();
 
 		return Modal.create("qotw-add-question", "Create QOTW Question")
-				.addComponents(ActionRow.of(questionField), ActionRow.of(priorityField))
+				.addComponents(Label.of("Question Text", questionField), Label.of("Priority (Leave blank for default)", priorityField))
 				.build();
 	}
 

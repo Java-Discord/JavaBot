@@ -12,6 +12,7 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
@@ -41,7 +42,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 	public ChangeMyMindCommand() {
 		setCommandData(Commands.slash("change-my-mind", "Generates the \"Change My Mind\" meme from your given input.")
 				.addOption(OptionType.STRING, "text", "The text which should be used on the template.", true)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

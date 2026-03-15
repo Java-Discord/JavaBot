@@ -48,8 +48,8 @@ public class ChangeSelfRoleStatusSubcommand extends SlashCommand.Subcommand {
 		event.deferReply(true).queue();
 		event.getChannel().retrieveMessageById(idMapping.getAsString()).queue(message -> {
 			message.editMessageComponents(disabled ?
-					MessageActionUtils.disableActionRows(message.getActionRows()) :
-					MessageActionUtils.enableActionRows(message.getActionRows())
+					MessageActionUtils.disableActionRows(message.getComponents()) :
+					MessageActionUtils.enableActionRows(message.getComponents())
 			).queue();
 			MessageEmbed embed = buildSelfRoleStatusEmbed(event.getUser(), message, disabled);
 			notificationService.withGuild(event.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(embed));

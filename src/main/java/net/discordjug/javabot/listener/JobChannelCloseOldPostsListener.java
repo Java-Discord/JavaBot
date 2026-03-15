@@ -9,6 +9,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.util.InteractionUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
@@ -78,7 +79,7 @@ public class JobChannelCloseOldPostsListener extends ListenerAdapter {
 					.setDescription("Since only one open post is allowed per user, older posts have been closed")
 					.setColor(Color.YELLOW)
 					.build())
-				.addActionRow(InteractionUtils.createDeleteButton(post.getOwnerIdLong()))
+				.addComponents(ActionRow.of(InteractionUtils.createDeleteButton(post.getOwnerIdLong())))
 				.queue();
 		}
 	}

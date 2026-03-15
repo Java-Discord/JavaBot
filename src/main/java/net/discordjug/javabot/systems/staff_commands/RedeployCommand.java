@@ -12,6 +12,7 @@ import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
@@ -49,7 +50,7 @@ public class RedeployCommand extends SlashCommand {
 		this.applicationContext = applicationContext;
 		setCommandData(Commands.slash("redeploy", "(ADMIN-ONLY) Makes the bot redeploy.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());
 	}
@@ -62,7 +63,7 @@ public class RedeployCommand extends SlashCommand {
 		}
 		log.warn("Redeploying... Requested by: " + UserUtils.getUserTag(event.getUser()));
 		event.reply("**Redeploying...** This may take some time.").queue();
-		messageCache.synchronize();
+		messageCache.synchronizeNow();
 		asyncPool.shutdownNow();
 		try {
 			asyncPool.awaitTermination(3, TimeUnit.SECONDS);

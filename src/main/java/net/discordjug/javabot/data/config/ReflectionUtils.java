@@ -2,6 +2,7 @@ package net.discordjug.javabot.data.config;
 
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
@@ -10,31 +11,13 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Utility class for resolving JSON files.
  */
 @Slf4j
 public class ReflectionUtils {
-	private static final Map<Class<?>, Function<String, Object>> propertyTypeParsers = new HashMap<>();
-
-	static {
-		propertyTypeParsers.put(Integer.class, Integer::parseInt);
-		propertyTypeParsers.put(int.class, Integer::parseInt);
-		propertyTypeParsers.put(Long.class, Long::parseLong);
-		propertyTypeParsers.put(long.class, Long::parseLong);
-		propertyTypeParsers.put(Float.class, Float::parseFloat);
-		propertyTypeParsers.put(float.class, Float::parseFloat);
-		propertyTypeParsers.put(Double.class, Double::parseDouble);
-		propertyTypeParsers.put(double.class, Double::parseDouble);
-		propertyTypeParsers.put(Boolean.class, Boolean::parseBoolean);
-		propertyTypeParsers.put(String.class, s -> s);
-	}
-
 	private ReflectionUtils() {
 	}
 
@@ -92,47 +75,17 @@ public class ReflectionUtils {
 	}
 
 	/**
-	 * Gets a mapping of properties and their type, recursively for the given
-	 * type.
-	 *
-	 * @param parentPropertyName The root property name to append child field
-	 *                           names to. This is null for the base case.
-	 * @param parentClass        The class to search for properties in.
-	 * @return The map of properties and their types.
-	 * @throws IllegalAccessException If a field cannot have its value obtained.
-	 */
-	public static @NotNull Map<String, Class<?>> getFields(@NotNull String parentPropertyName, @NotNull Class<?> parentClass) throws IllegalAccessException {
-		Map<String, Class<?>> fieldsMap = new HashMap<>();
-		for (Field field : parentClass.getDeclaredFields()) {
-			// Skip transient fields.
-			if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
-			field.setAccessible(true);
-			String fieldPropertyName = parentPropertyName == null ? field.getName() : parentPropertyName + "." + field.getName();
-			// Check if the field represents a "leaf" property, one which does not have any children.
-			if (propertyTypeParsers.containsKey(field.getType())) {
-				fieldsMap.put(fieldPropertyName, field.getType());
-			} else {
-				Map<String, Class<?>> childFieldsMap = getFields(fieldPropertyName, field.getType());
-				fieldsMap.putAll(childFieldsMap);
-			}
-		}
-		return fieldsMap;
-	}
-
-	/**
-	 * Sets the value of a field to a certain value, using {@link ReflectionUtils#propertyTypeParsers}
-	 * to try and parse the correct value.
+	 * Sets the value of a field to a new value.
 	 *
 	 * @param field  The field to set.
 	 * @param parent The object whose property value to set.
 	 * @param s      The string representation of the value.
+	 * @return Returns the new value.
 	 * @throws IllegalAccessException If the field cannot be set.
 	 */
-	public static void set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
-		Function<String, Object> parser = propertyTypeParsers.get(field.getType());
-		if (parser == null) {
-			throw new IllegalArgumentException("No supported property type parser for the type " + field.getType().getSimpleName());
-		}
-		field.set(parent, parser.apply(s));
+	public static Object set(@NotNull Field field, @NotNull Object parent, @NotNull String s) throws IllegalAccessException {
+		Object value = field.getType() == String.class ? s : GsonUtils.fromJson(s, field.getGenericType());
+		field.set(parent, value);
+		return value;
 	}
 }

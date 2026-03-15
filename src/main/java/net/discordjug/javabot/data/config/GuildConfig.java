@@ -1,12 +1,11 @@
 package net.discordjug.javabot.data.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.guild.*;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Pair;
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -70,11 +69,10 @@ public class GuildConfig {
 	 * @throws UncheckedIOException if an IO error occurs.
 	 */
 	public static GuildConfig loadOrCreate(Guild guild, Path file) {
-		Gson gson = new GsonBuilder().create();
 		GuildConfig config;
 		if (Files.exists(file)) {
 			try (BufferedReader reader = Files.newBufferedReader(file)) {
-				config = gson.fromJson(reader, GuildConfig.class);
+				config = GsonUtils.fromJson(reader, GuildConfig.class);
 				config.setFile(file);
 				config.setGuild(guild);
 				log.info("Loaded config from {}", file);
@@ -115,9 +113,8 @@ public class GuildConfig {
 	 * Saves this config to its file path.
 	 */
 	public synchronized void flush() {
-		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 		try (BufferedWriter writer = Files.newBufferedWriter(this.file)) {
-			gson.toJson(this, writer);
+			GsonUtils.toJson(this, writer);
 			writer.flush();
 		} catch (IOException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
@@ -160,7 +157,10 @@ public class GuildConfig {
 		Optional<Pair<Field, Object>> result = ReflectionUtils.resolveField(propertyName, this);
 		result.ifPresent(pair -> {
 			try {
-				ReflectionUtils.set(pair.first(), pair.second(), value);
+				Object updatedField = ReflectionUtils.set(pair.first(), pair.second(), value);
+				if (updatedField instanceof GuildConfigItem item) {
+					item.setGuildConfig(this);
+				}
 				this.flush();
 			} catch (IllegalAccessException e) {
 				ExceptionLogger.capture(e, getClass().getSimpleName());

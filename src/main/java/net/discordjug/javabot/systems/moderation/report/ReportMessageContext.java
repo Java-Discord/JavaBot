@@ -4,6 +4,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.ContextCommand;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -19,7 +20,7 @@ public class ReportMessageContext extends ContextCommand.Message {
 	public ReportMessageContext(BotConfig botConfig) {
 		this.botConfig = botConfig;
 		setCommandData(Commands.message("Report Message")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

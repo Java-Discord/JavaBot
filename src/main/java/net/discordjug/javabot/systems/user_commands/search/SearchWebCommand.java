@@ -5,6 +5,7 @@ import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -27,7 +28,7 @@ public class SearchWebCommand extends SlashCommand {
 	public SearchWebCommand(SystemsConfig systemsConfig) {
 		this.systemsConfig = systemsConfig;
 		setCommandData(Commands.slash("search-web", "Searches the web by turning your text-input into a search query")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 				.addOption(OptionType.STRING, "query", "Text that will be converted into a search query", true)
 		);
 	}

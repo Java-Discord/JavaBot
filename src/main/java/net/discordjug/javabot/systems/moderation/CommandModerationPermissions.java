@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.moderation;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +20,8 @@ public interface CommandModerationPermissions {
 	 * @param data The {@link SlashCommandData}.
 	 */
 	default void setModerationSlashCommandData(@NotNull SlashCommandData data) {
-		setCommandData(data.setGuildOnly(true)
+		setCommandData(data
+				.setContexts(InteractionContextType.GUILD)
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
 		);
 	}

@@ -8,6 +8,9 @@ import net.discordjug.javabot.util.Pair;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -22,8 +25,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
 import org.jetbrains.annotations.NotNull;
@@ -105,7 +106,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			TextChannel notifChannel = config.getHelpConfig().getHelpNotificationChannel();
 
 			notifChannel.sendMessageEmbeds(createHelpEmbed(comment, post, member))
-				.addActionRow(createAcknowledgementButton(post.getId()))
+				.addComponents(ActionRow.of(createAcknowledgementButton(post.getId())))
 				.queue();
 			event.reply("""
 					Successfully requested help.
@@ -268,7 +269,7 @@ public class HelpPingSubcommand extends SlashCommand.Subcommand implements Butto
 			.map(this::removeOldField)
 			.map(EmbedBuilder::build)
 			.toList())
-		.setActionRow(acknowledged?createUndoAcknowledgementButton(postId):createAcknowledgementButton(postId))
+		.setComponents(ActionRow.of(acknowledged?createUndoAcknowledgementButton(postId):createAcknowledgementButton(postId)))
 		.queue();
 	}
 

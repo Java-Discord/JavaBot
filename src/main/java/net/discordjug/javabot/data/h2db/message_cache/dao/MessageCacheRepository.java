@@ -82,13 +82,14 @@ public class MessageCacheRepository {
 	public List<CachedMessage> getAll() throws DataAccessException {
 		List<CachedMessage> messagesWithLink = jdbcTemplate.query(
 				"SELECT * FROM message_cache LEFT JOIN message_cache_attachments ON message_cache.message_id = message_cache_attachments.message_id",
-				(rs, rowNum) -> this.read(rs));
+				(rs, _) -> this.read(rs));
 		Map<Long, CachedMessage> messages=new LinkedHashMap<>();
 		for (CachedMessage msg : messagesWithLink) {
-			CachedMessage previous = messages.putIfAbsent(msg.getMessageId(), msg);
-			if(previous!=null) {
-				previous.getAttachments().addAll(msg.getAttachments());
-			}
+			messages.merge(msg.getMessageId(), msg, (oldValue, value) -> {
+				ArrayList<String> attachments = new ArrayList<>(oldValue.getAttachments());
+				attachments.addAll(value.getAttachments());
+				return new CachedMessage(oldValue.getMessageId(), oldValue.getAuthorId(), oldValue.getMessageContent(), attachments);
+			});
 		}
 		return new ArrayList<>(messages.values());
 	}
@@ -110,14 +111,15 @@ public class MessageCacheRepository {
 	}
 
 	private CachedMessage read(ResultSet rs) throws SQLException {
-		CachedMessage cachedMessage = new CachedMessage();
-		cachedMessage.setMessageId(rs.getLong("message_cache.message_id"));
-		cachedMessage.setAuthorId(rs.getLong("author_id"));
-		cachedMessage.setMessageContent(rs.getString("message_content"));
+		List<String> attachments = new ArrayList<>();
 		String attachment = rs.getString("link");
-		if(attachment!=null) {
-			cachedMessage.getAttachments().add(attachment);
+		if(attachment != null) {
+			attachments.add(attachment);
 		}
-		return cachedMessage;
+		return new CachedMessage(
+				rs.getLong("message_cache.message_id"),
+				rs.getLong("author_id"),
+				rs.getString("message_content"),
+				attachments);
 	}
 }

@@ -5,6 +5,7 @@ import net.discordjug.javabot.systems.moderation.ModerationService;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.util.concurrent.ExecutorService;
@@ -28,7 +29,7 @@ public class WarnsListContext extends ContextCommand.User {
 		this.asyncPool = asyncPool;
 		this.moderationService = moderationService;
 		setCommandData(Commands.user("Show Warns")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

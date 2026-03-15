@@ -3,6 +3,7 @@ package net.discordjug.javabot.util;
 import java.awt.Color;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.CheckReturnValue;
@@ -55,6 +56,11 @@ public final class Responses {
 	public static @NotNull ReplyCallbackAction error(IReplyCallback event, String message, Object... args) {
 		return reply(event, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}
+	
+	@CheckReturnValue
+	public static @NotNull ReplyCallbackAction errorWithTitle(IReplyCallback event, String title, String message, Object... args) {
+		return reply(event, title, String.format(message, args), Type.ERROR.getColor(), true);
+	}
 
 	@CheckReturnValue
 	public static @NotNull WebhookMessageCreateAction<Message> error(InteractionHook hook, String message, Object... args) {
@@ -63,7 +69,7 @@ public final class Responses {
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String message, Object... args) {
-		return warning(event, null, String.format(message, args));
+		return warnin(event, null, String.format(message, args));
 	}
 
 	@CheckReturnValue
@@ -72,7 +78,7 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
-	public static @NotNull ReplyCallbackAction warning(IReplyCallback event, String title, String message, Object... args) {
+	public static @NotNull ReplyCallbackAction warnin(IReplyCallback event, String title, String message, Object... args) {
 		return reply(event, title, String.format(message, args), Type.WARN.getColor(), true);
 	}
 
@@ -120,17 +126,17 @@ public final class Responses {
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyCannotInteract(IReplyCallback event, @NotNull IMentionable mentionable) {
-		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention());
+		return error(event, "I am missing permissions in order to interact with that. (%s)", mentionable.getAsMention()).setAllowedMentions(List.of());
 	}
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyStaffOnly(IReplyCallback event, GuildConfig guildConfig) {
-		return error(event, "This command may only be used by staff members. (%s)", guildConfig.getModerationConfig().getStaffRole().getAsMention());
+		return error(event, "This command may only be used by staff members. (%s)", guildConfig.getModerationConfig().getStaffRole().getAsMention()).setAllowedMentions(List.of());
 	}
 
 	@CheckReturnValue
 	public static @NotNull ReplyCallbackAction replyAdminOnly(IReplyCallback event, GuildConfig guildConfig) {
-		return error(event, "This command may only be used by admins. (%s)", guildConfig.getModerationConfig().getAdminRole().getAsMention());
+		return error(event, "This command may only be used by admins. (%s)", guildConfig.getModerationConfig().getAdminRole().getAsMention()).setAllowedMentions(List.of());
 	}
 
 	/**

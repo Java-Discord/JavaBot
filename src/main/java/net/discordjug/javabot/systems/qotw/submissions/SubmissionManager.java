@@ -14,6 +14,8 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.discordjug.javabot.util.WebhookUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -24,8 +26,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -104,7 +104,7 @@ public class SubmissionManager {
 	}
 
 	/**
-	 * Handles a submission review using a {@link net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu}.
+	 * Handles a submission review using a {@link net.dv8tion.jda.api.components.selections.StringSelectMenu}.
 	 *
 	 * @param event The {@link StringSelectInteractionEvent} that was fired.
 	 * @param threadId The submissions' thread-id.

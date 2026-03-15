@@ -5,6 +5,7 @@ import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public class SearchWebMessageContext extends ContextCommand.Message {
 	public SearchWebMessageContext(SystemsConfig systemsConfig) {
 		this.systemsConfig = systemsConfig;
 		setCommandData(Commands.message("Search the Web")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 
@@ -33,7 +34,7 @@ public class SearchWebMessageContext extends ContextCommand.Message {
 	public void execute(@NotNull MessageContextInteractionEvent event) {
 		String query = event.getTarget().getContentDisplay();
 		if (query.isEmpty() || query.isBlank()) {
-			Responses.warning(event, "No Content", "The message doesn't have any content to search for").queue();
+			Responses.warnin(event, "No Content", "The message doesn't have any content to search for").queue();
 			return;
 		}
 		event.deferReply().queue();

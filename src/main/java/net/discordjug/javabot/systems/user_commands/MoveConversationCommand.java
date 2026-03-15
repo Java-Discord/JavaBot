@@ -5,16 +5,18 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 
@@ -42,7 +44,7 @@ public class MoveConversationCommand extends SlashCommand {
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "channel", "Where should the current conversation be continued?", true)
 								.setChannelTypes(ChannelType.TEXT, ChannelType.GUILD_NEWS_THREAD, ChannelType.GUILD_PRIVATE_THREAD, ChannelType.GUILD_PUBLIC_THREAD, ChannelType.VOICE, ChannelType.STAGE)
-				).setGuildOnly(true)
+				).setContexts(InteractionContextType.GUILD)
 		);
 	}
 
@@ -59,19 +61,19 @@ public class MoveConversationCommand extends SlashCommand {
 		}
 		GuildMessageChannel channel = channelMapping.getAsChannel().asGuildMessageChannel();
 		if (event.getChannel().getIdLong() == channel.getIdLong()) {
-			Responses.warning(event, "Invalid Channel", "You cannot move the conversation to the same channel!").queue();
+			Responses.warnin(event, "Invalid Channel", "You cannot move the conversation to the same channel!").queue();
 			return;
 		}
 		if (channelMapping.getAsChannel().getType() == ChannelType.TEXT && channelMapping.getAsChannel().asTextChannel().getSlowmode() > 0) {
-			Responses.warning(event, "Invalid Channel", "You cannot move the conversation to a channel that has slowmode enabled!").queue();
+			Responses.warnin(event, "Invalid Channel", "You cannot move the conversation to a channel that has slowmode enabled!").queue();
 			return;
 		}
 		if (isInvalidChannel(event.getMember(), channel)) {
-			Responses.warning(event, "Invalid Channel", "You're not allowed to move the conversation to %s", channel.getAsMention()).queue();
+			Responses.warnin(event, "Invalid Channel", "You're not allowed to move the conversation to %s", channel.getAsMention()).queue();
 			return;
 		}
 		if (isInvalidChannel(event.getGuild().getSelfMember(), channel)) {
-			Responses.error(event, "Insufficient Permissions", "I'm not allowed to sent messages to %s", channel.getAsMention()).queue();
+			Responses.errorWithTitle(event, "Insufficient Permissions", "I'm not allowed to sent messages to %s", channel.getAsMention()).queue();
 			return;
 		}
 		event.deferReply(true).queue();
@@ -117,7 +119,7 @@ public class MoveConversationCommand extends SlashCommand {
 
 	private @NotNull MessageEditAction editMovedFromChannelMessage(@NotNull SlashCommandInteractionEvent event, @NotNull Message movedFrom, @NotNull Message movedTo) {
 		return movedTo.editMessageFormat(MOVED_FROM_MESSAGE, event.getChannel().getAsMention(), event.getUser().getAsMention(), movedFrom.getJumpUrl())
-				.setActionRow(Button.link(movedFrom.getJumpUrl(), "Jump to Message"))
+				.setComponents(ActionRow.of(Button.link(movedFrom.getJumpUrl(), "Jump to Message")))
 				.setAllowedMentions(Collections.emptySet());
 	}
 }

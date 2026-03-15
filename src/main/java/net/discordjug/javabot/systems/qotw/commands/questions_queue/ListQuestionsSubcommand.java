@@ -6,6 +6,7 @@ import net.discordjug.javabot.systems.qotw.model.QOTWQuestion;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -67,7 +68,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 								"> %s\nPriority: **%d**\nCreated by: %s\nCreated at: <t:%s:D>",
 								question.getText(),
 								question.getPriority(),
-								event.getJDA().retrieveUserById(question.getCreatedBy()).complete().getAsMention(),
+								UserSnowflake.fromId(question.getCreatedBy()).getAsMention(),
 								question.getCreatedAt().toEpochSecond(ZoneOffset.UTC)
 						),
 						false

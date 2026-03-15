@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.suggestions;
 
 import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -32,7 +31,7 @@ public class DeclineSuggestionSubcommand extends SuggestionSubcommand {
 	}
 
 	@Override
-	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
+	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message) {
 		String reason = event.getOption("reason", null, OptionMapping::getAsString);
 		MessageEmbed embed = message.getEmbeds().get(0);
 		MessageEmbed declineEmbed = buildSuggestionDeclineEmbed(event.getUser(), embed, reason);

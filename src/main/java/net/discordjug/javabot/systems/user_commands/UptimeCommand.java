@@ -5,6 +5,7 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class UptimeCommand extends SlashCommand {
 	 */
 	public UptimeCommand() {
 		setCommandData(Commands.slash("uptime", "Shows the bot's current uptime.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

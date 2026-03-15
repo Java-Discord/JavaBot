@@ -1,7 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.tags.commands;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
-
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 /**
@@ -17,7 +17,7 @@ public class TagsCommand extends SlashCommand {
 	 */
 	public TagsCommand(TagViewSubcommand tagViewSubcommand, TagListSubcommand tagListSubcommand, TagSearchSubcommand tagSearchSubcommand) {
 		setCommandData(Commands.slash("tag", "Commands for interacting with Custom Tags.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		addSubcommands(tagViewSubcommand, tagListSubcommand, tagSearchSubcommand);
 	}

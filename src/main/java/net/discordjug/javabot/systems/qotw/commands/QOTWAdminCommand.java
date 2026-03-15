@@ -6,6 +6,7 @@ import net.discordjug.javabot.systems.qotw.commands.questions_queue.AddQuestionS
 import net.discordjug.javabot.systems.qotw.commands.questions_queue.ListQuestionsSubcommand;
 import net.discordjug.javabot.systems.qotw.commands.questions_queue.RemoveQuestionSubcommand;
 import net.discordjug.javabot.systems.qotw.submissions.subcommands.QOTWReviewSubcommand;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
@@ -29,7 +30,7 @@ public class QOTWAdminCommand extends SlashCommand {
 	public QOTWAdminCommand(ListQuestionsSubcommand listQuestionsSubcommand, AddQuestionSubcommand addQuestionSubcommand, RemoveQuestionSubcommand removeQuestionSubcommand, IncrementPointsSubcommand incrementPointsSubcommand, DecrementPointsSubcommand decrementPointsSubcommand, QOTWReviewSubcommand reviewSubcommand) {
 		setCommandData(Commands.slash("qotw-admin", "Administrative tools for managing the Question of the Week.")
 				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		addSubcommands(reviewSubcommand);
 		addSubcommandGroups(

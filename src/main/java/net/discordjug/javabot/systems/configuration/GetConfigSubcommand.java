@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.configuration;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.UnknownPropertyException;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -38,7 +39,8 @@ public class GetConfigSubcommand extends ConfigSubcommand implements AutoComplet
 		}
 		String property = propertyOption.getAsString().trim();
 		Object value = config.resolve(property);
-		return Responses.info(event, "Configuration Property", "The value of the property `%s` is:\n```\n%s\n```", property, value);
+		String json = GsonUtils.toJson(value);
+		return Responses.info(event, "Configuration Property", "The value of the property `%s` is:\n```\n%s\n```", property, json);
 	}
 
 	@Override

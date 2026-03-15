@@ -4,12 +4,14 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.util.Constants;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +26,7 @@ public class ServerInfoCommand extends SlashCommand {
 	 */
 	public ServerInfoCommand() {
 		setCommandData(Commands.slash("serverinfo", "Shows some information about the current server.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 
@@ -40,7 +42,7 @@ public class ServerInfoCommand extends SlashCommand {
 				.getHook()
 				.sendMessageEmbeds(
 					buildServerInfoEmbed(event.getGuild(), owner))
-						.addActionRow(Button.link(Constants.WEBSITE_LINK, "Website")
+						.addComponents(ActionRow.of(Button.link(Constants.WEBSITE_LINK, "Website"))
 				).queue()
 		);
 	}

@@ -4,6 +4,7 @@ package net.discordjug.javabot.systems.user_commands.format_code;
 import net.discordjug.javabot.util.IndentationHelper;
 import net.discordjug.javabot.util.StringUtils;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,7 @@ public class FormatAndIndentCodeMessageContext extends ContextCommand.Message {
 	 */
 	public FormatAndIndentCodeMessageContext() {
 		setCommandData(Commands.message("Format and Indent Code")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

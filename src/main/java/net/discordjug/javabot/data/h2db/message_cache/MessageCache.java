@@ -1,23 +1,5 @@
 package net.discordjug.javabot.data.h2db.message_cache;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
@@ -30,15 +12,34 @@ import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.TimeUtils;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 /**
  * Listens for Incoming Messages and stores them in the Message Cache.
@@ -49,7 +50,7 @@ public class MessageCache {
 	/**
 	 * A memory-cache (list) of sent Messages, wrapped to a {@link CachedMessage} object.
 	 */
-	public List<CachedMessage> cache = new ArrayList<>();
+	public Deque<CachedMessage> cache = new ArrayDeque<>();
 	/**
 	 * Amount of messages since the last synchronization.
 	 * <p>
@@ -74,24 +75,30 @@ public class MessageCache {
 		this.botConfig = botConfig;
 		this.cacheRepository = cacheRepository;
 		try {
-			cache = cacheRepository.getAll();
+			cache = new ArrayDeque<>(cacheRepository.getAll());
 		} catch (DataAccessException e) {
 			ExceptionLogger.capture(e, getClass().getSimpleName());
 			log.error("Something went wrong during retrieval of stored messages.");
 		}
-
 	}
 
 	/**
-	 * Synchronizes Messages saved in the Database with what is currently stored in memory.
+	 * Synchronizes Messages saved in the Database with what is currently stored in memory. This action is executed in the background.
 	 */
 	public void synchronize() {
 		asyncPool.execute(()->{
-			cacheRepository.delete(cache.size());
-			cacheRepository.insertList(cache);
-			messageCount = 0;
-			log.info("Synchronized Database with local Cache.");
+			synchronizeNow();
 		});
+	}
+	
+	/**
+	 * Synchronizes Messages saved in the Database with what is currently stored in memory and wait until the synchronization finishes.
+	 */
+	public void synchronizeNow() {
+		cacheRepository.delete(cache.size());
+		cacheRepository.insertList(new ArrayList<>(cache));
+		messageCount = 0;
+		log.info("Synchronized Database with local Cache.");
 	}
 
 	/**
@@ -102,7 +109,7 @@ public class MessageCache {
 	public void cache(Message message) {
 		MessageCacheConfig config = botConfig.get(message.getGuild()).getMessageCacheConfig();
 		if (cache.size() + 1 > config.getMaxCachedMessages()) {
-			cache.remove(0);
+			cache.removeFirst();
 		}
 		if (messageCount >= config.getMessageSynchronizationInterval()) {
 			synchronize();
@@ -124,8 +131,8 @@ public class MessageCache {
 		if (config.getMessageCacheLogChannel() == null) return;
 		if (updated.getContentRaw().trim().equals(before.getMessageContent()) && updated.getAttachments().size() == before.getAttachments().size()) return;
 		MessageCreateAction action = config.getMessageCacheLogChannel()
-				.sendMessageEmbeds(buildMessageEditEmbed(updated.getGuild(), updated.getAuthor(), updated.getChannel(), before, updated))
-				.setActionRow(Button.link(updated.getJumpUrl(), "Jump to Message"));
+				.sendMessageEmbeds(buildMessageEditEmbed(updated.getAuthor(), updated.getChannel(), before, updated))
+				.addComponents(ActionRow.of(Button.link(updated.getJumpUrl(), "Jump to Message")));
 		if (before.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH || updated.getContentRaw().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 			action.addFiles(FileUpload.fromData(buildEditedMessageFile(updated.getAuthor(), before, updated), before.getMessageId() + ".txt"));
 		}
@@ -143,13 +150,29 @@ public class MessageCache {
 		MessageCacheConfig config = botConfig.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
-			MessageCreateAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(guild, author, channel, message));
+			MessageCreateAction action = config.getMessageCacheLogChannel().sendMessageEmbeds(buildMessageDeleteEmbed(author, channel, message));
 			if (message.getMessageContent().length() > MessageEmbed.VALUE_MAX_LENGTH) {
 				action.addFiles(FileUpload.fromData(buildDeletedMessageFile(author, message), message.getMessageId() + ".txt"));
 			}
 			action.queue();
 			requestMessageAttachments(message);
 		});
+	}
+	
+	/**
+	 * Retrieves all cached messages that were sent after a passed timestamp.
+	 * @param timestamp the timestamp since when messages should be received
+	 * @return the messages sent after the given timestamp as a {@link List}
+	 */
+	public List<CachedMessage> getMessagesAfter(OffsetDateTime timestamp) {
+		List<CachedMessage> cachedMessages = new ArrayList<>();
+		for (CachedMessage msg : this.cache.reversed()) {
+			if (UserSnowflake.fromId(msg.getMessageId()).getTimeCreated().isBefore(timestamp)) {
+				return cachedMessages.reversed();
+			}
+			cachedMessages.add(msg);
+		}
+		return cachedMessages.reversed();
 	}
 
 	/**
@@ -165,23 +188,31 @@ public class MessageCache {
 		}
 	}
 
-	private EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage before) {
-		long epoch = IdCalculatorCommand.getTimestampFromId(before.getMessageId()) / 1000;
+	/**
+	 * Creates an {@link EmbedBuilder} with information about a cached message.
+	 * @param channel The channel the message was sent in.
+	 * @param author The author of the message.
+	 * @param message The message to extract the information from as a {@link CachedMessage}.
+	 * @param contentFieldName the name of the field containing the message content in the embed.
+	 * @return an {@link EmbedBuilder} with information about the message.
+	 */
+	public EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage message, String contentFieldName) {
+		long epoch = IdCalculatorCommand.getTimestampFromId(message.getMessageId()) / 1000;
 		return new EmbedBuilder()
 				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
 				.addField("Author", author.getAsMention(), true)
 				.addField("Channel", channel.getAsMention(), true)
 				.addField("Created at", String.format("<t:%s:F>", epoch), true)
-				.setFooter("ID: " + before.getMessageId());
+				.setFooter("ID: " + message.getMessageId())
+				.addField(contentFieldName,
+						message.getMessageContent().substring(0, Math.min(message.getMessageContent().length(), MessageEmbed.VALUE_MAX_LENGTH)),
+						false);
 	}
 
-	private MessageEmbed buildMessageEditEmbed(Guild guild, User author, MessageChannel channel, CachedMessage before, Message after) {
-		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, before)
+	private MessageEmbed buildMessageEditEmbed(User author, MessageChannel channel, CachedMessage before, Message after) {
+		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, before, "Before")
 				.setTitle("Message Edited")
 				.setColor(Responses.Type.WARN.getColor())
-				.addField("Before", before.getMessageContent().substring(0, Math.min(
-						before.getMessageContent().length(),
-						MessageEmbed.VALUE_MAX_LENGTH)), false)
 				.addField("After", after.getContentRaw().substring(0, Math.min(
 						after.getContentRaw().length(),
 						MessageEmbed.VALUE_MAX_LENGTH)), false);
@@ -202,14 +233,10 @@ public class MessageCache {
 				.build();
 	}
 
-	private MessageEmbed buildMessageDeleteEmbed(Guild guild, User author, MessageChannel channel, CachedMessage message) {
-		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, message)
+	private MessageEmbed buildMessageDeleteEmbed(User author, MessageChannel channel, CachedMessage message) {
+		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, message, "Message Content")
 				.setTitle("Message Deleted")
-				.setColor(Responses.Type.ERROR.getColor())
-				.addField("Message Content",
-						message.getMessageContent().substring(0, Math.min(
-								message.getMessageContent().length(),
-								MessageEmbed.VALUE_MAX_LENGTH)), false);
+				.setColor(Responses.Type.ERROR.getColor());
 		if (!message.getAttachments().isEmpty()) {
 			addAttachmentsToMessageBuilder(message, eb);
 		}

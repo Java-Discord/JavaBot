@@ -1,10 +1,15 @@
 package net.discordjug.javabot.systems.configuration;
 
+import com.google.gson.JsonSyntaxException;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.UnknownPropertyException;
+import net.discordjug.javabot.util.GsonUtils;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -12,10 +17,8 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
@@ -56,11 +59,17 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 			if (resolved == null) {
 				return Responses.error(event, "Config `%s` not found", property);
 			}
+			String value;
+			if (resolved instanceof String s) {
+				value = s;
+			} else {
+				value = GsonUtils.toJson(resolved);
+			}
 			return event.replyModal(
 					Modal.create(ComponentIdBuilder.build("config-set", property), "Change configuration value")
-					.addActionRow(TextInput.create("value", "new value", TextInputStyle.PARAGRAPH)
-							.setValue(String.valueOf(resolved))
-							.build())
+					.addComponents(Label.of("new value", TextInput.create("value", TextInputStyle.PARAGRAPH)
+							.setValue(value)
+							.build()))
 				.build());
 		}
 		String valueString = valueOption.getAsString().trim();
@@ -77,8 +86,8 @@ public class SetConfigSubcommand extends ConfigSubcommand implements ModalHandle
 		try {
 			guildConfig.set(property, valueString);
 			Responses.success(event, "Configuration Updated", "The property `%s` has been set to `%s`.", property, valueString).queue();
-		} catch (UnknownPropertyException e) {
-			Responses.error(event, "Property not found: %s", property).queue();
+		} catch (UnknownPropertyException | JsonSyntaxException e) {
+			Responses.error(event, "Error while setting new value").queue();
 		}
 	}
 

@@ -7,6 +7,7 @@ import com.google.re2j.PatternSyntaxException;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -24,7 +25,7 @@ public class RegexCommand extends SlashCommand {
 		setCommandData(Commands.slash("regex", "Checks if the given string matches the regex pattern")
 				.addOption(OptionType.STRING, "regex", "The regex pattern", true)
 				.addOption(OptionType.STRING, "string", "The string which is tested", true)
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 

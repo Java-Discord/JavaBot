@@ -6,13 +6,13 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -54,12 +54,12 @@ public abstract class SuggestionSubcommand extends SlashCommand.Subcommand {
 		long messageId = messageIdMapping.getAsLong();
 		event.deferReply(true).queue();
 		event.getMessageChannel().retrieveMessageById(messageId).queue(
-				message -> message.clearReactions().queue(s -> handleSuggestionCommand(event, message, config).queue()),
+				message -> message.clearReactions().queue(s -> handleSuggestionCommand(event, message).queue()),
 				e -> Responses.error(event.getHook(), "Could not find suggestion message with id " + messageId).queue());
 
 	}
 
-	protected abstract WebhookMessageCreateAction<Message> handleSuggestionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Message message, GuildConfig config);
+	protected abstract WebhookMessageCreateAction<Message> handleSuggestionCommand(@Nonnull SlashCommandInteractionEvent event, @Nonnull Message message);
 
 	protected ActionRow getJumpButton(@NotNull Message m) {
 		return ActionRow.of(Button.link(m.getJumpUrl(), "Jump to Message"));

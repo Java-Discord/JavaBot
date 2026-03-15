@@ -1,6 +1,5 @@
 package net.discordjug.javabot.systems.help.commands;
 
-import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.StringResourceCache;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,9 +15,8 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 public class HelpGuidelinesSubcommand extends SlashCommand.Subcommand {
 	/**
 	 * The constructor of this class, which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
-	 * @param botConfig The main configuration of the bot
 	 */
-	public HelpGuidelinesSubcommand(BotConfig botConfig) {
+	public HelpGuidelinesSubcommand() {
 		setCommandData(new SubcommandData("guidelines", "Show the server's help guidelines in a simple format."));
 	}
 

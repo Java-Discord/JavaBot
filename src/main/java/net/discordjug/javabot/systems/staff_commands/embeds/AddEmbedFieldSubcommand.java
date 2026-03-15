@@ -7,6 +7,9 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.util.Pair;
 import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -16,11 +19,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -91,23 +91,23 @@ public class AddEmbedFieldSubcommand extends EmbedSubcommand implements ModalHan
 	}
 
 	private @NotNull Modal buildAddFieldModal(long messageId) {
-		TextInput titleInput = TextInput.create("name", "Field Name", TextInputStyle.SHORT)
+		TextInput titleInput = TextInput.create("name", TextInputStyle.SHORT)
 				.setPlaceholder(String.format("Choose a fitting field name. (max. %s chars)", MessageEmbed.TITLE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.TITLE_MAX_LENGTH)
 				.setRequired(true)
 				.build();
-		TextInput valueInput = TextInput.create("value", "Field Value", TextInputStyle.PARAGRAPH)
+		TextInput valueInput = TextInput.create("value", TextInputStyle.PARAGRAPH)
 				.setPlaceholder(String.format("Choose a description for your embed. (max. %s chars)", MessageEmbed.VALUE_MAX_LENGTH))
 				.setMaxLength(MessageEmbed.VALUE_MAX_LENGTH)
 				.setRequired(true)
 				.build();
-		TextInput inlineInput = TextInput.create("inline", "Should the field inline?", TextInputStyle.SHORT)
+		TextInput inlineInput = TextInput.create("inline", TextInputStyle.SHORT)
 				.setPlaceholder("true")
 				.setMaxLength(5)
 				.setRequired(true)
 				.build();
 		return Modal.create(ComponentIdBuilder.build("embed-addfield", messageId), "Add an Embed Field")
-				.addComponents(ActionRow.of(titleInput), ActionRow.of(valueInput), ActionRow.of(inlineInput))
+				.addComponents(Label.of("Field Name", titleInput), Label.of("Field Value", valueInput), Label.of("Should the field inline?", inlineInput))
 				.build();
 	}
 

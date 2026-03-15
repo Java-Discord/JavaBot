@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -38,7 +39,7 @@ public class RunScheduledTaskCommand extends SlashCommand implements AutoComplet
 	public RunScheduledTaskCommand(BotConfig botConfig, ScheduledTaskHolder taskHolder) {
 		setCommandData(Commands.slash("run-task", "(ADMIN ONLY) Run scheduled tasks")
 				.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 				.addOption(OptionType.STRING, "name", "Class name of the task", true, true)
 		);
 		setRequiredUsers(botConfig.getSystems().getAdminConfig().getAdminUsers());

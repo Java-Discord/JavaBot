@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
 import net.discordjug.javabot.util.InteractionUtils;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -35,7 +36,7 @@ public class QOTWSubmissionListener extends ListenerAdapter {
 									Please keep in mind that messages **over 2000 characters** get split in half due to webhook limitations.
 									If you want to make sure that your submission is properly formatted, split your message into smaller chunks instead.""",
 							event.getAuthor().getAsMention())
-					.setActionRow(InteractionUtils.createDeleteButton(event.getAuthor().getIdLong()))
+					.addComponents(ActionRow.of(InteractionUtils.createDeleteButton(event.getAuthor().getIdLong())))
 					.queue();
 		}
 	}

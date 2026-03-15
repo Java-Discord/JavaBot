@@ -12,6 +12,9 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -21,11 +24,8 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.InteractionCallbackAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +83,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 	}
 
 	private @NotNull Modal buildEditTagModal(@NotNull CustomTag tag) {
-		TextInput responseField = TextInput.create("tag-response", "Tag Response", TextInputStyle.PARAGRAPH)
+		TextInput responseField = TextInput.create("tag-response", TextInputStyle.PARAGRAPH)
 				.setPlaceholder("""
 						According to all known laws
 						of aviation,
@@ -95,13 +95,13 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				.setMaxLength(2000)
 				.setRequired(true)
 				.build();
-		TextInput replyField = TextInput.create("tag-reply", "Should the tag reply to your message?", TextInputStyle.SHORT)
+		TextInput replyField = TextInput.create("tag-reply", TextInputStyle.SHORT)
 				.setPlaceholder("true")
 				.setValue(String.valueOf(tag.isReply()))
 				.setMaxLength(5)
 				.setRequired(true)
 				.build();
-		TextInput embedField = TextInput.create("tag-embed", "Should the tag be embedded?", TextInputStyle.SHORT)
+		TextInput embedField = TextInput.create("tag-embed", TextInputStyle.SHORT)
 				.setPlaceholder("true")
 				.setValue(String.valueOf(tag.isReply()))
 				.setMaxLength(5)
@@ -109,7 +109,7 @@ public class EditCustomTagSubcommand extends TagsSubcommand implements AutoCompl
 				.build();
 		return Modal.create(ComponentIdBuilder.build("tag-edit", tag.getName()),
 						String.format("Edit \"%s\"", tag.getName().length() > 90 ? tag.getName().substring(0, 87) + "..." : tag.getName()))
-				.addComponents(ActionRow.of(responseField), ActionRow.of(replyField), ActionRow.of(embedField))
+				.addComponents(Label.of("Tag Response", responseField), Label.of("Should the tag reply to your message?", replyField), Label.of("Should the tag be embedded?", embedField))
 				.build();
 	}
 

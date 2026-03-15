@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.help.commands;
 
 import net.discordjug.javabot.systems.help.commands.notify.HelpPingSubcommand;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 
@@ -17,7 +18,7 @@ public class HelpCommand extends SlashCommand {
 	 */
 	public HelpCommand(HelpAccountSubcommand helpAccountSubcommand, HelpPingSubcommand helpPingSubcommand, HelpGuidelinesSubcommand helpGuidelinesSubcommand, HelpStatisticsSubcommand helpStatisticsSubcommand) {
 		setCommandData(Commands.slash("help", "Commands related to the help system.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 		addSubcommands(helpAccountSubcommand, helpPingSubcommand, helpGuidelinesSubcommand, helpStatisticsSubcommand);
 	}

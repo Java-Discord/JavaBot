@@ -12,10 +12,13 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import net.dv8tion.jda.api.components.MessageTopLevelComponent;
+import net.dv8tion.jda.api.components.MessageTopLevelComponentUnion;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
 
 /**
  * Utility class for message actions.
@@ -31,12 +34,12 @@ public class MessageActionUtils {
 	 * @param components The {@link List} of {@link ItemComponent}s.
 	 * @return A {@link List} of {@link ActionRow}s.
 	 */
-	public static @NotNull List<ActionRow> toActionRows(@NotNull List<? extends ItemComponent> components) {
+	public static @NotNull List<ActionRow> toActionRows(@NotNull List<? extends ActionRowChildComponent> components) {
 		if (components.size() > 25) {
 			throw new IllegalArgumentException("Cannot add more than 25 components to a message action.");
 		}
 		List<ActionRow> rows = new ArrayList<>(5);
-		List<ItemComponent> rowComponents = new ArrayList<>(5);
+		List<ActionRowChildComponent> rowComponents = new ArrayList<>(5);
 		while (!components.isEmpty()) {
 			rowComponents.add(components.remove(0));
 			if (rowComponents.size() == 5) {
@@ -50,24 +53,24 @@ public class MessageActionUtils {
 		return rows;
 	}
 
-	public static List<ActionRow> enableActionRows(List<ActionRow> actionRows) {
-		return actionRows.stream().map(ActionRow::asEnabled).toList();
+	public static List<MessageTopLevelComponent> enableActionRows(List<MessageTopLevelComponentUnion> actionRows) {
+		return actionRows.stream().map(component -> component instanceof ActionRow ar ? ar.asEnabled() : component).toList();
 	}
 
-	public static List<ActionRow> disableActionRows(List<ActionRow> actionRows) {
-		return actionRows.stream().map(ActionRow::asDisabled).toList();
+	public static List<MessageTopLevelComponent> disableActionRows(List<MessageTopLevelComponentUnion> actionRows) {
+		return actionRows.stream().map(component -> component instanceof ActionRow ar ? ar.asDisabled() : component).toList();
 	}
 
 	/**
-	 * Adds all Attachments from the initial message to the new message action and sends the message.
+	 * Adds attachments to a new message action and sends the message.
 	 *
-	 * @param message The initial {@link Message} object.
+	 * @param attachments The attachments to add.
 	 * @param action  The new {@link net.dv8tion.jda.api.requests.restaction.MessageCreateAction}.
 	 * @return A {@link CompletableFuture} with the message that is being sent.
 	 */
-	public static CompletableFuture<Message> addAttachmentsAndSend(Message message, MessageCreateAction action) {
+	public static CompletableFuture<Message> addAttachmentsAndSend(List<Attachment> attachments, MessageCreateAction action) {
 		List<CompletableFuture<?>> attachmentFutures = new ArrayList<>();
-		for (Message.Attachment attachment : message.getAttachments()) {
+		for (Message.Attachment attachment : attachments) {
 			attachmentFutures.add(
 					attachment.getProxy().download()
 							.thenApply(is -> action.addFiles(FileUpload.fromData(is, attachment.getFileName())))

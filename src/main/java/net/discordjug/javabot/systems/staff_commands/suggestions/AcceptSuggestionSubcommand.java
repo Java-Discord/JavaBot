@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.suggestions;
 
 import net.discordjug.javabot.data.config.BotConfig;
-import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,9 +30,9 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 	}
 
 	@Override
-	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message, GuildConfig config) {
+	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message) {
 		MessageEmbed embed = message.getEmbeds().get(0);
-		MessageEmbed declineEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed, config);
+		MessageEmbed declineEmbed = buildSuggestionAcceptEmbed(event.getUser(), embed);
 		message.editMessageEmbeds(declineEmbed).queue(
 				edit -> edit.addReaction(botConfig.getSystems().getEmojiConfig().getSuccessEmote(event.getJDA())).queue(),
 				error -> Responses.error(event.getHook(), error.getMessage()).queue());
@@ -41,7 +40,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 				.setComponents(getJumpButton(message));
 	}
 
-	private @NotNull MessageEmbed buildSuggestionAcceptEmbed(@NotNull User user, @NotNull MessageEmbed embed, @NotNull GuildConfig config) {
+	private @NotNull MessageEmbed buildSuggestionAcceptEmbed(@NotNull User user, @NotNull MessageEmbed embed) {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.SUCCESS.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())

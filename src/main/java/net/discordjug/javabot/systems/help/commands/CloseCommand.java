@@ -5,6 +5,7 @@ import net.discordjug.javabot.data.h2db.DbActions;
 import net.discordjug.javabot.systems.help.dao.HelpAccountRepository;
 import net.discordjug.javabot.systems.help.dao.HelpTransactionRepository;
 import net.discordjug.javabot.systems.user_preferences.UserPreferenceService;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
@@ -28,7 +29,7 @@ public class CloseCommand extends UnreserveCommand {
 		super(botConfig, dbActions, helpTransactionRepository, helpAccountRepository, preferenceService);
 		setCommandData(
 				Commands.slash("close", "Unreserves this post marking your question/issue as resolved.")
-						.setGuildOnly(true).addOption(OptionType.STRING, "reason",
-								"The reason why you're unreserving this channel", false));
+				.setContexts(InteractionContextType.GUILD)
+				.addOption(OptionType.STRING, "reason", "The reason why you're unreserving this channel", false));
 	}
 }

@@ -7,10 +7,12 @@ import net.discordjug.javabot.util.StringUtils;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +28,14 @@ public class BotInfoCommand extends SlashCommand {
 	 */
 	public BotInfoCommand() {
 		setCommandData(Commands.slash("botinfo", "Shows some information about the Bot.")
-				.setGuildOnly(true)
+				.setContexts(InteractionContextType.GUILD)
 		);
 	}
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		event.replyEmbeds(buildBotInfoEmbed(event.getJDA()))
-				.addActionRow(Button.link(Constants.GITHUB_LINK, "View on GitHub"))
+				.addComponents(ActionRow.of(Button.link(Constants.GITHUB_LINK, "View on GitHub")))
 				.queue();
 	}
 

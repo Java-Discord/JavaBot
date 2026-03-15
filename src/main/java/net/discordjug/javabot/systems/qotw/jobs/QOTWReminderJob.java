@@ -39,7 +39,7 @@ public class QOTWReminderJob {
 			if (q.isEmpty()) {
 				notificationService.withGuild(guild).sendToModerationLog(m -> m.sendMessageFormat(
 						"Warning! %s There's no Question of the Week in the queue. Please add one before it's time to post!",
-						config.getQOTWReviewRole().getAsMention()));
+						config.getQOTWReviewRole().getAsMention()).mention(config.getQOTWReviewRole()));
 			}
 		}
 	}
