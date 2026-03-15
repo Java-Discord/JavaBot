@@ -268,6 +268,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			ModalMapping mapping = values.get(i);
 			FormField field = form.fields().get(i);
 			String value = mapping.getAsString();
+			if (value != null) value = value.replace("```", "` ` `");
 			builder.addField(field.label(), value == null ? "*Empty*" : "```\n" + value + "\n```", false);
 		}
 
