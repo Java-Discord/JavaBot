@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
-
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -53,7 +52,6 @@ public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
-				.queue();
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
 	}
 }

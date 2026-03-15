@@ -3,7 +3,6 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;

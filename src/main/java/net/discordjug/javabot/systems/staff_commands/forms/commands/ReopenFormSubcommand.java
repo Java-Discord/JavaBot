@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
-
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;

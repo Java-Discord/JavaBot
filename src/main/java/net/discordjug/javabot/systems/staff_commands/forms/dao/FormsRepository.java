@@ -11,12 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -185,8 +183,8 @@ public class FormsRepository {
 	public boolean hasSubmitted(User user, FormData form) {
 		try {
 			return jdbcTemplate.queryForObject(
-					"select * from `form_submissions` where `user_id` = ? and `form_id` = ? limit 1",
-					(_, _) -> true, user.getIdLong(), form.id());
+					"select * from `form_submissions` where `user_id` = ? and `form_id` = ? limit 1", (_, _) -> true,
+					user.getIdLong(), form.id());
 		} catch (EmptyResultDataAccessException e) {
 			return false;
 		}
@@ -279,8 +277,7 @@ public class FormsRepository {
 	}
 
 	private List<FormField> readFormFields(long formId) {
-		return jdbcTemplate.query("select * from `form_fields` where `form_id` = ?", (rs, _) -> readField(rs),
-				formId);
+		return jdbcTemplate.query("select * from `form_fields` where `form_id` = ?", (rs, _) -> readField(rs), formId);
 	}
 
 	private static FormData read(ResultSet rs, List<FormField> fields) throws SQLException {

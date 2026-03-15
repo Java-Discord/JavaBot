@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.model;
 
 import java.util.Objects;
-
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 
@@ -25,30 +24,30 @@ import net.dv8tion.jda.api.components.textinput.TextInputStyle;
  * @param id          form id.
  */
 public record FormField(String label, int max, int min, String placeholder, boolean required, TextInputStyle style,
-        String value, long id) {
+		String value, long id) {
 
-    /**
-     * The main constructor.
-     */
-    public FormField {
-        Objects.requireNonNull(label);
-        if (min < 0) throw new IllegalArgumentException("min < 0");
+	/**
+	 * The main constructor.
+	 */
+	public FormField {
+		Objects.requireNonNull(label);
+		if (min < 0) throw new IllegalArgumentException("min < 0");
 
-        if (max < 1) throw new IllegalArgumentException("max < 1");
+		if (max < 1) throw new IllegalArgumentException("max < 1");
 
-        if (max < min) throw new IllegalArgumentException("max < min");
+		if (max < min) throw new IllegalArgumentException("max < min");
 
-        Objects.requireNonNull(style);
-    }
+		Objects.requireNonNull(style);
+	}
 
-    /**
-     * Create a text input from this field.
-     *
-     * @param id ID of this text input.
-     * @return text input ready to use in a modal.
-     */
-    public TextInput createTextInput(String id) {
-        return TextInput.create(id, style()).setRequiredRange(min(), max()).setPlaceholder(placeholder())
-                .setRequired(required()).setValue(value()).build();
-    }
+	/**
+	 * Create a text input from this field.
+	 *
+	 * @param id ID of this text input.
+	 * @return text input ready to use in a modal.
+	 */
+	public TextInput createTextInput(String id) {
+		return TextInput.create(id, style()).setRequiredRange(min(), max()).setPlaceholder(placeholder())
+				.setRequired(required()).setValue(value()).build();
+	}
 }

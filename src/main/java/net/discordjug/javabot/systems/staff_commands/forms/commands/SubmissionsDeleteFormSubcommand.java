@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
-
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.entities.User;
@@ -30,9 +29,9 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 	 */
 	public SubmissionsDeleteFormSubcommand(FormsRepository formsRepo) {
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of a user in the form")
-				.addOptions(new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for",
-						true, true), new OptionData(OptionType.USER, "user", "User to delete submissions of", true)));
+		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of a user in the form").addOptions(
+				new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for", true, true),
+				new OptionData(OptionType.USER, "user", "User to delete submissions of", true)));
 	}
 
 	@Override
@@ -54,7 +53,6 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
-				.queue();
+				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
 	}
 }

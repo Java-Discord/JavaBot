@@ -3,7 +3,6 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
@@ -61,8 +60,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 
 		formsRepo.removeField(form, index);
 
-		event.getHook().sendMessage("Removed field `" + form.fields().get(index).label() + "` from the form.")
-				.queue();
+		event.getHook().sendMessage("Removed field `" + form.fields().get(index).label() + "` from the form.").queue();
 	}
 
 	@Override
