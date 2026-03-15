@@ -8,6 +8,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponentUnion;
 import net.dv8tion.jda.api.components.buttons.Button;
@@ -106,7 +107,7 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 				return ActionRow.of(cpts);
 			}).filter(Objects::nonNull).toList();
 			msg.editMessageComponents(components).queue();
-		}, _ -> {});
+		}, e -> ExceptionLogger.capture(e));
 	}
 
 }
