@@ -260,7 +260,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	private static MessageEmbed createSubmissionEmbed(FormData form, List<ModalMapping> values, Member author) {
 		EmbedBuilder builder = new EmbedBuilder().setTitle("New form submission received")
 				.setAuthor(author.getEffectiveName(), null, author.getEffectiveAvatarUrl()).setTimestamp(Instant.now());
-		builder.addField("Sender", author.getAsMention(), true).addField("Title", form.title(), true);
+		builder.addField("Sender", String.format("%s (`%s`)", author.getAsMention(), author.getId()), true)
+				.addField("Title", form.title(), true);
 
 		int len = Math.min(values.size(), form.fields().size());
 		for (int i = 0; i < len; i++) {
