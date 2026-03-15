@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.dv8tion.jda.api.components.label.Label;
 
@@ -34,12 +35,6 @@ import net.dv8tion.jda.api.components.label.Label;
 // TODO `Optional` getter for the submit message
 public record FormData(long id, List<FormField> fields, String title, long submitChannel, String submitMessage,
 		Long messageId, Long messageChannel, Instant expiration, boolean closed, boolean onetime) {
-
-	/**
-	 * Setting {@link FormData#expiration} to this value indicates, that the form
-	 * will never expire.
-	 */
-	public static final long EXPIRATION_PERMANENT = -1;
 
 	/**
 	 * The main constructor.

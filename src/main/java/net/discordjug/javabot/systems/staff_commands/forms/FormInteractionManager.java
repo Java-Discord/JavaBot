@@ -223,9 +223,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	 * Gets expiration time from the slash comamnd event.
 	 *
 	 * @param event slash event to get expiration from.
-	 * @return an optional containing expiration time,
-	 *         {@link FormData#EXPIRATION_PERMANENT} if none given, or an empty
-	 *         optional if it's invalid.
+	 * @return an optional containing expiration time, or an empty optional if it's
+	 *         not present.
 	 * @throws IllegalArgumentException if the date doesn't follow the format.
 	 */
 	public static Optional<Instant> parseExpiration(SlashCommandInteractionEvent event)
