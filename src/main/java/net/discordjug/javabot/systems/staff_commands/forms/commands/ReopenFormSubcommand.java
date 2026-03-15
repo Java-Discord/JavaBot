@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form reopen` command. Reopens a closed form, allowing new submissions.
@@ -23,7 +22,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * @see CloseFormSubcommandr
  * @see FormData
  */
-public class ReopenFormSubcommand extends Subcommand implements AutoCompletable {
+public class ReopenFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 	private final FormInteractionManager interactionManager;
@@ -37,6 +36,7 @@ public class ReopenFormSubcommand extends Subcommand implements AutoCompletable 
 	 */
 	public ReopenFormSubcommand(FormsRepository formsRepo, FormInteractionManager interactionManager,
 			BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		this.interactionManager = interactionManager;
 		setCommandData(new SubcommandData("reopen", "Reopen a closed form").addOptions(
@@ -45,6 +45,7 @@ public class ReopenFormSubcommand extends Subcommand implements AutoCompletable 
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
+		if (!checkForStaffRole(event)) return;
 		long id = event.getOption("form-id", OptionMapping::getAsLong);
 		Optional<FormData> formOpt = formsRepo.getForm(id);
 		if (formOpt.isEmpty()) {

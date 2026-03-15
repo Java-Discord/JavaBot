@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form close` command. This command closes a form. A closed form doesn't
@@ -24,7 +23,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * 
  * @see FormData
  */
-public class CloseFormSubcommand extends Subcommand implements AutoCompletable {
+public class CloseFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 	private final FormInteractionManager interactionManager;
@@ -38,6 +37,7 @@ public class CloseFormSubcommand extends Subcommand implements AutoCompletable {
 	 */
 	public CloseFormSubcommand(FormsRepository formsRepo, FormInteractionManager interactionManager,
 			BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		this.interactionManager = interactionManager;
 		setCommandData(new SubcommandData("close", "Close an existing form")
@@ -46,6 +46,7 @@ public class CloseFormSubcommand extends Subcommand implements AutoCompletable {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
+		if (!checkForStaffRole(event)) return;
 		long id = event.getOption("form-id", OptionMapping::getAsLong);
 		Optional<FormData> formOpt = formsRepo.getForm(id);
 		if (formOpt.isEmpty()) {

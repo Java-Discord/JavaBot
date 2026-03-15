@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -12,17 +13,16 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form create` command.
- * This command creates a new, empty form.
- * Newly created forms have no fields, and thus can't be attached (See {@link AttachFormSubcommand}) to messages.
- * Use {@link AddFieldFormSubcommand} to add new fields to the form.
+ * The `/form create` command. This command creates a new, empty form. Newly
+ * created forms have no fields, and thus can't be attached (See
+ * {@link AttachFormSubcommand}) to messages. Use {@link AddFieldFormSubcommand}
+ * to add new fields to the form.
  * 
  * @see FormData
  */
-public class CreateFormSubcommand extends Subcommand {
+public class CreateFormSubcommand extends FormSubcommand {
 
 	private final FormsRepository formsRepo;
 
@@ -30,8 +30,10 @@ public class CreateFormSubcommand extends Subcommand {
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public CreateFormSubcommand(FormsRepository formsRepo) {
+	public CreateFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("create", "Create a new form").addOptions(
 				new OptionData(OptionType.STRING, "title", "Form title (shown in modal)", true),
@@ -47,7 +49,7 @@ public class CreateFormSubcommand extends Subcommand {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(true).queue();
 		Optional<Instant> expirationOpt;
 		try {

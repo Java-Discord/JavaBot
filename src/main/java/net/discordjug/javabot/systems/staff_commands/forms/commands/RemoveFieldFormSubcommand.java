@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
@@ -15,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form remove-field` command. This command removes a field from the form.
@@ -23,7 +23,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * @see AddFieldFormSubcommand
  * @see FormData
  */
-public class RemoveFieldFormSubcommand extends Subcommand implements AutoCompletable {
+public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 
@@ -31,8 +31,10 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public RemoveFieldFormSubcommand(FormsRepository formsRepo) {
+	public RemoveFieldFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("remove-field", "Removse a field from an existing form")
 				.addOption(OptionType.INTEGER, "form-id", "Form ID to add the field to", true, true)
@@ -41,7 +43,7 @@ public class RemoveFieldFormSubcommand extends Subcommand implements AutoComplet
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		event.deferReply(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
 		int index = event.getOption("field", OptionMapping::getAsInt);

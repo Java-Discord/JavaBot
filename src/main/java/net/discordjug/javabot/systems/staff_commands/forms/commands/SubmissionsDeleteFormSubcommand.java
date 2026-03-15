@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.entities.User;
@@ -14,7 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form submissions-delete` command. Deletes all submission records from a
@@ -23,7 +23,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * 
  * @see FormData
  */
-public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoCompletable {
+public class SubmissionsDeleteFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 
@@ -31,8 +31,10 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public SubmissionsDeleteFormSubcommand(FormsRepository formsRepo) {
+	public SubmissionsDeleteFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of a user in the form").addOptions(
 				new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for", true, true),
@@ -41,6 +43,7 @@ public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoC
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
+		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {

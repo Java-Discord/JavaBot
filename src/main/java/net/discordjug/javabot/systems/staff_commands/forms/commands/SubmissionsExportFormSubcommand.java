@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
@@ -23,7 +24,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.FileUpload;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form submissions-export` command. Export all submissions tied to the
@@ -31,7 +31,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * 
  * @see FormData
  */
-public class SubmissionsExportFormSubcommand extends Subcommand implements AutoCompletable {
+public class SubmissionsExportFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -40,8 +40,10 @@ public class SubmissionsExportFormSubcommand extends Subcommand implements AutoC
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public SubmissionsExportFormSubcommand(FormsRepository formsRepo) {
+	public SubmissionsExportFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("submissions-export", "Export all of the form's submissions").addOptions(
 				new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get submissions for", true, true)));
@@ -49,7 +51,7 @@ public class SubmissionsExportFormSubcommand extends Subcommand implements AutoC
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(false).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {

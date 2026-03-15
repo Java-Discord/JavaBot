@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.util.Arrays;
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
@@ -15,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form add-field` command. This command allows for modification of
@@ -27,7 +27,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * 
  * @see FormData
  */
-public class AddFieldFormSubcommand extends Subcommand implements AutoCompletable {
+public class AddFieldFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 
@@ -35,8 +35,10 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public AddFieldFormSubcommand(FormsRepository formsRepo) {
+	public AddFieldFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("add-field", "Adds a field to an existing form")
 				.addOption(OptionType.INTEGER, "form-id", "Form ID to add the field to", true, true)
@@ -52,7 +54,7 @@ public class AddFieldFormSubcommand extends Subcommand implements AutoCompletabl
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		event.deferReply(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {

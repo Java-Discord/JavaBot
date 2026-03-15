@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -21,7 +22,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 /**
@@ -32,7 +32,7 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
  * 
  * @see FormData
  */
-public class DetachFormSubcommand extends Subcommand implements AutoCompletable {
+public class DetachFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 
@@ -40,8 +40,10 @@ public class DetachFormSubcommand extends Subcommand implements AutoCompletable 
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public DetachFormSubcommand(FormsRepository formsRepo) {
+	public DetachFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("detach", "Detach a form from a message")
 				.addOptions(new OptionData(OptionType.INTEGER, "form-id", "ID of the form to attach", true, true)));
@@ -49,7 +51,7 @@ public class DetachFormSubcommand extends Subcommand implements AutoCompletable 
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(true).queue();
 
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));

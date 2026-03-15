@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -13,7 +14,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form show` command. Brings up an input modal for the given form. This
@@ -22,7 +22,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * 
  * @see FormData
  */
-public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
+public class ShowFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 
@@ -30,8 +30,10 @@ public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public ShowFormSubcommand(FormsRepository formsRepo) {
+	public ShowFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("show",
 				"Forcefully opens a form dialog, even if it's closed, or not attached to a message")
@@ -40,7 +42,7 @@ public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.reply("A form with this ID was not found.").setEphemeral(true).queue();

@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.time.Instant;
 import java.util.Optional;
 
+import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,7 +19,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
  * The `/form details` command. Displays information about the specified form.
@@ -27,7 +27,7 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  * 
  * @see FormData
  */
-public class DetailsFormSubcommand extends Subcommand implements AutoCompletable {
+public class DetailsFormSubcommand extends FormSubcommand implements AutoCompletable {
 
 	private final FormsRepository formsRepo;
 
@@ -35,8 +35,10 @@ public class DetailsFormSubcommand extends Subcommand implements AutoCompletable
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
+	 * @param botConfig bot configuration
 	 */
-	public DetailsFormSubcommand(FormsRepository formsRepo) {
+	public DetailsFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
+		super(botConfig);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("details", "Get details about a form").addOptions(
 				new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get details for", true, true)));
@@ -44,7 +46,7 @@ public class DetailsFormSubcommand extends Subcommand implements AutoCompletable
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
+		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(false).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
