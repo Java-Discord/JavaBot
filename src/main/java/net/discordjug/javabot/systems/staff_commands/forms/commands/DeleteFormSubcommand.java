@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -15,7 +16,12 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form delete` command.
+ * The `/form delete` command. Deletes an existing form, also detaching it from
+ * a message if it's attached at the time of running this command. This command
+ * does NOT delete submission records from the database, see
+ * {@link SubmissionsDeleteFormSubcommand}.
+ * 
+ * @see FormData
  */
 public class DeleteFormSubcommand extends Subcommand implements AutoCompletable {
 

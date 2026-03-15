@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -29,7 +30,14 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 /**
- * The `/form attach` command.
+ * The `/form attach` command. This command can be used to attach a form to an
+ * existing message. "Attaching" a form to message in this case mean that the
+ * bot will modify the target message with a button, that when interacted with,
+ * will bring up a modal where the user can input their data. See
+ * {@link DetachFormSubcommand} for a command used to detach the form from a
+ * message.
+ * 
+ * @see FormData
  */
 public class AttachFormSubcommand extends Subcommand implements AutoCompletable {
 

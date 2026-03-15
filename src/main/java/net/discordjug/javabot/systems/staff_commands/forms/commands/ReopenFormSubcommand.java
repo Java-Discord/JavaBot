@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
+
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
@@ -17,7 +18,10 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form reopen` command.
+ * The `/form reopen` command. Reopens a closed form, allowing new submissions.
+ * 
+ * @see CloseFormSubcommandr
+ * @see FormData
  */
 public class ReopenFormSubcommand extends Subcommand implements AutoCompletable {
 

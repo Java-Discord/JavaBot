@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -24,7 +25,12 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 /**
- * The `/form detach` command.
+ * The `/form detach` command. This command detaches this form from the message
+ * it's attached to. Detaching a form means that any buttons that could be used
+ * to bring its input dialog will be removed. See {@link AttachFormSubcommand}
+ * for a command for attaching the form to a message.
+ * 
+ * @see FormData
  */
 public class DetachFormSubcommand extends Subcommand implements AutoCompletable {
 

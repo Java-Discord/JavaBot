@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.time.Instant;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -17,7 +18,9 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form modify` command.
+ * The `/form modify` command. Modifies attributes of an existing form.
+ * 
+ * @see FormData
  */
 public class ModifyFormSubcommand extends Subcommand implements AutoCompletable {
 
@@ -33,7 +36,6 @@ public class ModifyFormSubcommand extends Subcommand implements AutoCompletable 
 		setCommandData(new SubcommandData("modify", "Modify an existing form").addOptions(
 				new OptionData(OptionType.INTEGER, "form-id", "ID of the form to modify", true, true),
 				new OptionData(OptionType.STRING, "title", "Form title (shown in modal)"),
-				new OptionData(OptionType.STRING, "json", "Form inputs data"),
 				new OptionData(OptionType.CHANNEL, "submit-channel", "Channel to log form submissions in"),
 				new OptionData(OptionType.STRING, "submit-message",
 						"Message displayed to the user once they submit the form"),

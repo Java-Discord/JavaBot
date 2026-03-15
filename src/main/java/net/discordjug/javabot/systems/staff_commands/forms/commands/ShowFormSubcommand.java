@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -15,7 +16,11 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form show` command.
+ * The `/form show` command. Brings up an input modal for the given form. This
+ * command works even if the form is currently not accepting new submissions
+ * (due to being closed or expired), or is not attached to a message.
+ * 
+ * @see FormData
  */
 public class ShowFormSubcommand extends Subcommand implements AutoCompletable {
 

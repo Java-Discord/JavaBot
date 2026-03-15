@@ -4,10 +4,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
@@ -24,7 +26,10 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form submissions-export` command.
+ * The `/form submissions-export` command. Export all submissions tied to the
+ * specified form from the database in JSON format.
+ * 
+ * @see FormData
  */
 public class SubmissionsExportFormSubcommand extends Subcommand implements AutoCompletable {
 

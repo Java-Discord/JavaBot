@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
@@ -17,7 +18,10 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form remove-field` command.
+ * The `/form remove-field` command. This command removes a field from the form.
+ *
+ * @see AddFieldFormSubcommand
+ * @see FormData
  */
 public class RemoveFieldFormSubcommand extends Subcommand implements AutoCompletable {
 

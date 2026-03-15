@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -15,6 +16,11 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
 
 /**
  * The `/form create` command.
+ * This command creates a new, empty form.
+ * Newly created forms have no fields, and thus can't be attached (See {@link AttachFormSubcommand}) to messages.
+ * Use {@link AddFieldFormSubcommand} to add new fields to the form.
+ * 
+ * @see FormData
  */
 public class CreateFormSubcommand extends Subcommand {
 

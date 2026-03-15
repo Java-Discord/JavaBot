@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
+
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
@@ -17,7 +18,11 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form close` command.
+ * The `/form close` command. This command closes a form. A closed form doesn't
+ * accept any new submissions. See {@link ReopenFormSubcommand} for a command
+ * that can be used to re-open a closed form.
+ * 
+ * @see FormData
  */
 public class CloseFormSubcommand extends Subcommand implements AutoCompletable {
 

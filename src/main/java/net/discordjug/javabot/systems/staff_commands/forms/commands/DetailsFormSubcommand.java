@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.time.Instant;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,7 +21,11 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form details` command.
+ * The `/form details` command. Displays information about the specified form.
+ * The information is sent as a non-ephemeral embed in the same channel this
+ * command is executed in.
+ * 
+ * @see FormData
  */
 public class DetailsFormSubcommand extends Subcommand implements AutoCompletable {
 

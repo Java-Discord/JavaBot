@@ -1,6 +1,7 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.entities.User;
@@ -16,7 +17,11 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form submissions-delete` command.
+ * The `/form submissions-delete` command. Deletes all submission records from a
+ * given user from the database. For one-time forms this will allow a user who
+ * already submitted the form to submit it again.
+ * 
+ * @see FormData
  */
 public class SubmissionsDeleteFormSubcommand extends Subcommand implements AutoCompletable {
 

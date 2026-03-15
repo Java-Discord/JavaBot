@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Arrays;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
@@ -17,7 +18,14 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
- * The `/form add-field` command.
+ * The `/form add-field` command. This command allows for modification of
+ * {@link FormData} by adding new fields to it. See
+ * {@link RemoveFieldFormSubcommand} for the command used to remove fields from
+ * a form.<br>
+ * Currently, due to Discord limitations, only 5 fields are allowed per form.
+ * Trying to add more fields will have no effect.
+ * 
+ * @see FormData
  */
 public class AddFieldFormSubcommand extends Subcommand implements AutoCompletable {
 
