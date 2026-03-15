@@ -15,6 +15,9 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  */
 public abstract class FormSubcommand extends Subcommand {
 
+	/**
+	 * Form ID field identificator used in form subcommands.
+	 */
 	protected static final String FORM_ID_FIELD = "form-id";
 	private final BotConfig botConfig;
 	private final FormsRepository formsRepository;
@@ -22,8 +25,8 @@ public abstract class FormSubcommand extends Subcommand {
 	/**
 	 * The main constructor.
 	 * 
-	 * @param formsRepo the forms repository
 	 * @param botConfig main bot configuration
+	 * @param formsRepository the forms repository
 	 */
 	public FormSubcommand(BotConfig botConfig, FormsRepository formsRepository) {
 		this.botConfig = botConfig;

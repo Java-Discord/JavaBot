@@ -30,7 +30,6 @@ public class DeleteFormSubcommand extends FormSubcommand implements AutoCompleta
 	 * The main constructor of this subcommand.
 	 *
 	 * @param formsRepo the forms repository
-	 * @param botConfig
 	 * @param botConfig bot configuration
 	 */
 	public DeleteFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
