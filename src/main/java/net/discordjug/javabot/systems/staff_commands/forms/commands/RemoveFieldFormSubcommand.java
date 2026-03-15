@@ -34,10 +34,10 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 	 * @param botConfig bot configuration
 	 */
 	public RemoveFieldFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("remove-field", "Removse a field from an existing form")
-				.addOption(OptionType.INTEGER, "form-id", "Form ID to add the field to", true, true)
+				.addOption(OptionType.INTEGER, FORM_ID_FIELD, "Form ID to add the field to", true, true)
 				.addOption(OptionType.INTEGER, "field", "# of the field to remove", true, true));
 	}
 
@@ -45,7 +45,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
 		event.deferReply(true).queue();
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		int index = event.getOption("field", OptionMapping::getAsInt);
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("A form with this ID was not found.").queue();
@@ -71,27 +71,20 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		switch (target.getName()) {
-			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
-					.queue();
-			case "field" -> {
-				Long formId = event.getOption("form-id", OptionMapping::getAsLong);
-				if (formId != null) {
-					Optional<FormData> form = formsRepo.getForm(formId);
-					if (form.isPresent()) {
-						List<Choice> choices = new ArrayList<>();
-						List<FormField> fields = form.get().fields();
-						for (int i = 0; i < fields.size(); i++) {
-							choices.add(new Choice(fields.get(i).label(), i));
-						}
-						event.replyChoices(choices).queue();
-						return;
+		if (!handleFormIDAutocomplete(event, target) && "field".equals(target.getName())) {
+			Long formId = event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong);
+			if (formId != null) {
+				Optional<FormData> form = formsRepo.getForm(formId);
+				if (form.isPresent()) {
+					List<Choice> choices = new ArrayList<>();
+					List<FormField> fields = form.get().fields();
+					for (int i = 0; i < fields.size(); i++) {
+						choices.add(new Choice(fields.get(i).label(), i));
 					}
+					event.replyChoices(choices).queue();
+					return;
 				}
-				event.replyChoices().queue();
 			}
-			default -> {}
 		}
 	}
 }

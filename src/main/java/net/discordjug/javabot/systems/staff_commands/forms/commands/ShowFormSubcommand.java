@@ -9,7 +9,6 @@ import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -33,17 +32,17 @@ public class ShowFormSubcommand extends FormSubcommand implements AutoCompletabl
 	 * @param botConfig bot configuration
 	 */
 	public ShowFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("show",
 				"Forcefully opens a form dialog, even if it's closed, or not attached to a message")
-				.addOption(OptionType.INTEGER, "form-id", "Form ID to add the field to", true, true));
+				.addOption(OptionType.INTEGER, FORM_ID_FIELD, "Form ID to add the field to", true, true));
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.reply("A form with this ID was not found.").setEphemeral(true).queue();
 			return;
@@ -58,7 +57,6 @@ public class ShowFormSubcommand extends FormSubcommand implements AutoCompletabl
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
+		handleFormIDAutocomplete(event, target);
 	}
 }

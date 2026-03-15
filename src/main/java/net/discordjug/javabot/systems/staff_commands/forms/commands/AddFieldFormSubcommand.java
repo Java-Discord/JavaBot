@@ -38,10 +38,10 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 	 * @param botConfig bot configuration
 	 */
 	public AddFieldFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("add-field", "Adds a field to an existing form")
-				.addOption(OptionType.INTEGER, "form-id", "Form ID to add the field to", true, true)
+				.addOption(OptionType.INTEGER, FORM_ID_FIELD, "Form ID to add the field to", true, true)
 				.addOption(OptionType.STRING, "label", "Field label", true)
 				.addOption(OptionType.INTEGER, "min", "Minimum number of characters")
 				.addOption(OptionType.INTEGER, "max", "Maximum number of characters")
@@ -56,7 +56,7 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
 		event.deferReply(true).queue();
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("A form with this ID was not found.").queue();
 			return;
@@ -74,14 +74,9 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		switch (target.getName()) {
-			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
-					.queue();
-			case "style" ->
-				event.replyChoices(Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
-						.map(style -> new Choice(style.name(), style.name())).toList()).queue();
-			default -> {}
+		if (!handleFormIDAutocomplete(event, target) && "style".equals(target.getName())) {
+			event.replyChoices(Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
+					.map(style -> new Choice(style.name(), style.name())).toList()).queue();
 		}
 	}
 

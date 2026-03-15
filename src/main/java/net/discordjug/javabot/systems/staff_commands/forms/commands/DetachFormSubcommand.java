@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -43,10 +42,10 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 	 * @param botConfig bot configuration
 	 */
 	public DetachFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("detach", "Detach a form from a message")
-				.addOptions(new OptionData(OptionType.INTEGER, "form-id", "ID of the form to attach", true, true)));
+				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to attach", true, true)));
 	}
 
 	@Override
@@ -54,7 +53,7 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(true).queue();
 
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("A form with this ID was not found.").queue();
 			return;
@@ -74,8 +73,7 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
+		handleFormIDAutocomplete(event, target);
 	}
 
 	/**

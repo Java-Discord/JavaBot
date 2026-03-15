@@ -33,7 +33,7 @@ public class CreateFormSubcommand extends FormSubcommand {
 	 * @param botConfig bot configuration
 	 */
 	public CreateFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("create", "Create a new form").addOptions(
 				new OptionData(OptionType.STRING, "title", "Form title (shown in modal)", true),

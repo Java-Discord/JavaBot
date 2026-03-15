@@ -10,7 +10,6 @@ import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -33,10 +32,10 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 	 * @param botConfig bot configuration
 	 */
 	public ModifyFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("modify", "Modify an existing form").addOptions(
-				new OptionData(OptionType.INTEGER, "form-id", "ID of the form to modify", true, true),
+				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to modify", true, true),
 				new OptionData(OptionType.STRING, "title", "Form title (shown in modal)"),
 				new OptionData(OptionType.CHANNEL, "submit-channel", "Channel to log form submissions in"),
 				new OptionData(OptionType.STRING, "submit-message",
@@ -52,7 +51,7 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
 		event.deferReply(true).queue();
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("Couldn't find a form with this ID").queue();
 			return;
@@ -89,8 +88,7 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
+		handleFormIDAutocomplete(event, target);
 	}
 
 }

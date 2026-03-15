@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -38,17 +37,17 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 	 * @param botConfig bot configuration
 	 */
 	public DetailsFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("details", "Get details about a form").addOptions(
-				new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to get details for", true, true)));
+				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to get details for", true, true)));
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(false).queue();
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("Couldn't find a form with this id").queue();
 			return;
@@ -66,8 +65,7 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(
-				formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList()).queue();
+		handleFormIDAutocomplete(event, target);
 	}
 
 	private EmbedBuilder createFormDetailsEmbed(FormData form, Guild guild) {

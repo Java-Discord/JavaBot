@@ -1,9 +1,13 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.util.Checks;
 import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
+import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
 
 /**
@@ -11,15 +15,19 @@ import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcom
  */
 public abstract class FormSubcommand extends Subcommand {
 
+	protected static final String FORM_ID_FIELD = "form-id";
 	private final BotConfig botConfig;
+	private final FormsRepository formsRepository;
 
 	/**
 	 * The main constructor.
 	 * 
+	 * @param formsRepo the forms repository
 	 * @param botConfig main bot configuration
 	 */
-	public FormSubcommand(BotConfig botConfig) {
+	public FormSubcommand(BotConfig botConfig, FormsRepository formsRepository) {
 		this.botConfig = botConfig;
+		this.formsRepository = formsRepository;
 	}
 
 	/**
@@ -35,5 +43,24 @@ public abstract class FormSubcommand extends Subcommand {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Tries to handle the auto completion event initiated by a user. If current
+	 * focused field's id is equal to {@link #FORM_ID_FIELD}, the method will handle
+	 * the event by replying with a list of all available form IDs,
+	 * 
+	 * @param event  the event to handle
+	 * @param target auto completion target
+	 * @return true if the event was handled by this method
+	 */
+	protected boolean handleFormIDAutocomplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
+		if (FORM_ID_FIELD.equals(target.getName())) {
+			event.replyChoices(
+					formsRepository.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
+					.queue();
+			return true;
+		}
+		return false;
 	}
 }

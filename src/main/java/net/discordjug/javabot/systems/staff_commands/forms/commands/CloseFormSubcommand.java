@@ -9,7 +9,6 @@ import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -37,17 +36,17 @@ public class CloseFormSubcommand extends FormSubcommand implements AutoCompletab
 	 */
 	public CloseFormSubcommand(FormsRepository formsRepo, FormInteractionManager interactionManager,
 			BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		this.interactionManager = interactionManager;
 		setCommandData(new SubcommandData("close", "Close an existing form")
-				.addOptions(new OptionData(OptionType.INTEGER, "form-id", "The ID of a form to close", true, true)));
+				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to close", true, true)));
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		long id = event.getOption("form-id", OptionMapping::getAsLong);
+		long id = event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong);
 		Optional<FormData> formOpt = formsRepo.getForm(id);
 		if (formOpt.isEmpty()) {
 			event.reply("A form with this ID was not found.").setEphemeral(true).queue();
@@ -69,8 +68,6 @@ public class CloseFormSubcommand extends FormSubcommand implements AutoCompletab
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		event.replyChoices(
-				formsRepo.getAllForms(false).stream().map(form -> new Choice(form.toString(), form.id())).toList())
-				.queue();
+		handleFormIDAutocomplete(event, target);
 	}
 }

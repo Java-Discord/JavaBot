@@ -50,10 +50,10 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 	 * @param botConfig bot configuration
 	 */
 	public AttachFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
-		super(botConfig);
+		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("attach", "Attach a form to a message").addOptions(
-				new OptionData(OptionType.INTEGER, "form-id", "ID of the form to attach", true, true),
+				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to attach", true, true),
 				new OptionData(OptionType.STRING, "message-id", "ID of the message to attach the form to", true),
 				new OptionData(OptionType.CHANNEL, "channel",
 						"Channel of the message. Required if the message is in a different channel"),
@@ -67,7 +67,7 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 		if (!checkForStaffRole(event)) return;
 		event.deferReply().setEphemeral(true).queue();
 
-		Optional<FormData> formOpt = formsRepo.getForm(event.getOption("form-id", OptionMapping::getAsLong));
+		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("A form with this ID was not found.").queue();
 			return;
@@ -121,15 +121,11 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		switch (target.getName()) {
-			case "form-id" -> event.replyChoices(
-					formsRepo.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
-					.queue();
-			case "button-style" -> event.replyChoices(
+		if (!handleFormIDAutocomplete(event, target) && "button-style".equals(target.getName())) {
+			event.replyChoices(
 					Set.of(ButtonStyle.DANGER, ButtonStyle.PRIMARY, ButtonStyle.SECONDARY, ButtonStyle.SUCCESS).stream()
 							.map(style -> new Choice(style.name(), style.name())).toList())
 					.queue();
-			default -> {}
 		}
 	}
 
