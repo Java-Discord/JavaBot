@@ -38,7 +38,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("remove-field", "Removse a field from an existing form")
 				.addOption(OptionType.INTEGER, FORM_ID_FIELD, "Form ID to add the field to", true, true)
-				.addOption(OptionType.INTEGER, "field", "# of the field to remove", true, true));
+				.addOption(OptionType.INTEGER, "field", "0-indexed # of the field to remove", true, true));
 	}
 
 	@Override
