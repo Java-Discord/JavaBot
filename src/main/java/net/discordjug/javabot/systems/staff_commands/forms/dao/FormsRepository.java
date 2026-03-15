@@ -22,10 +22,10 @@ import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 /**
  * Dao class that represents the FORMS table.
@@ -139,7 +139,7 @@ public class FormsRepository {
 	public Map<FormUser, Integer> getSubmissionsCountPerUser(FormData form) {
 		Objects.requireNonNull(form);
 		List<FormUser> users = jdbcTemplate.query("select * from `form_submissions` where `form_id` = ?",
-				(rs, rowNum) -> new FormUser(rs.getLong("user_id"), rs.getString("user_name")), form.id());
+				(rs, _) -> new FormUser(rs.getLong("user_id"), rs.getString("user_name")), form.id());
 		Map<FormUser, Integer> map = new HashMap<>();
 		for (FormUser user : users) {
 			map.merge(user, 1, Integer::sum);
@@ -156,7 +156,7 @@ public class FormsRepository {
 	public Optional<FormData> getForm(long formId) {
 		try {
 			return Optional.of(jdbcTemplate.queryForObject("select * from `forms` where `form_id` = ?",
-					(RowMapper<FormData>) (rs, rowNum) -> read(rs, readFormFields(formId)), formId));
+					(RowMapper<FormData>) (rs, _) -> read(rs, readFormFields(formId)), formId));
 		} catch (EmptyResultDataAccessException e) {
 			return Optional.empty();
 		}
@@ -171,7 +171,7 @@ public class FormsRepository {
 	public int getTotalSubmissionsCount(FormData form) {
 		Objects.requireNonNull(form);
 		return jdbcTemplate.queryForObject("select count(*) from `form_submissions` where `form_id` = ?",
-				(rs, rowNum) -> rs.getInt(1), form.id());
+				(rs, _) -> rs.getInt(1), form.id());
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class FormsRepository {
 		try {
 			return jdbcTemplate.queryForObject(
 					"select * from `form_submissions` where `user_id` = ? and `form_id` = ? limit 1",
-					(rs, rowNum) -> true, user.getIdLong(), form.id());
+					(_, _) -> true, user.getIdLong(), form.id());
 		} catch (EmptyResultDataAccessException e) {
 			return false;
 		}
@@ -279,7 +279,7 @@ public class FormsRepository {
 	}
 
 	private List<FormField> readFormFields(long formId) {
-		return jdbcTemplate.query("select * from `form_fields` where `form_id` = ?", (rs, rowNum) -> readField(rs),
+		return jdbcTemplate.query("select * from `form_fields` where `form_id` = ?", (rs, _) -> readField(rs),
 				formId);
 	}
 

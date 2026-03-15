@@ -44,7 +44,6 @@ public class CreateFormSubcommand extends Subcommand {
 	public void execute(SlashCommandInteractionEvent event) {
 
 		event.deferReply().setEphemeral(true).queue();
-		String expirationStr = event.getOption("expiration", null, OptionMapping::getAsString);
 		Optional<Instant> expirationOpt;
 		try {
 			expirationOpt = FormInteractionManager.parseExpiration(event);
