@@ -52,10 +52,6 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 			return;
 		}
 		FormData form = formOpt.get();
-		if (index < 0 || index >= form.fields().size()) {
-			event.getHook().sendMessage("Field index out of bounds.").queue();
-			return;
-		}
 
 		if (form.isAttached() && form.fields().size() <= 1) {
 			event.getHook().sendMessage(
@@ -64,7 +60,10 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 			return;
 		}
 
-		formsRepo.removeField(form, index);
+		if (!formsRepo.removeField(form, index)) {
+			event.getHook().sendMessage("A field on this index was not found.").queue();
+			return;
+		}
 
 		event.getHook().sendMessage("Removed field `" + form.fields().get(index).label() + "` from the form.").queue();
 	}

@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -238,11 +240,12 @@ public class FormsRepository {
 	 *
 	 * @param form  form to remove the field from
 	 * @param index index of the field to remove
+	 * @return 
 	 */
-	public void removeField(FormData form, int index) {
+	public boolean removeField(FormData form, int index) {
 		List<FormField> fields = form.fields();
-		if (index < 0 || index >= fields.size()) return;
-		jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).id());
+		if (index < 0 || index >= fields.size()) return false;
+		return jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).id()) > 0;
 	}
 
 	/**
