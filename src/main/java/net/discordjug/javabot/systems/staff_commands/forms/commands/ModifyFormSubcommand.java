@@ -43,7 +43,7 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 				new OptionData(OptionType.STRING, "submit-message",
 						"Message displayed to the user once they submit the form"),
 				new OptionData(OptionType.STRING, "expiration",
-						"UTC time after which the form will not accept further submissions. "
+						"UTC time after which the form stops accepting submissions. - for no expiration"
 								+ FormInteractionManager.DATE_FORMAT_STRING),
 				new OptionData(OptionType.BOOLEAN, "onetime",
 						"If the form should only accept one submission per user. Defaults to false.")));
@@ -67,6 +67,7 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 		if (event.getOption("expiration") == null) {
 			expiration = oldForm.expiration();
 		} else {
+			if ("-".equals(event.getOption("expiration", OptionMapping::getAsString))) expiration = null;
 			Optional<Instant> expirationOpt;
 			try {
 				expirationOpt = FormInteractionManager.parseExpiration(event);
