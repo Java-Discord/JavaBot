@@ -88,7 +88,7 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 	public static void detachFromMessage(FormData form, Guild guild) {
 		if (!form.isAttached()) return;
 		TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
-		formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
+		if (formChannel != null) formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
 			List<ActionRow> components = msg.getComponents().stream().map(msgComponent -> {
 				ActionRow row = msgComponent.asActionRow();
 				List<ActionRowChildComponentUnion> cpts = row.getComponents().stream().filter(cpt -> {
