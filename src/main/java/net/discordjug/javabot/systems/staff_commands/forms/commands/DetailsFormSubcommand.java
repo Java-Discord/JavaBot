@@ -1,6 +1,5 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import net.discordjug.javabot.data.config.BotConfig;
@@ -56,7 +55,6 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 		FormData form = formOpt.get();
 		EmbedBuilder embedBuilder = createFormDetailsEmbed(form, event.getGuild());
 		embedBuilder.setAuthor(event.getMember().getEffectiveName(), null, event.getMember().getEffectiveAvatarUrl());
-		embedBuilder.setTimestamp(Instant.now());
 
 		MessageCreateData builder = new MessageCreateBuilder().addEmbeds(embedBuilder.build()).build();
 
