@@ -15,10 +15,10 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
- * The `/form delete` command. Deletes an existing form, also detaching it from
- * a message if it's attached at the time of running this command. This command
- * does NOT delete submission records from the database, see
- * {@link SubmissionsDeleteFormSubcommand}.
+ * The `/form delete` command. Deletes an existing form. This command does NOT
+ * delete submission records from the database, see
+ * {@link SubmissionsDeleteFormSubcommand}. This command won't work if the form
+ * is attached to a message, see {@link DetachFormSubcommand}
  * 
  * @see FormData
  */
@@ -36,8 +36,8 @@ public class DeleteFormSubcommand extends FormSubcommand implements AutoCompleta
 	public DeleteFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("delete", "Delete an existing form")
-				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to delete", true, true)));
+		setCommandData(new SubcommandData("delete", "Delete an existing form").addOptions(
+				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to delete", true, true)));
 	}
 
 	@Override
@@ -51,14 +51,16 @@ public class DeleteFormSubcommand extends FormSubcommand implements AutoCompleta
 		}
 
 		event.deferReply(true).queue();
-
 		FormData form = formOpt.get();
-		formsRepo.deleteForm(form);
 
 		if (form.isAttached()) {
-			DetachFormSubcommand.detachFromMessage(form, event.getGuild());
-			// TODO send a warning
+			event.getHook().sendMessage(
+					"This form is attached to a message. Use `details` subcommand to check the message this form is attached to, or `detach` subcommand to detach the message before deleting.")
+					.queue();
+			return;
 		}
+
+		formsRepo.deleteForm(form);
 
 		event.getHook().sendMessage("Form deleted!").queue();
 	}
