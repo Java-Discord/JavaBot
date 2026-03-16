@@ -83,7 +83,7 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 	 */
 	public List<Label> createComponents() {
 		List<Label> list = new ArrayList<>(fields.size());
-		for (int i = 0; i < list.size(); i++) {
+		for (int i = 0; i < fields.size(); i++) {
 			FormField field = fields.get(i);
 			list.add(Label.of(fields.get(i).label(), field.createTextInput("text" + i)));
 		}
