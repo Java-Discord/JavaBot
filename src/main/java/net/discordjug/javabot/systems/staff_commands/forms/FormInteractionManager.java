@@ -76,7 +76,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			long messageId = info.messageId();
 			MessageChannel formChannel = guild.getJDA().getChannelById(MessageChannel.class, messageChannelId);
 			formChannel.retrieveMessageById(messageId).queue(msg -> {
-				mapFormMessageButtons(msg, btn -> {
+				editFormMessageButtons(msg, btn -> {
 					String cptId = btn.getCustomId();
 					String[] split = ComponentIdBuilder.split(cptId);
 					if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)
@@ -156,15 +156,15 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	/**
 	 * Modifies buttons in a message using given function for mapping.
 	 *
-	 * @param msg    message to modify buttons in.
-	 * @param mapper mapping function.
+	 * @param msg          message to modify buttons in.
+	 * @param editFunction function to edit the buttons.
 	 */
-	public void mapFormMessageButtons(Message msg, Function<Button, Button> mapper) {
+	public void editFormMessageButtons(Message msg, Function<Button, Button> editFunction) {
 		List<ActionRow> components = msg.getComponents().stream().map(messageComponent -> {
 			ActionRow row = messageComponent.asActionRow();
 			List<ActionRowChildComponent> cpts = row.getComponents().stream().map(cpt -> {
 				if (cpt instanceof Button btn) {
-					return mapper.apply(btn);
+					return editFunction.apply(btn);
 				}
 				return cpt;
 			}).toList();
@@ -191,7 +191,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			long messageId = info.messageId();
 			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
 			formChannel.retrieveMessageById(messageId).queue(msg -> {
-				mapFormMessageButtons(msg, btn -> {
+				editFormMessageButtons(msg, btn -> {
 					String cptId = btn.getCustomId();
 					String[] split = ComponentIdBuilder.split(cptId);
 					if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)
