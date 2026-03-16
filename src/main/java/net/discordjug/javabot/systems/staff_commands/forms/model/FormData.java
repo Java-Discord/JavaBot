@@ -63,7 +63,7 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 
 	/**
 	 * Get information about the form's attachment state. If the form is attached to
-	 * a message, this method will return a non-empty optional containin information
+	 * a message, this method will return a non-empty optional containing information
 	 * about the message this form is attached to.
 	 * 
 	 * @return optional attachment info

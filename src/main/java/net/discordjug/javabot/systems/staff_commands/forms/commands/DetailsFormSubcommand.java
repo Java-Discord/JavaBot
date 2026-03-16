@@ -8,7 +8,8 @@ import net.discordjug.javabot.systems.staff_commands.forms.model.FormAttachmentI
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -87,7 +88,7 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 
 		channelMention = attachmentInfoOptonal.map(info -> {
 			long channelId = info.messageChannelId();
-			TextChannel channel = guild.getTextChannelById(channelId);
+			MessageChannel channel = guild.getJDA().getChannelById(MessageChannel.class, channelId);
 			return channel != null ? channel.getAsMention() : "`" + channelId + "`";
 		}).orElse("*Not attached*");
 
@@ -95,15 +96,15 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 			long messageId = attachmentInfo.messageId();
 			long channelId = attachmentInfo.messageChannelId();
 			return MarkdownUtil.maskedLink("Link",
-					String.format("https://discord.com/channels/%s/%s/%s", guild.getId(), channelId, messageId));
+					String.format(Message.JUMP_URL, guild.getId(), channelId, messageId));
 		}).orElse("*Not attached*");
 
 		String submissionsChannelMention;
-		TextChannel submissionsChannel = guild.getTextChannelById(form.submitChannel());
+		MessageChannel submissionsChannel = guild.getJDA().getChannelById(MessageChannel.class, form.submitChannel());
 		if (submissionsChannel != null) {
 			submissionsChannelMention = submissionsChannel.getAsMention();
 		} else {
-			submissionsChannelMention = "`" + form.submitChannel();
+			submissionsChannelMention = "`" + form.submitChannel() + "`";
 		}
 
 		builder.addField("Attached in", channelMention, true);

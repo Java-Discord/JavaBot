@@ -240,7 +240,8 @@ public class FormsRepository {
 	}
 
 	/**
-	 * Remove a field from a form. Fails silently if the index is out of bounds.
+	 * Remove a field from a form. Fails and return false if the index is out of
+	 * bounds.
 	 *
 	 * @param form  form to remove the field from
 	 * @param index index of the field to remove
@@ -249,7 +250,8 @@ public class FormsRepository {
 	public boolean removeField(FormData form, int index) {
 		List<FormField> fields = form.fields();
 		if (index < 0 || index >= fields.size()) return false;
-		return jdbcTemplate.update("delete from `form_fields` where `id` = ?", fields.get(index).id()) > 0;
+		return jdbcTemplate.update("delete from `form_fields` where `id` = ? and `form_id` = ?", fields.get(index).id(),
+				form.id()) > 0;
 	}
 
 	/**

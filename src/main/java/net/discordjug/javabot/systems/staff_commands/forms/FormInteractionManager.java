@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -80,7 +81,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 		form.getAttachmentInfo().ifPresent(info -> {
 			long messageChannelId = info.messageChannelId();
 			long messageId = info.messageId();
-			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
+			MessageChannel formChannel = guild.getJDA().getChannelById(MessageChannel.class, messageChannelId);
 			formChannel.retrieveMessageById(messageId).queue(msg -> {
 				mapFormMessageButtons(msg, btn -> {
 					String cptId = btn.getCustomId();

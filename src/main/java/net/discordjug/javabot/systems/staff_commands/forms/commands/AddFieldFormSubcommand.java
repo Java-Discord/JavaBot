@@ -8,15 +8,16 @@ import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
 /**
  * The `/form add-field` command. This command allows for modification of
@@ -56,7 +57,11 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 				.addOption(OptionType.STRING, FORM_PLACEHOLDER_FIELD, "Field placeholder")
 				.addOption(OptionType.BOOLEAN, FORM_REQUIRED_FIELD,
 						"Whether or not the user has to input data in this field. Default: false")
-				.addOption(OptionType.STRING, FORM_STYLE_FIELD, "Input style. Default: SHORT", false, true)
+				.addOptions(
+						new OptionData(OptionType.STRING, FORM_STYLE_FIELD, "Input style. Default: SHORT", false)
+								.addChoices(
+										Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
+												.map(style -> new Choice(style.name(), style.name())).toList()))
 				.addOption(OptionType.STRING, FORM_VALUE_FIELD, "Initial field value"));
 	}
 
@@ -71,7 +76,7 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 		}
 		FormData form = formOpt.get();
 
-		if (form.fields().size() >= 5) {
+		if (form.fields().size() >= Message.MAX_COMPONENT_COUNT) {
 			event.getHook().sendMessage("Can't add more than 5 components to a form").queue();
 			return;
 		}
@@ -82,12 +87,7 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		if (!handleFormIDAutocomplete(event, target) && FORM_STYLE_FIELD.equals(target.getName())) {
-			event.replyChoices(AutoCompleteUtils.filterChoices(event,
-					Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
-							.map(style -> new Choice(style.name(), style.name())).toList()))
-					.queue();
-		}
+		handleFormIDAutocomplete(event, target);
 	}
 
 	private static FormField createFormFieldFromEvent(SlashCommandInteractionEvent e) {

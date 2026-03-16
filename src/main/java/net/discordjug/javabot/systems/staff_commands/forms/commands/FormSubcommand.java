@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand.Subcommand;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
 /**
  * Base abstract class containing common methods used in form subcommands.
@@ -19,37 +20,37 @@ public abstract class FormSubcommand extends Subcommand {
 	 * Form ID field identificator used in form subcommands.
 	 */
 	protected static final String FORM_ID_FIELD = "form-id";
-	
+
 	/**
 	 * Channel field identifier.
 	 */
 	protected static final String FORM_CHANNEL_FIELD = "channel";
-	
+
 	/**
 	 * Message id field identifier.
 	 */
 	protected static final String FORM_MESSAGE_ID_FIELD = "message-id";
-	
+
 	/**
 	 * Expiration field identifier.
 	 */
 	protected static final String FORM_EXPIRATION_FIELD = "expiration";
-	
+
 	/**
 	 * "onetime" field identifier.
 	 */
 	protected static final String FORM_ONETIME_FIELD = "onetime";
-	
+
 	/**
 	 * Submit message field identifier.
 	 */
 	protected static final String FORM_SUBMIT_MESSAGE_FIELD = "submit-message";
-	
+
 	/**
 	 * Submit channel field identifier.
 	 */
 	protected static final String FORM_SUBMIT_CHANNEL_FIELD = "submit-channel";
-	
+
 	/**
 	 * Form title field identifier.
 	 */
@@ -60,7 +61,7 @@ public abstract class FormSubcommand extends Subcommand {
 	/**
 	 * The main constructor.
 	 * 
-	 * @param botConfig main bot configuration
+	 * @param botConfig       main bot configuration
 	 * @param formsRepository the forms repository
 	 */
 	public FormSubcommand(BotConfig botConfig, FormsRepository formsRepository) {
@@ -94,9 +95,8 @@ public abstract class FormSubcommand extends Subcommand {
 	 */
 	protected boolean handleFormIDAutocomplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		if (FORM_ID_FIELD.equals(target.getName())) {
-			event.replyChoices(
-					formsRepository.getAllForms().stream().map(form -> new Choice(form.toString(), form.id())).toList())
-					.queue();
+			event.replyChoices(AutoCompleteUtils.filterChoices(event, formsRepository.getAllForms().stream()
+					.map(form -> new Choice(form.toString(), form.id())).toList())).queue();
 			return true;
 		}
 		return false;

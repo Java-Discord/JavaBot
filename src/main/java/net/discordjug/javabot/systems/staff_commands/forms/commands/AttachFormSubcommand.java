@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,12 +26,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
-import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 /**
  * The `/form attach` command. This command can be used to attach a form to an
- * existing message. "Attaching" a form to message in this case mean that the
+ * existing message. "Attaching" a form to message in this case means that the
  * bot will modify the target message with a button, that when interacted with,
  * will bring up a modal where the user can input their data. See
  * {@link DetachFormSubcommand} for a command used to detach the form from a
@@ -64,7 +62,10 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 				new OptionData(OptionType.STRING, FORM_BUTTON_LABEL_FIELD,
 						"Label of the submit button. Default is \"Submit\""),
 				new OptionData(OptionType.STRING, FORM_BUTTON_STYLE_FIELD, "Submit button style. Defaults to primary",
-						false, true)));
+						false)
+						.addChoices(Set
+								.of(ButtonStyle.DANGER, ButtonStyle.PRIMARY, ButtonStyle.SECONDARY, ButtonStyle.SUCCESS)
+								.stream().map(style -> new Choice(style.name(), style.name())).toList())));
 	}
 
 	@Override
@@ -106,14 +107,13 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 		}
 
 		String buttonLabel = event.getOption(FORM_BUTTON_LABEL_FIELD, "Submit", OptionMapping::getAsString);
-		net.dv8tion.jda.api.components.buttons.ButtonStyle style = event.getOption(FORM_BUTTON_STYLE_FIELD,
-				ButtonStyle.PRIMARY, t -> {
-					try {
-						return ButtonStyle.valueOf(t.getAsString().toUpperCase());
-					} catch (IllegalArgumentException e) {
-						return ButtonStyle.PRIMARY;
-					}
-				});
+		ButtonStyle style = event.getOption(FORM_BUTTON_STYLE_FIELD, ButtonStyle.PRIMARY, t -> {
+			try {
+				return ButtonStyle.valueOf(t.getAsString().toUpperCase());
+			} catch (IllegalArgumentException e) {
+				return ButtonStyle.PRIMARY;
+			}
+		});
 
 		msgChannel.retrieveMessageById(messageId).queue(message -> {
 			attachFormToMessage(message, buttonLabel, style, form);
@@ -126,12 +126,7 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		if (!handleFormIDAutocomplete(event, target) && FORM_BUTTON_STYLE_FIELD.equals(target.getName())) {
-			event.replyChoices(AutoCompleteUtils.filterChoices(event,
-					Set.of(ButtonStyle.DANGER, ButtonStyle.PRIMARY, ButtonStyle.SECONDARY, ButtonStyle.SUCCESS).stream()
-							.map(style -> new Choice(style.name(), style.name())).toList()))
-					.queue();
-		}
+		handleFormIDAutocomplete(event, target);
 	}
 
 	private static void attachFormToMessage(Message message, String buttonLabel, ButtonStyle style, FormData form) {
@@ -149,9 +144,8 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 			rows.add(ActionRow.of(button));
 		} else {
 			ActionRow lastRow = rows.get(rows.size() - 1);
-			List<ActionRowChildComponent> components = new ArrayList<>(lastRow.getComponents().size() + 1);
-			Collections.copy(components, lastRow.getComponents());
-			components.set(components.size() - 1, button);
+			List<ActionRowChildComponent> components = new ArrayList<>(lastRow.getComponents());
+			components.add(button);
 			rows.set(rows.size() - 1, ActionRow.of(components));
 		}
 

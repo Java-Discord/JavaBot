@@ -37,17 +37,19 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 	public ModifyFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("modify", "Modify an existing form's data. Use *-field commands to manage form fields").addOptions(
-				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to modify", true, true),
-				new OptionData(OptionType.STRING, FORM_TITLE_FIELD, "Form title (shown in modal)"),
-				new OptionData(OptionType.CHANNEL, FORM_SUBMIT_CHANNEL_FIELD, "Channel to log form submissions in"),
-				new OptionData(OptionType.STRING, FORM_SUBMIT_MESSAGE_FIELD,
-						"Message displayed to the user once they submit the form"),
-				new OptionData(OptionType.STRING, FORM_EXPIRATION_FIELD,
-						"UTC time after which the form stops accepting submissions. - for no expiration. "
-								+ FormInteractionManager.DATE_FORMAT_STRING),
-				new OptionData(OptionType.BOOLEAN, FORM_ONETIME_FIELD,
-						"If the form should only accept one submission per user. Defaults to false.")));
+		setCommandData(new SubcommandData("modify",
+				"Modify an existing form's data. Use *-field commands to manage form fields")
+				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to modify", true, true),
+						new OptionData(OptionType.STRING, FORM_TITLE_FIELD, "Form title (shown in modal)"),
+						new OptionData(OptionType.CHANNEL, FORM_SUBMIT_CHANNEL_FIELD,
+								"Channel to log form submissions in"),
+						new OptionData(OptionType.STRING, FORM_SUBMIT_MESSAGE_FIELD,
+								"Message displayed to the user once they submit the form"),
+						new OptionData(OptionType.STRING, FORM_EXPIRATION_FIELD,
+								"UTC time after which the form stops accepting submissions. - for no expiration. "
+										+ FormInteractionManager.DATE_FORMAT_STRING),
+						new OptionData(OptionType.BOOLEAN, FORM_ONETIME_FIELD,
+								"If the form should only accept one submission per user. Defaults to false.")));
 	}
 
 	@Override
@@ -61,14 +63,16 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 		}
 		FormData oldForm = formOpt.get();
 
-		String title = event.getOption("title", oldForm.title(), OptionMapping::getAsString);
-		long submitChannel = event.getOption("submit-channel", oldForm.submitChannel(), OptionMapping::getAsLong);
-		String submitMessage = event.getOption("submit-message", oldForm.submitMessage(), OptionMapping::getAsString);
+		String title = event.getOption(FORM_TITLE_FIELD, oldForm.title(), OptionMapping::getAsString);
+		long submitChannel = event.getOption(FORM_SUBMIT_CHANNEL_FIELD, oldForm.submitChannel(),
+				OptionMapping::getAsLong);
+		String submitMessage = event.getOption(FORM_SUBMIT_MESSAGE_FIELD, oldForm.submitMessage(),
+				OptionMapping::getAsString);
 		Instant expiration;
-		if (event.getOption("expiration") == null) {
+		if (event.getOption(FORM_EXPIRATION_FIELD) == null) {
 			expiration = oldForm.expiration();
 		} else {
-			if ("-".equals(event.getOption("expiration", OptionMapping::getAsString))) {
+			if ("-".equals(event.getOption(FORM_EXPIRATION_FIELD, OptionMapping::getAsString))) {
 				expiration = null;
 			} else {
 				Optional<Instant> expirationOpt;
@@ -82,7 +86,7 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 			}
 		}
 
-		boolean onetime = event.getOption("onetime", oldForm.onetime(), OptionMapping::getAsBoolean);
+		boolean onetime = event.getOption(FORM_ONETIME_FIELD, oldForm.onetime(), OptionMapping::getAsBoolean);
 
 		Long messageId;
 		Long messageChannel;

@@ -15,9 +15,8 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
- * The `/form delete` command. Deletes an existing form. This command does NOT
- * delete submission records from the database, see
- * {@link SubmissionsDeleteFormSubcommand}. This command won't work if the form
+ * The `/form delete` command. Deletes an existing form. This command also does
+ * delete submission records from the database. This command won't work if the form
  * is attached to a message, see {@link DetachFormSubcommand}
  * 
  * @see FormData

@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponentUnion;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -89,7 +89,7 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 		form.getAttachmentInfo().ifPresent(info -> {
 			long messageChannelId = info.messageChannelId();
 			long messageId = info.messageId();
-			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
+			MessageChannel formChannel = guild.getJDA().getChannelById(MessageChannel.class, messageChannelId);
 			if (formChannel != null) {
 				formChannel.retrieveMessageById(messageId).queue(msg -> {
 					List<ActionRow> components = msg.getComponents().stream().map(msgComponent -> {
