@@ -7,6 +7,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -17,6 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.modals.Modal;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
@@ -24,7 +26,7 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
  * {@link FormData} by adding new fields to it. See
  * {@link RemoveFieldFormSubcommand} for the command used to remove fields from
  * a form.<br>
- * Currently, due to Discord limitations, only 5 fields are allowed per form.
+ * Currently, due to Discord limitations, only {@link Modal#MAX_COMPONENTS} fields are allowed per form.
  * Trying to add more fields will have no effect.
  * 
  * @see FormData
@@ -57,32 +59,29 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 				.addOption(OptionType.STRING, FORM_PLACEHOLDER_FIELD, "Field placeholder")
 				.addOption(OptionType.BOOLEAN, FORM_REQUIRED_FIELD,
 						"Whether or not the user has to input data in this field. Default: false")
-				.addOptions(
-						new OptionData(OptionType.STRING, FORM_STYLE_FIELD, "Input style. Default: SHORT", false)
-								.addChoices(
-										Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
-												.map(style -> new Choice(style.name(), style.name())).toList()))
+				.addOptions(new OptionData(OptionType.STRING, FORM_STYLE_FIELD, "Input style. Default: SHORT", false)
+						.addChoices(Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
+								.map(style -> new Choice(style.name(), style.name())).toList()))
 				.addOption(OptionType.STRING, FORM_VALUE_FIELD, "Initial field value"));
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("A form with this ID was not found.").queue();
+			Responses.error(event, "A form with this ID was not found.").queue();
 			return;
 		}
 		FormData form = formOpt.get();
 
 		if (form.fields().size() >= Message.MAX_COMPONENT_COUNT) {
-			event.getHook().sendMessage("Can't add more than 5 components to a form").queue();
+			Responses.error(event, "Can't add more than %s components to a form", Message.MAX_COMPONENT_COUNT).queue();
 			return;
 		}
 
 		formsRepo.addField(form, createFormFieldFromEvent(event));
-		event.getHook().sendMessage("Added a new field to the form.").queue();
+		event.reply("Added a new field to the form.").setEphemeral(true).queue();
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.dv8tion.jda.api.components.Component.Type;
 import net.dv8tion.jda.api.components.MessageTopLevelComponentUnion;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
@@ -140,7 +141,8 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 			button = button.asDisabled();
 		}
 
-		if (rows.isEmpty() || rows.get(rows.size() - 1).getActionComponents().size() >= 5) {
+		if (rows.isEmpty()
+				|| rows.get(rows.size() - 1).getActionComponents().size() >= ActionRow.getMaxAllowed(Type.BUTTON)) {
 			rows.add(ActionRow.of(button));
 		} else {
 			ActionRow lastRow = rows.get(rows.size() - 1);

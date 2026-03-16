@@ -1,14 +1,13 @@
 package net.discordjug.javabot.systems.staff_commands.forms;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
@@ -45,14 +44,14 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 public class FormInteractionManager implements ButtonHandler, ModalHandler {
 
 	/**
-	 * Date and time format used in forms.
-	 */
-	public static final DateFormat DATE_FORMAT;
-
-	/**
 	 * String representation of the date and time format used in forms.
 	 */
-	public static final String DATE_FORMAT_STRING;
+	public static final String DATE_FORMAT_STRING = "dd/MM/yyyy HH:mm";
+
+	/**
+	 * Date and time formatter used in forms.
+	 */
+	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_STRING);
 
 	/**
 	 * Component ID used for form buttons and modals.
@@ -61,12 +60,6 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	private static final String FORM_NOT_FOUND_MSG = "This form was not found in the database. Please report this to the server staff.";
 
 	private final FormsRepository formsRepo;
-
-	static {
-		DATE_FORMAT_STRING = "dd/MM/yyyy HH:mm";
-		DATE_FORMAT = new SimpleDateFormat(FormInteractionManager.DATE_FORMAT_STRING, Locale.ENGLISH);
-		DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-	}
 
 	/**
 	 * Closes the form, preventing further submissions and disabling associated
@@ -239,8 +232,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			expiration = Optional.empty();
 		} else {
 			try {
-				expiration = Optional.of(FormInteractionManager.DATE_FORMAT.parse(expirationStr).toInstant());
-			} catch (ParseException e) {
+				expiration = Optional.of(LocalDateTime.parse(expirationStr, DATE_FORMATTER).toInstant(ZoneOffset.UTC));
+			} catch (DateTimeParseException e) {
 				throw new IllegalArgumentException("Invalid date. You should follow the format `"
 						+ FormInteractionManager.DATE_FORMAT_STRING + "`.");
 			}
