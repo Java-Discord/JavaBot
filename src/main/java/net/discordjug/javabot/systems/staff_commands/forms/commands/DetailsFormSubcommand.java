@@ -111,8 +111,7 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 
 		builder.addField("Submissions channel", submissionsChannelMention, true);
 		builder.addField("Is one-time", form.onetime() ? ":white_check_mark:" : ":x:", true);
-		addCodeblockField(builder, "Submission message",
-				form.submitMessage() == null ? "Default" : form.submitMessage(), true);
+		addCodeblockField(builder, "Submission message", form.getOptionalSubmitMessage().orElse("Default"), true);
 
 		addCodeblockField(builder, "Number of fields", form.fields().size(), true);
 		addCodeblockField(builder, "Number of submissions", formsRepo.getTotalSubmissionsCount(form), true);

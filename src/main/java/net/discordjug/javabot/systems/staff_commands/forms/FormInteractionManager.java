@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.Function;
+
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
@@ -155,9 +156,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			formsRepo.addSubmission(event.getUser(), form, msg);
 		});
 
-		event.getHook()
-				.sendMessage(form.submitMessage() == null ? "Your submission was received!" : form.submitMessage())
-				.queue();
+		event.getHook().sendMessage(form.getOptionalSubmitMessage().orElse("Your submission was received!")).queue();
 	}
 
 	/**

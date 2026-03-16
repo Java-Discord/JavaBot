@@ -1,5 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
@@ -34,8 +35,7 @@ public class FormCommand extends SlashCommand {
 			AttachFormSubcommand attachSub, DetachFormSubcommand detachSub,
 			SubmissionsExportFormSubcommand submissionsGetSub, SubmissionsDeleteFormSubcommand submissionsDeleteSub) {
 		setCommandData(Commands.slash("form", "Commands for managing modal forms")
-				.setDefaultPermissions(DefaultMemberPermissions.DISABLED)); // TODO check for an option to make the
-																			// command guild only
+				.setContexts(InteractionContextType.GUILD).setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 		addSubcommands(createSub, deleteSub, closeSub, reopenSub, detailsSub, modifySub, addFieldSub, removeFieldSub,
 				showSub, attachSub, detachSub, submissionsGetSub, submissionsDeleteSub);
 	}

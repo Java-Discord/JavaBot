@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.dv8tion.jda.api.components.label.Label;
 
@@ -33,7 +34,6 @@ import net.dv8tion.jda.api.components.label.Label;
  * @param onetime        onetime state of this form. If it's true, the form only
  *                       accepts one submission per user.
  */
-// TODO `Optional` getter for the submit message
 public record FormData(long id, List<FormField> fields, String title, long submitChannel, String submitMessage,
 		Long messageId, Long messageChannel, Instant expiration, boolean closed, boolean onetime) {
 
@@ -46,6 +46,19 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 		if (fields.size() > 5) {
 			throw new IllegalArgumentException("fields.size() > 5");
 		}
+	}
+
+	/**
+	 * Get this form's submit message as an {@link Optional}. If the message is null
+	 * or blank, the returned optional will be empty.
+	 * 
+	 * @return optional submit message
+	 */
+	public Optional<String> getOptionalSubmitMessage() {
+		if (submitMessage == null || submitMessage.isBlank()) {
+			return Optional.empty();
+		}
+		return Optional.of(submitMessage);
 	}
 
 	/**
@@ -106,7 +119,6 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 		} else if (hasExpired()) {
 			prefix = "Expired";
 		} else {
-			// TODO change how date and time is formatted
 			prefix = FormInteractionManager.DATE_FORMAT.format(new Date(expiration.toEpochMilli())) + " UTC";
 		}
 
