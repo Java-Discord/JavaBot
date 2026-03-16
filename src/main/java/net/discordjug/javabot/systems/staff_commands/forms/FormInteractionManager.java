@@ -117,7 +117,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 			return;
 		}
 
-		Modal modal = createFormModal(form);
+		Modal modal = createSubmissionModal(form);
 
 		event.replyModal(modal).queue();
 	}
@@ -226,7 +226,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	 * @param form form to open submission modal for.
 	 * @return submission modal to be presented to the user.
 	 */
-	public static Modal createFormModal(FormData form) {
+	public static Modal createSubmissionModal(FormData form) {
 		Modal modal = Modal.create(ComponentIdBuilder.build(FORM_COMPONENT_ID, form.id()), form.title())
 				.addComponents(form.createComponents()).build();
 		return modal;

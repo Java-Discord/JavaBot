@@ -52,7 +52,7 @@ public class ShowFormSubcommand extends FormSubcommand implements AutoCompletabl
 			event.reply("You can't open a form with no fields").setEphemeral(true).queue();
 			return;
 		}
-		event.replyModal(FormInteractionManager.createFormModal(form)).queue();
+		event.replyModal(FormInteractionManager.createSubmissionModal(form)).queue();
 	}
 
 	@Override
