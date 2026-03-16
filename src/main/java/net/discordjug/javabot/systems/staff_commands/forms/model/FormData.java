@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.dv8tion.jda.api.components.label.Label;
 
@@ -49,6 +48,13 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 		}
 	}
 
+	/**
+	 * Get information about the form's attachment state. If the form is attached to
+	 * a message, this method will return a non-empty optional containin information
+	 * about the message this form is attached to.
+	 * 
+	 * @return optional attachment info
+	 */
 	public Optional<FormAttachmentInfo> getAttachmentInfo() {
 		if (messageChannel != null && messageId != null) {
 			return Optional.of(new FormAttachmentInfo(messageId, messageChannel));
