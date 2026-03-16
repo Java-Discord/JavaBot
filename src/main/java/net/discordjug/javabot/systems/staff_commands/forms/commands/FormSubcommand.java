@@ -19,12 +19,40 @@ public abstract class FormSubcommand extends Subcommand {
 	 * Form ID field identificator used in form subcommands.
 	 */
 	protected static final String FORM_ID_FIELD = "form-id";
+	
+	/**
+	 * Channel field identifier.
+	 */
 	protected static final String FORM_CHANNEL_FIELD = "channel";
+	
+	/**
+	 * Message id field identifier.
+	 */
 	protected static final String FORM_MESSAGE_ID_FIELD = "message-id";
+	
+	/**
+	 * Expiration field identifier.
+	 */
 	protected static final String FORM_EXPIRATION_FIELD = "expiration";
+	
+	/**
+	 * "onetime" field identifier.
+	 */
 	protected static final String FORM_ONETIME_FIELD = "onetime";
+	
+	/**
+	 * Submit message field identifier.
+	 */
 	protected static final String FORM_SUBMIT_MESSAGE_FIELD = "submit-message";
+	
+	/**
+	 * Submit channel field identifier.
+	 */
 	protected static final String FORM_SUBMIT_CHANNEL_FIELD = "submit-channel";
+	
+	/**
+	 * Form title field identifier.
+	 */
 	protected static final String FORM_TITLE_FIELD = "title";
 	private final BotConfig botConfig;
 	private final FormsRepository formsRepository;

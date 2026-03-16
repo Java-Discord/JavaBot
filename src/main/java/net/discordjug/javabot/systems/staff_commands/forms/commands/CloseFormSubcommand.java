@@ -39,7 +39,7 @@ public class CloseFormSubcommand extends FormSubcommand implements AutoCompletab
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		this.interactionManager = interactionManager;
-		setCommandData(new SubcommandData("close", "Close an existing form")
+		setCommandData(new SubcommandData("close", "Close an existing form, preventing further submissions.")
 				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to close", true, true)));
 	}
 

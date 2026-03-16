@@ -37,7 +37,7 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 	public ModifyFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("modify", "Modify an existing form").addOptions(
+		setCommandData(new SubcommandData("modify", "Modify an existing form's data. Use *-field commands to manage form fields").addOptions(
 				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to modify", true, true),
 				new OptionData(OptionType.STRING, FORM_TITLE_FIELD, "Form title (shown in modal)"),
 				new OptionData(OptionType.CHANNEL, FORM_SUBMIT_CHANNEL_FIELD, "Channel to log form submissions in"),
