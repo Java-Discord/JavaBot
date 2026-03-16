@@ -36,7 +36,7 @@ public class SubmissionsDeleteFormSubcommand extends FormSubcommand implements A
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of a user in the form").addOptions(
-				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to get submissions for", true, true),
+				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to delete submissions from", true, true),
 				new OptionData(OptionType.USER, "user", "User to delete submissions of", true)));
 	}
 
