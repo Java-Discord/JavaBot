@@ -1,6 +1,8 @@
 package net.discordjug.javabot.systems.staff_commands.forms.model;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -54,15 +56,16 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 	/**
 	 * Creates text components for use in the submission modal.
 	 *
-	 * @return List of layout components for use in the submission modal.
+	 * @return An unmodifiable list of layout components for use in the submission
+	 *         modal.
 	 */
-	public Label[] createComponents() {
-		Label[] array = new Label[fields.size()];
-		for (int i = 0; i < array.length; i++) {
+	public List<Label> createComponents() {
+		List<Label> list = new ArrayList<>(fields.size());
+		for (int i = 0; i < list.size(); i++) {
 			FormField field = fields.get(i);
-			array[i] = Label.of(fields.get(i).label(), field.createTextInput("text" + i));
+			list.add(Label.of(fields.get(i).label(), field.createTextInput("text" + i)));
 		}
-		return array;
+		return Collections.unmodifiableList(list);
 	}
 
 	/**
