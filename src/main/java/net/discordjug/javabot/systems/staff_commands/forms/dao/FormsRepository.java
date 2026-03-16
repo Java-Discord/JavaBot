@@ -240,7 +240,7 @@ public class FormsRepository {
 	 *
 	 * @param form  form to remove the field from
 	 * @param index index of the field to remove
-	 * @return 
+	 * @return true if changes were successfully made to the database.
 	 */
 	public boolean removeField(FormData form, int index) {
 		List<FormField> fields = form.fields();

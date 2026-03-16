@@ -88,26 +88,28 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 	public static void detachFromMessage(FormData form, Guild guild) {
 		if (!form.isAttached()) return;
 		TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
-		if (formChannel != null) formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
-			List<ActionRow> components = msg.getComponents().stream().map(msgComponent -> {
-				ActionRow row = msgComponent.asActionRow();
-				List<ActionRowChildComponentUnion> cpts = row.getComponents().stream().filter(cpt -> {
-					if (cpt instanceof Button btn) {
-						String cptId = btn.getCustomId();
-						String[] split = ComponentIdBuilder.split(cptId);
-						if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)) {
-							return !split[1].equals(Long.toString(form.id()));
+		if (formChannel != null) {
+			formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
+				List<ActionRow> components = msg.getComponents().stream().map(msgComponent -> {
+					ActionRow row = msgComponent.asActionRow();
+					List<ActionRowChildComponentUnion> cpts = row.getComponents().stream().filter(cpt -> {
+						if (cpt instanceof Button btn) {
+							String cptId = btn.getCustomId();
+							String[] split = ComponentIdBuilder.split(cptId);
+							if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)) {
+								return !split[1].equals(Long.toString(form.id()));
+							}
 						}
+						return true;
+					}).toList();
+					if (cpts.isEmpty()) {
+						return null;
 					}
-					return true;
-				}).toList();
-				if (cpts.isEmpty()) {
-					return null;
-				}
-				return ActionRow.of(cpts);
-			}).filter(Objects::nonNull).toList();
-			msg.editMessageComponents(components).queue();
-		}, e -> ExceptionLogger.capture(e));
+					return ActionRow.of(cpts);
+				}).filter(Objects::nonNull).toList();
+				msg.editMessageComponents(components).queue();
+			}, e -> ExceptionLogger.capture(e));
+		}
 	}
 
 }
