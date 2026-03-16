@@ -4,12 +4,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -25,8 +23,8 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
- * The `/form submissions-export` command. Export all submissions tied to the
- * specified form from the database in JSON format.
+ * The `/form submissions-export` command. Export a list of users who have
+ * submitted the specified form from the database in JSON format.
  * 
  * @see FormData
  */
@@ -44,8 +42,9 @@ public class SubmissionsExportFormSubcommand extends FormSubcommand implements A
 	public SubmissionsExportFormSubcommand(FormsRepository formsRepo, BotConfig botConfig) {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
-		setCommandData(new SubcommandData("submissions-export", "Export all of the form's submissions").addOptions(
-				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to get submissions for", true, true)));
+		setCommandData(new SubcommandData("submissions-export", "Export all of the form's submissions")
+				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to get submissions for",
+						true, true)));
 	}
 
 	@Override
