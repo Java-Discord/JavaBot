@@ -38,8 +38,9 @@ public class ReopenFormSubcommand extends FormSubcommand implements AutoCompleta
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		this.interactionManager = interactionManager;
-		setCommandData(new SubcommandData("reopen", "Reopen a closed form").addOptions(
-				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a closed form to reopen", true, true)));
+		setCommandData(new SubcommandData("reopen", "Reopen a closed form. This will allow new submissions.")
+				.addOptions(new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a closed form to reopen", true,
+						true)));
 	}
 
 	@Override
