@@ -2,12 +2,13 @@ package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -62,13 +63,13 @@ public class SubmissionsExportFormSubcommand extends FormSubcommand implements A
 		JsonObject root = new JsonObject();
 		JsonObject details = new JsonObject();
 		JsonArray users = new JsonArray();
-		for (Entry<FormUser, Integer> entry : submissions.entrySet()) {
+		submissions.forEach((formUser, value) -> {
 			JsonObject uobj = new JsonObject();
-			uobj.addProperty("username", entry.getKey().username());
-			uobj.addProperty("submissions", entry.getValue());
-			details.add(Long.toString(entry.getKey().id()), uobj);
-			users.add(entry.getKey().username());
-		}
+			uobj.addProperty("username", formUser.username());
+			uobj.addProperty("submissions", value);
+			details.add(Long.toString(formUser.id()), uobj);
+			users.add(formUser.username());
+		});
 		root.add("users", users);
 		root.add("details", details);
 		event.getHook().sendFiles(FileUpload.fromData(gson.toJson(root).getBytes(StandardCharsets.UTF_8),
