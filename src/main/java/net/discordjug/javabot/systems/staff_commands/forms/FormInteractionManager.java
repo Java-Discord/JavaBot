@@ -45,6 +45,10 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 @Slf4j
 public class FormInteractionManager implements ButtonHandler, ModalHandler {
 
+	private static final String SUBMISSION_ERROR_LOG = "A user tried to submit a form \"%s\", but an error occured.";
+
+	private static final String SUBMISSION_ERROR_MSG = "We couldn't receive your submission due to an error. Please contact server staff.";
+
 	/**
 	 * String representation of the date and time format used in forms.
 	 */
@@ -144,17 +148,25 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 		if (channel == null) {
 			log.warn("A user tried to submit a form \"%s\" because the submission channel does not exist."
 					.formatted(form.title()));
-			event.getHook()
-					.sendMessage("We couldn't receive your submission due to an error. Please contact server staff.")
-					.queue();
+			event.getHook().sendMessage(SUBMISSION_ERROR_MSG).queue();
 			return;
 		}
 
-		channel.sendMessageEmbeds(createSubmissionEmbed(form, values, event.getMember())).queue(msg -> {
-			formsRepo.addSubmission(event.getUser(), form, msg);
-		});
-
-		event.getHook().sendMessage(form.getOptionalSubmitMessage().orElse("Your submission was received!")).queue();
+		try {
+			channel.sendMessageEmbeds(createSubmissionEmbed(form, values, event.getMember())).queue(msg -> {
+				formsRepo.addSubmission(event.getUser(), form, msg);
+				event.getHook().sendMessage(form.getOptionalSubmitMessage().orElse("Your submission was received!"))
+						.queue();
+			}, e -> {
+				event.getHook().sendMessage(SUBMISSION_ERROR_MSG).queue();
+				log.error(SUBMISSION_ERROR_LOG.formatted(form.title()));
+				ExceptionLogger.capture(e);
+			});
+		} catch (IllegalArgumentException e) {
+			event.getHook().sendMessage(SUBMISSION_ERROR_MSG).queue();
+			log.error(SUBMISSION_ERROR_LOG.formatted(form.title()));
+			ExceptionLogger.capture(e);
+		}
 	}
 
 	/**
