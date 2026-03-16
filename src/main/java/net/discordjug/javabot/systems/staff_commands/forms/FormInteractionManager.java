@@ -45,10 +45,6 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 @Slf4j
 public class FormInteractionManager implements ButtonHandler, ModalHandler {
 
-	private static final String SUBMISSION_ERROR_LOG = "A user tried to submit a form \"%s\", but an error occured.";
-
-	private static final String SUBMISSION_ERROR_MSG = "We couldn't receive your submission due to an error. Please contact server staff.";
-
 	/**
 	 * String representation of the date and time format used in forms.
 	 */
@@ -63,6 +59,11 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	 * Component ID used for form buttons and modals.
 	 */
 	public static final String FORM_COMPONENT_ID = "modal-form";
+
+	private static final String SUBMISSION_ERROR_LOG = "A user tried to submit a form \"%s\", but an error occured.";
+
+	private static final String SUBMISSION_ERROR_MSG = "We couldn't receive your submission due to an error. Please contact server staff.";
+
 	private static final String FORM_NOT_FOUND_MSG = "This form was not found in the database. Please report this to the server staff.";
 
 	private final FormsRepository formsRepo;
@@ -193,8 +194,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	}
 
 	/**
-	 * Re-opens the form, re-enabling associated buttons in the message it's attached
-	 * to, if any.
+	 * Re-opens the form, re-enabling associated buttons in the message it's
+	 * attached to, if any.
 	 *
 	 * @param guild guild this form is contained in.
 	 * @param form  form to re-open.

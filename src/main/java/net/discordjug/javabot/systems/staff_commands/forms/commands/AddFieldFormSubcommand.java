@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.modals.Modal;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
@@ -26,7 +25,7 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
  * {@link FormData} by adding new fields to it. See
  * {@link RemoveFieldFormSubcommand} for the command used to remove fields from
  * a form.<br>
- * Currently, due to Discord limitations, only {@link Modal#MAX_COMPONENTS} fields are allowed per form.
+ * Currently, due to Discord limitations, only 5 fields are allowed per form.
  * Trying to add more fields will have no effect.
  * 
  * @see FormData
