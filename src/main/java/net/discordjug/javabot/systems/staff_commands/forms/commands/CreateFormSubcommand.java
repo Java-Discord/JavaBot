@@ -36,14 +36,15 @@ public class CreateFormSubcommand extends FormSubcommand {
 		super(botConfig, formsRepo);
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("create", "Create a new form").addOptions(
-				new OptionData(OptionType.STRING, "title", "Form title (shown in modal)", true),
-				new OptionData(OptionType.CHANNEL, "submit-channel", "Channel to log form submissions in", true),
-				new OptionData(OptionType.STRING, "submit-message",
+				new OptionData(OptionType.STRING, FORM_TITLE_FIELD, "Form title (shown in modal)", true),
+				new OptionData(OptionType.CHANNEL, FORM_SUBMIT_CHANNEL_FIELD, "Channel to log form submissions in",
+						true),
+				new OptionData(OptionType.STRING, FORM_SUBMIT_MESSAGE_FIELD,
 						"Message displayed to the user once they submit the form"),
-				new OptionData(OptionType.STRING, "expiration",
+				new OptionData(OptionType.STRING, FORM_EXPIRATION_FIELD,
 						"UTC time after which the form will not accept further submissions. "
 								+ FormInteractionManager.DATE_FORMAT_STRING),
-				new OptionData(OptionType.BOOLEAN, "onetime",
+				new OptionData(OptionType.BOOLEAN, FORM_ONETIME_FIELD,
 						"If the form should only accept one submission per user. Defaults to false.")));
 	}
 
@@ -61,10 +62,10 @@ public class CreateFormSubcommand extends FormSubcommand {
 
 		Instant expiration = expirationOpt.orElse(null);
 
-		FormData form = new FormData(0, List.of(), event.getOption("title", OptionMapping::getAsString),
-				event.getOption("submit-channel", OptionMapping::getAsChannel).getIdLong(),
-				event.getOption("submit-message", null, OptionMapping::getAsString), null, null, expiration, false,
-				event.getOption("onetime", false, OptionMapping::getAsBoolean));
+		FormData form = new FormData(0, List.of(), event.getOption(FORM_TITLE_FIELD, OptionMapping::getAsString),
+				event.getOption(FORM_SUBMIT_CHANNEL_FIELD, OptionMapping::getAsChannel).getIdLong(),
+				event.getOption(FORM_SUBMIT_MESSAGE_FIELD, null, OptionMapping::getAsString), null, null, expiration,
+				false, event.getOption(FORM_ONETIME_FIELD, false, OptionMapping::getAsBoolean));
 
 		formsRepo.insertForm(form);
 		event.getHook()

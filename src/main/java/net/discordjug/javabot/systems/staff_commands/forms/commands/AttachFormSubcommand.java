@@ -42,6 +42,8 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
  */
 public class AttachFormSubcommand extends FormSubcommand implements AutoCompletable {
 
+	private static final String FORM_BUTTON_STYLE_FIELD = "button-style";
+	private static final String FORM_BUTTON_LABEL_FIELD = "button-label";
 	private final FormsRepository formsRepo;
 
 	/**
@@ -55,12 +57,14 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("attach", "Add a button for bringing up the form to a message").addOptions(
 				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to attach", true, true),
-				new OptionData(OptionType.STRING, "message-id", "ID of the message to attach the form to", true),
-				new OptionData(OptionType.CHANNEL, "channel",
+				new OptionData(OptionType.STRING, FORM_MESSAGE_ID_FIELD, "ID of the message to attach the form to",
+						true),
+				new OptionData(OptionType.CHANNEL, FORM_CHANNEL_FIELD,
 						"Channel of the message. Required if the message is in a different channel"),
-				new OptionData(OptionType.STRING, "button-label", "Label of the submit button. Default is \"Submit\""),
-				new OptionData(OptionType.STRING, "button-style", "Submit button style. Defaults to primary", false,
-						true)));
+				new OptionData(OptionType.STRING, FORM_BUTTON_LABEL_FIELD,
+						"Label of the submit button. Default is \"Submit\""),
+				new OptionData(OptionType.STRING, FORM_BUTTON_STYLE_FIELD, "Submit button style. Defaults to primary",
+						false, true)));
 	}
 
 	@Override
@@ -87,8 +91,8 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 			return;
 		}
 
-		String messageId = event.getOption("message-id", OptionMapping::getAsString);
-		GuildChannel channel = event.getOption("channel", event.getChannel().asGuildMessageChannel(),
+		String messageId = event.getOption(FORM_MESSAGE_ID_FIELD, OptionMapping::getAsString);
+		GuildChannel channel = event.getOption(FORM_CHANNEL_FIELD, event.getChannel().asGuildMessageChannel(),
 				OptionMapping::getAsChannel);
 
 		if (channel == null) {
@@ -101,9 +105,9 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 			return;
 		}
 
-		String buttonLabel = event.getOption("button-label", "Submit", OptionMapping::getAsString);
-		net.dv8tion.jda.api.components.buttons.ButtonStyle style = event.getOption("button-style", ButtonStyle.PRIMARY,
-				t -> {
+		String buttonLabel = event.getOption(FORM_BUTTON_LABEL_FIELD, "Submit", OptionMapping::getAsString);
+		net.dv8tion.jda.api.components.buttons.ButtonStyle style = event.getOption(FORM_BUTTON_STYLE_FIELD,
+				ButtonStyle.PRIMARY, t -> {
 					try {
 						return ButtonStyle.valueOf(t.getAsString().toUpperCase());
 					} catch (IllegalArgumentException e) {
@@ -122,7 +126,7 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		if (!handleFormIDAutocomplete(event, target) && "button-style".equals(target.getName())) {
+		if (!handleFormIDAutocomplete(event, target) && FORM_BUTTON_STYLE_FIELD.equals(target.getName())) {
 			event.replyChoices(AutoCompleteUtils.filterChoices(event,
 					Set.of(ButtonStyle.DANGER, ButtonStyle.PRIMARY, ButtonStyle.SECONDARY, ButtonStyle.SUCCESS).stream()
 							.map(style -> new Choice(style.name(), style.name())).toList()))

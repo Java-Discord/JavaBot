@@ -24,6 +24,7 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
  */
 public class SubmissionsDeleteFormSubcommand extends FormSubcommand implements AutoCompletable {
 
+	private static final String FORM_USER_FIELD = "user";
 	private final FormsRepository formsRepo;
 
 	/**
@@ -37,7 +38,7 @@ public class SubmissionsDeleteFormSubcommand extends FormSubcommand implements A
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("submissions-delete", "Deletes submissions of a user in the form").addOptions(
 				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "The ID of a form to delete submissions from", true, true),
-				new OptionData(OptionType.USER, "user", "User to delete submissions of", true)));
+				new OptionData(OptionType.USER, FORM_USER_FIELD, "User to delete submissions of", true)));
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class SubmissionsDeleteFormSubcommand extends FormSubcommand implements A
 			return;
 		}
 
-		User user = event.getOption("user", OptionMapping::getAsUser);
+		User user = event.getOption(FORM_USER_FIELD, OptionMapping::getAsUser);
 		FormData form = formOpt.get();
 
 		int count = formsRepo.deleteSubmissions(form, user);

@@ -39,14 +39,14 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("modify", "Modify an existing form").addOptions(
 				new OptionData(OptionType.INTEGER, FORM_ID_FIELD, "ID of the form to modify", true, true),
-				new OptionData(OptionType.STRING, "title", "Form title (shown in modal)"),
-				new OptionData(OptionType.CHANNEL, "submit-channel", "Channel to log form submissions in"),
-				new OptionData(OptionType.STRING, "submit-message",
+				new OptionData(OptionType.STRING, FORM_TITLE_FIELD, "Form title (shown in modal)"),
+				new OptionData(OptionType.CHANNEL, FORM_SUBMIT_CHANNEL_FIELD, "Channel to log form submissions in"),
+				new OptionData(OptionType.STRING, FORM_SUBMIT_MESSAGE_FIELD,
 						"Message displayed to the user once they submit the form"),
-				new OptionData(OptionType.STRING, "expiration",
+				new OptionData(OptionType.STRING, FORM_EXPIRATION_FIELD,
 						"UTC time after which the form stops accepting submissions. - for no expiration. "
 								+ FormInteractionManager.DATE_FORMAT_STRING),
-				new OptionData(OptionType.BOOLEAN, "onetime",
+				new OptionData(OptionType.BOOLEAN, FORM_ONETIME_FIELD,
 						"If the form should only accept one submission per user. Defaults to false.")));
 	}
 

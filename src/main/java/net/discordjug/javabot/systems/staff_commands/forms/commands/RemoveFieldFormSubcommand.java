@@ -26,6 +26,7 @@ import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
  */
 public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCompletable {
 
+	private static final String FORM_FIELD_INDEX_FIELD = "field";
 	private final FormsRepository formsRepo;
 
 	/**
@@ -39,7 +40,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("remove-field", "Removse a field from an existing form")
 				.addOption(OptionType.INTEGER, FORM_ID_FIELD, "Form ID to add the field to", true, true)
-				.addOption(OptionType.INTEGER, "field", "0-indexed # of the field to remove", true, true));
+				.addOption(OptionType.INTEGER, FORM_FIELD_INDEX_FIELD, "0-indexed # of the field to remove", true, true));
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 		if (!checkForStaffRole(event)) return;
 		event.deferReply(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
-		int index = event.getOption("field", OptionMapping::getAsInt);
+		int index = event.getOption(FORM_FIELD_INDEX_FIELD, OptionMapping::getAsInt);
 		if (formOpt.isEmpty()) {
 			event.getHook().sendMessage("A form with this ID was not found.").queue();
 			return;
@@ -71,7 +72,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		if (!handleFormIDAutocomplete(event, target) && "field".equals(target.getName())) {
+		if (!handleFormIDAutocomplete(event, target) && FORM_FIELD_INDEX_FIELD.equals(target.getName())) {
 			Long formId = event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong);
 			if (formId != null) {
 				Optional<FormData> form = formsRepo.getForm(formId);

@@ -30,6 +30,13 @@ import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
  */
 public class AddFieldFormSubcommand extends FormSubcommand implements AutoCompletable {
 
+	private static final String FORM_VALUE_FIELD = "value";
+	private static final String FORM_STYLE_FIELD = "style";
+	private static final String FORM_REQUIRED_FIELD = "required";
+	private static final String FORM_PLACEHOLDER_FIELD = "placeholder";
+	private static final String FORM_MAX_FIELD = "max";
+	private static final String FORM_MIN_FIELD = "min";
+	private static final String FORM_LABEL_FIELD = "label";
 	private final FormsRepository formsRepo;
 
 	/**
@@ -43,14 +50,14 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 		this.formsRepo = formsRepo;
 		setCommandData(new SubcommandData("add-field", "Adds a field to an existing form")
 				.addOption(OptionType.INTEGER, FORM_ID_FIELD, "Form ID to add the field to", true, true)
-				.addOption(OptionType.STRING, "label", "Field label", true)
-				.addOption(OptionType.INTEGER, "min", "Minimum number of characters")
-				.addOption(OptionType.INTEGER, "max", "Maximum number of characters")
-				.addOption(OptionType.STRING, "placeholder", "Field placeholder")
-				.addOption(OptionType.BOOLEAN, "required",
+				.addOption(OptionType.STRING, FORM_LABEL_FIELD, "Field label", true)
+				.addOption(OptionType.INTEGER, FORM_MIN_FIELD, "Minimum number of characters")
+				.addOption(OptionType.INTEGER, FORM_MAX_FIELD, "Maximum number of characters")
+				.addOption(OptionType.STRING, FORM_PLACEHOLDER_FIELD, "Field placeholder")
+				.addOption(OptionType.BOOLEAN, FORM_REQUIRED_FIELD,
 						"Whether or not the user has to input data in this field. Default: false")
-				.addOption(OptionType.STRING, "style", "Input style. Default: SHORT", false, true)
-				.addOption(OptionType.STRING, "value", "Initial field value"));
+				.addOption(OptionType.STRING, FORM_STYLE_FIELD, "Input style. Default: SHORT", false, true)
+				.addOption(OptionType.STRING, FORM_VALUE_FIELD, "Initial field value"));
 	}
 
 	@Override
@@ -75,7 +82,7 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
-		if (!handleFormIDAutocomplete(event, target) && "style".equals(target.getName())) {
+		if (!handleFormIDAutocomplete(event, target) && FORM_STYLE_FIELD.equals(target.getName())) {
 			event.replyChoices(AutoCompleteUtils.filterChoices(event,
 					Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
 							.map(style -> new Choice(style.name(), style.name())).toList()))
@@ -84,19 +91,19 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 	}
 
 	private static FormField createFormFieldFromEvent(SlashCommandInteractionEvent e) {
-		String label = e.getOption("label", OptionMapping::getAsString);
-		int min = e.getOption("min", 0, OptionMapping::getAsInt);
-		int max = e.getOption("max", 64, OptionMapping::getAsInt);
-		String placeholder = e.getOption("placeholder", OptionMapping::getAsString);
-		boolean required = e.getOption("required", false, OptionMapping::getAsBoolean);
-		TextInputStyle style = e.getOption("style", TextInputStyle.SHORT, t -> {
+		String label = e.getOption(FORM_LABEL_FIELD, OptionMapping::getAsString);
+		int min = e.getOption(FORM_MIN_FIELD, 0, OptionMapping::getAsInt);
+		int max = e.getOption(FORM_MAX_FIELD, 64, OptionMapping::getAsInt);
+		String placeholder = e.getOption(FORM_PLACEHOLDER_FIELD, OptionMapping::getAsString);
+		boolean required = e.getOption(FORM_REQUIRED_FIELD, false, OptionMapping::getAsBoolean);
+		TextInputStyle style = e.getOption(FORM_STYLE_FIELD, TextInputStyle.SHORT, t -> {
 			try {
 				return TextInputStyle.valueOf(t.getAsString().toUpperCase());
 			} catch (IllegalArgumentException e2) {
 				return TextInputStyle.SHORT;
 			}
 		});
-		String value = e.getOption("value", OptionMapping::getAsString);
+		String value = e.getOption(FORM_VALUE_FIELD, OptionMapping::getAsString);
 
 		return new FormField(label, max, min, placeholder, required, style, value, 0);
 	}
