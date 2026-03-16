@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
 /**
  * The `/form add-field` command. This command allows for modification of
@@ -75,8 +76,10 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		if (!handleFormIDAutocomplete(event, target) && "style".equals(target.getName())) {
-			event.replyChoices(Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
-					.map(style -> new Choice(style.name(), style.name())).toList()).queue();
+			event.replyChoices(AutoCompleteUtils.filterChoices(event,
+					Arrays.stream(TextInputStyle.values()).filter(t -> t != TextInputStyle.UNKNOWN)
+							.map(style -> new Choice(style.name(), style.name())).toList()))
+					.queue();
 		}
 	}
 

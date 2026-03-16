@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
 /**
  * The `/form remove-field` command. This command removes a field from the form.
@@ -80,7 +81,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 					for (int i = 0; i < fields.size(); i++) {
 						choices.add(new Choice(fields.get(i).label(), i));
 					}
-					event.replyChoices(choices).queue();
+					event.replyChoices(AutoCompleteUtils.filterChoices(event, choices)).queue();
 					return;
 				}
 			}

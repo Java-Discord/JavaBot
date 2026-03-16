@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
+import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 /**
@@ -122,9 +123,9 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 	@Override
 	public void handleAutoComplete(CommandAutoCompleteInteractionEvent event, AutoCompleteQuery target) {
 		if (!handleFormIDAutocomplete(event, target) && "button-style".equals(target.getName())) {
-			event.replyChoices(
+			event.replyChoices(AutoCompleteUtils.filterChoices(event,
 					Set.of(ButtonStyle.DANGER, ButtonStyle.PRIMARY, ButtonStyle.SECONDARY, ButtonStyle.SUCCESS).stream()
-							.map(style -> new Choice(style.name(), style.name())).toList())
+							.map(style -> new Choice(style.name(), style.name())).toList()))
 					.queue();
 		}
 	}
