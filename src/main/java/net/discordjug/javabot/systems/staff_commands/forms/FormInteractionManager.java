@@ -46,7 +46,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	/**
 	 * String representation of the date and time format used in forms.
 	 */
-	public static final String DATE_FORMAT_STRING = "dd/MM/yyyy HH:mm";
+	public static final String DATE_FORMAT_STRING = "dd.MM.yyyy HH:mm";
 
 	/**
 	 * Date and time formatter used in forms.

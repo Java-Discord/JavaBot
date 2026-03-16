@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.modals.Modal;
 
 /**
  * Class containing information about a form.
@@ -43,8 +44,8 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 	public FormData {
 		Objects.requireNonNull(title);
 		fields = List.copyOf(fields);
-		if (fields.size() > 5) {
-			throw new IllegalArgumentException("fields.size() > 5");
+		if (fields.size() > Modal.MAX_COMPONENTS) {
+			throw new IllegalArgumentException("fields.size() > " + Modal.MAX_COMPONENTS);
 		}
 	}
 
