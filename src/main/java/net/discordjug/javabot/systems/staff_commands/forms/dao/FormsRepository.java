@@ -217,7 +217,7 @@ public class FormsRepository {
 	/**
 	 * Add a user form submission to the database.
 	 *
-	 * @param user    user to log
+	 * @param user    the user who submitted the form
 	 * @param form    form to log on
 	 * @param message message containing details about this user's submission
 	 */
