@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
@@ -41,6 +42,7 @@ import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
  */
 @AutoDetectableComponentHandler(FormInteractionManager.FORM_COMPONENT_ID)
 @RequiredArgsConstructor
+@Slf4j
 public class FormInteractionManager implements ButtonHandler, ModalHandler {
 
 	/**
@@ -140,6 +142,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 
 		TextChannel channel = event.getGuild().getTextChannelById(form.submitChannel());
 		if (channel == null) {
+			log.warn("A user tried to submit a form \"%s\" because the submission channel does not exist."
+					.formatted(form.title()));
 			event.getHook()
 					.sendMessage("We couldn't receive your submission due to an error. Please contact server staff.")
 					.queue();
