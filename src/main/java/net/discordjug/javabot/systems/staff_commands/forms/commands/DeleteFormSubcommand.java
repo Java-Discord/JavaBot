@@ -52,7 +52,7 @@ public class DeleteFormSubcommand extends FormSubcommand implements AutoCompleta
 		event.deferReply(true).queue();
 		FormData form = formOpt.get();
 
-		if (form.isAttached()) {
+		if (form.getAttachmentInfo().isPresent()) {
 			event.getHook().sendMessage(
 					"This form is attached to a message. Use `details` subcommand to check the message this form is attached to, or `detach` subcommand to detach the message before deleting.")
 					.queue();

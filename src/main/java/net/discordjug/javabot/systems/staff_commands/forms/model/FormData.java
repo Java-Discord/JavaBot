@@ -49,8 +49,11 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 		}
 	}
 
-	public boolean isAttached() {
-		return messageChannel != null && messageId != null;
+	public Optional<FormAttachmentInfo> getAttachmentInfo() {
+		if (messageChannel != null && messageId != null) {
+			return Optional.of(new FormAttachmentInfo(messageId, messageChannel));
+		}
+		return Optional.empty();
 	}
 
 	/**
@@ -85,14 +88,6 @@ public record FormData(long id, List<FormField> fields, String title, long submi
 	 */
 	public boolean hasExpired() {
 		return hasExpirationTime() && expiration.isBefore(Instant.now());
-	}
-
-	public Optional<Long> getMessageId() {
-		return Optional.ofNullable(messageId);
-	}
-
-	public Optional<Long> getMessageChannel() {
-		return Optional.ofNullable(messageChannel);
 	}
 
 	@Override

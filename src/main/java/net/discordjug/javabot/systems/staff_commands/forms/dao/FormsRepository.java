@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormAttachmentInfo;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
@@ -200,13 +201,16 @@ public class FormsRepository {
 	public void insertForm(@NonNull FormData data) {
 		Objects.requireNonNull(data);
 		jdbcTemplate.update(con -> {
+
+			Optional<FormAttachmentInfo> attachmentInfoOptional = data.getAttachmentInfo();
+
 			PreparedStatement statement = con.prepareStatement(
 					"insert into `forms` (title, submit_message, submit_channel, message_id, message_channel, expiration, onetime) values (?, ?, ?, ?, ?, ?, ?)");
 			statement.setString(1, data.title());
 			statement.setString(2, data.submitMessage());
 			statement.setLong(3, data.submitChannel());
-			statement.setObject(4, data.getMessageId().orElse(null));
-			statement.setObject(5, data.getMessageChannel().orElse(null));
+			statement.setObject(4, attachmentInfoOptional.map(FormAttachmentInfo::messageId).orElse(null));
+			statement.setObject(5, attachmentInfoOptional.map(FormAttachmentInfo::messageChannelId).orElse(null));
 			statement.setTimestamp(6,
 					data.hasExpirationTime() ? new Timestamp(data.expiration().toEpochMilli()) : null);
 			statement.setBoolean(7, data.onetime());

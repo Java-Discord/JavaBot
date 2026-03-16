@@ -75,7 +75,7 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 		}
 		FormData form = formOpt.get();
 
-		if (form.isAttached()) {
+		if (form.getAttachmentInfo().isPresent()) {
 			event.getHook()
 					.sendMessage("The form seems to already be attached to a message. Detach it before continuing.")
 					.queue();

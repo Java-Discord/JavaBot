@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormAttachmentInfo;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.utils.MarkdownUtil;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
@@ -81,16 +83,20 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 
 		String channelMention;
 		String messageLink;
-		if (form.isAttached()) {
-			long channelId = form.getMessageChannel().get();
+		Optional<FormAttachmentInfo> attachmentInfoOptonal = form.getAttachmentInfo();
+
+		channelMention = attachmentInfoOptonal.map(info -> {
+			long channelId = info.messageChannelId();
 			TextChannel channel = guild.getTextChannelById(channelId);
-			channelMention = channel != null ? channel.getAsMention() : "`" + channelId + "`";
-			messageLink = String.format("[Link](https://discord.com/channels/%s/%s/%s)", guild.getId(),
-					form.getMessageChannel().get(), form.getMessageId().get());
-		} else {
-			channelMention = "*Not attached*";
-			messageLink = "*Not attached*";
-		}
+			return channel != null ? channel.getAsMention() : "`" + channelId + "`";
+		}).orElse("*Not attached*");
+
+		messageLink = attachmentInfoOptonal.map(attachmentInfo -> {
+			long messageId = attachmentInfo.messageId();
+			long channelId = attachmentInfo.messageChannelId();
+			return MarkdownUtil.maskedLink("Link",
+					String.format("https://discord.com/channels/%s/%s/%s", guild.getId(), channelId, messageId));
+		}).orElse("*Not attached*");
 
 		String submissionsChannelMention;
 		TextChannel submissionsChannel = guild.getTextChannelById(form.submitChannel());

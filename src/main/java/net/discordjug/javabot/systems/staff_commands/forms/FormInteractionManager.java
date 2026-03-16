@@ -16,6 +16,7 @@ import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
+import net.discordjug.javabot.util.ExceptionLogger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
@@ -76,9 +77,11 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	public void closeForm(Guild guild, FormData form) {
 		formsRepo.closeForm(form);
 
-		if (form.isAttached()) {
-			TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
-			formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
+		form.getAttachmentInfo().ifPresent(info -> {
+			long messageChannelId = info.messageChannelId();
+			long messageId = info.messageId();
+			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
+			formChannel.retrieveMessageById(messageId).queue(msg -> {
 				mapFormMessageButtons(msg, btn -> {
 					String cptId = btn.getCustomId();
 					String[] split = ComponentIdBuilder.split(cptId);
@@ -88,8 +91,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 					}
 					return btn;
 				});
-			}, _ -> {});
-		}
+			}, ExceptionLogger::capture);
+		});
 	}
 
 	@Override
@@ -191,9 +194,11 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	public void reopenForm(Guild guild, FormData form) {
 		formsRepo.reopenForm(form);
 
-		if (form.isAttached()) {
-			TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
-			formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
+		form.getAttachmentInfo().ifPresent(info -> {
+			long messageChannelId = info.messageChannelId();
+			long messageId = info.messageId();
+			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
+			formChannel.retrieveMessageById(messageId).queue(msg -> {
 				mapFormMessageButtons(msg, btn -> {
 					String cptId = btn.getCustomId();
 					String[] split = ComponentIdBuilder.split(cptId);
@@ -203,8 +208,8 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 					}
 					return btn;
 				});
-			}, _ -> {});
-		}
+			}, ExceptionLogger::capture);
+		});
 	}
 
 	/**

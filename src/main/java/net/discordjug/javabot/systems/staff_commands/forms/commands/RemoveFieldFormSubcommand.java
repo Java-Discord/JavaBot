@@ -54,7 +54,7 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 		}
 		FormData form = formOpt.get();
 
-		if (form.isAttached() && form.fields().size() <= 1) {
+		if (form.getAttachmentInfo().isPresent() && form.fields().size() <= 1) {
 			event.getHook().sendMessage(
 					"Can't remove the last field from an attached form. Detach the form before removing the field")
 					.queue();

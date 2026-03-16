@@ -6,6 +6,7 @@ import java.util.Optional;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormAttachmentInfo;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -83,9 +84,21 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 
 		boolean onetime = event.getOption("onetime", oldForm.onetime(), OptionMapping::getAsBoolean);
 
-		FormData newForm = new FormData(oldForm.id(), oldForm.fields(), title, submitChannel, submitMessage,
-				oldForm.getMessageId().orElse(null), oldForm.getMessageChannel().orElse(null), expiration,
-				oldForm.closed(), onetime);
+		Long messageId;
+		Long messageChannel;
+
+		Optional<FormAttachmentInfo> infoOptional = oldForm.getAttachmentInfo();
+		if (infoOptional.isPresent()) {
+			FormAttachmentInfo info = infoOptional.get();
+			messageId = info.messageId();
+			messageChannel = info.messageChannelId();
+		} else {
+			messageChannel = null;
+			messageId = null;
+		}
+
+		FormData newForm = new FormData(oldForm.id(), oldForm.fields(), title, submitChannel, submitMessage, messageId,
+				messageChannel, expiration, oldForm.closed(), onetime);
 
 		formsRepo.updateForm(newForm);
 

@@ -62,7 +62,7 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 		}
 		FormData form = formOpt.get();
 
-		if (!form.isAttached()) {
+		if (form.getAttachmentInfo().isEmpty()) {
 			event.getHook().sendMessage("This form doesn't seem to be attached to a message").queue();
 			return;
 		}
@@ -86,30 +86,33 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 	 * @param guild guild this form is contained in
 	 */
 	public static void detachFromMessage(FormData form, Guild guild) {
-		if (!form.isAttached()) return;
-		TextChannel formChannel = guild.getTextChannelById(form.getMessageChannel().get());
-		if (formChannel != null) {
-			formChannel.retrieveMessageById(form.getMessageId().get()).queue(msg -> {
-				List<ActionRow> components = msg.getComponents().stream().map(msgComponent -> {
-					ActionRow row = msgComponent.asActionRow();
-					List<ActionRowChildComponentUnion> cpts = row.getComponents().stream().filter(cpt -> {
-						if (cpt instanceof Button btn) {
-							String cptId = btn.getCustomId();
-							String[] split = ComponentIdBuilder.split(cptId);
-							if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)) {
-								return !split[1].equals(Long.toString(form.id()));
+		form.getAttachmentInfo().ifPresent(info -> {
+			long messageChannelId = info.messageChannelId();
+			long messageId = info.messageId();
+			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
+			if (formChannel != null) {
+				formChannel.retrieveMessageById(messageId).queue(msg -> {
+					List<ActionRow> components = msg.getComponents().stream().map(msgComponent -> {
+						ActionRow row = msgComponent.asActionRow();
+						List<ActionRowChildComponentUnion> cpts = row.getComponents().stream().filter(cpt -> {
+							if (cpt instanceof Button btn) {
+								String cptId = btn.getCustomId();
+								String[] split = ComponentIdBuilder.split(cptId);
+								if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)) {
+									return !split[1].equals(Long.toString(form.id()));
+								}
 							}
+							return true;
+						}).toList();
+						if (cpts.isEmpty()) {
+							return null;
 						}
-						return true;
-					}).toList();
-					if (cpts.isEmpty()) {
-						return null;
-					}
-					return ActionRow.of(cpts);
-				}).filter(Objects::nonNull).toList();
-				msg.editMessageComponents(components).queue();
-			}, e -> ExceptionLogger.capture(e));
-		}
+						return ActionRow.of(cpts);
+					}).filter(Objects::nonNull).toList();
+					msg.editMessageComponents(components).queue();
+				}, ExceptionLogger::capture);
+			}
+		});
 	}
 
 }
