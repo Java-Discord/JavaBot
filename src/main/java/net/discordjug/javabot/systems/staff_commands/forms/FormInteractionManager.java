@@ -193,7 +193,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 	}
 
 	/**
-	 * Re-opens the form, re-enabling associated buttons in message it's attached
+	 * Re-opens the form, re-enabling associated buttons in the message it's attached
 	 * to, if any.
 	 *
 	 * @param guild guild this form is contained in.
