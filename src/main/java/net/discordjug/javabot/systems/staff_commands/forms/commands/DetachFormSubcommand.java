@@ -9,6 +9,7 @@ import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManage
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponentUnion;
 import net.dv8tion.jda.api.components.buttons.Button;
@@ -53,20 +54,20 @@ public class DetachFormSubcommand extends FormSubcommand implements AutoCompleta
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply().setEphemeral(true).queue();
 
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("A form with this ID was not found.").queue();
+			Responses.error(event, "A form with this ID was not found.").queue();
 			return;
 		}
 		FormData form = formOpt.get();
 
 		if (form.getAttachmentInfo().isEmpty()) {
-			event.getHook().sendMessage("This form doesn't seem to be attached to a message").queue();
+			Responses.error(event, "This form doesn't seem to be attached to a message").queue();
 			return;
 		}
 
+		event.deferReply().setEphemeral(true).queue();
 		detachFromMessage(form, event.getGuild());
 		formsRepo.detachForm(form);
 

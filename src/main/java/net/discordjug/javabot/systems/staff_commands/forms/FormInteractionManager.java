@@ -17,6 +17,7 @@ import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
 import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
@@ -101,7 +102,7 @@ public class FormInteractionManager implements ButtonHandler, ModalHandler {
 		long formId = Long.parseLong(ComponentIdBuilder.split(button.getCustomId())[1]);
 		Optional<FormData> formOpt = formsRepo.getForm(formId);
 		if (!formOpt.isPresent()) {
-			event.reply(FORM_NOT_FOUND_MSG).setEphemeral(true).queue();
+			Responses.error(event, FORM_NOT_FOUND_MSG).queue();
 			return;
 		}
 		FormData form = formOpt.get();

@@ -1,10 +1,10 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
-
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -16,8 +16,8 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
  * The `/form delete` command. Deletes an existing form. This command also does
- * delete submission records from the database. This command won't work if the form
- * is attached to a message, see {@link DetachFormSubcommand}
+ * delete submission records from the database. This command won't work if the
+ * form is attached to a message, see {@link DetachFormSubcommand}
  * 
  * @see FormData
  */
@@ -44,22 +44,21 @@ public class DeleteFormSubcommand extends FormSubcommand implements AutoCompleta
 		long id = event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong);
 		Optional<FormData> formOpt = formsRepo.getForm(id);
 		if (formOpt.isEmpty()) {
-			event.reply("A form with this ID was not found.").setEphemeral(true).queue();
+			Responses.error(event, "A form with this ID was not found.").queue();
 			return;
 		}
 
-		event.deferReply(true).queue();
 		FormData form = formOpt.get();
 
 		if (form.getAttachmentInfo().isPresent()) {
-			event.getHook().sendMessage(
+			Responses.error(event,
 					"This form is attached to a message. Use `details` subcommand to check the message this form is attached to, or `detach` subcommand to detach the message before deleting.")
 					.queue();
 			return;
 		}
 
+		event.deferReply(true).queue();
 		formsRepo.deleteForm(form);
-
 		event.getHook().sendMessage("Form deleted!").queue();
 	}
 

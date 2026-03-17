@@ -8,6 +8,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -46,28 +47,28 @@ public class RemoveFieldFormSubcommand extends FormSubcommand implements AutoCom
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		int index = event.getOption(FORM_FIELD_INDEX_FIELD, OptionMapping::getAsInt);
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("A form with this ID was not found.").queue();
+			Responses.error(event, "A form with this ID was not found.").queue();
 			return;
 		}
 		FormData form = formOpt.get();
 
 		if (form.getAttachmentInfo().isPresent() && form.fields().size() <= 1) {
-			event.getHook().sendMessage(
+			Responses.error(event, 
 					"Can't remove the last field from an attached form. Detach the form before removing the field")
 					.queue();
 			return;
 		}
 
 		if (!formsRepo.removeField(form, index)) {
-			event.getHook().sendMessage("A field on this index was not found.").queue();
+			Responses.error(event, "A field on this index was not found.").queue();
 			return;
 		}
 
-		event.getHook().sendMessage("Removed field `" + form.fields().get(index).label() + "` from the form.").queue();
+		event.reply("Removed field `" + form.fields().get(index).label() + "` from the form.")
+		.setEphemeral(true).queue();
 	}
 
 	@Override

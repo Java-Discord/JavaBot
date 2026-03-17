@@ -8,6 +8,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -51,15 +52,15 @@ public class CreateFormSubcommand extends FormSubcommand {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply().setEphemeral(true).queue();
 		Optional<Instant> expirationOpt;
 		try {
 			expirationOpt = FormInteractionManager.parseExpiration(event);
 		} catch (IllegalArgumentException e) {
-			event.getHook().sendMessage(e.getMessage()).queue();
+			Responses.error(event, e.getMessage()).queue();
 			return;
 		}
 
+		event.deferReply().setEphemeral(true).queue();
 		Instant expiration = expirationOpt.orElse(null);
 
 		FormData form = new FormData(0, List.of(), event.getOption(FORM_TITLE_FIELD, OptionMapping::getAsString),

@@ -6,6 +6,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormAttachmentInfo;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -48,13 +49,13 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply().setEphemeral(false).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("Couldn't find a form with this id").queue();
+			Responses.error(event, "Couldn't find a form with this id").queue();
 			return;
 		}
 
+		event.deferReply().setEphemeral(false).queue();
 		FormData form = formOpt.get();
 		EmbedBuilder embedBuilder = createFormDetailsEmbed(form, event.getGuild());
 		embedBuilder.setAuthor(event.getMember().getEffectiveName(), null, event.getMember().getEffectiveAvatarUrl());
@@ -73,7 +74,7 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 		long id = form.id();
 
 		addCodeblockField(builder, "ID", id, true);
-		builder.addField("Created at", String.format("<t:%s>", id / 1000L), true);
+		builder.addField("Created at", String.format("<t:%s>", id / 1000L), true); // TODO i forgot to fix
 
 		builder.addField("Expires at",
 				form.hasExpirationTime() ? TimeFormat.DATE_TIME_LONG.format(form.expiration().toEpochMilli())

@@ -13,6 +13,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormUser;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -51,13 +52,13 @@ public class SubmissionsExportFormSubcommand extends FormSubcommand implements A
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply().setEphemeral(false).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("Couldn't find a form with this id").queue();
+			Responses.error(event, "Couldn't find a form with this id").queue();
 			return;
 		}
 
+		event.deferReply().setEphemeral(false).queue();
 		FormData form = formOpt.get();
 		Map<FormUser, Integer> submissions = formsRepo.getSubmissionsCountPerUser(form);
 		JsonObject root = new JsonObject();

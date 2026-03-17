@@ -6,6 +6,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -44,12 +45,12 @@ public class ShowFormSubcommand extends FormSubcommand implements AutoCompletabl
 		if (!checkForStaffRole(event)) return;
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.reply("A form with this ID was not found.").setEphemeral(true).queue();
+			Responses.error(event, "A form with this ID was not found.").queue();
 			return;
 		}
 		FormData form = formOpt.get();
 		if (form.fields().isEmpty()) {
-			event.reply("You can't open a form with no fields").setEphemeral(true).queue();
+			Responses.error(event, "You can't open a form with no fields").queue();
 			return;
 		}
 		event.replyModal(FormInteractionManager.createSubmissionModal(form)).queue();

@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -44,13 +45,13 @@ public class SubmissionsDeleteFormSubcommand extends FormSubcommand implements A
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply().setEphemeral(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("Couldn't find a form with this id").queue();
+			Responses.error(event, "Couldn't find a form with this id").queue();
 			return;
 		}
 
+		event.deferReply().setEphemeral(true).queue();
 		User user = event.getOption(FORM_USER_FIELD, OptionMapping::getAsUser);
 		FormData form = formOpt.get();
 

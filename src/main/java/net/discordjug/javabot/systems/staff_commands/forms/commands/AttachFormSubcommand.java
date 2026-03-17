@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.components.Component.Type;
 import net.dv8tion.jda.api.components.MessageTopLevelComponentUnion;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
@@ -72,24 +72,22 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply().setEphemeral(true).queue();
 
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("A form with this ID was not found.").queue();
+			Responses.error(event, "A form with this ID was not found.").queue();
 			return;
 		}
 		FormData form = formOpt.get();
 
 		if (form.getAttachmentInfo().isPresent()) {
-			event.getHook()
-					.sendMessage("The form seems to already be attached to a message. Detach it before continuing.")
+			Responses.error(event, "The form seems to already be attached to a message. Detach it before continuing.")
 					.queue();
 			return;
 		}
 
 		if (form.fields().isEmpty()) {
-			event.getHook().sendMessage("You can't attach a form with no fields.").queue();
+			Responses.error(event, "You can't attach a form with no fields.").queue();
 			return;
 		}
 
@@ -98,12 +96,12 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 				OptionMapping::getAsChannel);
 
 		if (channel == null) {
-			event.getHook().sendMessage("A channel with this ID was not found.").setEphemeral(true).queue();
+			Responses.error(event, "A channel with this ID was not found.").queue();
 			return;
 		}
 
 		if (!(channel instanceof MessageChannel msgChannel)) {
-			event.getHook().sendMessage("You must specify a message channel").setEphemeral(true).queue();
+			Responses.error(event, "You must specify a message channel").queue();
 			return;
 		}
 
@@ -119,10 +117,9 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 		msgChannel.retrieveMessageById(messageId).queue(message -> {
 			attachFormToMessage(message, buttonLabel, style, form);
 			formsRepo.attachForm(form, msgChannel, message);
-			event.getHook()
-					.sendMessage("Successfully attached the form to the [message](" + message.getJumpUrl() + ")!")
-					.queue();
-		}, _ -> event.getHook().sendMessage("A message with this ID was not found").queue());
+			event.reply("Successfully attached the form to the [message](" + message.getJumpUrl() + ")!")
+					.setEphemeral(true).queue();
+		}, _ -> Responses.error(event, "A message with this ID was not found").queue());
 	}
 
 	@Override

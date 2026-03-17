@@ -8,6 +8,7 @@ import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManage
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormAttachmentInfo;
 import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.util.Responses;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
@@ -55,12 +56,12 @@ public class ModifyFormSubcommand extends FormSubcommand implements AutoCompleta
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		if (!checkForStaffRole(event)) return;
-		event.deferReply(true).queue();
 		Optional<FormData> formOpt = formsRepo.getForm(event.getOption(FORM_ID_FIELD, OptionMapping::getAsLong));
 		if (formOpt.isEmpty()) {
-			event.getHook().sendMessage("Couldn't find a form with this ID").queue();
+			Responses.error(event, "Couldn't find a form with this ID").queue();
 			return;
 		}
+		event.deferReply(true).queue();
 		FormData oldForm = formOpt.get();
 
 		String title = event.getOption(FORM_TITLE_FIELD, oldForm.title(), OptionMapping::getAsString);
