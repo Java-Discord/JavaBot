@@ -74,7 +74,6 @@ public class DetailsFormSubcommand extends FormSubcommand implements AutoComplet
 		long id = form.id();
 
 		addCodeblockField(builder, "ID", id, true);
-		builder.addField("Created at", String.format("<t:%s>", id / 1000L), true); // TODO i forgot to fix
 
 		builder.addField("Expires at",
 				form.hasExpirationTime() ? TimeFormat.DATE_TIME_LONG.format(form.expiration().toEpochMilli())
