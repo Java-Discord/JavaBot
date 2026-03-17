@@ -60,7 +60,7 @@ public class ChangeMyMindCommand extends SlashCommand {
 				try {
 					String imageUrl = hr.getBody().getObject().getString("message");
 					event.getHook().sendMessageEmbeds(new EmbedBuilder()
-							.setAuthor(UserUtils.getUserTag(event.getUser()), imageUrl, event.getUser().getEffectiveAvatarUrl())
+							.setAuthor(UserUtils.getUserTag(event.getUser()), null, event.getUser().getEffectiveAvatarUrl())
 							.setColor(Responses.Type.DEFAULT.getColor())
 							.setImage(imageUrl)
 							.setTimestamp(Instant.now())
