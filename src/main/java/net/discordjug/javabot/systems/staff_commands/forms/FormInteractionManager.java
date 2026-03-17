@@ -1,0 +1,291 @@
+package net.discordjug.javabot.systems.staff_commands.forms;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
+import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormData;
+import net.discordjug.javabot.systems.staff_commands.forms.model.FormField;
+import net.discordjug.javabot.util.ExceptionLogger;
+import net.discordjug.javabot.util.Responses;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.modals.Modal;
+import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
+import xyz.dynxsty.dih4jda.interactions.components.ModalHandler;
+import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
+
+/**
+ * Handle forms interactions, including buttons and submissions modals.
+ */
+@AutoDetectableComponentHandler(FormInteractionManager.FORM_COMPONENT_ID)
+@RequiredArgsConstructor
+@Slf4j
+public class FormInteractionManager implements ButtonHandler, ModalHandler {
+
+	/**
+	 * String representation of the date and time format used in forms.
+	 */
+	public static final String DATE_FORMAT_STRING = "dd.MM.yyyy HH:mm";
+
+	/**
+	 * Date and time formatter used in forms.
+	 */
+	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_STRING);
+
+	/**
+	 * Component ID used for form buttons and modals.
+	 */
+	public static final String FORM_COMPONENT_ID = "modal-form";
+
+	private static final String SUBMISSION_ERROR_LOG = "A user tried to submit a form \"%s\", but an error occured.";
+
+	private static final String SUBMISSION_ERROR_MSG = "We couldn't receive your submission due to an error. Please contact server staff.";
+
+	private static final String FORM_NOT_FOUND_MSG = "This form was not found in the database. Please report this to the server staff.";
+
+	private final FormsRepository formsRepo;
+
+	/**
+	 * Closes the form, preventing further submissions and disabling associated
+	 * buttons from a message this form is attached to, if any.
+	 *
+	 * @param guild guild this form is located in.
+	 * @param form  form to close.
+	 */
+	public void closeForm(Guild guild, FormData form) {
+		formsRepo.closeForm(form);
+
+		form.getAttachmentInfo().ifPresent(info -> {
+			long messageChannelId = info.messageChannelId();
+			long messageId = info.messageId();
+			MessageChannel formChannel = guild.getJDA().getChannelById(MessageChannel.class, messageChannelId);
+			formChannel.retrieveMessageById(messageId).queue(msg -> {
+				editFormMessageButtons(msg, btn -> {
+					String cptId = btn.getCustomId();
+					String[] split = ComponentIdBuilder.split(cptId);
+					if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)
+							&& split[1].equals(Long.toString(form.id()))) {
+						return btn.asDisabled();
+					}
+					return btn;
+				});
+			}, ExceptionLogger::capture);
+		});
+	}
+
+	@Override
+	public void handleButton(ButtonInteractionEvent event, Button button) {
+		long formId = Long.parseLong(ComponentIdBuilder.split(button.getCustomId())[1]);
+		Optional<FormData> formOpt = formsRepo.getForm(formId);
+		if (!formOpt.isPresent()) {
+			Responses.error(event, FORM_NOT_FOUND_MSG).queue();
+			return;
+		}
+		FormData form = formOpt.get();
+		if (!isOpen(form)) {
+			event.reply("This form is not accepting new submissions.").setEphemeral(true).queue();
+			if (!form.closed()) {
+				closeForm(event.getGuild(), form);
+			}
+			return;
+		}
+
+		if (form.onetime() && formsRepo.hasSubmitted(event.getUser(), form)) {
+			event.reply("You have already submitted this form").setEphemeral(true).queue();
+			return;
+		}
+
+		Modal modal = createSubmissionModal(form);
+
+		event.replyModal(modal).queue();
+	}
+
+	@Override
+	public void handleModal(ModalInteractionEvent event, List<ModalMapping> values) {
+		event.deferReply().setEphemeral(true).queue();
+		long formId = Long.parseLong(ComponentIdBuilder.split(event.getModalId())[1]);
+		Optional<FormData> formOpt = formsRepo.getForm(formId);
+		if (!formOpt.isPresent()) {
+			event.reply(FORM_NOT_FOUND_MSG).setEphemeral(true).queue();
+			return;
+		}
+
+		FormData form = formOpt.get();
+
+		if (!isOpen(form)) {
+			event.getHook().sendMessage("This form is not accepting new submissions.").queue();
+			return;
+		}
+
+		if (form.onetime() && formsRepo.hasSubmitted(event.getUser(), form)) {
+			event.getHook().sendMessage("You have already submitted this form").queue();
+			return;
+		}
+
+		TextChannel channel = event.getGuild().getTextChannelById(form.submitChannel());
+		if (channel == null) {
+			log.warn("A user tried to submit a form \"%s\" because the submission channel does not exist."
+					.formatted(form.title()));
+			event.getHook().sendMessage(SUBMISSION_ERROR_MSG).queue();
+			return;
+		}
+
+		try {
+			channel.sendMessageEmbeds(createSubmissionEmbed(form, values, event.getMember())).queue(msg -> {
+				formsRepo.addSubmission(event.getUser(), form, msg);
+				event.getHook().sendMessage(form.getOptionalSubmitMessage().orElse("Your submission was received!"))
+						.queue();
+			}, e -> {
+				event.getHook().sendMessage(SUBMISSION_ERROR_MSG).queue();
+				log.error(SUBMISSION_ERROR_LOG.formatted(form.title()));
+				ExceptionLogger.capture(e);
+			});
+		} catch (IllegalArgumentException e) {
+			event.getHook().sendMessage(SUBMISSION_ERROR_MSG).queue();
+			log.error(SUBMISSION_ERROR_LOG.formatted(form.title()));
+			ExceptionLogger.capture(e);
+		}
+	}
+
+	/**
+	 * Modifies buttons in a message using given function for mapping.
+	 *
+	 * @param msg          message to modify buttons in.
+	 * @param editFunction function to edit the buttons.
+	 */
+	public void editFormMessageButtons(Message msg, Function<Button, Button> editFunction) {
+		List<ActionRow> components = msg.getComponents().stream().map(messageComponent -> {
+			ActionRow row = messageComponent.asActionRow();
+			List<ActionRowChildComponent> cpts = row.getComponents().stream().map(cpt -> {
+				if (cpt instanceof Button btn) {
+					return editFunction.apply(btn);
+				}
+				return cpt;
+			}).toList();
+			if (cpts.isEmpty()) {
+				return null;
+			}
+			return ActionRow.of(cpts);
+		}).filter(Objects::nonNull).toList();
+		msg.editMessageComponents(components).queue();
+	}
+
+	/**
+	 * Re-opens the form, re-enabling associated buttons in the message it's
+	 * attached to, if any.
+	 *
+	 * @param guild guild this form is contained in.
+	 * @param form  form to re-open.
+	 */
+	public void reopenForm(Guild guild, FormData form) {
+		formsRepo.reopenForm(form);
+
+		form.getAttachmentInfo().ifPresent(info -> {
+			long messageChannelId = info.messageChannelId();
+			long messageId = info.messageId();
+			TextChannel formChannel = guild.getTextChannelById(messageChannelId);
+			formChannel.retrieveMessageById(messageId).queue(msg -> {
+				editFormMessageButtons(msg, btn -> {
+					String cptId = btn.getCustomId();
+					String[] split = ComponentIdBuilder.split(cptId);
+					if (split[0].equals(FormInteractionManager.FORM_COMPONENT_ID)
+							&& split[1].equals(Long.toString(form.id()))) {
+						return btn.asEnabled();
+					}
+					return btn;
+				});
+			}, ExceptionLogger::capture);
+		});
+	}
+
+	/**
+	 * Creates a submission modal for the given form.
+	 *
+	 * @param form form to open submission modal for.
+	 * @return submission modal to be presented to the user.
+	 */
+	public static Modal createSubmissionModal(FormData form) {
+		Modal modal = Modal.create(ComponentIdBuilder.build(FORM_COMPONENT_ID, form.id()), form.title())
+				.addComponents(form.createComponents()).build();
+		return modal;
+	}
+
+	/**
+	 * Gets expiration time from the slash comamnd event.
+	 *
+	 * @param event slash event to get expiration from.
+	 * @return an optional containing expiration time, or an empty optional if it's
+	 *         not present.
+	 * @throws IllegalArgumentException if the date doesn't follow the format.
+	 */
+	public static Optional<Instant> parseExpiration(SlashCommandInteractionEvent event)
+			throws IllegalArgumentException {
+		String expirationStr = event.getOption("expiration", null, OptionMapping::getAsString);
+		Optional<Instant> expiration;
+		if (expirationStr == null) {
+			expiration = Optional.empty();
+		} else {
+			try {
+				expiration = Optional.of(LocalDateTime.parse(expirationStr, DATE_FORMATTER).toInstant(ZoneOffset.UTC));
+			} catch (DateTimeParseException e) {
+				throw new IllegalArgumentException("Invalid date. You should follow the format `"
+						+ FormInteractionManager.DATE_FORMAT_STRING + "`.");
+			}
+		}
+
+		if (expiration.isPresent() && expiration.get().isBefore(Instant.now())) {
+			throw new IllegalArgumentException("The expiration date shouldn't be in the past");
+		}
+		return expiration;
+	}
+
+	private static boolean isOpen(FormData data) {
+		if (data.closed() || data.hasExpired()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private static MessageEmbed createSubmissionEmbed(FormData form, List<ModalMapping> values, Member author) {
+		EmbedBuilder builder = new EmbedBuilder().setTitle("New form submission received")
+				.setAuthor(author.getEffectiveName(), null, author.getEffectiveAvatarUrl()).setTimestamp(Instant.now());
+		builder.addField("Sender", String.format("%s (`%s`)", author.getAsMention(), author.getId()), true)
+				.addField("Title", form.title(), true);
+
+		int len = Math.min(values.size(), form.fields().size());
+		for (int i = 0; i < len; i++) {
+			ModalMapping mapping = values.get(i);
+			FormField field = form.fields().get(i);
+			String value = mapping.getAsString();
+			if (value != null) value = value.replace("```", "` ` `");
+			builder.addField(field.label(), value == null ? "*Empty*" : "```\n" + value + "\n```", false);
+		}
+
+		return builder.build();
+	}
+}
