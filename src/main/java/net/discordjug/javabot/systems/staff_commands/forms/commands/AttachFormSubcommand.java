@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -115,6 +116,11 @@ public class AttachFormSubcommand extends FormSubcommand implements AutoCompleta
 		});
 
 		msgChannel.retrieveMessageById(messageId).queue(message -> {
+			SelfUser self = message.getJDA().getSelfUser();
+			if (message.getAuthor().getIdLong() != self.getIdLong()) {
+				Responses.error(event, "You can only attach forms to messages sent by " + self.getAsMention()).queue();
+				return;
+			}
 			attachFormToMessage(message, buttonLabel, style, form);
 			formsRepo.attachForm(form, msgChannel, message);
 			event.reply("Successfully attached the form to the [message](" + message.getJumpUrl() + ")!")
