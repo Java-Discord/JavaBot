@@ -152,7 +152,7 @@ public class FormsRepository {
 	 * Get a form for given ID.
 	 *
 	 * @param formId form ID to query
-	 * @return optional form
+	 * @return the obtained form or {@link Optional#empty()}
 	 */
 	public Optional<FormData> getForm(long formId) {
 		try {

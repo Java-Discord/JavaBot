@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.modals.Modal;
 import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 
 /**
@@ -74,7 +75,7 @@ public class AddFieldFormSubcommand extends FormSubcommand implements AutoComple
 		}
 		FormData form = formOpt.get();
 
-		if (form.fields().size() >= Message.MAX_COMPONENT_COUNT) {
+		if (form.fields().size() >= Modal.MAX_COMPONENTS) {
 			Responses.error(event, "Can't add more than %s components to a form", Message.MAX_COMPONENT_COUNT).queue();
 			return;
 		}

@@ -26,12 +26,11 @@ CREATE TABLE form_fields (
 );
 
 CREATE TABLE form_submissions (
-    id BIGINT NOT NULL AUTO_INCREMENT,
     message_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     form_id BIGINT NOT NULL,
     user_name VARCHAR NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (message_id),
     FOREIGN KEY (form_id) REFERENCES FORMS(form_id) ON DELETE CASCADE ON UPDATE RESTRICT
 );
 

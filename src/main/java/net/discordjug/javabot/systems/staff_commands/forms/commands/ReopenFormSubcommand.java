@@ -1,7 +1,6 @@
 package net.discordjug.javabot.systems.staff_commands.forms.commands;
 
 import java.util.Optional;
-
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.systems.staff_commands.forms.FormInteractionManager;
 import net.discordjug.javabot.systems.staff_commands.forms.dao.FormsRepository;
@@ -57,6 +56,11 @@ public class ReopenFormSubcommand extends FormSubcommand implements AutoCompleta
 
 		if (!form.closed()) {
 			Responses.error(event, "This form is already opened").queue();
+			return;
+		}
+
+		if (form.hasExpired()) {
+			Responses.error(event, "You can't reopen an expired form").queue();
 			return;
 		}
 
