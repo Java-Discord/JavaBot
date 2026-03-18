@@ -131,11 +131,6 @@
 							<artifactId>lombok</artifactId>
 						</annotationProcessorPath>
 					</annotationProcessorPaths>
-					<fork>true</fork>
-					<compilerArgs>
-						<compilerArg>--add-opens</compilerArg>
-						<compilerArg>jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</compilerArg>
-					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

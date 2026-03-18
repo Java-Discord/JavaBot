@@ -38,7 +38,7 @@ jobs:
       - nativetest
     if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     concurrency:
-      group: example-group
+      group: publish
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
