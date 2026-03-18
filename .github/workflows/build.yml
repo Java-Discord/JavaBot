@@ -35,7 +35,6 @@ jobs:
       contents: read
     needs:
       - build
-      - nativetest
     if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     concurrency:
       group: publish
