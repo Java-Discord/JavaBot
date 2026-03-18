@@ -13,6 +13,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '25'
+          cache: 'maven'
           distribution: 'temurin'
       - name: Build and run tests
         run: mvn verify
@@ -27,6 +28,7 @@ jobs:
           with:
             java-version: '25'
             distribution: 'graalvm-community'
+            cache: 'maven'
         - name: Run tests with native-image
           run: mvn test -PnativeTest
   publish:
@@ -46,6 +48,7 @@ jobs:
         with:
           java-version: '25'
           distribution: 'graalvm-community'
+          cache: 'maven'
       - name: Build native-image
         run: "mvn native:compile -Pnative -Pprod '-P!dev'"
       - name: Build Docker image
