@@ -37,6 +37,9 @@ jobs:
       - build
       - nativetest
     if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
+    concurrency:
+      group: example-group
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
       - name: Set up JDK 25
