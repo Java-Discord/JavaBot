@@ -1,7 +1,8 @@
 FROM alpine:latest
 RUN apk add --no-cache libsm libxrender libxext libxtst libxi gcompat ttf-dejavu
 
-COPY build/native/nativeCompile /work
+COPY target/*.so /work/
+COPY target/javabot /work/
 WORKDIR /work
 
 RUN chown 1000:1000 /work
