@@ -10,11 +10,13 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.zaxxer.hikari.HikariDataSource;
-
+import net.discordjug.javabot.RuntimeHintsConfiguration;
 import net.discordjug.javabot.data.h2db.DbHelper;
 import net.discordjug.javabot.systems.help.dao.HelpAccountRepository;
 import net.discordjug.javabot.systems.help.model.HelpAccount;
@@ -22,6 +24,8 @@ import net.discordjug.javabot.systems.help.model.HelpAccount;
 /**
  * Tests functionality of automated experience subtraction.
  */
+@ExtendWith(SpringExtension.class)
+@Import(RuntimeHintsConfiguration.class)
 public class HelpExperienceSubtractionTest {
 	
 	private HikariDataSource dataSource;
