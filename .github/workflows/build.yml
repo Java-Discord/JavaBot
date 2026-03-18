@@ -10,14 +10,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 25
-        uses: graalvm/setup-graalvm@v1
+        uses: graalvm/setup-java@v1
         with:
           java-version: '25'
-          distribution: 'graalvm-community'
+          distribution: 'temurin'
       - name: Build and run tests
         run: mvn verify
-      - name: Run tests with native-image
-        run: mvn test -PnativeTest
+  nativetest:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+      steps:
+        - uses: actions/checkout@v4
+        - name: Set up JDK 25
+          uses: graalvm/setup-graalvm@v1
+          with:
+            java-version: '25'
+            distribution: 'graalvm-community'
+        - name: Run tests with native-image
+          run: mvn test -PnativeTest
   publish:
     runs-on: ubuntu-latest
     permissions:
@@ -32,7 +43,7 @@ jobs:
           java-version: '25'
           distribution: 'graalvm-community'
       - name: Build native-image
-        run: "mvn native:compile -Pnative -Pprod"
+        run: "mvn native:compile -Pnative -Pprod '-P!dev'"
       - name: Build Docker image
         run: docker build -t javabot .
       - name: Tag docker image
