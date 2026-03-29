@@ -63,6 +63,7 @@ public class QOTWJob {
 								Permission.CREATE_PRIVATE_THREADS,
 								Permission.CREATE_PUBLIC_THREADS,
 								Permission.MESSAGE_ADD_REACTION))
+						.removePermissionOverride(qotw.getQOTWReviewRole())
 						.queue();
 				if (question.getQuestionNumber() == null) {
 					question.setQuestionNumber(questionQueueRepository.getNextQuestionNumber());

@@ -82,6 +82,10 @@ public class QOTWCloseSubmissionsJob {
 							Permission.CREATE_PRIVATE_THREADS,
 							Permission.CREATE_PUBLIC_THREADS,
 							Permission.MESSAGE_ADD_REACTION))
+					.putPermissionOverride(
+							qotwConfig.getQOTWReviewRole(), 
+							Set.of(Permission.MESSAGE_SEND_IN_THREADS, Permission.MANAGE_THREADS, Permission.USE_APPLICATION_COMMANDS),
+							Set.of())
 					.queue();
 			TextChannel logChannel = config.getModerationConfig().getLogChannel();
 			if (logChannel == null) continue;
