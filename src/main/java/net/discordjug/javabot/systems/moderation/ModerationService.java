@@ -311,11 +311,14 @@ public class ModerationService {
 	 */
 	public void kick(User user, String reason, Member kickedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed kickEmbed = buildKickEmbed(user, kickedBy, reason);
-		kickedBy.getGuild().kick(user).queue(s -> {
-			notificationService.withUser(user).sendDirectMessage(c -> c.sendMessageEmbeds(kickEmbed));
-			notificationService.withGuild(kickedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(kickEmbed));
-			if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
-		}, ExceptionLogger::capture);
+		user.openPrivateChannel()
+			.flatMap(c -> c.sendMessageEmbeds(kickEmbed).setContent(getModerationConfig(kickedBy).getKickMessageText()))
+			.mapToResult() // errors in sending DMs should still result in the kicking logic being executed
+			.queue(_ -> {
+				kickedBy.getGuild().kick(user).queue();
+				notificationService.withGuild(kickedBy.getGuild()).sendToModerationLog(c -> c.sendMessageEmbeds(kickEmbed));
+				if (!quiet) channel.sendMessageEmbeds(kickEmbed).queue();
+			});
 	}
 
 	public void sendKickGuildNotification(User user, String reason, Member moderator) {
