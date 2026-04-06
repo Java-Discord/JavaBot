@@ -103,7 +103,12 @@ public class ModerationConfig extends GuildConfigItem {
 	/**
 	 * Text that is sent to users when they're banned.
 	 */
-	private String banMessageText = "Looks like you've been banned from the Java Discord. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
+	private String banMessageText = "Looks like you've been banned from the Discord Java Community. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
+	
+	/**
+	 * Text that is sent to users when they're banned.
+	 */
+	private String kickMessageText = "Looks like you've been kicked from the Discord Java Community. If you want to, you should be able to rejoin at <https://join.discordjug.net/> but please ensure you are following the rules if you do.";
 
 	/**
 	 * A list of rules that can result in a message being blocked or similar.
