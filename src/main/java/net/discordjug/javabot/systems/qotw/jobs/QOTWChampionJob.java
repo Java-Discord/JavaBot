@@ -56,6 +56,7 @@ public class QOTWChampionJob {
 									for (Member member : membersToAdd) {
 										guild.addRoleToMember(member, qotwChampionRole).queue();
 									}
+									qotwChampionRepository.setCurrentQOTWChampions(guild.getIdLong(), membersToAdd.stream().mapToLong(Member::getIdLong).toArray());
 								});
 						});
 				});

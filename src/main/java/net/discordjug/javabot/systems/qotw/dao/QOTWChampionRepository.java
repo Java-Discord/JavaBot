@@ -35,7 +35,7 @@ public class QOTWChampionRepository {
 	 * @param users the QOTW champions
 	 */
 	public void setCurrentQOTWChampions(long guild, long[] users) {
-		jdbcTemplate.update("DELETE FROM qotw_champion WHERE guild_id = ?");
+		jdbcTemplate.update("DELETE FROM qotw_champion WHERE guild_id = ?", guild);
 		List<Object[]> params = new ArrayList<>();
 		for (long userId : users) {
 			params.add(new Object[] {guild, userId});
