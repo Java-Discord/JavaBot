@@ -1,5 +1,6 @@
 package net.discordjug.javabot.systems.user_commands.format_code;
 
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.util.*;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
@@ -77,10 +78,7 @@ public class FormatCodeCommand extends SlashCommand {
 								.filter(m -> !m.getAuthor().isBot()).findFirst()
 								.orElse(null);
 						if (target != null) {
-							event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()),IndentationHelper.IndentationType.valueOf(indentation)))
-									.setAllowedMentions(List.of())
-									.setComponents(buildActionRow(target, event.getUser().getIdLong()))
-									.queue();
+							sendFormattedCode(event, target, format, indentation);
 						} else {
 							Responses.error(event.getHook(), "Could not find message; please specify a message id.").queue();
 						}
@@ -92,11 +90,38 @@ public class FormatCodeCommand extends SlashCommand {
 			}
 			long messageId = idOption.getAsLong();
 			event.getChannel().retrieveMessageById(messageId).queue(
-					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()), IndentationHelper.IndentationType.valueOf(indentation)))
-							.setAllowedMentions(List.of())
-							.setComponents(buildActionRow(target, event.getUser().getIdLong()))
-							.queue(),
+					target -> sendFormattedCode(event, target, format, indentation),
 					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
 		}
+	}
+
+	private void sendFormattedCode(SlashCommandInteractionEvent event, Message target, String format, String indentation) {
+		String content = IndentationHelper.formatIndentation(
+				StringUtils.standardSanitizer().compute(target.getContentRaw()),
+				IndentationHelper.IndentationType.valueOf(indentation));
+
+		if (content.isBlank()) {
+			Responses.error(event.getHook(), "There is no code to format in that message.").queue();
+			return;
+		}
+
+		Code code = new Code(Language.fromString(format), content);
+		sendChunksInOrder(event.getHook(), code.toDiscordMessages(), 0);
+	}
+
+	private void sendChunksInOrder(InteractionHook hook, List<String> messages, int index) {
+		if (index >= messages.size()) {
+			return;
+		}
+		var action = hook.sendMessage(messages.get(index)).setAllowedMentions(List.of());
+
+		action.queue(
+				success -> sendChunksInOrder(hook, messages, index + 1),
+				error ->  {
+					ExceptionLogger.capture(error, getClass().getSimpleName());
+					Responses.error(hook, "The message could not be converted into a formatted code block.")
+							.queue();
+				}
+		);
 	}
 }
