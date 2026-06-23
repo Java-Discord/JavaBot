@@ -18,6 +18,12 @@ public class Code {
 	private Language language;
 	private final String content;
 
+	/**
+	 * Creates a code block for the given language and content.
+	 *
+	 * @param language the language the code is written in, used for syntax highlighting
+	 * @param content  the raw, already-sanitized code to format
+	 */
 	public Code(Language language, String content) {
 		this.language = language;
 		this.content = content;
@@ -31,15 +37,13 @@ public class Code {
 		return language;
 	}
 
-	public void setLanguage(Language language) {
-		this.language = language;
-	}
-
 	/**
 	 * Splits {@link #content} into pieces that each fit within {@link #MAX_SIZE},
 	 * breaking on newlines where possible so lines are not cut in half.
+	 *
+	 * @return the content split into chunks that each fit within the limit
 	 */
-	public List<String> toDiscordChunks() {
+	private List<String> toDiscordChunks() {
 		List<String> chunks = new ArrayList<>();
 		String remaining = content;
 
@@ -59,7 +63,12 @@ public class Code {
 		return chunks;
 	}
 
-	/** Wraps each chunk in a language-tagged Discord code block. */
+	/**
+	 * Splits the content into chunks that each fit within Discord's character limit and wraps
+	 * every chunk in a language-tagged code block.
+	 *
+	 * @return the formatted code-block messages, one per Discord message
+	 */
 	public List<String> toDiscordMessages() {
 		return toDiscordChunks()
 				.stream()
