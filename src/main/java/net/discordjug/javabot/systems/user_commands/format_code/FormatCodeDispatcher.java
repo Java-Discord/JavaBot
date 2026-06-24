@@ -19,7 +19,7 @@ import java.util.List;
  * downloadable file, then posts it as one or more ordered code-block messages that each respect
  * Discord's 2000-character limit.
  */
-public class FormatCodeDispatcher {
+class FormatCodeDispatcher {
 
 	/**
 	 * Acknowledges the interaction by replying with the full code as a file, then posts the code as
@@ -32,10 +32,10 @@ public class FormatCodeDispatcher {
 	 */
 	public static void sendCode(Code code, @Nonnull CommandInteraction event, Message target){
 		if (code.getContent().isBlank()) {
-			Responses.error(event.getHook(), "There is no code to format in that message.").queue();
+			Responses.error(event, "There is no code to format in that message.").queue();
 			return;
 		}
-		// Currently we always format as Java. A language dropdown will be added in the future.
+
 		List<String> messages = code.toDiscordMessages();
 
 		// The reply both acknowledges the interaction and hands users the full,
@@ -49,7 +49,7 @@ public class FormatCodeDispatcher {
 
 		event.replyFiles(file)
 				.setAllowedMentions(List.of())
-				.setComponents(FormatCodeCommand.buildActionRow(target, event.getUser().getIdLong()))
+				.setComponents(buildActionRow(target, event.getUser().getIdLong()))
 				.queue(success -> sendChunksInOrder(channel, messages, 0, target,event));
 	}
 
@@ -62,7 +62,11 @@ public class FormatCodeDispatcher {
 				.setAllowedMentions(List.of());
 
 		if (index == messages.size() - 1) {
-			action.setComponents(buildActionRow(target, event.getUser().getIdLong()));
+			if(index == 0){
+				action.setComponents(buildActionRow(target, event.getUser().getIdLong()));
+			} else {
+				action.setComponents(buildActionRow(target));
+			}
 		}
 
 		action.queue(success ->
@@ -73,11 +77,23 @@ public class FormatCodeDispatcher {
 	 * Builds the action row placed on the last code-block message.
 	 *
 	 * @param target      the original message linked by the "View Original" button
-	 * @param requesterId the id of the requesting user
 	 * @return an action row containing the "View Original" link button
 	 */
 	@Contract("_ -> new")
-	static @NotNull ActionRow buildActionRow(@NotNull Message target, long requesterId) {
+	static @NotNull ActionRow buildActionRow(@NotNull Message target) {
 		return ActionRow.of(Button.link(target.getJumpUrl(), "View Original"));
+	}
+
+	/**
+	 * Builds the action row placed on the file-upload message: a delete button and a "View Original" link.
+	 *
+	 * @param target      the original message linked by the "View Original" button
+	 * @param requesterId the id of the user permitted to delete the message
+	 * @return an action row containing the delete and "View Original" buttons
+	 */
+	@Contract("_ -> new")
+	static @NotNull ActionRow buildActionRow(@NotNull Message target, long requesterId) {
+		return ActionRow.of(InteractionUtils.createDeleteButton(requesterId),
+				Button.link(target.getJumpUrl(), "View Original"));
 	}
 }

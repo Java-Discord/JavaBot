@@ -2,8 +2,6 @@ package net.discordjug.javabot.systems.user_commands.format_code;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.util.*;
-import net.dv8tion.jda.api.components.actionrow.ActionRow;
-import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
@@ -11,7 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.jetbrains.annotations.Contract;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -53,19 +51,6 @@ public class FormatCodeCommand extends SlashCommand {
 		return option;
 	}
 
-	/**
-	 * Builds the action row placed on the file-upload message: a delete button and a "View Original" link.
-	 *
-	 * @param target      the original message linked by the "View Original" button
-	 * @param requesterId the id of the user permitted to delete the message
-	 * @return an action row containing the delete and "View Original" buttons
-	 */
-	@Contract("_ -> new")
-	static @NotNull ActionRow buildActionRow(@NotNull Message target, long requesterId) {
-		return ActionRow.of(InteractionUtils.createDeleteButton(requesterId),
-				Button.link(target.getJumpUrl(), "View Original"));
-	}
-
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idOption = event.getOption("message-id");
@@ -83,18 +68,18 @@ public class FormatCodeCommand extends SlashCommand {
 						if (target != null) {
 							sendFormattedCode(event, target, language, indentation);
 						} else {
-							Responses.error(event.getHook(), "Could not find message; please specify a message id.").queue();
+							Responses.error(event, "Could not find message; please specify a message id.").queue();
 						}
 					});
 		} else {
 			if (Checks.isInvalidLongInput(idOption)) {
-				Responses.error(event.getHook(), "Please provide a valid message id!").queue();
+				Responses.error(event, "Please provide a valid message id!").queue();
 				return;
 			}
 			long messageId = idOption.getAsLong();
 			event.getChannel().retrieveMessageById(messageId).queue(
 					target -> sendFormattedCode(event, target, language, indentation),
-					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
+					e -> Responses.error(event, "Could not retrieve message with id: " + messageId).queue());
 		}
 	}
 

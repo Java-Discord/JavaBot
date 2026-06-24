@@ -15,7 +15,7 @@ public class Code {
 	 */
 	private static final int MAX_SIZE = 1980;
 
-	private Language language;
+	private final Language language;
 	private final String content;
 
 	/**
