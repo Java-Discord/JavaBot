@@ -22,6 +22,11 @@ import java.util.List;
 class FormatCodeDispatcher {
 
 	/**
+	 * The maximum number of code-block messages to post inline; longer code is sent only as a file.
+	 */
+	private static final int MAX_MESSAGES = 5;
+
+	/**
 	 * Acknowledges the interaction by replying with the full code as a file, then posts the code as
 	 * ordered code-block messages. Replies with an error instead if there is nothing to format.
 	 *
@@ -32,7 +37,7 @@ class FormatCodeDispatcher {
 	 */
 	public static void sendCode(Code code, @Nonnull CommandInteraction event, Message target){
 		if (code.getContent().isBlank()) {
-			Responses.error(event, "There is no code to format in that message.").queue();
+			Responses.errorWithTitle(event, "404 Code not found","There is no code to format in that message.").queue();
 			return;
 		}
 
@@ -56,6 +61,11 @@ class FormatCodeDispatcher {
 
 	private static void sendChunksInOrder(MessageChannel channel, List<String> messages, int index, Message target, @Nonnull CommandInteraction event) {
 		if (index >= messages.size()) {
+			return;
+		}
+		if (messages.size() > MAX_MESSAGES) {
+			Responses.errorWithTitle(event.getHook(), "Output Too Large", "The formatted result is too large to send. Please provide a smaller code snippet or use a paste service instead."
+			).queue();
 			return;
 		}
 		var action = channel.sendMessage(messages.get(index))

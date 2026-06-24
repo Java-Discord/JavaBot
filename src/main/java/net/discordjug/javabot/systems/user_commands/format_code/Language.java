@@ -79,6 +79,10 @@ public enum Language {
 	 */
 	XML("XML", "xml"),
 	/**
+	 * A structured data format.
+	 */
+	JSON("JSON", "json"),
+	/**
 	 * Fallback used when the language is unrecognised; renders as plain text.
 	 */
 	UNKNOWN("Unknown", "txt");

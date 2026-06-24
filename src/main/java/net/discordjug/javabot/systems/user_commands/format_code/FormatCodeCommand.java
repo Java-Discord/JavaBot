@@ -68,18 +68,20 @@ public class FormatCodeCommand extends SlashCommand {
 						if (target != null) {
 							sendFormattedCode(event, target, language, indentation);
 						} else {
-							Responses.error(event, "Could not find message; please specify a message id.").queue();
+							Responses.errorWithTitle(event, "Message Not Found", "No recent user message could be found. Please specify a message ID.")
+									.queue();
 						}
 					});
 		} else {
 			if (Checks.isInvalidLongInput(idOption)) {
-				Responses.error(event, "Please provide a valid message id!").queue();
+				Responses.errorWithTitle(event, "Invalid Message ID", "Please provide a valid Discord message ID.")
+				.queue();
 				return;
 			}
 			long messageId = idOption.getAsLong();
 			event.getChannel().retrieveMessageById(messageId).queue(
 					target -> sendFormattedCode(event, target, language, indentation),
-					e -> Responses.error(event, "Could not retrieve message with id: " + messageId).queue());
+					error -> Responses.errorWithTitle(event, "Message Not Found", "Could not retrieve the message with ID `" + messageId + "`. Make sure the message exists and is accessible.").queue());
 		}
 	}
 
