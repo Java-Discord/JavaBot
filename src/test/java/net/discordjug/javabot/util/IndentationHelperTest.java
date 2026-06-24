@@ -22,10 +22,15 @@ public class IndentationHelperTest {
 		formatted = StringResourceCache.load("/Formatted Strings.txt").split("----");
 
 		for (int i = 0, k = 0; i < unformatted.length; i++) {
-			assertEquals(formatted[k++], IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.FOUR_SPACES), "Method failed to format a text with four spaces correctly");
-			assertEquals(formatted[k++], IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.TWO_SPACES), "Method failed to format a text with two spaces correctly");
-			assertEquals(formatted[k++], IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.TABS), "Method failed to format a text with tabs correctly.");
-			assertEquals(formatted[k++], IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.NULL), "Method returned a String not matching the input");
+			assertEquals(normalizeLineEndings(formatted[k++]), normalizeLineEndings(IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.FOUR_SPACES)), "Method failed to format a text with four spaces correctly");
+			assertEquals(normalizeLineEndings(formatted[k++]), normalizeLineEndings(IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.TWO_SPACES)), "Method failed to format a text with two spaces correctly");
+			assertEquals(normalizeLineEndings(formatted[k++]), normalizeLineEndings(IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.TABS)), "Method failed to format a text with tabs correctly.");
+			assertEquals(normalizeLineEndings(formatted[k++]), normalizeLineEndings(IndentationHelper.formatIndentation(unformatted[i], IndentationHelper.IndentationType.NULL)), "Method returned a String not matching the input");
 		}
+	}
+
+	private static String normalizeLineEndings(String text) {
+		return text.replace("\r\n", "\n")
+				.replace("\r", "\n");
 	}
 }
