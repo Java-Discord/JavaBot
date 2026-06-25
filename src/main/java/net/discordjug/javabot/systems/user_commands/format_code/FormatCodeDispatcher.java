@@ -20,7 +20,7 @@ import java.util.List;
 class FormatCodeDispatcher {
 
 	/**
-	 * The maximum number of code-block messages to post inline; longer code results as an ERROR.
+	 * The maximum number of code-block messages to post inline; longer code results in an error.
 	 */
 	private static final int MAX_MESSAGES = 5;
 
