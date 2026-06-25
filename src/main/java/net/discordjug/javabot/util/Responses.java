@@ -63,6 +63,11 @@ public final class Responses {
 	}
 
 	@CheckReturnValue
+	public static @NotNull WebhookMessageCreateAction<Message> errorWithTitle(InteractionHook hook, String title, String message, Object... args) {
+		return reply(hook, title, String.format(message, args), Type.ERROR.getColor(), true);
+	}
+
+	@CheckReturnValue
 	public static @NotNull WebhookMessageCreateAction<Message> error(InteractionHook hook, String message, Object... args) {
 		return reply(hook, "An Error Occurred", String.format(message, args), Type.ERROR.getColor(), true);
 	}

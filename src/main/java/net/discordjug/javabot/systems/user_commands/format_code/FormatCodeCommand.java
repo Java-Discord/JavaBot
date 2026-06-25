@@ -2,8 +2,6 @@ package net.discordjug.javabot.systems.user_commands.format_code;
 
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.util.*;
-import net.dv8tion.jda.api.components.actionrow.ActionRow;
-import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
@@ -11,11 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <h3>This class represents the /format-code command.</h3>
@@ -29,25 +24,7 @@ public class FormatCodeCommand extends SlashCommand {
 				.setContexts(InteractionContextType.GUILD)
 				.addOptions(
 						new OptionData(OptionType.STRING, "message-id", "Message to be formatted, last message used if left blank.", false),
-						new OptionData(OptionType.STRING, "format", "The language used to format the code, defaults to Java if left blank.", false)
-								.addChoice("C", "c")
-								.addChoice("C#", "csharp")
-								.addChoice("C++", "cpp")
-								.addChoice("CSS", "css")
-								.addChoice("D", "d")
-								.addChoice("Go", "go")
-								.addChoice("HTML", "html")
-								.addChoice("Java", "java")
-								.addChoice("JavaScript", "js")
-								.addChoice("Kotlin", "kotlin")
-								.addChoice("PHP", "php")
-								.addChoice("Python", "python")
-								.addChoice("Ruby", "ruby")
-								.addChoice("Rust", "rust")
-								.addChoice("SQL", "sql")
-								.addChoice("Swift", "swift")
-								.addChoice("TypeScript", "typescript")
-								.addChoice("XML", "xml"),
+						formatOption(),
 						new OptionData(OptionType.STRING,"auto-indent","The type of indentation applied to the message, does not automatically indent if left blank.",false)
 								.addChoice("Four Spaces","FOUR_SPACES")
 								.addChoice("Two Spaces","TWO_SPACES")
@@ -56,47 +33,66 @@ public class FormatCodeCommand extends SlashCommand {
 		);
 	}
 
-	@Contract("_ -> new")
-	static @NotNull ActionRow buildActionRow(@NotNull Message target, long requesterId) {
-		return ActionRow.of(InteractionUtils.createDeleteButton(requesterId),
-				Button.link(target.getJumpUrl(), "View Original"));
+	/**
+	 * Builds the {@code format} option, generating one choice per {@link Language} (excluding
+	 * {@link Language#UNKNOWN}) so the enum stays the single source of truth for the language list.
+	 *
+	 * @return the configured {@code format} option
+	 */
+	private static OptionData formatOption() {
+		OptionData option = new OptionData(OptionType.STRING, "format", "The language used to format the code, defaults to Java if left blank.", false);
+		for (Language language : Language.values()) {
+			if (language != Language.UNKNOWN) {                       // UNKNOWN is the fallback, not a real choice
+				option.addChoice(language.getDisplayName(), language.name()); // value = enum name so valueOf() reverses it
+			}
+		}
+		return option;
 	}
 
 	@Override
 	public void execute(@NotNull SlashCommandInteractionEvent event) {
 		OptionMapping idOption = event.getOption("message-id");
-		String format = event.getOption("format", "java", OptionMapping::getAsString);
+		Language language = event.getOption("format", Language.JAVA, o -> Language.fromString(o.getAsString()));
 		String indentation = event.getOption("auto-indent","NULL",OptionMapping::getAsString);
-		event.deferReply().queue();
+
 		if (idOption == null) {
-			event.getChannel().getHistory()
-					.retrievePast(10)
-					.queue(messages -> {
-						Collections.reverse(messages);
-						Message target = messages.stream()
-								.filter(m -> !m.getAuthor().isBot()).findFirst()
-								.orElse(null);
-						if (target != null) {
-							event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()),IndentationHelper.IndentationType.valueOf(indentation)))
-									.setAllowedMentions(List.of())
-									.setComponents(buildActionRow(target, event.getUser().getIdLong()))
-									.queue();
-						} else {
-							Responses.error(event.getHook(), "Could not find message; please specify a message id.").queue();
-						}
-					});
+			event.deferReply().queue(_ -> {
+				event.getChannel().getHistory()
+				.retrievePast(10)
+				.queue(messages -> {
+					Message target = messages.stream()
+							.filter(m -> !m.getAuthor().isBot()).findFirst()
+							.orElse(null);
+					if (target != null) {
+						sendFormattedCode(event, target, language, indentation);
+					} else {
+						Responses.errorWithTitle(event.getHook(), "Message Not Found", "No recent user message could be found. Please specify a message ID.")
+								.queue();
+					}
+				});
+			});
 		} else {
 			if (Checks.isInvalidLongInput(idOption)) {
-				Responses.error(event.getHook(), "Please provide a valid message id!").queue();
+				Responses.errorWithTitle(event, "Invalid Message ID", "Please provide a valid Discord message ID.")
+					.queue();
 				return;
 			}
 			long messageId = idOption.getAsLong();
-			event.getChannel().retrieveMessageById(messageId).queue(
-					target -> event.getHook().sendMessageFormat("```%s\n%s\n```", format, IndentationHelper.formatIndentation(StringUtils.standardSanitizer().compute(target.getContentRaw()), IndentationHelper.IndentationType.valueOf(indentation)))
-							.setAllowedMentions(List.of())
-							.setComponents(buildActionRow(target, event.getUser().getIdLong()))
-							.queue(),
-					e -> Responses.error(event.getHook(), "Could not retrieve message with id: " + messageId).queue());
+			event.deferReply().queue(_ -> {
+				event.getChannel().retrieveMessageById(messageId).queue(
+						target -> sendFormattedCode(event, target, language, indentation),
+						error -> Responses.errorWithTitle(event.getHook(), "Message Not Found", "Could not retrieve the message with ID `" + messageId + "`. Make sure the message exists and is accessible.").queue());
+			});
 		}
+	}
+
+	private void sendFormattedCode(SlashCommandInteractionEvent event, Message target, Language language, String indentation) {
+		String content = IndentationHelper.formatIndentation(
+				StringUtils.standardSanitizer().compute(target.getContentRaw()),
+				IndentationHelper.IndentationType.valueOf(indentation));
+
+		Code code = new Code(language,content);
+
+		FormatCodeDispatcher.sendCode(code, event, target);
 	}
 }
