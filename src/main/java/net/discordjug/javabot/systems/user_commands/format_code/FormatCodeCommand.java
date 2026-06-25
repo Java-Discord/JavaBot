@@ -56,29 +56,33 @@ public class FormatCodeCommand extends SlashCommand {
 		String indentation = event.getOption("auto-indent","NULL",OptionMapping::getAsString);
 
 		if (idOption == null) {
-			event.getChannel().getHistory()
-					.retrievePast(10)
-					.queue(messages -> {
-						Message target = messages.stream()
-								.filter(m -> !m.getAuthor().isBot()).findFirst()
-								.orElse(null);
-						if (target != null) {
-							sendFormattedCode(event, target, language, indentation);
-						} else {
-							Responses.errorWithTitle(event, "Message Not Found", "No recent user message could be found. Please specify a message ID.")
-									.queue();
-						}
-					});
+			event.deferReply().queue(_ -> {
+				event.getChannel().getHistory()
+				.retrievePast(10)
+				.queue(messages -> {
+					Message target = messages.stream()
+							.filter(m -> !m.getAuthor().isBot()).findFirst()
+							.orElse(null);
+					if (target != null) {
+						sendFormattedCode(event, target, language, indentation);
+					} else {
+						Responses.errorWithTitle(event.getHook(), "Message Not Found", "No recent user message could be found. Please specify a message ID.")
+								.queue();
+					}
+				});
+			});
 		} else {
 			if (Checks.isInvalidLongInput(idOption)) {
 				Responses.errorWithTitle(event, "Invalid Message ID", "Please provide a valid Discord message ID.")
-				.queue();
+					.queue();
 				return;
 			}
 			long messageId = idOption.getAsLong();
-			event.getChannel().retrieveMessageById(messageId).queue(
-					target -> sendFormattedCode(event, target, language, indentation),
-					error -> Responses.errorWithTitle(event, "Message Not Found", "Could not retrieve the message with ID `" + messageId + "`. Make sure the message exists and is accessible.").queue());
+			event.deferReply().queue(_ -> {
+				event.getChannel().retrieveMessageById(messageId).queue(
+						target -> sendFormattedCode(event, target, language, indentation),
+						error -> Responses.errorWithTitle(event.getHook(), "Message Not Found", "Could not retrieve the message with ID `" + messageId + "`. Make sure the message exists and is accessible.").queue());
+			});
 		}
 	}
 

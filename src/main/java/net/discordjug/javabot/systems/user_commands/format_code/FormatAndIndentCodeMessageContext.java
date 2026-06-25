@@ -30,6 +30,6 @@ public class FormatAndIndentCodeMessageContext extends ContextCommand.Message {
 
 		Code code = new Code(Language.JAVA, indented);
 
-		FormatCodeDispatcher.sendCode(code, event, event.getTarget());
+		event.deferReply().queue(_ -> FormatCodeDispatcher.sendCode(code, event, event.getTarget()));
 	}
 }

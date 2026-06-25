@@ -35,7 +35,7 @@ class FormatCodeDispatcher {
 	 */
 	public static void sendCode(Code code, @Nonnull CommandInteraction event, Message target){
 		if (code.getContent().isBlank()) {
-			Responses.errorWithTitle(event, "404 Code not found","There is no code to format in that message.").queue();
+			Responses.errorWithTitle(event.getHook(), "404 Code not found","There is no code to format in that message.").queue();
 			return;
 		}
 
@@ -49,7 +49,7 @@ class FormatCodeDispatcher {
 			return;
 		}
 
-		Responses.success(event, "Success", "The formatted message is being sent to this channel.")
+		Responses.success(event.getHook(), "Success", "The formatted message is being sent to this channel.")
 				.queue(success -> sendChunksInOrder(channel, messages, 0, target,event));
 	}
 

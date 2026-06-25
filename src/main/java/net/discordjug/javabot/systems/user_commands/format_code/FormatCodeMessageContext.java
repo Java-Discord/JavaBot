@@ -27,6 +27,6 @@ public class FormatCodeMessageContext extends ContextCommand.Message {
 
 		Code code = new Code(Language.JAVA, content);
 
-		FormatCodeDispatcher.sendCode(code, event, event.getTarget());
+		event.deferReply().queue(_ -> FormatCodeDispatcher.sendCode(code, event, event.getTarget()));
 	}
 }

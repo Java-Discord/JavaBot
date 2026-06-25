@@ -33,10 +33,6 @@ public class Code {
 		return content;
 	}
 
-	public Language getLanguage() {
-		return language;
-	}
-
 	/**
 	 * Splits {@link #content} into pieces that each fit within {@link #MAX_SIZE},
 	 * breaking on newlines where possible so lines are not cut in half.
