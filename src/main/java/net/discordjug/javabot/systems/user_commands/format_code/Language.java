@@ -83,9 +83,13 @@ public enum Language {
 	 */
 	JSON("JSON", "json"),
 	/**
-	 * Fallback used when the language is unrecognised; renders as plain text.
+	 * Simple plain text.
 	 */
-	UNKNOWN("Unknown", "txt");
+	TXT("TXT", "txt"),
+	/**
+	 * Fallback used when the language is unrecognised.
+	 */
+	UNKNOWN("Unknown", "");
 
 	private final String displayName;
 	private final String discordName;

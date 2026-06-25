@@ -12,8 +12,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-
 /**
  * <h3>This class represents the /format-code command.</h3>
  */
@@ -61,7 +59,6 @@ public class FormatCodeCommand extends SlashCommand {
 			event.getChannel().getHistory()
 					.retrievePast(10)
 					.queue(messages -> {
-						Collections.reverse(messages);
 						Message target = messages.stream()
 								.filter(m -> !m.getAuthor().isBot()).findFirst()
 								.orElse(null);

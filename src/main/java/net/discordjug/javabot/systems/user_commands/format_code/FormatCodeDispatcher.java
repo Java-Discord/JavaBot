@@ -6,12 +6,10 @@ import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
-import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -22,7 +20,7 @@ import java.util.List;
 class FormatCodeDispatcher {
 
 	/**
-	 * The maximum number of code-block messages to post inline; longer code is sent only as a file.
+	 * The maximum number of code-block messages to post inline; longer code results as an ERROR.
 	 */
 	private static final int MAX_MESSAGES = 5;
 
@@ -43,29 +41,21 @@ class FormatCodeDispatcher {
 
 		List<String> messages = code.toDiscordMessages();
 
-		// The reply both acknowledges the interaction and hands users the full,
-		// un-split code as a downloadable file (so chunking never loses anything).
-		FileUpload file = FileUpload.fromData(
-				code.getContent().getBytes(StandardCharsets.UTF_8),
-				"code." + code.getLanguage().getDiscordName()
-		);
-
 		MessageChannel channel = target.getChannel();
 
-		event.replyFiles(file)
-				.setAllowedMentions(List.of())
-				.setComponents(buildActionRow(target, event.getUser().getIdLong()))
+		if (messages.size() > MAX_MESSAGES) {
+			Responses.errorWithTitle(event.getHook(), "Output Too Large", "The formatted result is too large to send. Please provide a smaller code snippet or use a paste service instead."
+			).queue();
+			return;
+		}
+
+		Responses.success(event, "Success", "The formatted message is being sent to this channel.")
 				.queue(success -> sendChunksInOrder(channel, messages, 0, target,event));
 	}
 
 
 	private static void sendChunksInOrder(MessageChannel channel, List<String> messages, int index, Message target, @Nonnull CommandInteraction event) {
 		if (index >= messages.size()) {
-			return;
-		}
-		if (messages.size() > MAX_MESSAGES) {
-			Responses.errorWithTitle(event.getHook(), "Output Too Large", "The formatted result is too large to send. Please provide a smaller code snippet or use a paste service instead."
-			).queue();
 			return;
 		}
 		var action = channel.sendMessage(messages.get(index))
@@ -101,7 +91,7 @@ class FormatCodeDispatcher {
 	 * @param requesterId the id of the user permitted to delete the message
 	 * @return an action row containing the delete and "View Original" buttons
 	 */
-	@Contract("_ -> new")
+	@Contract("_,_ -> new")
 	static @NotNull ActionRow buildActionRow(@NotNull Message target, long requesterId) {
 		return ActionRow.of(InteractionUtils.createDeleteButton(requesterId),
 				Button.link(target.getJumpUrl(), "View Original"));
