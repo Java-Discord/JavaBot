@@ -69,7 +69,6 @@ public class MessageCacheListener extends ListenerAdapter {
 			messageCache.cache.remove(message);
 		});
 	}
-	
 
 	/**
 	 * Checks whether the given message should be ignored by the cache.
