@@ -39,7 +39,7 @@ public class AnswerOverflowService {
 						.header("Content-Type", "application/json")
 						.POST(BodyPublishers.ofString("""
 								{
-								  "solutionId": "%d"
+									"solutionId": "%d"
 								}
 								""".formatted(messageId)))
 					.build(),
