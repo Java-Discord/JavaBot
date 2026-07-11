@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.qotw.submissions.subcommands;
 
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
+import net.discordjug.javabot.systems.help.AnswerOverflowService;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -34,7 +35,7 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 	private final QuestionQueueRepository questionQueueRepository;
 	private final BotConfig botConfig;
 	private final ExecutorService asyncPool;
-
+	private final AnswerOverflowService answerOverflowService;
 
 	/**
 	 * The constructor of this class, which sets the corresponding {@link SubcommandData}.
@@ -43,13 +44,15 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 	 * @param questionQueueRepository The {@link QuestionQueueRepository}.
 	 * @param botConfig The main configuration of the bot
 	 * @param asyncPool The main thread pool for asynchronous operations
+	 * @param answerOverflowService The {@link AnswerOverflowService} for interacting with the Answer Overflow bot.
 	 */
-	public QOTWReviewSubcommand(QOTWPointsService pointsService, NotificationService notificationService, QuestionQueueRepository questionQueueRepository, BotConfig botConfig, ExecutorService asyncPool) {
+	public QOTWReviewSubcommand(QOTWPointsService pointsService, NotificationService notificationService, QuestionQueueRepository questionQueueRepository, BotConfig botConfig, ExecutorService asyncPool, AnswerOverflowService answerOverflowService) {
 		this.pointsService = pointsService;
 		this.notificationService = notificationService;
 		this.questionQueueRepository = questionQueueRepository;
 		this.botConfig = botConfig;
 		this.asyncPool = asyncPool;
+		this.answerOverflowService = answerOverflowService;
 		setCommandData(new SubcommandData("review", "Administrative command for reviewing QOTW-submissions")
 				.addOptions(
 						new OptionData(OptionType.CHANNEL, "submission", "A users' submission", true)
@@ -80,7 +83,7 @@ public class QOTWReviewSubcommand extends SlashCommand.Subcommand {
 		event.deferReply().queue();
 		QOTWSubmission submission = new QOTWSubmission(submissionThread);
 		submission.retrieveAuthor(author -> {
-			SubmissionManager manager = new SubmissionManager(qotwConfig, pointsService, questionQueueRepository, notificationService, asyncPool);
+			SubmissionManager manager = new SubmissionManager(qotwConfig, pointsService, questionQueueRepository, notificationService, asyncPool, answerOverflowService);
 			if (state.contains("ACCEPT")) {
 				manager.acceptSubmission(submissionThread, author, event.getMember(), state.equals("ACCEPT_BEST"));
 				Responses.success(event.getHook(), "Submission Accepted", "Successfully accepted submission by " + author.getAsMention()).queue();

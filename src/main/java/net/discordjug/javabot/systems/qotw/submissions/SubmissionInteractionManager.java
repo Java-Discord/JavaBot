@@ -8,6 +8,7 @@ import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import lombok.RequiredArgsConstructor;
 import net.discordjug.javabot.annotations.AutoDetectableComponentHandler;
 import net.discordjug.javabot.data.config.BotConfig;
+import net.discordjug.javabot.systems.help.AnswerOverflowService;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -29,11 +30,12 @@ public class SubmissionInteractionManager implements ButtonHandler, StringSelect
 	private final NotificationService notificationService;
 	private final BotConfig botConfig;
 	private final QuestionQueueRepository questionQueueRepository;
+	private final AnswerOverflowService answerOverflowService;
 	private final ExecutorService asyncPool;
 
 	@Override
 	public void handleButton(@NotNull ButtonInteractionEvent event, Button button) {
-		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
+		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool, answerOverflowService);
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
 			case "submit" -> manager.handleSubmission(event, Integer.parseInt(id[2])).queue();
@@ -43,7 +45,7 @@ public class SubmissionInteractionManager implements ButtonHandler, StringSelect
 
 	@Override
 	public void handleStringSelectMenu(@NotNull StringSelectInteractionEvent event, @NotNull List<String> values) {
-		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
+		SubmissionManager manager = new SubmissionManager(botConfig.get(event.getGuild()).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool, answerOverflowService);
 		String[] id = ComponentIdBuilder.split(event.getComponentId());
 		switch (id[1]) {
 			case "review" -> manager.handleSelectReview(event, id[2]);

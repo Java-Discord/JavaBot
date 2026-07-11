@@ -10,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
 import org.springframework.stereotype.Service;
 
+/**
+ * A service class for interacting with the Answer Overflow bot.
+ */
 @Service
 @Slf4j
 public class AnswerOverflowService {
