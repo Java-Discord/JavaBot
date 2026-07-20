@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * This class is responsible for calling {@link MessageFilter}s on incoming messages and optionally replacing the message.
@@ -28,6 +29,7 @@ public class MessageFilterHandler extends ListenerAdapter {
 
 	private final List<MessageFilter> filters;
 	private final AutoMod autoMod;
+	private final Executor asyncPool;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -42,36 +44,39 @@ public class MessageFilterHandler extends ListenerAdapter {
 				new ArrayList<>(event.getMessage().getEmbeds())
 		);
 
-		boolean handled = false;
 
-		for (MessageFilter filter : filters) {
-			MessageModificationStatus status = filter.processMessage(content);
-			if (status == MessageModificationStatus.MODIFIED) {
-				handled = true;
-			} else if (status == MessageModificationStatus.STOP_PROCESSING) {
-				return;
-			}
-		}
+		asyncPool.execute(() -> {
+			boolean handled = false;
 
-		if (handled) {
-			IWebhookContainer webhookContainer = null;
-			long threadId = 0;
-			if (event.isFromType(ChannelType.TEXT)) {
-				webhookContainer = event.getChannel().asTextChannel();
+			for (MessageFilter filter : filters) {
+				MessageModificationStatus status = filter.processMessage(content);
+				if (status == MessageModificationStatus.MODIFIED) {
+					handled = true;
+				} else if (status == MessageModificationStatus.STOP_PROCESSING) {
+					return;
+				}
 			}
-			if (event.isFromThread()) {
-				StandardGuildChannel parentChannel = event.getChannel()
-						.asThreadChannel()
-						.getParentChannel()
-						.asStandardGuildChannel();
-				threadId = event.getChannel().getIdLong();
-				webhookContainer = (IWebhookContainer) parentChannel;
+			
+			if (handled) {
+				IWebhookContainer webhookContainer = null;
+				long threadId = 0;
+				if (event.isFromType(ChannelType.TEXT)) {
+					webhookContainer = event.getChannel().asTextChannel();
+				}
+				if (event.isFromThread()) {
+					StandardGuildChannel parentChannel = event.getChannel()
+							.asThreadChannel()
+							.getParentChannel()
+							.asStandardGuildChannel();
+					threadId = event.getChannel().getIdLong();
+					webhookContainer = (IWebhookContainer) parentChannel;
+				}
+				if (webhookContainer == null) {
+					return;
+				}
+				replaceMessage(webhookContainer, threadId, content);
 			}
-			if (webhookContainer == null) {
-				return;
-			}
-			replaceMessage(webhookContainer, threadId, content);
-		}
+		});
 	}
 
 	private boolean shouldRunFilters(@NotNull MessageReceivedEvent event) {

@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,14 +24,27 @@ import java.util.Map.Entry;
 @Repository
 public class MessageCacheRepository {
 	private final JdbcTemplate jdbcTemplate;
-
+	private final TransactionTemplate template;
+	
 	/**
-	 * Inserts a {@link List} of {@link CachedMessage} objects.
+	 * Replaces the entire message cache with a {@link List} of {@link CachedMessage} objects.
 	 *
-	 * @param messages The List to insert.
-	 * @throws SQLException If an error occurs.
+	 * @param messages The new message cache.
 	 */
-	public void insertList(@NotNull List<CachedMessage> messages) throws DataAccessException {
+	public void replaceWithList(@NotNull List<CachedMessage> messages) {
+		template.execute(_ -> {
+			clear();
+			insertList(messages);
+			return null;
+		});
+	}
+	
+	private void clear() throws DataAccessException {
+		jdbcTemplate.update("DELETE FROM message_cache_attachments WHERE 1 = 1");
+		jdbcTemplate.update("DELETE FROM message_cache WHERE 1 = 1");
+	}
+
+	private void insertList(@NotNull List<CachedMessage> messages) throws DataAccessException {
 		jdbcTemplate.batchUpdate("MERGE INTO message_cache (message_id, author_id, message_content) VALUES (?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
@@ -77,11 +91,10 @@ public class MessageCacheRepository {
 	 * Gets all Messages from the Database.
 	 *
 	 * @return A {@link List} of {@link CachedMessage}s.
-	 * @throws SQLException If anything goes wrong.
 	 */
 	public List<CachedMessage> getAll() throws DataAccessException {
 		List<CachedMessage> messagesWithLink = jdbcTemplate.query(
-				"SELECT * FROM message_cache LEFT JOIN message_cache_attachments ON message_cache.message_id = message_cache_attachments.message_id",
+				"SELECT * FROM message_cache LEFT JOIN message_cache_attachments ON message_cache.message_id = message_cache_attachments.message_id ORDER BY message_cache.message_id ASC",
 				(rs, _) -> this.read(rs));
 		Map<Long, CachedMessage> messages=new LinkedHashMap<>();
 		for (CachedMessage msg : messagesWithLink) {
@@ -92,22 +105,6 @@ public class MessageCacheRepository {
 			});
 		}
 		return new ArrayList<>(messages.values());
-	}
-
-	/**
-	 * Deletes the given amount of Messages.
-	 *
-	 * @param amount The amount to delete.
-	 * @return If any rows we're affected.
-	 * @throws SQLException If anything goes wrong.
-	 */
-	public boolean delete(int amount) throws DataAccessException {
-		int rows = jdbcTemplate.update("DELETE FROM message_cache LIMIT ?", amount);
-		if(rows > 0){
-			jdbcTemplate.update("DELETE FROM message_cache_attachments WHERE message_id NOT IN (SELECT message_id FROM message_cache)");
-			return true;
-		}
-		return false;
 	}
 
 	private CachedMessage read(ResultSet rs) throws SQLException {

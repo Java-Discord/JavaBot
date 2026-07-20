@@ -35,6 +35,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -50,7 +51,7 @@ public class MessageCache {
 	/**
 	 * A memory-cache (list) of sent Messages, wrapped to a {@link CachedMessage} object.
 	 */
-	public Deque<CachedMessage> cache = new ArrayDeque<>();
+	public Deque<CachedMessage> cache = new ConcurrentLinkedDeque<>();
 	/**
 	 * Amount of messages since the last synchronization.
 	 * <p>
@@ -95,8 +96,10 @@ public class MessageCache {
 	 * Synchronizes Messages saved in the Database with what is currently stored in memory and wait until the synchronization finishes.
 	 */
 	public void synchronizeNow() {
-		cacheRepository.delete(cache.size());
-		cacheRepository.insertList(new ArrayList<>(cache));
+		if (messageCount == 0) {
+			return;
+		}
+		cacheRepository.replaceWithList(new ArrayList<>(cache));
 		messageCount = 0;
 		log.info("Synchronized Database with local Cache.");
 	}

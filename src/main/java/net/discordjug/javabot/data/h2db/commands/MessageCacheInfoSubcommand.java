@@ -3,6 +3,7 @@ package net.discordjug.javabot.data.h2db.commands;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
+import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
 import net.discordjug.javabot.data.h2db.DbActions;
 import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
 import net.discordjug.javabot.util.Responses;
@@ -44,13 +45,14 @@ public class MessageCacheInfoSubcommand extends SlashCommand.Subcommand {
 
 	private MessageEmbed buildInfoEmbed(GuildConfig config, User author) {
 		long messages = dbActions.count("SELECT count(*) FROM message_cache");
-		int maxMessages = config.getMessageCacheConfig().getMaxCachedMessages();
+		MessageCacheConfig messageCacheConfig = config.getMessageCacheConfig();
+		int maxMessages = messageCacheConfig.getMaxCachedMessages();
 		return new EmbedBuilder()
 				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
 				.setTitle("Message Cache Info")
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Table Size", dbActions.getLogicalSize("message_cache") + " bytes", false)
-				.addField("Message Count", String.valueOf(messageCache.getMessageCount()), true)
+				.addField("Messages since synchronization", messageCache.getMessageCount() + "/" + messageCacheConfig.getMessageSynchronizationInterval(), true)
 				.addField("Cached (Memory)", String.format("%s/%s (%.2f%%)", messageCache.cache.size(), maxMessages, ((float) messageCache.cache.size() / maxMessages) * 100), true)
 				.addField("Cached (Database)", String.format("%s/%s (%.2f%%)", messages, maxMessages, ((float) messages / maxMessages) * 100), true)
 				.build();
