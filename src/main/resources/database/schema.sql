@@ -1,13 +1,4 @@
 // Help System
-CREATE TABLE IF NOT EXISTS reserved_help_channels
-(
-	id          BIGINT PRIMARY KEY AUTO_INCREMENT,
-	channel_id  BIGINT       NOT NULL UNIQUE,
-	reserved_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-	user_id     BIGINT       NOT NULL,
-	timeout     INT          NOT NULL DEFAULT 60
-);
-
 CREATE TABLE IF NOT EXISTS help_channel_thanks
 (
 	id             BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -31,7 +22,7 @@ CREATE TABLE IF NOT EXISTS help_transaction
 	recipient   BIGINT       NOT NULL,
 	created_at  TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
 	weight      DOUBLE       NOT NULL,
-	messagetype INT          NOT NULL DEFAULT 0
+	channel     BIGINT       DEFAULT -1
 );
 
 // Question of the Week
@@ -95,13 +86,14 @@ CREATE TABLE IF NOT EXISTS message_cache
 (
 	message_id      BIGINT PRIMARY KEY,
 	author_id       BIGINT        NOT NULL,
-	message_content VARCHAR(4000) NOT NULL
+	message_content VARCHAR(4000) NOT NULL,
+	channel_id      BIGINT        DEFAULT -1
 );
 
 CREATE TABLE IF NOT EXISTS message_cache_attachments (
 	message_id     		BIGINT NOT NULL,
 	attachment_index	INT NOT NULL,
-	link				VARCHAR(255),
+	link				VARCHAR(511),
 	PRIMARY KEY(message_id, attachment_index)
 );
 
@@ -120,3 +112,56 @@ CREATE TABLE qotw_champion (
         user_id         BIGINT NOT NULL,
         PRIMARY KEY(guild_id, user_id)
 );
+
+// staff activity
+CREATE TABLE staff_activity_messages (
+	guild_id	BIGINT NOT NULL,
+	user_id		BIGINT NOT NULL,
+	message_id	BIGINT NOT NULL,
+	PRIMARY KEY(guild_id, user_id)
+);
+
+// custom voice channels
+CREATE TABLE custom_vc (
+	channel_id	BIGINT NOT NULL PRIMARY KEY,
+	owner_id	BIGINT NOT NULL
+);
+
+// forms
+CREATE TABLE forms (
+    form_id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR NOT NULL,
+    submit_message VARCHAR DEFAULT NULL,
+    submit_channel BIGINT NOT NULL,
+    message_id BIGINT DEFAULT NULL,
+    message_channel BIGINT DEFAULT NULL,
+    expiration TIMESTAMP DEFAULT NULL,
+    closed BOOLEAN NOT NULL DEFAULT FALSE,
+    onetime BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (form_id)
+);
+
+CREATE TABLE form_fields (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    form_id BIGINT NOT NULL,
+    label VARCHAR NOT NULL,
+    min INTEGER DEFAULT 0 NOT NULL,
+    max INTEGER DEFAULT 16 NOT NULL,
+    placeholder VARCHAR,
+    "required" BOOLEAN DEFAULT FALSE NOT NULL,
+    "style" ENUM('SHORT', 'PARAGRAPH') DEFAULT 'SHORT' NOT NULL,
+    initial VARCHAR DEFAULT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (form_id) REFERENCES forms(form_id) ON DELETE CASCADE ON UPDATE RESTRICT
+);
+
+CREATE TABLE form_submissions (
+    message_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    form_id BIGINT NOT NULL,
+    user_name VARCHAR NOT NULL,
+    PRIMARY KEY (message_id),
+    FOREIGN KEY (form_id) REFERENCES FORMS(form_id) ON DELETE CASCADE ON UPDATE RESTRICT
+);
+
+CREATE INDEX FORM_SUBMISSIONS_USER_ID_IDX ON form_submissions (user_id,form_id);
