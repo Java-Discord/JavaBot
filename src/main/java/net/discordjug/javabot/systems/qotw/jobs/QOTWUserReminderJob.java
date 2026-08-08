@@ -2,6 +2,7 @@ package net.discordjug.javabot.systems.qotw.jobs;
 
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
+import net.discordjug.javabot.systems.help.AnswerOverflowService;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -33,6 +34,7 @@ public class QOTWUserReminderJob {
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
 	private final QuestionQueueRepository questionQueueRepository;
+	private final AnswerOverflowService answerOverflowService;
 	private final ExecutorService asyncPool;
 
 	/**
@@ -42,7 +44,7 @@ public class QOTWUserReminderJob {
 	public void execute() {
 		for (Guild guild : jda.getGuilds()) {
 			QOTWConfig config = botConfig.get(guild).getQotwConfig();
-			List<QOTWSubmission> submissions = new SubmissionManager(config, pointsService, questionQueueRepository, notificationService, asyncPool).getActiveSubmissions();
+			List<QOTWSubmission> submissions = new SubmissionManager(config, pointsService, questionQueueRepository, notificationService, asyncPool, answerOverflowService).getActiveSubmissions();
 			for (QOTWSubmission submission : submissions) {
 				submission.retrieveAuthor(author -> {
 					UserPreference preference = userPreferenceService.getOrCreate(author.getIdLong(), Preference.QOTW_REMINDER);

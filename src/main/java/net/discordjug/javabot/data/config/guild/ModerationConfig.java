@@ -29,6 +29,18 @@ public class ModerationConfig extends GuildConfigItem {
 	private long expertRoleId = 0;
 
 	/**
+	* The time window, in seconds, that the cross-channel spam automod looks back over when
+	* counting a user's recent messages. If this is {@code 0}, the cross-channel spam automod
+	* is disabled.
+	*/
+	private int crossChannelSpamWindowSeconds = 0;
+
+	/**
+	 * The number of distinct channels a user must post in within
+	 * {@link #crossChannelSpamWindowSeconds} seconds before the cross-channel spam automod acts.
+	 */
+	private int crossChannelSpamMinChannels = 3;
+	/**
 	 * ID of the share-knowledge channel.
 	 */
 	private long shareKnowledgeChannelId = 0;

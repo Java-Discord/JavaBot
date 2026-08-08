@@ -3,6 +3,7 @@ package net.discordjug.javabot.systems.moderation;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.h2db.message_cache.MessageCache;
+import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.discordjug.javabot.systems.moderation.warn.model.WarnSeverity;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.util.ExceptionLogger;
@@ -24,9 +25,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,18 +49,19 @@ public class AutoMod extends ListenerAdapter {
 	private final MessageCache messageCache;
 
 	/**
-	 * Constructor of the class, that creates a list of strings with potential spam/scam urls.
+	 * Constructor of the class, that creates a list of strings with potential spam/scam URLs.
+	 *
 	 * @param notificationService The {@link QOTWPointsService}
-	 * @param botConfig The main configuration of the bot
-	 * @param moderationService Service object for moderating members
-	 * @param messageCache service for retrieving cached messages
+	 * @param botConfig           The main configuration of the bot
+	 * @param moderationService   Service object for moderating members
+	 * @param messageCache        service for retrieving cached messages
 	 */
 	public AutoMod(NotificationService notificationService, BotConfig botConfig, ModerationService moderationService, MessageCache messageCache) {
 		this.notificationService = notificationService;
 		this.botConfig = botConfig;
 		this.moderationService = moderationService;
 		this.messageCache = messageCache;
-		try(Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
+		try (Scanner scan = new Scanner(new URL("https://raw.githubusercontent.com/DevSpen/scam-links/master/src/links.txt").openStream()).useDelimiter("\\A")) {
 			String response = scan.next();
 			spamUrls = List.of(response.split("\n"));
 		} catch (IOException e) {
@@ -105,21 +105,46 @@ public class AutoMod extends ListenerAdapter {
 	private void checkNewMessageAutomod(@Nonnull Message message) {
 		// spam
 		long spamCount = messageCache.getMessagesAfter(message.getTimeCreated().minusSeconds(6))
-			.stream()
-			.filter(cached -> cached.getMessageId() != message.getIdLong()) // exclude new/current message
-			.filter(cached -> cached.getAuthorId() == message.getAuthor().getIdLong())
-			.filter(cached -> 
-				// only java files -> not spam
-				cached.getAttachments().isEmpty() || 
-				cached.getAttachments().stream()
-					.anyMatch(attachment -> !attachment.contains(".java?")))
-			.count() + 1; // include new message
-			
+				.stream()
+				.filter(cached -> cached.getMessageId() != message.getIdLong()) // exclude new/current message
+				.filter(cached -> cached.getAuthorId() == message.getAuthor().getIdLong())
+				.filter(cached ->
+						// only java files -> not spam
+						cached.getAttachments().isEmpty() ||
+								cached.getAttachments().stream()
+										.anyMatch(attachment -> !attachment.contains(".java?")))
+				.count() + 1; // include new message
+
 		if (spamCount >= 5) {
-			handleSpam(message, message.getMember());
+			handleSpam(message);
+		}
+		checkContentAutomod(message);
+		checkCrossChannelSpam(message);
+	}
+
+	private void checkCrossChannelSpam(@Nonnull Message message) {
+		int spamWindowSeconds = (botConfig.get(message.getGuild()).getModerationConfig()).getCrossChannelSpamWindowSeconds();
+		Set<Long> channelIds = new HashSet<>();
+		List<CachedMessage> spamMessages = new ArrayList<>();
+
+		if (spamWindowSeconds <= 0) {
+			return;
 		}
 
-		checkContentAutomod(message);
+		for (CachedMessage cachedMessage : messageCache.getMessagesAfter(message.getTimeCreated().minusSeconds(spamWindowSeconds))) {
+			if (cachedMessage.getMessageId() == message.getIdLong()) {
+				continue;
+			}
+			if (cachedMessage.getAuthorId() != message.getAuthor().getIdLong()) {
+				continue;
+			}
+			channelIds.add(cachedMessage.getChannelId());
+			spamMessages.add(cachedMessage);
+		}
+
+		if (channelIds.size() >= (botConfig.get(message.getGuild()).getModerationConfig()).getCrossChannelSpamMinChannels()) {
+			handleSpam(spamMessages, message);
+		}
 	}
 
 	/**
@@ -130,7 +155,7 @@ public class AutoMod extends ListenerAdapter {
 	private void checkContentAutomod(@Nonnull Message message) {
 		//Check for Advertising Links
 		if (hasAdvertisingLink(message)) {
-			doAutomodActions(message,"Advertising");
+			doAutomodActions(message, "Advertising");
 		}
 
 		//Check for suspicious Links
@@ -158,20 +183,29 @@ public class AutoMod extends ListenerAdapter {
 	/**
 	 * Handles detected spam messages.
 	 *
-	 * @param msg    the (last) spam message
-	 * @param member the member to be potentially warned
+	 * @param msg the (last) spam message
 	 */
-	private void handleSpam(@Nonnull Message msg, Member member) {
+	private void handleSpam(@Nonnull Message msg) {
+		timeoutForSpam(msg);
+		msg.delete().queue();
+	}
+
+	private void handleSpam(@Nonnull List<CachedMessage> cachedMessages, Message message) {
+		timeoutForSpam(message);
+		cachedMessages.forEach(cachedMessage -> message.getGuild().getTextChannelById(cachedMessage.getChannelId())
+				.deleteMessageById(cachedMessage.getMessageId()).queue());
+	}
+
+	private void timeoutForSpam(@Nonnull Message message) {
 		moderationService
 				.timeout(
-						member.getUser(),
+						message.getAuthor(),
 						"Automod: Spam",
-						msg.getGuild().getSelfMember(),
+						message.getGuild().getSelfMember(),
 						Duration.of(6, ChronoUnit.HOURS),
-						msg.getChannel(),
+						message.getChannel(),
 						false
 				);
-		msg.delete().queue();
 	}
 
 	/**
@@ -237,5 +271,5 @@ public class AutoMod extends ListenerAdapter {
 		return channel.getType().isGuild() &&
 				channel.getIdLong() == botConfig.get(channel.asGuildMessageChannel().getGuild()).getModerationConfig().getSuggestionChannel().getIdLong();
 	}
-	
+
 }

@@ -1,1 +1,0 @@
-ALTER TABLE help_transaction ADD COLUMN channel BIGINT DEFAULT -1;

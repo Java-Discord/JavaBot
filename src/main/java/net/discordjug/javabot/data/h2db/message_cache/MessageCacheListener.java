@@ -4,6 +4,8 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.guild.MessageCacheConfig;
 import net.discordjug.javabot.data.h2db.message_cache.model.CachedMessage;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
@@ -39,10 +41,10 @@ public class MessageCacheListener extends ListenerAdapter {
 		CachedMessage before;
 		if (optional.isPresent()) {
 			CachedMessage inCache= optional.get();
-			before = new CachedMessage(inCache.getMessageId(), inCache.getAuthorId(), inCache.getMessageContent(), inCache.getAttachments());
+			before = new CachedMessage(inCache.getMessageId(), inCache.getAuthorId(), inCache.getChannelId(),inCache.getMessageContent(), inCache.getAttachments());
 			inCache.init(event.getMessage());
 		} else {
-			before = new CachedMessage(event.getMessageIdLong(), event.getAuthor().getIdLong(), "[unknown content]", List.of());
+			before = new CachedMessage(event.getMessageIdLong(), event.getAuthor().getIdLong(), event.getChannel().getIdLong(),"[unknown content]", List.of());
 			messageCache.cache(event.getMessage());
 		}
 		messageCache.sendUpdatedMessageToLog(event.getMessage(), before);
@@ -50,13 +52,23 @@ public class MessageCacheListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		Optional<CachedMessage> optional = messageCache.cache.stream().filter(m -> m.getMessageId() == event.getMessageIdLong()).findFirst();
+		processMessageDeletion(event.getMessageIdLong(), event.getGuildChannel());
+	}
+	
+	@Override
+	public void onChannelDelete(ChannelDeleteEvent event) {
+		if (event.getChannelType().isThread()) {
+			processMessageDeletion(event.getChannel().getIdLong(), event.getChannel().asThreadChannel().getParentChannel());
+		}
+	}
+
+	private void processMessageDeletion(long messageId, GuildChannel channel) {
+		Optional<CachedMessage> optional = messageCache.cache.stream().filter(m -> m.getMessageId() == messageId).findFirst();
 		optional.ifPresent(message -> {
-			messageCache.sendDeletedMessageToLog(event.getGuild(), event.getChannel(), message);
+			messageCache.sendDeletedMessageToLog(channel.getGuild(), channel, message);
 			messageCache.cache.remove(message);
 		});
 	}
-
 
 	/**
 	 * Checks whether the given message should be ignored by the cache.
