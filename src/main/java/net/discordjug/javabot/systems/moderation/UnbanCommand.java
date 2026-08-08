@@ -47,7 +47,7 @@ public class UnbanCommand extends ModerateCommand {
 			.thenAccept(success -> {
 				Responses.success(event.getHook(), "User Unbanned", "User with id `%s` has been unbanned.", id).queue();
 			}).exceptionally(failed -> {
-				Responses.warning(event, "Could not find banned User with id `%s` or a different error occured: `%s`", id, failed.getMessage()).queue();
+				Responses.warning(event.getHook(), "Could not find banned User with id `%s` or a different error occured: `%s`", id, failed.getMessage()).queue();
 				return null;
 			});
 		return event.deferReply();
