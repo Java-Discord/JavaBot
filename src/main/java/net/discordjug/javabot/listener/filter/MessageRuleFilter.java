@@ -9,6 +9,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,8 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.GsonUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.utils.TimeUtil;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import org.springframework.stereotype.Component;
 
@@ -103,7 +106,28 @@ public class MessageRuleFilter implements MessageFilter {
 				}
 			}
 		}
-		return matchesSHA;
+		if (!matchesSHA) {
+			return false;
+		}
+		if (rule.getNoMessagesFromAuthorBeforeSeconds() > 0) {
+			OffsetDateTime maxTime = content.event().getMessage().getTimeCreated()
+					.minusSeconds(rule.getNoMessagesFromAuthorBeforeSeconds());
+			long authorId = content.event().getAuthor().getIdLong();
+			return !hasMessagesOlderThan(maxTime, content.event().getGuild(), authorId);
+		}
+		return true;
+	}
+	
+	private boolean hasMessagesOlderThan(OffsetDateTime maxTime, Guild guild, long authorId) {
+		if (messageCache.cache.stream()
+				.filter(msg -> TimeUtil.getTimeCreated(msg.getMessageId()).isBefore(maxTime))
+				.anyMatch(msg -> msg.getAuthorId() == authorId)) {
+			return true;
+		}
+		return guild.searchMessages()
+			.authors(authorId)
+			.maxId(TimeUtil.getDiscordTimestamp(maxTime.toInstant().toEpochMilli()))
+			.complete().asResults().getTotalResults() > 0;
 	}
 
 	private String computeAttachmentDescription(List<Message.Attachment> attachments) {

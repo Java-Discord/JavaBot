@@ -1,5 +1,7 @@
 package net.discordjug.javabot;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import com.zaxxer.hikari.HikariConfig;
 import net.discordjug.javabot.data.config.BotConfig;
@@ -15,6 +17,7 @@ import net.discordjug.javabot.data.config.guild.ModerationConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
 import net.discordjug.javabot.data.config.guild.ServerLockConfig;
 import net.discordjug.javabot.data.config.guild.StarboardConfig;
+import net.dv8tion.jda.api.entities.SoundboardSound;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.internal.entities.GuildVoiceStateImpl;
 import net.dv8tion.jda.internal.requests.restaction.PermOverrideData;
@@ -60,6 +63,8 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		// JDA needs to be able to access listener methods
 		hints.reflection().registerType(ListenerAdapter.class, MemberCategory.INVOKE_PUBLIC_METHODS);
 		
+		hints.reflection().registerType(ThreadPoolExecutor.class, MemberCategory.INVOKE_PUBLIC_METHODS);
+		
 		// caffeine
 		hints.reflection().registerTypeIfPresent(getClass().getClassLoader(), "com.github.benmanes.caffeine.cache.SSW", MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		
@@ -77,5 +82,6 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		}
 		
 		hints.reflection().registerType(GuildVoiceStateImpl[].class, MemberCategory.UNSAFE_ALLOCATED);
+		hints.reflection().registerType(SoundboardSound[].class, MemberCategory.UNSAFE_ALLOCATED);
 	}
 }

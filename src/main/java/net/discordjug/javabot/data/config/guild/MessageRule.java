@@ -34,6 +34,12 @@ public class MessageRule {
 	private Set<String> attachmentSHAs = new HashSet<>();
 	
 	/**
+	 * There must be no messages older than that number of seconds.
+	 * If this value is {@code 0} or negative, this condition is ignored.
+	 */
+	private long noMessagesFromAuthorBeforeSeconds = -1;
+	
+	/**
 	 * The action to execute on the message.
 	 */
 	private MessageAction action = MessageAction.LOG;
