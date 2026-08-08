@@ -44,6 +44,12 @@ public class MessageCacheRepository {
 		jdbcTemplate.update("DELETE FROM message_cache WHERE 1 = 1");
 	}
 
+	/**
+	 * Inserts a {@link List} of {@link CachedMessage} objects.
+	 *
+	 * @param messages The List to insert.
+	 * @throws DataAccessException If an error occurs.
+	 */
 	public void insertList(@NotNull List<CachedMessage> messages) throws DataAccessException {
 		jdbcTemplate.batchUpdate("MERGE INTO message_cache (message_id, author_id, channel_id, message_content) VALUES (?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
