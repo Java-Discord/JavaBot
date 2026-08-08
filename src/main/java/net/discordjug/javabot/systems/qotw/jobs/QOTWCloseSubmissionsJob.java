@@ -5,6 +5,7 @@ import net.discordjug.javabot.data.config.BotConfig;
 import net.discordjug.javabot.data.config.GuildConfig;
 import net.discordjug.javabot.data.config.SystemsConfig;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
+import net.discordjug.javabot.systems.help.AnswerOverflowService;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -63,6 +64,7 @@ public class QOTWCloseSubmissionsJob {
 	private final ExecutorService asyncPool;
 	private final QOTWPointsService pointsService;
 	private final NotificationService notificationService;
+	private final AnswerOverflowService answerOverflowService;
 	private final BotConfig botConfig;
 
 	/**
@@ -131,7 +133,7 @@ public class QOTWCloseSubmissionsJob {
 					s.retrieveAuthor(author -> {
 						submission.removeThreadMember(author).queue();
 						if (author.getIdLong() == qotwConfig.getQotwSampleAnswerUserId()) {
-							SubmissionManager manager = new SubmissionManager(botConfig.get(guild).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool);
+							SubmissionManager manager = new SubmissionManager(botConfig.get(guild).getQotwConfig(), pointsService, questionQueueRepository, notificationService, asyncPool, answerOverflowService);
 							manager.copySampleAnswerSubmission(submission, author);
 						} else {
 							thread

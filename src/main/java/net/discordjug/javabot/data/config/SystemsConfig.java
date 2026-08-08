@@ -24,6 +24,11 @@ public class SystemsConfig {
 	 * The Key used for the bing-search-api.
 	 */
 	private String azureSubscriptionKey = "";
+	
+	/**
+	 * The API key of the Answer Overflow API.
+	 */
+	private String answerOverflowApiKey = "";
 
 	/**
 	 * The DSN for the Sentry API.

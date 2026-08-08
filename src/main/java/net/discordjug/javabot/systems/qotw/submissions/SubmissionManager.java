@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.guild.QOTWConfig;
+import net.discordjug.javabot.systems.help.AnswerOverflowService;
 import net.discordjug.javabot.systems.notification.NotificationService;
 import net.discordjug.javabot.systems.qotw.QOTWPointsService;
 import net.discordjug.javabot.systems.qotw.dao.QuestionQueueRepository;
@@ -39,6 +40,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
+
 /**
  * Handles & manages QOTW Submissions by using Discords {@link ThreadChannel}s.
  */
@@ -57,6 +60,7 @@ public class SubmissionManager {
 	private final QuestionQueueRepository questionQueueRepository;
 	private final NotificationService notificationService;
 	private final ExecutorService asyncPool;
+	private final AnswerOverflowService answerOverflowService;
 
 	/**
 	 * Handles the "Submit your Answer" Button interaction.
@@ -221,14 +225,19 @@ public class SubmissionManager {
 			ThreadChannel newestPost = newestPostOptional.get();
 			WebhookUtil.ensureWebhookExists(newestPost.getParentChannel().asForumChannel(), wh ->
 					getMessagesByUser(thread, author).thenAccept(messages -> {
-						for (Message message : messages) {
-							boolean lastMessage = messages.indexOf(message) + 1 == messages.size();
+						for (int i = 0; i < messages.size(); i++) {
+							Message message = messages.get(i);
+							boolean lastMessage = i + 1 == messages.size();
 							if (message.getAuthor().isBot() || message.getType() != MessageType.DEFAULT) continue;
+							ReadonlyMessage firstPostedMessage;
 							if (message.getContentRaw().length() > 2000) {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null).join();
+								firstPostedMessage = WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(0, 2000), newestPost.getIdLong(), null, null).join();
 								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw().substring(2000), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, type)) : null).join();
 							} else {
-								WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, type)) : null).join();
+								firstPostedMessage = WebhookUtil.mirrorMessageToWebhook(wh, message, message.getContentRaw(), newestPost.getIdLong(), null, lastMessage ? List.of(buildAuthorEmbed(author, type)) : null).join();
+							}
+							if (i == 0 && (type == AcceptedAnswerType.BEST_ANSWER || type == AcceptedAnswerType.SAMPLE_ANSWER)) {
+								answerOverflowService.markAnswer(firstPostedMessage.getChannelId(), firstPostedMessage.getId());
 							}
 						}
 					}).exceptionally(err->{

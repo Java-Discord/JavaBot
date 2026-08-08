@@ -30,6 +30,7 @@ import xyz.dynxsty.dih4jda.interactions.components.ButtonHandler;
 import xyz.dynxsty.dih4jda.util.ComponentIdBuilder;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -79,6 +80,7 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return System.currentTimeMillis() > eldest.getValue() || size() >= 32;
 		}
 	};
+	private final AnswerOverflowService answerOverflowService;
 
 	@Override
 	public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -121,12 +123,8 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 			return;
 		}
 		// cache messages
-		List<Message> messages = new ArrayList<>();
-		messages.add(event.getMessage());
-		if (HELP_POST_MESSAGES.containsKey(post.getIdLong())) {
-			messages.addAll(HELP_POST_MESSAGES.get(post.getIdLong()));
-		}
-		HELP_POST_MESSAGES.put(post.getIdLong(), messages);
+		HELP_POST_MESSAGES.computeIfAbsent(post.getIdLong(), _ -> new ArrayList<>())
+			.add(event.getMessage());
 		// suggest to close post on "problem solved"-messages
 		replyCloseSuggestionIfPatternMatches(event.getMessage());
 	}
@@ -291,15 +289,32 @@ public class HelpListener extends ListenerAdapter implements ButtonHandler {
 		event.getMessage().delete().queue(s -> {
 			experienceService.addMessageBasedHelpXP(post, true);
 			// thank all helpers
-			getButtonStream(event.getMessage())
-					.filter(b -> b.getCustomId() != null)
-					.filter(b -> b.isDisabled() || (b.getCustomId().equals(additionalButtonId)))
-					.forEach(b -> manager.thankHelper(
-							event.getGuild(),
-							post,
-							Long.parseLong(ComponentIdBuilder.split(b.getCustomId())[2])
-					));
+			
+			Set<Long> helpersToThank = getButtonStream(event.getMessage())
+				.filter(b -> b.getCustomId() != null)
+				.filter(b -> b.isDisabled() || (b.getCustomId().equals(additionalButtonId)))
+				.map(b -> Long.parseLong(ComponentIdBuilder.split(b.getCustomId())[2]))
+				.collect(Collectors.toSet());
+			
+			for (Long helperId : helpersToThank) {
+				manager.thankHelper(event.getGuild(), post, helperId);
+			}
+			markAnswer(post, helpersToThank);
+			HELP_POST_MESSAGES.remove(post.getIdLong());
 		});
+	}
+
+	private void markAnswer(ThreadChannel post, Set<Long> helpers) {
+		List<Message> messages = HELP_POST_MESSAGES.get(post.getIdLong());
+		if (messages == null) {
+			return;
+		}
+		for (Message msg : messages.reversed()) {
+			if (helpers.contains(msg.getAuthor().getIdLong())) {
+				answerOverflowService.markAnswer(post.getIdLong(), msg.getIdLong());
+				return;
+			}
+		}
 	}
 
 	private void handleReplyGuidelines(@NotNull IReplyCallback callback, @NotNull ForumChannel channel) {
