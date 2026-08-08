@@ -4,7 +4,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.discordjug.javabot.data.config.GuildConfig;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,9 +24,9 @@ public final class GuildNotificationService extends NotificationService.MessageC
 	/**
 	 * Sends a notification to the log channel.
 	 *
-	 * @param function The {@link Function} to use which MUST return a {@link MessageCreateAction}.
+	 * @param function A {@link Function} sending the message.
 	 */
-	public void sendToModerationLog(@NotNull Function<MessageChannel, MessageCreateAction> function) {
+	public void sendToModerationLog(@NotNull Function<MessageChannel, RestAction<? extends Message>> function) {
 		MessageChannel channel = guildConfig.getModerationConfig().getLogChannel();
 		if (channel == null) {
 			log.error("Could not send message to LogChannel in guild " + guildConfig.getGuild().getId());

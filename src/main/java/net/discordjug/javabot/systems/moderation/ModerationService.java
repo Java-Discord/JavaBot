@@ -10,6 +10,7 @@ import net.discordjug.javabot.util.ExceptionLogger;
 import net.discordjug.javabot.util.Responses;
 import net.discordjug.javabot.util.UserUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
@@ -20,16 +21,20 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * This service provides methods for performing moderation actions, like banning
@@ -281,23 +286,44 @@ public class ModerationService {
 	 * @param quiet    If true, don't send a message in the channel.
 	 * @return Whether the member is banned or not.
 	 */
-	public boolean unban(long userId, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
+	@CheckReturnValue
+	public CompletableFuture<?> unban(long userId, String reason, Member bannedBy, MessageChannel channel, boolean quiet) {
 		MessageEmbed unbanEmbed = this.buildUnbanEmbed(userId, reason, bannedBy);
-		boolean isBanned = isBanned(bannedBy.getGuild(), userId);
 		ModerationConfig moderationConfig = getModerationConfig(bannedBy);
-		if (isBanned) {
-			bannedBy.getGuild().unban(User.fromId(userId)).queue(s -> {
-				moderationConfig.getLogChannel().sendMessageEmbeds(unbanEmbed).queue();
-				if (!quiet) channel.sendMessageEmbeds(unbanEmbed).queue();
-			}, ExceptionLogger::capture);
-		}
-		return isBanned;
+		return bannedBy.getGuild().unban(User.fromId(userId)).reason(reason).map(_ -> {
+			moderationConfig.getLogChannel().sendMessageEmbeds(unbanEmbed).queue(unbanLogMessage -> notifyUserAboutUnban(userId, unbanEmbed, moderationConfig, unbanLogMessage));
+			if (!quiet) {
+				channel.sendMessageEmbeds(unbanEmbed).queue();
+			}
+			return null;
+		}).submit();
 	}
 
-	private boolean isBanned(@NotNull Guild guild, long userId) {
-		return guild.retrieveBanList().complete()
-				.stream().map(Guild.Ban::getUser)
-				.map(User::getIdLong).toList().contains(userId);
+	private void notifyUserAboutUnban(long userId, MessageEmbed unbanEmbed, ModerationConfig moderationConfig, Message unbanLogMessage) {
+		JDA jda = moderationConfig.getGuild().getJDA();
+		jda.retrieveUserById(userId)
+			.flatMap(User::openPrivateChannel)
+			.flatMap(c -> c.getHistory().retrievePast(1))
+			.queue(history -> {
+				if (history.isEmpty()) {
+					return;
+				}
+				Message banMessage = history.getFirst();
+				if (banMessage.getAuthor().getIdLong() != jda.getSelfUser().getIdLong()) {
+					return;
+				}
+				ArrayList<MessageEmbed> embeds = new ArrayList<>(banMessage.getEmbeds());
+				embeds.add(new EmbedBuilder(unbanEmbed).setColor(Responses.Type.SUCCESS.getColor()).build());
+				banMessage.editMessageEmbeds(embeds).setContent(moderationConfig.getUnbanMessageText()).queue(success -> {
+					List<MessageEmbed> unbanLogEmbeds = unbanLogMessage.getEmbeds();
+					if (unbanLogEmbeds.isEmpty()) {
+						return;
+					}
+					unbanLogMessage.editMessageEmbeds(new EmbedBuilder(unbanLogEmbeds.getLast())
+							.addField("User informed", "The ban info in the user's DMs has been updated.", true).build())
+						.queue();
+				});
+		});
 	}
 
 	/**
@@ -329,8 +355,19 @@ public class ModerationService {
 		sendGuildNotification(moderator.getGuild(), buildBanEmbed(user, moderator, reason));
 	}
 
+	/**
+	 * Sends an unban notification to the guild log.
+	 * 
+	 * This will also try to update the ban notification of the user to say they are unbanned.
+	 * @param user The unbanned user
+	 * @param reason The reason they were unbanned
+	 * @param moderator The moderator unbanning them (That {@link Member}'s {@link Guild} is used to determine the guild log to send the notification to.
+	 */
 	public void sendUnbanGuildNotification(User user, String reason, Member moderator) {
-		sendGuildNotification(moderator.getGuild(), buildUnbanEmbed(user.getIdLong(), reason, moderator));
+		MessageEmbed unbanEmbed = buildUnbanEmbed(user.getIdLong(), reason, moderator);
+		sendGuildNotification(moderator.getGuild(), unbanEmbed, msg -> {
+			notifyUserAboutUnban(user.getIdLong(), unbanEmbed, botConfig.get(moderator.getGuild()).getModerationConfig(), msg);
+		});
 	}
 
 	public void sendTimeoutGuildNotification(User user, String reason, Member moderator, Duration duration) {
@@ -342,12 +379,19 @@ public class ModerationService {
 	}
 
 	private void sendGuildNotification(Guild guild, MessageEmbed embed) {
+		sendGuildNotification(guild, embed, _ -> {});
+	}
+	
+	private void sendGuildNotification(Guild guild, MessageEmbed embed, Consumer<Message> onComplete) {
 		MessageEmbed newEmbed = new EmbedBuilder(embed)
 				.addField("Source", "This action was executed manually without a bot command.", false)
 				.build();
 		notificationService
 			.withGuild(guild)
-			.sendToModerationLog(c -> c.sendMessageEmbeds(newEmbed));
+			.sendToModerationLog(c -> c.sendMessageEmbeds(newEmbed).map(success -> {
+				onComplete.accept(success);
+				return success;
+			}));
 	}
 
 	private @NotNull EmbedBuilder buildModerationEmbed(@NotNull User user, @NotNull Member moderator, String reason) {
