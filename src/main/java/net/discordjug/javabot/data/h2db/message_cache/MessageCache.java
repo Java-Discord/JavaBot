@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -146,7 +147,7 @@ public class MessageCache {
 	 * @param channel The message's {@link MessageChannel}.
 	 * @param message The {@link CachedMessage}.
 	 */
-	public void sendDeletedMessageToLog(Guild guild, MessageChannel channel, CachedMessage message) {
+	public void sendDeletedMessageToLog(Guild guild, Channel channel, CachedMessage message) {
 		MessageCacheConfig config = botConfig.get(guild).getMessageCacheConfig();
 		if (config.getMessageCacheLogChannel() == null) return;
 		guild.getJDA().retrieveUserById(message.getAuthorId()).queue(author -> {
@@ -196,7 +197,7 @@ public class MessageCache {
 	 * @param contentFieldName the name of the field containing the message content in the embed.
 	 * @return an {@link EmbedBuilder} with information about the message.
 	 */
-	public EmbedBuilder buildMessageCacheEmbed(MessageChannel channel, User author, CachedMessage message, String contentFieldName) {
+	public EmbedBuilder buildMessageCacheEmbed(Channel channel, User author, CachedMessage message, String contentFieldName) {
 		long epoch = IdCalculatorCommand.getTimestampFromId(message.getMessageId()) / 1000;
 		return new EmbedBuilder()
 				.setAuthor(UserUtils.getUserTag(author), null, author.getEffectiveAvatarUrl())
@@ -233,7 +234,7 @@ public class MessageCache {
 				.build();
 	}
 
-	private MessageEmbed buildMessageDeleteEmbed(User author, MessageChannel channel, CachedMessage message) {
+	private MessageEmbed buildMessageDeleteEmbed(User author, Channel channel, CachedMessage message) {
 		EmbedBuilder eb = buildMessageCacheEmbed(channel, author, message, "Message Content")
 				.setTitle("Message Deleted")
 				.setColor(Responses.Type.ERROR.getColor());
