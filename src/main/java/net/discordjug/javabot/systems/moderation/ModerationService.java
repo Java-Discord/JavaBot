@@ -355,6 +355,14 @@ public class ModerationService {
 		sendGuildNotification(moderator.getGuild(), buildBanEmbed(user, moderator, reason));
 	}
 
+	/**
+	 * Sends an unban notification to the guild log.
+	 * 
+	 * This will also try to update the ban notification of the user to say they are unbanned.
+	 * @param user The unbanned user
+	 * @param reason The reason they were unbanned
+	 * @param moderator The moderator unbanning them (That {@link Member}'s {@link Guild} is used to determine the guild log to send the notification to.
+	 */
 	public void sendUnbanGuildNotification(User user, String reason, Member moderator) {
 		MessageEmbed unbanEmbed = buildUnbanEmbed(user.getIdLong(), reason, moderator);
 		sendGuildNotification(moderator.getGuild(), unbanEmbed, msg -> {
