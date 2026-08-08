@@ -43,10 +43,13 @@ public class UnbanCommand extends ModerateCommand {
 		}
 		long id = idOption.getAsLong();
 		boolean quiet = ModerateUserCommand.isQuiet(botConfig, event);
-		if (moderationService.unban(id, reasonOption.getAsString(), event.getMember(), event.getChannel(), quiet)) {
-			return Responses.success(event, "User Unbanned", "User with id `%s` has been unbanned.", id);
-		} else {
-			return Responses.warning(event, "Could not find banned User with id `%s`", id);
-		}
+		moderationService.unban(id, reasonOption.getAsString(), event.getMember(), event.getChannel(), quiet)
+			.thenAccept(success -> {
+				Responses.success(event.getHook(), "User Unbanned", "User with id `%s` has been unbanned.", id).queue();
+			}).exceptionally(failed -> {
+				Responses.warning(event, "Could not find banned User with id `%s` or a different error occured: `%s`", id, failed.getMessage()).queue();
+				return null;
+			});
+		return event.deferReply();
 	}
 }

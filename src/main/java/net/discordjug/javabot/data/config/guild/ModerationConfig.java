@@ -117,6 +117,12 @@ public class ModerationConfig extends GuildConfigItem {
 	 */
 	private String banMessageText = "Looks like you've been banned from the Discord Java Community. If you want to appeal this decision please fill out our form at <https://airtable.com/shrp5V4H1U5TYOXyC>.";
 	
+
+	/**
+	 * Text that is sent to users when they're unbanned.
+	 */
+	private String unbanMessageText = "You have been unbanned. You can now rejoin at <https://join.discordjug.net/> but please ensure you are following the rules if you do.";
+	
 	/**
 	 * Text that is sent to users when they're banned.
 	 */
