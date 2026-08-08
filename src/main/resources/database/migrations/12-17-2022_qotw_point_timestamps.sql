@@ -1,3 +1,0 @@
-ALTER TABLE qotw_points ADD obtained_at DATE NOT NULL DEFAULT CURRENT_TIMESTAMP(0);
-ALTER TABLE qotw_points DROP PRIMARY KEY;
-ALTER TABLE qotw_points ADD PRIMARY KEY (user_id, obtained_at);

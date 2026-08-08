@@ -52,7 +52,6 @@ public class ExportTableSubcommand extends SlashCommand.Subcommand {
 								.addChoice("Message Cache", "MESSAGE_CACHE")
 								.addChoice("Question of the Week Accounts", "QOTW_POINTS")
 								.addChoice("Question of the Week Questions", "QOTW_QUESTION")
-								.addChoice("Reserved Help Channels", "RESERVED_HELP_CHANNELS")
 								.addChoice("Starboard", "STARBOARD")
 								.addChoice("Warns", "WARN")
 								.addChoice("User Preferences", "USER_PREFERENCES"),

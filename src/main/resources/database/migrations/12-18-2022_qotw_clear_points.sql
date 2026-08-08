@@ -1,1 +1,0 @@
-DELETE FROM qotw_points WHERE user_id=374328434677121036;
