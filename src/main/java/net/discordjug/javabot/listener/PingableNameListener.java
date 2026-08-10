@@ -48,7 +48,7 @@ public class PingableNameListener extends ListenerAdapter {
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		checkNickname(event.getMember());
 	}
-	
+
 	@Override
 	public void onGuildMemberUpdate(GuildMemberUpdateEvent event) {
 		checkNickname(event.getMember());
@@ -65,12 +65,12 @@ public class PingableNameListener extends ListenerAdapter {
 	}
 
 	/**
-	 * Changes the given {@link Member}s name to a randomly generated one.
+	 * Changes the given {@link Member}s name to properly formatted name if fails then use random generated one.
 	 * @param member The Member whose name should be changed.
 	 */
 	private void changeName(Member member) {
 		String oldName = member.getEffectiveName();
-		String newName = generateRandomName();
+		String newName = generateNewName(member.getUser().getName());
 		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
 				.flatMap(channel ->
@@ -97,6 +97,14 @@ public class PingableNameListener extends ListenerAdapter {
 		String noun = nouns.get(random.nextInt(nouns.size()));
 		String adjective = adjectives.get(random.nextInt(adjectives.size()));
 		return StringUtils.capitalize(adjective) + StringUtils.capitalize(noun);
+	}
+
+	private String generateNewName(String username){
+		String newName = StringUtils.capitalize(username.replaceAll("(?u)(?:^[^A-Za-z]++|[^A-Za-z]++$)",""));
+		if(!isPingable(newName)){
+			newName = generateRandomName();
+		}
+		return newName;
 	}
 
 	/**
