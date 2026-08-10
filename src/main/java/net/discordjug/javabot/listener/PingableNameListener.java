@@ -60,7 +60,7 @@ public class PingableNameListener extends ListenerAdapter {
 	 */
 	private void checkNickname(Member member) {
 		if (!isPingable(member.getEffectiveName()) && !canBypassCheck(member)) {
-					changeName(member);
+			changeName(member);
 		}
 	}
 
@@ -70,7 +70,7 @@ public class PingableNameListener extends ListenerAdapter {
 	 */
 	private void changeName(Member member) {
 		String oldName = member.getEffectiveName();
-		String newName = makeNewName(member.getUser().getName());
+		String newName = generateNewName(member.getUser().getName());
 		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
 				.flatMap(channel ->
@@ -99,7 +99,7 @@ public class PingableNameListener extends ListenerAdapter {
 		return StringUtils.capitalize(adjective) + StringUtils.capitalize(noun);
 	}
 
-	private String makeNewName(String username){
+	private String generateNewName(String username){
 		int startIndex = 0;
 		int endIndex = username.length()-1;
 		for(int i=0; i < username.length();i++){
@@ -116,11 +116,11 @@ public class PingableNameListener extends ListenerAdapter {
 				break;
 			}
 		}
-		String newUsername = StringUtils.capitalize(username.substring(startIndex,endIndex+1));
-		if(!isPingable(newUsername)){
-			newUsername = generateRandomName();
+		String newName = StringUtils.capitalize(username.substring(startIndex,endIndex+1));
+		if(!isPingable(newName)){
+			newName = generateRandomName();
 		}
-		return newUsername;
+		return newName;
 	}
 
 	/**
