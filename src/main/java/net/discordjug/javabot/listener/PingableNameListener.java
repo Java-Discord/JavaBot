@@ -48,7 +48,7 @@ public class PingableNameListener extends ListenerAdapter {
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		checkNickname(event.getMember());
 	}
-	
+
 	@Override
 	public void onGuildMemberUpdate(GuildMemberUpdateEvent event) {
 		checkNickname(event.getMember());
@@ -60,17 +60,17 @@ public class PingableNameListener extends ListenerAdapter {
 	 */
 	private void checkNickname(Member member) {
 		if (!isPingable(member.getEffectiveName()) && !canBypassCheck(member)) {
-			changeName(member);
+					changeName(member);
 		}
 	}
 
 	/**
-	 * Changes the given {@link Member}s name to a randomly generated one.
+	 * Changes the given {@link Member}s name to properly formatted name if fails then use random generated one.
 	 * @param member The Member whose name should be changed.
 	 */
 	private void changeName(Member member) {
 		String oldName = member.getEffectiveName();
-		String newName = generateRandomName();
+		String newName = makeNewName(member.getUser().getName());
 		member.modifyNickname(newName.substring(0, Math.min(31, newName.length()))).queue();
 		member.getUser().openPrivateChannel()
 				.flatMap(channel ->
@@ -97,6 +97,30 @@ public class PingableNameListener extends ListenerAdapter {
 		String noun = nouns.get(random.nextInt(nouns.size()));
 		String adjective = adjectives.get(random.nextInt(adjectives.size()));
 		return StringUtils.capitalize(adjective) + StringUtils.capitalize(noun);
+	}
+
+	private String makeNewName(String username){
+		int startIndex = 0;
+		int endIndex = username.length()-1;
+		for(int i=0; i < username.length();i++){
+			char character = username.charAt(i);
+			if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z'){
+				startIndex = i;
+				break;
+			}
+		}
+		for(int i=username.length()-1; i >= 0;i--){
+			char character = username.charAt(i);
+			if (character >= 'a' && character <='z' || character >= 'A' && character <= 'Z'){
+				endIndex = i;
+				break;
+			}
+		}
+		String newUsername = StringUtils.capitalize(username.substring(startIndex,endIndex+1));
+		if(!isPingable(newUsername)){
+			newUsername = generateRandomName();
+		}
+		return newUsername;
 	}
 
 	/**
