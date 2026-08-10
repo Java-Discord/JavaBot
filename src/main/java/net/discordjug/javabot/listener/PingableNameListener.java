@@ -100,7 +100,7 @@ public class PingableNameListener extends ListenerAdapter {
 	}
 
 	private String generateNewName(String username){
-		String newName = username.replaceAll("(?u)(?:^[^A-Za-z]++|[^A-Za-z]++$)","");
+		String newName = StringUtils.capitalize(username.replaceAll("(?u)(?:^[^A-Za-z]++|[^A-Za-z]++$)",""));
 		if(!isPingable(newName)){
 			newName = generateRandomName();
 		}
