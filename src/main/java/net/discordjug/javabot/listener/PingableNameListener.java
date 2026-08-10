@@ -100,23 +100,7 @@ public class PingableNameListener extends ListenerAdapter {
 	}
 
 	private String generateNewName(String username){
-		int startIndex = 0;
-		int endIndex = username.length()-1;
-		for(int i=0; i < username.length();i++){
-			char character = username.charAt(i);
-			if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z'){
-				startIndex = i;
-				break;
-			}
-		}
-		for(int i=username.length()-1; i >= 0;i--){
-			char character = username.charAt(i);
-			if (character >= 'a' && character <='z' || character >= 'A' && character <= 'Z'){
-				endIndex = i;
-				break;
-			}
-		}
-		String newName = StringUtils.capitalize(username.substring(startIndex,endIndex+1));
+		String newName = username.replaceAll("(?u)(?:^[^A-Za-z]++|[^A-Za-z]++$)","");
 		if(!isPingable(newName)){
 			newName = generateRandomName();
 		}
