@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -45,7 +46,7 @@ public class HelpStatisticsSubcommand extends SlashCommand.Subcommand {
 	public HelpStatisticsSubcommand(HelpTransactionRepository transactionRepository) {
 		this.transactionRepository = transactionRepository;
 		setCommandData(new SubcommandData("stats", "Shows an general plot about help activity in this server")
-				.addOption(OptionType.BOOLEAN, "darkmode", "generate a plot in dark mode.", false)
+				.addOption(OptionType.BOOLEAN, "darkmode", "Generates the plot with a dark background.", false)
 		);
 
 	}
@@ -78,7 +79,7 @@ public class HelpStatisticsSubcommand extends SlashCommand.Subcommand {
 					correctMonth = false;
 				}
 			}
-			plotData.add(new Pair<>(position.getMonth() + " " + position.getYear(), new Plotter.Bar(entriesForThisMonth)));
+			plotData.add(new Pair<>(position.getMonth().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.ROOT) + " '" + String.valueOf(position.getYear()).substring(2), new Plotter.Bar(entriesForThisMonth)));
 		}
 
 		BufferedImage plot = new Plotter(plotData, "Help Statistics","Monthly assistance provided to community members",darkMode).plot();

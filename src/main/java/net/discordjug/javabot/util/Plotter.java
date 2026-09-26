@@ -11,67 +11,93 @@ public class Plotter {
 	private static final int WIDTH = 3000;
 	private static final int HEIGHT = 1500;
 
-	private static final int GRID_LINES = 6;
-	private static final int PILL_MARGIN = 34;
-	private static final int PILL_HEIGHT = 42;
-	private static final int PILL_BOTTOM_MARGIN = 65;
-	private static final int LEFT_HEADING_MARGIN = (int) (WIDTH * 0.02);        	// 2%
-	private static final int LEFT_GRAPH_MARGIN = (int) (WIDTH * 0.05);				// 5%
-	private static final int RIGHT_GRAPH_MARGIN = (int) (WIDTH * 0.02);       		// 2%
-	private static final int TOP_HEADING_MARGIN = (int) (HEIGHT * 0.06);   			// 6%
-	private static final int TOP_SUBHEADING_MARGIN = (int) (HEIGHT * 0.09);  		// 9%
-	private static final int TOP_GRAPH_MARGIN = (int) (HEIGHT * 0.15);     			// 15%
-	private static final int BOTTOM_GRAPH_MARGIN = (int) (HEIGHT * 0.09);			// 9%
-	private static final int TITLE_SIZE = (int) (HEIGHT * 0.038);    				// 3.87%
-	private static final int SUBTITLE_SIZE = (int) (HEIGHT * 0.018);   				// 1.87%
-	private static final int AXIS_SIZE = (int) (HEIGHT * 0.016);     				// 1.6%
-	private static final int LABEL_SIZE = (int) (HEIGHT * 0.016);    				// 1.67%
-	private static final int VALUE_SIZE = (int) (HEIGHT * 0.016);     				// 1.6%
-	private static final int GRAPH_WIDTH = WIDTH - LEFT_GRAPH_MARGIN - RIGHT_GRAPH_MARGIN;
-	private static final int GRAPH_HEIGHT = HEIGHT - TOP_GRAPH_MARGIN - BOTTOM_GRAPH_MARGIN;
+	private static final int GRID_LINES = 5;
+	private static final int BAR_LABEL_MARGIN = 34;
+	private static final int BAR_LABEL_HEIGHT = 42;
+	private static final int BAR_LABEL_BOTTOM_MARGIN = 65;
+	private static final int TITLE_FONT_SIZE = 57;
+	private static final int SUBTITLE_FONT_SIZE = 27;
+	private static final int AXIS_FONT_SIZE = 24;
+	private static final int HEADING_MARGIN_LEFT = (int) (WIDTH * 0.02);               // 2%
+	private static final int AXIS_LABEL_MARGIN_LEFT = (int) (WIDTH * 0.045);           // 4.5%
+	private static final int GRAPH_MARGIN_LEFT = (int) (WIDTH * 0.05);                 // 5%
+	private static final int GRAPH_MARGIN_RIGHT = (int) (WIDTH * 0.02);                // 2%
+	private static final int AXIS_LABEL_MARGIN_BOTTOM = (int) (HEIGHT * 0.043);        // 4.3%
+	private static final int HEADING_MARGIN_TOP = (int) (HEIGHT * 0.06);               // 6%
+	private static final int SUBHEADING_MARGIN_TOP = (int) (HEIGHT * 0.09);            // 9%
+	private static final int GRAPH_MARGIN_TOP = (int) (HEIGHT * 0.15);                 // 15%
+	private static final int GRAPH_MARGIN_BOTTOM = (int) (HEIGHT * 0.09);              // 9%
+	private static final int LABEL_SIZE = (int) (HEIGHT * 0.016);                      // 1.6%
+	private static final int VALUE_SIZE = (int) (HEIGHT * 0.016);                      // 1.6%
+	private static final int GRAPH_WIDTH = WIDTH - GRAPH_MARGIN_LEFT - GRAPH_MARGIN_RIGHT;
+	private static final int GRAPH_HEIGHT = HEIGHT - GRAPH_MARGIN_TOP - GRAPH_MARGIN_BOTTOM;
+	private static final int ARC_SIZE = 18;
+	private static final double BAR_WIDTH_RATIO = 0.42;
+	private static final int BAR_WIDTH_MAX = 110;
 
-	private Color BOARDER_COLOR = Color.BLACK;
-	private Color BACKGROUND = Color.decode("#EAEDF5");
-	private Color GRID = Color.decode("#B2B2B2");
-	private Color GRID_STRONG = Color.decode("#606061");
-	private Color TEXT = Color.decode("#2D2D2D");
-	private Color TEXT_MUTED = Color.decode("#42474D");
-	private Color TEXT_DIM = Color.decode("#59616D");
-	private Color PILL = Color.decode("#D9D9D9");
+	private final Color borderColor;
+	private final Color backgroundColor;
+	private final Color gridLineColor;
+	private final Color gridLineColorStrong;
+	private final Color textColor;
+	private final Color textColorMuted;
+	private final Color textColorDim;
+	private final Color barLabelColor;
 
-	private String title;
-	private String subtitle;
+	private final String titleText;
+	private final String subtitleText;
 	private final List<Pair<String, Bar>> entries;
 
 	/**
 	 * Creates the plotter.
-	 * @param entries a list of all data points to plot, each represented as a {@link Pair} consisting of the name and value of the data point
-	 * @param title the title of the plot
-	 * @param subtitle the subtitle of plot
+	 *
+	 * @param entries      a list of all data points to plot, each represented as a {@link Pair} consisting of the name and value of the data point
+	 * @param titleText    the title of the plot
+	 * @param subtitleText the subtitle of plot
 	 */
-	public Plotter(List<Pair<String, Bar>> entries, String title, String subtitle) {
+	public Plotter(List<Pair<String, Bar>> entries, String titleText, String subtitleText) {
 		this.entries = entries;
-		this.title = title;
-		this.subtitle = subtitle;
+		this.titleText = titleText;
+		this.subtitleText = subtitleText;
+		borderColor = Color.BLACK;
+		backgroundColor = Color.decode("#EAEDF5");
+		gridLineColor = Color.decode("#B2B2B2");
+		gridLineColorStrong = Color.decode("#606061");
+		textColor = Color.decode("#2D2D2D");
+		textColorMuted = Color.decode("#42474D");
+		textColorDim = Color.decode("#59616D");
+		barLabelColor = Color.decode("#D9D9D9");
 	}
 
 	/**
 	 * Creates the plotter.
-	 * @param entries a list of all data points to plot, each represented as a {@link Pair} consisting of the name and value of the data point
-	 * @param title the title of the plot
-	 * @param subtitle the subtitle of plot
-	 * @param darkMode the dark mode for plot
+	 *
+	 * @param entries      a list of all data points to plot, each represented as a {@link Pair} consisting of the name and value of the data point
+	 * @param titleText    the title of the plot
+	 * @param subtitleText the subtitle of plot
+	 * @param darkMode     {@code true} if the plot should be generated in dark mode, otherwise {@code false}
 	 */
-	public Plotter(List<Pair<String, Bar>> entries, String title, String subtitle,boolean darkMode) {
+	public Plotter(List<Pair<String, Bar>> entries, String titleText, String subtitleText, boolean darkMode) {
 		this.entries = entries;
-		this.title = title;
-		this.subtitle = subtitle;
-		if (darkMode){
-			BACKGROUND = Color.decode("#111318");
-			GRID = Color.decode("#252A32");
-			GRID_STRONG = Color.decode("#303640");
-			TEXT = Color.decode("#F5F7FA");
-			PILL = Color.decode("#171C23");
+		this.titleText = titleText;
+		this.subtitleText = subtitleText;
+		borderColor = Color.BLACK;
+		if (darkMode) {
+			backgroundColor = Color.decode("#111318");
+			gridLineColor = Color.decode("#252A32");
+			gridLineColorStrong = Color.decode("#303640");
+			textColor = Color.decode("#F5F7FA");
+			barLabelColor = Color.decode("#333333");
+			textColorMuted = Color.decode("#C9C9C9");
+			textColorDim = Color.decode("#E3E3E3");
+		} else {
+			backgroundColor = Color.decode("#EAEDF5");
+			gridLineColor = Color.decode("#B2B2B2");
+			gridLineColorStrong = Color.decode("#606061");
+			textColor = Color.decode("#2D2D2D");
+			barLabelColor = Color.decode("#D9D9D9");
+			textColorMuted = Color.decode("#42474D");
+			textColorDim = Color.decode("#59616D");
 		}
 	}
 
@@ -83,116 +109,134 @@ public class Plotter {
 		BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics2D = img.createGraphics();
 
-		setBackground(graphics2D);
+		fillBackground(graphics2D);
 
-		drawHeading(graphics2D,LEFT_HEADING_MARGIN,TOP_HEADING_MARGIN,TOP_SUBHEADING_MARGIN);
-		drawGraph(graphics2D,LEFT_GRAPH_MARGIN,TOP_GRAPH_MARGIN,GRAPH_WIDTH,GRAPH_HEIGHT);
+		drawHeadings(graphics2D);
+		drawGraph(graphics2D);
 
 		return img;
 	}
 
-	private void drawHeading(Graphics2D graphics2D,int startX, int titleY, int subtitleY){
-		Font titleFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", TITLE_SIZE).orElseThrow();
-		Font subtitleFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", SUBTITLE_SIZE).orElseThrow();
+	private void drawHeadings(Graphics2D graphics2D) {
+		Font titleFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", TITLE_FONT_SIZE).orElseThrow();
+		Font subtitleFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", SUBTITLE_FONT_SIZE).orElseThrow();
 
-		graphics2D.setColor(TEXT);
+		graphics2D.setColor(textColor);
 		graphics2D.setFont(titleFont);
-		graphics2D.drawString(title,startX,titleY);
+		graphics2D.drawString(titleText, HEADING_MARGIN_LEFT, HEADING_MARGIN_TOP);
 
-		graphics2D.setColor(TEXT_MUTED);
+		graphics2D.setColor(textColorMuted);
 		graphics2D.setFont(subtitleFont);
-		graphics2D.drawString(subtitle,startX,subtitleY);
+		graphics2D.drawString(subtitleText, HEADING_MARGIN_LEFT, SUBHEADING_MARGIN_TOP);
 
 	}
 
-	private void setBackground(Graphics2D graphics2D){
-		graphics2D.setColor(BACKGROUND);
+	private void fillBackground(Graphics2D graphics2D) {
+		graphics2D.setColor(backgroundColor);
 		graphics2D.fillRect(-1, -1, WIDTH, HEIGHT);
 	}
 
-	private void drawGraph(Graphics2D graphics2D, int startX, int startY, int width,int height){
-		double maxValue = entries.stream()
-						.map(Pair::second)
-						.mapToDouble(Bar::sum)
-						.max().orElse(0);
+	private void drawGraph(Graphics2D graphics2D) {
+		double maxValue = entries.stream().map(Pair::second).mapToDouble(Bar::sum).max().orElse(0);
 
-		if(maxValue == 0) return;
+		if (maxValue == 0) {
+			return;
+		}
 		double axisMax = niceMaximum(maxValue);
 
-		drawLines(graphics2D,startX,startY,width,height,axisMax);
-		drawBars(graphics2D,startX,startY,width,height,axisMax);
+		drawGridLines(graphics2D, axisMax);
+		drawBars(graphics2D, axisMax);
 	}
 
-	private void drawLines(Graphics2D graphics2D,int startX ,int startY,int width ,int height, double axisMax){
-		Font axisFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", AXIS_SIZE).orElseThrow();
-		graphics2D.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));	// Use a 2px stroke because a line is between pixels.
+	private void drawGridLines(Graphics2D graphics2D, double axisMax) {
+		Font axisFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", AXIS_FONT_SIZE).orElseThrow();
+		graphics2D.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));    // Use a 2px stroke because a line is between pixels.
 		graphics2D.setFont(axisFont);
 
 		for (int i = 0; i <= GRID_LINES; i++) {
 			double fraction = (double) i / GRID_LINES;
-			int gridY = startY + height - (int) (height * fraction);
+			int gridY = GRAPH_MARGIN_TOP + GRAPH_HEIGHT - (int) (GRAPH_HEIGHT * fraction);
 
-			graphics2D.setColor(i == 0 ? GRID_STRONG : GRID);
-			graphics2D.drawLine(startX, gridY+1, startX + width, gridY+1);	// Move 1px down so the 2px stroke aligns with the grid position.
+			graphics2D.setColor(i == 0 ? gridLineColorStrong : gridLineColor);
+			graphics2D.drawLine(GRAPH_MARGIN_LEFT, gridY + 1, GRAPH_MARGIN_LEFT + GRAPH_WIDTH, gridY + 1);    // Move 1px down so the 2px stroke aligns with the grid position.
 
 			double value = axisMax * fraction;
 
 			String label = formatValue(value);
-			graphics2D.setColor(TEXT_DIM);
-			graphics2D.drawString(label, startX - 25 - graphics2D.getFontMetrics().stringWidth(label), gridY + 8);
+			graphics2D.setColor(textColorDim);
+			graphics2D.drawString(label, AXIS_LABEL_MARGIN_LEFT - (graphics2D.getFontMetrics().stringWidth(label)), gridY + (graphics2D.getFontMetrics().getAscent() + graphics2D.getFontMetrics().getDescent()) / 2);
 		}
 	}
 
-	private void drawBars(Graphics2D graphics2D,int startX ,int startY,int width ,int height, double axisMax){
+	private void drawBars(Graphics2D graphics2D, double axisMax) {
 		int count = entries.size();
-		int slotWidth = width / count;
-		int barWidth = Math.min(110, (int) (slotWidth * 0.42));
-
+		int slotWidth = GRAPH_WIDTH / count;
 		Font labelFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", LABEL_SIZE).orElseThrow();
-		Font valueFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", VALUE_SIZE).orElseThrow();
 
 		for (int i = 0; i < count; i++) {
 			Pair<String, Bar> entry = entries.get(i);
 			Bar bar = entry.second();
-			double total = bar.sum();
-			int centerX = startX + (slotWidth * i )+ (slotWidth / 2);
-			int totalHeight = (int) (height * (total / axisMax));
+
+			int centerX = GRAPH_MARGIN_LEFT + (slotWidth * i) + (slotWidth / 2);
+			int barWidth = Math.min(BAR_WIDTH_MAX, (int) (slotWidth * BAR_WIDTH_RATIO));
 			int barX = centerX - barWidth / 2;
-			int barBottom = startY + height;
 
-			String totalText = formatValue(total);
-			graphics2D.setFont(valueFont);
-			int textWidth = graphics2D.getFontMetrics().stringWidth(totalText);
-			int pillWidth = textWidth + PILL_MARGIN;
-			int pillY = barBottom - totalHeight - PILL_BOTTOM_MARGIN;
+			drawBarLabel(graphics2D, axisMax, centerX, bar);
+			drawSegmentedBars(graphics2D, bar, barX, barWidth, axisMax);
 
-			graphics2D.setColor(PILL);
-			graphics2D.fillRoundRect(centerX - pillWidth / 2, pillY, pillWidth, PILL_HEIGHT, 18, 18);
-			graphics2D.setColor(TEXT);
-			graphics2D.drawString(totalText, centerX - textWidth / 2, pillY + 29);
+			graphics2D.setFont(labelFont);
+			graphics2D.setColor(textColorMuted);
 
-			int currentY = barBottom;
-			for (Pair<Color, Double> element : bar.elements()) {
-				double value = element.second();
-				int segmentHeight = (int) (height * (value / axisMax));
-				if (segmentHeight <= 0) continue;
+			String label = entry.first();
+			drawStringCentered(graphics2D, label, centerX, GRAPH_MARGIN_TOP + GRAPH_HEIGHT + AXIS_LABEL_MARGIN_BOTTOM);
+		}
+	}
 
-				currentY -=segmentHeight;
+	private void drawBarLabel(Graphics2D graphics2D, double axisMax, int centerX, Bar bar) {
+		int barBottom = GRAPH_MARGIN_TOP + GRAPH_HEIGHT;
+		double barTotal = bar.sum();
+		int totalBarHeight = (int) (GRAPH_HEIGHT * (barTotal / axisMax));
+		int barLabelY = barBottom - totalBarHeight - BAR_LABEL_BOTTOM_MARGIN;
 
+		Font valueFont = ImageGenerationUtils.getResourceFont("assets/fonts/Uni-Sans-Heavy.ttf", VALUE_SIZE).orElseThrow();
+		graphics2D.setFont(valueFont);
+
+		String totalText = formatValue(barTotal);
+		int textWidth = graphics2D.getFontMetrics().stringWidth(totalText);
+		int barLabelWidth = textWidth + BAR_LABEL_MARGIN;
+
+		graphics2D.setColor(barLabelColor);
+		graphics2D.fillRoundRect(centerX - barLabelWidth / 2, barLabelY, barLabelWidth, BAR_LABEL_HEIGHT, ARC_SIZE, ARC_SIZE);
+		graphics2D.setColor(textColor);
+		drawStringCentered(graphics2D,totalText,centerX, barLabelY + 29);
+	}
+
+	private void drawSegmentedBars(Graphics2D graphics2D, Bar bar,int barX, int barWidth, double axisMax) {
+		int barBottom = GRAPH_MARGIN_TOP + GRAPH_HEIGHT;
+		int barSum = 0;
+		int incrementalBarHeight = 0;
+
+		for (Pair<Color, Double> element : bar.elements()) {
+			double value = element.second();
+			barSum += value;
+			int expectedBarHeight = (int) (GRAPH_HEIGHT * (barSum / axisMax));
+			int segmentHeight = expectedBarHeight - incrementalBarHeight;
+			incrementalBarHeight += segmentHeight;
+			int currentY = barBottom - incrementalBarHeight;
+
+			if (segmentHeight > 0) {
 				graphics2D.setColor(element.first());
 				graphics2D.fillRect(barX, currentY, barWidth, segmentHeight);
 
-				graphics2D.setColor(BOARDER_COLOR);
-				graphics2D.drawRect(barX-1, currentY-1, barWidth+1, segmentHeight+1);
+				graphics2D.setColor(borderColor);
+				graphics2D.drawRect(barX - 1, currentY - 1, barWidth + 1, segmentHeight + 1);
 			}
-
-			graphics2D.setFont(labelFont);
-			graphics2D.setColor(TEXT_MUTED);
-
-			String label = formatMonth(entry.first());
-			int labelWidth = graphics2D.getFontMetrics().stringWidth(label);
-			graphics2D.drawString(label, centerX - labelWidth / 2, startY + height + 65);
 		}
+	}
+
+	private void drawStringCentered(Graphics2D graphics2D,String text,int x, int y){
+		int textWidth = graphics2D.getFontMetrics().stringWidth(text);
+		graphics2D.drawString(text,x- textWidth / 2, y);
 	}
 
 	private String formatValue(double value) {
@@ -211,31 +255,6 @@ public class Plotter {
 		return String.format("%.2f", value);
 	}
 
-	private String formatMonth(String month) {
-		String[] parts = month.split(" ");
-
-		String monthName = parts[0];
-		String year = parts[1];
-
-		String shortMonth = switch (monthName) {
-			case "JANUARY" -> "Jan";
-			case "FEBRUARY" -> "Feb";
-			case "MARCH" -> "Mar";
-			case "APRIL" -> "Apr";
-			case "MAY" -> "May";
-			case "JUNE" -> "Jun";
-			case "JULY" -> "Jul";
-			case "AUGUST" -> "Aug";
-			case "SEPTEMBER" -> "Sep";
-			case "OCTOBER" -> "Oct";
-			case "NOVEMBER" -> "Nov";
-			case "DECEMBER" -> "Dec";
-			default -> throw new IllegalArgumentException("Invalid month: " + monthName);
-		};
-
-		return shortMonth + " " + year.substring(2);
-	}
-
 	private double niceMaximum(double value) {
 		double magnitude = Math.pow(10, Math.floor(Math.log10(value)));
 		double normalized = value / magnitude;
@@ -243,8 +262,8 @@ public class Plotter {
 
 		if (normalized <= 1) {
 			nice = 1;
-		} else if (normalized <= 2) {
-			nice = 2;
+		} else if (normalized <= 2.5) {
+			nice = 2.5;
 		} else if (normalized <= 5) {
 			nice = 5;
 		} else {
@@ -256,14 +275,13 @@ public class Plotter {
 
 	/**
 	 * A single bar which should be plotted.
-	 * 
 	 * @param elements any number of the entries to plot
 	 */
-	public record Bar(List<Pair<Color,Double>> elements) {
+	public record Bar(List<Pair<Color, Double>> elements) {
 		public Bar(double singleElement) {
 			this(List.of(new Pair<>(Color.GRAY, singleElement)));
 		}
-		
+
 		private double sum() {
 			return elements.stream().mapToDouble(Pair::second).sum();
 		}
