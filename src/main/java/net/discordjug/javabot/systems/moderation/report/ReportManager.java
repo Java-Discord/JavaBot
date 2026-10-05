@@ -214,7 +214,7 @@ public class ReportManager implements ButtonHandler, ModalHandler {
 	}
 
 	private void sendReportResponse(InteractionHook hook, User targetUser, EmbedBuilder reportEmbed, ThreadChannel reportThread) {
-		reportEmbed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(targetUser) + "`!\nYour report has been send to our Moderators.\nIn case you want to supply additional details, please use the \"Create thread\" button below.");
+		reportEmbed.setDescription("Successfully reported " + "`" + UserUtils.getUserTag(targetUser) + "`!\nYour report has been sent to our Moderators.\nIn case you want to supply additional details, please use the \"Create thread\" button below.");
 		hook.sendMessageEmbeds(reportEmbed.build())
 			.addComponents(ActionRow.of(
 					Button.secondary(
