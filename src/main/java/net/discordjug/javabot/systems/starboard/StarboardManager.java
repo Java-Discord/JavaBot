@@ -224,8 +224,12 @@ public class StarboardManager extends ListenerAdapter {
 							}
 						} else {
 							UnicodeEmoji starEmote = config.getEmojis().get(0);
-							if (stars > 10) starEmote = config.getEmojis().get(1);
-							if (stars > 25) starEmote = config.getEmojis().get(2);
+							if (stars > 5 && config.getEmojis().size() > 1) {
+								starEmote = config.getEmojis().get(1);
+							}
+							if (stars > 10 && config.getEmojis().size() > 2) {
+								starEmote = config.getEmojis().get(2);
+							}
 							starboardMessage.editMessage(
 											String.format("%s %s | %s", starEmote, stars, message.getChannel().getAsMention()))
 									.queue();
