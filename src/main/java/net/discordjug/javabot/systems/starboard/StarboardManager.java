@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -30,8 +31,10 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -47,34 +50,55 @@ public class StarboardManager extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-		if (isInvalidUser(event.getUser())) return;
-		if (isInvalidChannel(event.getChannel())) return;
+		if (shouldSkip(event)) {
+			return;
+		}
+		if (isInvalidUser(event.getUser())) {
+			return;
+		}
+		if (event.getMessageAuthorIdLong() == event.getUserIdLong()) {
+			return;
+		}
 		handleReactionEvent(event.getGuild(), event.getEmoji(), event.getChannel(), event.getMessageIdLong());
 	}
 
 	@Override
 	public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
-		if (isInvalidUser(event.getUser())) return;
-		if (isInvalidChannel(event.getGuildChannel())) return;
+		if (shouldSkip(event)) {
+			return;
+		}
 		handleReactionEvent(event.getGuild(), event.getEmoji(), event.getChannel(), event.getMessageIdLong());
 	}
-
+	
+	private boolean shouldSkip(GenericMessageReactionEvent event) {
+		if (isInvalidChannel(event.getChannel())) {
+			return true;
+		}
+		StarboardConfig config = botConfig.get(event.getGuild()).getStarboardConfig();
+		if (config.getDisallowedChannelIds().contains(event.getChannel().getIdLong())) {
+			return true;
+		}
+		if (config.getStarboardChannelId() == event.getChannel().getIdLong()) {
+			return true;
+		}
+		return false;
+	}
+	
 	private void handleReactionEvent(Guild guild, Emoji emoji, MessageChannel channel, long messageId) {
 		asyncPool.submit(() -> {
 			StarboardConfig config = botConfig.get(guild).getStarboardConfig();
-			if (config.getStarboardChannel().equals(channel)) return;
-			Emoji starEmote = config.getEmojis().get(0);
-			if (!emoji.equals(starEmote)) return;
+			Set<Emoji> starEmojis = new HashSet<>(config.getEmojis());
+			if (!starEmojis.contains(emoji)) return;
 			channel.retrieveMessageById(messageId).queue(
 					message -> {
-						int stars = getReactionCountForEmote(starEmote, message);
 						asyncPool.execute(()->{
+							long stars = getReactionCountForEmotes(starEmojis, message);
 							try {
 								starboardRepository
 									.getEntryByMessageId(message.getIdLong())
-									.ifPresentOrElse(entry->{
-										updateStarboardMessage(message, stars, config);
-									}, ()->{
+									.ifPresentOrElse(_ -> 
+										updateStarboardMessage(message, stars, config)
+									, ()->{
 										if (stars >= config.getReactionThreshold()) {
 											addMessageToStarboard(message, stars, config);
 										} else if (stars < 1 && !removeMessageFromStarboard(message.getIdLong(), channel, config)) {
@@ -122,21 +146,24 @@ public class StarboardManager extends ListenerAdapter {
 	}
 
 	/**
-	 * Attemps to get the amount of reactions for the given emote.
+	 * Attemps to get the amount of reactions for the given emotes.
 	 *
 	 * @param emoji   The emote.
 	 * @param message The message.
 	 * @return The amount of reactions.
 	 */
-	private int getReactionCountForEmote(Emoji emoji, @NotNull Message message) {
+	private long getReactionCountForEmotes(Set<Emoji> emojis, @NotNull Message message) {
 		return message.getReactions().stream()
-				.filter(r -> r.getEmoji().equals(emoji))
-				.findFirst()
-				.map(MessageReaction::getCount)
-				.orElse(0);
+				.filter(r -> emojis.contains(r.getEmoji()))
+				.flatMap(reaction -> reaction.retrieveUsers().complete().stream())
+				.filter(user -> !isInvalidUser(user))
+				.mapToLong(User::getIdLong)
+				.filter(userId -> userId != message.getAuthor().getIdLong())
+				.distinct()
+				.count();
 	}
 
-	private void addMessageToStarboard(Message message, int stars, @NotNull StarboardConfig config) throws DataAccessException {
+	private void addMessageToStarboard(Message message, long stars, @NotNull StarboardConfig config) throws DataAccessException {
 		if (stars < config.getReactionThreshold()) return;
 		MessageEmbed embed = buildStarboardEmbed(message);
 		MessageCreateAction action = config.getStarboardChannel()
@@ -177,7 +204,7 @@ public class StarboardManager extends ListenerAdapter {
 		);
 	}
 
-	private void updateStarboardMessage(@NotNull Message message, int stars, @NotNull StarboardConfig config) throws DataAccessException {
+	private void updateStarboardMessage(@NotNull Message message, long stars, @NotNull StarboardConfig config) throws DataAccessException {
 		Optional<StarboardEntry> starboardEntry = starboardRepository.getEntryByMessageId(message.getIdLong());
 		starboardEntry.ifPresentOrElse(entry->{
 			long starboardId = entry.getStarboardMessageId();
