@@ -148,7 +148,7 @@ public class StarboardManager extends ListenerAdapter {
 	/**
 	 * Attemps to get the amount of reactions for the given emotes.
 	 *
-	 * @param emoji   The emote.
+	 * @param emojis  The emotes that included in the count.
 	 * @param message The message.
 	 * @return The amount of reactions.
 	 */
