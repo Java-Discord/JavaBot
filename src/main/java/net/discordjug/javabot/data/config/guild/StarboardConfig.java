@@ -8,7 +8,9 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration for the guild's starboard system.
@@ -19,6 +21,7 @@ public class StarboardConfig extends GuildConfigItem {
 	private long starboardChannelId;
 	private int reactionThreshold;
 	private List<String> emojiUnicodes = new ArrayList<>();
+	private Set<Long> disallowedChannelIds = new HashSet<>();
 
 	public TextChannel getStarboardChannel() {
 		return this.getGuild().getTextChannelById(this.starboardChannelId);
