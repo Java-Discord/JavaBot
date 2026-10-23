@@ -15,7 +15,7 @@ public class CustomVCAddMemberSubcommand extends CustomVCChangeMembersSubcommand
 
 	public CustomVCAddMemberSubcommand(CustomVCRepository dataStorage,
 			BotConfig botConfig) {
-		super(new SubcommandData("add-member", "adds a member to the voice channel"), dataStorage, botConfig);
+		super(new SubcommandData("add-member", "Adds a member to the voice channel"), dataStorage, botConfig);
 	}
 
 	@Override
