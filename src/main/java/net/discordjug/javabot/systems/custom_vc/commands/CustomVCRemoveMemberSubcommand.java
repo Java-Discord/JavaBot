@@ -18,7 +18,7 @@ public class CustomVCRemoveMemberSubcommand extends CustomVCChangeMembersSubcomm
 
 	public CustomVCRemoveMemberSubcommand(CustomVCRepository dataStorage,
 			BotConfig botConfig) {
-		super(new SubcommandData("remove-member", "removes a member to the voice channel"), dataStorage, botConfig);
+		super(new SubcommandData("remove-member", "Removes a member from the voice channel"), dataStorage, botConfig);
 	}
 
 	@Override
