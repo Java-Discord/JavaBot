@@ -41,7 +41,7 @@ public class WarnsListCommand extends SlashCommand {
 	public WarnsListCommand(ExecutorService asyncPool, ModerationService moderationService) {
 		this.asyncPool = asyncPool;
 		this.moderationService = moderationService;
-		setCommandData(Commands.slash("warns", "Shows a list of all recent warnings for the current user or a specified user.")
+		setCommandData(Commands.slash("warns", "Shows a list of all recent warnings for the current user or a specified user")
 				.addOption(OptionType.USER, "user", "If given, shows the recent warns of the given user instead.", false)
 				.setContexts(InteractionContextType.GUILD)
 		);
