@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
+
 /**
  * Subcommand that lets staff members accept suggestions.
  */
@@ -46,7 +48,7 @@ public class AcceptSuggestionSubcommand extends SuggestionSubcommand {
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion Accepted")
 				.setDescription(embed.getDescription())
-				.setTimestamp(embed.getTimestamp())
+				.setTimestamp(Instant.now())
 				.setFooter("Accepted by " + UserUtils.getUserTag(user))
 				.build();
 	}
