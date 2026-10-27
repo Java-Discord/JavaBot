@@ -31,7 +31,7 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 	@Override
 	protected WebhookMessageCreateAction<Message> handleSuggestionCommand(@NotNull SlashCommandInteractionEvent event, @NotNull Message message) {
 		MessageEmbed embed = message.getEmbeds().get(0);
-		MessageEmbed clearEmbed = buildSuggestionClearEmbed(embed);
+		MessageEmbed clearEmbed = buildSuggestionClearEmbed(message, embed);
 		SystemsConfig.EmojiConfig emojiConfig = botConfig.getSystems().getEmojiConfig();
 		message.editMessageEmbeds(clearEmbed).queue(
 				edit -> {
@@ -43,13 +43,13 @@ public class ClearSuggestionSubcommand extends SuggestionSubcommand {
 				.setComponents(getJumpButton(message));
 	}
 
-	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull MessageEmbed embed) {
+	private @NotNull MessageEmbed buildSuggestionClearEmbed(@NotNull Message message, @NotNull MessageEmbed embed) {
 		return new EmbedBuilder()
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion")
 				.setDescription(embed.getDescription())
-				.setTimestamp(embed.getTimestamp())
+				.setTimestamp(message.getTimeCreated())
 				.setFooter(null)
 				.build();
 	}
