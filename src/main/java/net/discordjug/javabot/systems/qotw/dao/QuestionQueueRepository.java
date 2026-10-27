@@ -105,21 +105,7 @@ public class QuestionQueueRepository {
 	 */
 	public List<QOTWQuestion> getQuestions(long guildId, int page, int size) throws DataAccessException {
 		return jdbcTemplate.query("SELECT * FROM qotw_question WHERE guild_id = ? AND used = FALSE ORDER BY priority DESC, created_at ASC LIMIT ? OFFSET ?", (rs, row)-> this.read(rs),
-				guildId, size, page);
-	}
-
-	/**
-	 * Gets as many questions matching a query as specified.
-	 * @param guildId The current guild's id..
-	 * @param query   The query to match questions against.
-	 * @param page    The page.
-	 * @param size    The amount of questions to return.
-	 * @return A {@link List} containing the specified amount (or less) of {@link QOTWQuestion} matching the query.
-	 * @throws DataAccessException If an error occurs.
-	 */
-	public List<QOTWQuestion> getUsedQuestionsWithQuery(long guildId, String query, int page, int size) throws DataAccessException {
-		return jdbcTemplate.query("SELECT * FROM qotw_question WHERE guild_id = ? AND \"TEXT\" LIKE ? AND used = TRUE ORDER BY question_number DESC, created_at ASC LIMIT ? OFFSET ?", (rs, rows)->this.read(rs),
-				guildId, "%" + query.toLowerCase() + "%", size, page);
+				guildId, size, page * size);
 	}
 
 	/**
