@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
+
 /**
  * <h3>This class represents the /suggestion on-hold command.</h3>
  */
@@ -47,7 +49,7 @@ public class OnHoldSuggestionSubcommand extends SuggestionSubcommand {
 				.setAuthor(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl())
 				.setTitle("Suggestion On Hold")
 				.setDescription(embed.getDescription())
-				.setTimestamp(embed.getTimestamp())
+				.setTimestamp(Instant.now())
 				.setFooter("Suggestion marked as On Hold by " + UserUtils.getUserTag(user))
 				.build();
 	}
