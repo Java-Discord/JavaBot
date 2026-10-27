@@ -36,7 +36,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 		this.asyncPool = asyncPool;
 		this.questionQueueRepository = questionQueueRepository;
 		setCommandData(new SubcommandData("list", "Show a list of all questions in the queue.")
-				.addOption(OptionType.INTEGER, "page", "The page of results you get.", false)
+				.addOption(OptionType.INTEGER, "page", "The page of results you get, starting at 1.", false)
 		);
 	}
 
@@ -45,7 +45,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 		OptionMapping pageOption = event.getOption("page");
 		int page = 0;
 		if (pageOption != null) {
-			int userPage = (int) pageOption.getAsLong();
+			int userPage = (int) pageOption.getAsLong() - 1;
 			if (userPage < 0) {
 				return Responses.warning(event, "Invalid page.");
 			}
@@ -57,7 +57,7 @@ public class ListQuestionsSubcommand extends QOTWSubcommand {
 				.setTitle("QOTW Questions Queue")
 				.setColor(Responses.Type.DEFAULT.getColor());
 		if (questions.isEmpty()) {
-			embedBuilder.setDescription("There are no questions in the queue.");
+			embedBuilder.setDescription(page == 0 ? "There are no questions in the queue." : "There are no more questions at that page.");
 			return event.replyEmbeds(embedBuilder.build());
 		}
 		asyncPool.submit(() -> {
