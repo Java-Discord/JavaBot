@@ -11,6 +11,7 @@ import net.discordjug.javabot.util.MessageUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
@@ -192,7 +193,7 @@ public class AutoMod extends ListenerAdapter {
 
 	private void handleSpam(@Nonnull List<CachedMessage> cachedMessages, Message message) {
 		timeoutForSpam(message);
-		cachedMessages.forEach(cachedMessage -> message.getGuild().getTextChannelById(cachedMessage.getChannelId())
+		cachedMessages.forEach(cachedMessage -> message.getGuild().getChannelById(GuildMessageChannel.class, cachedMessage.getChannelId())
 				.deleteMessageById(cachedMessage.getMessageId()).queue());
 	}
 
