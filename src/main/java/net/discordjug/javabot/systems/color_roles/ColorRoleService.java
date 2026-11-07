@@ -13,6 +13,11 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for assigning and removing color roles.
+ * @see ColorRoleService#addColor(Member, Color)
+ * @see ColorRoleService#removeColor(Member)
+ */
 @Service
 public class ColorRoleService extends ListenerAdapter {
 	
@@ -24,6 +29,13 @@ public class ColorRoleService extends ListenerAdapter {
 		this.config = config;
 	}
 	
+	/**
+	 * Adds a color role to a user.
+	 * 
+	 * If a color role with the given color exists already, it will be reused. Otherwise, it will create a new one.
+	 * @param member The member to add the role to
+	 * @param color The color of the role to assign
+	 */
 	public synchronized void addColor(Member member, Color color) {
 		repo.getFromColor(member.getGuild().getIdLong(), color)
 			.ifPresentOrElse(colorRole -> {
@@ -44,6 +56,13 @@ public class ColorRoleService extends ListenerAdapter {
 			});
 	}
 
+	/**
+	 * Removes all color roles from a user.
+	 * 
+	 * If no other members have that role, the role will be deleted.
+	 * @param member The member to remove the role from
+	 * @return {@code true} if any color roles were removed, else {@code false}
+	 */
 	public synchronized boolean removeColor(Member member) {
 		boolean changed = false;
 		for (ColorRole color : repo.getColorRolesOfMember(member.getGuild().getIdLong(), member.getIdLong())) {

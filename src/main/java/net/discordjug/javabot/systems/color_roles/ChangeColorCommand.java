@@ -18,6 +18,9 @@ import xyz.dynxsty.dih4jda.interactions.AutoCompletable;
 import xyz.dynxsty.dih4jda.interactions.commands.application.SlashCommand;
 import xyz.dynxsty.dih4jda.util.AutoCompleteUtils;
 
+/**
+ * The {@code /color} command which allows users to change their own color with color roles.
+ */
 public class ChangeColorCommand extends SlashCommand implements AutoCompletable {
 	
 	private static final Pattern COLOR_PATTERN = Pattern.compile("#[A-F0-9]{6}", Pattern.CASE_INSENSITIVE);
@@ -25,11 +28,16 @@ public class ChangeColorCommand extends SlashCommand implements AutoCompletable 
 	private final BotConfig config;
 	private final ColorRoleService service;
 	
+	/**
+	 * The constructor which sets the corresponding {@link net.dv8tion.jda.api.interactions.commands.build.SlashCommandData}.
+	 * @param botConfig The bot's configuration
+	 * @param service The {@link ColorRoleService} to actually change color roles
+	 */
 	public ChangeColorCommand(BotConfig botConfig, ColorRoleService service) {
 		this.config = botConfig;
 		this.service = service;
 		setCommandData(Commands.slash("color", "Sets the color of your roles")
-				.addOption(OptionType.STRING, "color", "The hex code of the role color", false, true));
+				.addOption(OptionType.STRING, "color", "The hex code of the role color (leave empty to remove your color roles)", false, true));
 	}
 	
 	@Override
