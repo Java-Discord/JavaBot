@@ -27,6 +27,7 @@ public class ModerationConfig extends GuildConfigItem {
 	private long staffRoleId = 0;
 	private long adminRoleId = 0;
 	private long expertRoleId = 0;
+	private long colorRoleChangeRoleId = 0;
 
 	/**
 	* The time window, in seconds, that the cross-channel spam automod looks back over when
@@ -179,6 +180,10 @@ public class ModerationConfig extends GuildConfigItem {
 
 	public Role getExpertRole() {
 		return this.getGuild().getRoleById(this.expertRoleId);
+	}
+	
+	public Role getColorRoleChangeRole() {
+		return this.getGuild().getRoleById(this.colorRoleChangeRoleId);
 	}
 
 	public TextChannel getNotificationThreadChannel() {
