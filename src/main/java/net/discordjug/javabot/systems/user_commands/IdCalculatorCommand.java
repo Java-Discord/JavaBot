@@ -58,7 +58,7 @@ public class IdCalculatorCommand extends SlashCommand {
 				.setColor(Responses.Type.DEFAULT.getColor())
 				.addField("Snowflake Input", String.format(MarkdownUtil.codeblock("%s"), id), false)
 				.addField("Unix-Timestamp", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp / 1000), true)
-				.addField("Unix-Timestamp (+ milliseconds)", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp ), true)
+				.addField("Unix-Timestamp (+ milliseconds)", String.format(MarkdownUtil.codeblock("%s"), unixTimestamp), true)
 				.addField("Date", String.format("<t:%s:F>", Instant.ofEpochMilli(unixTimestamp).getEpochSecond()), false)
 				.build();
 	}
