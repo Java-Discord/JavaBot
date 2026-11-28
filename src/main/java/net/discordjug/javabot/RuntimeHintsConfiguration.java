@@ -1,5 +1,6 @@
 package net.discordjug.javabot;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
@@ -22,6 +23,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.internal.entities.GuildVoiceStateImpl;
 import net.dv8tion.jda.internal.requests.restaction.PermOverrideData;
 import org.h2.server.TcpServer;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -83,5 +85,12 @@ public class RuntimeHintsConfiguration implements RuntimeHintsRegistrar {
 		
 		hints.reflection().registerType(GuildVoiceStateImpl[].class, MemberCategory.UNSAFE_ALLOCATED);
 		hints.reflection().registerType(SoundboardSound[].class, MemberCategory.UNSAFE_ALLOCATED);
+		
+		try {
+			// allow shutting down when bot shuts down
+			hints.reflection().registerMethod(ScheduledThreadPoolExecutor.class.getMethod("shutdown"), ExecutableMode.INVOKE);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
