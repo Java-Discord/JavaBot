@@ -125,7 +125,7 @@ public class HelpAccountSubcommand extends SlashCommand.Subcommand {
 			plotData.add(new Pair<>(position.getMonth() + " " + position.getYear(), new Plotter.Bar(value)));
 		}
 		
-		BufferedImage plt = new Plotter(plotData, "gained help XP per month").plot();
+		BufferedImage plt = new Plotter(plotData, "General Helper XP Gains","XP earned each month from general helper activity").plot();
 		try(ByteArrayOutputStream os = new ByteArrayOutputStream()){
 			ImageIO.write(plt, "png", os);
 			return FileUpload.fromData(os.toByteArray(), "image.png");
